@@ -1,0 +1,393 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "o11y-collector.fullname" . }}-fluentd
+  labels:
+    app: {{ template "o11y-collector.name" . }}
+    chart: {{ template "o11y-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  fluent.conf: |-
+    @include system.conf
+    @include source.containers.conf
+    @include source.files.conf
+    @include source.journald.conf
+    @include monit.conf
+    @include output.conf
+    @include prometheus.conf
+
+  system.conf: |-
+    # system wide configurations
+    <system>
+      log_level {{ .Values.fluentd.config.logLevel }}
+      root_dir /tmp/fluentd
+    </system>
+
+  prometheus.conf: |-
+    # input plugin that exports metrics
+    <source>
+      @type prometheus
+    </source>
+
+    # input plugin that collects metrics from MonitorAgent
+    <source>
+      @type prometheus_monitor
+      <labels>
+        host ${hostname}
+      </labels>
+    </source>
+
+    # input plugin that collects metrics for output plugin
+    <source>
+      @type prometheus_output_monitor
+      <labels>
+        host ${hostname}
+      </labels>
+    </source>
+
+  source.containers.conf: |-
+    # This configuration file for Fluentd / td-agent is used
+    # to watch changes to Docker log files. The kubelet creates symlinks that
+    # capture the pod name, namespace, container name & Docker container ID
+    # to the docker logs for pods in the /var/log/containers directory on the host.
+    # If running this fluentd configuration in a Docker container, the /var/log
+    # directory should be mounted in the container.
+    # reading kubelet logs from journal
+    #
+    # Reference:
+    # https://github.com/kubernetes/community/blob/20d2f6f5498a5668bae2aea9dcaf4875b9c06ccb/contributors/design-proposals/node/kubelet-cri-logging.md
+    #
+    # Json Log Example:
+    # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
+    # CRI Log Example (not supported):
+    # 2016-02-17T00:04:05.931087621Z stdout [info:2016-02-16T16:04:05.930-08:00] Some log text here
+    <source>
+      @id containers.log
+      @type tail
+      @label @CONCAT
+      tag tail.containers.*
+      path {{ .Values.fluentd.path | default "/var/log/containers/*.log" }}
+      {{- if .Values.fluentd.config.excludePath }}
+      exclude_path {{ .Values.fluentd.config.excludePath | toJson }}
+      {{- end }}
+      pos_file {{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos
+      path_key source
+      read_from_head true
+      <parse>
+      {{- if eq .Values.fluentd.config.containers.logFormatType "cri" }}
+        @type regexp
+        expression /^(?<time>.+) (?<stream>stdout|stderr) [^ ]* (?<log>.*)$/
+        time_format  {{ .Values.fluentd.containers.logFormat | default "%Y-%m-%dT%H:%M:%S.%N%:z" }}
+      {{- else if eq .Values.fluentd.config.containers.logFormatType "json" }}
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      {{- end }}
+        time_key time
+        time_type string
+        localtime false
+      </parse>
+    </source>
+
+  source.files.conf: |-
+    # This fluentd conf file contains sources for log files other than container logs.
+    {{- $checks := dict "hasFileLog" false }}
+    {{- range $name, $logDef := .Values.fluentd.config.logs }}
+    {{- if $logDef.from.file }}
+    {{- set $checks "hasFileLog" true | and nil }}
+    <source>
+      @id tail.file.{{ $name }}
+      @type tail
+      @label @CONCAT
+      tag tail.file.{{ or $logDef.sourcetype $name }}
+      path {{ $logDef.from.file.path }}
+      pos_file {{ $.Values.fluentd.config.posFilePrefix }}-{{ $name }}.pos
+      read_from_head true
+      path_key source
+      {{- if $logDef.multiline }}
+      multiline_flush_interval {{ $logDef.multiline.flushInterval | default "5s" }}
+      {{- end }}
+      <parse>
+        {{- if $logDef.multiline }}
+        @type multiline
+        format_firstline {{ $logDef.multiline.firstline }}
+        {{- if $logDef.timestampExtraction }}
+        format1 /^(?<log>{{ $logDef.timestampExtraction.regexp }}.*)$/
+        time_key time
+        time_type string
+        time_format {{ $logDef.timestampExtraction.format }}
+        {{- end }}
+        {{- else if $logDef.timestampExtraction }}
+        @type regexp
+        expression /^(?<log>{{ $logDef.timestampExtraction.regexp }}.*)$/
+        time_key time
+        time_type string
+        time_format {{ $logDef.timestampExtraction.format }}
+        {{- else }}
+        @type none
+        message_key log
+        {{- end }}
+      </parse>
+    </source>
+    {{- end }}
+    {{- end }}
+
+  source.journald.conf: |-
+    # This fluentd conf file contains configurations for reading logs from systemd journal.
+    {{- range $name, $logDef := .Values.fluentd.config.logs }}
+    {{- if $logDef.from.journald }}
+    {{- set $checks "hasJournald" true | and nil }}
+    <source>
+      @id journald-{{ $name }}
+      @type systemd
+      @label @CONCAT
+      tag journald.{{ or $logDef.sourcetype $name }}
+      path {{ $.Values.fluentd.config.journalLogPath | quote }}
+      matches [{ "_SYSTEMD_UNIT": {{ $logDef.from.journald.unit | quote }} }]
+      read_from_head true
+      <storage>
+        @type local
+        persistent true
+        path /var/log/splunkd-fluentd-journald-{{ $name }}.pos.json
+      </storage>
+      <entry>
+        field_map {"MESSAGE": "log", "_SYSTEMD_UNIT": "source"}
+        field_map_strict true
+      </entry>
+    </source>
+    {{- end }}
+    {{- end }}
+
+  monit.conf: |-
+    <source>
+      @id fluentd-monitor-agent
+      @type monitor_agent
+      @label @SPLUNK
+      tag monitor_agent
+    </source>
+
+  output.conf: |-
+    #Events are emitted to the CONCAT label from the container, file and journald sources for multiline processing.
+    <label @CONCAT>
+      # = filters for container logs =
+      {{- range $name, $logDef := .Values.fluentd.config.logs }}
+      {{- if and $logDef.from.pod $logDef.multiline }}
+      <filter tail.containers.var.log.containers.{{ $logDef.from.pod }}*{{ or $logDef.from.container $name }}*.log>
+        @type concat
+        key log
+        timeout_label @SPLUNK
+        stream_identity_key stream
+        multiline_start_regexp {{ $logDef.multiline.firstline }}
+        flush_interval {{ $logDef.multiline.flushInterval | default "5s" }}
+        separator {{ $logDef.multiline.separator | default "" | quote }}
+        use_first_timestamp true
+      </filter>
+      {{- end }}
+      {{- end }}
+      # = filters for journald logs =
+      {{- range $name, $logDef := .Values.fluentd.config.logs }}
+      {{- if and $logDef.from.journald $logDef.multiline }}
+      <filter journald.{{ or $logDef.sourcetype $name }}>
+        @type concat
+        key log
+        timeout_label @SPLUNK
+        multiline_start_regexp {{ $logDef.multiline.firstline }}
+        flush_interval {{ $logDef.multiline.flushInterval | default "5s" }}
+      </filter>
+      {{- end }}
+      {{- end }}
+      # Events are relabeled then emitted to the SPLUNK label
+      <match **>
+        @type relabel
+        @label @SPLUNK
+      </match>
+    </label>
+    <label @SPLUNK>
+      # Enrich log with k8s metadata
+      <filter tail.containers.**>
+        @type kubernetes_metadata
+        annotation_match [ "^splunk\.com" ]
+        de_dot false
+      </filter>
+      <filter tail.containers.**>
+        @type record_transformer
+        enable_ruby
+        <record>
+          # set the sourcetype from splunk.com/sourcetype pod annotation or set it to kube:container:CONTAINER_NAME
+          sourcetype ${record.dig("kubernetes", "annotations", "splunk.com/sourcetype") ? "kube:"+record.dig("kubernetes", "annotations", "splunk.com/sourcetype") : "kube:container:"+record.dig("kubernetes","container_name")}
+          container_name ${record.dig("kubernetes","container_name")}
+          namespace ${record.dig("kubernetes","namespace_name")}
+          pod ${record.dig("kubernetes","pod_name")}
+          container_id ${record.dig("docker","container_id")}
+          pod_uid ${record.dig("kubernetes","pod_id")}
+          container_image ${record.dig("kubernetes","container_image")}
+          # set the cluster_name field to the configured value, or default to "cluster_name"
+          {{- with .Values.clusterName }}
+          cluster_name {{ . }}
+          {{- end }}
+          # set the index field to the value found in the pod splunk.com/index annotations. if not set, use namespace annotation, or default to the default_index
+          index ${record.dig("kubernetes", "annotations", "splunk.com/index") ? record.dig("kubernetes", "annotations", "splunk.com/index") : record.dig("kubernetes", "namespace_annotations", "splunk.com/index") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/index"]) : ("{{ .Values.logsBackend.hec.indexName | default "main"}}")}
+          {{- range .Values.fluentd.config.k8sMetadata.podLabels }}
+          label_{{ . }} ${record.dig("kubernetes","labels","{{ . }}")}
+          {{- end }}
+          blacklist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
+          {{- if .Values.fluentd.config.customMetadata }}
+          {{- range .Values.fluentd.config.customMetadata }}
+          {{ .name }} "{{ .value }}"
+          {{- end }}
+          {{- end }}
+        </record>
+      </filter>
+      <filter tail.containers.**>
+        # Exclude all logs that are blacklisted
+        @type grep
+        <exclude>
+          key blacklist
+          pattern /^true$/
+        </exclude>
+      </filter>
+      # extract pod_uid and container_name for CRIO runtime
+      {{- if eq .Values.fluentd.config.containers.logFormatType "cri" }}
+      <filter tail.containers.var.log.pods.**>
+        @type jq_transformer
+        jq '.record | . + (.source | capture("/var/log/pods/(?<pod_uid>[^/]+)/(?<container_name>[^/]+)/(?<container_retry>[0-9]+).log")) | .sourcetype = ("kube:container:" + .container_name) | .index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }}'
+      </filter>
+      {{- end }}
+
+      # create source and sourcetype
+      {{- if $checks.hasJournald }}
+      <filter journald.**>
+        @type jq_transformer
+        jq '.record.source = "{{ .Values.fluentd.config.journalLogPath }}/" + .record.source | .record.sourcetype = (.tag | ltrimstr("journald.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = "{{ .value }}" {{- end }}{{- end }} |.record'
+      </filter>
+      {{- end }}
+
+      # = filters for non-container log files =
+      {{- if $checks.hasFileLog }}
+      # extract sourcetype
+      <filter tail.file.**>
+        @type jq_transformer
+        jq '.record.sourcetype = (.tag | ltrimstr("tail.file.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = "{{ .value }}" {{- end }}{{- end }} | .record'
+      </filter>
+      {{- end }}
+
+      # = filters for monitor agent =
+      <filter monitor_agent>
+        @type jq_transformer
+        jq ".record.source = \"namespace:#{ENV['MY_NAMESPACE']}/pod:#{ENV['MY_POD_NAME']}\" | .record.sourcetype = \"fluentd:monitor-agent\" | .record.cluster_name = \"{{ .Values.clusterName }}\" | .record.index = \"{{ .Values.logsBackend.hec.indexName | default "main" }}\" {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = \"{{ .value }}\" {{- end }}{{- end }} | .record"
+      </filter>
+
+      # = custom filters specified by users =
+      {{- range $name, $filterDef := .Values.customFilters }}
+      {{- if and $filterDef.tag $filterDef.type }}
+      <filter {{ $filterDef.tag }}>
+        @type {{ $filterDef.type }}
+        {{- if $filterDef.body }}
+        {{ $filterDef.body | indent 8 }}
+        {{- end }}
+      </filter>
+      {{- end }}
+      {{- end }}
+
+      # = output =
+      <match **>
+        {{- if .Values.logsBackend.splunkIngestAPI.ingestAPIHost }}
+        @type splunk_ingest_api
+        {{- with .Values.logsBackend.splunkIngestAPI.serviceClientIdentifier }}
+        service_client_identifier {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.serviceClientSecretKey }}
+        service_client_secret_key {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.tokenEndpoint }}
+        token_endpoint {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.ingestAuthHost }}
+        ingest_auth_host {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.ingestAPIHost }}
+        ingest_api_host {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.tenant }}
+        ingest_api_tenant {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.eventsEndpoint }}
+        ingest_api_events_endpoint {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.splunkIngestAPI.debugIngestAPI }}
+        debug_http {{ . }}
+        {{- end }}
+        {{- else }}
+        @type splunk_hec
+        {{- with .Values.logsBackend.hec.protocol | default .Values.signalfx.protocol }}
+        protocol {{ . }}
+        {{- end }}
+        {{- with .Values.logsBackend.hec.host | default .Values.signalfx.host }}
+        hec_host {{ . | quote }}
+        {{- end }}
+        {{- with .Values.logsBackend.hec.port | default .Values.signalfx.port }}
+        hec_port {{ . }}
+        {{- end }}
+        hec_token "#{ENV['SPLUNK_HEC_TOKEN']}"
+        index_key index
+        insecure_ssl {{ .Values.logsBackend.hec.insecureSSL | default false }}
+        {{- if .Values.logsBackend.hec.clientCert }}
+        client_cert /fluentd/etc/splunk/hec_client_cert
+        {{- end }}
+        {{- if .Values.logsBackend.hec.clientKey }}
+        client_key /fluentd/etc/splunk/hec_client_key
+        {{- end }}
+        {{- if .Values.logsBackend.hec.caFile }}
+        ca_file /fluentd/etc/splunk/hec_ca_file
+        {{- end }}
+        {{- end }}
+        host "#{ENV['K8S_NODE_NAME']}"
+        source_key source
+        sourcetype_key sourcetype
+        <fields>
+          # currently CRI does not produce log paths with all the necessary
+          # metadata to parse out pod, namespace, container_name, container_id.
+          # this may be resolved in the future by this issue: https://github.com/kubernetes/kubernetes/issues/58638#issuecomment-385126031
+          {{- if eq .Values.fluentd.config.containers.logFormatType "cri"}}
+          container_retry
+          {{- else }}
+          container.image.name container_image
+          {{- end }}
+          k8s.pod.uid pod_uid
+          k8s.pod.name pod
+          container.name container_name
+          k8s.namespace.name namespace
+          container.id container_id
+          {{- if .Values.clusterName }}
+          k8s.cluster.name cluster_name
+          {{- end }}
+          {{- if .Values.fluentd.config.customMetadata }}
+          {{- range .Values.fluentd.config.customMetadata }}
+          {{ .name }}
+          {{- end }}
+          {{- end }}
+          {{- range .Values.indexFields }}
+          {{ . }}
+          {{- end }}
+          {{- range .Values.fluentd.config.k8sMetadata.podLabels }}
+          label_{{ . }}
+          {{- end }}
+        </fields>
+        {{- with .Values.fluentd.config.buffer }}
+        <buffer>
+        {{- range $parameter, $value := . }}
+          {{ $parameter }} {{ $value }}
+        {{- end }}
+        </buffer>
+        {{- end }}
+        <format monitor_agent>
+          @type json
+        </format>
+        <format>
+          # we just want to keep the raw logs, not the structure created by docker or journald
+          @type single_value
+          message_key log
+          add_newline false
+        </format>
+      </match>
+    </label>

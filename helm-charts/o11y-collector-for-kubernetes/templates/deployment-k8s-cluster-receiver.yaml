@@ -1,0 +1,90 @@
+{{ if .Values.otelK8sClusterReceiver.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "o11y-collector.fullname" . }}-k8s-cluster-receiver
+  labels:
+    app: {{ template "o11y-collector.name" . }}
+    component: otel-k8s-cluster-receiver
+    chart: {{ template "o11y-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "o11y-collector.name" . }}
+      component: otel-k8s-cluster-receiver
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "o11y-collector.name" . }}
+        component: otel-k8s-cluster-receiver
+        release: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-k8s-cluster-receiver.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ template "o11y-collector.serviceAccountName" . }}
+      {{- if .Values.otelK8sClusterReceiver.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .Values.otelK8sClusterReceiver.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.otelK8sClusterReceiver.tolerations }}
+      tolerations:
+        {{ toYaml .Values.otelK8sClusterReceiver.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.otelK8sClusterReceiver.affinity }}
+      affinity:
+        {{ toYaml .Values.otelK8sClusterReceiver.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.otelK8sClusterReceiver.securityContext }}
+      securityContext:
+        {{ toYaml .Values.otelK8sClusterReceiver.securityContext | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: otel-collector
+        command:
+        - /otelcontribcol
+        - --config=/conf/relay.yaml
+        - --metrics-addr=0.0.0.0:8888
+        {{- range .Values.otelK8sClusterReceiver.extraArgs }}
+        - {{ . }}
+        {{- end }}
+        image: {{ template "o11y-collector.image.otelcol" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: K8S_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources:
+          {{- toYaml .Values.otelK8sClusterReceiver.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /conf
+          name: collector-configmap
+      terminationGracePeriodSeconds: {{ .Values.otelK8sClusterReceiver.terminationGracePeriodSeconds }}
+      volumes:
+      - name: collector-configmap
+        configMap:
+          name: {{ template "o11y-collector.fullname" . }}-otel-k8s-cluster-receiver
+          items:
+            - key: relay
+              path: relay.yaml
+      {{- if .Values.otelK8sClusterReceiver.priorityClassName }}
+      priorityClassName: {{ .Values.otelK8sClusterReceiver.priorityClassName }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "o11y-collector.fullname" . }}-otel-collector
+  labels:
+    app: {{ template "o11y-collector.name" . }}
+    chart: {{ template "o11y-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  relay: |
+    {{- template "o11y-collector.otelCollector.config" . }}
