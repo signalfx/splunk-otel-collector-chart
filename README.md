@@ -1,6 +1,6 @@
 # Observability Collector for Kubernetes
 
-`o11y-collector` is a [Helm](https://github.com/kubernetes/helm) chart that
+`o11y-collector-for-kubernetes` is a [Helm](https://github.com/kubernetes/helm) chart that
 creates a kubernetes daemonset along with other kubernetes objects in a
 kubernetes cluster to collect the cluster's logs, traces and metrics send them to
 [Signalfx](https://www.signalfx.com/).
@@ -88,4 +88,4 @@ signalfx:
 
 ## License ##
 
-See [LICENSE.md](LICENSE.md).
+See [LICENSE](LICENSE).
