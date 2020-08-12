@@ -26,7 +26,7 @@ The deamonset runs [OpenTelemetry Collector](https://github.com/open-telemetry/o
 to collect traces and send them to
 [Splunk SignalFx Microservices APM](https://www.splunk.com/en_us/software/microservices-apm.html).
 
-### Metrics Collection
+### Metric Collection
 
 [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) also collects kubernetes and host 
 metrics using the following components enabled by default:
@@ -36,14 +36,17 @@ to collect metrics from Kubelet API.
 to collect metrics from Kubernetes API.
 - [Host metrics receiver](https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver) 
 to collect host metrics from kubernetes node.
-Metrics are sent them to
+
+The metrics are sent to
 [Splunk SignalFx Infrastructure Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html).
 
 ## Usage
 
 ### Prerequisites
 
-- [Helm client](https://helm.sh/docs/intro/install/).
+The following components required to use the helm chart:
+
+- [Helm client](https://helm.sh/docs/intro/install/)
 - [Kubernetes cluster](https://kubernetes.io/)
 
 ### How to install
@@ -51,7 +54,7 @@ Metrics are sent them to
 To install o11y-collector in k8s cluster at least three parameters must be provided:
 - `signalfx.realm` (default `us0`): SignalFx realm to send telemetry data to.
 - `signalfx.accessToken`: Your SignalFx org access token.
-- `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment
+- `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment.
 
 The project is in active development state. There are no packages released yet.
 In order to install helm chart you need to clone the repo first and use it locally.
@@ -81,9 +84,9 @@ deletes the release.
 
 ## Configuration
 
-The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/helm-charts/o11y-collector-for-kubernetes/values.yaml) lists all supported configurable parameters for
-this chart, along with detailed explanation. Read through it to understand how
-to configure this chart.
+The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/helm-charts/o11y-collector-for-kubernetes/values.yaml)
+lists all supported configurable parameters for this chart, along with detailed explanation. 
+Read through it to understand how to configure this chart.
 
 At the minimum you need to configure the following values.
 
