@@ -73,7 +73,7 @@ $ helm install my-o11y-collector --values my_values.yaml ./helm-charts/o11y-coll
 To uninstall/delete a deployment with name `my-o11y-collector`:
 
 ```bash
-$ helm delete --purge my-o11y-collector
+$ helm delete my-o11y-collector
 ```
 
 The command removes all the Kubernetes components associated with the chart and
