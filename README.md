@@ -39,28 +39,36 @@ to collect host metrics from kubernetes node.
 Metrics are sent them to
 [Splunk SignalFx Infrastructure Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html).
 
-## Install
+## Usage
 
-See also [Using Helm](https://docs.helm.sh/using_helm/#using-helm).
+### Prerequisites
+
+- [Helm client](https://helm.sh/docs/intro/install/).
+- [Kubernetes cluster](https://kubernetes.io/)
+
+### How to install
 
 To install o11y-collector in k8s cluster at least three parameters must be provided:
 - `signalfx.realm` (default `us0`): SignalFx realm to send telemetry data to.
 - `signalfx.accessToken`: Your SignalFx org access token.
 - `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment
 
-The values can be provided as arguments to `helm install`:
+The project is in active development state. There are no packages released yet.
+In order to install helm chart you need to clone the repo first and use it locally.
 
 ```bash
-$ helm install --name my-o11y-collector --set="signalfx.realm=us0,signalfx.accessToken=xxxxxx,clusterName=my-cluster" https://github.com/signalfx/o11y-collector-for-kubernetes/releases/download/0.1.0/o11y-collector-for-kubernetes-0.1.0.tgz
+$ git clone git@github.com:signalfx/o11y-collector-for-kubernetes.git
+$ cd ./o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --set="signalfx.realm=us0,signalfx.accessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector-for-kubernetes
 ```
 
-Or using by setting the values in a yaml file:
+Instead of setting helm values as arguments a yaml file can be provided:
 
 ```bash
-$ helm install --name my-o11y-collector --values my_values.yaml https://github.com/signalfx/o11y-collector-for-kubernetes/releases/download/0.1.0/o11y-collector-for-kubernetes-0.1.0.tgz
+$ helm install my-o11y-collector --values my_values.yaml ./helm-charts/o11y-collector-for-kubernetes
 ```
 
-## Uninstall
+### How to uninstall
 
 To uninstall/delete a deployment with name `my-o11y-collector`:
 
