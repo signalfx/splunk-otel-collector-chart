@@ -658,11 +658,11 @@ logsBackend:
     # host will be set to `signalfx.ingestUrl` used by default 
     host:
     # port to HEC, optional, default 443
-    port: 443
+    port:
     # token is required, `signalfx.token` used by default
     token:
     # protocol has two options: "http" and "https", default is "https"
-    protocol: https
+    protocol:
     # indexName tells which splunk index to use, this is optional.
     indexName: main
     # insecureSSL is a boolean, it indicates should it allow inscure SSL connection (when protocol is "https"). Default is false.

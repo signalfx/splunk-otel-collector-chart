@@ -57,13 +57,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        {{- if or .Values.logsBackend.hec.token }}
           - name: SPLUNK_HEC_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ template "o11y-collector.secret" . }}
                 key: splunk_hec_token
-        {{- end }}
         resources:
           {{- toYaml .Values.fluentd.resources | nindent 10 }}
         volumeMounts:
