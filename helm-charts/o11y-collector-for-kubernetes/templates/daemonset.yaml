@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}
+  name: {{ template "o11y-collector.fullname" . }}-agent
   labels:
     app: {{ template "o11y-collector.name" . }}
     chart: {{ template "o11y-collector.chart" . }}

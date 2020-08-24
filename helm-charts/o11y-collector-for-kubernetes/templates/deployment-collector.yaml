@@ -23,7 +23,7 @@ spec:
         component: otel-collector
         release: {{ .Release.Name }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap-collector.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-collector.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ template "o11y-collector.serviceAccountName" . }}
       {{- if .Values.otelCollector.nodeSelector }}
@@ -86,7 +86,7 @@ spec:
       volumes:
       - name: collector-configmap
         configMap:
-          name: {{ template "o11y-collector.fullname" . }}-collector
+          name: {{ template "o11y-collector.fullname" . }}-otel-collector
           items:
             - key: relay
               path: relay.yaml

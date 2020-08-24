@@ -205,9 +205,10 @@ otelAgent:
       # signalfx backend, otherwise the exporter will be removed in templates.
       otlp:
         # If collector is enabled, it will be set to collector k8s service endpoint:
-        # {{ tepmlate opentelemetry-collector.fullname }}:55680
+        # {{ template o11y-collector.fullname }}:55680
         # The value empty should not be overridden
         endpoint:
+        insecure: true
 
       # sapm exporter will be used only if collector is disabled, otherwise the exporter will be removed.
       sapm:
@@ -220,7 +221,7 @@ otelAgent:
 
       signalfx:
         # If collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint
-        # Otherwise it will be set to {{ tepmlate opentelemetry-collector.fullname }}:55680
+        # Otherwise it will be set to {{ template o11y-collector.fullname }}:55680
         # The value empty should not be overridden
 
         # Will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint by default

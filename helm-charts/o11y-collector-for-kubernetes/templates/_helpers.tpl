@@ -193,7 +193,9 @@ Otherwise traces are sent directly to Signalfx backend.
 {{- if hasKey $exporters "otlp" }}
 {{- $otlpExporter := index $exporters "otlp" }}
 {{- $_ := set $otlpExporter "endpoint" (printf "%s:55680" (include "o11y-collector.fullname" .)) }}
+{{- if not (index $tracesPipeline "exporters") }}
 {{- $_ := set $tracesPipeline "exporters" (list "otlp") }}
+{{- end }}
 {{- end }}
 {{- else }}
 {{- if hasKey $exporters "sapm" }}
@@ -201,7 +203,9 @@ Otherwise traces are sent directly to Signalfx backend.
 {{- $sapmExporter := index $exporters "sapm" }}
 {{- $_ := set $sapmExporter "endpoint" (printf "%s/v2/trace" (include "o11y-collector.ingestUrl" .)) }}
 {{- $_ := set $sapmExporter "access_token" (include "o11y-collector.accessToken" .) }}
+{{- if not (index $tracesPipeline "exporters") }}
 {{- $_ := set $tracesPipeline "exporters" (list "sapm") }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
