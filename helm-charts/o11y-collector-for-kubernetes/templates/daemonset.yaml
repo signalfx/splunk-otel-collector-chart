@@ -78,6 +78,7 @@ spec:
         - name: secrets
           mountPath: /fluentd/etc/splunk
           readOnly: true
+      {{- if .Values.otelAgent.enabled }}
       - name: otel-collector
         command:
         - /otelcontribcol
@@ -149,6 +150,7 @@ spec:
           name: hostfs
           readOnly: true
           mountPropagation: HostToContainer
+      {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       - name: varlog
@@ -166,6 +168,7 @@ spec:
       - name: fluentd-configmap
         configMap:
           name: {{ template "o11y-collector.fullname" . }}-fluentd
+      {{- if .Values.otelAgent.enabled }}
       - name: hostfs
         hostPath:
           path: /
@@ -175,6 +178,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}

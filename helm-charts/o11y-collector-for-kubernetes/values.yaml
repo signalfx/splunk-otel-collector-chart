@@ -48,6 +48,8 @@ signalfx:
 ################################################################################
 
 otelAgent:
+  enabled: true
+
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must
   # be unique across all the nodes in k8s cluster. Any port can be disabled,

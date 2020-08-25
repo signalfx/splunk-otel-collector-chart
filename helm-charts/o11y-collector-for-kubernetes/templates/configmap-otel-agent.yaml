@@ -1,3 +1,4 @@
+{{ if .Values.otelAgent.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,3 +11,4 @@ metadata:
 data:
   relay: |
     {{- template "o11y-collector.otelAgent.config" . }}
+{{- end }}
