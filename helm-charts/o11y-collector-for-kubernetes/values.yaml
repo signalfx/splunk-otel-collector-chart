@@ -151,21 +151,13 @@ otelAgent:
 
     # By default k8s_tagger, queued_retry and batch processors enabled.
     processors:
-      # k8s_tagger/traces enriches traces with k8s metadata
-      k8s_tagger/traces:
-        # If collector deployment is enabled, the `passthrough` configuration is enabled by default.
-        # It means that traces enrichemnt happens in collector, and the agent only passes traces through.
-        # passthrough: true
+      # k8s_tagger enriches traces and metrics with k8s metadata
+      k8s_tagger:
+        # If standalone collector deployment is enabled, the `passthrough` configuration will be enabled by default.
+        # It means that traces and metrics enrichemnt happens in collector, and the agent only passes through information 
+        # about traces and metrics source.
         filter:
           node_from_env_var: K8S_NODE_NAME
-      # k8s_tagger to enrich its own metrics
-      k8s_tagger/metrics:
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-          labels:
-            key: component
-            op: equals
-            value: otel-agent
 
       # Processor setting host specific resource attributes based on `OTEL_RESOURCE` environment variable.
       resourcedetection:
@@ -222,11 +214,9 @@ otelAgent:
         access_token:
 
       signalfx:
-        # If collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint
-        # Otherwise it will be set to {{ template o11y-collector.fullname }}:55680
-        # The value empty should not be overridden
-
-        # Will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint by default
+        # If standalone collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint.
+        # Otherwise the exporter will be removed in templates, and otlp exporter will be used instead to forward metrics
+        # to standalone otel-collector.
         ingest_url:
         # Will be set to {{ .Values.signalfx.ingestUrl }} by default
         api_url:
@@ -248,7 +238,7 @@ otelAgent:
         # default traces pipeline
         traces:
           receivers: [otlp, jaeger, zipkin, opencensus]
-          processors: [memory_limiter, k8s_tagger/traces, resource/add_cluster_name, batch, queued_retry]
+          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch, queued_retry]
           # The exporters value will set either to [sapm] or [otlp] depending on .collector.enabled.
           # The value should not be changed manually
           exporters:
@@ -256,8 +246,11 @@ otelAgent:
         # k8s metrics pipeline
         metrics:
           receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-          processors: [k8s_tagger/metrics, resource/add_cluster_name, resourcedetection]
-          exporters: [signalfx]
+          processors: [k8s_tagger, resource/add_cluster_name, resourcedetection]
+          # The exporters value will set either to [signalfx] or [otlp] depending on whether we need to 
+          # forward metrics through the standalone otel-collector which is defined by .collector.enabled config.
+          # The value should not be changed manually
+          exporters:
 
 
 ################################################################################
@@ -813,9 +806,9 @@ otelCollector:
 
   resources:
     limits:
-      cpu: 1
+      cpu: 4
       # Memory limit value is used as a source for default memory_limiter configuration
-      memory: 2Gi
+      memory: 8Gi
 
   # Scheduling configurations
   nodeSelector: {}
@@ -859,8 +852,6 @@ otelCollector:
         endpoint: 0.0.0.0:9411
       opencensus:
         endpoint: 0.0.0.0:55678
-      signalfx:
-        endpoint: 0.0.0.0:9943
 
     # By default k8s_tagger, memory_limiter, queued_retry and batch processors enabled.
     processors:
@@ -903,6 +894,7 @@ otelCollector:
         api_url:
         # Will be set to {{ .Values.signalfx.accessToken }}
         access_token:
+        send_compatible_metrics: true
         timeout: 5s
 
     service:
@@ -921,7 +913,7 @@ otelCollector:
 
         # default metrics pipeline
         metrics:
-          receivers: [signalfx, prometheus]
+          receivers: [otlp, prometheus]
           processors: [k8s_tagger, resource/add_cluster_name]
           exporters: [signalfx]
 

@@ -181,41 +181,59 @@ Create the opentelemetry collector agent configmap with applied default values.
 {{- $service := index $config "service" }}
 {{- $pipelines := index $service "pipelines" }}
 {{- $tracesPipeline := index $pipelines "traces" }}
+{{- $metricsPipeline := index $pipelines "metrics" }}
 
 {{- /*
-Setup default traces exporter.
-If collector deployment is enabled, it's used by the traces exproter to send OTLP traces.
-Otherwise traces are sent directly to Signalfx backend.
+Setup default traces and metrics exporters.
+If standalone collector deployment is enabled, it's used to send OTLP traces and metrics to.
+Otherwise traces and metrics are sent directly to Signalfx backend.
 */}}
-{{- if $tracesPipeline }}
-{{- if .Values.otelCollector.enabled }}
-{{- $_ := unset $exporters "sapm" }}
 {{- if hasKey $exporters "otlp" }}
-{{- $otlpExporter := index $exporters "otlp" }}
-{{- $_ := set $otlpExporter "endpoint" (printf "%s:55680" (include "o11y-collector.fullname" .)) }}
-{{- if not (index $tracesPipeline "exporters") }}
-{{- $_ := set $tracesPipeline "exporters" (list "otlp") }}
+  {{- $otlpExporter := index $exporters "otlp" }}
+  {{- if not (index $otlpExporter "endpoint") }}
+    {{- if .Values.otelCollector.enabled }}
+      {{- $_ := set $otlpExporter "endpoint" (printf "%s:55680" (include "o11y-collector.fullname" .)) }}
+    {{- else }}
+      {{- $_ := unset $exporters "otlp" }}
+    {{- end }}
+  {{- end }}
 {{- end }}
-{{- end }}
-{{- else }}
 {{- if hasKey $exporters "sapm" }}
-{{- $_ := unset $exporters "otlp" }}
-{{- $sapmExporter := index $exporters "sapm" }}
-{{- $_ := set $sapmExporter "endpoint" (printf "%s/v2/trace" (include "o11y-collector.ingestUrl" .)) }}
-{{- $_ := set $sapmExporter "access_token" (include "o11y-collector.accessToken" .) }}
-{{- if not (index $tracesPipeline "exporters") }}
-{{- $_ := set $tracesPipeline "exporters" (list "sapm") }}
+  {{- $sapmExporter := index $exporters "sapm" }}
+  {{- if not (index $sapmExporter "endpoint") | or (not (index $sapmExporter "access_token")) }}
+    {{- if .Values.otelCollector.enabled }}
+      {{- $_ := unset $exporters "sapm" }}
+    {{- else }}
+      {{- $_ := set $sapmExporter "endpoint" (printf "%s/v2/trace" (include "o11y-collector.ingestUrl" .)) }}
+      {{- $_ := set $sapmExporter "access_token" (include "o11y-collector.accessToken" .) }}
+    {{- end }}
+  {{- end }}
 {{- end }}
+{{- if hasKey $exporters "signalfx" }}
+  {{- $signalfxExporter := index $exporters "signalfx" }}
+  {{- if not (index $signalfxExporter "ingest_url") | or (not (index $signalfxExporter "api_url")) | or (not (index $signalfxExporter "access_token")) }}
+    {{- if .Values.otelCollector.enabled }}
+      {{- $_ := unset $exporters "signalfx" }}
+    {{- else }}
+      {{- $_ := set $signalfxExporter "ingest_url" (printf "%s/v2/datapoint" (include "o11y-collector.ingestUrl" .)) }}
+      {{- $_ := set $signalfxExporter "api_url" (include "o11y-collector.apiUrl" .) }}
+      {{- $_ := set $signalfxExporter "access_token" (include "o11y-collector.accessToken" .) }}
+    {{- end }}
+  {{- end }}
 {{- end }}
+{{- if $tracesPipeline | and (not (index $tracesPipeline "exporters")) }}
+  {{- if .Values.otelCollector.enabled }}
+    {{- $_ := set $tracesPipeline "exporters" (list "otlp") }}
+  {{- else }}
+    {{- $_ := set $tracesPipeline "exporters" (list "sapm") }}
+  {{- end }}
 {{- end }}
-{{- end }}
-
-{{- /* Setup signalfx exporter based on .Values.signalfx configurations */}}
-{{ if hasKey $exporters "signalfx" }}
-{{- $signalfxExporter := index $exporters "signalfx" }}
-{{- $_ := set $signalfxExporter "ingest_url" (printf "%s/v2/datapoint" (include "o11y-collector.ingestUrl" .)) }}
-{{- $_ := set $signalfxExporter "api_url" (include "o11y-collector.apiUrl" .) }}
-{{- $_ := set $signalfxExporter "access_token" (include "o11y-collector.accessToken" .) }}
+{{- if $metricsPipeline | and (not (index $metricsPipeline "exporters")) }}
+  {{- if .Values.otelCollector.enabled }}
+    {{- $_ := set $metricsPipeline "exporters" (list "otlp") }}
+  {{- else }}
+    {{- $_ := set $metricsPipeline "exporters" (list "signalfx") }}
+  {{- end }}
 {{- end }}
 
 {{- /* Setup default memory_limiter processor configuration based of otel container limits */}}
@@ -234,9 +252,9 @@ Otherwise traces are sent directly to Signalfx backend.
 {{- $_ := set $resourceProcessor "attributes" (append $resourceAttributes $insertClusterNameAction) -}}
 {{- end }}
 
-{{- /* Set "passthrough" mode in k8s_tagger/traces processor if collector enabled */}}
-{{ if and (hasKey $processors "k8s_tagger/traces") .Values.otelCollector.enabled }}
-{{- $k8sProcessor := index $processors "k8s_tagger/traces" }}
+{{- /* Set "passthrough" mode in k8s_tagger processor if collector enabled */}}
+{{ if and (hasKey $processors "k8s_tagger") .Values.otelCollector.enabled }}
+{{- $k8sProcessor := index $processors "k8s_tagger" }}
 {{- $_ := set $k8sProcessor "passthrough" true -}}
 {{- end }}
 
