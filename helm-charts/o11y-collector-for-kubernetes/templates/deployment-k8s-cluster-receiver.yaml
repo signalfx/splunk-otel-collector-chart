@@ -47,6 +47,7 @@ spec:
         command:
         - /otelcontribcol
         - --config=/conf/relay.yaml
+        - --mem-ballast-size-mib={{ template "o11y-collector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelK8sClusterReceiver.extraArgs }}
         - {{ . }}

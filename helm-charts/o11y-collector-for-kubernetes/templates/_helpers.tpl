@@ -329,6 +329,14 @@ Create the k8s сluster receiver configmap with applied default values.
 {{- $_ := set $resourceProcessor "attributes" (append $resourceAttributes $insertClusterNameAction) -}}
 {{- end }}
 
+{{- /* Setup default memory_limiter processor configuration */}}
+{{- if hasKey $processors "memory_limiter" }}
+{{- $memoryLimiter := index $processors "memory_limiter" }}
+{{- $_ := set $memoryLimiter "limit_mib" (include "o11y-collector.getOtelMemLimitMib" .Values.otelK8sClusterReceiver) }}
+{{- $_ := set $memoryLimiter "spike_limit_mib" (include "o11y-collector.getOtelMemSpikeLimitMib" .Values.otelK8sClusterReceiver) }}
+{{- $_ := set $memoryLimiter "ballast_size_mib" (include "o11y-collector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver) }}
+{{- end }}
+
 {{- $config | toYaml | nindent 4 }}
 
 {{- end -}}

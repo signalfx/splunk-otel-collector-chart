@@ -163,7 +163,7 @@ otelAgent:
       resourcedetection:
         detectors: [env]
 
-      # memory limiter is enabled bby default.
+      # memory limiter is enabled by default.
       memory_limiter:
         # check_interval is the time between measurements of memory usage.
         check_interval: 5s
@@ -246,7 +246,7 @@ otelAgent:
         # k8s metrics pipeline
         metrics:
           receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-          processors: [k8s_tagger, resource/add_cluster_name, resourcedetection]
+          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection, queued_retry]
           # The exporters value will set either to [signalfx] or [otlp] depending on whether we need to 
           # forward metrics through the standalone otel-collector which is defined by .collector.enabled config.
           # The value should not be changed manually
@@ -300,6 +300,22 @@ otelK8sClusterReceiver:
         metadata_exporters: [signalfx]
 
     processors:
+      queued_retry: {}
+
+      # memory limiter is enabled by default.
+      memory_limiter:
+        # check_interval is the time between measurements of memory usage.
+        check_interval: 5s
+
+        # If left empty, the limit_mib value will be set to 80% of "agent.resources.limits.memory" by default
+        limit_mib:
+
+        # If left empty, the value spike_limit_mib will be set to 25% of "agent.resources.limits.memory" by default
+        spike_limit_mib:
+
+        # If left empty, the value ballast_size_mib will be set to 40% of "agent.resources.limits.memory" by default
+        ballast_size_mib:
+
       # k8s_tagger to enrich its own metrics
       k8s_tagger:
         filter:
@@ -333,7 +349,7 @@ otelK8sClusterReceiver:
         # default metrics pipeline
         metrics:
           receivers: [prometheus, k8s_cluster]
-          processors: [k8s_tagger, resource/add_cluster_name]
+          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
           exporters: [signalfx]
 
 
@@ -914,7 +930,7 @@ otelCollector:
         # default metrics pipeline
         metrics:
           receivers: [otlp, prometheus]
-          processors: [k8s_tagger, resource/add_cluster_name]
+          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
           exporters: [signalfx]
 
 
