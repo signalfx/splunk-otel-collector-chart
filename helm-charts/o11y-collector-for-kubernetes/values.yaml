@@ -3,9 +3,9 @@
 # Declared variables will be passed into templates.
 
 ################################################################################
-# clusterName is a REQUIRED field. It can be set to an arbitrary value 
-# that identifies this K8s cluster in SignalFx. The value will be associated 
-# with every trace, metric and log as "k8s.cluster.name" metadata attribute. 
+# clusterName is a REQUIRED field. It can be set to an arbitrary value
+# that identifies this K8s cluster in SignalFx. The value will be associated
+# with every trace, metric and log as "k8s.cluster.name" metadata attribute.
 ################################################################################
 
 clusterName: k8s-cluster
@@ -17,8 +17,8 @@ clusterName: k8s-cluster
 
 signalfx:
 
-  # The SignalFx realm to send telemetry data to. If set, the values of `ingestUrl` 
-  # and `apiUrl` will be automatically set based on this 
+  # The SignalFx realm to send telemetry data to. If set, the values of `ingestUrl`
+  # and `apiUrl` will be automatically set based on this
   # realm value. If not set, it defaults to the original "us0" realm.
   realm: us0
 
@@ -100,7 +100,7 @@ otelAgent:
 
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
-# This is an extra 1-replica deployment of Open-temlemetry collector used 
+# This is an extra 1-replica deployment of Open-temlemetry collector used
 # specifically for collecting metrics from kubernetes API.
 ################################################################################
 
@@ -144,7 +144,7 @@ fluentd:
     requests:
       cpu: 100m
       memory: 200Mi
-  
+
   # Currently fluentd logging component need to be run in privileged mode.
   securityContext:
     privileged: true
@@ -183,7 +183,7 @@ fluentd:
       overflow_action: block
       retry_max_times: 3
 
-    # logLevel is to set log level of the Splunk log collector. 
+    # logLevel is to set log level of the Splunk log collector.
     # Available values are: trace, debug, info, warn, error
     logLevel: info
 
@@ -438,14 +438,14 @@ fluentd:
 
 ################################################################################
 # Additional configuration for logs backend.
-# It allows to configure o11y collector send logs to a Splunk backend, 
+# It allows to configure o11y collector send logs to a Splunk backend,
 # instead of Signalfx.
 ################################################################################
 
 logsBackend:
   # Configurations for HEC (HTTP Event Collector)
   hec:
-    # host will be set to `signalfx.ingestUrl` used by default 
+    # host will be set to `signalfx.ingestUrl` used by default
     host:
     # port to HEC, optional, default 443
     port:
@@ -560,10 +560,10 @@ priorityClassName: ""
 
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
-# This is an additional deployment of Open-telemetry collector that can be used 
-# to pass traces trough it, make k8s metadata enrichment and batching. 
-# Another use case is to point tracing instrumentation libraries directly to 
-# the collector endpoint instead of local agents. The collector running in the 
+# This is an additional deployment of Open-telemetry collector that can be used
+# to pass traces trough it, make k8s metadata enrichment and batching.
+# Another use case is to point tracing instrumentation libraries directly to
+# the collector endpoint instead of local agents. The collector running in the
 # passthrough mode is recommended for large k8s clusters, disabled by default.
 ################################################################################
 

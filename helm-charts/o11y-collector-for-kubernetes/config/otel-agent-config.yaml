@@ -69,7 +69,7 @@ processors:
   # k8s_tagger enriches traces and metrics with k8s metadata
   k8s_tagger:
     # If standalone collector deployment is enabled, the `passthrough` configuration will be enabled by default.
-    # It means that traces and metrics enrichment happens in collector, and the agent only passes through information 
+    # It means that traces and metrics enrichment happens in collector, and the agent only passes through information
     # about traces and metrics source.
     filter:
       node_from_env_var: K8S_NODE_NAME
@@ -103,7 +103,7 @@ processors:
 
   resource/add_cluster_name:
     attributes: []
-    # This item will be added in templates to set k8s.cluster.name 
+    # This item will be added in templates to set k8s.cluster.name
     # resource attribute based on clusterName value
     # - action: upsert
     #   value: {{ .Values.clusterName }}
@@ -166,7 +166,7 @@ service:
     metrics:
       receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
       processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection, queued_retry]
-      # The exporters value will set either to [signalfx] or [otlp] depending on whether we need to 
+      # The exporters value will set either to [signalfx] or [otlp] depending on whether we need to
       # forward metrics through the standalone otel-collector which is defined by .otelCollector.enabled config.
       # The value should not be changed manually
       exporters:

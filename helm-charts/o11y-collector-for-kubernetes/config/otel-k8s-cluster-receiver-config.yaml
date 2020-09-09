@@ -46,7 +46,7 @@ processors:
         value: otel-k8s-cluster-receiver
   resource/add_cluster_name:
     attributes: []
-    # This item will be added in templates to set k8s.cluster.name 
+    # This item will be added in templates to set k8s.cluster.name
     # resource attribute based on clusterName value
     # - action: upsert
     #   value: {{ .Values.clusterName }}
