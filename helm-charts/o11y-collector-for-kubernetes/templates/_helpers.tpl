@@ -152,7 +152,11 @@ Get otel memory_limiter limit_mib value based on 80% of resources.limit.
 */}}
 {{- define "o11y-collector.getOtelMemLimitMib" -}}
 {{- $resourseLimit := include "o11y-collector.convertMemToMib" .resources.limits.memory }}
-{{- .config.processors.memory_limiter.limit_mib | default (div (mul $resourseLimit 80) 100) }}
+{{- $presetLimit := "" }}
+{{- if .config.processors }}{{ if .config.processors.memory_limiter }}{{ if .config.processors.memory_limiter.limit_mib }}
+  {{- $presetLimit := .config.processors.memory_limiter.limit_mib }}
+{{- end }}{{ end }}{{ end }}
+{{- $presetLimit | default (div (mul $resourseLimit 80) 100) }}
 {{- end -}}
 
 {{/*
@@ -160,7 +164,11 @@ Get otel memory_limiter spike_limit_mib value based on 25% of resources.limit.
 */}}
 {{- define "o11y-collector.getOtelMemSpikeLimitMib" -}}
 {{- $resourseLimit := include "o11y-collector.convertMemToMib" .resources.limits.memory }}
-{{- .config.processors.memory_limiter.spike_limit_mib | default (div (mul $resourseLimit 25) 100) }}
+{{- $presetSpikeLimit := "" }}
+{{- if .config.processors }}{{ if .config.processors.memory_limiter }}{{ if .config.processors.memory_limiter.spike_limit_mib }}
+  {{- $presetSpikeLimit := .config.processors.memory_limiter.spike_limit_mib }}
+{{- end }}{{ end }}{{ end }}
+{{- $presetSpikeLimit | default (div (mul $resourseLimit 25) 100) }}
 {{- end -}}
 
 {{/*
@@ -168,14 +176,18 @@ Get otel memory_limiter ballast_size_mib value based on 40% of resources.limit.
 */}}
 {{- define "o11y-collector.getOtelMemBallastSizeMib" }}
 {{- $resourseLimit := include "o11y-collector.convertMemToMib" .resources.limits.memory }}
-{{- .config.processors.memory_limiter.ballast_size_mib | default (div (mul $resourseLimit 40) 100) }}
+{{- $presetBallastSize := "" }}
+{{- if .config.processors }}{{ if .config.processors.memory_limiter }}{{ if .config.processors.memory_limiter.ballast_size_mib }}
+  {{- $presetBallastSize := .config.processors.memory_limiter.ballast_size_mib }}
+{{- end }}{{ end }}{{ end }}
+{{- $presetBallastSize | default (div (mul $resourseLimit 40) 100) }}
 {{- end -}}
 
 {{/*
 Create the opentelemetry collector agent configmap with applied default values.
 */}}
 {{- define "o11y-collector.otelAgent.config" -}}
-{{- $config := .Values.otelAgent.config | deepCopy -}}
+{{- $config := .Files.Get "config/otel-agent-config.yaml" | fromYaml | mustMerge .Values.otelAgent.config | deepCopy -}}
 {{- $processors := index $config "processors" }}
 {{- $exporters := index $config "exporters" }}
 {{- $service := index $config "service" }}
@@ -280,7 +292,7 @@ Otherwise traces and metrics are sent directly to Signalfx backend.
 Create the opentelemetry collector configmap with applied default values.
 */}}
 {{- define "o11y-collector.otelCollector.config" -}}
-{{- $config := .Values.otelCollector.config | deepCopy -}}
+{{- $config := .Files.Get "config/otel-collector-config.yaml" | fromYaml | mustMerge .Values.otelCollector.config | deepCopy -}}
 {{- $processors := index $config "processors" }}
 {{- $exporters := index $config "exporters" }}
 
@@ -323,7 +335,7 @@ Create the opentelemetry collector configmap with applied default values.
 Create the k8s сluster receiver configmap with applied default values.
 */}}
 {{- define "o11y-collector.otelK8sClusterReceiver.config" -}}
-{{- $config := .Values.otelK8sClusterReceiver.config | deepCopy -}}
+{{- $config := .Files.Get "config/otel-k8s-cluster-receiver-config.yaml" | fromYaml | mustMerge .Values.otelK8sClusterReceiver.config | deepCopy -}}
 {{- $processors := index $config "processors" }}
 {{- $exporters := index $config "exporters" }}
 

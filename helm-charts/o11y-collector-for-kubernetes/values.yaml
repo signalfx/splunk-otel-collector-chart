@@ -92,178 +92,11 @@ otelAgent:
 
   securityContext: {}
 
-  # OpenTelemetry Collector default configuration.
+  # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
+  # Default configuration defined in config/otel-agent-config.yaml
   # Any additional fields can be added to the defaults,
   # existing fields can be disabled by setting them to null value.
-  config:
-    extensions:
-      health_check: {}
-      k8s_observer:
-        auth_type: serviceAccount
-        node: ${K8S_NODE_NAME}
-
-    receivers:
-      # Prometheus receiver scraping the prometheus metrics from the pod itself, both otelcol and fluentd.
-      prometheus:
-        config:
-          scrape_configs:
-          - job_name: 'o11y-collector-agent'
-            scrape_interval: 10s
-            static_configs:
-            - targets: ["${K8S_POD_IP}:8888", "${K8S_POD_IP}:24231"]
-      hostmetrics:
-        collection_interval: 10s
-        scrapers:
-          cpu:
-          disk:
-          filesystem:
-          memory:
-          network:
-          # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
-          load:
-          # Aggregated system process count metrics
-          processes:
-          # Virtual memory metrics, disabled by default
-          # swap:
-          # System processes metrics, disabled by default
-          # process:
-      receiver_creator:
-        watch_observers: [k8s_observer]
-        receivers:
-          prometheus_simple:
-            # Enable prometheus scraping for pods with standard prometheus annotations
-            rule: type.pod && annotations["prometheus.io/scrape"] == "true"
-            config:
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
-      kubeletstats:
-        collection_interval: 10s
-        auth_type: serviceAccount
-        endpoint: ${K8S_NODE_IP}:10250
-        extra_metadata_labels:
-          - container.id
-      otlp:
-        protocols:
-          grpc:
-          http:
-      jaeger:
-        protocols:
-          thrift_http:
-            endpoint: 0.0.0.0:14268
-          grpc:
-            endpoint: 0.0.0.0:14250
-      zipkin:
-        endpoint: 0.0.0.0:9411
-      opencensus:
-        endpoint: 0.0.0.0:55678
-
-    # By default k8s_tagger, queued_retry and batch processors enabled.
-    processors:
-      # k8s_tagger enriches traces and metrics with k8s metadata
-      k8s_tagger:
-        # If standalone collector deployment is enabled, the `passthrough` configuration will be enabled by default.
-        # It means that traces and metrics enrichment happens in collector, and the agent only passes through information 
-        # about traces and metrics source.
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-
-      # Resource detection processor picks attributes from host environment.
-      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/processor/resourcedetectionprocessor
-      # "detectors" will be set based on {{ .Values.platform }}.
-      # By default only "env" detector is enabled: [env].
-      resourcedetection:
-        detectors:
-        timeout: 10s
-
-      # memory limiter is enabled by default.
-      memory_limiter:
-        # check_interval is the time between measurements of memory usage.
-        check_interval: 5s
-
-        # If left empty, the limit_mib value will be set to 80% of "agent.resources.limits.memory" by default
-        limit_mib:
-
-        # If left empty, the value spike_limit_mib will be set to 25% of "agent.resources.limits.memory" by default
-        spike_limit_mib:
-
-        # If left empty, the value ballast_size_mib will be set to 40% of "agent.resources.limits.memory" by default
-        ballast_size_mib:
-
-      queued_retry: {}
-      batch:
-        timeout: 200ms
-        send_batch_size: 128
-
-      resource/add_cluster_name:
-        attributes: []
-        # This item will be added in templates to set k8s.cluster.name 
-        # resource attribute based on clusterName value
-        # - action: upsert
-        #   value: {{ .Values.clusterName }}
-        #   key: k8s.cluster.name
-
-    # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
-    # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
-    # These values should not be specified manually and will be set in the templates.
-    exporters:
-
-      # otlp exporter will be used only if collector is enable to forward the traces before exporting to
-      # signalfx backend, otherwise the exporter will be removed in templates.
-      otlp:
-        # If collector is enabled, it will be set to collector k8s service endpoint:
-        # {{ template o11y-collector.fullname }}:55680
-        # The value empty should not be overridden
-        endpoint:
-        insecure: true
-
-      # sapm exporter will be used only if collector is disabled, otherwise the exporter will be removed.
-      sapm:
-        # If collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/trace
-        # The value empty should not be overridden
-        endpoint:
-        # Will be set to {{ .Values.signalfx.accessToken }}
-        # The value empty should not be overridden
-        access_token:
-
-      signalfx:
-        # If standalone collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint.
-        # Otherwise the exporter will be removed in templates, and otlp exporter will be used instead to forward metrics
-        # to standalone otel-collector.
-        ingest_url:
-        # Will be set to {{ .Values.signalfx.ingestUrl }} by default
-        api_url:
-        # Will be set to {{ .Values.signalfx.accessToken }}
-        access_token:
-        send_compatible_metrics: true
-        timeout: 5s
-
-    service:
-      extensions: [health_check, k8s_observer]
-
-      # By default there are two pipelines sending metrics and traces. Metrics are always sent
-      # to signalfx backend. Traces sent to "collector" k8s service using otlp format or directly
-      # to signalfx backend depending on collector.enabled configuration.
-      # The default pipelines are not expected to be changed. You can add any custom pipeline instead.
-      # In order to disable a default pipeline just set it to `null`.
-      pipelines:
-
-        # default traces pipeline
-        traces:
-          receivers: [otlp, jaeger, zipkin, opencensus]
-          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch, queued_retry]
-          # The exporters value will set either to [sapm] or [otlp] depending on .collector.enabled.
-          # The value should not be changed manually
-          exporters:
-
-        # k8s metrics pipeline
-        metrics:
-          receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection, queued_retry]
-          # The exporters value will set either to [signalfx] or [otlp] depending on whether we need to 
-          # forward metrics through the standalone otel-collector which is defined by .otelCollector.enabled config.
-          # The value should not be changed manually
-          exporters:
-
+  config: {}
 
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
@@ -293,77 +126,11 @@ otelK8sClusterReceiver:
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
-  # Config of the k8s cluster receiver deployment.
-  config:
-    extensions:
-      health_check: {}
-
-    receivers:
-      # Prometheus receiver scraping the pod itself
-      prometheus:
-        config:
-          scrape_configs:
-          - job_name: 'otel-k8s-cluster-receiver'
-            scrape_interval: 10s
-            static_configs:
-            - targets: ["${K8S_POD_IP}:8888"]
-      k8s_cluster:
-        auth_type: serviceAccount
-        metadata_exporters: [signalfx]
-
-    processors:
-      queued_retry: {}
-
-      # memory limiter is enabled by default.
-      memory_limiter:
-        # check_interval is the time between measurements of memory usage.
-        check_interval: 5s
-
-        # If left empty, the limit_mib value will be set to 80% of "agent.resources.limits.memory" by default
-        limit_mib:
-
-        # If left empty, the value spike_limit_mib will be set to 25% of "agent.resources.limits.memory" by default
-        spike_limit_mib:
-
-        # If left empty, the value ballast_size_mib will be set to 40% of "agent.resources.limits.memory" by default
-        ballast_size_mib:
-
-      # k8s_tagger to enrich its own metrics
-      k8s_tagger:
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-          labels:
-            key: component
-            op: equals
-            value: otel-k8s-cluster-receiver
-      resource/add_cluster_name:
-        attributes: []
-        # This item will be added in templates to set k8s.cluster.name 
-        # resource attribute based on clusterName value
-        # - action: upsert
-        #   value: {{ .Values.clusterName }}
-        #   key: k8s.cluster.name
-
-    exporters:
-      signalfx:
-        # Will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint by default
-        ingest_url:
-        # Will be set to https://{{ .Values.signalfx.apiUrl }} by default
-        api_url:
-        # Will be set to {{ .Values.signalfx.accessToken }}
-        access_token:
-        send_compatible_metrics: true
-        timeout: 10s
-
-    service:
-      extensions: [health_check]
-      pipelines:
-        # default metrics pipeline
-        metrics:
-          receivers: [prometheus, k8s_cluster]
-          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
-          exporters: [signalfx]
-
+  # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
+  # Defaul configuration defined in config/otel-k8s-cluster-receiver-config.yaml
+  # Any additional fields can be added to the defaults,
+  # existing fields can be disabled by setting them to null value.
+  config: {}
 
 ################################################################################
 # Fluentd configuration for logs collection
@@ -669,7 +436,6 @@ fluentd:
           format: "%Y-%m-%dT%H:%M:%SZ"
         sourcetype: kube:apiserver-audit
 
-
 ################################################################################
 # Additional configuration for logs backend.
 # It allows to configure o11y collector send logs to a Splunk backend, 
@@ -848,103 +614,11 @@ otelCollector:
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
-  # OpenTelemetry Collector default configuration.
+  # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
+  # Default configuration defined in config/otel-collector-config.yaml
   # Any additional fields can be added to the defaults,
   # existing fields can be disabled by setting them to `null`.
-  config:
-    extensions:
-      health_check: {}
-
-    receivers:
-      # Prometheus receiver scraping the pod itself
-      prometheus:
-        config:
-          scrape_configs:
-          - job_name: 'otel-collector'
-            scrape_interval: 10s
-            static_configs:
-            - targets: ["${K8S_POD_IP}:8888"]
-      otlp:
-        protocols:
-          grpc:
-          http:
-      sapm:
-        endpoint: 0.0.0.0:7276
-      jaeger:
-        protocols:
-          thrift_http:
-            endpoint: 0.0.0.0:14268
-          grpc:
-            endpoint: 0.0.0.0:14250
-      zipkin:
-        endpoint: 0.0.0.0:9411
-      opencensus:
-        endpoint: 0.0.0.0:55678
-
-    # By default k8s_tagger, memory_limiter, queued_retry and batch processors enabled.
-    processors:
-      k8s_tagger: {}
-      memory_limiter:
-        # check_interval is the time between measurements of memory usage.
-        check_interval: 5s
-        # The limit_mib value will set to 85% of "collector.resources.limits.memory" by default.
-        limit_mib:
-        # The spike_limit_mib value will set to 20% of "collector.resources.limits.memory" by default.
-        spike_limit_mib:
-        # The ballast_size_mib value will set to 40% of "collector.resources.limits.memory" by default.
-        ballast_size_mib:
-      queued_retry: {}
-      batch:
-        timeout: 1s
-        send_batch_size: 1024
-
-      resource/add_cluster_name:
-        attributes: []
-        # This item will be added in templates to set k8s.cluster.name 
-        # resource attribute based on clusterName value
-        # - action: upsert
-        #   value: {{ .Values.clusterName }}
-        #   key: k8s.cluster.name
-
-    # By default only sapm and signalfx exporters enabled. They are pointed to signalfx backend
-    # using `signalfx` configuration .
-    # The values should not be specified manually and will be set in the templates.
-    exporters:
-      sapm:
-        # This will be set to {{ .Values.signalfx.ingestUrl }}/v2/trace by default
-        endpoint:
-        # Will be set to {{ .Values.signalfx.accessToken }}
-        access_token:
-      signalfx:
-        # Will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint by default
-        ingest_url:
-        # Will be set to https://{{ .Values.signalfx.apiUrl }} by default
-        api_url:
-        # Will be set to {{ .Values.signalfx.accessToken }}
-        access_token:
-        send_compatible_metrics: true
-        timeout: 5s
-
-    service:
-      extensions: [health_check]
-
-      # By default there are two pipelines sending metrics and traces to signalfx backend.
-      # The default pipelines are not expected to be changed. You can add any custom pipeline instead.
-      # In order to disable a default pipeline just set it to `null`.
-      pipelines:
-
-        # default traces pipeline
-        traces:
-          receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch, queued_retry]
-          exporters: [sapm]
-
-        # default metrics pipeline
-        metrics:
-          receivers: [otlp, prometheus]
-          processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
-          exporters: [signalfx]
-
+  config: {}
 
 ################################################################################
 # OpenTelemetry service config, used for otel collector deployment.
