@@ -258,6 +258,20 @@ Otherwise traces and metrics are sent directly to Signalfx backend.
 {{- $_ := set $k8sProcessor "passthrough" true -}}
 {{- end }}
 
+{{- /* Set "processors.resourcedetection.detectors" based on "platform" */}}
+{{ if index $processors "resourcedetection" }}
+  {{- $resourcedetectionProcessor := index $processors "resourcedetection" }}
+  {{- if not (index $resourcedetectionProcessor "detectors") }}
+    {{- if eq .Values.platform "gcp" }}
+      {{- $_ := set $resourcedetectionProcessor "detectors" (list "env" "gce" ) }}
+    {{- else if eq .Values.platform "aws" }}
+      {{- $_ := set $resourcedetectionProcessor "detectors" (list "env" "ec2") }}
+    {{- else }}
+      {{- $_ := set $resourcedetectionProcessor "detectors" (list "env") }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
 {{- $config | toYaml | nindent 4 }}
 
 {{- end -}}

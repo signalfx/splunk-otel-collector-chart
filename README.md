@@ -97,6 +97,14 @@ signalfx:
   realm: us0
 ```
 
+### Kubernetes platform
+
+Use `platform` parameter to provide information about underlying kubernetes platform. 
+It'll allow the o11y collector to automatically scrape additional cloud metadata. Supported options:
+- `aws` - Amazon EKS or self-managed k8s cluster in AWS environment.
+- `gcp` - Google GKE or self-managed k8s cluster in GCP environment.
+- `default` - default configuration for other platforms.
+
 ## License ##
 
 See [LICENSE](LICENSE).

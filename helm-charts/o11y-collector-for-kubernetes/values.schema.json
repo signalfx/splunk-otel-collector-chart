@@ -2,7 +2,8 @@
   "$schema": "http://json-schema.org/schema#",
   "type": "object",
   "required": [
-    "clusterName"
+    "clusterName",
+    "platform"
   ],
   "title": "Values",
   "properties": {
@@ -10,6 +11,11 @@
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
       "minLength": 1,
       "type": "string"
+    },
+    "platform": {
+      "description": "Kubernetes platform used to run the collector on",
+      "type": "string",
+      "enum": ["aws", "gcp", "default"]
     }
   }
 }

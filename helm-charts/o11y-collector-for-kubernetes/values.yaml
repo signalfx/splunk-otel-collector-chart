@@ -37,6 +37,14 @@ signalfx:
   # Signalfx ingest protocol: "http" and "https".
   protocol: https
 
+################################################################################
+# Kubernetes platform used to run the collector on. Valid options are:
+# - "aws" (Amazon EKS and self-managed k8s cluster on AWS EC2)
+# - "gcp" (Google GKE and self-managed k8s cluster on GCP GCE)
+# - "default"
+################################################################################
+
+platform: default
 
 ################################################################################
 # OPTIONAL CONFIGURATIONS OF PARTICULAR O11Y COLLECTOR COMPONENTS
@@ -159,9 +167,13 @@ otelAgent:
         filter:
           node_from_env_var: K8S_NODE_NAME
 
-      # Processor setting host specific resource attributes based on `OTEL_RESOURCE` environment variable.
+      # Resource detection processor picks attributes from host environment.
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/processor/resourcedetectionprocessor
+      # "detectors" will be set based on {{ .Values.platform }}.
+      # By default only "env" detector is enabled: [env].
       resourcedetection:
-        detectors: [env]
+        detectors:
+        timeout: 10s
 
       # memory limiter is enabled by default.
       memory_limiter:
