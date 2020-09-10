@@ -64,14 +64,14 @@ exporters:
   sapm:
     # This will be set to {{ .Values.signalfx.ingestUrl }}/v2/trace by default
     endpoint:
-    # Will be set to {{ .Values.signalfx.accessToken }}
+    # Will be set to {{ .Values.splunkAccessToken }}
     access_token:
   signalfx:
     # Will be set to {{ .Values.signalfx.ingestUrl }}/v2/datapoint by default
     ingest_url:
     # Will be set to https://{{ .Values.signalfx.apiUrl }} by default
     api_url:
-    # Will be set to {{ .Values.signalfx.accessToken }}
+    # Will be set to {{ .Values.splunkAccessToken }}
     access_token:
     send_compatible_metrics: true
     timeout: 5s

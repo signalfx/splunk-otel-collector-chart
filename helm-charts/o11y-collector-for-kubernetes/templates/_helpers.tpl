@@ -54,8 +54,8 @@ Create the name of the service account to use
 Get Signalfx ingest host
 */}}
 {{- define "o11y-collector.ingestHost" -}}
-{{- $_ := required "signalfx.realm or signalfx.ingestHost must be provided" (or .Values.signalfx.ingestHost .Values.signalfx.realm) }}
-{{- .Values.signalfx.ingestHost | default (printf "ingest.%s.signalfx.com" .Values.signalfx.realm) }}
+{{- $_ := required "splunkRealm or ingestHost must be provided" (or .Values.ingestHost .Values.splunkRealm) }}
+{{- .Values.ingestHost | default (printf "ingest.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
 
 {{/*
@@ -63,9 +63,9 @@ Get Signalfx ingest URL
 */}}
 {{- define "o11y-collector.ingestUrl" -}}
 {{- $host := include "o11y-collector.ingestHost" . }}
-{{- $endpoint := printf "%s://%s" .Values.signalfx.protocol $host }}
-{{- if or (and (eq .Values.signalfx.protocol "http") (ne (toString .Values.signalfx.port) "80")) (and (eq .Values.signalfx.protocol "https") (ne (toString .Values.signalfx.port) "443")) }}
-{{- printf "%s:%s" $endpoint (toString .Values.signalfx.port) }}
+{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
+{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
+{{- printf "%s:%s" $endpoint (toString .Values.ingestPort) }}
 {{- else }}
 {{- $endpoint }}
 {{- end }}
@@ -75,8 +75,8 @@ Get Signalfx ingest URL
 Get Signalfx API host.
 */}}
 {{- define "o11y-collector.apiHost" -}}
-{{- $_ := required "signalfx.realm or signalfx.apiHost must be provided" (or .Values.signalfx.apiHost .Values.signalfx.realm) }}
-{{- .Values.signalfx.apiHost | default (printf "api.%s.signalfx.com" .Values.signalfx.realm) }}
+{{- $_ := required "splunkRealm or apiHost must be provided" (or .Values.apiHost .Values.splunkRealm) }}
+{{- .Values.apiHost | default (printf "api.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
 
 {{/*
@@ -84,19 +84,19 @@ Get Signalfx API URL.
 */}}
 {{- define "o11y-collector.apiUrl" -}}
 {{- $host := include "o11y-collector.apiHost" . -}}
-{{- $endpoint := printf "%s://%s" .Values.signalfx.protocol $host }}
-{{- if or (and (eq .Values.signalfx.protocol "http") (ne (toString .Values.signalfx.port) "80")) (and (eq .Values.signalfx.protocol "https") (ne (toString .Values.signalfx.port) "443")) }}
-{{- printf "%s:%s" $endpoint (toString .Values.signalfx.port) }}
+{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
+{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
+{{- printf "%s:%s" $endpoint (toString .Values.ingestPort) }}
 {{- else }}
 {{- $endpoint }}
 {{- end }}
 {{- end -}}
 
 {{/*
-Get signalfx.accessToken.
+Get splunkAccessToken.
 */}}
 {{- define "o11y-collector.accessToken" -}}
-{{- required "signalfx.accessToken value must be provided" .Values.signalfx.accessToken -}}
+{{- required "splunkAccessToken value must be provided" .Values.splunkAccessToken -}}
 {{- end -}}
 
 {{/*

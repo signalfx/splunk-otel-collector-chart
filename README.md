@@ -52,8 +52,8 @@ The following components required to use the helm chart:
 ### How to install
 
 To install o11y-collector in k8s cluster at least three parameters must be provided:
-- `signalfx.realm` (default `us0`): SignalFx realm to send telemetry data to.
-- `signalfx.accessToken`: Your SignalFx org access token.
+- `splunkRealm` (default `us0`): SignalFx realm to send telemetry data to.
+- `splunkAccessToken`: Your SignalFx org access token.
 - `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment.
 
 The project is in active development state. There are no packages released yet.
@@ -62,7 +62,7 @@ In order to install helm chart you need to clone the repo first and use it local
 ```bash
 $ git clone git@github.com:signalfx/o11y-collector-for-kubernetes.git
 $ cd ./o11y-collector-for-kubernetes
-$ helm install my-o11y-collector --set="signalfx.realm=us0,signalfx.accessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector-for-kubernetes
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:

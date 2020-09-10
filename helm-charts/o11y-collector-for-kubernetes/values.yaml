@@ -12,30 +12,28 @@ clusterName: k8s-cluster
 
 
 ################################################################################
-# Signalfx backend configuration
+# Splunk SignalFx backend configuration
 ################################################################################
 
-signalfx:
+# The SignalFx realm to send telemetry data to. If set, the values of `ingestUrl`
+# and `apiUrl` will be automatically set based on this
+# realm value. If not set, it defaults to the original "us0" realm.
+splunkRealm: us0
 
-  # The SignalFx realm to send telemetry data to. If set, the values of `ingestUrl`
-  # and `apiUrl` will be automatically set based on this
-  # realm value. If not set, it defaults to the original "us0" realm.
-  realm: us0
+# (REQUIRED) SignalFx org access token.
+splunkAccessToken:
 
-  # (REQUIRED) The SignalFx org access token.
-  accessToken:
+# SignalFx ingest server host, default: "ingest.<realm>.signalfx.com".
+ingestHost:
 
-  # SignalFx ingest server host, default: "ingest.<realm>.signalfx.com".
-  ingestHost:
+# The SignalFx API host, default: "api.<realm>.signalfx.com".
+apiHost:
 
-  # The SignalFx API host, default: "api.<realm>.signalfx.com".
-  apiHost:
+# Signalfx ingest endpoint port.
+ingestPort: 443
 
-  # Signalfx ingest endpoint port.
-  port: 443
-
-  # Signalfx ingest protocol: "http" and "https".
-  protocol: https
+# Signalfx ingest protocol: "http" and "https".
+ingestProtocol: https
 
 ################################################################################
 # Kubernetes platform used to run the collector on. Valid options are:

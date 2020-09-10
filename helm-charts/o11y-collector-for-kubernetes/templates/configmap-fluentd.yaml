@@ -319,13 +319,13 @@ data:
         {{- end }}
         {{- else }}
         @type splunk_hec
-        {{- with .Values.logsBackend.hec.protocol | default .Values.signalfx.protocol }}
+        {{- with .Values.logsBackend.hec.protocol | default .Values.ingestProtocol }}
         protocol {{ . }}
         {{- end }}
         {{- with .Values.logsBackend.hec.host | default (include "o11y-collector.ingestHost" .) }}
         hec_host {{ . | quote }}
         {{- end }}
-        {{- with .Values.logsBackend.hec.port | default .Values.signalfx.port }}
+        {{- with .Values.logsBackend.hec.port | default .Values.ingestPort }}
         hec_port {{ . }}
         {{- end }}
         hec_token "#{ENV['SPLUNK_HEC_TOKEN']}"
