@@ -1,4 +1,4 @@
-{{ if .Values.otelAgent.enabled }}
+{{ if and .Values.otelAgent.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

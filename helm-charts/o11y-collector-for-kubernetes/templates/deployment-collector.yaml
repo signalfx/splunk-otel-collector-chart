@@ -1,4 +1,4 @@
-{{ if .Values.otelCollector.enabled }}
+{{ if and .Values.otelCollector.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

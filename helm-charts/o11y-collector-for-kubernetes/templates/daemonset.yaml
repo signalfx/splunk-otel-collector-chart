@@ -37,6 +37,7 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       containers:
+      {{- if .Values.logsEnabled }}
       - name: fluentd
         image: {{ template "o11y-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -78,7 +79,8 @@ spec:
         - name: secrets
           mountPath: /fluentd/etc/splunk
           readOnly: true
-      {{- if .Values.otelAgent.enabled }}
+      {{- end }}
+      {{- if and .Values.otelAgent.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
       - name: otel-collector
         command:
         - /otelcontribcol

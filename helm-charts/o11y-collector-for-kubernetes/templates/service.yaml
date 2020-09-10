@@ -1,4 +1,4 @@
-{{ if .Values.otelCollector.enabled }}
+{{ if and .Values.otelCollector.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
 apiVersion: v1
 kind: Service
 metadata:
