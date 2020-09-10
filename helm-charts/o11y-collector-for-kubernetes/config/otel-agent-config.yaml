@@ -128,7 +128,7 @@ exporters:
     # If collector is disabled, this will be set to {{ .Values.signalfx.ingestUrl }}/v2/trace
     # The value empty should not be overridden
     endpoint:
-    # Will be set to {{ .Values.signalfx.accessToken }}
+    # Will be set to {{ .Values.splunkAccessToken }}
     # The value empty should not be overridden
     access_token:
 
@@ -139,7 +139,7 @@ exporters:
     ingest_url:
     # Will be set to {{ .Values.signalfx.ingestUrl }} by default
     api_url:
-    # Will be set to {{ .Values.signalfx.accessToken }}
+    # Will be set to {{ .Values.splunkAccessToken }}
     access_token:
     send_compatible_metrics: true
     timeout: 5s

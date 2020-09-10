@@ -58,7 +58,7 @@ exporters:
     ingest_url:
     # Will be set to https://{{ .Values.signalfx.apiUrl }} by default
     api_url:
-    # Will be set to {{ .Values.signalfx.accessToken }}
+    # Will be set to {{ .Values.splunkAccessToken }}
     access_token:
     send_compatible_metrics: true
     timeout: 10s
