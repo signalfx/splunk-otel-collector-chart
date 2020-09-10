@@ -109,9 +109,9 @@ It'll allow the o11y collector to automatically scrape additional cloud metadata
 By default all telemetry data (metrics, traces and logs) is collected from the k8s cluster.
 It's possible to disable any kind of telemetry with the following parameters.
 
-`metricsEnabled`: `<true/false>`
-`tracesEnabled`: `<true/false>`
-`logsEnabled`: `<true/false>`
+- `metricsEnabled`: `<true/false>`
+- `tracesEnabled`: `<true/false>`
+- `logsEnabled`: `<true/false>`
 
 ## License ##
 
