@@ -92,9 +92,8 @@ At the minimum you need to configure the following values.
 
 ```yaml
 clusterName: my-k8s-cluster
-signalfx:
-  accessToken: xxxxxx
-  realm: us0
+splunkAccessToken: xxxxxx
+splunkRealm: us0
 ```
 
 ### Kubernetes platform
