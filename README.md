@@ -113,6 +113,12 @@ It's possible to disable any kind of telemetry with the following parameters.
 - `tracesEnabled`: `<true/false>`
 - `logsEnabled`: `<true/false>`
 
+For exapmle, to install o11y collector only for logs:
+
+```bash
+$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector-for-kubernetes
+```
+
 ## License ##
 
 See [LICENSE](LICENSE).
