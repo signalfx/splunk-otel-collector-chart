@@ -1,4 +1,4 @@
-{{ if .Values.otelK8sClusterReceiver.enabled }}
+{{ if and .Values.otelK8sClusterReceiver.enabled .Values.metricsEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

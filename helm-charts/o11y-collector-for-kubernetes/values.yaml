@@ -45,6 +45,16 @@ ingestProtocol: https
 platform: default
 
 ################################################################################
+# Telemetry configuration.
+# By default metrics, traces and logs are collected from the k8s cluster.
+# It's possible to disable any kind of telemetry, if it's not needed.
+################################################################################
+
+metricsEnabled: true
+tracesEnabled: true
+logsEnabled: true
+
+################################################################################
 # OPTIONAL CONFIGURATIONS OF PARTICULAR O11Y COLLECTOR COMPONENTS
 ################################################################################
 

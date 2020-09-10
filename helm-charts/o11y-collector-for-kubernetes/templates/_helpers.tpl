@@ -284,6 +284,16 @@ Otherwise traces and metrics are sent directly to Signalfx backend.
   {{- end }}
 {{- end }}
 
+{{- /* Disable metrics pipeline */}}
+{{ if not .Values.metricsEnabled }}
+{{- $_ := unset $pipelines "metrics" }}
+{{- end }}
+
+{{- /* Disable traces pipeline */}}
+{{ if not .Values.tracesEnabled }}
+{{- $_ := unset $pipelines "traces" }}
+{{- end }}
+
 {{- $config | toYaml | nindent 4 }}
 
 {{- end -}}
@@ -295,6 +305,8 @@ Create the opentelemetry collector configmap with applied default values.
 {{- $config := .Files.Get "config/otel-collector-config.yaml" | fromYaml | mustMerge .Values.otelCollector.config | deepCopy -}}
 {{- $processors := index $config "processors" }}
 {{- $exporters := index $config "exporters" }}
+{{- $service := index $config "service" }}
+{{- $pipelines := index $service "pipelines" }}
 
 {{- /* Set sapm exporter values based on .Values.signalfx configurations */}}
 {{- if hasKey $exporters "sapm" }}
@@ -325,6 +337,16 @@ Create the opentelemetry collector configmap with applied default values.
 {{- $resourceAttributes := index $resourceProcessor "attributes" }}
 {{- $insertClusterNameAction := (dict "action" "upsert" "key" "k8s.cluster.name" "value" .Values.clusterName) -}}
 {{- $_ := set $resourceProcessor "attributes" (append $resourceAttributes $insertClusterNameAction) -}}
+{{- end }}
+
+{{- /* Disable metrics pipeline */}}
+{{ if not .Values.metricsEnabled }}
+{{- $_ := unset $pipelines "metrics" }}
+{{- end }}
+
+{{- /* Disable traces pipeline */}}
+{{ if not .Values.tracesEnabled }}
+{{- $_ := unset $pipelines "traces" }}
 {{- end }}
 
 {{- $config | toYaml | nindent 4 }}

@@ -105,6 +105,15 @@ It'll allow the o11y collector to automatically scrape additional cloud metadata
 - `gcp` - Google GKE or self-managed k8s cluster in GCP environment.
 - `default` - default configuration for other platforms.
 
+### Disable particular types of telemetry
+
+By default all telemetry data (metrics, traces and logs) is collected from the k8s cluster.
+It's possible to disable any kind of telemetry with the following parameters.
+
+`metricsEnabled`: `<true/false>`
+`tracesEnabled`: `<true/false>`
+`logsEnabled`: `<true/false>`
+
 ## License ##
 
 See [LICENSE](LICENSE).
