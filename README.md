@@ -22,7 +22,7 @@ kubernetes cluster, but also the logs for kubernetes itself (i.e. logs from
 ### Trace Collection
 
 The deamonset runs [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) with the
-[Splunk SAPM Exporter][(https://github.com/splunk/fluent-plugin-splunk-hec](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/sapmexporter))
+[Splunk SAPM Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/sapmexporter)
 to collect traces and send them to
 [Splunk SignalFx Microservices APM](https://www.splunk.com/en_us/software/microservices-apm.html).
 
