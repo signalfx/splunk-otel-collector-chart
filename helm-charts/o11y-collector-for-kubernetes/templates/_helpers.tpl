@@ -72,24 +72,11 @@ Get Signalfx ingest URL
 {{- end -}}
 
 {{/*
-Get Signalfx API host.
-*/}}
-{{- define "o11y-collector.apiHost" -}}
-{{- $_ := required "splunkRealm or apiHost must be provided" (or .Values.apiHost .Values.splunkRealm) }}
-{{- .Values.apiHost | default (printf "api.%s.signalfx.com" .Values.splunkRealm) }}
-{{- end -}}
-
-{{/*
 Get Signalfx API URL.
 */}}
 {{- define "o11y-collector.apiUrl" -}}
-{{- $host := include "o11y-collector.apiHost" . -}}
-{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
-{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
-{{- printf "%s:%s" $endpoint (toString .Values.ingestPort) }}
-{{- else }}
-{{- $endpoint }}
-{{- end }}
+{{- $_ := required "splunkRealm or apiUrl must be provided" (or .Values.apiUrl .Values.splunkRealm) }}
+{{- .Values.apiUrl | default (printf "https://api.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
 
 {{/*
