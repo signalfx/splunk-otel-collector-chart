@@ -84,7 +84,7 @@ deletes the release.
 
 ## Configuration
 
-The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/helm-charts/o11y-collector-for-kubernetes/values.yaml)
+The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/master/helm-charts/o11y-collector-for-kubernetes/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed explanation.
 Read through it to understand how to configure this chart.
 
@@ -107,11 +107,11 @@ It'll allow the o11y collector to automatically scrape additional cloud metadata
 ### Disable particular types of telemetry
 
 By default all telemetry data (metrics, traces and logs) is collected from the k8s cluster.
-It's possible to disable any kind of telemetry with the following parameters.
+It's possible to disable any kind of telemetry with the following parameters:
 
-- `metricsEnabled`: `<true/false>`
-- `tracesEnabled`: `<true/false>`
-- `logsEnabled`: `<true/false>`
+- `metricsEnabled`: `false`
+- `tracesEnabled`: `false`
+- `logsEnabled`: `false`
 
 For exapmle, to install o11y collector only for logs:
 
