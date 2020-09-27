@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    # Release only on changes in Chart.yaml
+    paths:
+      - helm-charts/**/Chart.yaml
 
 jobs:
   release:
