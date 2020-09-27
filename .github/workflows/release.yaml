@@ -34,3 +34,5 @@ jobs:
           charts_dir: helm-charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          # TODO: Remove this line to publish charts once the repo turned public
+          CR_PAGES_BRANCH: gh-pages-unpublished
