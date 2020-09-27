@@ -1,10 +1,17 @@
-apiVersion: v1
-version: 0.1.0
+apiVersion: v2
 name: o11y-collector-for-kubernetes
-description: Observability Collector for Kubernetes
+version: 0.1.0
+description: Splunk Observability Collector for Kubernetes Helm Chart
+type: application
 keywords:
 - splunk
-- signalfx
 - observability
-- logging
-- tracing
+- logs
+- traces
+- metrics
+maintainers:
+- name: asuresh4
+- name: ccaraman
+- name: dmitryax
+- name: jrcamp
+- name: mstumpfx
