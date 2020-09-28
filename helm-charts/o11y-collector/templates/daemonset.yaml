@@ -134,7 +134,7 @@ spec:
 
           # Host specific resource attributes
           - name: OTEL_RESOURCE
-            value: host=$(K8S_NODE_NAME),k8s.node.name=$(K8S_NODE_NAME)
+            value: host.name=$(K8S_NODE_NAME),k8s.node.name=$(K8S_NODE_NAME)
           {{- end }}
 
         readinessProbe:

@@ -142,6 +142,7 @@ exporters:
     # Will be set to {{ .Values.splunkAccessToken }}
     access_token:
     send_compatible_metrics: true
+    sync_host_metadata: true
     timeout: 5s
 
 service:
