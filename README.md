@@ -56,13 +56,20 @@ To install o11y-collector in k8s cluster at least three parameters must be provi
 - `splunkAccessToken`: Your SignalFx org access token.
 - `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment.
 
-The project is in active development state. There are no packages released yet.
-In order to install helm chart you need to clone the repo first and use it locally.
+The repository is not publicly available yet.
+In order to install the helm chart you need to clone the repo first and use it locally.
 
 ```bash
 $ git clone git@github.com:signalfx/o11y-collector-for-kubernetes.git
 $ cd ./o11y-collector-for-kubernetes
 $ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector
+```
+
+Once the repository is public, it will be possible to use helm repository to install the chart.
+
+```bash
+$ helm repo add o11y-collector-for-kubernetes https://signalfx.github.io/o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" o11y-collector-for-kubernetes/o11y-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
@@ -113,7 +120,7 @@ It's possible to disable any kind of telemetry with the following parameters:
 - `tracesEnabled`: `false`
 - `logsEnabled`: `false`
 
-For exapmle, to install o11y collector only for logs:
+For example, to install o11y collector only for logs:
 
 ```bash
 $ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector
