@@ -1,6 +1,6 @@
 # Observability Collector for Kubernetes
 
-`o11y-collector-for-kubernetes` is a [Helm](https://github.com/kubernetes/helm) chart that
+`o11y-collector` is a [Helm](https://github.com/kubernetes/helm) chart that
 creates a kubernetes daemonset along with other kubernetes objects in a
 kubernetes cluster to collect the cluster's logs, traces and metrics send them to
 [Signalfx](https://www.signalfx.com/).
@@ -62,13 +62,13 @@ In order to install helm chart you need to clone the repo first and use it local
 ```bash
 $ git clone git@github.com:signalfx/o11y-collector-for-kubernetes.git
 $ cd ./o11y-collector-for-kubernetes
-$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
 
 ```bash
-$ helm install my-o11y-collector --values my_values.yaml ./helm-charts/o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --values my_values.yaml ./helm-charts/o11y-collector
 ```
 
 ### How to uninstall
@@ -84,7 +84,7 @@ deletes the release.
 
 ## Configuration
 
-The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/master/helm-charts/o11y-collector-for-kubernetes/values.yaml)
+The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/master/helm-charts/o11y-collector/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed explanation.
 Read through it to understand how to configure this chart.
 
@@ -116,7 +116,7 @@ It's possible to disable any kind of telemetry with the following parameters:
 For exapmle, to install o11y collector only for logs:
 
 ```bash
-$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector-for-kubernetes
+$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector
 ```
 
 ## License ##
