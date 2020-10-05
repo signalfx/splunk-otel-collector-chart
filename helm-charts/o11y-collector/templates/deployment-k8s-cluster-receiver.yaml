@@ -64,6 +64,11 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: status.podIP
+          - name: SPLUNK_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "o11y-collector.secret" . }}
+                key: splunk_access_token
         readinessProbe:
           httpGet:
             path: /

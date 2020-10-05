@@ -19,7 +19,7 @@ Common config for the otel-collector sapm exporter
 {{- define "o11y-collector.otelSapmExporter" -}}
 sapm:
   endpoint: {{ include "o11y-collector.ingestUrl" . }}/v2/trace
-  access_token: {{ include "o11y-collector.accessToken" . }}
+  access_token: ${SPLUNK_ACCESS_TOKEN}
 {{- end }}
 
 {{/*
