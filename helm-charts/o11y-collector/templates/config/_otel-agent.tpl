@@ -132,7 +132,7 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [redis, hostmetrics, prometheus, kubeletstats, receiver_creator]
+      receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
       processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection, queued_retry]
       exporters:
         {{- if .Values.otelCollector.enabled }}
