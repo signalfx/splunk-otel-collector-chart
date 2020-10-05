@@ -40,7 +40,7 @@ exporters:
   signalfx:
     ingest_url: {{ include "o11y-collector.ingestUrl" . }}/v2/datapoint
     api_url: {{ include "o11y-collector.apiUrl" . }}
-    access_token: {{ include "o11y-collector.accessToken" . }}
+    access_token: ${SPLUNK_ACCESS_TOKEN}
     send_compatible_metrics: true
 
 service:
