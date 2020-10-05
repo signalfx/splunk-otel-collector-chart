@@ -10,5 +10,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- template "o11y-collector.otelCollector.config" . }}
+    {{- $config := include "o11y-collector.otelCollectorConfig" . | fromYaml }}
+    {{- .Values.otelCollector.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

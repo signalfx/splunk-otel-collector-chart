@@ -102,7 +102,7 @@ otelAgent:
 
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
   # Default configuration defined in config/otel-agent-config.yaml
-  # Any additional fields can be added to the defaults,
+  # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}
 
@@ -136,7 +136,7 @@ otelK8sClusterReceiver:
 
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
   # Defaul configuration defined in config/otel-k8s-cluster-receiver-config.yaml
-  # Any additional fields can be added to the defaults,
+  # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}
 
@@ -624,7 +624,7 @@ otelCollector:
 
   # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
   # Default configuration defined in config/otel-collector-config.yaml
-  # Any additional fields can be added to the defaults,
+  # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.
   config: {}
 
