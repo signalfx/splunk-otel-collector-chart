@@ -38,6 +38,11 @@ processors:
       - action: upsert
         value: {{ .Values.clusterName }}
         key: k8s.cluster.name
+      {{- range .Values.extraAttributes.custom }}
+      - action: upsert
+        value: {{ .value }}
+        key: {{ .name }}
+      {{- end }}
 
 exporters:
   signalfx:

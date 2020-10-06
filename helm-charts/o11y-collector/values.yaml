@@ -54,6 +54,24 @@ metricsEnabled: true
 tracesEnabled: true
 logsEnabled: true
 
+# Configuration for additional metadata that will be added to all the telemetry
+# as extra attributes.
+extraAttributes:
+
+  # Labels that will be collected from k8s pods (in case they are set)
+  # and added  as extra attributes to the telemetry in the following format:
+  # k8s.pod.labels.<label_name>: <label_value>
+  podLabels: []
+    # - app
+    # - k8s-app
+    # - release
+
+  # List of hardcoded key/value pairs that will be added as attributes to
+  # all the telemetry.
+  custom: []
+    # - name: "account_id"
+    #   value: "1234567890"
+
 ################################################################################
 # OPTIONAL CONFIGURATIONS OF PARTICULAR O11Y COLLECTOR COMPONENTS
 ################################################################################
@@ -264,22 +282,6 @@ fluentd:
     # ```
     # WARNING: The fields being used here must be available inside the fluentd record.
     indexFields: []
-
-    # Enriches pod log record with kubernetes data
-    # TODO: Apply this configuration for metrics and traces as well
-    k8sMetadata:
-      # Pod labels to collect
-      podLabels:
-        - app
-        - k8s-app
-        - release
-
-    # List of key/value pairs for metadata purpse.
-    # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
-    # TODO: Apply this configuration for metrics and traces as well
-    customMetadata:
-    #  - name: "cloud_account_id"
-    #    value: "1234567890"
 
     # `logs` defines the source of logs, multiline support, and their sourcetypes.
     #
@@ -521,7 +523,7 @@ image:
     # The name of the opentelemetry collector image to pull
     name: otel/opentelemetry-collector-contrib-dev
     # The tag of the opentelemetry collector image to pull
-    tag: e3493cedf4b6f7419be7e4e61b4186e51073f411
+    tag: a07f2c3676cfc76b048575f927d1bec8581ac112
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
