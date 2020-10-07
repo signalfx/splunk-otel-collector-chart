@@ -221,11 +221,9 @@ data:
           pod ${record.dig("kubernetes","pod_name")}
           container_id ${record.dig("docker","container_id")}
           pod_uid ${record.dig("kubernetes","pod_id")}
+          node_name "#{ENV['K8S_NODE_NAME']}"
+          cluster_name {{ .Values.clusterName }}
           container_image ${record.dig("kubernetes","container_image")}
-          # set the cluster_name field to the configured value, or default to "cluster_name"
-          {{- with .Values.clusterName }}
-          cluster_name {{ . }}
-          {{- end }}
           # set the index field to the value found in the pod splunk.com/index annotations. if not set, use namespace annotation, or default to the default_index
           index ${record.dig("kubernetes", "annotations", "splunk.com/index") ? record.dig("kubernetes", "annotations", "splunk.com/index") : record.dig("kubernetes", "namespace_annotations", "splunk.com/index") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/index"]) : ("{{ .Values.logsBackend.hec.indexName | default "main"}}")}
           {{- range .Values.extraAttributes.podLabels }}
@@ -356,8 +354,9 @@ data:
           k8s.pod.name pod
           k8s.container.name container_name
           k8s.namespace.name namespace
+          k8s.node.name node_name
+          k8s.cluster.name cluster_name
           container.id container_id
-          k8s.cluster.name {{ .Values.clusterName }}
           {{- range .Values.extraAttributes.custom }}
           {{ .name }}
           {{- end }}
