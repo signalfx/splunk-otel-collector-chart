@@ -63,6 +63,18 @@ processors:
     {{- end }}
     filter:
       node_from_env_var: K8S_NODE_NAME
+    extract:
+      metadata:
+        - namespace
+        - node
+        - podName
+        - podUID
+      {{- with .Values.extraAttributes.podLabels }}
+      labels:
+        {{- range . }}
+        - key: {{ . }}
+        {{- end }}
+      {{- end }}
 
   # Resource detection processor picks attributes from host environment.
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/processor/resourcedetectionprocessor
@@ -85,9 +97,14 @@ processors:
 
   resource/add_cluster_name:
     attributes:
-    - action: upsert
-      value: {{ .Values.clusterName }}
-      key: k8s.cluster.name
+      - action: upsert
+        value: {{ .Values.clusterName }}
+        key: k8s.cluster.name
+      {{- range .Values.extraAttributes.custom }}
+      - action: upsert
+        value: {{ .value }}
+        key: {{ .name }}
+      {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.

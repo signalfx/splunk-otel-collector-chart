@@ -20,7 +20,19 @@ receivers:
 
 # By default k8s_tagger, memory_limiter, queued_retry and batch processors enabled.
 processors:
-  k8s_tagger: {}
+  k8s_tagger:
+    extract:
+      metadata:
+        - namespace
+        - node
+        - podName
+        - podUID
+      {{- with .Values.extraAttributes.podLabels }}
+      labels:
+        {{- range . }}
+        - key: {{ . }}
+        {{- end }}
+      {{- end }}
 
   {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
@@ -31,9 +43,14 @@ processors:
 
   resource/add_cluster_name:
     attributes:
-    - action: upsert
-      value: {{ .Values.clusterName }}
-      key: k8s.cluster.name
+      - action: upsert
+        value: {{ .Values.clusterName }}
+        key: k8s.cluster.name
+      {{- range .Values.extraAttributes.custom }}
+      - action: upsert
+        value: {{ .value }}
+        key: {{ .name }}
+      {{- end }}
 
 exporters:
   {{- include "o11y-collector.otelSapmExporter" . | nindent 2 }}

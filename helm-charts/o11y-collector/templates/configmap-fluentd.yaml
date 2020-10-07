@@ -228,14 +228,12 @@ data:
           {{- end }}
           # set the index field to the value found in the pod splunk.com/index annotations. if not set, use namespace annotation, or default to the default_index
           index ${record.dig("kubernetes", "annotations", "splunk.com/index") ? record.dig("kubernetes", "annotations", "splunk.com/index") : record.dig("kubernetes", "namespace_annotations", "splunk.com/index") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/index"]) : ("{{ .Values.logsBackend.hec.indexName | default "main"}}")}
-          {{- range .Values.fluentd.config.k8sMetadata.podLabels }}
-          label_{{ . }} ${record.dig("kubernetes","labels","{{ . }}")}
+          {{- range .Values.extraAttributes.podLabels }}
+          k8s.pod.labels.{{ . }} ${record.dig("kubernetes","labels","{{ . }}")}
           {{- end }}
           blacklist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
-          {{- if .Values.fluentd.config.customMetadata }}
-          {{- range .Values.fluentd.config.customMetadata }}
+          {{- range .Values.extraAttributes.custom }}
           {{ .name }} "{{ .value }}"
-          {{- end }}
           {{- end }}
         </record>
       </filter>
@@ -259,7 +257,7 @@ data:
       {{- if $checks.hasJournald }}
       <filter journald.**>
         @type jq_transformer
-        jq '.record.source = "{{ .Values.fluentd.config.journalLogPath }}/" + .record.source | .record.sourcetype = (.tag | ltrimstr("journald.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = "{{ .value }}" {{- end }}{{- end }} |.record'
+        jq '.record.source = "{{ .Values.fluentd.config.journalLogPath }}/" + .record.source | .record.sourcetype = (.tag | ltrimstr("journald.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- range .Values.extraAttributes.custom }}| .record.{{ .name }} = "{{ .value }}" {{- end }} |.record'
       </filter>
       {{- end }}
 
@@ -268,14 +266,14 @@ data:
       # extract sourcetype
       <filter tail.file.**>
         @type jq_transformer
-        jq '.record.sourcetype = (.tag | ltrimstr("tail.file.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = "{{ .value }}" {{- end }}{{- end }} | .record'
+        jq '.record.sourcetype = (.tag | ltrimstr("tail.file.")) | .record.cluster_name = "{{ .Values.clusterName }}" | .record.index = {{ .Values.logsBackend.hec.indexName | default "main" | quote }} {{- range .Values.extraAttributes.custom }}| .record.{{ .name }} = "{{ .value }}" {{- end }} | .record'
       </filter>
       {{- end }}
 
       # = filters for monitor agent =
       <filter monitor_agent>
         @type jq_transformer
-        jq ".record.source = \"namespace:#{ENV['MY_NAMESPACE']}/pod:#{ENV['MY_POD_NAME']}\" | .record.sourcetype = \"fluentd:monitor-agent\" | .record.cluster_name = \"{{ .Values.clusterName }}\" | .record.index = \"{{ .Values.logsBackend.hec.indexName | default "main" }}\" {{- if .Values.fluentd.config.customMetadata }}{{- range .Values.fluentd.config.customMetadata }}| .record.{{ .name }} = \"{{ .value }}\" {{- end }}{{- end }} | .record"
+        jq ".record.source = \"namespace:#{ENV['MY_NAMESPACE']}/pod:#{ENV['MY_POD_NAME']}\" | .record.sourcetype = \"fluentd:monitor-agent\" | .record.cluster_name = \"{{ .Values.clusterName }}\" | .record.index = \"{{ .Values.logsBackend.hec.indexName | default "main" }}\" {{- range .Values.extraAttributes.custom }}| .record.{{ .name }} = \"{{ .value }}\" {{- end }} | .record"
       </filter>
 
       # = custom filters specified by users =
@@ -359,19 +357,15 @@ data:
           k8s.container.name container_name
           k8s.namespace.name namespace
           container.id container_id
-          {{- if .Values.clusterName }}
-          k8s.cluster.name cluster_name
-          {{- end }}
-          {{- if .Values.fluentd.config.customMetadata }}
-          {{- range .Values.fluentd.config.customMetadata }}
+          k8s.cluster.name {{ .Values.clusterName }}
+          {{- range .Values.extraAttributes.custom }}
           {{ .name }}
-          {{- end }}
           {{- end }}
           {{- range .Values.indexFields }}
           {{ . }}
           {{- end }}
-          {{- range .Values.fluentd.config.k8sMetadata.podLabels }}
-          label_{{ . }}
+          {{- range .Values.extraAttributes.podLabels }}
+          k8s.pod.labels.{{ . }}
           {{- end }}
         </fields>
         {{- with .Values.fluentd.config.buffer }}
