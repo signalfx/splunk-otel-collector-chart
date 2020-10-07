@@ -44,6 +44,18 @@ receivers:
         config:
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+      # Redis discovery enabled by default.
+      # "service_name" pod label is used as service.name attribute attached the metrics,
+      # pod name used as fallback if the label is not set.
+      # Password has to be specified if redis pods have auth layer enabled.
+      # The discovery can be disabled by setting agent.config.receivers.receiver_creator.redis to null.
+      redis:
+        rule: type.port && port == 6379
+        config:
+          service_name: '`"service_name" in pod.labels ? pod.labels["service_name"] : pod.name`'
+          collection_interval: 10s
+          # password: <password>
+
   kubeletstats:
     collection_interval: 10s
     auth_type: serviceAccount
