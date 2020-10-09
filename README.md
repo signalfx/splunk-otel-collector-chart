@@ -126,6 +126,18 @@ For example, to install o11y collector only for logs:
 $ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector
 ```
 
+## Running locally
+
+It's recommended to use [minikube](https://github.com/kubernetes/minikube) with
+[calico networking](https://docs.projectcalico.org/getting-started/kubernetes/) to run o11y-collector locally.
+
+If you run it on Windows or MacOS, use a linux VM driver, e.g. virtualbox.
+In that case use the following arguments to start minikube cluster:
+
+```bash
+minikube start --cni calico --vm-driver=virtualbox
+```
+
 ## License ##
 
 See [LICENSE](LICENSE).
