@@ -102,7 +102,6 @@ processors:
 
   {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
 
-  queued_retry: {}
   batch:
     timeout: 200ms
     send_batch_size: 128
@@ -151,7 +150,7 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch, queued_retry]
+      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch]
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
@@ -162,7 +161,7 @@ service:
     # default metrics pipeline
     metrics:
       receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection, queued_retry]
+      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection]
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp

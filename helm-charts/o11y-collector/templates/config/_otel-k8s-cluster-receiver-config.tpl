@@ -20,8 +20,6 @@ receivers:
     metadata_exporters: [signalfx]
 
 processors:
-  queued_retry: {}
-
   {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
 
   # k8s_tagger to enrich its own metrics
@@ -58,6 +56,6 @@ service:
     # k8s metrics pipeline
     metrics:
       receivers: [prometheus, k8s_cluster]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
+      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name]
       exporters: [signalfx]
 {{- end }}

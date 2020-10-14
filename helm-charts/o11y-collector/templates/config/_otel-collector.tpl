@@ -18,7 +18,7 @@ receivers:
         - targets: ["${K8S_POD_IP}:8888"]
 
 
-# By default k8s_tagger, memory_limiter, queued_retry and batch processors enabled.
+# By default k8s_tagger, memory_limiter, and batch processors enabled.
 processors:
   k8s_tagger:
     extract:
@@ -36,7 +36,6 @@ processors:
 
   {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
-  queued_retry: {}
   batch:
     timeout: 1s
     send_batch_size: 1024
@@ -71,12 +70,12 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch, queued_retry]
+      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch]
       exporters: [sapm]
 
     # default metrics pipeline
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, queued_retry]
+      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name]
       exporters: [signalfx]
 {{- end }}
