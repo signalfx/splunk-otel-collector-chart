@@ -18,7 +18,7 @@ receivers:
         - targets: ["${K8S_POD_IP}:8888"]
 
 
-# By default k8s_tagger, memory_limiter, and batch processors enabled.
+# By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
   k8s_tagger:
     extract:
