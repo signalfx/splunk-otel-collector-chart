@@ -53,7 +53,7 @@ spec:
         - {{ . }}
         {{- end }}
         image: {{ template "o11y-collector.image.otelcol" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: K8S_NODE_NAME
             valueFrom:

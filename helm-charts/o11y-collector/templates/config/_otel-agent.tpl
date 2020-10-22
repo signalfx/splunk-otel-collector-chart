@@ -63,7 +63,7 @@ receivers:
     extra_metadata_labels:
       - container.id
 
-# By default k8s_tagger, queued_retry and batch processors enabled.
+# By default k8s_tagger and batch processors enabled.
 processors:
   # k8s_tagger enriches traces and metrics with k8s metadata
   k8s_tagger:
@@ -137,6 +137,9 @@ exporters:
     send_compatible_metrics: true
     sync_host_metadata: true
   {{- end }}
+  signalfx_correlation:
+    access_token: ${SPLUNK_ACCESS_TOKEN}
+    endpoint: {{ include "o11y-collector.apiUrl" . }}
 
 service:
   extensions: [health_check, k8s_observer]
@@ -150,13 +153,14 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch]
+      processors: [memory_limiter, resourcedetection, k8s_tagger, resource/add_cluster_name, batch]
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
         {{- else }}
         - sapm
         {{- end }}
+        - signalfx_correlation
 
     # default metrics pipeline
     metrics:

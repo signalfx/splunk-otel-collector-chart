@@ -96,7 +96,7 @@ spec:
           {{- toYaml $port | trim | nindent 10 }}
         {{- end }}
         image: {{ template "o11y-collector.image.otelcol" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         {{- if .Values.otelAgent.securityContext }}
         securityContext:
           {{ toYaml .Values.otelAgent.securityContext | nindent 10 }}
