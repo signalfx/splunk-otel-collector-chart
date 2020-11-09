@@ -202,7 +202,7 @@ fluentd:
     buffer:
       "@type": memory
       total_limit_size: 600m
-      chunk_limit_size: 200m
+      chunk_limit_size: 1m
       chunk_limit_records: 100000
       flush_interval: 5s
       flush_thread_count: 1
