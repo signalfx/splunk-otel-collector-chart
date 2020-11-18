@@ -287,8 +287,8 @@ data:
       {{- end }}
 
       # = output =
+      {{- if .Values.logsBackend.splunkIngestAPI.ingestAPIHost }}
       <match **>
-        {{- if .Values.logsBackend.splunkIngestAPI.ingestAPIHost }}
         @type splunk_ingest_api
         {{- with .Values.logsBackend.splunkIngestAPI.serviceClientIdentifier }}
         service_client_identifier {{ . }}
@@ -314,7 +314,9 @@ data:
         {{- with .Values.logsBackend.splunkIngestAPI.debugIngestAPI }}
         debug_http {{ . }}
         {{- end }}
-        {{- else }}
+      </match>
+      {{- end }}
+      <match **>
         @type splunk_hec
         {{- with .Values.logsBackend.hec.protocol | default .Values.ingestProtocol }}
         protocol {{ . }}
@@ -336,7 +338,6 @@ data:
         {{- end }}
         {{- if .Values.logsBackend.hec.caFile }}
         ca_file /fluentd/etc/splunk/hec_ca_file
-        {{- end }}
         {{- end }}
         host "#{ENV['K8S_NODE_NAME']}"
         source_key source

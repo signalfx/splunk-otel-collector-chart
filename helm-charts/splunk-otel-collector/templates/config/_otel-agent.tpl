@@ -137,6 +137,28 @@ exporters:
     sync_host_metadata: true
   {{- end }}
 
+  {{- if .Values.splunkHEC.metrics.enabled }}
+  splunk_hec/metrics:
+    {{- with .Values.splunkHEC.metrics }}
+    token: {{ .token }}
+    endpoint: {{ .endpoint }}
+    sourcetype: {{ .sourcetype }}
+    index: {{ .index }}
+    insecure_skip_verify: {{ .insecure }}
+    {{- end }}
+  {{- end }}
+
+  {{- if .Values.splunkHEC.traces.enabled }}
+  splunk_hec/traces:
+    {{- with .Values.splunkHEC.traces }}
+    token: {{ .token }}
+    endpoint: {{ .endpoint }}
+    sourcetype: {{ .sourcetype }}
+    index: {{ .index }}
+    insecure_skip_verify: {{ .insecure }}
+    {{- end }}
+  {{- end }}
+
 service:
   extensions: [health_check, k8s_observer, zpages]
 
@@ -156,7 +178,9 @@ service:
         {{- else }}
         - sapm
         {{- end }}
-        - signalfx
+        {{- if .Values.splunkHEC.traces.enabled }}
+        - splunk_hec/traces
+        {{- end }}
 
     # default metrics pipeline
     metrics:
@@ -167,5 +191,8 @@ service:
         - otlp
         {{- else }}
         - signalfx
+        {{- end }}
+        {{- if .Values.splunkHEC.metrics.enabled }}
+        - splunk_hec/metrics
         {{- end }}
 {{- end }}

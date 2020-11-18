@@ -54,6 +54,22 @@ metricsEnabled: true
 tracesEnabled: true
 logsEnabled: true
 
+splunkHEC:
+  metrics:
+    enabled: false
+    endpoint: "http://example.com"
+    index: metrics
+    insecure: false
+    sourcetype: o11y:metrics
+    token: "<HEC token>"
+  traces:
+    enabled: false
+    endpoint: "http://example.com"
+    index: traces
+    insecure: false
+    sourcetype: o11y:traces
+    token: "<HEC token>"
+
 # Configuration for additional metadata that will be added to all the telemetry
 # as extra attributes.
 extraAttributes:
