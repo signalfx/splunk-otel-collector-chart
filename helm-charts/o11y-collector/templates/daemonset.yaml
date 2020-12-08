@@ -23,6 +23,8 @@ spec:
       annotations:
         checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: {{ template "o11y-collector.serviceAccountName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
