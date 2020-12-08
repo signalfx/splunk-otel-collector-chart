@@ -18,7 +18,8 @@ spec:
   allowPrivilegeEscalation: true
   allowedCapabilities:
   - '*'
-  hostNetwork: false
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
   hostIPC: false
   hostPID: false
   volumes:
