@@ -137,9 +137,6 @@ exporters:
     send_compatible_metrics: true
     sync_host_metadata: true
   {{- end }}
-  signalfx_correlation:
-    access_token: ${SPLUNK_ACCESS_TOKEN}
-    endpoint: {{ include "o11y-collector.apiUrl" . }}
 
 service:
   extensions: [health_check, k8s_observer]
@@ -160,7 +157,7 @@ service:
         {{- else }}
         - sapm
         {{- end }}
-        - signalfx_correlation
+        - signalfx
 
     # default metrics pipeline
     metrics:
