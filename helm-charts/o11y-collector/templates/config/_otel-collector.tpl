@@ -76,6 +76,6 @@ service:
     # default metrics pipeline
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name]
+      processors: [memory_limiter, resource/add_cluster_name]
       exporters: [signalfx]
 {{- end }}
