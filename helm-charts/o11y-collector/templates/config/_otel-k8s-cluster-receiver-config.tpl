@@ -56,6 +56,6 @@ service:
     # k8s metrics pipeline
     metrics:
       receivers: [prometheus, k8s_cluster]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name]
+      processors: [memory_limiter, resource/add_cluster_name]
       exporters: [signalfx]
 {{- end }}

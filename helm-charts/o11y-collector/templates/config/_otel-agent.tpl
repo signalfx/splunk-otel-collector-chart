@@ -131,6 +131,11 @@ exporters:
   # If collector is disabled, metrics and traces will be set to to SignalFx backend
   {{- include "o11y-collector.otelSapmExporter" . | nindent 2 }}
   signalfx:
+    correlation:
+      sync_attributes:
+        # TODO: Change to otel conventions when mappings are changed.
+        k8s.pod.uid: kubernetes_pod_uid
+        container.id: container_id
     ingest_url: {{ include "o11y-collector.ingestUrl" . }}/v2/datapoint
     api_url: {{ include "o11y-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
@@ -162,7 +167,7 @@ service:
     # default metrics pipeline
     metrics:
       receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, resourcedetection]
+      processors: [memory_limiter, resource/add_cluster_name, resourcedetection]
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
