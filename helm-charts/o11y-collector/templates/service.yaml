@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}
+  name: {{ template "splunk-otel-connector.fullname" . }}
   labels:
-    app: {{ template "o11y-collector.name" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
     component: otel-collector
-    chart: {{ template "o11y-collector.chart" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.service.annotations }}
@@ -23,7 +23,7 @@ spec:
     protocol: {{ $port.protocol }}
   {{- end }}
   selector:
-    app: {{ template "o11y-collector.name" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
     component: otel-collector
     release: {{ .Release.Name }}
 {{- end }}

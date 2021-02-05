@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}-agent
+  name: {{ template "splunk-otel-connector.fullname" . }}-agent
   labels:
-    app: {{ template "o11y-collector.name" . }}
-    chart: {{ template "o11y-collector.chart" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     engine: fluentd
@@ -13,19 +13,19 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: {{ template "o11y-collector.name" . }}
+      app: {{ template "splunk-otel-connector.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "o11y-collector.name" . }}
+        app: {{ template "splunk-otel-connector.name" . }}
         release: {{ .Release.Name }}
       annotations:
         checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      serviceAccountName: {{ template "o11y-collector.serviceAccountName" . }}
+      serviceAccountName: {{ template "splunk-otel-connector.serviceAccountName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
@@ -41,7 +41,7 @@ spec:
       containers:
       {{- if .Values.logsEnabled }}
       - name: fluentd
-        image: {{ template "o11y-collector.image.fluentd" . }}
+        image: {{ template "splunk-otel-connector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
         {{- if .Values.fluentd.securityContext }}
         securityContext:
@@ -63,7 +63,7 @@ spec:
           - name: SPLUNK_HEC_TOKEN
             valueFrom:
               secretKeyRef:
-                name: {{ template "o11y-collector.secret" . }}
+                name: {{ template "splunk-otel-connector.secret" . }}
                 key: splunk_hec_token
         resources:
           {{- toYaml .Values.fluentd.resources | nindent 10 }}
@@ -87,7 +87,7 @@ spec:
         command:
         - /otelcontribcol
         - --config=/conf/relay.yaml
-        - --mem-ballast-size-mib={{ template "o11y-collector.getOtelMemBallastSizeMib" .Values.otelAgent }}
+        - --mem-ballast-size-mib={{ template "splunk-otel-connector.getOtelMemBallastSizeMib" .Values.otelAgent }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelAgent.extraArgs }}
         - {{ . }}
@@ -97,7 +97,7 @@ spec:
         - name: {{ $key }}
           {{- toYaml $port | trim | nindent 10 }}
         {{- end }}
-        image: {{ template "o11y-collector.image.otelcol" . }}
+        image: {{ template "splunk-otel-connector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         {{- if .Values.otelAgent.securityContext }}
         securityContext:
@@ -121,7 +121,7 @@ spec:
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: {{ include "o11y-collector.secret" . }}
+                name: {{ include "splunk-otel-connector.secret" . }}
                 key: splunk_access_token
 
           {{- if .Values.metricsEnabled }}
@@ -177,10 +177,10 @@ spec:
           path: {{ .Values.fluentd.config.journalLogPath | quote }}
       - name: secrets
         secret:
-          secretName: {{ template "o11y-collector.secret" . }}
+          secretName: {{ template "splunk-otel-connector.secret" . }}
       - name: fluentd-configmap
         configMap:
-          name: {{ template "o11y-collector.fullname" . }}-fluentd
+          name: {{ template "splunk-otel-connector.fullname" . }}-fluentd
       {{- if .Values.otelAgent.enabled }}
       {{- if .Values.metricsEnabled }}
       - name: hostfs
@@ -189,7 +189,7 @@ spec:
       {{- end }}
       - name: otel-configmap
         configMap:
-          name: {{ template "o11y-collector.fullname" . }}-otel-agent
+          name: {{ template "splunk-otel-connector.fullname" . }}-otel-agent
           items:
             - key: relay
               path: relay.yaml

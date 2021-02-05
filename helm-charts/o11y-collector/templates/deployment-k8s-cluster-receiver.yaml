@@ -2,30 +2,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}-k8s-cluster-receiver
+  name: {{ template "splunk-otel-connector.fullname" . }}-k8s-cluster-receiver
   labels:
-    app: {{ template "o11y-collector.name" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
     component: otel-k8s-cluster-receiver
-    chart: {{ template "o11y-collector.chart" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "o11y-collector.name" . }}
+      app: {{ template "splunk-otel-connector.name" . }}
       component: otel-k8s-cluster-receiver
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "o11y-collector.name" . }}
+        app: {{ template "splunk-otel-connector.name" . }}
         component: otel-k8s-cluster-receiver
         release: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-k8s-cluster-receiver.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: {{ template "o11y-collector.serviceAccountName" . }}
+      serviceAccountName: {{ template "splunk-otel-connector.serviceAccountName" . }}
       {{- if .Values.otelK8sClusterReceiver.nodeSelector }}
       nodeSelector:
         {{ toYaml .Values.otelK8sClusterReceiver.nodeSelector | nindent 8 }}
@@ -47,12 +47,12 @@ spec:
         command:
         - /otelcontribcol
         - --config=/conf/relay.yaml
-        - --mem-ballast-size-mib={{ template "o11y-collector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver }}
+        - --mem-ballast-size-mib={{ template "splunk-otel-connector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelK8sClusterReceiver.extraArgs }}
         - {{ . }}
         {{- end }}
-        image: {{ template "o11y-collector.image.otelcol" . }}
+        image: {{ template "splunk-otel-connector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: K8S_NODE_NAME
@@ -67,7 +67,7 @@ spec:
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: {{ include "o11y-collector.secret" . }}
+                name: {{ include "splunk-otel-connector.secret" . }}
                 key: splunk_access_token
         readinessProbe:
           httpGet:
@@ -86,7 +86,7 @@ spec:
       volumes:
       - name: collector-configmap
         configMap:
-          name: {{ template "o11y-collector.fullname" . }}-otel-k8s-cluster-receiver
+          name: {{ template "splunk-otel-connector.fullname" . }}-otel-k8s-cluster-receiver
           items:
             - key: relay
               path: relay.yaml

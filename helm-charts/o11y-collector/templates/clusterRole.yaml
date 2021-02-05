@@ -1,10 +1,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}
+  name: {{ template "splunk-otel-connector.fullname" . }}
   labels:
-    app: {{ template "o11y-collector.name" . }}
-    chart: {{ template "o11y-collector.chart" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
@@ -12,7 +12,7 @@ rules:
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
-  resourceNames:  [{{ template "o11y-collector.fullname" . }}]
+  resourceNames:  [{{ template "splunk-otel-connector.fullname" . }}]
 {{- end }}
 - apiGroups:
   - ""

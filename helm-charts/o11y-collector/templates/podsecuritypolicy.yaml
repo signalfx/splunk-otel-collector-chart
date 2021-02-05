@@ -2,10 +2,10 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}
+  name: {{ template "splunk-otel-connector.fullname" . }}
   labels:
-    app: {{ template "o11y-collector.name" . }}
-    chart: {{ template "o11y-collector.chart" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:

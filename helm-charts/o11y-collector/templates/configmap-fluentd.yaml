@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}-fluentd
+  name: {{ template "splunk-otel-connector.fullname" . }}-fluentd
   labels:
-    app: {{ template "o11y-collector.name" . }}
-    chart: {{ template "o11y-collector.chart" . }}
+    app: {{ template "splunk-otel-connector.name" . }}
+    chart: {{ template "splunk-otel-connector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
@@ -319,7 +319,7 @@ data:
         {{- with .Values.logsBackend.hec.protocol | default .Values.ingestProtocol }}
         protocol {{ . }}
         {{- end }}
-        {{- with .Values.logsBackend.hec.host | default (include "o11y-collector.ingestHost" .) }}
+        {{- with .Values.logsBackend.hec.host | default (include "splunk-otel-connector.ingestHost" .) }}
         hec_host {{ . | quote }}
         {{- end }}
         {{- with .Values.logsBackend.hec.port | default .Values.ingestPort }}
