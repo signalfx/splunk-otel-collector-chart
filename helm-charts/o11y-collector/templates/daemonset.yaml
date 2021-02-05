@@ -85,7 +85,7 @@ spec:
       {{- if and .Values.otelAgent.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
       - name: otel-collector
         command:
-        - /otelcontribcol
+        - /otelcol
         - --config=/conf/relay.yaml
         - --mem-ballast-size-mib={{ template "splunk-otel-collector.getOtelMemBallastSizeMib" .Values.otelAgent }}
         - --metrics-addr=0.0.0.0:8888
