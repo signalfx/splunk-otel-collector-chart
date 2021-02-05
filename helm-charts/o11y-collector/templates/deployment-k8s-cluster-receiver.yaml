@@ -45,7 +45,7 @@ spec:
       containers:
       - name: otel-collector
         command:
-        - /otelcontribcol
+        - /otelcol
         - --config=/conf/relay.yaml
         - --mem-ballast-size-mib={{ template "splunk-otel-collector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver }}
         - --metrics-addr=0.0.0.0:8888

@@ -4,7 +4,13 @@ The values can be overridden in .Values.otelCollector.config
 */}}
 {{- define "splunk-otel-collector.otelCollectorConfig" -}}
 extensions:
-  health_check: {}
+  health_check:
+
+  http_forwarder:
+    egress:
+      endpoint: {{ include "splunk-otel-collector.apiUrl" . }}
+
+  zpages:
 
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
@@ -17,6 +23,8 @@ receivers:
         static_configs:
         - targets: ["${K8S_POD_IP}:8888"]
 
+  fluentforward:
+    endpoint: 0.0.0.0:8006
 
 # By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
@@ -60,22 +68,27 @@ exporters:
     send_compatible_metrics: true
 
 service:
-  extensions: [health_check]
+  extensions: [health_check, http_forwarder, zpages]
 
-  # By default there are two pipelines sending metrics and traces to signalfx backend.
-  # The default pipelines should to be changed. You can add any custom pipeline instead.
+  # The default pipelines should not need to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in otelCollector.config overrides.
   pipelines:
 
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-      processors: [memory_limiter, k8s_tagger, resource/add_cluster_name, batch]
+      processors: [memory_limiter, batch, k8s_tagger, resource/add_cluster_name]
       exporters: [sapm]
 
     # default metrics pipeline
     metrics:
       receivers: [otlp, prometheus]
-      processors: [memory_limiter, resource/add_cluster_name]
+      processors: [memory_limiter, batch, resource/add_cluster_name]
+      exporters: [signalfx]
+
+    # default logs pipeline
+    logs:
+      receivers: [signalfx]
+      processors: [memory_limiter, batch]
       exporters: [signalfx]
 {{- end }}

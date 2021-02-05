@@ -105,6 +105,10 @@ otelAgent:
       containerPort: 14250
       hostPort: 14250
       protocol: TCP
+    fluentforward:
+      containerPort: 8006
+      hostPort: 8006
+      protocol: TCP
     # opencensus:
     #   containerPort: 55678
     #   hostPort: 55678
@@ -519,11 +523,11 @@ image:
 
   otelcol:
     # The domain of the registry to pull the opentelemetry collector image from
-    registry: docker.io
+    registry: quay.io
     # The name of the opentelemetry collector image to pull
-    name: otel/opentelemetry-collector-contrib-dev
+    name: signalfx/splunk-otel-collector
     # The tag of the opentelemetry collector image to pull
-    tag: 9677f5b3a3cca335aae23938de07d2296468572e
+    tag: v0.6.0
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
@@ -607,6 +611,15 @@ otelCollector:
     signalfx:
       containerPort: 9943
       protocol: TCP
+    fluentforward:
+      containerPort: 8006
+      protocol: TCP
+    http-forwarder:
+      containerPort: 6060
+      protocol: TCP
+    # opencensus:
+    #   containerPort: 55678
+    #   protocol: TCP
 
   resources:
     limits:
@@ -667,3 +680,15 @@ service:
       containerPort: 9943
       targetPort: signalfx
       protocol: TCP
+    fluentforward:
+      containerPort: 8006
+      targetPort: fluentforward
+      protocol: TCP
+    http-forwarder:
+      containerPort: 6060
+      targetPort: http-forwarder
+      protocol: TCP
+    # opencensus:
+    #   containerPort: 55678
+    #   targetPort: opencensus
+    #   protocol: TCP
