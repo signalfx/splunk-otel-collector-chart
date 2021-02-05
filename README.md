@@ -59,7 +59,7 @@ deletes the release.
 ## Advanced Configuration
 
 The
-[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/master/helm-charts/splunk-otel-connector/values.yaml)
+[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-connector/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed
 explanation. Read through it to understand how to configure this chart.
 
