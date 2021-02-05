@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "o11y-collector.fullname" . }}-otel-k8s-cluster-receiver
+  name: {{ template "splunk-otel-collector.fullname" . }}-otel-k8s-cluster-receiver
   labels:
-    app: {{ template "o11y-collector.name" . }}
-    chart: {{ template "o11y-collector.chart" . }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "o11y-collector.otelK8sClusterReceiverConfig" . | fromYaml }}
+    {{- $config := include "splunk-otel-collector.otelK8sClusterReceiverConfig" . | fromYaml }}
     {{- .Values.otelK8sClusterReceiver.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

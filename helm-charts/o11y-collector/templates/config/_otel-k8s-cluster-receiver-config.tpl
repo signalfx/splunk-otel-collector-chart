@@ -2,7 +2,7 @@
 Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.otelK8sClusterReceiver.config
 */}}
-{{- define "o11y-collector.otelK8sClusterReceiverConfig" -}}
+{{- define "splunk-otel-collector.otelK8sClusterReceiverConfig" -}}
 extensions:
   health_check: {}
 
@@ -20,7 +20,7 @@ receivers:
     metadata_exporters: [signalfx]
 
 processors:
-  {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
 
   # k8s_tagger to enrich its own metrics
   k8s_tagger:
@@ -44,8 +44,8 @@ processors:
 
 exporters:
   signalfx:
-    ingest_url: {{ include "o11y-collector.ingestUrl" . }}/v2/datapoint
-    api_url: {{ include "o11y-collector.apiUrl" . }}
+    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/datapoint
+    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     send_compatible_metrics: true
     timeout: 10s

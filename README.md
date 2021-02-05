@@ -1,46 +1,20 @@
-# Observability Collector for Kubernetes
+# Splunk OpenTelemetry Connector for Kubernetes
 
-`o11y-collector` is a [Helm](https://github.com/kubernetes/helm) chart that
-creates a kubernetes daemonset along with other kubernetes objects in a
-kubernetes cluster to collect the cluster's logs, traces and metrics send them to
-[Signalfx](https://www.signalfx.com/).
+The Splunk OpenTelemetry Connector for Kubernetes is a
+[Helm](https://github.com/kubernetes/helm) chart for the [Splunk Distribution
+of OpenTelemetry Collector](https://github.com/signalfx/splunk-otel-collector).
+This chart creates a Kubernetes DaemonSet along with other Kubernetes objects
+in a Kubernetes cluster to collect the cluster's:
 
-### Log Collection
+- Metrics for [Splunk Infrastructure
+  Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html)
+- Traces for [Splunk
+  APM](https://www.splunk.com/en_us/software/microservices-apm.html)
+- Logs for Splunk Log Observer
 
-The deamonset runs [fluentd](https://www.fluentd.org/) with the
-[Splunk HEC output plugin](https://github.com/splunk/fluent-plugin-splunk-hec)
-to collect logs and send them over
-[Splunk HEC](http://docs.splunk.com/Documentation/Splunk/7.1.0/Data/AboutHEC).
+> :construction: This project is currently in **BETA**.
 
-It does not only collects logs for applications which are running in the
-kubernetes cluster, but also the logs for kubernetes itself (i.e. logs from
-`kubelet`, `apiserver`, etc.). It reads logs from both file system with the
-[fluentd tail plugin](https://docs.fluentd.org/v1.0/articles/in_tail) and
-[systemd journal](http://0pointer.de/blog/projects/journalctl.html) with
-[`fluent-plugin-systemd`](https://github.com/reevoo/fluent-plugin-systemd).
-
-### Trace Collection
-
-The deamonset runs [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) with the
-[Splunk SAPM Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter)
-to collect traces and send them to
-[Splunk SignalFx Microservices APM](https://www.splunk.com/en_us/software/microservices-apm.html).
-
-### Metric Collection
-
-[OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) also collects kubernetes and host
-metrics using the following components enabled by default:
-- [Kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver)
-to collect metrics from Kubelet API.
-- [K8s cluster receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver)
-to collect metrics from Kubernetes API.
-- [Host metrics receiver](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/hostmetricsreceiver)
-to collect host metrics from kubernetes node.
-
-The metrics are sent to
-[Splunk SignalFx Infrastructure Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html).
-
-## Usage
+## Getting Started
 
 ### Prerequisites
 
@@ -51,49 +25,43 @@ The following components required to use the helm chart:
 
 ### How to install
 
-To install o11y-collector in k8s cluster at least three parameters must be provided:
-- `splunkRealm` (default `us0`): SignalFx realm to send telemetry data to.
-- `splunkAccessToken`: Your SignalFx org access token.
-- `clusterName`: arbitrary value that will identify your kubernetes cluster in SignalFx environment.
+To install splunk-otel-collector in k8s cluster at least three parameters must be provided:
 
-The repository is not publicly available yet.
-In order to install the helm chart you need to clone the repo first and use it locally.
+- `splunkRealm` (default `us0`): Splunk realm to send telemetry data to.
+- `splunkAccessToken`: Your Splunk org access token.
+- `clusterName`: arbitrary value that will identify your Kubernetes cluster in Splunk.
 
-```bash
-$ git clone git@github.com:signalfx/o11y-collector-for-kubernetes.git
-$ cd ./o11y-collector-for-kubernetes
-$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" ./helm-charts/o11y-collector
-```
-
-Once the repository is public, it will be possible to use helm repository to install the chart.
+To deploy the chart run the following commands replacing the parameters above
+with their appropriate values.
 
 ```bash
-$ helm repo add o11y-collector-for-kubernetes https://signalfx.github.io/o11y-collector-for-kubernetes
-$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" o11y-collector-for-kubernetes/o11y-collector
+$ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+$ helm install my-splunk-otel-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
 
 ```bash
-$ helm install my-o11y-collector --values my_values.yaml ./helm-charts/o11y-collector
+$ helm install my-splunk-otel-collector --values my_values.yaml ./helm-charts/splunk-otel-collector
 ```
 
 ### How to uninstall
 
-To uninstall/delete a deployment with name `my-o11y-collector`:
+To uninstall/delete a deployment with name `my-splunk-otel-collector`:
 
 ```bash
-$ helm delete my-o11y-collector
+$ helm delete my-splunk-otel-collector
 ```
 
 The command removes all the Kubernetes components associated with the chart and
 deletes the release.
 
-## Configuration
+## Advanced Configuration
 
-The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/main/helm-charts/o11y-collector/values.yaml)
-lists all supported configurable parameters for this chart, along with detailed explanation.
-Read through it to understand how to configure this chart.
+The
+[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
+lists all supported configurable parameters for this chart, along with detailed
+explanation. Read through it to understand how to configure this chart.
 
 At the minimum you need to configure the following values.
 
@@ -105,39 +73,31 @@ splunkRealm: us0
 
 ### Kubernetes platform
 
-Use `platform` parameter to provide information about underlying kubernetes platform.
-It'll allow the o11y collector to automatically scrape additional cloud metadata. Supported options:
+Use the `platform` parameter to provide information about underlying Kubernetes
+platform. This parameter allows the connector to automatically scrape
+additional cloud metadata. The supported options are:
+
 - `aws` - Amazon EKS or self-managed k8s cluster in AWS environment.
 - `gcp` - Google GKE or self-managed k8s cluster in GCP environment.
 - `default` - default configuration for other platforms.
 
 ### Disable particular types of telemetry
 
-By default all telemetry data (metrics, traces and logs) is collected from the k8s cluster.
+By default all telemetry data (metrics, traces and logs) is collected from the Kubernetes cluster.
 It's possible to disable any kind of telemetry with the following parameters:
 
 - `metricsEnabled`: `false`
 - `tracesEnabled`: `false`
 - `logsEnabled`: `false`
 
-For example, to install o11y collector only for logs:
+For example, to install the connector only for logs:
 
 ```bash
-$ helm install my-o11y-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" ./helm-charts/o11y-collector
+$ helm install my-splunk-otel-collector \
+  --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" \
+  ./helm-charts/splunk-otel-collector
 ```
 
-## Running locally
+## License
 
-It's recommended to use [minikube](https://github.com/kubernetes/minikube) with
-[calico networking](https://docs.projectcalico.org/getting-started/kubernetes/) to run o11y-collector locally.
-
-If you run it on Windows or MacOS, use a linux VM driver, e.g. virtualbox.
-In that case use the following arguments to start minikube cluster:
-
-```bash
-minikube start --cni calico --vm-driver=virtualbox
-```
-
-## License ##
-
-See [LICENSE](LICENSE).
+[Apache Software License version 2.0](LICENSE).

@@ -2,7 +2,7 @@
 Config for the otel-collector agent
 The values can be overridden in .Values.otelAgent.config
 */}}
-{{- define "o11y-collector.otelAgentConfig" -}}
+{{- define "splunk-otel-collector.otelAgentConfig" -}}
 extensions:
   health_check: {}
   k8s_observer:
@@ -10,7 +10,7 @@ extensions:
     node: ${K8S_NODE_NAME}
 
 receivers:
-  {{- include "o11y-collector.otelTraceReceivers" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus:
     config:
@@ -100,7 +100,7 @@ processors:
       {{- end }}
     timeout: 10s
 
-  {{- include "o11y-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
 
   batch:
     timeout: 200ms
@@ -125,19 +125,19 @@ exporters:
   {{- if .Values.otelCollector.enabled }}
   # If collector is enabled, metrics and traces will be sent to collector
   otlp:
-    endpoint: {{ include "o11y-collector.fullname" . }}:55680
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:55680
     insecure: true
   {{- else }}
   # If collector is disabled, metrics and traces will be set to to SignalFx backend
-  {{- include "o11y-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   signalfx:
     correlation:
       sync_attributes:
         # TODO: Change to otel conventions when mappings are changed.
         k8s.pod.uid: kubernetes_pod_uid
         container.id: container_id
-    ingest_url: {{ include "o11y-collector.ingestUrl" . }}/v2/datapoint
-    api_url: {{ include "o11y-collector.apiUrl" . }}
+    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/datapoint
+    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     send_compatible_metrics: true
     sync_host_metadata: true

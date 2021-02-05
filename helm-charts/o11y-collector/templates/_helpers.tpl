@@ -3,7 +3,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "o11y-collector.name" -}}
+{{- define "splunk-otel-collector.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -12,7 +12,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "o11y-collector.fullname" -}}
+{{- define "splunk-otel-collector.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -28,14 +28,14 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "o11y-collector.chart" -}}
+{{- define "splunk-otel-collector.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "o11y-collector.secret" -}}
+{{- define "splunk-otel-collector.secret" -}}
 {{- if .Values.secret.name -}}
 {{- printf "%s" .Values.secret.name -}}
 {{- else -}}
@@ -46,23 +46,23 @@ Create chart name and version as used by the chart label.
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "o11y-collector.serviceAccountName" -}}
-    {{ default (include "o11y-collector.fullname" .) .Values.serviceAccount.name }}
+{{- define "splunk-otel-collector.serviceAccountName" -}}
+    {{ default (include "splunk-otel-collector.fullname" .) .Values.serviceAccount.name }}
 {{- end -}}
 
 {{/*
-Get Signalfx ingest host
+Get Splunk ingest host
 */}}
-{{- define "o11y-collector.ingestHost" -}}
+{{- define "splunk-otel-collector.ingestHost" -}}
 {{- $_ := required "splunkRealm or ingestHost must be provided" (or .Values.ingestHost .Values.splunkRealm) }}
 {{- .Values.ingestHost | default (printf "ingest.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
 
 {{/*
-Get Signalfx ingest URL
+Get Splunk ingest URL
 */}}
-{{- define "o11y-collector.ingestUrl" -}}
-{{- $host := include "o11y-collector.ingestHost" . }}
+{{- define "splunk-otel-collector.ingestUrl" -}}
+{{- $host := include "splunk-otel-collector.ingestHost" . }}
 {{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
 {{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
 {{- printf "%s:%s" $endpoint (toString .Values.ingestPort) }}
@@ -72,9 +72,9 @@ Get Signalfx ingest URL
 {{- end -}}
 
 {{/*
-Get Signalfx API URL.
+Get Splunk API URL.
 */}}
-{{- define "o11y-collector.apiUrl" -}}
+{{- define "splunk-otel-collector.apiUrl" -}}
 {{- $_ := required "splunkRealm or apiUrl must be provided" (or .Values.apiUrl .Values.splunkRealm) }}
 {{- .Values.apiUrl | default (printf "https://api.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
@@ -82,28 +82,28 @@ Get Signalfx API URL.
 {{/*
 Get splunkAccessToken.
 */}}
-{{- define "o11y-collector.accessToken" -}}
+{{- define "splunk-otel-collector.accessToken" -}}
 {{- required "splunkAccessToken value must be provided" .Values.splunkAccessToken -}}
 {{- end -}}
 
 {{/*
 Create the fluentd image name.
 */}}
-{{- define "o11y-collector.image.fluentd" -}}
+{{- define "splunk-otel-collector.image.fluentd" -}}
 {{- printf "%s/%s:%s" .Values.image.fluentd.registry .Values.image.fluentd.name .Values.image.fluentd.tag -}}
 {{- end -}}
 
 {{/*
 Create the opentelemetry collector image name.
 */}}
-{{- define "o11y-collector.image.otelcol" -}}
+{{- define "splunk-otel-collector.image.otelcol" -}}
 {{- printf "%s/%s:%s" .Values.image.otelcol.registry .Values.image.otelcol.name .Values.image.otelcol.tag -}}
 {{- end -}}
 
 {{/*
 Convert memory value from resources.limit to numeric value in MiB to be used by otel memory_limiter processor.
 */}}
-{{- define "o11y-collector.convertMemToMib" -}}
+{{- define "splunk-otel-collector.convertMemToMib" -}}
 {{- $mem := lower . -}}
 {{- if hasSuffix "e" $mem -}}
 {{- trimSuffix "e" $mem | atoi | mul 1000 | mul 1000 | mul 1000 | mul 1000 -}}
@@ -137,20 +137,20 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{/*
 Get otel memory_limiter limit_mib value based on 80% of resources.memory.limit.
 */}}
-{{- define "o11y-collector.getOtelMemLimitMib" -}}
-{{- div (mul (include "o11y-collector.convertMemToMib" .resources.limits.memory) 80) 100 }}
+{{- define "splunk-otel-collector.getOtelMemLimitMib" -}}
+{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 80) 100 }}
 {{- end -}}
 
 {{/*
 Get otel memory_limiter spike_limit_mib value based on 25% of resources.memory.limit.
 */}}
-{{- define "o11y-collector.getOtelMemSpikeLimitMib" -}}
-{{- div (mul (include "o11y-collector.convertMemToMib" .resources.limits.memory) 25) 100 }}
+{{- define "splunk-otel-collector.getOtelMemSpikeLimitMib" -}}
+{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 25) 100 }}
 {{- end -}}
 
 {{/*
 Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.limit.
 */}}
-{{- define "o11y-collector.getOtelMemBallastSizeMib" }}
-{{- div (mul (include "o11y-collector.convertMemToMib" .resources.limits.memory) 40) 100 }}
+{{- define "splunk-otel-collector.getOtelMemBallastSizeMib" }}
+{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 40) 100 }}
 {{- end -}}
