@@ -25,7 +25,7 @@ The following components required to use the helm chart:
 
 ### How to install
 
-To install splunk-otel-connector in k8s cluster at least three parameters must be provided:
+To install splunk-otel-collector in k8s cluster at least three parameters must be provided:
 
 - `splunkRealm` (default `us0`): Splunk realm to send telemetry data to.
 - `splunkAccessToken`: Your Splunk org access token.
@@ -36,21 +36,21 @@ with their appropriate values.
 
 ```bash
 $ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-$ helm install my-splunk-otel-connector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-connector
+$ helm install my-splunk-otel-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
 
 ```bash
-$ helm install my-splunk-otel-connector --values my_values.yaml ./helm-charts/splunk-otel-connector
+$ helm install my-splunk-otel-collector --values my_values.yaml ./helm-charts/splunk-otel-collector
 ```
 
 ### How to uninstall
 
-To uninstall/delete a deployment with name `my-splunk-otel-connector`:
+To uninstall/delete a deployment with name `my-splunk-otel-collector`:
 
 ```bash
-$ helm delete my-splunk-otel-connector
+$ helm delete my-splunk-otel-collector
 ```
 
 The command removes all the Kubernetes components associated with the chart and
@@ -59,7 +59,7 @@ deletes the release.
 ## Advanced Configuration
 
 The
-[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-connector/values.yaml)
+[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed
 explanation. Read through it to understand how to configure this chart.
 
@@ -93,9 +93,9 @@ It's possible to disable any kind of telemetry with the following parameters:
 For example, to install the connector only for logs:
 
 ```bash
-$ helm install my-splunk-otel-connector \
+$ helm install my-splunk-otel-collector \
   --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" \
-  ./helm-charts/splunk-otel-connector
+  ./helm-charts/splunk-otel-collector
 ```
 
 ## License

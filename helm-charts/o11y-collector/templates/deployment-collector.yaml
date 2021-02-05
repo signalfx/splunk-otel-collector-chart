@@ -2,30 +2,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "splunk-otel-connector.fullname" . }}
+  name: {{ template "splunk-otel-collector.fullname" . }}
   labels:
-    app: {{ template "splunk-otel-connector.name" . }}
+    app: {{ template "splunk-otel-collector.name" . }}
     component: otel-collector
-    chart: {{ template "splunk-otel-connector.chart" . }}
+    chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.otelCollector.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "splunk-otel-connector.name" . }}
+      app: {{ template "splunk-otel-collector.name" . }}
       component: otel-collector
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "splunk-otel-connector.name" . }}
+        app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector
         release: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-collector.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: {{ template "splunk-otel-connector.serviceAccountName" . }}
+      serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.otelCollector.nodeSelector }}
       nodeSelector:
         {{ toYaml .Values.otelCollector.nodeSelector | nindent 8 }}
@@ -47,12 +47,12 @@ spec:
         command:
         - /otelcontribcol
         - --config=/conf/relay.yaml
-        - --mem-ballast-size-mib={{ template "splunk-otel-connector.getOtelMemBallastSizeMib" .Values.otelCollector }}
+        - --mem-ballast-size-mib={{ template "splunk-otel-collector.getOtelMemBallastSizeMib" .Values.otelCollector }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelCollector.extraArgs }}
         - {{ . }}
         {{- end }}
-        image: {{ template "splunk-otel-connector.image.otelcol" . }}
+        image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: K8S_NODE_NAME
@@ -67,7 +67,7 @@ spec:
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: {{ include "splunk-otel-connector.secret" . }}
+                name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_access_token
         ports:
         {{- range $key, $port := .Values.otelCollector.ports }}
@@ -91,7 +91,7 @@ spec:
       volumes:
       - name: collector-configmap
         configMap:
-          name: {{ template "splunk-otel-connector.fullname" . }}-otel-collector
+          name: {{ template "splunk-otel-collector.fullname" . }}-otel-collector
           items:
             - key: relay
               path: relay.yaml

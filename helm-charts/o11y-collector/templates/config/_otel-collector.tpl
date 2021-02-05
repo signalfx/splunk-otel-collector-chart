@@ -2,12 +2,12 @@
 Config for the optional standalone collector
 The values can be overridden in .Values.otelCollector.config
 */}}
-{{- define "splunk-otel-connector.otelCollectorConfig" -}}
+{{- define "splunk-otel-collector.otelCollectorConfig" -}}
 extensions:
   health_check: {}
 
 receivers:
-  {{- include "splunk-otel-connector.otelTraceReceivers" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus:
     config:
@@ -34,7 +34,7 @@ processors:
         {{- end }}
       {{- end }}
 
-  {{- include "splunk-otel-connector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
   batch:
     timeout: 1s
@@ -52,10 +52,10 @@ processors:
       {{- end }}
 
 exporters:
-  {{- include "splunk-otel-connector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   signalfx:
-    ingest_url: {{ include "splunk-otel-connector.ingestUrl" . }}/v2/datapoint
-    api_url: {{ include "splunk-otel-connector.apiUrl" . }}
+    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/datapoint
+    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     send_compatible_metrics: true
 
