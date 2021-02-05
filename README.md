@@ -22,7 +22,7 @@ kubernetes cluster, but also the logs for kubernetes itself (i.e. logs from
 ### Trace Collection
 
 The deamonset runs [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) with the
-[Splunk SAPM Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/sapmexporter)
+[Splunk SAPM Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter)
 to collect traces and send them to
 [Splunk SignalFx Microservices APM](https://www.splunk.com/en_us/software/microservices-apm.html).
 
@@ -30,11 +30,11 @@ to collect traces and send them to
 
 [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector/) also collects kubernetes and host
 metrics using the following components enabled by default:
-- [Kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/receiver/kubeletstatsreceiver)
+- [Kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver)
 to collect metrics from Kubelet API.
-- [K8s cluster receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/receiver/k8sclusterreceiver)
+- [K8s cluster receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver)
 to collect metrics from Kubernetes API.
-- [Host metrics receiver](https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver)
+- [Host metrics receiver](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/hostmetricsreceiver)
 to collect host metrics from kubernetes node.
 
 The metrics are sent to
@@ -91,7 +91,7 @@ deletes the release.
 
 ## Configuration
 
-The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/master/helm-charts/o11y-collector/values.yaml)
+The [values.yaml](https://github.com/signalfx/o11y-collector-for-kubernetes/blob/main/helm-charts/o11y-collector/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed explanation.
 Read through it to understand how to configure this chart.
 

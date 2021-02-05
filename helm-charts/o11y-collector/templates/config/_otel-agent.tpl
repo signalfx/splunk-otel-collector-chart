@@ -89,7 +89,7 @@ processors:
       {{- end }}
 
   # Resource detection processor picks attributes from host environment.
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/processor/resourcedetectionprocessor
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
   resourcedetection:
     detectors:
       - env
