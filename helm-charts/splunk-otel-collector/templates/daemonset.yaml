@@ -166,6 +166,7 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
+      {{- if .Values.logsEnabled }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -181,6 +182,7 @@ spec:
       - name: fluentd-configmap
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
+      {{- end}}
       {{- if .Values.otelAgent.enabled }}
       {{- if .Values.metricsEnabled }}
       - name: hostfs
