@@ -1,0 +1,19 @@
+{{- if and (and .Values.otelK8sClusterReceiver.enabled .Values.metricsEnabled) .Values.podDisruptionBudget }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "splunk-otel-collector.fullname" . }}-otel-k8s-cluster-receiver
+  labels:
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-k8s-cluster-receiver
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "splunk-otel-collector.name" . }}
+      component: otel-k8s-cluster-receiver
+      release: {{ .Release.Name }}
+{{ toYaml .Values.podDisruptionBudget | trim | indent 2 }}
+{{- end }}
