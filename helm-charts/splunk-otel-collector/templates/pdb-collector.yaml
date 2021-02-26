@@ -1,0 +1,19 @@
+{{- if and .Values.otelCollector.enabled .Values.podDisruptionBudget }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "splunk-otel-collector.fullname" . }}
+  labels:
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-collector
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "splunk-otel-collector.name" . }}
+      component: otel-collector
+      release: {{ .Release.Name }}
+{{ toYaml .Values.podDisruptionBudget | trim | indent 2 }}
+{{- end }}
