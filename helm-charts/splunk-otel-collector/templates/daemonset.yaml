@@ -48,6 +48,8 @@ spec:
           {{ toYaml .Values.fluentd.securityContext | nindent 10 }}
         {{- end }}
         env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelAgent.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -87,7 +89,6 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --mem-ballast-size-mib={{ template "splunk-otel-collector.getOtelMemBallastSizeMib" .Values.otelAgent }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelAgent.extraArgs }}
         - {{ . }}

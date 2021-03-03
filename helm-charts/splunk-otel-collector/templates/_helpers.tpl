@@ -133,24 +133,3 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{- div (div ($mem | atoi) 1024) 1024 -}}
 {{- end -}}
 {{- end -}}
-
-{{/*
-Get otel memory_limiter limit_mib value based on 80% of resources.memory.limit.
-*/}}
-{{- define "splunk-otel-collector.getOtelMemLimitMib" -}}
-{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 80) 100 }}
-{{- end -}}
-
-{{/*
-Get otel memory_limiter spike_limit_mib value based on 25% of resources.memory.limit.
-*/}}
-{{- define "splunk-otel-collector.getOtelMemSpikeLimitMib" -}}
-{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 25) 100 }}
-{{- end -}}
-
-{{/*
-Get otel memory_limiter ballast_size_mib value based on 40% of resources.memory.limit.
-*/}}
-{{- define "splunk-otel-collector.getOtelMemBallastSizeMib" }}
-{{- div (mul (include "splunk-otel-collector.convertMemToMib" .resources.limits.memory) 40) 100 }}
-{{- end -}}

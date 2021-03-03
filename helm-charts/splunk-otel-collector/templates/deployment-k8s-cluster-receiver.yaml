@@ -47,7 +47,6 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --mem-ballast-size-mib={{ template "splunk-otel-collector.getOtelMemBallastSizeMib" .Values.otelK8sClusterReceiver }}
         - --metrics-addr=0.0.0.0:8888
         {{- range .Values.otelK8sClusterReceiver.extraArgs }}
         - {{ . }}
@@ -55,6 +54,8 @@ spec:
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelK8sClusterReceiver.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
