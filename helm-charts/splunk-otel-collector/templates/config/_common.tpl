@@ -6,11 +6,9 @@ memory_limiter:
   # check_interval is the time between measurements of memory usage.
   check_interval: 5s
   # By default limit_mib is set to 80% of container memory limit
-  limit_mib: {{ include "splunk-otel-collector.getOtelMemLimitMib" . | quote }}
-  # By default spike_limit_mib is set to 25% of container memory limit
-  spike_limit_mib: {{ include "splunk-otel-collector.getOtelMemSpikeLimitMib" . | quote }}
-  # By default ballast_size_mib is set to 40% of container memory limit
-  ballast_size_mib: {{ include "splunk-otel-collector.getOtelMemBallastSizeMib" . | quote }}
+  limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+  # Agent will set this value.
+  ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 {{- end }}
 
 {{/*
