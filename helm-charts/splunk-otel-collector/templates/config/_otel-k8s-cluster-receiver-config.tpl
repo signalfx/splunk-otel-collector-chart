@@ -44,7 +44,7 @@ processors:
 
 exporters:
   signalfx:
-    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/datapoint
+    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     send_compatible_metrics: true
