@@ -42,7 +42,7 @@ $ helm install my-splunk-otel-collector --set="splunkRealm=us0,splunkAccessToken
 Instead of setting helm values as arguments a yaml file can be provided:
 
 ```bash
-$ helm install my-splunk-otel-collector --values my_values.yaml ./helm-charts/splunk-otel-collector
+$ helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### How to uninstall
@@ -95,7 +95,7 @@ For example, to install the connector only for logs:
 ```bash
 $ helm install my-splunk-otel-collector \
   --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" \
-  ./helm-charts/splunk-otel-collector
+  splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ## License
