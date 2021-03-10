@@ -33,12 +33,10 @@ receivers:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
       load:
-      # Aggregated system process count metrics
-      processes:
       # Paging/Swap space utilization and I/O metrics
       paging:
-      # Virtual memory metrics, disabled by default
-      # swap:
+      # Aggregated system process count metrics
+      processes:
       # System processes metrics, disabled by default
       # process:
 
