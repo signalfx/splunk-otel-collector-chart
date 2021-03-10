@@ -35,6 +35,8 @@ receivers:
       load:
       # Aggregated system process count metrics
       processes:
+      # Paging/Swap space utilization and I/O metrics
+      paging:
       # Virtual memory metrics, disabled by default
       # swap:
       # System processes metrics, disabled by default
