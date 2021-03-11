@@ -98,6 +98,17 @@ $ helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+### Deployment environment
+
+Optional `environment` parameter can be used to specify an additional `deployment.environment`
+attribute that will be added to all the telemetry data. It will help Splunk Observability 
+users to investigate data coming from different source separately. 
+Value examples: development, staging, production, etc.
+
+```yaml
+environment: production
+```
+
 ## License
 
 [Apache Software License version 2.0](LICENSE).

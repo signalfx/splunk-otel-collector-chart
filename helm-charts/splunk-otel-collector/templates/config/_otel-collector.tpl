@@ -59,13 +59,20 @@ processors:
         key: {{ .name }}
       {{- end }}
 
+  {{- if .Values.environment }}
+  resource/add_environment:
+    attributes:
+      - action: insert
+        value: {{ .Values.environment }}
+        key: deployment.environment
+  {{- end }}
+
 exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
-    send_compatible_metrics: true
 
 service:
   extensions: [health_check, http_forwarder, zpages]
@@ -77,7 +84,14 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-      processors: [memory_limiter, batch, k8s_tagger, resource/add_cluster_name]
+      processors: 
+        - memory_limiter
+        - batch
+        - k8s_tagger
+        - resource/add_cluster_name
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
       exporters: [sapm]
 
     # default metrics pipeline
