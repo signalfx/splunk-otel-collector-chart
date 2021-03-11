@@ -54,6 +54,14 @@ metricsEnabled: true
 tracesEnabled: true
 logsEnabled: true
 
+################################################################################
+# Optional "environment" parameter that will be added to all the telemetry
+# data (traces/logs/metrics) as an attribute. It will allow Splunk Observability
+# users to investigate data coming from different source separately.
+################################################################################
+
+# environment: production
+
 # Configuration for additional metadata that will be added to all the telemetry
 # as extra attributes.
 extraAttributes:
