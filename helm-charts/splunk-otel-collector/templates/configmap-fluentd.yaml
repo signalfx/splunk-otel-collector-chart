@@ -233,6 +233,9 @@ data:
           {{- range .Values.extraAttributes.custom }}
           {{ .name }} "{{ .value }}"
           {{- end }}
+          {{- if .Values.environment }}
+          deployment.environment "{{ .Values.environment }}"
+          {{- end }}
         </record>
       </filter>
       <filter tail.containers.**>
@@ -365,6 +368,9 @@ data:
           {{- end }}
           {{- range .Values.extraAttributes.podLabels }}
           k8s.pod.labels.{{ . }}
+          {{- end }}
+          {{- if .Values.environment }}
+          deployment.environment
           {{- end }}
         </fields>
         {{- with .Values.fluentd.config.buffer }}

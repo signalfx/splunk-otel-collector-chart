@@ -113,6 +113,14 @@ processors:
         key: {{ .name }}
       {{- end }}
 
+  {{- if .Values.environment }}
+  resource/add_environment:
+    attributes:
+      - action: insert
+        value: {{ .Values.environment }}
+        key: deployment.environment
+  {{- end }}
+
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
 # These values should not be specified manually and will be set in the templates.
@@ -150,7 +158,15 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus]
-      processors: [memory_limiter, resourcedetection, k8s_tagger, resource/add_cluster_name, batch]
+      processors: 
+        - memory_limiter
+        - resourcedetection
+        - k8s_tagger
+        - resource/add_cluster_name
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
+        - batch
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp

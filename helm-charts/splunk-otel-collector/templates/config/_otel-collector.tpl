@@ -59,6 +59,14 @@ processors:
         key: {{ .name }}
       {{- end }}
 
+  {{- if .Values.environment }}
+  resource/add_environment:
+    attributes:
+      - action: insert
+        value: {{ .Values.environment }}
+        key: deployment.environment
+  {{- end }}
+
 exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   signalfx:
@@ -76,7 +84,14 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-      processors: [memory_limiter, batch, k8s_tagger, resource/add_cluster_name]
+      processors: 
+        - memory_limiter
+        - batch
+        - k8s_tagger
+        - resource/add_cluster_name
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
       exporters: [sapm]
 
     # default metrics pipeline
