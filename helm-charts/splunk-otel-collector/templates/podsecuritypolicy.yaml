@@ -14,15 +14,16 @@ metadata:
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
     apparmor.security.beta.kubernetes.io/defaultProfileName:  'runtime/default'
 spec:
-  privileged: true
-  allowPrivilegeEscalation: true
-  allowedCapabilities:
-  - '*'
+  privileged: false
+  allowPrivilegeEscalation: false
   hostNetwork: true
   hostIPC: false
   hostPID: false
   volumes:
-  - '*'
+  - 'configMap'
+  - 'emptyDir'
+  - 'hostPath'
+  - 'secret'
   runAsUser:
     rule: 'RunAsAny'
   seLinux:
