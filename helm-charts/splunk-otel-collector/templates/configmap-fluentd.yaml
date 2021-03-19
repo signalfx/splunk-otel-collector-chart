@@ -278,12 +278,12 @@ data:
       </filter>
 
       # = custom filters specified by users =
-      {{- range $name, $filterDef := .Values.customFilters }}
+      {{- range $name, $filterDef := .Values.fluentd.config.customFilters }}
       {{- if and $filterDef.tag $filterDef.type }}
       <filter {{ $filterDef.tag }}>
         @type {{ $filterDef.type }}
         {{- if $filterDef.body }}
-        {{ $filterDef.body | indent 8 }}
+        {{- $filterDef.body | nindent 8 }}
         {{- end }}
       </filter>
       {{- end }}
