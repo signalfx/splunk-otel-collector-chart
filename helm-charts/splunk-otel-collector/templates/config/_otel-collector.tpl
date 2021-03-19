@@ -26,6 +26,9 @@ receivers:
   fluentforward:
     endpoint: 0.0.0.0:8006
 
+  signalfx:
+    endpoint: 0.0.0.0:9943
+
 # By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
   k8s_tagger:
