@@ -1,3 +1,4 @@
+{{- if or .Values.otelAgent.enabled .Values.logsEnabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -200,3 +201,4 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
+{{- end }}
