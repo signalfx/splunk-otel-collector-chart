@@ -132,6 +132,7 @@ exporters:
   {{- else }}
   # If collector is disabled, metrics and traces will be set to to SignalFx backend
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- end }}
   signalfx:
     correlation:
       sync_attributes:
@@ -142,7 +143,6 @@ exporters:
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     sync_host_metadata: true
-  {{- end }}
 
 service:
   extensions: [health_check, k8s_observer, zpages]
