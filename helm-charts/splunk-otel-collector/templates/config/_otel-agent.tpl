@@ -88,8 +88,10 @@ processors:
     detectors:
       - env
       {{- if eq .Values.platform "gcp" }}
+      - gke
       - gce
       {{- else if eq .Values.platform "aws" }}
+      - eks
       - ec2
       {{- end }}
     timeout: 10s
