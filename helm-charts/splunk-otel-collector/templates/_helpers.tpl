@@ -90,14 +90,14 @@ Get splunkAccessToken.
 Create the fluentd image name.
 */}}
 {{- define "splunk-otel-collector.image.fluentd" -}}
-{{- printf "%s/%s:%s" .Values.image.fluentd.registry .Values.image.fluentd.name .Values.image.fluentd.tag | trimPrefix "/" | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.image.fluentd.repository .Values.image.fluentd.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{/*
 Create the opentelemetry collector image name.
 */}}
 {{- define "splunk-otel-collector.image.otelcol" -}}
-{{- printf "%s/%s:%s" .Values.image.otelcol.registry .Values.image.otelcol.name .Values.image.otelcol.tag | trimPrefix "/" | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.image.otelcol.repository .Values.image.otelcol.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{/*
