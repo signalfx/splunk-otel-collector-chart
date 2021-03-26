@@ -518,20 +518,16 @@ image:
   imagePullSecrets: []
 
   fluentd:
-    # The domain of the registry to pull the fluentd image from
-    registry: docker.io
-    # The name of the fluentd image to pull
-    name: splunk/fluentd-hec
+    # The registry and name of the fluentd image to pull
+    repository: splunk/fluentd-hec
     # The tag of the fluentd image to pull
     tag: 1.2.4
     # The policy that specifies when the user wants the fluentd images to be pulled
     pullPolicy: IfNotPresent
 
   otelcol:
-    # The domain of the registry to pull the opentelemetry collector image from
-    registry: quay.io
-    # The name of the opentelemetry collector image to pull
-    name: signalfx/splunk-otel-collector
+    # The registry and name of the opentelemetry collector image to pull
+    repository: quay.io/signalfx/splunk-otel-collector
     # The tag of the opentelemetry collector image to pull
     tag: 0.21.1
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
