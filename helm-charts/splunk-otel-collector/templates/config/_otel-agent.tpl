@@ -45,7 +45,7 @@ receivers:
     receivers:
       prometheus_simple:
         # Enable prometheus scraping for pods with standard prometheus annotations
-        rule: type.pod && annotations["prometheus.io/scrape"] == "true"
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         config:
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
@@ -156,7 +156,7 @@ service:
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, opencensus]
-      processors: 
+      processors:
         - memory_limiter
         - resourcedetection
         - k8s_tagger
