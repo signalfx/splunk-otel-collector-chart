@@ -59,6 +59,19 @@ Get Splunk ingest host
 {{- end -}}
 
 {{/*
+Get Splunk log URL
+*/}}
+{{- define "splunk-otel-collector.logUrl" -}}
+{{- $host := include "splunk-otel-collector.ingestHost" . }}
+{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
+{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
+{{- printf "%s:%s/v1/log" $endpoint (toString .Values.ingestPort) }}
+{{- else }}
+{{- $endpoint }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get Splunk ingest URL
 */}}
 {{- define "splunk-otel-collector.ingestUrl" -}}

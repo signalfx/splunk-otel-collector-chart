@@ -495,6 +495,8 @@ logsBackend:
     indexName: main
     # insecureSSL is a boolean, it indicates should it allow inscure SSL connection (when protocol is "https"). Default is false.
     insecureSSL: false
+
+    # TODO: Remaining options are unsupported in splunkhec exporter.
     # The PEM-format CA certificate for this client.
     # NOTE: The content of the certificate itself should be used here, not the file path.
     #       The certificate will be stored as a secret in kubernetes.
@@ -508,23 +510,6 @@ logsBackend:
     #       The file will be stored as a secret in kubernetes.
     caFile:
   # Configurations for Splunk Ingest API which will be used instead of HEC logs backend if logsBackend.splunkIngestAPI.ingestAPIHost is set
-  splunkIngestAPI:
-    # serviceClientIdentifier is a string, the client identifier is used to make requests to the ingest API with authorization.
-    serviceClientIdentifier:
-    # serviceClientSecretKey is a string, the client identifier is used to make requests to the ingest API with authorization.
-    serviceClientSecretKey:
-    # tokenEndpoint is a string, it indicates which endpoint should be used to get the authorization token used to make requests to the ingest API.
-    tokenEndpoint:
-    # ingestAuthHost is a string, it indicates which url/hostname should be used to make token auth requests to the ingest API.
-    ingestAuthHost:
-    # ingestAPIHost is a string, it indicates which url/hostname should be used to make requests to the ingest API.
-    ingestAPIHost:
-    # tenant is a string, it indicates which tenant should be used to make requests to the ingest API.
-    tenant:
-    # eventsEndpoint is a string, it indicates which endpoint should be used to make requests to the ingest API.
-    eventsEndpoint:
-    # debugIngestAPI is a boolean, it indicates whether user wants to debug requests and responses to ingest API. Default is false.
-    debugIngestAPI:
 
 
 ################################################################################
@@ -619,7 +604,7 @@ otelCollector:
 
   # The ports exposed by the collector container.
   # Any port can be disabled by setting to null.
-  # Any changes should be alligned with service.ports configuraition below.
+  # Any changes should be aligned with service.ports configuration below.
   ports:
     otlp:
       containerPort: 4317

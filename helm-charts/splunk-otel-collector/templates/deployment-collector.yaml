@@ -70,6 +70,11 @@ spec:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_access_token
+          - name: SPLUNK_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "splunk-otel-collector.secret" . }}
+                key: splunk_hec_token
           {{- with .Values.otelCollector.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
