@@ -137,10 +137,6 @@ exporters:
   {{- end }}
   signalfx:
     correlation:
-      sync_attributes:
-        # TODO: Change to otel conventions when mappings are changed.
-        k8s.pod.uid: kubernetes_pod_uid
-        container.id: container_id
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
