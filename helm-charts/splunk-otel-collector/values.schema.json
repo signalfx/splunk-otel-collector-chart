@@ -3,7 +3,8 @@
   "type": "object",
   "required": [
     "clusterName",
-    "platform",
+    "provider",
+    "distro",
     "tracesEnabled",
     "metricsEnabled",
     "logsEnabled"
@@ -15,10 +16,15 @@
       "minLength": 1,
       "type": "string"
     },
-    "platform": {
-      "description": "Kubernetes platform used to run the collector on",
+    "provider": {
+      "description": "Cloud provider where the collector is running",
       "type": "string",
-      "enum": ["aws", "gcp", "default"]
+      "enum": ["aws", "gcp", "azure", " ", ""]
+    },
+    "distro": {
+      "description": "Kubernetes distribution where the collector is running",
+      "type": "string",
+      "enum": ["eks", "gke", "aks", " ", ""]
     },
     "metricsEnabled": {
       "description": "Metrics telemetry enabled",
