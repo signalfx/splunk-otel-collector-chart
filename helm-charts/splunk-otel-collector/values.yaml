@@ -26,7 +26,7 @@ splunkAccessToken:
 # SignalFx ingest server host, default: "ingest.<realm>.signalfx.com".
 ingestHost:
 
-# The SignalFx API URL, default: "htpps://api.<realm>.signalfx.com".
+# The SignalFx API URL, default: "https://api.<realm>.signalfx.com".
 apiUrl:
 
 # Signalfx ingest endpoint port.
@@ -36,13 +36,22 @@ ingestPort: 443
 ingestProtocol: https
 
 ################################################################################
-# Kubernetes platform used to run the collector on. Valid options are:
-# - "aws" (Amazon EKS and self-managed k8s cluster on AWS EC2)
-# - "gcp" (Google GKE and self-managed k8s cluster on GCP GCE)
-# - "default"
+# Cloud provider, if any, the collector is running on. Leave empty for none/other.
+# - "aws" (Amazon Web Services)
+# - "gcp" (Google Cloud Platform)
+# - "azure" (Microsoft Azure)
 ################################################################################
 
-platform: default
+provider: ""
+
+################################################################################
+# Kubernetes distribution being run. Leave empty for other.
+# - "eks" (Amazon Elastic Kubernetes Service)
+# - "gke" (Google Google Kubernetes Engine)
+# - "aks" (Azure Kubernetes Service)
+################################################################################
+
+distro: ""
 
 ################################################################################
 # Telemetry configuration.

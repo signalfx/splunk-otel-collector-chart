@@ -86,13 +86,22 @@ processors:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
   resourcedetection:
     detectors:
+      # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
+      # before it gets set later by the cloud provider detector.
       - env
-      {{- if eq .Values.platform "gcp" }}
+      {{- if eq .Values.distro "gke" }}
       - gke
-      - gce
-      {{- else if eq .Values.platform "aws" }}
+      {{- else if eq .Values.distro "eks" }}
       - eks
+      {{- else if eq .Values.distro "aks" }}
+      - aks
+      {{- end }}
+      {{- if eq .Values.provider "gcp" }}
+      - gce
+      {{- else if eq .Values.provider "aws" }}
       - ec2
+      {{- else if eq .Values.provider "azure" }}
+      - azure
       {{- end }}
     timeout: 10s
 
