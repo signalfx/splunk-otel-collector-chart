@@ -103,6 +103,8 @@ processors:
       {{- else if eq .Values.provider "azure" }}
       - azure
       {{- end }}
+    # Don't override existing resource attributes to maintain identification of data sources
+    override: false
     timeout: 10s
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
