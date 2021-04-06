@@ -120,6 +120,18 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
@@ -142,8 +154,8 @@ spec:
             value: /hostfs/dev
 
           # Host specific resource attributes
-          - name: OTEL_RESOURCE
-            value: host.name=$(K8S_NODE_NAME),k8s.node.name=$(K8S_NODE_NAME)
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: host.name=$(K8S_NODE_NAME),k8s.node.name=$(K8S_NODE_NAME),k8s.pod.name=$(K8S_POD_NAME),k8s.pod.uid=$(K8S_POD_UID),k8s.namespace.name=$(K8S_NAMESPACE)
           {{- end }}
 
         readinessProbe:
