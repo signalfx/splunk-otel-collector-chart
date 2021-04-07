@@ -35,7 +35,7 @@ data:
     <source>
       @type prometheus_monitor
       <labels>
-        host ${hostname}
+        host.name ${hostname}
       </labels>
     </source>
 
@@ -43,7 +43,7 @@ data:
     <source>
       @type prometheus_output_monitor
       <labels>
-        host ${hostname}
+        host.name ${hostname}
       </labels>
     </source>
 
@@ -204,6 +204,12 @@ data:
       </match>
     </label>
     <label @SPLUNK>
+      <filter **>
+        @type record_transformer
+        <record>
+          host.name "#{ENV['K8S_NODE_NAME']}"
+        </record>
+      </filter>
       # Enrich log with k8s metadata
       <filter tail.containers.**>
         @type kubernetes_metadata
@@ -360,6 +366,7 @@ data:
           k8s.node.name node_name
           k8s.cluster.name cluster_name
           container.id container_id
+          host.name
           {{- range .Values.extraAttributes.custom }}
           {{ .name }}
           {{- end }}
