@@ -126,10 +126,6 @@ otelAgent:
       containerPort: 8006
       hostPort: 8006
       protocol: TCP
-    # opencensus:
-    #   containerPort: 55678
-    #   hostPort: 55678
-    #   protocol: TCP
 
   resources:
     limits:
@@ -636,9 +632,6 @@ otelCollector:
     http-forwarder:
       containerPort: 6060
       protocol: TCP
-    # opencensus:
-    #   containerPort: 55678
-    #   protocol: TCP
 
   resources:
     limits:
@@ -707,7 +700,3 @@ service:
       containerPort: 6060
       targetPort: http-forwarder
       protocol: TCP
-    # opencensus:
-    #   containerPort: 55678
-    #   targetPort: opencensus
-    #   protocol: TCP
