@@ -86,6 +86,7 @@ processors:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
   resourcedetection:
     detectors:
+      - system
       # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
       # before it gets set later by the cloud provider detector.
       - env
