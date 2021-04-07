@@ -38,6 +38,4 @@ jaeger:
       endpoint: 0.0.0.0:14250
 zipkin:
   endpoint: 0.0.0.0:9411
-opencensus:
-  endpoint: 0.0.0.0:55678
 {{- end }}

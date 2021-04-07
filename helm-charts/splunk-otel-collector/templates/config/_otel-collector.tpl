@@ -86,8 +86,8 @@ service:
 
     # default traces pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin, opencensus, sapm]
-      processors: 
+      receivers: [otlp, jaeger, zipkin, sapm]
+      processors:
         - memory_limiter
         - batch
         - k8s_tagger

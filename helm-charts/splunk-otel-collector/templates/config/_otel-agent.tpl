@@ -165,7 +165,7 @@ service:
 
     # default traces pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin, opencensus]
+      receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
         - resourcedetection
