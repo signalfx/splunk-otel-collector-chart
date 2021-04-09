@@ -15,7 +15,7 @@ extensions:
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus:
+  prometheus/agent:
     config:
       scrape_configs:
       - job_name: 'otel-agent'
@@ -117,20 +117,32 @@ processors:
   resource/add_cluster_name:
     attributes:
       - action: upsert
-        value: {{ .Values.clusterName }}
         key: k8s.cluster.name
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
-        value: {{ .value }}
         key: {{ .name }}
+        value: {{ .value }}
       {{- end }}
+
+  resource/add_agent_k8s:
+    attributes:
+      - action: insert
+        key: k8s.pod.name
+        value: "${K8S_POD_NAME}"
+      - action: insert
+        key: k8s.pod.uid
+        value: "${K8S_POD_UID}"
+      - action: insert
+        key: k8s.namespace.name
+        value: "${K8S_NAMESPACE}"
 
   {{- if .Values.environment }}
   resource/add_environment:
     attributes:
       - action: insert
-        value: {{ .Values.environment }}
         key: deployment.environment
+        value: {{ .Values.environment }}
   {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
@@ -185,8 +197,19 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
+      receivers: [hostmetrics, kubeletstats, receiver_creator]
       processors: [memory_limiter, resource/add_cluster_name, resourcedetection]
+      exporters:
+        {{- if .Values.otelCollector.enabled }}
+        - otlp
+        {{- else }}
+        - signalfx
+        {{- end }}
+
+    # Pipeline for metrics collected about the agent pod itself.
+    metrics/agent:
+      receivers: [prometheus/agent]
+      processors: [memory_limiter, resource/add_cluster_name, resource/add_agent_k8s, resourcedetection]
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
