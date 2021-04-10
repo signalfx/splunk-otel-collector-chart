@@ -31,15 +31,19 @@ processors:
         op: equals
         value: otel-k8s-cluster-receiver
 
-  resource/add_cluster_name:
+  resource:
     attributes:
+      # TODO: Remove once available in mapping service.
+      - action: insert
+        key: metric_source
+        value: kubernetes
       - action: upsert
-        value: {{ .Values.clusterName }}
         key: k8s.cluster.name
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
-        value: {{ .value }}
         key: {{ .name }}
+        value: {{ .value }}
       {{- end }}
 
 exporters:
@@ -55,6 +59,6 @@ service:
     # k8s metrics pipeline
     metrics:
       receivers: [prometheus, k8s_cluster]
-      processors: [memory_limiter, resource/add_cluster_name]
+      processors: [memory_limiter, resource]
       exporters: [signalfx]
 {{- end }}
