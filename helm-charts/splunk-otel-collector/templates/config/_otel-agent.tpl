@@ -114,17 +114,25 @@ processors:
     timeout: 200ms
     send_batch_size: 128
 
-  resource/add_cluster_name:
+  resource:
+    # General resource attributes that apply to all telemetry passing through the agent.
     attributes:
-      - action: upsert
+      - action: insert
+        key: host.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
+        key: k8s.node.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
         key: k8s.cluster.name
-        value: {{ .Values.clusterName }}
+        value: "{{ .Values.clusterName }}"
       {{- range .Values.extraAttributes.custom }}
-      - action: upsert
-        key: {{ .name }}
-        value: {{ .value }}
+      - action: insert
+        key: "{{ .name }}"
+        value: "{{ .value }}"
       {{- end }}
 
+  # Resource attributes specific to the agent itself.
   resource/add_agent_k8s:
     attributes:
       - action: insert
@@ -142,7 +150,7 @@ processors:
     attributes:
       - action: insert
         key: deployment.environment
-        value: {{ .Values.environment }}
+        value: "{{ .Values.environment }}"
   {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
@@ -180,9 +188,9 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
+        - resource
         - resourcedetection
         - k8s_tagger
-        - resource/add_cluster_name
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -198,7 +206,10 @@ service:
     # default metrics pipeline
     metrics:
       receivers: [hostmetrics, kubeletstats, receiver_creator]
-      processors: [memory_limiter, resource/add_cluster_name, resourcedetection]
+      processors:
+        - memory_limiter
+        - resource
+        - resourcedetection
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
@@ -209,7 +220,11 @@ service:
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
       receivers: [prometheus/agent]
-      processors: [memory_limiter, resource/add_cluster_name, resource/add_agent_k8s, resourcedetection]
+      processors:
+        - memory_limiter
+        - resource
+        - resource/add_agent_k8s
+        - resourcedetection
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp

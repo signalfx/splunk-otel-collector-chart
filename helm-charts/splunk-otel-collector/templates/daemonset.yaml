@@ -152,10 +152,6 @@ spec:
             value: /hostfs/run
           - name: HOST_DEV
             value: /hostfs/dev
-
-          # Host specific resource attributes
-          - name: OTEL_RESOURCE_ATTRIBUTES
-            value: host.name=$(K8S_NODE_NAME),k8s.node.name=$(K8S_NODE_NAME)
           {{- end }}
 
         readinessProbe:
