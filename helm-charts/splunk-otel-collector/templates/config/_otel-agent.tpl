@@ -15,7 +15,7 @@ extensions:
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus:
+  prometheus/agent:
     config:
       scrape_configs:
       - job_name: 'otel-agent'
@@ -114,23 +114,43 @@ processors:
     timeout: 200ms
     send_batch_size: 128
 
-  resource/add_cluster_name:
+  resource:
+    # General resource attributes that apply to all telemetry passing through the agent.
     attributes:
-      - action: upsert
-        value: {{ .Values.clusterName }}
+      - action: insert
+        key: host.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
+        key: k8s.node.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
         key: k8s.cluster.name
+        value: "{{ .Values.clusterName }}"
       {{- range .Values.extraAttributes.custom }}
-      - action: upsert
-        value: {{ .value }}
-        key: {{ .name }}
+      - action: insert
+        key: "{{ .name }}"
+        value: "{{ .value }}"
       {{- end }}
+
+  # Resource attributes specific to the agent itself.
+  resource/add_agent_k8s:
+    attributes:
+      - action: insert
+        key: k8s.pod.name
+        value: "${K8S_POD_NAME}"
+      - action: insert
+        key: k8s.pod.uid
+        value: "${K8S_POD_UID}"
+      - action: insert
+        key: k8s.namespace.name
+        value: "${K8S_NAMESPACE}"
 
   {{- if .Values.environment }}
   resource/add_environment:
     attributes:
       - action: insert
-        value: {{ .Values.environment }}
         key: deployment.environment
+        value: "{{ .Values.environment }}"
   {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
@@ -168,9 +188,9 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
+        - resource
         - resourcedetection
         - k8s_tagger
-        - resource/add_cluster_name
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -185,8 +205,26 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [hostmetrics, prometheus, kubeletstats, receiver_creator]
-      processors: [memory_limiter, resource/add_cluster_name, resourcedetection]
+      receivers: [hostmetrics, kubeletstats, receiver_creator]
+      processors:
+        - memory_limiter
+        - resource
+        - resourcedetection
+      exporters:
+        {{- if .Values.otelCollector.enabled }}
+        - otlp
+        {{- else }}
+        - signalfx
+        {{- end }}
+
+    # Pipeline for metrics collected about the agent pod itself.
+    metrics/agent:
+      receivers: [prometheus/agent]
+      processors:
+        - memory_limiter
+        - resource
+        - resource/add_agent_k8s
+        - resourcedetection
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
