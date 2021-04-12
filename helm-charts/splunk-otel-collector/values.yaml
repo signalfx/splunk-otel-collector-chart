@@ -135,6 +135,9 @@ otelAgent:
 
   securityContext: {}
 
+  # Extra enviroment variables to be set in the OTel agent container
+  extraEnvs: []
+
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
   # Default configuration defined in config/otel-agent-config.yaml
   # Any additional fields will be merged into the defaults,
@@ -169,6 +172,9 @@ otelK8sClusterReceiver:
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
+  # Extra enviroment variables to be set in the OTel Cluster Receiver container
+  extraEnvs: []
+
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
   # Defaul configuration defined in config/otel-k8s-cluster-receiver-config.yaml
   # Any additional fields will be merged into the defaults,
@@ -190,6 +196,9 @@ fluentd:
 
   securityContext:
     runAsUser: 0
+
+  # Extra enviroment variables to be set in the FluentD container
+  extraEnvs: []
 
   config:
     # Configurations for container logs
@@ -648,6 +657,9 @@ otelCollector:
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Extra enviroment variables to be set in the standalone OTel collector container
+  extraEnvs: []
 
   # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
   # Default configuration defined in config/otel-collector-config.yaml
