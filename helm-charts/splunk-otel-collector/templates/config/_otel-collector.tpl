@@ -48,8 +48,6 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
   batch:
-    timeout: 1s
-    send_batch_size: 1024
 
   resource/add_cluster_name:
     attributes:
