@@ -70,6 +70,9 @@ spec:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_access_token
+          {{- with .Values.otelK8sClusterReceiver.extraEnvs }}
+          {{- . | toYaml | nindent 10 }}
+          {{- end }}
         readinessProbe:
           httpGet:
             path: /
