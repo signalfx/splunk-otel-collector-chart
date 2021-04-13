@@ -70,6 +70,9 @@ spec:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_access_token
+          {{- with .Values.otelCollector.extraEnvs }}
+          {{- . | toYaml | nindent 10 }}
+          {{- end }}
         ports:
         {{- range $key, $port := .Values.otelCollector.ports }}
         - name: {{ $key }}
