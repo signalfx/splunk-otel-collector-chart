@@ -111,8 +111,6 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
 
   batch:
-    timeout: 200ms
-    send_batch_size: 128
 
   resource:
     # General resource attributes that apply to all telemetry passing through the agent.
@@ -188,13 +186,13 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
+        - batch
         - resource
         - resourcedetection
         - k8s_tagger
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - batch
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp
@@ -208,6 +206,7 @@ service:
       receivers: [hostmetrics, kubeletstats, receiver_creator]
       processors:
         - memory_limiter
+        - batch
         - resource
         - resourcedetection
       exporters:
@@ -222,6 +221,7 @@ service:
       receivers: [prometheus/agent]
       processors:
         - memory_limiter
+        - batch
         - resource
         - resource/add_agent_k8s
         - resourcedetection
