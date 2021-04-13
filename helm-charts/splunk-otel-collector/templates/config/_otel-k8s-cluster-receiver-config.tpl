@@ -22,6 +22,8 @@ receivers:
 processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
 
+  batch:
+
   # k8s_tagger to enrich its own metrics
   k8s_tagger:
     filter:
@@ -59,6 +61,6 @@ service:
     # k8s metrics pipeline
     metrics:
       receivers: [prometheus, k8s_cluster]
-      processors: [memory_limiter, resource]
+      processors: [memory_limiter, batch, resource]
       exporters: [signalfx]
 {{- end }}
