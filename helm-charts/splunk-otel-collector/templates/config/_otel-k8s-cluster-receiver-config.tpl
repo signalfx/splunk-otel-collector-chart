@@ -50,8 +50,13 @@ processors:
 
 exporters:
   signalfx:
+    {{- if .Values.otelCollector.enabled }}
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
+    {{- end }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     timeout: 10s
 
