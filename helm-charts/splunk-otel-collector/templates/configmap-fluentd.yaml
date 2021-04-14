@@ -359,6 +359,7 @@ data:
           k8s.namespace.name namespace
           k8s.node.name node_name
           k8s.cluster.name cluster_name
+          clusterName cluster_name
           container.id container_id
           host.name
           {{- range .Values.extraAttributes.custom }}
