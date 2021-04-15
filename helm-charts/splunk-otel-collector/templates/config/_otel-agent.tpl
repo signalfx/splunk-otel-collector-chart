@@ -57,6 +57,10 @@ receivers:
     extra_metadata_labels:
       - container.id
 
+  smartagent/signalfx-forwarder:
+    type: signalfx-forwarder
+    listenAddress: 0.0.0.0:9080
+
 # By default k8s_tagger and batch processors enabled.
 processors:
   # k8s_tagger enriches traces and metrics with k8s metadata
@@ -188,7 +192,7 @@ service:
 
     # default traces pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin]
+      receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
       processors:
         - memory_limiter
         - batch
@@ -231,7 +235,7 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
       exporters:
-        # Use signalfx instead of otlp even if collector is enabled 
+        # Use signalfx instead of otlp even if collector is enabled
         # in order to sync host metadata.
         - signalfx
 {{- end }}
