@@ -163,7 +163,7 @@ exporters:
   {{- if .Values.otelCollector.enabled }}
   # If collector is enabled, metrics and traces will be sent to collector
   otlp:
-    endpoint: {{ include "splunk-otel-collector.fullname" . }}:55680
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     insecure: true
   {{- else }}
   # If collector is disabled, metrics and traces will be set to to SignalFx backend
