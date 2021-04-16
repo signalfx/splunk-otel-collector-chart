@@ -107,8 +107,8 @@ otelAgent:
   # For example to disable zipkin ports set `otelAgent.ports.zipkin: null`.
   ports:
     otlp:
-      containerPort: 55680
-      hostPort: 55680
+      containerPort: 4317
+      hostPort: 4317
       protocol: TCP
     zipkin:
       containerPort: 9411
@@ -618,7 +618,7 @@ otelCollector:
   # Any changes should be alligned with service.ports configuraition below.
   ports:
     otlp:
-      containerPort: 55680
+      containerPort: 4317
       protocol: TCP
     jaeger-thrift:
       containerPort: 14268
@@ -681,7 +681,7 @@ service:
   # Ports exposed by the opentelemetry collector service. Container named ports used.
   ports:
     otlp:
-      containerPort: 55680
+      containerPort: 4317
       targetPort: otlp
       protocol: TCP
     jaeger-thrift:
