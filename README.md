@@ -6,7 +6,7 @@
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="CONTRIBUTING.md">Getting Involved</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
   </strong>
 </p>
 
@@ -22,15 +22,15 @@
 
 <p align="center">
   <strong>
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/components.md">Components</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/components.md">Components</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/monitoring.md">Monitoring</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/monitoring.md">Monitoring</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/security.md">Security</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/security.md">Security</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/sizing.md">Sizing</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/sizing.md">Sizing</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/troubleshooting.md">Troubleshooting</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md">Troubleshooting</a>
   </strong>
 </p>
 
