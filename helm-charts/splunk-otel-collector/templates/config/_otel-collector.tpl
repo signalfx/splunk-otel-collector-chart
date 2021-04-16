@@ -28,6 +28,7 @@ receivers:
 
   signalfx:
     endpoint: 0.0.0.0:9943
+    access_token_passthrough: true
 
 # By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
@@ -97,7 +98,7 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [otlp, prometheus]
+      receivers: [otlp, prometheus, signalfx]
       processors: [memory_limiter, batch, resource/add_cluster_name]
       exporters: [signalfx]
 

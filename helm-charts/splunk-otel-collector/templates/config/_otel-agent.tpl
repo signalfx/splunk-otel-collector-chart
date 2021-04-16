@@ -57,6 +57,10 @@ receivers:
     extra_metadata_labels:
       - container.id
 
+  smartagent/signalfx-forwarder:
+    type: signalfx-forwarder
+    listenAddress: 0.0.0.0:9080
+
 # By default k8s_tagger and batch processors enabled.
 processors:
   # k8s_tagger enriches traces and metrics with k8s metadata
@@ -167,8 +171,13 @@ exporters:
   {{- end }}
   signalfx:
     correlation:
+    {{- if .Values.otelCollector.enabled }}
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
+    {{- end }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     sync_host_metadata: true
 
@@ -183,13 +192,13 @@ service:
 
     # default traces pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin]
+      receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
       processors:
         - memory_limiter
+        - k8s_tagger
         - batch
         - resource
         - resourcedetection
-        - k8s_tagger
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -226,9 +235,7 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
       exporters:
-        {{- if .Values.otelCollector.enabled }}
-        - otlp
-        {{- else }}
+        # Use signalfx instead of otlp even if collector is enabled
+        # in order to sync host metadata.
         - signalfx
-        {{- end }}
 {{- end }}

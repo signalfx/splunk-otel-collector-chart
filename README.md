@@ -6,7 +6,7 @@
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="CONTRIBUTING.md">Getting Involved</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
   </strong>
 </p>
 
@@ -22,15 +22,15 @@
 
 <p align="center">
   <strong>
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/components.md">Components</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/components.md">Components</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/monitoring.md">Monitoring</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/monitoring.md">Monitoring</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/security.md">Security</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/security.md">Security</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/sizing.md">Sizing</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/sizing.md">Sizing</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://github.com/signalfx/splunk-otel-collector/docs/troubleshooting.md">Troubleshooting</a>
+    <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md">Troubleshooting</a>
   </strong>
 </p>
 
@@ -139,21 +139,33 @@ splunkAccessToken: xxxxxx
 splunkRealm: us0
 ```
 
-### Kubernetes platform
+### Cloud provider
 
-Use the `platform` parameter to provide information about underlying Kubernetes
-platform. This parameter allows the connector to automatically scrape
-additional cloud metadata. The supported options are:
+Use the `provider` parameter to provide information about the cloud provider, if any.
 
-- `aws` - Amazon EKS or self-managed k8s cluster in AWS environment.
-- `gcp` - Google GKE or self-managed k8s cluster in GCP environment.
-- `default` - default configuration for other platforms.
+- `aws` - Amazon Web Services
+- `gcp` - Google Cloud
+- `azure` - Microsoft Azure
+
+This value can be omitted if none of the values apply.
+
+### Kubernetes distribution
+
+Use the `distro` parameter to provide information about underlying Kubernetes
+deployment. This parameter allows the connector to automatically scrape
+additional metadata. The supported options are:
+
+- `eks` - Amazon EKS
+- `gke` - Google GKE
+- `aks` - Azure AKS
+
+This value can be omitted if none of the values apply.
 
 ### Deployment environment
 
 Optional `environment` parameter can be used to specify an additional `deployment.environment`
-attribute that will be added to all the telemetry data. It will help Splunk Observability 
-users to investigate data coming from different source separately. 
+attribute that will be added to all the telemetry data. It will help Splunk Observability
+users to investigate data coming from different source separately.
 Value examples: development, staging, production, etc.
 
 ```yaml
