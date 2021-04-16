@@ -27,7 +27,9 @@ Common config for the otel-collector traces receivers
 otlp:
   protocols:
     grpc:
+      endpoint: 0.0.0.0:4317
     http:
+      endpoint: 0.0.0.0:55681
 sapm:
   endpoint: 0.0.0.0:7276
 jaeger:
