@@ -195,10 +195,10 @@ service:
       receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
       processors:
         - memory_limiter
+        - k8s_tagger
         - batch
         - resource
         - resourcedetection
-        - k8s_tagger
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
