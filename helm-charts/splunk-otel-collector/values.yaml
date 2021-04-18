@@ -110,6 +110,10 @@ otelAgent:
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
+    signalfx-forwarder:
+      containerPort: 9080
+      hostPort: 9080
+      protocol: TCP
     zipkin:
       containerPort: 9411
       hostPort: 9411
