@@ -78,7 +78,7 @@ This distribution currently supports:
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/splunkhecexporter).
 
-> :construction: This project is currently in **BETA**.
+> :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
 ## Getting Started
 
