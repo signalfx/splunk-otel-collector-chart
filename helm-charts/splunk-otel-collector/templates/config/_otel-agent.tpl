@@ -21,7 +21,10 @@ receivers:
       - job_name: 'otel-agent'
         scrape_interval: 10s
         static_configs:
-        - targets: ["${K8S_POD_IP}:8888", "${K8S_POD_IP}:24231"]
+        - targets:
+          - "${K8S_POD_IP}:8888"
+          # Fluend metrics collection disabled by default
+          # - "${K8S_POD_IP}:24231"
 
   hostmetrics:
     collection_interval: 10s
