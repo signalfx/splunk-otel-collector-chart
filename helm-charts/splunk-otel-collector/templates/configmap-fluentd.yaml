@@ -315,6 +315,15 @@ data:
         {{- end }}
         </buffer>
         {{- end }}
+        <format monitor_agent>
+          @type json
+        </format>
+        <format>
+          # we just want to keep the raw logs, not the structure created by docker or journald
+          @type single_value
+          message_key log
+          add_newline false
+        </format>
       </match>
     </label>
 {{- end }}

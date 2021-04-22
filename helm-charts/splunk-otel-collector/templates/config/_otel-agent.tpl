@@ -167,20 +167,19 @@ processors:
 exporters:
 
   {{- if .Values.otelCollector.enabled }}
-  # If collector is enabled, metrics and traces will be sent to collector
+  # If collector is enabled, metrics, logs and traces will be sent to collector
   otlp:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     insecure: true
   {{- else }}
-  # If collector is disabled, metrics and traces will be set to to SignalFx backend
+  # If collector is disabled, metrics, logs and traces will be sent to to SignalFx backend
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
-  {{- end }}
-
   splunk_hec:
     endpoint: {{ include "splunk-otel-collector.logUrl" . }}
     token: "${SPLUNK_HEC_TOKEN}"
     index: "{{ .Values.logsBackend.hec.indexName }}"
     insecure_skip_verify: {{ .Values.logsBackend.hec.insecureSSL | default false }}
+  {{- end }}
 
   signalfx:
     correlation:
@@ -239,7 +238,7 @@ service:
         {{- end }}
         - signalfx
 
-    # default metrics pipeline
+    # Default metrics pipeline.
     metrics:
       receivers: [hostmetrics, kubeletstats, receiver_creator]
       processors:
