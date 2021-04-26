@@ -57,8 +57,19 @@ receivers:
     collection_interval: 10s
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
+    metric_groups:
+      - container
+      - pod
+      - node
+      # Volume metrics are not collected by default
+      # - volume
+    # To collect metadata from underlying storage resources, set k8s_api_config and list k8s.volume.type
+    # under extra_metadata_labels
+    # k8s_api_config:
+    #  auth_type: serviceAccount
     extra_metadata_labels:
       - container.id
+      # - k8s.volume.type
 
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
