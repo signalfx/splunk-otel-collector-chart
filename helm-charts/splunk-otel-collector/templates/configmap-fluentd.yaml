@@ -167,7 +167,8 @@ data:
       # = filters for container logs =
       {{- range $name, $logDef := .Values.fluentd.config.logs }}
       {{- if and $logDef.from.pod $logDef.multiline }}
-      <filter tail.containers.var.log.containers.{{ $logDef.from.pod }}*{{ or $logDef.from.container $name }}*.log>
+      {{- $filenameGlob := regexReplaceAll "\\*+" (printf "%s*%s*" $logDef.from.pod ($logDef.from.container | default "")) "*" }}
+      <filter tail.containers.var.log.containers.{{ $filenameGlob }}.log>
         @type concat
         key log
         timeout_label @SPLUNK
