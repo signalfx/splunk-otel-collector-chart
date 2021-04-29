@@ -107,26 +107,32 @@ otelAgent:
   # For example to disable zipkin ports set `otelAgent.ports.zipkin: null`.
   ports:
     otlp:
+      enabled: true
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
     sfx-forwarder:
+      enabled: true
       containerPort: 9080
       hostPort: 9080
       protocol: TCP
     zipkin:
+      enabled: true
       containerPort: 9411
       hostPort: 9411
       protocol: TCP
     jaeger-thrift:
+      enabled: true
       containerPort: 14268
       hostPort: 14268
       protocol: TCP
     jaeger-grpc:
+      enabled: true
       containerPort: 14250
       hostPort: 14250
       protocol: TCP
     fluentforward:
+      enabled: true
       containerPort: 8006
       hostPort: 8006
       protocol: TCP
@@ -625,27 +631,35 @@ otelCollector:
   # Any changes should be alligned with service.ports configuraition below.
   ports:
     otlp:
+      enabled: true
       containerPort: 4317
       protocol: TCP
     jaeger-thrift:
+      enabled: true
       containerPort: 14268
       protocol: TCP
     jaeger-grpc:
+      enabled: true
       containerPort: 14250
       protocol: TCP
     zipkin:
+      enabled: true
       containerPort: 9411
       protocol: TCP
     sapm:
+      enabled: true
       containerPort: 7276
       protocol: TCP
     signalfx:
+      enabled: true
       containerPort: 9943
       protocol: TCP
     fluentforward:
+      enabled: true
       containerPort: 8006
       protocol: TCP
     http-forwarder:
+      enabled: true
       containerPort: 6060
       protocol: TCP
 
@@ -688,34 +702,42 @@ service:
   # Ports exposed by the opentelemetry collector service. Container named ports used.
   ports:
     otlp:
+      enabled: true
       containerPort: 4317
       targetPort: otlp
       protocol: TCP
     jaeger-thrift:
+      enabled: true
       containerPort: 14268
       targetPort: jaeger-thrift
       protocol: TCP
     jaeger-grpc:
+      enabled: true
       containerPort: 14250
       targetPort: jaeger-grpc
       protocol: TCP
     zipkin:
+      enabled: true
       containerPort: 9411
       targetPort: zipkin
       protocol: TCP
     sapm:
+      enabled: true
       containerPort: 7276
       targetPort: sapm
       protocol: TCP
     signalfx:
+      enabled: true
       containerPort: 9943
       targetPort: signalfx
       protocol: TCP
     fluentforward:
+      enabled: true
       containerPort: 8006
       targetPort: fluentforward
       protocol: TCP
     http-forwarder:
+      enabled: true
       containerPort: 6060
       targetPort: http-forwarder
       protocol: TCP
