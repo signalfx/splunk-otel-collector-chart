@@ -1,0 +1,33 @@
+name: Ensure valid and up-to-date Changelog
+
+on: pull_request
+
+jobs:
+  validate-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Lint changelog file
+        uses: avto-dev/markdown-lint@v1
+        with:
+          rules: /lint/rules/changelog.js
+          config: /lint/config/changelog.yml
+          args: ./CHANGELOG.md
+
+      - name: Read current version of the Chart
+        id: read-chart
+        uses: cumulusds/get-yaml-paths-action@v0.1.0
+        with:
+          file: helm-charts/splunk-otel-collector/Chart.yaml
+          version: version
+
+      - name: Ensure that CHANGELOG.md has an entry for the current version
+        id: read-changelog
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ steps.read-chart.outputs.version }}
+          path: ./CHANGELOG.md
