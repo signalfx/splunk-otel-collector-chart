@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.24.11] - 2021-04-29
+
+- Change the way to configure "concat" filter for container logs (#117)
+
 ## [0.24.10] - 2021-04-21
 
 ### Changed
