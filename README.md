@@ -80,6 +80,21 @@ This distribution currently supports:
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
+### Supported Kubernetes distributions
+
+This helm chart is tested and works with default configurations on the following
+Kubernetes distributions:
+
+- [Vanilla (unmodified version) Kubernetes](https://kubernetes.io)
+- [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks)
+- [Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/aks)
+- [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
+- [Minikube](https://kubernetes.io/docs/tutorials/hello-minikube)
+
+While this helm chart should work for other Kubernetes distributions, it may
+require additional configurations applied to
+[values.yaml](helm-charts/splunk-otel-collector/values.yaml).
+
 ## Getting Started
 
 ### Prerequisites
