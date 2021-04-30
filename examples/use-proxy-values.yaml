@@ -1,0 +1,12 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+otelAgent:
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"
+otelK8sClusterReceiver:
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"

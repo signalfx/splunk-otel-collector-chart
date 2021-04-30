@@ -1,0 +1,11 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+otelCollector:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gb
