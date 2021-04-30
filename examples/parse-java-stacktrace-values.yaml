@@ -1,0 +1,12 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+fluentd:
+  config:
+    logs:
+      java-app:
+        from:
+          pod: "java-app"
+        multiline:
+          firstline: /\d{4}-\d{1,2}-\d{1,2}/
