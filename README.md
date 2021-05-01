@@ -101,7 +101,7 @@ require additional configurations applied to
 
 The following components required to use the helm chart:
 
-- [Helm client](https://helm.sh/docs/intro/install/)
+- [Helm 3](https://helm.sh/docs/intro/install/) (Helm 2 is not supported)
 - [Kubernetes cluster](https://kubernetes.io/)
 - [Splunk Access Token](https://docs.splunk.com/Observability/admin/authentication-tokens/org-tokens.html#admin-org-tokens)
 - [Splunk Realm](https://dev.splunk.com/observability/docs/realms_in_endpoints/)
