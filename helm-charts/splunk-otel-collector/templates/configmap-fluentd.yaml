@@ -56,7 +56,9 @@ data:
     # Json Log Example:
     # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
     # CRI Log Example (not supported):
-    # 2016-02-17T00:04:05.931087621Z stdout [info:2016-02-16T16:04:05.930-08:00] Some log text here
+    # 2016-02-17T00:04:05.931087621Z stdout P { 'long': { 'json', 'object output' },
+    # 2016-02-17T00:04:05.931087621Z stdout F 'splitted': 'partial-lines' }
+    # 2016-02-17T00:04:05.931087621Z stdout F [info:2016-02-16T16:04:05.930-08:00] Some log text here
     <source>
       @id containers.log
       @type tail
@@ -72,8 +74,8 @@ data:
       <parse>
       {{- if eq .Values.fluentd.config.containers.logFormatType "cri" }}
         @type regexp
-        expression /^(?<time>.+) (?<stream>stdout|stderr) [^ ]* (?<log>.*)$/
-        time_format  {{ .Values.fluentd.containers.logFormat | default "%Y-%m-%dT%H:%M:%S.%N%:z" }}
+        expression /^(?<time>.+) (?<stream>stdout|stderr)( (?<partial_flag>[FP]))? (?<log>.*)$/
+        time_format {{ .Values.fluentd.config.containers.criTimeFormat }}
       {{- else if eq .Values.fluentd.config.containers.logFormatType "json" }}
         @type json
         time_format %Y-%m-%dT%H:%M:%S.%NZ
@@ -164,7 +166,18 @@ data:
   output.conf: |-
     #Events are emitted to the CONCAT label from the container, file and journald sources for multiline processing.
     <label @CONCAT>
-      # = filters for container logs =
+      # = handle cri/containerd multiline format =
+      {{- if eq .Values.fluentd.config.containers.logFormatType "cri" }}
+      <filter tail.containers.var.log.containers.**>
+        @type concat
+        key log
+        partial_key partial_flag
+        partial_value P
+        separator ''
+        timeout_label @SPLUNK
+      </filter>
+      {{- end }}
+      # = handle custom multiline logs =
       {{- range $name, $logDef := .Values.fluentd.config.logs }}
       {{- if and $logDef.from.pod $logDef.multiline }}
       {{- $filenameGlob := regexReplaceAll "\\*+" (printf "%s*%s*" $logDef.from.pod ($logDef.from.container | default "")) "*" }}

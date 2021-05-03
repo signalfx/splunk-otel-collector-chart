@@ -1,0 +1,9 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+fluentd:
+  config:
+    containers:
+      logFormatType: cri
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"

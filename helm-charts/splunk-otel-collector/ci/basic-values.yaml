@@ -1,3 +1,10 @@
 clusterName: fake-cluster
 splunkRealm: fake-realm
 splunkAccessToken: fake-token
+
+# Logs collection config for Kind cluster
+fluentd:
+  config:
+    containers:
+      logFormatType: cri
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%NZ"
