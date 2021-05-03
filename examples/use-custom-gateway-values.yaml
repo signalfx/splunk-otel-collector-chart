@@ -1,0 +1,26 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+otelAgent:
+  config:
+    exporters:
+      otlp:
+        endpoint: <custom-gateway-url>:4317
+        insecure: true
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060
+    service:
+      pipelines:
+        traces:
+          exporters: [otlp, signalfx]
+        metrics:
+          exporters: [otlp]
+
+otelK8sClusterReceiver:
+  config:
+    exporters:
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060
