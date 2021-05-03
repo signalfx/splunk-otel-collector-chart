@@ -4,7 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.24.12] - 2021-05-03
+
+### Fixed
+
+- Fix logs collection configuration for CRI-O / containerd runtimes (#120)
+
 ## [0.24.11] - 2021-04-29
+
+### Changed
 
 - Change the way to configure "concat" filter for container logs (#117)
 

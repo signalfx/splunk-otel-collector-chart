@@ -114,3 +114,20 @@ fluentd:
         multiline:
           firstline: /\d{4}-\d{1,2}-\d{1,2}/
 ```
+
+# Logs collection configuration for CRI-O container runtime
+
+Default logs collection is configured for Docker container runtime.
+The following configuration should be set for CRI-O or containerd runtimes,
+e.g. OpenShift.
+
+```yaml
+fluentd:
+  config:
+    containers:
+      logFormatType: cri
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"
+```
+
+`criTimeFormat` can be used to configure logs collection for different log
+formats, e.g. `criTimeFormat: "%Y-%m-%dT%H:%M:%S.%NZ"` for IBM IKS.

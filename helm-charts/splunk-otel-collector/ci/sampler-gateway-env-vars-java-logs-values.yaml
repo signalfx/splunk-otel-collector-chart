@@ -43,3 +43,8 @@ fluentd:
           pod: "java-app"
         multiline:
           firstline: /\d{4}-\d{1,2}-\d{1,2}/
+
+    # Logs collection config for Kind cluster
+    containers:
+      logFormatType: cri
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%NZ"
