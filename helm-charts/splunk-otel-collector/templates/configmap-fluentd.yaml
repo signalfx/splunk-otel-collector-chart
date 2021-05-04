@@ -215,8 +215,6 @@ data:
         <record>
           # set the sourcetype from splunk.com/sourcetype pod annotation or set it to kube:container:CONTAINER_NAME
           sourcetype ${record.dig("kubernetes", "annotations", "splunk.com/sourcetype") ? "kube:"+record.dig("kubernetes", "annotations", "splunk.com/sourcetype") : "kube:container:"+record.dig("kubernetes","container_name")}
-          # set the index field to the value found in the pod splunk.com/index annotations. if not set, use namespace annotation, or default to the default_index
-          index ${record.dig("kubernetes", "annotations", "splunk.com/index") ? record.dig("kubernetes", "annotations", "splunk.com/index") : record.dig("kubernetes", "namespace_annotations", "splunk.com/index")}
 
           k8s.container.name ${record.dig("kubernetes","container_name")}
           k8s.namespace.name ${record.dig("kubernetes","namespace_name")}
@@ -294,9 +292,8 @@ data:
         <record>
           com.splunk.sourcetype ${record.dig("sourcetype") ? record.dig("sourcetype") : ""}
           com.splunk.source ${record.dig("source") ? record.dig("source") : ""}
-          com.splunk.index ${record.dig("index") ? record.dig("index") : "{{ .Values.logsBackend.hec.indexName | default "main"}}"}
         </record>
-        remove_keys denylist,docker,kubernetes,source,sourcetype,index
+        remove_keys denylist,docker,kubernetes,source,sourcetype
       </filter>
 
       # = output =

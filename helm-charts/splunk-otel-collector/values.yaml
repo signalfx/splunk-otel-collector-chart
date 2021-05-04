@@ -23,17 +23,11 @@ splunkRealm: us0
 # (REQUIRED) SignalFx org access token.
 splunkAccessToken:
 
-# SignalFx ingest server host, default: "ingest.<realm>.signalfx.com".
-ingestHost:
+# SignalFx ingest URL, default: "https://ingest.<realm>.signalfx.com".
+ingestUrl:
 
 # The SignalFx API URL, default: "https://api.<realm>.signalfx.com".
 apiUrl:
-
-# Signalfx ingest endpoint port.
-ingestPort: 443
-
-# Signalfx ingest protocol: "http" and "https".
-ingestProtocol: https
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
@@ -291,26 +285,6 @@ fluentd:
     # ```
     customFilters: {}
 
-    #
-    # You can find more information on indexed fields here - http://dev.splunk.com/view/event-collector/SP-CAAAFB6
-    # The scheme to define an indexed field is:
-    #
-    # ```
-    # ["field_1", "field_2"]
-    # ```
-    #
-    # `indexFields` defines the fields from the fluentd record to be indexed.
-    # You can find more information on indexed fields here - http://dev.splunk.com/view/event-collector/SP-CAAAFB6
-    # The input is in the form of an array(comma separated list) of the values you want to use as indexed fields.
-    #
-    # For example if you want to define indexed fields for "field_1" and "field_2"
-    # you will have to define an indexFields section as follows in values.yaml file.
-    # ```
-    # indexFields: ["field_1", "field_2"]
-    # ```
-    # WARNING: The fields being used here must be available inside the fluentd record.
-    indexFields: []
-
     # `logs` defines the source of logs, multiline support, and their sourcetypes.
     #
     # The scheme to define a log is:
@@ -476,44 +450,6 @@ fluentd:
         timestampExtraction:
           format: "%Y-%m-%dT%H:%M:%SZ"
         sourcetype: kube:apiserver-audit
-
-################################################################################
-# Additional configuration for logs backend.
-# It allows to configure o11y collector send logs to a Splunk backend,
-# instead of Signalfx.
-################################################################################
-
-logsBackend:
-  # Configurations for HEC (HTTP Event Collector)
-  hec:
-    # host will be set to `signalfx.ingestUrl` used by default
-    host:
-    # port to HEC, optional, default 443
-    port:
-    # token is required, `signalfx.token` used by default
-    token:
-    # protocol has two options: "http" and "https", default is "https"
-    protocol:
-    # indexName tells which splunk index to use, this is optional.
-    indexName: main
-    # insecureSSL is a boolean, it indicates should it allow inscure SSL connection (when protocol is "https"). Default is false.
-    insecureSSL: false
-
-    # TODO: Remaining options are unsupported in splunkhec exporter.
-    # The PEM-format CA certificate for this client.
-    # NOTE: The content of the certificate itself should be used here, not the file path.
-    #       The certificate will be stored as a secret in kubernetes.
-    clientCert:
-    # The private key for this client.
-    # NOTE: The content of the key itself should be used here, not the file path.
-    #       The key will be stored as a secret in kubernetes.
-    clientKey:
-    # The PEM-format CA certificate file.
-    # NOTE: The content of the file itself should be used here, not the file path.
-    #       The file will be stored as a secret in kubernetes.
-    caFile:
-  # Configurations for Splunk Ingest API which will be used instead of HEC logs backend if logsBackend.splunkIngestAPI.ingestAPIHost is set
-
 
 ################################################################################
 # Docker image configuration
