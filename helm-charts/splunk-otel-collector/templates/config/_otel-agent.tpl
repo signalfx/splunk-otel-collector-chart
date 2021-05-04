@@ -187,7 +187,7 @@ exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   splunk_hec:
     endpoint: {{ include "splunk-otel-collector.logUrl" . }}
-    token: "${SPLUNK_HEC_TOKEN}"
+    token: "${SPLUNK_ACCESS_TOKEN}"
     index: "{{ .Values.logsBackend.hec.indexName }}"
     insecure_skip_verify: {{ .Values.logsBackend.hec.insecureSSL | default false }}
   {{- end }}
