@@ -1,0 +1,20 @@
+clusterName: my-cluster
+splunkRealm: us0
+splunkAccessToken: my-access-token
+
+otelAgent:
+  config:
+    processor:
+      probabilistic_sampler:
+        hash_seed: 22
+        sampling_percentage: 15.3
+    service:
+      pipelines:
+        traces:
+          processors:
+            - memory_limiter
+            - probabilistic_sampler
+            - k8s_tagger
+            - batch
+            - resource
+            - resourcedetection

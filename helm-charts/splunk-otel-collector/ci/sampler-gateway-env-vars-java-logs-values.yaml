@@ -1,0 +1,50 @@
+clusterName: fake-cluster
+splunkRealm: fake-realm
+splunkAccessToken: fake-token
+
+otelAgent:
+  config:
+    processor:
+      probabilistic_sampler:
+        hash_seed: 22
+        sampling_percentage: 15.3
+    service:
+      pipelines:
+        traces:
+          processors:
+            - memory_limiter
+            - probabilistic_sampler
+            - k8s_tagger
+            - batch
+            - resource
+            - resourcedetection
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"
+
+otelK8sClusterReceiver:
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"
+
+otelCollector:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 400Mi
+
+fluentd:
+  config:
+    logs:
+      java-app:
+        from:
+          pod: "java-app"
+        multiline:
+          firstline: /\d{4}-\d{1,2}-\d{1,2}/
+
+    # Logs collection config for Kind cluster
+    containers:
+      logFormatType: cri
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%NZ"

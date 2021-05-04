@@ -215,7 +215,7 @@ fluentd:
       logFormatType: json
       # Specify the log format for "cri" logFormatType
       # It can be "%Y-%m-%dT%H:%M:%S.%N%:z" for openshift and "%Y-%m-%dT%H:%M:%S.%NZ" for IBM IKS
-      logFormat:
+      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"
 
     # Directory where to read journald logs. (docker daemon logs, kubelet logs, and anyother specified serivce logs)
     journalLogPath: /run/log/journal
@@ -346,7 +346,10 @@ fluentd:
     #       path: /var/log/docker.log
     # ```
     #
-    # For `container` logs, pod name is required. You can also provide the container name, if it's not provided, the name of this source will be used as the container name:
+    # For `container` logs, `pod` field is required. It represents part of
+    # the pod name, can be name of a deployment or replica set. Use "*" to
+    # apply the configuration to all pods. Optional `container` value can be
+    # used to apply configuration to a particular container.
     # ```
     # kube-apiserver:
     #   from:
