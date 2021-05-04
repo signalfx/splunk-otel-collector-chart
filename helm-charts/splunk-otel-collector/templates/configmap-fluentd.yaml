@@ -14,7 +14,6 @@ data:
     @include source.containers.conf
     @include source.files.conf
     @include source.journald.conf
-    @include monit.conf
     @include output.conf
     @include prometheus.conf
 
@@ -155,14 +154,6 @@ data:
     {{- end }}
     {{- end }}
 
-  monit.conf: |-
-    <source>
-      @id fluentd-monitor-agent
-      @type monitor_agent
-      @label @SPLUNK
-      tag monitor_agent
-    </source>
-
   output.conf: |-
     #Events are emitted to the CONCAT label from the container, file and journald sources for multiline processing.
     <label @CONCAT>
@@ -285,12 +276,6 @@ data:
       </filter>
       {{- end }}
 
-      # = filters for monitor agent =
-      <filter monitor_agent>
-        @type jq_transformer
-        jq ".record.source = \"namespace:#{ENV['MY_NAMESPACE']}/pod:#{ENV['MY_POD_NAME']}\" | .record.sourcetype = \"fluentd:monitor-agent\" | .record.cluster_name = \"{{ .Values.clusterName }}\" | .record.index = \"{{ .Values.logsBackend.hec.indexName | default "main" }}\" {{- range .Values.extraAttributes.custom }}| .record.{{ .name }} = \"{{ .value }}\" {{- end }} | .record"
-      </filter>
-
       # = custom filters specified by users =
       {{- range $name, $filterDef := .Values.fluentd.config.customFilters }}
       {{- if and $filterDef.tag $filterDef.type }}
@@ -395,9 +380,6 @@ data:
         {{- end }}
         </buffer>
         {{- end }}
-        <format monitor_agent>
-          @type json
-        </format>
         <format>
           # we just want to keep the raw logs, not the structure created by docker or journald
           @type single_value
