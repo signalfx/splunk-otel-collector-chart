@@ -159,8 +159,6 @@ data:
     <source>
       @id fluentd-monitor-agent
       @type monitor_agent
-      @label @SPLUNK
-      tag monitor_agent
     </source>
 
   output.conf: |-
@@ -285,12 +283,6 @@ data:
       </filter>
       {{- end }}
 
-      # = filters for monitor agent =
-      <filter monitor_agent>
-        @type jq_transformer
-        jq ".record.source = \"namespace:#{ENV['MY_NAMESPACE']}/pod:#{ENV['MY_POD_NAME']}\" | .record.sourcetype = \"fluentd:monitor-agent\" {{- range .Values.extraAttributes.custom }}| .record.{{ .name }} = \"{{ .value }}\" {{- end }} | .record"
-      </filter>
-
       # = custom filters specified by users =
       {{- range $name, $filterDef := .Values.fluentd.config.customFilters }}
       {{- if and $filterDef.tag $filterDef.type }}
@@ -329,9 +321,6 @@ data:
         {{- end }}
         </buffer>
         {{- end }}
-        <format monitor_agent>
-          @type json
-        </format>
         <format>
           # we just want to keep the raw logs, not the structure created by docker or journald
           @type single_value
