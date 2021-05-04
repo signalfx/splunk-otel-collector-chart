@@ -71,6 +71,11 @@ processors:
 
 exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  splunk_hec:
+    endpoint: {{ include "splunk-otel-collector.logUrl" . }}
+    token: "${SPLUNK_HEC_TOKEN}"
+    index: "{{ .Values.logsBackend.hec.indexName }}"
+    insecure_skip_verify: {{ .Values.logsBackend.hec.insecureSSL | default false }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
@@ -104,6 +109,12 @@ service:
 
     # default logs pipeline
     logs:
+      receivers: [otlp, fluentforward]
+      processors: [memory_limiter, batch]
+      exporters: [splunk_hec]
+
+    # logs pipeline for receiving and exporting SignalFx events
+    logs/signalfx-events:
       receivers: [signalfx]
       processors: [memory_limiter, batch]
       exporters: [signalfx]
