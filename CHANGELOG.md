@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.24.13] - 2021-05-04
+
+### Changed
+
+- Remove internal fluentd metrics sent as logs with monitor_agent. Prometheus
+  metrics exposed on 0.0.0.0:24231 should be used instead (#122)
+
 ## [0.24.12] - 2021-05-03
 
 ### Fixed

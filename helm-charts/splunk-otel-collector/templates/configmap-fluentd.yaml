@@ -14,7 +14,6 @@ data:
     @include source.containers.conf
     @include source.files.conf
     @include source.journald.conf
-    @include monit.conf
     @include output.conf
     @include prometheus.conf
 
@@ -154,12 +153,6 @@ data:
     </source>
     {{- end }}
     {{- end }}
-
-  monit.conf: |-
-    <source>
-      @id fluentd-monitor-agent
-      @type monitor_agent
-    </source>
 
   output.conf: |-
     #Events are emitted to the CONCAT label from the container, file and journald sources for multiline processing.
