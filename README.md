@@ -206,6 +206,10 @@ $ helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+## Pre-rendered Kubernetes resources
+
+The [rendered directory](rendered) contains pre-rendered Kubernetes resource files for [metrics-only](rendered/metrics-only), [traces-only](rendered/traces-only), and [logs-only](rendered/logs-only). The [default](rendered/default) configuration contains manifest with all telemetry types enabled.
+
 ## License
 
 [Apache Software License version 2.0](LICENSE).
