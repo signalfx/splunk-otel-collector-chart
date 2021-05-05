@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- Pre-rendered manifests can be found in [rendered](rendered) directory
+
 ## [0.24.13] - 2021-05-04
 
 ### Changed
