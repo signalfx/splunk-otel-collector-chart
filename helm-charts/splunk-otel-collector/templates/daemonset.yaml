@@ -63,6 +63,9 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- with .Values.fluentd.extraEnvs }}
+          {{- . | toYaml | nindent 10 }}
+          {{- end }}
         resources:
           {{- toYaml .Values.fluentd.resources | nindent 10 }}
         volumeMounts:
