@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- fluentd logs are now sent through the collector instead of being sent directly to the backend (#109)
+
+### Removed
+
+- Removed `ingestHost`, `ingestPort`, `ingestProtocol`, use `ingestUrl` instead (#123)
+- Removed `logsBackend`, configure `splunk_hec` exporter directly (#123)
+- Removed `splunk.com/index` annotation for logs (#123)
+- Removed `fluentd.config.indexFields` as all fields sent are indexed (#123)
+
 ## [0.24.13] - 2021-05-04
 
 ### Changed

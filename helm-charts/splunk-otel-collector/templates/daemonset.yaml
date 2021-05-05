@@ -63,6 +63,9 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- with .Values.fluentd.extraEnvs }}
+          {{- . | toYaml | nindent 10 }}
+          {{- end }}
         resources:
           {{- toYaml .Values.fluentd.resources | nindent 10 }}
         volumeMounts:
@@ -147,11 +150,6 @@ spec:
           - name: HOST_DEV
             value: /hostfs/dev
           {{- end }}
-          - name: SPLUNK_HEC_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: {{ template "splunk-otel-collector.secret" . }}
-                key: splunk_hec_token
           {{- with .Values.otelAgent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}

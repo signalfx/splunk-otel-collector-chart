@@ -51,37 +51,11 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
-Get Splunk ingest host
-*/}}
-{{- define "splunk-otel-collector.ingestHost" -}}
-{{- $_ := required "splunkRealm or ingestHost must be provided" (or .Values.ingestHost .Values.splunkRealm) }}
-{{- .Values.ingestHost | default (printf "ingest.%s.signalfx.com" .Values.splunkRealm) }}
-{{- end -}}
-
-{{/*
-Get Splunk log URL
-*/}}
-{{- define "splunk-otel-collector.logUrl" -}}
-{{- $host := include "splunk-otel-collector.ingestHost" . }}
-{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
-{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
-{{- printf "%s:%s/v1/log" $endpoint (toString .Values.ingestPort) }}
-{{- else }}
-{{- $endpoint }}
-{{- end }}
-{{- end -}}
-
-{{/*
 Get Splunk ingest URL
 */}}
 {{- define "splunk-otel-collector.ingestUrl" -}}
-{{- $host := include "splunk-otel-collector.ingestHost" . }}
-{{- $endpoint := printf "%s://%s" .Values.ingestProtocol $host }}
-{{- if or (and (eq .Values.ingestProtocol "http") (ne (toString .Values.ingestPort) "80")) (and (eq .Values.ingestProtocol "https") (ne (toString .Values.ingestPort) "443")) }}
-{{- printf "%s:%s" $endpoint (toString .Values.ingestPort) }}
-{{- else }}
-{{- $endpoint }}
-{{- end }}
+{{- $_ := required "splunkRealm or ingestUrl must be provided" (or .Values.ingestUrl .Values.splunkRealm) }}
+{{- .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" .Values.splunkRealm) }}
 {{- end -}}
 
 {{/*
