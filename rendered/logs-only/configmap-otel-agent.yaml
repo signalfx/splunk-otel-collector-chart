@@ -12,9 +12,9 @@ metadata:
 data:
   relay: |
     exporters:
-      sapm:
-        access_token: ${SPLUNK_ACCESS_TOKEN}
-        endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace
+      splunk_hec:
+        endpoint: https://ingest.CHANGEME.signalfx.com
+        token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -65,42 +65,27 @@ data:
         override: false
         timeout: 10s
     receivers:
-      jaeger:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:14250
-          thrift_http:
-            endpoint: 0.0.0.0:14268
+      fluentforward:
+        endpoint: 0.0.0.0:8006
       otlp:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:55681
-      sapm:
-        endpoint: 0.0.0.0:7276
-      smartagent/signalfx-forwarder:
-        listenAddress: 0.0.0.0:9080
-        type: signalfx-forwarder
-      zipkin:
-        endpoint: 0.0.0.0:9411
     service:
       extensions:
       - health_check
       - k8s_observer
       - zpages
       pipelines:
-        traces:
+        logs:
           exporters:
-          - sapm
+          - splunk_hec
           processors:
           - memory_limiter
-          - k8s_tagger
           - batch
           - resource
           - resourcedetection
           receivers:
-          - otlp
-          - jaeger
-          - smartagent/signalfx-forwarder
-          - zipkin
+          - fluentforward

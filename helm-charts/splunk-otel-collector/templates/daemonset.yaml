@@ -1,4 +1,4 @@
-{{- if or .Values.otelAgent.enabled .Values.logsEnabled }}
+{{- if .Values.otelAgent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -83,7 +83,6 @@ spec:
           mountPath: /fluentd/etc/splunk
           readOnly: true
       {{- end }}
-      {{- if and .Values.otelAgent.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
       - name: otel-collector
         command:
         - /otelcol
@@ -173,7 +172,6 @@ spec:
           readOnly: true
           mountPropagation: HostToContainer
         {{- end }}
-      {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.logsEnabled }}
@@ -193,7 +191,6 @@ spec:
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
       {{- end}}
-      {{- if .Values.otelAgent.enabled }}
       {{- if .Values.metricsEnabled }}
       - name: hostfs
         hostPath:
@@ -205,7 +202,6 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
