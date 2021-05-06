@@ -1,0 +1,21 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: local
+    hooks:
+    - id: render
+      name: Pre-render Kubernetes resources
+      entry: make render
+      language: system
+      pass_filenames: false
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    - id: trailing-whitespace
+      exclude: "^rendered"
+    - id: end-of-file-fixer
+      exclude: "^rendered"
+    - id: check-yaml
+      # Can't check source yaml since it has go templates in it.
+      exclude: "^helm-charts"
+    - id: check-added-large-files
