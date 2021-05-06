@@ -9,7 +9,6 @@ metadata:
     chart: splunk-otel-collector-0.24.13
     release: default
     heritage: Helm
-    engine: fluentd
 spec:
   updateStrategy:
     type: RollingUpdate

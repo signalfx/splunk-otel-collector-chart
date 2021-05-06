@@ -19,7 +19,6 @@ receivers:
     endpoint: 0.0.0.0:8006
   {{- end }}
 
-  {{- if .Values.metricsEnabled }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/agent:
     config:
@@ -32,6 +31,7 @@ receivers:
           # Fluend metrics collection disabled by default
           # - "${K8S_POD_IP}:24231"
 
+  {{- if .Values.metricsEnabled }}
   hostmetrics:
     collection_interval: 10s
     scrapers:
@@ -198,7 +198,6 @@ exporters:
   {{- end }}
   {{- end }}
 
-  {{- if .Values.metricsEnabled }}
   signalfx:
     correlation:
     {{- if .Values.otelCollector.enabled }}
@@ -210,7 +209,6 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
     sync_host_metadata: true
-  {{- end }}
 
 service:
   extensions: [health_check, k8s_observer, zpages]
@@ -279,6 +277,7 @@ service:
         {{- else }}
         - signalfx
         {{- end }}
+    {{- end }}
 
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
@@ -293,5 +292,4 @@ service:
         # Use signalfx instead of otlp even if collector is enabled
         # in order to sync host metadata.
         - signalfx
-    {{- end }}
 {{- end }}

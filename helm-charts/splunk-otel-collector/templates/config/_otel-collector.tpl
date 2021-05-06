@@ -14,7 +14,6 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
-  {{- if .Values.metricsEnabled }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus:
     config:
@@ -26,7 +25,6 @@ receivers:
   signalfx:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true
-  {{- end }}
 
 # By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
@@ -74,12 +72,10 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}
     token: "${SPLUNK_ACCESS_TOKEN}"
   {{- end }}
-  {{- if .Values.metricsEnabled }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
     access_token: ${SPLUNK_ACCESS_TOKEN}
-  {{- end }}
 
 service:
   extensions: [health_check, http_forwarder, zpages]
@@ -102,7 +98,6 @@ service:
       exporters: [sapm]
     {{- end }}
 
-    {{- if .Values.metricsEnabled }}
     # default metrics pipeline
     metrics:
       receivers: [otlp, prometheus, signalfx]
@@ -114,7 +109,6 @@ service:
       receivers: [signalfx]
       processors: [memory_limiter, batch]
       exporters: [signalfx]
-    {{- end }}
 
     {{- if .Values.logsEnabled }}
     # default logs pipeline
