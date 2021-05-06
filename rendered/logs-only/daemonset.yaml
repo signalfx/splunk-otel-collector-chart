@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 8651f2150af7d1d460014391c650794927f7cd5d6fc1ef3fd102c4d0133cc48f
+        checksum/config: 6b30d9691a4e827ea5cd9666722ac1d10b4fec26f45416e48272d9ccea1b9610
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -54,11 +54,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          - name: SPLUNK_HEC_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: splunk-otel-collector
-                key: splunk_hec_token
         resources:
           limits:
             cpu: 500m
