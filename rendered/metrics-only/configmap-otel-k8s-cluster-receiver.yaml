@@ -18,7 +18,7 @@ data:
         ingest_url: https://ingest.CHANGEME.signalfx.com
         timeout: 10s
     extensions:
-      health_check: {}
+      health_check: null
     processors:
       batch: null
       k8s_tagger:
