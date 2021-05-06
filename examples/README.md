@@ -82,6 +82,41 @@ otelAgent:
 logsEnabled: false
 ```
 
+## Route telemetry data through a gateway deployed separately
+
+The following configuration can be used to forward telemetry through an OTel
+collector gateway deployed separately.
+
+```yaml
+otelAgent:
+  config:
+    exporters:
+      otlp:
+        endpoint: <custom-gateway-url>:4317
+        insecure: true
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060
+    service:
+      pipelines:
+        traces:
+          exporters: [otlp, signalfx]
+        metrics:
+          exporters: [otlp]
+
+otelK8sClusterReceiver:
+  config:
+    exporters:
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060
+```
+
+OTLP format is used between agent and gateway wherever possible for performance
+reasons. OTLP is almost the same as internal data representation in OTel
+Collector, so using it between agent and gateway reduce CPU cycles spent on
+data format transformations.
+
 ## Route telemetry data through a proxy server
 
 This configuration shows how to add extra environment variables to OTel

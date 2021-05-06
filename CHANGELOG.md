@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Pre-rendered manifests can be found in [rendered](rendered) directory
+
 ### Changed
 
 - fluentd logs are now sent through the collector instead of being sent directly to the backend (#109)

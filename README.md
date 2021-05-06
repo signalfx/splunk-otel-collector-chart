@@ -56,7 +56,7 @@ This distribution currently supports:
 
 - [Splunk APM](https://www.splunk.com/en_us/software/splunk-apm.html) via the
   [`sapm`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/sapmexporter).
+  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter).
   The [`otlphttp`
   exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter)
   can be used with a [custom
@@ -66,17 +66,17 @@ This distribution currently supports:
 - [Splunk Infrastructure
   Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html)
   via the [`signalfx`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/signalfxexporter).
+  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter).
   More information available
   [here](https://docs.signalfx.com/en/latest/otel/imm-otel-collector.html).
 - [Splunk Log Observer](https://www.splunk.com/en_us/form/splunk-log-observer.html) via
   the [`splunk_hec`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/splunkhecexporter).
+  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 - [Splunk Cloud](https://www.splunk.com/en_us/software/splunk-cloud.html) or
   [Splunk
   Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html) via
   the [`splunk_hec`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/exporter/splunkhecexporter).
+  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
@@ -205,6 +205,10 @@ $ helm install my-splunk-otel-collector \
   --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+## Pre-rendered Kubernetes resources
+
+The [rendered directory](rendered) contains pre-rendered Kubernetes resource files for [metrics-only](rendered/metrics-only), [traces-only](rendered/traces-only), and [logs-only](rendered/logs-only). The [agent-only](rendered/agent-only) configuration contains manifests with all telemetry types enabled for the agent (the default when installing Helm chart). Values that must be changed can be found by searching for `CHANGEME`.
 
 ## License
 
