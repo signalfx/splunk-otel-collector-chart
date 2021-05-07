@@ -29,7 +29,7 @@ Final OTel config will be created by merging the custom config provided in
 ```yaml
 otelAgent:
   config:
-    processor:
+    processors:
       probabilistic_sampler:
         hash_seed: 22
         sampling_percentage: 15.3
