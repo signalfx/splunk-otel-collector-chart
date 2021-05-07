@@ -18,6 +18,9 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+      splunk_hec:
+        endpoint: https://ingest.CHANGEME.signalfx.com
+        token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -68,27 +71,8 @@ data:
         override: false
         timeout: 10s
     receivers:
-      hostmetrics:
-        collection_interval: 10s
-        scrapers:
-          cpu: null
-          disk: null
-          filesystem: null
-          load: null
-          memory: null
-          network: null
-          paging: null
-          processes: null
-      kubeletstats:
-        auth_type: serviceAccount
-        collection_interval: 10s
-        endpoint: ${K8S_NODE_IP}:10250
-        extra_metadata_labels:
-        - container.id
-        metric_groups:
-        - container
-        - pod
-        - node
+      fluentforward:
+        endpoint: 0.0.0.0:8006
       otlp:
         protocols:
           grpc:
@@ -103,35 +87,22 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8888
-      receiver_creator:
-        receivers:
-          prometheus_simple:
-            config:
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"]
-                : 9090`'
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
-                : "/metrics"`'
-            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
-        watch_observers:
-        - k8s_observer
     service:
       extensions:
       - health_check
       - k8s_observer
       - zpages
       pipelines:
-        metrics:
+        logs:
           exporters:
-          - signalfx
+          - splunk_hec
           processors:
           - memory_limiter
           - batch
           - resource
           - resourcedetection
           receivers:
-          - hostmetrics
-          - kubeletstats
-          - receiver_creator
+          - fluentforward
         metrics/agent:
           exporters:
           - signalfx

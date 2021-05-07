@@ -21,12 +21,11 @@ render:
 	mv rendered/agent-only/splunk-otel-collector/templates/* rendered/agent-only
 	rm -rf rendered/agent-only/splunk-otel-collector
 
-	# XXX: Disable for now, reenable on otel-logs branch.
-	# # All telemetry types but no agent, only gateway.
-	# rm -rf rendered/gateway-only
-	# mkdir -p rendered/gateway-only
-	# helm template --values rendered/values.yaml --output-dir rendered/gateway-only \
-	# 	--set otelAgent.enabled=false,otelCollector.enabled=true,otelK8sClusterReceiver.enabled=false,fluentd.enabled=false \
-	# 	default helm-charts/splunk-otel-collector
-	# mv rendered/gateway-only/splunk-otel-collector/templates/* rendered/gateway-only
-	# rm -rf rendered/gateway-only/splunk-otel-collector
+	# All telemetry types but no agent, only gateway.
+	rm -rf rendered/gateway-only
+	mkdir -p rendered/gateway-only
+	helm template --values rendered/values.yaml --output-dir rendered/gateway-only \
+		--set otelAgent.enabled=false,otelCollector.enabled=true,otelK8sClusterReceiver.enabled=false \
+		default helm-charts/splunk-otel-collector
+	mv rendered/gateway-only/splunk-otel-collector/templates/* rendered/gateway-only
+	rm -rf rendered/gateway-only/splunk-otel-collector

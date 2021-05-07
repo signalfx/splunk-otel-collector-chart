@@ -14,8 +14,10 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
+  {{- if .Values.logsEnabled }}
   fluentforward:
     endpoint: 0.0.0.0:8006
+  {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/agent:
@@ -29,6 +31,7 @@ receivers:
           # Fluend metrics collection disabled by default
           # - "${K8S_POD_IP}:24231"
 
+  {{- if .Values.metricsEnabled }}
   hostmetrics:
     collection_interval: 10s
     scrapers:
@@ -73,10 +76,13 @@ receivers:
     extra_metadata_labels:
       - container.id
       # - k8s.volume.type
+  {{- end }}
 
+  {{- if .Values.tracesEnabled }}
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
+  {{- end }}
 
 # By default k8s_tagger and batch processors enabled.
 processors:
@@ -185,9 +191,11 @@ exporters:
   {{- else }}
   # If collector is disabled, metrics, logs and traces will be sent to to SignalFx backend
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- if .Values.logsEnabled }}
   splunk_hec:
     endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}
     token: "${SPLUNK_ACCESS_TOKEN}"
+  {{- end }}
   {{- end }}
 
   signalfx:
@@ -210,6 +218,7 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in otelAgent.config overrides.
   pipelines:
+    {{- if .Values.logsEnabled }}
     logs:
       receivers: [fluentforward]
       processors:
@@ -226,7 +235,9 @@ service:
         {{- else }}
         - splunk_hec
         {{- end }}
+    {{- end }}
 
+    {{- if .Values.tracesEnabled }}
     # Default traces pipeline.
     traces:
       receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
@@ -245,8 +256,13 @@ service:
         {{- else }}
         - sapm
         {{- end }}
+        {{- if .Values.metricsEnabled }}
+        # For trace/metric correlation.
         - signalfx
+        {{- end }}
+    {{- end }}
 
+    {{- if .Values.metricsEnabled }}
     # Default metrics pipeline.
     metrics:
       receivers: [hostmetrics, kubeletstats, receiver_creator]
@@ -261,6 +277,7 @@ service:
         {{- else }}
         - signalfx
         {{- end }}
+    {{- end }}
 
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
