@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.25.0] - 2021-05-07
+
+### Changed
+
+- Upgrade splunk-otel-collector docker image to 0.25.0 (#131)
+
 ### Added
 
 - Pre-rendered manifests can be found in [rendered](rendered) directory
