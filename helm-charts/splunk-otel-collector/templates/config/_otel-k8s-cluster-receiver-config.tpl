@@ -39,6 +39,12 @@ processors:
       - action: insert
         key: metric_source
         value: kubernetes
+      # XXX: Added so that Smart Agent metrics and OTel metrics don't map to the same MTS identity
+      # (same metric and dimension names and values) after mappings are applied. This would be
+      # the case if somebody uses the same cluster name from Smart Agent and OTel in the same org.
+      - action: insert
+        key: receiver
+        value: k8scluster
       - action: upsert
         key: k8s.cluster.name
         value: {{ .Values.clusterName }}
