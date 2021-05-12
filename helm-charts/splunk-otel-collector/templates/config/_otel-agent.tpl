@@ -71,6 +71,9 @@ receivers:
       - container.id
       # - k8s.volume.type
 
+  signalfx:
+    endpoint: 0.0.0.0:9943
+
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
@@ -226,7 +229,7 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [hostmetrics, kubeletstats, receiver_creator]
+      receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
       processors:
         - memory_limiter
         - batch
