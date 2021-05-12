@@ -116,13 +116,17 @@ data:
         receivers:
           prometheus_simple:
             config:
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
+              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"]
+                : 9090`'
+              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
+                : "/metrics"`'
             rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         watch_observers:
         - k8s_observer
       sapm:
         endpoint: 0.0.0.0:7276
+      signalfx:
+        endpoint: 0.0.0.0:9943
       smartagent/signalfx-forwarder:
         listenAddress: 0.0.0.0:9080
         type: signalfx-forwarder
@@ -146,6 +150,7 @@ data:
           - hostmetrics
           - kubeletstats
           - receiver_creator
+          - signalfx
         metrics/agent:
           exporters:
           - signalfx
