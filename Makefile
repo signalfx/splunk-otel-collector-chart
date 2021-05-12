@@ -1,9 +1,9 @@
 .PHONY: render
 render:
+	rm -rf rendered/manifests
 	# Set for one of each telemetry type.
 	for i in metrics traces logs; do \
-		dir=rendered/"$$i-only"; \
-		rm -rf "$$dir"; \
+		dir=rendered/manifests/"$$i-only"; \
 		mkdir -p "$$dir"; \
 		helm template \
 			--values rendered/values.yaml \
@@ -14,18 +14,18 @@ render:
 	done
 
 	# All telemetry types but no gateway, only agent.
-	rm -rf rendered/agent-only
-	mkdir -p rendered/agent-only
-	helm template --values rendered/values.yaml --output-dir rendered/agent-only \
-		default helm-charts/splunk-otel-collector
-	mv rendered/agent-only/splunk-otel-collector/templates/* rendered/agent-only
-	rm -rf rendered/agent-only/splunk-otel-collector
+	dir=rendered/manifests/agent-only; \
+	mkdir -p "$$dir"; \
+	helm template --values rendered/values.yaml --output-dir "$$dir" \
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector
 
 	# All telemetry types but no agent, only gateway.
-	rm -rf rendered/gateway-only
-	mkdir -p rendered/gateway-only
-	helm template --values rendered/values.yaml --output-dir rendered/gateway-only \
+	dir=rendered/manifests/gateway-only; \
+	mkdir -p "$$dir"; \
+	helm template --values rendered/values.yaml --output-dir "$$dir" \
 		--set otelAgent.enabled=false,otelCollector.enabled=true,otelK8sClusterReceiver.enabled=false \
-		default helm-charts/splunk-otel-collector
-	mv rendered/gateway-only/splunk-otel-collector/templates/* rendered/gateway-only
-	rm -rf rendered/gateway-only/splunk-otel-collector
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector

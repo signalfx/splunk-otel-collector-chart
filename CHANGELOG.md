@@ -4,10 +4,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added
-
-- Pre-rendered manifests can be found in [rendered](rendered) directory
-
 ### Changed
 
 - fluentd logs are now sent through the collector instead of being sent directly to the backend (#109)
@@ -20,6 +16,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Removed `splunk.com/index` annotation for logs (#123)
 - Removed `fluentd.config.indexFields` as all fields sent are indexed (#123)
 - Removed `fluentforward` receiver from gateway (#127)
+
+## [0.25.0] - 2021-05-07
+
+### Added
+
+- Pre-rendered manifests can be found in [rendered](rendered) directory
+
+### Changed
+
+- Upgrade splunk-otel-collector docker image to 0.25.0 (#131)
+
 
 ## [0.24.13] - 2021-05-04
 

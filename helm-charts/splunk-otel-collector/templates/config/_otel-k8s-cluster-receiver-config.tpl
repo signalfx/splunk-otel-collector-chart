@@ -4,7 +4,7 @@ The values can be overridden in .Values.otelK8sClusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.otelK8sClusterReceiverConfig" -}}
 extensions:
-  health_check: {}
+  health_check:
 
 receivers:
   # Prometheus receiver scraping metrics from the pod itself, both otel and fluentd
