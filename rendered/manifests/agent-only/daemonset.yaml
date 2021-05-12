@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: f7bda3b90a45f2473c5df047da3c6828baea040485d98e50a1b563d457cd9088
+        checksum/config: 4b685bb298c3de62c802e617fac44e4d4e3dbdcdcfb4126592805beb4b150051
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -105,6 +105,10 @@ spec:
         - name: sfx-forwarder
           containerPort: 9080
           hostPort: 9080
+          protocol: TCP
+        - name: signalfx
+          containerPort: 9943
+          hostPort: 9943
           protocol: TCP
         - name: zipkin
           containerPort: 9411

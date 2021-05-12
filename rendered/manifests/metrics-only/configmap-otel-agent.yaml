@@ -116,10 +116,8 @@ data:
         receivers:
           prometheus_simple:
             config:
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"]
-                : 9090`'
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
-                : "/metrics"`'
+              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
             rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         watch_observers:
         - k8s_observer

@@ -130,6 +130,10 @@ otelAgent:
       containerPort: 8006
       hostPort: 8006
       protocol: TCP
+    signalfx:
+      containerPort: 9943
+      hostPort: 9943
+      protocol: TCP
 
   resources:
     limits:
