@@ -123,6 +123,8 @@ data:
         - k8s_observer
       sapm:
         endpoint: 0.0.0.0:7276
+      signalfx:
+        endpoint: 0.0.0.0:9943
       smartagent/signalfx-forwarder:
         listenAddress: 0.0.0.0:9080
         type: signalfx-forwarder
@@ -146,6 +148,7 @@ data:
           - hostmetrics
           - kubeletstats
           - receiver_creator
+          - signalfx
         metrics/agent:
           exporters:
           - signalfx
