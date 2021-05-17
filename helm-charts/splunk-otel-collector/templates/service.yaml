@@ -16,7 +16,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  {{- range $key, $port := .Values.service.ports }}
+  {{- range $key, $port := .Values.otelCollector.ports }}
   - name: {{ $key }}
     port: {{ $port.containerPort }}
     targetPort: {{ $port.targetPort }}

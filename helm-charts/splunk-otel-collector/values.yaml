@@ -689,37 +689,3 @@ service:
   type: ClusterIP
   # Service annotations
   annotations: {}
-  # Ports exposed by the opentelemetry collector service. Container named ports used.
-  ports:
-    otlp:
-      containerPort: 4317
-      targetPort: otlp
-      protocol: TCP
-    jaeger-thrift:
-      containerPort: 14268
-      targetPort: jaeger-thrift
-      protocol: TCP
-    jaeger-grpc:
-      containerPort: 14250
-      targetPort: jaeger-grpc
-      protocol: TCP
-    zipkin:
-      containerPort: 9411
-      targetPort: zipkin
-      protocol: TCP
-    sapm:
-      containerPort: 7276
-      targetPort: sapm
-      protocol: TCP
-    signalfx:
-      containerPort: 9943
-      targetPort: signalfx
-      protocol: TCP
-    fluentforward:
-      containerPort: 8006
-      targetPort: fluentforward
-      protocol: TCP
-    http-forwarder:
-      containerPort: 6060
-      targetPort: http-forwarder
-      protocol: TCP
