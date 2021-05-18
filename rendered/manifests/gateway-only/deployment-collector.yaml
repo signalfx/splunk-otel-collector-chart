@@ -53,9 +53,6 @@ spec:
                 name: splunk-otel-collector
                 key: splunk_access_token
         ports:
-        - name: fluentforward
-          containerPort: 8006
-          protocol: TCP
         - name: http-forwarder
           containerPort: 6060
           protocol: TCP

@@ -110,30 +110,37 @@ otelAgent:
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
+      enabled_for: [traces, metrics, logs]
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
       protocol: TCP
+      enabled_for: [traces]
     zipkin:
       containerPort: 9411
       hostPort: 9411
       protocol: TCP
+      enabled_for: [traces]
     jaeger-thrift:
       containerPort: 14268
       hostPort: 14268
       protocol: TCP
+      enabled_for: [traces]
     jaeger-grpc:
       containerPort: 14250
       hostPort: 14250
       protocol: TCP
+      enabled_for: [traces]
     fluentforward:
       containerPort: 8006
       hostPort: 8006
       protocol: TCP
+      enabled_for: [logs]
     signalfx:
       containerPort: 9943
       hostPort: 9943
       protocol: TCP
+      enabled_for: [metrics]
 
   resources:
     limits:
@@ -631,27 +638,37 @@ otelCollector:
     otlp:
       containerPort: 4317
       protocol: TCP
+      enabled_for: [metrics, traces, logs]
     jaeger-thrift:
       containerPort: 14268
       protocol: TCP
+      enabled_for: [traces]
     jaeger-grpc:
       containerPort: 14250
       protocol: TCP
+      enabled_for: [traces]
     zipkin:
       containerPort: 9411
       protocol: TCP
+      enabled_for: [traces]
     sapm:
       containerPort: 7276
       protocol: TCP
+      enabled_for: [traces]
     signalfx:
       containerPort: 9943
       protocol: TCP
+      # SignalFx metrics enabled in gateway for all telemetry types since there may be
+      # bundled metrics.
+      enabled_for: [metrics, traces, logs]
     fluentforward:
       containerPort: 8006
       protocol: TCP
+      enabled_for: [logs]
     http-forwarder:
       containerPort: 6060
       protocol: TCP
+      enabled_for: [metrics]
 
   resources:
     limits:

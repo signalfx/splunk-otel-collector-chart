@@ -13,10 +13,6 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: fluentforward
-    port: 8006
-    targetPort: fluentforward
-    protocol: TCP
   - name: http-forwarder
     port: 6060
     targetPort: http-forwarder
