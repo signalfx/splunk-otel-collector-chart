@@ -2,10 +2,10 @@
 
 The [manifests](manifests) directory contains pre-rendered Kubernetes resource manifests that can be applied with `kubectl create`. Different sets contain different features enabled
 
-- [metrics-only](rendered/metrics-only)
-- [traces-only](rendered/traces-only)
-- [logs-only](rendered/logs-only)
-- [agent-only](rendered/agent-only)
+- [metrics-only](manifests/metrics-only)
+- [traces-only](manifests/traces-only)
+- [logs-only](manifests/logs-only)
+- [agent-only](manifests/agent-only)
 
     contains manifests with all telemetry types enabled for the agent (the default when installing Helm chart).
 
