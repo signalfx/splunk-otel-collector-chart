@@ -85,29 +85,9 @@ spec:
           containerPort: 8006
           hostPort: 8006
           protocol: TCP
-        - name: jaeger-grpc
-          containerPort: 14250
-          hostPort: 14250
-          protocol: TCP
-        - name: jaeger-thrift
-          containerPort: 14268
-          hostPort: 14268
-          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317
-          protocol: TCP
-        - name: sfx-forwarder
-          containerPort: 9080
-          hostPort: 9080
-          protocol: TCP
-        - name: signalfx
-          containerPort: 9943
-          hostPort: 9943
-          protocol: TCP
-        - name: zipkin
-          containerPort: 9411
-          hostPort: 9411
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.25.0
         imagePullPolicy: IfNotPresent

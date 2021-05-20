@@ -95,8 +95,10 @@ spec:
         {{- end }}
         ports:
         {{- range $key, $port := .Values.otelAgent.ports }}
+        {{- if any (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
-          {{- toYaml $port | trim | nindent 10 }}
+          {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
+        {{- end }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
