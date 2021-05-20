@@ -112,6 +112,8 @@ data:
             rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         watch_observers:
         - k8s_observer
+      signalfx:
+        endpoint: 0.0.0.0:9943
     service:
       extensions:
       - health_check
@@ -130,6 +132,7 @@ data:
           - hostmetrics
           - kubeletstats
           - receiver_creator
+          - signalfx
         metrics/agent:
           exporters:
           - signalfx

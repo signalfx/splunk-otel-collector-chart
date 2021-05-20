@@ -76,6 +76,9 @@ receivers:
     extra_metadata_labels:
       - container.id
       # - k8s.volume.type
+
+  signalfx:
+    endpoint: 0.0.0.0:9943
   {{- end }}
 
   {{- if .Values.tracesEnabled }}
@@ -265,7 +268,7 @@ service:
     {{- if .Values.metricsEnabled }}
     # Default metrics pipeline.
     metrics:
-      receivers: [hostmetrics, kubeletstats, receiver_creator]
+      receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
       processors:
         - memory_limiter
         - batch

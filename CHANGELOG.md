@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Removed `splunk.com/index` annotation for logs (#123)
 - Removed `fluentd.config.indexFields` as all fields sent are indexed (#123)
 - Removed `fluentforward` receiver from gateway (#127)
+- Removed `service.ports`, sourced from `otelCollector.ports` instead (#140)
 
 ## [0.25.0] - 2021-05-07
 
