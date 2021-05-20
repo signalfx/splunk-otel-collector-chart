@@ -146,9 +146,6 @@ processors:
     # General resource attributes that apply to all telemetry passing through the agent.
     attributes:
       - action: insert
-        key: host.name
-        value: "${K8S_NODE_NAME}"
-      - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
       - action: insert
