@@ -17,10 +17,12 @@ spec:
   type: {{ .Values.service.type }}
   ports:
   {{- range $key, $port := .Values.otelCollector.ports }}
+  {{- if any (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
   - name: {{ $key }}
     port: {{ $port.containerPort }}
     targetPort: {{ $key }}
     protocol: {{ $port.protocol }}
+  {{- end }}
   {{- end }}
   selector:
     app: {{ template "splunk-otel-collector.name" . }}

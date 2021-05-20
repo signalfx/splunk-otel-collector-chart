@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- `otelAgent.ports` and `otelCollector.ports` are selectively enabled depending on what telemetry types are enabled with `metricsEnabled`, `tracesEnabled`, and `logsEnabled`
+
 ### Removed
 
 - Removed `service.ports`, sourced from `otelCollector.ports` instead (#140)
