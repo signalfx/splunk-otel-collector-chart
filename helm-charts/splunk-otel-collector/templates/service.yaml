@@ -19,7 +19,7 @@ spec:
   {{- range $key, $port := .Values.otelCollector.ports }}
   - name: {{ $key }}
     port: {{ $port.containerPort }}
-    targetPort: {{ $port.targetPort }}
+    targetPort: {{ $key }}
     protocol: {{ $port.protocol }}
   {{- end }}
   selector:
