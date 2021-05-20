@@ -589,7 +589,8 @@ otelCollector:
     http-forwarder:
       containerPort: 6060
       protocol: TCP
-      enabled_for: [metrics]
+      # Enabled for all because SignalFx exporter will always send metadata updates when enabled.
+      enabled_for: [metrics, traces, logs]
 
   resources:
     limits:
