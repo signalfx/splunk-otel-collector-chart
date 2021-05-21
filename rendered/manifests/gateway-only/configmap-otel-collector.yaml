@@ -20,7 +20,7 @@ data:
         api_url: https://api.CHANGEME.signalfx.com
         ingest_url: https://ingest.CHANGEME.signalfx.com
       splunk_hec:
-        endpoint: https://ingest.CHANGEME.signalfx.com
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
         token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null

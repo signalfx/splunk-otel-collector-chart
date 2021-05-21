@@ -24,7 +24,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: a0db49365bc903b8dd8c61204d591e76de454437c83f1433a72b2dbf64fd5de3
+        checksum/config: 67f5ee632b636acb944c824ab50e44d088735265a3f87738ad277fb96b82b7da
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:
@@ -53,9 +53,6 @@ spec:
                 name: splunk-otel-collector
                 key: splunk_access_token
         ports:
-        - name: fluentforward
-          containerPort: 8006
-          protocol: TCP
         - name: http-forwarder
           containerPort: 6060
           protocol: TCP
