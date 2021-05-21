@@ -1,4 +1,4 @@
-{{- if or .Values.otelAgent.enabled .Values.logsEnabled }}
+{{- if .Values.otelAgent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -8,7 +8,9 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- if .Values.logsEnabled }}
     engine: fluentd
+    {{- end }}
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -63,11 +65,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          - name: SPLUNK_HEC_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: {{ template "splunk-otel-collector.secret" . }}
-                key: splunk_hec_token
           {{- with .Values.fluentd.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
@@ -88,7 +85,6 @@ spec:
           mountPath: /fluentd/etc/splunk
           readOnly: true
       {{- end }}
-      {{- if and .Values.otelAgent.enabled (or .Values.metricsEnabled .Values.tracesEnabled) }}
       - name: otel-collector
         command:
         - /otelcol
@@ -160,6 +156,7 @@ spec:
           {{- with .Values.otelAgent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
+
         readinessProbe:
           httpGet:
             path: /
@@ -179,7 +176,6 @@ spec:
           readOnly: true
           mountPropagation: HostToContainer
         {{- end }}
-      {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.logsEnabled }}
@@ -199,7 +195,6 @@ spec:
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
       {{- end}}
-      {{- if .Values.otelAgent.enabled }}
       {{- if .Values.metricsEnabled }}
       - name: hostfs
         hostPath:
@@ -211,7 +206,6 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}

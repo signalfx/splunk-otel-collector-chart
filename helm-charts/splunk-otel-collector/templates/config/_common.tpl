@@ -15,9 +15,11 @@ memory_limiter:
 Common config for the otel-collector sapm exporter
 */}}
 {{- define "splunk-otel-collector.otelSapmExporter" -}}
+{{- if .Values.tracesEnabled }}
 sapm:
   endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/trace
   access_token: ${SPLUNK_ACCESS_TOKEN}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -30,6 +32,8 @@ otlp:
       endpoint: 0.0.0.0:4317
     http:
       endpoint: 0.0.0.0:55681
+
+{{- if .Values.tracesEnabled }}
 sapm:
   endpoint: 0.0.0.0:7276
 jaeger:
@@ -40,4 +44,5 @@ jaeger:
       endpoint: 0.0.0.0:14250
 zipkin:
   endpoint: 0.0.0.0:9411
+{{- end }}
 {{- end }}

@@ -6,11 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- fluentd logs are now sent through the collector instead of being sent directly to the backend (#109)
+- Logs are sent through the OpenTelemetry Agent on the local node by default. `otelAgent.enabled` value must be set to `true` when using logs (#127)
 - `otelAgent.ports` and `otelCollector.ports` are selectively enabled depending on what telemetry types are enabled with `metricsEnabled`, `tracesEnabled`, and `logsEnabled`
 - Removed setting `host.name` through the `resource` processor as it is already set by the `resourcedetection/system` processor
 
 ### Removed
 
+- Removed `ingestHost`, `ingestPort`, `ingestProtocol`, use `ingestUrl` instead (#123)
+- Removed `logsBackend`, configure `splunk_hec` exporter directly (#123)
+- Removed `splunk.com/index` annotation for logs (#123)
+- Removed `fluentd.config.indexFields` as all fields sent are indexed (#123)
+- Removed `fluentforward` receiver from gateway (#127)
 - Removed `service.ports`, sourced from `otelCollector.ports` instead (#140)
 
 ## [0.25.0] - 2021-05-07

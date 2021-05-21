@@ -22,10 +22,6 @@ receivers:
         scrape_interval: 10s
         static_configs:
         - targets: ["${K8S_POD_IP}:8888"]
-
-  fluentforward:
-    endpoint: 0.0.0.0:8006
-
   signalfx:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true
@@ -71,6 +67,11 @@ processors:
 
 exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- if .Values.logsEnabled }}
+  splunk_hec:
+    endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
+    token: "${SPLUNK_ACCESS_TOKEN}"
+  {{- end }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
     api_url: {{ include "splunk-otel-collector.apiUrl" . }}
@@ -82,7 +83,7 @@ service:
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in otelCollector.config overrides.
   pipelines:
-
+    {{- if .Values.tracesEnabled }}
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin, sapm]
@@ -95,6 +96,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters: [sapm]
+    {{- end }}
 
     # default metrics pipeline
     metrics:
@@ -102,9 +104,17 @@ service:
       processors: [memory_limiter, batch, resource/add_cluster_name]
       exporters: [signalfx]
 
-    # default logs pipeline
-    logs:
+    # logs pipeline for receiving and exporting SignalFx events
+    logs/signalfx-events:
       receivers: [signalfx]
       processors: [memory_limiter, batch]
       exporters: [signalfx]
+
+    {{- if .Values.logsEnabled }}
+    # default logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [splunk_hec]
+    {{- end }}
 {{- end }}

@@ -9,7 +9,6 @@ metadata:
     chart: splunk-otel-collector-0.25.0
     release: default
     heritage: Helm
-    engine: fluentd
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -23,7 +22,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 2e1a4082dddbe7755eb3d8b35d8f6e7b58cb06ef1b7d72344cf2df31d4a04cdd
+        checksum/config: e2f4d3cc875a10695946faec5ae4026f4534e07fd6d0ff655950b300164b6015
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -94,6 +93,7 @@ spec:
             value: /hostfs/run
           - name: HOST_DEV
             value: /hostfs/dev
+
         readinessProbe:
           httpGet:
             path: /

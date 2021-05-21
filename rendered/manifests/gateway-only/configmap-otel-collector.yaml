@@ -19,6 +19,9 @@ data:
         access_token: ${SPLUNK_ACCESS_TOKEN}
         api_url: https://api.CHANGEME.signalfx.com
         ingest_url: https://ingest.CHANGEME.signalfx.com
+      splunk_hec:
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null
       http_forwarder:
@@ -44,8 +47,6 @@ data:
           key: k8s.cluster.name
           value: CHANGEME
     receivers:
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       jaeger:
         protocols:
           grpc:
@@ -80,6 +81,14 @@ data:
       - zpages
       pipelines:
         logs:
+          exporters:
+          - splunk_hec
+          processors:
+          - memory_limiter
+          - batch
+          receivers:
+          - otlp
+        logs/signalfx-events:
           exporters:
           - signalfx
           processors:

@@ -68,33 +68,12 @@ data:
         override: false
         timeout: 10s
     receivers:
-      hostmetrics:
-        collection_interval: 10s
-        scrapers:
-          cpu: null
-          disk: null
-          filesystem: null
-          load: null
-          memory: null
-          network: null
-          paging: null
-          processes: null
       jaeger:
         protocols:
           grpc:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      kubeletstats:
-        auth_type: serviceAccount
-        collection_interval: 10s
-        endpoint: ${K8S_NODE_IP}:10250
-        extra_metadata_labels:
-        - container.id
-        metric_groups:
-        - container
-        - pod
-        - node
       otlp:
         protocols:
           grpc:
@@ -109,19 +88,8 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8888
-      receiver_creator:
-        receivers:
-          prometheus_simple:
-            config:
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
-        watch_observers:
-        - k8s_observer
       sapm:
         endpoint: 0.0.0.0:7276
-      signalfx:
-        endpoint: 0.0.0.0:9943
       smartagent/signalfx-forwarder:
         listenAddress: 0.0.0.0:9080
         type: signalfx-forwarder
@@ -133,19 +101,6 @@ data:
       - k8s_observer
       - zpages
       pipelines:
-        metrics:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          - resource
-          - resourcedetection
-          receivers:
-          - hostmetrics
-          - kubeletstats
-          - receiver_creator
-          - signalfx
         metrics/agent:
           exporters:
           - signalfx
@@ -160,7 +115,6 @@ data:
         traces:
           exporters:
           - sapm
-          - signalfx
           processors:
           - memory_limiter
           - k8s_tagger
