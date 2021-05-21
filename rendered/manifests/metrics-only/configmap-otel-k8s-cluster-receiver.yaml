@@ -37,6 +37,9 @@ data:
         - action: insert
           key: metric_source
           value: kubernetes
+        - action: insert
+          key: receiver
+          value: k8scluster
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
