@@ -75,7 +75,7 @@ spec:
           {{- end }}
         ports:
         {{- range $key, $port := .Values.otelCollector.ports }}
-        {{- if any (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
+        {{- if eq true (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
         {{- end }}
