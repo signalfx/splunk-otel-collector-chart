@@ -176,6 +176,9 @@ spec:
           readOnly: true
           mountPropagation: HostToContainer
         {{- end }}
+        {{- if .Values.otelAgent.extraVolumeMounts }}
+        {{- toYaml .Values.otelAgent.extraVolumeMounts | nindent 8 }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.logsEnabled }}
@@ -206,6 +209,9 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if .Values.otelAgent.extraVolumes }}
+      {{- toYaml .Values.otelAgent.extraVolumes | nindent 6 }}
+      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}

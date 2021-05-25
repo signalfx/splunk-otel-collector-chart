@@ -147,6 +147,11 @@ otelAgent:
   # Extra enviroment variables to be set in the OTel agent container
   extraEnvs: []
 
+  # Extra volumes to be mounted to the agent daemonset.
+  # The volumes will be available for both OTel agent and fluentd containers.
+  extraVolumes: []
+  extraVolumeMounts: []
+
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
   # Default configuration defined in config/otel-agent-config.yaml
   # Any additional fields will be merged into the defaults,
