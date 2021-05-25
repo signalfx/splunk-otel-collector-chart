@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.26.1] - 2021-05-25
+
+### Added
+
+- Add an option to mount extra volumes using `otelAgent.extraVolumes` and `otelAgent.extraVolumeMounts` (#151)
+
 ## [0.26.0] - 2021-05-21
 
 ### Added
