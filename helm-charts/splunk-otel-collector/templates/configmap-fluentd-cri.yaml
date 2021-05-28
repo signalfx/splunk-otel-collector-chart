@@ -1,6 +1,6 @@
 {{ if and .Values.logsEnabled .Values.otelAgent.enabled }}
 {{/*
-Fluentd config parts applied only to clusters with conteinerd/cri-o runtime.
+Fluentd config parts applied only to clusters with containerd/cri-o runtime.
 */}}
 apiVersion: v1
 kind: ConfigMap
