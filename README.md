@@ -99,7 +99,7 @@ require additional configurations applied to
 **IMPORTANT**
 
 By default, the chart is configured to collect logs from k8s clusters with
-**docker** runtime which will be deprecated starting from Kubernetes
+a **docker** runtime, which will be deprecated starting with Kubernetes
 version 1.20.
 
 If your cluster is running with **contained** or **cri-o** runtime make sure to
