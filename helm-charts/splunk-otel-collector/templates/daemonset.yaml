@@ -48,7 +48,7 @@ spec:
           command: [ "sh", "-c"]
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
-                if [ -S /hostfs/var/run/docker.sock ]; then
+                if [ "$(ls /hostfs/var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
                   export LOG_FORMAT_TYPE=json;
                 else
                   export LOG_FORMAT_TYPE=cri;
