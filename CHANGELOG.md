@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Automatically detect container runtime using an initContainer and apply
+- Automatically detect container runtime using initContainers and apply
   relevant parsing config instead of asking user to specify criTimeFormat.
   This is an important change to enable smooth transition from deprecated docker
   to containerd runtime (#154)
