@@ -102,7 +102,7 @@ By default, the chart is configured to collect logs from k8s clusters with
 a **docker** runtime, which will be deprecated starting with Kubernetes
 version 1.20.
 
-If your cluster is running with **contained** or **cri-o** runtime make sure to
+If your cluster is running with a **containerd** or **cri-o** runtime, make sure you
 add this option to the installation script:
 
 ```
