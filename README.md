@@ -95,6 +95,21 @@ While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to
 [values.yaml](helm-charts/splunk-otel-collector/values.yaml).
 
+---
+**IMPORTANT**
+
+By default, the chart is configured to collect logs from k8s clusters with
+**docker** runtime which will be deprecated starting from Kubernetes
+version 1.20.
+
+If your cluster is running with **contained** or **cri-o** runtime make sure to
+add this option to the installation script:
+
+```
+--set fluentd.config.containers.logFormatType=cri
+```
+---
+
 ## Getting Started
 
 ### Prerequisites
