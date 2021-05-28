@@ -41,6 +41,37 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.logsEnabled }}
+      initContainers:
+        - name: prepare-fluentd-config
+          image: busybox:1.33
+          command: [ "sh", "-c"]
+          args:
+            - if [ -z "${LOG_FORMAT_TYPE}" ]; then
+                if [ -S /hostfs/var/run/docker.sock ]; then
+                  export LOG_FORMAT_TYPE=json;
+                else
+                  export LOG_FORMAT_TYPE=cri;
+                fi;
+              fi;
+              cp /fluentd/etc/common/* /fluentd/etc/${LOG_FORMAT_TYPE}/* /fluentd/etc/
+          env:
+            - name: LOG_FORMAT_TYPE
+              value: "{{ .Values.fluentd.config.containers.logFormatType }}"
+          volumeMounts:
+            - mountPath: /hostfs
+              name: hostfs
+              readOnly: true
+              mountPropagation: HostToContainer
+            - name: fluentd-config
+              mountPath: /fluentd/etc
+            - name: fluentd-config-common
+              mountPath: /fluentd/etc/common
+            - name: fluentd-config-json
+              mountPath: /fluentd/etc/json
+            - name: fluentd-config-cri
+              mountPath: /fluentd/etc/cri
+      {{- end }}
       containers:
       {{- if .Values.logsEnabled }}
       - name: fluentd
@@ -79,7 +110,7 @@ spec:
         - name: journallogpath
           mountPath: {{ .Values.fluentd.config.journalLogPath | quote }}
           readOnly: true
-        - name: fluentd-configmap
+        - name: fluentd-config
           mountPath: /fluentd/etc
         - name: secrets
           mountPath: /fluentd/etc/splunk
@@ -194,9 +225,17 @@ spec:
       - name: secrets
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
-      - name: fluentd-configmap
+      - name: fluentd-config
+        emptyDir: {}
+      - name: fluentd-config-common
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
+      - name: fluentd-config-cri
+        configMap:
+          name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-cri
+      - name: fluentd-config-json
+        configMap:
+          name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
       {{- end}}
       {{- if .Values.metricsEnabled }}
       - name: hostfs
