@@ -1,0 +1,22 @@
+{{ if and .Values.logsEnabled .Values.otelAgent.enabled }}
+{{/*
+Fluentd config parts applied only to clusters with docker runtime.
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
+  labels:
+    app: {{ template "splunk-otel-collector.name" . }}
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  source.containers.parse.conf: |-
+    @type json
+    time_format %Y-%m-%dT%H:%M:%S.%NZ
+
+  output.filter.conf: ""
+
+  output.transform.conf: ""
+{{- end }}

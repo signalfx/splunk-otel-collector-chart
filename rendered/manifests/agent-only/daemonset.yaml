@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.26.1
+    chart: splunk-otel-collector-0.26.2
     release: default
     heritage: Helm
     engine: fluentd
@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 096aec6f715d06237cc9075d0a56632237e4ab5c7bda8497c086d0de00812c30
+        checksum/config: e115f1a1aa0bed7a05cf35184b7ad2425a25c12b12b19d9f4519763fcd91b87c
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -32,6 +32,35 @@ spec:
         
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
+      initContainers:
+        - name: prepare-fluentd-config
+          image: busybox:1.33
+          command: [ "sh", "-c"]
+          args:
+            - if [ -z "${LOG_FORMAT_TYPE}" ]; then
+                if [ "$(ls /hostfs/var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                  export LOG_FORMAT_TYPE=json;
+                else
+                  export LOG_FORMAT_TYPE=cri;
+                fi;
+              fi;
+              cp /fluentd/etc/common/* /fluentd/etc/${LOG_FORMAT_TYPE}/* /fluentd/etc/
+          env:
+            - name: LOG_FORMAT_TYPE
+              value: ""
+          volumeMounts:
+            - mountPath: /hostfs
+              name: hostfs
+              readOnly: true
+              mountPropagation: HostToContainer
+            - name: fluentd-config
+              mountPath: /fluentd/etc
+            - name: fluentd-config-common
+              mountPath: /fluentd/etc/common
+            - name: fluentd-config-json
+              mountPath: /fluentd/etc/json
+            - name: fluentd-config-cri
+              mountPath: /fluentd/etc/cri
       containers:
       - name: fluentd
         image: splunk/fluentd-hec:1.2.4
@@ -70,7 +99,7 @@ spec:
         - name: journallogpath
           mountPath: "/run/log/journal"
           readOnly: true
-        - name: fluentd-configmap
+        - name: fluentd-config
           mountPath: /fluentd/etc
         - name: secrets
           mountPath: /fluentd/etc/splunk
@@ -190,9 +219,17 @@ spec:
       - name: secrets
         secret:
           secretName: splunk-otel-collector
-      - name: fluentd-configmap
+      - name: fluentd-config
+        emptyDir: {}
+      - name: fluentd-config-common
         configMap:
           name: default-splunk-otel-collector-fluentd
+      - name: fluentd-config-cri
+        configMap:
+          name: default-splunk-otel-collector-fluentd-cri
+      - name: fluentd-config-json
+        configMap:
+          name: default-splunk-otel-collector-fluentd-json
       - name: hostfs
         hostPath:
           path: /
