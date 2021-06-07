@@ -11,6 +11,10 @@ metadata:
     {{- if .Values.logsEnabled }}
     engine: fluentd
     {{- end }}
+  {{- if .Values.otelAgent.annotations }}
+  annotations:
+    {{- toYaml .Values.otelAgent.annotations | nindent 4 }}
+  {{- end }}
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -25,6 +29,9 @@ spec:
         release: {{ .Release.Name }}
       annotations:
         checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
+        {{- if .Values.otelAgent.podAnnotations }}
+        {{- toYaml .Values.otelAgent.podAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
