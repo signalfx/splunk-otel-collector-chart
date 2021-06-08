@@ -144,6 +144,10 @@ otelAgent:
 
   securityContext: {}
 
+  # OTel agent annotations
+  annotations: {}
+  podAnnotations: {}
+
   # Extra enviroment variables to be set in the OTel agent container
   extraEnvs: []
 
@@ -185,6 +189,10 @@ otelK8sClusterReceiver:
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # k8s cluster receiver collector annotations
+  annotations: {}
+  podAnnotations: {}
 
   # Extra enviroment variables to be set in the OTel Cluster Receiver container
   extraEnvs: []
@@ -517,6 +525,9 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
+  # Service account annotations
+  annotations: {}
+
 podSecurityPolicy:
   # Specifies whether Pod Security Policy resources should be created.
   # This should be set to `false` if either:
@@ -614,6 +625,10 @@ otelCollector:
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # OTel collector annotations
+  annotations: {}
+  podAnnotations: {}
 
   # Extra enviroment variables to be set in the standalone OTel collector container
   extraEnvs: []

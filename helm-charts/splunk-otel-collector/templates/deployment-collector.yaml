@@ -9,6 +9,10 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  {{- if .Values.otelCollector.annotations }}
+  annotations:
+    {{- toYaml .Values.otelCollector.annotations | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.otelCollector.replicaCount }}
   selector:
@@ -24,6 +28,9 @@ spec:
         release: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-collector.yaml") . | sha256sum }}
+        {{- if .Values.otelCollector.podAnnotations }}
+        {{- toYaml .Values.otelCollector.podAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.otelCollector.nodeSelector }}
