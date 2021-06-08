@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.26.3] - 2021-06-08
+
 - Add an option to add extra labels to pods (#158)
 - Add an option to add extra annotations to deployments, daemonset, pods and service account (#158)
 - Add an option to mount extra volumes to gateway-mode and k8s cluster receiver collectors (#157)
