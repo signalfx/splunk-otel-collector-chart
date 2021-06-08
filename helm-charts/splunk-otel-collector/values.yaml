@@ -148,6 +148,9 @@ otelAgent:
   annotations: {}
   podAnnotations: {}
 
+  # OTel agent extra pod labels
+  podLabels: {}
+
   # Extra enviroment variables to be set in the OTel agent container
   extraEnvs: []
 
@@ -193,6 +196,9 @@ otelK8sClusterReceiver:
   # k8s cluster receiver collector annotations
   annotations: {}
   podAnnotations: {}
+
+  # k8s cluster receiver extra pod labels
+  podLabels: {}
 
   # Extra enviroment variables to be set in the OTel Cluster Receiver container
   extraEnvs: []
@@ -629,6 +635,9 @@ otelCollector:
   # OTel collector annotations
   annotations: {}
   podAnnotations: {}
+
+  # OTel collector extra pod labels
+  podLabels: {}
 
   # Extra enviroment variables to be set in the standalone OTel collector container
   extraEnvs: []

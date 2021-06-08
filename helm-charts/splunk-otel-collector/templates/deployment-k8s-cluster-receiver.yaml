@@ -26,6 +26,9 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-k8s-cluster-receiver
         release: {{ .Release.Name }}
+        {{- if .Values.otelK8sClusterReceiver.podLabels }}
+        {{- toYaml .Values.otelK8sClusterReceiver.podLabels | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-k8s-cluster-receiver.yaml") . | sha256sum }}
         {{- if .Values.otelK8sClusterReceiver.podAnnotations }}
