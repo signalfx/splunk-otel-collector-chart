@@ -26,6 +26,9 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector
         release: {{ .Release.Name }}
+        {{- if .Values.otelCollector.podLabels }}
+        {{- toYaml .Values.otelCollector.podLabels | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-collector.yaml") . | sha256sum }}
         {{- if .Values.otelCollector.podAnnotations }}
