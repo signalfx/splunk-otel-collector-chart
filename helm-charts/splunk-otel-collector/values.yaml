@@ -189,6 +189,10 @@ otelK8sClusterReceiver:
   # Extra enviroment variables to be set in the OTel Cluster Receiver container
   extraEnvs: []
 
+  # Extra volumes to be mounted to the k8s cluster receiver container.
+  extraVolumes: []
+  extraVolumeMounts: []
+
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
   # Defaul configuration defined in config/otel-k8s-cluster-receiver-config.yaml
   # Any additional fields will be merged into the defaults,
@@ -613,6 +617,10 @@ otelCollector:
 
   # Extra enviroment variables to be set in the standalone OTel collector container
   extraEnvs: []
+
+  # Extra volumes to be mounted to the OTel Collector container.
+  extraVolumes: []
+  extraVolumeMounts: []
 
   # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
   # Default configuration defined in config/otel-collector-config.yaml

@@ -86,6 +86,9 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap
+        {{- if .Values.otelK8sClusterReceiver.extraVolumeMounts }}
+        {{- toYaml .Values.otelK8sClusterReceiver.extraVolumeMounts | nindent 8 }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.otelK8sClusterReceiver.terminationGracePeriodSeconds }}
       volumes:
       - name: collector-configmap
@@ -94,6 +97,9 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if .Values.otelK8sClusterReceiver.extraVolumes }}
+      {{- toYaml .Values.otelK8sClusterReceiver.extraVolumes | nindent 6 }}
+      {{- end }}
       {{- if .Values.otelK8sClusterReceiver.priorityClassName }}
       priorityClassName: {{ .Values.otelK8sClusterReceiver.priorityClassName }}
       {{- end }}

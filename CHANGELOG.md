@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+- Add an option to mount extra volumes to gateway-mode and k8s cluster receiver collectors (#157)
+
 ## [0.26.2] - 2021-05-28
 
 ### Changed
