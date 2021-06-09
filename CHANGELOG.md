@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.26.4] - 2021-06-09
+
+### Fixed
+
+- Fix container runtime detection when metrics pipeline disabled (#161)
+
 ## [0.26.3] - 2021-06-08
 
 - Add an option to add extra labels to pods (#158)

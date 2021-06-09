@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.26.3
+    chart: splunk-otel-collector-0.26.4
     release: default
     heritage: Helm
     engine: fluentd
@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: d520f6aa9656afbcc9845cfdb59515beaf9b8d1f05611ce774f30e5c77d9bfaa
+        checksum/config: 21bc6edfc4ea6c41d9b45d4fd84293b8a5fe5f81c8eaa72fe2828380e374ef6d
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -38,7 +38,7 @@ spec:
           command: [ "sh", "-c"]
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
-                if [ "$(ls /hostfs/var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                if [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
                   export LOG_FORMAT_TYPE=json;
                 else
                   export LOG_FORMAT_TYPE=cri;
@@ -49,10 +49,9 @@ spec:
             - name: LOG_FORMAT_TYPE
               value: ""
           volumeMounts:
-            - mountPath: /hostfs
-              name: hostfs
+            - name: varlogdest
+              mountPath: /var/lib/docker/containers
               readOnly: true
-              mountPropagation: HostToContainer
             - name: fluentd-config
               mountPath: /fluentd/etc
             - name: fluentd-config-common

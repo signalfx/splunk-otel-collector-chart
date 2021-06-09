@@ -58,7 +58,7 @@ spec:
           command: [ "sh", "-c"]
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
-                if [ "$(ls /hostfs/var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
                   export LOG_FORMAT_TYPE=json;
                 else
                   export LOG_FORMAT_TYPE=cri;
@@ -69,10 +69,9 @@ spec:
             - name: LOG_FORMAT_TYPE
               value: "{{ .Values.fluentd.config.containers.logFormatType }}"
           volumeMounts:
-            - mountPath: /hostfs
-              name: hostfs
+            - name: varlogdest
+              mountPath: {{ .Values.fluentd.config.containers.pathDest }}
               readOnly: true
-              mountPropagation: HostToContainer
             - name: fluentd-config
               mountPath: /fluentd/etc
             - name: fluentd-config-common
