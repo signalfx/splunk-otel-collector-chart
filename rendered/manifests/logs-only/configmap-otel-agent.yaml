@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.26.4
+    chart: splunk-otel-collector-0.27.0
     release: default
     heritage: Helm
 data:
@@ -23,9 +23,6 @@ data:
         token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null
-      k8s_observer:
-        auth_type: serviceAccount
-        node: ${K8S_NODE_NAME}
       zpages: null
     processors:
       batch: null
@@ -87,7 +84,6 @@ data:
     service:
       extensions:
       - health_check
-      - k8s_observer
       - zpages
       pipelines:
         logs:

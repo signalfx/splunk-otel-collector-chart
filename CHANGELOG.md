@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.27.0] - 2021-06-15
+
+### Changed
+
+- BREAKING CHANGE: Auto-detection of prometheus metrics is disabled by default (#163). See
+  [Upgrade guideline](https://github.com/signalfx/splunk-otel-collector-chart#0264-to-0270)
+
 ## [0.26.4] - 2021-06-09
 
 ### Fixed

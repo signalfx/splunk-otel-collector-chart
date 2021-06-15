@@ -7,7 +7,7 @@ metadata:
   labels:
     app: splunk-otel-collector
     component: otel-collector
-    chart: splunk-otel-collector-0.26.4
+    chart: splunk-otel-collector-0.27.0
     release: default
     heritage: Helm
 spec:
@@ -24,7 +24,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 684037bd096a49fffb5644b90d2160ad48d0773e6268dc856b1d2b6b4110c851
+        checksum/config: 7cb28f7b6e64bfefab003794453d1f67813eb81e6eb4dfe88be170bf14c6b100
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:

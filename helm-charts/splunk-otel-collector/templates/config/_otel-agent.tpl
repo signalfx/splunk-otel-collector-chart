@@ -6,9 +6,11 @@ The values can be overridden in .Values.otelAgent.config
 extensions:
   health_check:
 
+{{- if .Values.autodetect.prometheus }}
   k8s_observer:
     auth_type: serviceAccount
     node: ${K8S_NODE_NAME}
+{{- end }}
 
   zpages:
 
@@ -49,6 +51,7 @@ receivers:
       # System processes metrics, disabled by default
       # process:
 
+  {{- if .Values.autodetect.prometheus }}
   receiver_creator:
     watch_observers: [k8s_observer]
     receivers:
@@ -58,6 +61,7 @@ receivers:
         config:
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+    {{- end }}
 
   kubeletstats:
     collection_interval: 10s
@@ -211,7 +215,12 @@ exporters:
     sync_host_metadata: true
 
 service:
-  extensions: [health_check, k8s_observer, zpages]
+  extensions:
+    - health_check
+    {{- if .Values.autodetect.prometheus }}
+    - k8s_observer
+    {{- end }}
+    - zpages
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
   # or directly to signalfx backend depending on otelCollector.enabled configuration.
@@ -265,7 +274,13 @@ service:
     {{- if .Values.metricsEnabled }}
     # Default metrics pipeline.
     metrics:
-      receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
+      receivers:
+        - hostmetrics
+        - kubeletstats
+        {{- if .Values.autodetect.prometheus }}
+        - receiver_creator
+        {{- end }}
+        - signalfx
       processors:
         - memory_limiter
         - batch
