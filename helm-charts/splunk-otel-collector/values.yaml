@@ -65,8 +65,21 @@ logsEnabled: true
 
 # environment: production
 
-# Configuration for additional metadata that will be added to all the telemetry
-# as extra attributes.
+################################################################################
+# Optional: Automatic detection of additional metric sources.
+# Set autodetect.prometheus=true if you want the otel-collector agent to scrape
+# prometheus metrics from pods that have prometheus-style annotations like
+# "prometheus.io/scrape"
+################################################################################
+
+autodetect:
+  prometheus: false
+
+################################################################################
+# Optional: Configuration for additional metadata that will be added to all the
+# telemetry as extra attributes.
+################################################################################
+
 extraAttributes:
 
   # Labels that will be collected from k8s pods (in case they are set)

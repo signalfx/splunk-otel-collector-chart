@@ -52,12 +52,14 @@ receivers:
   receiver_creator:
     watch_observers: [k8s_observer]
     receivers:
+      {{- if .Values.autodetect.prometheus }}
       prometheus_simple:
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         config:
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+      {{- end }}
 
   kubeletstats:
     collection_interval: 10s

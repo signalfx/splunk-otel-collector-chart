@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.26.4
+    chart: splunk-otel-collector-0.27.0
     release: default
     heritage: Helm
 data:
@@ -115,12 +115,7 @@ data:
             - targets:
               - ${K8S_POD_IP}:8888
       receiver_creator:
-        receivers:
-          prometheus_simple:
-            config:
-              endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
-              metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
+        receivers: null
         watch_observers:
         - k8s_observer
       sapm:

@@ -210,6 +210,20 @@ $ helm install my-splunk-otel-collector \
 
 The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
 
+## Upgrade guidelines
+
+### 0.26.4 to 0.27.0
+
+[#163 Auto-detection of prometheus metrics is disabled by default](https://github.com/signalfx/splunk-otel-collector-chart/pull/163):
+If you rely on automatic prometheus endpoints detection to scrape prometheus
+metrics from pods in your k8s cluster, make sure to add this configuration to
+your values.yaml:
+
+```
+autodetect:
+  prometheus: true
+```
+
 ## License
 
 [Apache Software License version 2.0](LICENSE).
