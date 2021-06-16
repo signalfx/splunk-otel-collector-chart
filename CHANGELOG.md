@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.28.0] - 2021-06-16
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.28.0 (#164)
+
 ## [0.27.0] - 2021-06-15
 
 ### Changed
