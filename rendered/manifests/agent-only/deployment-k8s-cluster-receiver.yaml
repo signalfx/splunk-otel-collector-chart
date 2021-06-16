@@ -7,7 +7,7 @@ metadata:
   labels:
     app: splunk-otel-collector
     component: otel-k8s-cluster-receiver
-    chart: splunk-otel-collector-0.27.0
+    chart: splunk-otel-collector-0.28.0
     release: default
     heritage: Helm
 spec:
@@ -24,7 +24,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: aae6f77ea8e569efa22900b2d41320d11939ff70ab1abab0b9e347f25aedcfbc
+        checksum/config: c1b39028b3f1ec0426c6fa935bc0e24decb82ffcc07909b4897474beddeca3c5
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:
@@ -33,7 +33,7 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         - --metrics-addr=0.0.0.0:8888
-        image: quay.io/signalfx/splunk-otel-collector:0.26.0
+        image: quay.io/signalfx/splunk-otel-collector:0.28.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
