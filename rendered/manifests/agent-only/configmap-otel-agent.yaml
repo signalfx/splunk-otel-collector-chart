@@ -26,6 +26,9 @@ data:
         token: ${SPLUNK_ACCESS_TOKEN}
     extensions:
       health_check: null
+      k8s_observer:
+        auth_type: serviceAccount
+        node: ${K8S_NODE_NAME}
       zpages: null
     processors:
       batch: null
@@ -111,6 +114,10 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8888
+      receiver_creator:
+        receivers: null
+        watch_observers:
+        - k8s_observer
       sapm:
         endpoint: 0.0.0.0:7276
       signalfx:
@@ -123,6 +130,7 @@ data:
     service:
       extensions:
       - health_check
+      - k8s_observer
       - zpages
       pipelines:
         logs:
@@ -146,6 +154,7 @@ data:
           receivers:
           - hostmetrics
           - kubeletstats
+          - receiver_creator
           - signalfx
         metrics/agent:
           exporters:

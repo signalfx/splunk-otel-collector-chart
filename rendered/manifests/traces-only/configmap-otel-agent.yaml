@@ -23,6 +23,9 @@ data:
         sync_host_metadata: true
     extensions:
       health_check: null
+      k8s_observer:
+        auth_type: serviceAccount
+        node: ${K8S_NODE_NAME}
       zpages: null
     processors:
       batch: null
@@ -95,6 +98,7 @@ data:
     service:
       extensions:
       - health_check
+      - k8s_observer
       - zpages
       pipelines:
         metrics/agent:
