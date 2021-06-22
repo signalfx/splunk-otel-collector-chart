@@ -222,7 +222,7 @@ service:
   pipelines:
     {{- if .Values.logsEnabled }}
     logs:
-      receivers: [fluentforward]
+      receivers: [fluentforward, otlp]
       processors:
         - memory_limiter
         - batch

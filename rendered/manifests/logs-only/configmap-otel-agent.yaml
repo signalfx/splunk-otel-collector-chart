@@ -100,6 +100,7 @@ data:
           - resourcedetection
           receivers:
           - fluentforward
+          - otlp
         metrics/agent:
           exporters:
           - signalfx
