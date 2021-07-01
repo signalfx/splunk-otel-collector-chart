@@ -29,10 +29,6 @@ spec:
     port: 4317
     targetPort: otlp
     protocol: TCP
-  - name: sapm
-    port: 7276
-    targetPort: sapm
-    protocol: TCP
   - name: signalfx
     port: 9943
     targetPort: signalfx

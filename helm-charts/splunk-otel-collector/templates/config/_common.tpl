@@ -34,8 +34,6 @@ otlp:
       endpoint: 0.0.0.0:55681
 
 {{- if .Values.tracesEnabled }}
-sapm:
-  endpoint: 0.0.0.0:7276
 jaeger:
   protocols:
     thrift_http:
