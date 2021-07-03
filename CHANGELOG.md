@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+- BREAKING: Remove SAPM receiver from default config (#168)
+
 ## [0.28.1] - 2021-06-18
 
 ### Changed
