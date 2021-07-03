@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- All missing attributes are added to prometheus metrics reported
+  by gateway and k8s-cluster-receiver collector deployments (#170)
+
 ## [0.29.1] - 2021-07-08
 
 ### Fixed

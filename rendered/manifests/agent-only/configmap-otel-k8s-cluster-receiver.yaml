@@ -21,13 +21,6 @@ data:
       health_check: null
     processors:
       batch: null
-      k8s_tagger:
-        filter:
-          labels:
-            key: component
-            op: equals
-            value: otel-k8s-cluster-receiver
-          node_from_env_var: K8S_NODE_NAME
       memory_limiter:
         ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
         check_interval: 5s
@@ -43,12 +36,32 @@ data:
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
+      resource/add_collector_k8s:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resourcedetection:
+        detectors:
+        - system
+        - env
+        override: false
+        timeout: 10s
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
-      prometheus:
+      prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
           - job_name: otel-k8s-cluster-receiver
@@ -67,6 +80,7 @@ data:
           - memory_limiter
           - batch
           - resource
+          - resource/add_collector_k8s
+          - resourcedetection
           receivers:
-          - prometheus
-          - k8s_cluster
+          - prometheus/k8s_cluster_receiver
