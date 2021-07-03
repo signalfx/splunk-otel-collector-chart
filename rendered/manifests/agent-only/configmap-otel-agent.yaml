@@ -118,8 +118,6 @@ data:
         receivers: null
         watch_observers:
         - k8s_observer
-      sapm:
-        endpoint: 0.0.0.0:7276
       signalfx:
         endpoint: 0.0.0.0:9943
       smartagent/signalfx-forwarder:

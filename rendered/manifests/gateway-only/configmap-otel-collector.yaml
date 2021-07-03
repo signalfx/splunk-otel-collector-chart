@@ -67,8 +67,6 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8888
-      sapm:
-        endpoint: 0.0.0.0:7276
       signalfx:
         access_token_passthrough: true
         endpoint: 0.0.0.0:9943
@@ -119,4 +117,3 @@ data:
           - otlp
           - jaeger
           - zipkin
-          - sapm

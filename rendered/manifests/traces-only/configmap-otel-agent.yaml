@@ -88,8 +88,6 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8888
-      sapm:
-        endpoint: 0.0.0.0:7276
       smartagent/signalfx-forwarder:
         listenAddress: 0.0.0.0:9080
         type: signalfx-forwarder

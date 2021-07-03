@@ -613,10 +613,6 @@ otelCollector:
       containerPort: 9411
       protocol: TCP
       enabled_for: [traces]
-    sapm:
-      containerPort: 7276
-      protocol: TCP
-      enabled_for: [traces]
     signalfx:
       containerPort: 9943
       protocol: TCP

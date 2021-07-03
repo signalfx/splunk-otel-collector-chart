@@ -86,7 +86,7 @@ service:
     {{- if .Values.tracesEnabled }}
     # default traces pipeline
     traces:
-      receivers: [otlp, jaeger, zipkin, sapm]
+      receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
         - batch
