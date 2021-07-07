@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: fe5a6b9570d81623b8890a819bb4cea087632880a0b5518d41bb4f147ed7d31c
+        checksum/config: 4e7580a9960f1908803f0b876094c8260d3fb12bab41e1cec41b2f797eff11cc
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -107,7 +107,7 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --metrics-addr=0.0.0.0:8888
+        - --metrics-addr=0.0.0.0:8889
         ports:
         - name: fluentforward
           containerPort: 8006

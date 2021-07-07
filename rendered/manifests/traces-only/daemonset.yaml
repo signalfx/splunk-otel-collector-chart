@@ -22,7 +22,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 5c9f829293fecaa315a656b6da361777818a29607e31fb6d02bc67db9a234b6e
+        checksum/config: a603fdc8a67dc462b424bcd6ff32f43d367ca79b88407e2edfde0479dce096e3
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -36,7 +36,7 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --metrics-addr=0.0.0.0:8888
+        - --metrics-addr=0.0.0.0:8889
         ports:
         - name: jaeger-grpc
           containerPort: 14250

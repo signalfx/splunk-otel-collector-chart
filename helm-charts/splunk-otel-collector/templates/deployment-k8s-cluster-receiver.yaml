@@ -60,7 +60,7 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --metrics-addr=0.0.0.0:8888
+        - --metrics-addr=0.0.0.0:8889
         {{- range .Values.otelK8sClusterReceiver.extraArgs }}
         - {{ . }}
         {{- end }}

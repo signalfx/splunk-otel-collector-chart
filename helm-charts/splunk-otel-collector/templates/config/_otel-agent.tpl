@@ -27,7 +27,7 @@ receivers:
         scrape_interval: 10s
         static_configs:
         - targets:
-          - "${K8S_POD_IP}:8888"
+          - "${K8S_POD_IP}:8889"
           # Fluend metrics collection disabled by default
           # - "${K8S_POD_IP}:24231"
 
