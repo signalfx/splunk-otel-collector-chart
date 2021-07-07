@@ -69,11 +69,13 @@ logsEnabled: true
 # Optional: Automatic detection of additional metric sources.
 # Set autodetect.prometheus=true if you want the otel-collector agent to scrape
 # prometheus metrics from pods that have prometheus-style annotations like
-# "prometheus.io/scrape"
+# "prometheus.io/scrape".
+# Set autodetect.istio=true in istio environment.
 ################################################################################
 
 autodetect:
   prometheus: false
+  istio: false
 
 ################################################################################
 # Optional: Configuration for additional metadata that will be added to all the

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - BREAKING: Remove SAPM receiver from default config (#168)
 
+### Added
+
+- Add Istio specific configurations (#171)
+
 ## [0.28.1] - 2021-06-18
 
 ### Changed

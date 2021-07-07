@@ -52,10 +52,15 @@ receivers:
   receiver_creator:
     watch_observers: [k8s_observer]
     receivers:
-      {{- if .Values.autodetect.prometheus }}
+      {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
       prometheus_simple:
+        {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
+        {{- else }}
+        # Enable prometheus scraping for istio pods only
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
+        {{- end }}
         config:
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
