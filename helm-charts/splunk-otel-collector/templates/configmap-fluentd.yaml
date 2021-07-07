@@ -210,6 +210,11 @@ data:
           k8s.pod.labels.{{ . }} ${record.dig("kubernetes","labels","{{ . }}")}
           {{- end }}
 
+          {{- if .Values.autodetect.istio }}
+          # Automaically compose service.name attribute the same way as done in istio for traces
+          service.name ${record.dig("kubernetes","labels","app")}.${record.dig("kubernetes","namespace_name")}
+          {{- end }}
+
           denylist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
         </record>
       </filter>

@@ -34,6 +34,9 @@ spec:
         {{- if .Values.otelCollector.podAnnotations }}
         {{- toYaml .Values.otelCollector.podAnnotations | nindent 8 }}
         {{- end }}
+        {{- if .Values.autodetect.istio }}
+        sidecar.istio.io/inject: "false"
+        {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.otelCollector.nodeSelector }}
