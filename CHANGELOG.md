@@ -4,9 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.29.0] - 2021-07-08
+
 ### Changed
 
 - Change internal metrics port from 8888 to 8889 (#172)
+- Upgrade splunk-otel-collector image version to 0.29.0 (#174)
 
 ## [0.28.2] - 2021-07-07
 
