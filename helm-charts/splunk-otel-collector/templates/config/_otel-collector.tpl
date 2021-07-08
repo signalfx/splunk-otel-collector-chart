@@ -21,7 +21,7 @@ receivers:
       - job_name: 'otel-collector'
         scrape_interval: 10s
         static_configs:
-        - targets: ["${K8S_POD_IP}:8888"]
+        - targets: ["${K8S_POD_IP}:8889"]
   signalfx:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true

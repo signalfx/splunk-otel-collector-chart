@@ -24,7 +24,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 9aa76e4a0195af8f49772eb3cf50bad809cb3b316a285e4bbcafbb52bd951194
+        checksum/config: 2b66c3f9e6bdc39bbca429096b3b6a56be8fa5c2d99bdc7d43df96213a871c78
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:
@@ -32,7 +32,7 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --metrics-addr=0.0.0.0:8888
+        - --metrics-addr=0.0.0.0:8889
         image: quay.io/signalfx/splunk-otel-collector:0.28.1
         imagePullPolicy: IfNotPresent
         env:

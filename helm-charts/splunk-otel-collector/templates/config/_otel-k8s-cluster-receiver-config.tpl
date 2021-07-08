@@ -14,7 +14,7 @@ receivers:
       - job_name: 'otel-k8s-cluster-receiver'
         scrape_interval: 10s
         static_configs:
-        - targets: ["${K8S_POD_IP}:8888"]
+        - targets: ["${K8S_POD_IP}:8889"]
   k8s_cluster:
     auth_type: serviceAccount
     metadata_exporters: [signalfx]
