@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-fluentd
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.29.0
+    chart: splunk-otel-collector-0.29.1
     release: default
     heritage: Helm
 data:
@@ -268,6 +268,7 @@ data:
           denylist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
         </record>
       </filter>
+
       <filter tail.containers.**>
         # Exclude all logs that are denylisted
         @type grep
