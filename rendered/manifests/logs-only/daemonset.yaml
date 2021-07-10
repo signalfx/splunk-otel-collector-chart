@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.29.0
+    chart: splunk-otel-collector-0.29.1
     release: default
     heritage: Helm
     engine: fluentd
@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: ab8acc9c6f81b9179a4b9219de716d5f715bd13fcf693be3a8a08bb92621d426
+        checksum/config: 45d855c74c87edf260c527d28e7acc8bb75d16a5d7c17ccf3b3c5290fae94003
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet

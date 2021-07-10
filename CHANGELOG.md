@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.29.1] - 2021-07-08
+
+### Fixed
+
+- Fix generation of service.name log attribute in istio environment (#176)
+
 ## [0.29.0] - 2021-07-08
 
 ### Changed

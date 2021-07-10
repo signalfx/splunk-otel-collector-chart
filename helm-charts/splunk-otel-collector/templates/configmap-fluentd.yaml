@@ -210,14 +210,23 @@ data:
           k8s.pod.labels.{{ . }} ${record.dig("kubernetes","labels","{{ . }}")}
           {{- end }}
 
-          {{- if .Values.autodetect.istio }}
-          # Automaically compose service.name attribute the same way as done in istio for traces
-          service.name ${record.dig("kubernetes","labels","app")}.${record.dig("kubernetes","namespace_name")}
-          {{- end }}
-
           denylist ${record.dig("kubernetes", "annotations", "splunk.com/exclude") ? record.dig("kubernetes", "annotations", "splunk.com/exclude") : record.dig("kubernetes", "namespace_annotations", "splunk.com/exclude") ? (record["kubernetes"]["namespace_annotations"]["splunk.com/exclude"]) : ("false")}
         </record>
       </filter>
+
+      {{- if .Values.autodetect.istio }}
+      # This filter adds "service.name" attribute, if it's not present, the same way as istio
+      # prepares service name for generated traces:
+      # https://github.com/istio/istio/blob/77e00b47a61f0e995a29b33438c9dae7e8aace82/galley/pkg/config/analysis/analyzers/testdata/common/sidecar-injector-configmap.yaml#L110-L115
+      # Name of the k8s deployment (or another object owning the pod, if any) is taken from "k8s.pod.name" attribute
+      # using regex to filter out name suffix according to the k8s name generation rules:
+      # https://github.com/kubernetes/apimachinery/blob/ff522ab81c745a9ac5f7eeb7852fac134194a3b6/pkg/util/rand/rand.go#L92-L127
+      <filter tail.containers.**>
+        @type jq_transformer
+        jq '.record["service.name"] = (.record["service.name"] // (.record.kubernetes.labels.app // (.record["k8s.pod.name"] // "istio-proxy" | (capture("^(?<owner_obj>.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$") | .owner_obj) // .)) + "." + (.record["k8s.namespace.name"] // "default")) | .record'
+      </filter>
+      {{- end }}
+
       <filter tail.containers.**>
         # Exclude all logs that are denylisted
         @type grep
