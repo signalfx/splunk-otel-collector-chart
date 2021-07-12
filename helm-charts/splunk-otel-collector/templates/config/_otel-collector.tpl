@@ -15,7 +15,7 @@ extensions:
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus:
+  prometheus/collector:
     config:
       scrape_configs:
       - job_name: 'otel-collector'
@@ -45,6 +45,24 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
   batch:
+
+  {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+
+  # Resource attributes specific to the collector itself.
+  resource/add_collector_k8s:
+    attributes:
+      - action: insert
+        key: k8s.node.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
+        key: k8s.pod.name
+        value: "${K8S_POD_NAME}"
+      - action: insert
+        key: k8s.pod.uid
+        value: "${K8S_POD_UID}"
+      - action: insert
+        key: k8s.namespace.name
+        value: "${K8S_NAMESPACE}"
 
   resource/add_cluster_name:
     attributes:
@@ -100,7 +118,7 @@ service:
 
     # default metrics pipeline
     metrics:
-      receivers: [otlp, prometheus, signalfx]
+      receivers: [otlp, signalfx]
       processors: [memory_limiter, batch, resource/add_cluster_name]
       exporters: [signalfx]
 
@@ -117,4 +135,15 @@ service:
       processors: [memory_limiter, batch]
       exporters: [splunk_hec]
     {{- end }}
+
+    # Pipeline for metrics collected about the collector pod itself.
+    metrics/collector:
+      receivers: [prometheus/collector]
+      processors:
+        - memory_limiter
+        - batch
+        - resource/add_cluster_name
+        - resource/add_collector_k8s
+        - resourcedetection
+      exporters: [signalfx]
 {{- end }}

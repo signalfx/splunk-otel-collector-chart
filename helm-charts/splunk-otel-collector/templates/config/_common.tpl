@@ -44,3 +44,34 @@ zipkin:
   endpoint: 0.0.0.0:9411
 {{- end }}
 {{- end }}
+
+{{/*
+Common config for resourcedetection processor
+*/}}
+{{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
+# Resource detection processor picks attributes from host environment.
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
+resourcedetection:
+  detectors:
+    - system
+    # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
+    # before it gets set later by the cloud provider detector.
+    - env
+    {{- if eq .Values.distro "gke" }}
+    - gke
+    {{- else if eq .Values.distro "eks" }}
+    - eks
+    {{- else if eq .Values.distro "aks" }}
+    - aks
+    {{- end }}
+    {{- if eq .Values.provider "gcp" }}
+    - gce
+    {{- else if eq .Values.provider "aws" }}
+    - ec2
+    {{- else if eq .Values.provider "azure" }}
+    - azure
+    {{- end }}
+  # Don't override existing resource attributes to maintain identification of data sources
+  override: false
+  timeout: 10s
+{{- end }}

@@ -24,7 +24,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: c62bfb843e168c5ae848390a1f6de78823d8ea4259dc5817cd16c50b305267cf
+        checksum/config: 23fb8e3ca7ae878920c7c82e5c4d451b22614848a3f65293747c77ac46127c1e
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:
@@ -47,6 +47,18 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:

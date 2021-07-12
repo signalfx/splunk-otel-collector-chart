@@ -8,7 +8,7 @@ extensions:
 
 receivers:
   # Prometheus receiver scraping metrics from the pod itself, both otel and fluentd
-  prometheus:
+  prometheus/k8s_cluster_receiver:
     config:
       scrape_configs:
       - job_name: 'otel-k8s-cluster-receiver'
@@ -24,14 +24,23 @@ processors:
 
   batch:
 
-  # k8s_tagger to enrich its own metrics
-  k8s_tagger:
-    filter:
-      node_from_env_var: K8S_NODE_NAME
-      labels:
-        key: component
-        op: equals
-        value: otel-k8s-cluster-receiver
+  {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+
+  # Resource attributes specific to the collector itself.
+  resource/add_collector_k8s:
+    attributes:
+      - action: insert
+        key: k8s.node.name
+        value: "${K8S_NODE_NAME}"
+      - action: insert
+        key: k8s.pod.name
+        value: "${K8S_POD_NAME}"
+      - action: insert
+        key: k8s.pod.uid
+        value: "${K8S_POD_UID}"
+      - action: insert
+        key: k8s.namespace.name
+        value: "${K8S_NAMESPACE}"
 
   resource:
     attributes:
@@ -71,7 +80,18 @@ service:
   pipelines:
     # k8s metrics pipeline
     metrics:
-      receivers: [prometheus, k8s_cluster]
+      receivers: [k8s_cluster]
       processors: [memory_limiter, batch, resource]
+      exporters: [signalfx]
+
+    # Pipeline for metrics collected about the collector pod itself.
+    metrics:
+      receivers: [prometheus/k8s_cluster_receiver]
+      processors:
+        - memory_limiter
+        - batch
+        - resource
+        - resource/add_collector_k8s
+        - resourcedetection
       exporters: [signalfx]
 {{- end }}
