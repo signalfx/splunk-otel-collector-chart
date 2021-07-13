@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Set more frequent checks for memory_limiter (#178)
+
 ### Fixed
 
 - All missing attributes are added to prometheus metrics reported
