@@ -4,7 +4,7 @@ Common config for the otel-collector memory_limiter processor
 {{- define "splunk-otel-collector.otelMemoryLimiterConfig" -}}
 memory_limiter:
   # check_interval is the time between measurements of memory usage.
-  check_interval: 5s
+  check_interval: 2s
   # By default limit_mib is set to 80% of container memory limit
   limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
   # Agent will set this value.
