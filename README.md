@@ -206,6 +206,30 @@ $ helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+## Additional telemetry sources
+
+Use `autodetect` config option to enable additional telemetry sources.
+
+Set `autodetect.prometheus=true` if you want the otel-collector agent to scrape
+prometheus metrics from pods that have generic prometheus-style annotations:
+- `prometheus.io/scrape: true`: Prometheus metrics will be scraped only from
+  pods having this annotation;
+- `prometheus.io/path`: path to scrape the metrics from, default `/metrics`;
+- `prometheus.io/port`: port to scrape the metrics from, default `9090`.
+
+Set `autodetect.istio=true`, if the otel-collector agent in running in Istio
+environment, to make sure that all traces, metrics and logs reported by Istio
+collected in a unified manner.
+
+For example to enable both Prometheus and Istio telemetry add the following
+lines to your `values.yaml` file:
+
+```
+autodetect:
+  istio: true
+  prometheus: true
+```
+
 ## Pre-rendered Kubernetes resources
 
 The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
