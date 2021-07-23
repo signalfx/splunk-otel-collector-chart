@@ -85,7 +85,7 @@ service:
       exporters: [signalfx]
 
     # Pipeline for metrics collected about the collector pod itself.
-    metrics:
+    metrics/collector:
       receivers: [prometheus/k8s_cluster_receiver]
       processors:
         - memory_limiter

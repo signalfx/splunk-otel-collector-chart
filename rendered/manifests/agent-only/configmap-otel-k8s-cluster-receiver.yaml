@@ -80,6 +80,15 @@ data:
           - memory_limiter
           - batch
           - resource
+          receivers:
+          - k8s_cluster
+        metrics/collector:
+          exporters:
+          - signalfx
+          processors:
+          - memory_limiter
+          - batch
+          - resource
           - resource/add_collector_k8s
           - resourcedetection
           receivers:
