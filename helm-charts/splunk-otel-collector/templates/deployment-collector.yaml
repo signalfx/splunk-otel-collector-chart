@@ -49,7 +49,7 @@ spec:
       {{- end }}
       {{- if .Values.otelCollector.affinity }}
       affinity:
-        {{ toYaml .Values.otelCollector.tolerations | nindent 8 }}
+        {{- toYaml .Values.otelCollector.affinity | nindent 8 }}
       {{- end }}
       {{- if .Values.otelCollector.securityContext }}
       securityContext:
