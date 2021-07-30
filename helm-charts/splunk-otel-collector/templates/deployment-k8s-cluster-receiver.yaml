@@ -49,7 +49,7 @@ spec:
       {{- end }}
       {{- if .Values.otelK8sClusterReceiver.affinity }}
       affinity:
-        {{ toYaml .Values.otelK8sClusterReceiver.tolerations | nindent 8 }}
+        {{- toYaml .Values.otelK8sClusterReceiver.affinity | nindent 8 }}
       {{- end }}
       {{- if .Values.otelK8sClusterReceiver.securityContext }}
       securityContext:
