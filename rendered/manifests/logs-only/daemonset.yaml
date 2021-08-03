@@ -35,6 +35,7 @@ spec:
       initContainers:
         - name: prepare-fluentd-config
           image: busybox:1.33
+          imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
