@@ -518,6 +518,12 @@ image:
     # The policy that specifies when the user wants the fluentd images to be pulled
     pullPolicy: IfNotPresent
 
+    initContainer:
+      # The image of the container for fluentd init to pull
+      image: busybox:1.33
+      # The policy that specifies when the user wants the fluentd init image to be pulled
+      pullPolicy: IfNotPresent
+
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
     repository: quay.io/signalfx/splunk-otel-collector
