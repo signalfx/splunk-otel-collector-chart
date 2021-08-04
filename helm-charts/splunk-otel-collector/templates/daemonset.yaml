@@ -57,7 +57,8 @@ spec:
       {{- if .Values.logsEnabled }}
       initContainers:
         - name: prepare-fluentd-config
-          image: busybox:1.33
+          image: {{ .Values.image.fluentd.initContainer.image }}
+          imagePullPolicy: {{ .Values.image.fluentd.initContainer.pullPolicy }}
           command: [ "sh", "-c"]
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
