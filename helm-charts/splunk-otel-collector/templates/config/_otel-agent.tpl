@@ -108,10 +108,10 @@ processors:
       node_from_env_var: K8S_NODE_NAME
     extract:
       metadata:
-        - namespace
-        - node
-        - podName
-        - podUID
+        - k8s.namespace.name
+        - k8s.node.name
+        - k8s.pod.name
+        - k8s.pod.uid
       {{- with .Values.extraAttributes.podLabels }}
       labels:
         {{- range . }}

@@ -33,10 +33,10 @@ data:
       k8s_tagger:
         extract:
           metadata:
-          - namespace
-          - node
-          - podName
-          - podUID
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
       memory_limiter:
         ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
         check_interval: 2s
