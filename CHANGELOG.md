@@ -4,15 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.31.0] - 2021-08-10
+
 ### Changed
 
 - Upgrade splunk-otel-collector image to 0.31.0 (#183)
 - Set more frequent checks for memory_limiter (#178)
+- Make Fluentd init container image variable (#182)
 
 ### Fixed
 
 - All missing attributes are added to prometheus metrics reported
   by gateway and k8s-cluster-receiver collector deployments (#170)
+- Fix pod affinity setting (#181)
 
 ## [0.29.1] - 2021-07-09
 
