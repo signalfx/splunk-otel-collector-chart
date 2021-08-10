@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Upgrade splunk-otel-collector image to 0.31.0 (#183)
 - Set more frequent checks for memory_limiter (#178)
 
 ### Fixed

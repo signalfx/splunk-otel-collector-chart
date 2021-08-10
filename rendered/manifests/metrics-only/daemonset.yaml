@@ -46,7 +46,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.29.0
+        image: quay.io/signalfx/splunk-otel-collector:0.31.0
         imagePullPolicy: IfNotPresent
         env:
           - name: K8S_NODE_NAME
