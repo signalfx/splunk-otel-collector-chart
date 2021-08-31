@@ -17,7 +17,9 @@ rules:
 - apiGroups:
   - ""
   resources:
+{{- if .Values.k8sEventsEnabled }}
   - configmaps
+{{- end }}
   - events
   - namespaces
   - namespaces/status

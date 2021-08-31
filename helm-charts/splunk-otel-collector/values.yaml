@@ -669,6 +669,10 @@ otelCollector:
   # existing fields can be disabled by setting them to `null`.
   config: {}
 
+# This Flag allow to add necessary permissions to support all SmartAgent
+# Kubernetes-related plugins and add missing key environmental variables.
+k8sEventsEnabled: false
+
 ################################################################################
 # OpenTelemetry service config, used for otel collector deployment.
 # Disabled by default
