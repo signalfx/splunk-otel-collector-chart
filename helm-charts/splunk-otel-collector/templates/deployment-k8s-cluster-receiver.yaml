@@ -90,7 +90,7 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          {{- if .Values.k8sEventsEnabled }}
+          {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
           - name: MY_NAMESPACE
             valueFrom:
               fieldRef:
