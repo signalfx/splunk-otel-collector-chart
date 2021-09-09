@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- smartagent/kubernetes-events now works with `otelK8sClusterReceiver` deployment. (#187)
+
 ## [0.31.0] - 2021-08-10
 
 ### Changed
