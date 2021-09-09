@@ -18,6 +18,19 @@ receivers:
   k8s_cluster:
     auth_type: serviceAccount
     metadata_exporters: [signalfx]
+  {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+  smartagent/kubernetes-events:
+    type: kubernetes-events
+    whitelistedEvents:
+    - reason: Created
+      involvedObjectKind: Pod
+    - reason: Unhealthy
+      involvedObjectKind: Pod
+    - reason: Failed
+      involvedObjectKind: Pod
+    - reason: FailedCreate
+      involvedObjectKind: Job
+  {{- end }}
 
 processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
@@ -94,4 +107,15 @@ service:
         - resource/add_collector_k8s
         - resourcedetection
       exporters: [signalfx]
+    {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+    logs/events:
+      receivers:
+        - smartagent/kubernetes-events
+      processors:
+        - memory_limiter
+        - batch
+        - resource
+        - resourcedetection
+      exporters: [signalfx]
+    {{- end }}
 {{- end }}

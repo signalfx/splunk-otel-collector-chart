@@ -14,6 +14,16 @@ rules:
   verbs:          ['use']
   resourceNames:  [{{ template "splunk-otel-collector.fullname" . }}]
 {{- end }}
+{{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+  - patch
+{{- end }}
 - apiGroups:
   - ""
   resources:
