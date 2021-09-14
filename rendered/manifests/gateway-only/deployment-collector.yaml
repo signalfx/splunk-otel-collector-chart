@@ -24,7 +24,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: c1b66be0095af72537e126ddc51a08f0049545a71f362444a48f678e8b864a92
+        checksum/config: 647f9057c466bf31093989d26de55d5be9c23ebde3ac426f5281a04d09fe2869
     spec:
       serviceAccountName: default-splunk-otel-collector
       containers:
@@ -33,7 +33,7 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         - --metrics-addr=0.0.0.0:8889
-        image: quay.io/signalfx/splunk-otel-collector:0.31.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:ab0055ef9f87e9c6df40bc4bae4cad32f0f911f2
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
