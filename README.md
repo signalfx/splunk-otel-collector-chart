@@ -146,7 +146,7 @@ The
 lists all supported configurable parameters for this chart, along with detailed
 explanation. Read through it to understand how to configure this chart.
 
-Also check [examples of chart configuration](./examples/README.md).
+Also check [examples of chart configuration](./examples/README.md). This also includes a guide to deploy for the k8s cluster with the windows worker node.
 
 At the minimum you need to configure the following values.
 

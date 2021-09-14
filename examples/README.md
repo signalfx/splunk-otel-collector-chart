@@ -17,6 +17,26 @@ splunkRealm: us0
 splunkAccessToken: my-access-token
 ```
 
+## Deploy for k8s cluster with windows worker node.
+
+This configuration will install application for windows worker node only.
+
+All windows images are available in a separate `quay.io` repository for that we need to change the image pul repository to `quay.io/signalfx/splunk-otel-collector-windows`.
+
+Windows node only supports traces and metrics collection. Because As of now, we don’t have fluentd-hec image for the windows worker node,  as we are moving away from fluentd, No logs will be collected.
+
+```yaml
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-windows
+logsEnabled: false
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
+isWindows: true
+```
+
 ## Enable traces sampling
 
 This example shows how to change default OTel Collector configuration to add

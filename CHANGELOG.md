@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - smartagent/kubernetes-events now works with `otelK8sClusterReceiver` deployment. (#187)
+- Support adde for k8s cluster with windows worker node. (#190)
 
 ## [0.31.0] - 2021-08-10
 
