@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Move k8s metadata enrichment from fluentd to otel-collector (#192)
+
 ### Fixed
 
 - smartagent/kubernetes-events now works with `otelK8sClusterReceiver` deployment. (#187)

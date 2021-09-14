@@ -87,8 +87,8 @@ extraAttributes:
   # Labels that will be collected from k8s pods (in case they are set)
   # and added  as extra attributes to the telemetry in the following format:
   # k8s.pod.labels.<label_name>: <label_value>
-  podLabels: []
-    # - app
+  podLabels:
+    - app
     # - k8s-app
     # - release
 
@@ -519,7 +519,7 @@ image:
     # The registry and name of the fluentd image to pull
     repository: splunk/fluentd-hec
     # The tag of the fluentd image to pull
-    tag: 1.2.4
+    tag: 1.2.7
     # The policy that specifies when the user wants the fluentd images to be pulled
     pullPolicy: IfNotPresent
 
@@ -531,9 +531,9 @@ image:
 
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
-    repository: quay.io/signalfx/splunk-otel-collector
+    repository: quay.io/signalfx/splunk-otel-collector-dev
     # The tag of the opentelemetry collector image to pull
-    tag: 0.31.0
+    tag: ab0055ef9f87e9c6df40bc4bae4cad32f0f911f2
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
