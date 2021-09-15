@@ -75,3 +75,42 @@ resourcedetection:
   override: false
   timeout: 10s
 {{- end }}
+
+{{/*
+Resource processor for logs manipulations
+*/}}
+{{- define "splunk-otel-collector.resourceLogsProcessor" -}}
+resource/logs:
+  attributes:
+    - key: com.splunk.sourcetype
+      from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+      action: upsert
+    - key: k8s.pod.annotations.splunk.com/sourcetype
+      action: delete
+    - key: splunk.com/exclude
+      action: delete
+    {{- if .Values.autodetect.istio }}
+    - key: service.name
+      from_attribute: k8s.pod.labels.app
+      action: insert
+    - key: service.name
+      from_attribute: istio_service_name
+      action: insert
+    - key: istio_service_name
+      action: delete
+    {{- end }}
+{{- end }}
+
+{{/*
+Filter logs processor
+*/}}
+{{- define "splunk-otel-collector.filterLogsProcessors" -}}
+# Drop logs coming from pods and namespaces with splunk.com/exclude annotation.
+# TODO: Update the interface once the following change is released:
+#       https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/4895
+filter/logs:
+  logs:
+    resource_attributes:
+      - key: splunk.com/exclude
+        value: "true"
+{{- end }}

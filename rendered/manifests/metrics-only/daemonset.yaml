@@ -22,7 +22,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 641a9ff44743a5f86f273a917f7ff83458f0d03fee3ef6829c2bc458c660dc72
+        checksum/config: c30967ada50acefcd403fbb77f96e28ffaf8283dd2d8e6d0b735c68682bb164b
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -46,7 +46,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.31.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:ab0055ef9f87e9c6df40bc4bae4cad32f0f911f2
         imagePullPolicy: IfNotPresent
         env:
           - name: K8S_NODE_NAME
