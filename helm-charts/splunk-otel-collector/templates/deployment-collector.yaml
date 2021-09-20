@@ -39,18 +39,12 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- if .Values.isWindows }}
       nodeSelector:
-        kubernetes.io/os: windows
-        {{- with .Values.otelCollector.nodeSelector }}
-        {{ toYaml . | nindent 8 }}
+        {{- if .Values.otelCollector.nodeSelector }}
+        {{ toYaml .Values.otelCollector.nodeSelector | nindent 8 }}
+        {{- else }}
+          kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
-      {{- else }}
-      {{- with .Values.otelCollector.nodeSelector }}
-      nodeSelector:
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- end }}
       {{- if .Values.otelCollector.tolerations }}
       tolerations:
         {{ toYaml .Values.otelCollector.tolerations | nindent 8 }}

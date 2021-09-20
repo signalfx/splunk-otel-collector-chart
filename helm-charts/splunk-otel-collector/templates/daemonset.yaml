@@ -44,18 +44,12 @@ spec:
       {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- if .Values.isWindows }}
       nodeSelector:
-        kubernetes.io/os: windows
-        {{- with .Values.nodeSelector }}
-        {{ toYaml . | nindent 8 }}
+        {{- if .Values.nodeSelector }}
+        {{ toYaml .Values.nodeSelector | nindent 8 }}
+        {{- else }}
+          kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
-      {{- else }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- end }}
       {{- with .Values.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}

@@ -596,6 +596,9 @@ readinessProbe:
 livenessProbe:
   initialDelaySeconds: 0
 
+# Specifies whether to apply for k8s cluster with windows worker node.
+isWindows: false
+
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
 # This is an additional deployment of Open-telemetry collector that can be used
@@ -680,9 +683,6 @@ otelCollector:
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.
   config: {}
-
-# Specifies whether to apply for k8s cluster with windows worker node.
-isWindows: false
 
 ################################################################################
 # OpenTelemetry service config, used for otel collector deployment.
