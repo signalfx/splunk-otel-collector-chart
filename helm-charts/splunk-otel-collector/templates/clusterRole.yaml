@@ -23,6 +23,9 @@ rules:
   - get
   - update
   - patch
+  - create
+  - list
+  - watch
 {{- end }}
 - apiGroups:
   - ""

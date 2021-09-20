@@ -106,18 +106,55 @@ processors:
     {{- end }}
     filter:
       node_from_env_var: K8S_NODE_NAME
+    pod_association:
+      - from: resource_attribute
+        name: k8s.pod.uid
+      - from: resource_attribute
+        name: k8s.pod.ip
+      - from: resource_attribute
+        name: ip
+      - from: connection
+      - from: resource_attribute
+        name: host.name
     extract:
       metadata:
         - k8s.namespace.name
         - k8s.node.name
         - k8s.pod.name
         - k8s.pod.uid
+      annotations:
+        - key: splunk.com/sourcetype
+          from: pod
+        - key: splunk.com/exclude
+          tag_name: splunk.com/exclude
+          from: namespace
+        - key: splunk.com/exclude
+          tag_name: splunk.com/exclude
+          from: pod
       {{- with .Values.extraAttributes.podLabels }}
       labels:
         {{- range . }}
         - key: {{ . }}
         {{- end }}
       {{- end }}
+
+  # Move flat fluentd logs attributes to resource attributes
+  groupbyattrs/logs:
+    keys:
+     - com.splunk.source
+     - com.splunk.sourcetype
+     - container.id
+     - fluent.tag
+     - istio_service_name
+     - k8s.container.name
+     - k8s.namespace.name
+     - k8s.pod.name
+     - k8s.pod.uid
+
+  {{- if not .Values.otelCollector.enabled }}
+  {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
+  {{- end }}
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
 
@@ -206,7 +243,13 @@ service:
       receivers: [fluentforward, otlp]
       processors:
         - memory_limiter
+        - groupbyattrs/logs
+        - k8s_tagger
         - batch
+        {{- if not .Values.otelCollector.enabled }}
+        - filter/logs
+        - resource/logs
+        {{- end }}
         - resource
         - resourcedetection
         {{- if .Values.environment }}

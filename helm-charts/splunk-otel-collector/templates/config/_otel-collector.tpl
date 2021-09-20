@@ -29,18 +29,40 @@ receivers:
 # By default k8s_tagger, memory_limiter and batch processors enabled.
 processors:
   k8s_tagger:
+    pod_association:
+      - from: resource_attribute
+        name: k8s.pod.uid
+      - from: resource_attribute
+        name: k8s.pod.ip
+      - from: resource_attribute
+        name: ip
+      - from: connection
+      - from: resource_attribute
+        name: host.name
     extract:
       metadata:
         - k8s.namespace.name
         - k8s.node.name
         - k8s.pod.name
         - k8s.pod.uid
+      annotations:
+        - key: splunk.com/sourcetype
+          from: pod
+        - key: splunk.com/exclude
+          tag_name: splunk.com/exclude
+          from: namespace
+        - key: splunk.com/exclude
+          tag_name: splunk.com/exclude
+          from: pod
       {{- with .Values.extraAttributes.podLabels }}
       labels:
         {{- range . }}
         - key: {{ . }}
         {{- end }}
       {{- end }}
+
+  {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
 
@@ -132,7 +154,12 @@ service:
     # default logs pipeline
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        - k8s_tagger
+        - batch
+        - filter/logs
+        - resource/logs
       exporters: [splunk_hec]
     {{- end }}
 

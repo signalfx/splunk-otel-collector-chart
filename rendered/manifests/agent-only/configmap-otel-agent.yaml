@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.31.0
+    chart: splunk-otel-collector-0.35.0
     release: default
     heritage: Helm
 data:
@@ -32,8 +32,35 @@ data:
       zpages: null
     processors:
       batch: null
+      filter/logs:
+        logs:
+          resource_attributes:
+          - key: splunk.com/exclude
+            value: "true"
+      groupbyattrs/logs:
+        keys:
+        - com.splunk.source
+        - com.splunk.sourcetype
+        - container.id
+        - fluent.tag
+        - istio_service_name
+        - k8s.container.name
+        - k8s.namespace.name
+        - k8s.pod.name
+        - k8s.pod.uid
       k8s_tagger:
         extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: pod
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          labels:
+          - key: app
           metadata:
           - k8s.namespace.name
           - k8s.node.name
@@ -41,6 +68,16 @@ data:
           - k8s.pod.uid
         filter:
           node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - from: resource_attribute
+          name: k8s.pod.uid
+        - from: resource_attribute
+          name: k8s.pod.ip
+        - from: resource_attribute
+          name: ip
+        - from: connection
+        - from: resource_attribute
+          name: host.name
       memory_limiter:
         ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
         check_interval: 2s
@@ -64,6 +101,15 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/logs:
+        attributes:
+        - action: upsert
+          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          key: com.splunk.sourcetype
+        - action: delete
+          key: k8s.pod.annotations.splunk.com/sourcetype
+        - action: delete
+          key: splunk.com/exclude
       resourcedetection:
         detectors:
         - system
@@ -136,7 +182,11 @@ data:
           - splunk_hec
           processors:
           - memory_limiter
+          - groupbyattrs/logs
+          - k8s_tagger
           - batch
+          - filter/logs
+          - resource/logs
           - resource
           - resourcedetection
           receivers:

@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.31.0
+    chart: splunk-otel-collector-0.35.0
     release: default
     heritage: Helm
 spec:
@@ -22,7 +22,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 4db8ca0f95cd078629000ee4aee534f92a489bf9e7f3d6cde5a731dd844a3ac4
+        checksum/config: b480459f9d4bc6398facf0a0d120a4facb4371c052cb43c71941bf19e4b8f0fe
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -58,7 +58,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.31.0
+        image: quay.io/signalfx/splunk-otel-collector:0.35.0
         imagePullPolicy: IfNotPresent
         env:
           - name: K8S_NODE_NAME
