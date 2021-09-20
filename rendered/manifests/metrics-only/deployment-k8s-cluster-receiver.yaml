@@ -27,6 +27,8 @@ spec:
         checksum/config: 79a8ad99f41f669a4a0fed51e2a7477a72eb68e52f12a78b9045e5d1117c3db7
     spec:
       serviceAccountName: default-splunk-otel-collector
+      nodeSelector:
+          kubernetes.io/os: linux
       containers:
       - name: otel-collector
         command:
