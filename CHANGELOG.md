@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Removed
+
+- Remove PodSecurityPolicy installation option (#195)
+
 ## [0.35.0] - 2021-09-17
 
 ### Added
