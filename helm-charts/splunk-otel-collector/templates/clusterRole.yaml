@@ -8,6 +8,16 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
+{{- if eq .Values.distro "openshift" }}
+- apiGroups:
+  - quota.openshift.io
+  resources:
+  - clusterresourcequotas
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
 {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
 - apiGroups:
   - ""
