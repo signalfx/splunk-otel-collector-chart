@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Support k8s clusters with Windows nodes (#190)
+
 ### Removed
 
 - Remove PodSecurityPolicy installation option (#195)
@@ -16,8 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- smartagent/kubernetes-events now works with `otelK8sClusterReceiver` deployment. (#187)
-- Support k8s clusters with Windows nodes (#190)
 - Move k8s metadata enrichment from fluentd to otel-collector (#192)
 
 ## [0.31.0] - 2021-08-10
