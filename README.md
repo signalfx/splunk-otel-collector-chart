@@ -89,7 +89,7 @@ Kubernetes distributions:
 - [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks)
 - [Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/aks)
 - [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
-- [Minikube](https://kubernetes.io/docs/tutorials/hello-minikube)
+- [Red Hat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift)
 
 While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to
