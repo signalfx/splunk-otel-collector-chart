@@ -203,7 +203,7 @@ processors:
     transforms:
       - include: container.memory.working_set
         action: insert
-        new_name: container_memory_usage_bytes
+        new_name: container.memory.usage
   {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
