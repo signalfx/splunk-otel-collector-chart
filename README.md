@@ -175,6 +175,7 @@ additional metadata. The supported options are:
 - `eks` - Amazon EKS
 - `gke` - Google GKE
 - `aks` - Azure AKS
+- `openshift` - Red Hat OpenShift
 
 This value can be omitted if none of the values apply.
 
