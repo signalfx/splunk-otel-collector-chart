@@ -48,7 +48,7 @@ spec:
         {{- if .Values.nodeSelector }}
         {{ toYaml .Values.nodeSelector | nindent 8 }}
         {{- else }}
-          kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
+        kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
       {{- with .Values.affinity }}
       affinity:
