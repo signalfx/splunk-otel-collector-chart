@@ -227,7 +227,7 @@ logsCollection:
   enabled: true
 ```
 
-There are following limitations of native OTel logs collection:
+There are following known limitations of native OTel logs collection:
 
 - Container attributes `container.id` and `container.image.name` are missed.
   This means that correlation between Splunk Log Observer and Splunk Infrastructure will not work
