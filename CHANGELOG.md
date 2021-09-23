@@ -4,8 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.35.1] - 2021-09-23
+
 ### Added
 
+- Add support for OpenShift distribution (#196)
 - Add native OTel logs collection as an option (#197)
 
 ### Removed
