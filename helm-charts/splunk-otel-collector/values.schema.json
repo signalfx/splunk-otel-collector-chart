@@ -24,7 +24,7 @@
     "distro": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
-      "enum": ["eks", "gke", "aks", " ", ""]
+      "enum": ["eks", "gke", "aks", "openshift", " ", ""]
     },
     "metricsEnabled": {
       "description": "Metrics telemetry enabled",

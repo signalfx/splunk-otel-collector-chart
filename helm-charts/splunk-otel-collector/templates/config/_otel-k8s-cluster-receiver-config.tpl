@@ -18,6 +18,9 @@ receivers:
   k8s_cluster:
     auth_type: serviceAccount
     metadata_exporters: [signalfx]
+    {{- if eq .Values.distro "openshift" }}
+    distribution: openshift
+    {{- end }}
   {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
   smartagent/kubernetes-events:
     type: kubernetes-events
