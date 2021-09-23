@@ -4,6 +4,11 @@ The values can be overridden in .Values.otelAgent.config
 */}}
 {{- define "splunk-otel-collector.otelAgentConfig" -}}
 extensions:
+  {{- if .Values.logsCollection.enabled}}
+  file_storage:
+    directory: {{ .Values.logsCollection.checkpointPath }}
+  {{- end }}
+
   health_check:
 
   k8s_observer:
@@ -92,6 +97,137 @@ receivers:
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
+  {{- end }}
+
+  {{- if and .Values.logsCollection.enabled .Values.logsCollection.containers.enabled }}
+  filelog:
+    include: ["/var/log/pods/*/*/*.log"]
+    # Exclude logs. The file format is
+    # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
+    exclude:
+      {{- if .Values.logsCollection.containers.excludeAgentLogs }}
+      - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
+      {{- end }}
+      {{- range $_, $excludePath := .Values.logsCollection.containers.exclude_paths }}
+      - {{ $excludePath }}
+      {{- end }}
+    start_at: beginning
+    include_file_path: true
+    include_file_name: false
+    poll_interval: 200ms
+    max_concurrent_files: 1024
+    encoding: nop
+    fingerprint_size: 1kb
+    max_log_size: 1MiB
+    operators:
+      {{- if not .Values.logsCollection.containers.containerRuntime }}
+      - type: router
+        id: get-format
+        routes:
+          - output: parser-docker
+            expr: '$$$$body matches "^\\{"'
+          - output: parser-crio
+            expr: '$$$$body matches "^[^ Z]+ "'
+          - output: parser-containerd
+            expr: '$$$$body matches "^[^ Z]+Z"'
+      {{- end }}
+      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
+      # Parse CRI-O format
+      - type: regex_parser
+        id: parser-crio
+        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
+        timestamp:
+          parse_from: time
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.000000000-07:00'
+      - type: recombine
+        id: crio-recombine
+        combine_field: log
+        is_last_entry: "($$.logtag) == 'F'"
+      - type: restructure
+        id: crio-handle_empty_log
+        output: filename
+        if: $$.log == nil
+        ops:
+          - add:
+              field: log
+              value: ""
+      {{- end }}
+      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
+      # Parse CRI-Containerd format
+      - type: regex_parser
+        id: parser-containerd
+        regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
+        timestamp:
+          parse_from: time
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: recombine
+        id: containerd-recombine
+        combine_field: log
+        is_last_entry: "($$.logtag) == 'F'"
+      - type: restructure
+        id: containerd-handle_empty_log
+        output: filename
+        if: $$.log == nil
+        ops:
+          - add:
+              field: log
+              value: ""
+      {{- end }}
+      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
+      # Parse Docker format
+      - type: json_parser
+        id: parser-docker
+        timestamp:
+          parse_from: time
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      {{- end }}
+      - type: metadata
+        id: filename
+        resource:
+          com.splunk.source: EXPR($$$$attributes["file.path"])
+      # Extract metadata from file path
+      - type: regex_parser
+        id: extract_metadata_from_filepath
+        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<run_id>\d+)\.log$'
+        parse_from: $$$$attributes["file.path"]
+      # Move out attributes to Attributes
+      - type: metadata
+        resource:
+          k8s.pod.uid: 'EXPR($$.uid)'
+          run_id: 'EXPR($$.run_id)'
+          k8s.container.name: 'EXPR($$.container_name)'
+          k8s.namespace.name: 'EXPR($$.namespace)'
+          k8s.pod.name: 'EXPR($$.pod_name)'
+          com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
+        attributes:
+          stream: 'EXPR($$.stream)'
+      {{- if .Values.logsCollection.containers.multilineConfigs }}
+      - type: router
+        routes:
+        {{- range $.Values.logsCollection.containers.multilineConfigs }}
+        - output: {{ .containerName | quote }}
+          expr: '($$$$resource["k8s.container.name"]) == {{ .containerName | quote }}'
+        {{- end }}
+        default: clean-up-log-record
+      {{- range $.Values.logsCollection.containers.multilineConfigs }}
+      - type: recombine
+        id: {{.containerName | quote }}
+        output: clean-up-log-record
+        combine_field: log
+        is_first_entry: '($$.log) matches {{ .first_entry_regex | quote }}'
+      {{- end }}
+      {{- end }}
+      {{- with .Values.logsCollection.containers.extraOperators }}
+      {{ . | toYaml | nindent 6 }}
+      {{- end }}
+      # Clean up log record
+      - type: restructure
+        id: clean-up-log-record
+        ops:
+          - move:
+              from: log
+              to: $$
   {{- end }}
 
 # By default k8s_tagger and batch processors enabled.
@@ -231,7 +367,13 @@ exporters:
     sync_host_metadata: true
 
 service:
-  extensions: [health_check, k8s_observer, zpages]
+  extensions:
+    {{- if .Values.logsCollection.enabled }}
+    - file_storage
+    {{- end }}
+    - health_check
+    - k8s_observer
+    - zpages
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
   # or directly to signalfx backend depending on otelCollector.enabled configuration.
@@ -240,7 +382,12 @@ service:
   pipelines:
     {{- if .Values.logsEnabled }}
     logs:
-      receivers: [fluentforward, otlp]
+      receivers:
+        {{- if and .Values.logsCollection.enabled .Values.logsCollection.containers.enabled }}
+        - filelog
+        {{- end }}
+        - fluentforward
+        - otlp
       processors:
         - memory_limiter
         - groupbyattrs/logs

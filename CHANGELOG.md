@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add native OTel logs collection as an option (#197)
+
 ### Removed
 
 - Remove PodSecurityPolicy installation option (#195)

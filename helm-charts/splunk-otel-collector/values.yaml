@@ -234,11 +234,64 @@ otelK8sClusterReceiver:
   # existing fields can be disabled by setting them to null value.
   config: {}
 
+#################################################################
+# Native OtelTelemetry logs collection using
+# https://github.com/open-telemetry/opentelemetry-log-collection.
+# Status: Experimental / disabled by default in favor of fluentd.
+#################################################################
+
+logsCollection:
+  # Otel native logs collection is disabled by default.
+  # If you want to enabled it, make sure to disable fluentd to avoid duplication.
+  enabled: false
+
+  # Container logs collection
+  containers:
+    enabled: true
+    # Container runtime. One of `docker`, `cri-o`, or `containerd`
+    # Automatically discovered if not set.
+    containerRuntime: ""
+    # Paths of logfiles to exclude. object type is array:
+    # i.e. to exclude `kube-system` namespace,
+    # excludePaths: ["/var/log/pods/kube-system_*/*/*.log"]
+    excludePaths: []
+    # Boolean for ingesting the agent's own log
+    excludeAgentLogs: true
+    # Extra operators for container logs.
+    # https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
+    extraOperators: []
+
+    # Multiline logs currently support only container name which is not unique within the cluster.
+    # TODO: support k8s object owner name (deployment, daemonset, statefulset) along with namespace
+    multilineConfigs: []
+    # Example configuration for processing and handling multiline logs/ java stack trace from test
+    # container "buttercup-app" by specifying  a regular expression (first_entry_regex) to parse first
+    # entry in a multiline log series.
+    #  Sample java stack trace/ multiline log from container "buttercup-app"
+    #  .........
+    #  Exception in thread "main" java.lang.NumberFormatException: For input string: "3.1415"
+    #      at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+    #      at java.lang.Integer.parseInt(Integer.java:580)
+    #      at ExampleCli.parseNumericArgument(ExampleCli.java:47)
+    #      at ExampleCli.parseCliOptions(ExampleCli.java:27)
+    #      at ExampleCli.main(ExampleCli.java:11)
+    #  .........
+    #  Sample configuration to handle multiline java stack trace from buttercup-app container
+    #  multilineConfigs:
+    #    - containerName: buttercup-app
+    #      first_entry_regex: ^.+Exception[^\n]++(\s+at.*)+
+
+  checkpointPath: "/var/lib/otel_pos"
+
 ################################################################################
-# Fluentd configuration for logs collection
+# Fluentd sidecar configuration for logs collection.
+# As of now, this is the recommended way to collect k8s logs,
+# but it will be replaced by the native otel logs collection soon.
 ################################################################################
 
 fluentd:
+  enabled: true
+
   resources:
     limits:
       cpu: 500m

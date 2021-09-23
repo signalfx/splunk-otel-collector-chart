@@ -207,6 +207,35 @@ $ helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+## Logs collection
+
+The helm chart currently utilizes [fluentd](https://docs.fluentd.org/) for Kubernetes logs
+collection. Logs collected with fluentd are sent through Splunk OTel Collector agent which
+does all the necessary metadata enrichment.
+
+OpenTelemetry Collector also has
+[native functionality for logs collection](https://github.com/open-telemetry/opentelemetry-log-collection).
+This chart soon will be migrated from fluentd to the OpenTelemetry logs collection.
+
+You already have an option to use OpenTelemetry logs collection instead of fluentd.
+The following configuration can be used to achieve that:
+
+```yaml
+fluentd:
+  enabled: false
+logsCollection:
+  enabled: true
+```
+
+There are following known limitations of native OTel logs collection:
+
+- Container attributes `container.id` and `container.image.name` are missed.
+  This means that correlation between Splunk Log Observer and Splunk Infrastructure will not work
+  on container level, but only on kubernetes pod level.
+- `service.name` attribute will not be automatically constructed in istio environment.
+  This means that correlation between logs and traces will not work in Splunk Observability.
+  Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
+
 ## Additional telemetry sources
 
 Use `autodetect` config option to enable additional telemetry sources.
