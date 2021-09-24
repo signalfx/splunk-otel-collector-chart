@@ -118,7 +118,6 @@ service:
         - memory_limiter
         - batch
         - resource
-        - resourcedetection
       exporters: [signalfx]
     {{- end }}
 {{- end }}
