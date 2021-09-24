@@ -24,6 +24,7 @@ receivers:
   {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
   smartagent/kubernetes-events:
     type: kubernetes-events
+    alwaysClusterReporter: true
     whitelistedEvents:
     - reason: Created
       involvedObjectKind: Pod

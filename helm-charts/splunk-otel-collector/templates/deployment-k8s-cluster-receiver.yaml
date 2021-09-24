@@ -90,16 +90,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
-          - name: MY_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: MY_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          {{- end }}
           - name: SPLUNK_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
