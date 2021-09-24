@@ -18,19 +18,6 @@ rules:
   - list
   - watch
 {{- end }}
-{{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - update
-  - patch
-  - create
-  - list
-  - watch
-{{- end }}
 - apiGroups:
   - ""
   resources:
