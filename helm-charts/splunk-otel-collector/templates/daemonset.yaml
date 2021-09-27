@@ -8,7 +8,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if .Values.logsEnabled }}
+    {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
     engine: fluentd
     {{- end }}
   {{- if .Values.otelAgent.annotations }}
@@ -58,7 +58,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.logsEnabled }}
+      {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
       initContainers:
         - name: prepare-fluentd-config
           image: {{ .Values.image.fluentd.initContainer.image }}
@@ -90,7 +90,7 @@ spec:
               mountPath: /fluentd/etc/cri
       {{- end }}
       containers:
-      {{- if .Values.logsEnabled }}
+      {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
       - name: fluentd
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -237,12 +237,23 @@ spec:
           readOnly: true
           mountPropagation: HostToContainer
         {{- end }}
+        {{- if and .Values.logsEnabled .Values.logsCollection.enabled }}
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: checkpoint
+          mountPath: {{ .Values.logsCollection.checkpointPath }}
+        {{- end }}
         {{- if .Values.otelAgent.extraVolumeMounts }}
         {{- toYaml .Values.otelAgent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.logsEnabled }}
+      {{- if .Values.fluentd.enabled }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -266,6 +277,19 @@ spec:
       - name: fluentd-config-json
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
+      {{- end}}
+      {{- if .Values.logsCollection.enabled }}
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: checkpoint
+        hostPath:
+          path: {{ .Values.logsCollection.checkpointPath }}
+          type: DirectoryOrCreate
+      {{- end}}
       {{- end}}
       {{- if .Values.metricsEnabled }}
       - name: hostfs

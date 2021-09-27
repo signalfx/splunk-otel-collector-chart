@@ -1,4 +1,4 @@
-{{ if and .Values.logsEnabled .Values.otelAgent.enabled }}
+{{ if and .Values.logsEnabled .Values.otelAgent.enabled .Values.fluentd.enabled }}
 {{/*
 Fluentd config parts applied only to clusters with docker runtime.
 */}}

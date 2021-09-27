@@ -24,6 +24,7 @@ receivers:
   {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
   smartagent/kubernetes-events:
     type: kubernetes-events
+    alwaysClusterReporter: true
     whitelistedEvents:
     - reason: Created
       involvedObjectKind: Pod
@@ -91,6 +92,14 @@ exporters:
     access_token: ${SPLUNK_ACCESS_TOKEN}
     timeout: 10s
 
+  {{- if and .Values.logsEnabled .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+  splunk_hec:
+    endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
+    token: "${SPLUNK_ACCESS_TOKEN}"
+    sourcetype: kube:events
+    source: kubelet
+  {{- end }}
+
 service:
   extensions: [health_check]
   pipelines:
@@ -118,7 +127,10 @@ service:
         - memory_limiter
         - batch
         - resource
-        - resourcedetection
-      exporters: [signalfx]
+      exporters:
+        - signalfx
+        {{- if .Values.logsEnabled }}
+        - splunk_hec
+        {{- end }}
     {{- end }}
 {{- end }}
