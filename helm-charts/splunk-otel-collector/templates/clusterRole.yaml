@@ -84,3 +84,6 @@ rules:
   - get
   - list
   - watch
+{{- with .Values.rbac.customRules }}
+{{ toYaml . }}
+{{- end }}

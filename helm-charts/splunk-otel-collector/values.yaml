@@ -614,6 +614,10 @@ serviceAccount:
   # Service account annotations
   annotations: {}
 
+rbac:
+  # Specifies additional rules that will be added to the clusterRole.
+  customRules: []
+
 # Create or use existing secret if name is empty default name is used
 secret:
   create: true
