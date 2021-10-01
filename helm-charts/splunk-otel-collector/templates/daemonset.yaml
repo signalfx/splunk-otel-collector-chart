@@ -39,13 +39,17 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
+      {{- if not .Values.isWindows }}
       hostNetwork: true
+      {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
+        {{- if .Values.nodeSelector }}
+        {{ toYaml .Values.nodeSelector | nindent 8 }}
+        {{- else }}
+        kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
+        {{- end }}
       {{- with .Values.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
@@ -131,8 +135,15 @@ spec:
       {{- end }}
       - name: otel-collector
         command:
+        {{- if .Values.isWindows }}
+        - powershell.exe
+        - -command
+        - .\otelcol.exe
+        - --config=C:\\conf\relay.yaml
+        {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
+        {{- end }}
         - --metrics-addr=0.0.0.0:8889
         {{- range .Values.otelAgent.extraArgs }}
         - {{ . }}
@@ -185,37 +196,43 @@ spec:
           {{- if .Values.metricsEnabled }}
           # Env variables for host metrics receiver
           - name: HOST_PROC
-            value: /hostfs/proc
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\proc" "/hostfs/proc" }}
           - name: HOST_SYS
-            value: /hostfs/sys
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\sys" "/hostfs/sys" }}
           - name: HOST_ETC
-            value: /hostfs/etc
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\etc" "/hostfs/etc" }}
           - name: HOST_VAR
-            value: /hostfs/var
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\var" "/hostfs/var" }}
           - name: HOST_RUN
-            value: /hostfs/run
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\run" "/hostfs/run" }}
           - name: HOST_DEV
-            value: /hostfs/dev
+            value: {{ .Values.isWindows | ternary "C:\\hostfs\\dev" "/hostfs/dev" }}
           {{- end }}
           {{- with .Values.otelAgent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
 
         readinessProbe:
+          {{- if .Values.readinessProbe.initialDelaySeconds }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          {{- end }}
           httpGet:
             path: /
             port: 13133
         livenessProbe:
+          {{- if .Values.livenessProbe.initialDelaySeconds }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          {{- end }}
           httpGet:
             path: /
             port: 13133
         resources:
           {{- toYaml .Values.otelAgent.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: /conf
+        - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
         {{- if .Values.metricsEnabled }}
-        - mountPath: /hostfs
+        - mountPath: {{ .Values.isWindows | ternary "C:\\hostfs" "/hostfs" }}
           name: hostfs
           readOnly: true
           mountPropagation: HostToContainer
@@ -277,7 +294,7 @@ spec:
       {{- if .Values.metricsEnabled }}
       - name: hostfs
         hostPath:
-          path: /
+          path: {{ .Values.isWindows | ternary "C:\\" "/" }}
       {{- end }}
       - name: otel-configmap
         configMap:

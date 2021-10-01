@@ -639,6 +639,16 @@ affinity: {}
 # Defines priorityClassName to assign a priority class to pods.
 priorityClassName: ""
 
+# This tells the kubelet that it should wait for x seconds before performing the first probe.
+# This is required in case you are using windows worker nodes.
+# It is recommended to keep it a 60-second window but it depends on cluster specification.
+readinessProbe:
+  initialDelaySeconds: 0
+livenessProbe:
+  initialDelaySeconds: 0
+
+# Specifies whether to apply for k8s cluster with windows worker node.
+isWindows: false
 
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.

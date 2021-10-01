@@ -334,6 +334,14 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  {{- if .Values.isWindows }}
+  metricstransform:
+    transforms:
+      - include: container.memory.working_set
+        action: insert
+        new_name: container.memory.usage
+  {{- end }}
+
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
 # These values should not be specified manually and will be set in the templates.
@@ -444,6 +452,9 @@ service:
         - batch
         - resource
         - resourcedetection
+        {{- if .Values.isWindows }}
+        - metricstransform
+        {{- end }}
       exporters:
         {{- if .Values.otelCollector.enabled }}
         - otlp

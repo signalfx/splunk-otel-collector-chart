@@ -39,10 +39,12 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- if .Values.otelK8sClusterReceiver.nodeSelector }}
       nodeSelector:
+        {{- if .Values.otelK8sClusterReceiver.nodeSelector }}
         {{ toYaml .Values.otelK8sClusterReceiver.nodeSelector | nindent 8 }}
-      {{- end }}
+        {{- else }}
+          kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
+        {{- end }}
       {{- if .Values.otelK8sClusterReceiver.tolerations }}
       tolerations:
         {{ toYaml .Values.otelK8sClusterReceiver.tolerations | nindent 8 }}
@@ -58,8 +60,15 @@ spec:
       containers:
       - name: otel-collector
         command:
+        {{- if .Values.isWindows }}
+        - powershell.exe
+        - -command
+        - .\otelcol.exe
+        - --config=C:\\conf\relay.yaml
+        {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
+        {{- end }}
         - --metrics-addr=0.0.0.0:8889
         {{- range .Values.otelK8sClusterReceiver.extraArgs }}
         - {{ . }}
@@ -99,17 +108,23 @@ spec:
           {{- . | toYaml | nindent 10 }}
           {{- end }}
         readinessProbe:
+          {{- if .Values.readinessProbe.initialDelaySeconds }}
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          {{- end }}
           httpGet:
             path: /
             port: 13133
         livenessProbe:
+          {{- if .Values.livenessProbe.initialDelaySeconds }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          {{- end }}
           httpGet:
             path: /
             port: 13133
         resources:
           {{- toYaml .Values.otelK8sClusterReceiver.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: /conf
+        - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
         {{- if .Values.otelK8sClusterReceiver.extraVolumeMounts }}
         {{- toYaml .Values.otelK8sClusterReceiver.extraVolumeMounts | nindent 8 }}
