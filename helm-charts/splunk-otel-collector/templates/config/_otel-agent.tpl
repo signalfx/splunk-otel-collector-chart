@@ -206,16 +206,16 @@ receivers:
       - type: router
         routes:
         {{- range $.Values.logsCollection.containers.multilineConfigs }}
-        - output: {{ .containerName | quote }}
-          expr: '($$$$resource["k8s.container.name"]) == {{ .containerName | quote }}'
+          - output: {{ include "splunk-otel-collector.newlineKey" . | quote }}
+            expr: {{ include "splunk-otel-collector.newlineExpr" . | quote }}
         {{- end }}
         default: clean-up-log-record
       {{- range $.Values.logsCollection.containers.multilineConfigs }}
       - type: recombine
-        id: {{.containerName | quote }}
+        id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
         output: clean-up-log-record
         combine_field: log
-        is_first_entry: '($$.log) matches {{ .first_entry_regex | quote }}'
+        is_first_entry: '($$.log) matches {{ .firstEntryRegex | quote }}'
       {{- end }}
       {{- end }}
       {{- with .Values.logsCollection.containers.extraOperators }}

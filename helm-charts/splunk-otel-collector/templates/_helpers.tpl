@@ -120,3 +120,40 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{- div (div ($mem | atoi) 1024) 1024 -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Creates a filter expression for multiline logs configuration.
+*/}}
+{{- define "splunk-otel-collector.newlineExpr" }}
+{{- $expr := "" }}
+{{- if .namespaceName }}
+{{- $useRegexp := eq (toString .namespaceName.useRegexp | default "false") "true" }}
+{{- $expr = cat "($$$$resource[\"k8s.namespace.name\"])" (ternary "matches" "==" $useRegexp) (quote .namespaceName.value) "&&" }}
+{{- end }}
+{{- if .podName }}
+{{- $useRegexp := eq (toString .podName.useRegexp | default "false") "true" }}
+{{- $expr = cat $expr "($$$$resource[\"k8s.pod.name\"])" (ternary "matches" "==" $useRegexp) (quote .podName.value) "&&" }}
+{{- end }}
+{{- if .containerName }}
+{{- $useRegexp := eq (toString .containerName.useRegexp | default "false") "true" }}
+{{- $expr = cat $expr "($$$$resource[\"k8s.container.name\"])" (ternary "matches" "==" $useRegexp) (quote .containerName.value) "&&" }}
+{{- end }}
+{{- $expr | trimSuffix "&&" | trim }}
+{{- end -}}
+
+{{/*
+Creates a identifier for multiline logs configuration.
+*/}}
+{{- define "splunk-otel-collector.newlineKey" }}
+{{- $key := "" }}
+{{- if .namespaceName }}
+{{- $key = printf "%s_" .namespaceName.value }}
+{{- end }}
+{{- if .podName }}
+{{- $key = printf "%s%s_" $key .podName.value }}
+{{- end }}
+{{- if .containerName }}
+{{- $key = printf "%s%s" $key .containerName.value }}
+{{- end }}
+{{- $key | trimSuffix "_" }}
+{{- end -}}
