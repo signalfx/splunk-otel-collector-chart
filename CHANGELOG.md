@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Improve multiline logs configuration for native logs collection (#208)
+
 ## [0.35.3] - 2021-09-29
 
 ### Added
