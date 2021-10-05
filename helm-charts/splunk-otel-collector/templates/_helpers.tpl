@@ -122,7 +122,7 @@ Convert memory value from resources.limit to numeric value in MiB to be used by 
 {{- end -}}
 
 {{/*
-Creates a filter expression for multiline logs configuration.
+Create a filter expression for multiline logs configuration.
 */}}
 {{- define "splunk-otel-collector.newlineExpr" }}
 {{- $expr := "" }}
@@ -142,7 +142,7 @@ Creates a filter expression for multiline logs configuration.
 {{- end -}}
 
 {{/*
-Creates a identifier for multiline logs configuration.
+Create an identifier for multiline logs configuration.
 */}}
 {{- define "splunk-otel-collector.newlineKey" }}
 {{- $key := "" }}
