@@ -104,13 +104,12 @@ Filter logs processor
 */}}
 {{- define "splunk-otel-collector.filterLogsProcessors" -}}
 # Drop logs coming from pods and namespaces with splunk.com/exclude annotation.
-# TODO: Update the interface once the following change is released:
-#       https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/4895
 filter/logs:
   logs:
-    resource_attributes:
-      - key: splunk.com/exclude
-        value: "true"
+    exclude:
+      resource_attributes:
+        - key: splunk.com/exclude
+          value: "true"
 {{- end }}
 
 {{/*

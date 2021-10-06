@@ -356,7 +356,8 @@ exporters:
   # If collector is enabled, metrics, logs and traces will be sent to collector
   otlp:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
-    insecure: true
+    tls:
+      insecure: true
   {{- else }}
   # If collector is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}

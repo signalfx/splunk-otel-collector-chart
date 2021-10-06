@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.36.0] - 2021-10-06
+
+### Added
+
+- Support k8s clusters with Windows nodes (#190)
+
 ### Changed
 
 - Change configuration interface to be able to send data to Splunk
@@ -20,7 +26,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Support k8s clusters with Windows nodes (#190)
 - Send k8s events additionally to Splunk HEC endpoint (#202)
 
 ## [0.35.1] - 2021-09-23

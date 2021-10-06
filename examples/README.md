@@ -125,7 +125,8 @@ otelAgent:
     exporters:
       otlp:
         endpoint: <custom-gateway-url>:4317
-        insecure: true
+        tls:
+          insecure: true
       signalfx:
         ingest_url: http://<custom-gateway-url>:9943
         api_url: http://<custom-gateway-url>:6060

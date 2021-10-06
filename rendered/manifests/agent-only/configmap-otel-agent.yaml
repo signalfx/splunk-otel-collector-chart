@@ -6,7 +6,7 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.35.3
+    chart: splunk-otel-collector-0.36.0
     release: default
     heritage: Helm
 data:
@@ -36,9 +36,10 @@ data:
       batch: null
       filter/logs:
         logs:
-          resource_attributes:
-          - key: splunk.com/exclude
-            value: "true"
+          exclude:
+            resource_attributes:
+            - key: splunk.com/exclude
+              value: "true"
       groupbyattrs/logs:
         keys:
         - com.splunk.source
