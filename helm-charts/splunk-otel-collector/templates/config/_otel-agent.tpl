@@ -9,6 +9,9 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
+  memory_ballast:
+    size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+
   health_check:
 
   k8s_observer:
@@ -393,6 +396,7 @@ service:
     {{- end }}
     - health_check
     - k8s_observer
+    - memory_ballast
     - zpages
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
