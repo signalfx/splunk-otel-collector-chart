@@ -128,9 +128,9 @@ For Splunk Enterprise/Cloud the following parameters are required:
 
 For Splunk Observability Cloud the following parameters are required:
 
-- `splunkObservability.splunkRealm` (default `us0`): Splunk realm to send
+- `splunkObservability.realm` (default `us0`): Splunk realm to send
   telemetry data to.
-- `splunkObservability.splunkAccessToken`: Your Splunk Observability org access
+- `splunkObservability.accessToken`: Your Splunk Observability org access
   token.
 - `clusterName`: arbitrary value that will identify your Kubernetes cluster in
   Splunk Observability Cloud.
@@ -140,7 +140,7 @@ commands replacing the parameters above with their appropriate values.
 
 ```bash
 $ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-$ helm install my-splunk-otel-collector --set="splunkObservability.splunkRealm=us0,splunkObservability.splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+$ helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
