@@ -305,14 +305,19 @@ The [rendered directory](rendered) contains pre-rendered Kubernetes resource man
 
 [#209 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/209)
 
-The following parameters required to send data to Splunk Observability are now
-deprecated and moved under `splunkObservability` group. They need to be updated
-in your custom values.yaml files before backward compatibility is discontinued.
+The following parameters are now deprecated and moved under
+`splunkObservability` group. They need to be updated in your custom values.yaml
+files before backward compatibility is discontinued.
+
+Required parameters:
 
 - `splunkRealm` changed to `splunkObservability.realm`
 - `splunkAccessToken` changed to `splunkObservability.accessToken`
+
+Optional parameters:
+
 - `ingestUrl` changed to `splunkObservability.ingestUrl`
-- `apiUrl` changed to `splunkObservability.ingestUrl`
+- `apiUrl` changed to `splunkObservability.apiUrl`
 - `metricsEnabled` changed to `splunkObservability.metricsEnabled`
 - `tracesEnabled` changed to `splunkObservability.tracesEnabled`
 - `logsEnabled` changed to `splunkObservability.logsEnabled`
