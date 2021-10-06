@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Change configuration interface to be able to send data to Splunk
+  Enterprise/Cloud and to Splunk Observability (#209)
 - Improve multiline logs configuration for native logs collection (#208)
 
 ## [0.35.3] - 2021-09-29

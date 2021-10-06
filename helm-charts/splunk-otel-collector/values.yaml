@@ -3,31 +3,86 @@
 # Declared variables will be passed into templates.
 
 ################################################################################
-# clusterName is a REQUIRED field. It can be set to an arbitrary value
-# that identifies this K8s cluster in SignalFx. The value will be associated
-# with every trace, metric and log as "k8s.cluster.name" metadata attribute.
+# clusterName is a REQUIRED field for Spunk Observability. It can be set to an
+# arbitrary value that identifies this K8s cluster in SignalFx. The value will
+# be associated with every trace, metric and log as "k8s.cluster.name" metadata
+# attribute.
 ################################################################################
 
-clusterName: k8s-cluster
-
+clusterName: ""
 
 ################################################################################
-# Splunk SignalFx backend configuration
+# Splunk Data-to-Everything Platform configuration.
 ################################################################################
 
-# The SignalFx realm to send telemetry data to. If set, the values of `ingestUrl`
-# and `apiUrl` will be automatically set based on this
-# realm value. If not set, it defaults to the original "us0" realm.
-splunkRealm: us0
+# Specify `endpoint` and `token` in order to send data to Splunk Cloud or Splunk
+# Enterprise.
+splunkPlatform:
+  # Required for Splunk Enterprise/Cloud. URL to a Splunk instance to send data to.
+  # e.g. "http://X.X.X.X:8088/services/collector"
+  endpoint: ""
+  # Required for Splunk Enterprise/Cloud. Splunk HTTP Event Collector token.
+  token: ""
 
-# (REQUIRED) SignalFx org access token.
-splunkAccessToken:
+  # Optional. Name of the Splunk index targeted.
+  index: ""
+  metrics_index:
+  # Optional. Default value for `source` field.
+  source: "kubernetes"
+  # Optional. Default value for `sourcetype` field. For container logs, it will
+  # be container name.
+  sourcetype:
+  # Maximum HTTP connections to use simultaneously when sending data.
+  max_connections: 200
+  # Whether to disable gzip compression over HTTP. Defaults to true.
+  disable_compression: true
+  # HTTP timeout when sending data. Defaults to 10s.
+  timeout: 10s
+  # Whether to skip checking the certificate of the HEC endpoint when sending
+  # data over HTTPS.
+  insecure_skip_verify: false
+  # The PEM-format CA certificate for this client.
+  # NOTE: The content of the certificate itself should be used here, not the
+  #       file path. The certificate will be stored as a secret in kubernetes.
+  clientCert: ""
+  # The private key for this client.
+  # NOTE: The content of the key itself should be used here, not the file path.
+  #       The key will be stored as a secret in kubernetes.
+  clientKey: ""
+  # The PEM-format CA certificate file.
+  # NOTE: The content of the file itself should be used here, not the file path.
+  #       The file will be stored as a secret in kubernetes.
+  caFile: ""
 
-# SignalFx ingest URL, default: "https://ingest.<realm>.signalfx.com".
-ingestUrl:
+  # Options to disable particular telemetry data types that will be sent to
+  # Splunk Platform.
+  logsEnabled: true
+  metricsEnabled: true
 
-# The SignalFx API URL, default: "https://api.<realm>.signalfx.com".
-apiUrl:
+################################################################################
+# Splunk Observability configuration
+################################################################################
+
+# Specify `realm` and `accessToken` to telemetry data to Splunk Observability
+# Cloud.
+splunkObservability:
+  # Required for Splunk Observability. Splunk Observability realm to send
+  # telemetry data to.
+  realm: us0
+  # Required for Splunk Observability. Splunk Observability org access token.
+  accessToken: ""
+
+  # Optional. Splunk Observability ingest URL, default:
+  # "https://ingest.<realm>.signalfx.com".
+  ingestUrl: ""
+  # Optional. Splunk Observability API URL, default:
+  # "https://api.<realm>.signalfx.com".
+  apiUrl: ""
+
+  # Options to disable particular telemetry data types.
+  logsEnabled: true
+  metricsEnabled: true
+  tracesEnabled: true
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
@@ -47,16 +102,6 @@ provider: ""
 ################################################################################
 
 distro: ""
-
-################################################################################
-# Telemetry configuration.
-# By default metrics, traces and logs are collected from the k8s cluster.
-# It's possible to disable any kind of telemetry, if it's not needed.
-################################################################################
-
-metricsEnabled: true
-tracesEnabled: true
-logsEnabled: true
 
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry

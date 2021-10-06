@@ -8,7 +8,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
     engine: fluentd
     {{- end }}
   {{- if .Values.otelAgent.annotations }}
@@ -58,7 +58,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
       initContainers:
         - name: prepare-fluentd-config
           image: {{ .Values.image.fluentd.initContainer.image }}
@@ -90,7 +90,7 @@ spec:
               mountPath: /fluentd/etc/cri
       {{- end }}
       containers:
-      {{- if and .Values.logsEnabled .Values.fluentd.enabled }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
       - name: fluentd
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -150,7 +150,7 @@ spec:
         {{- end }}
         ports:
         {{- range $key, $port := .Values.otelAgent.ports }}
-        {{- if eq true (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
+        {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
         {{- end }}
@@ -188,12 +188,21 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_ACCESS_TOKEN
+          {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+          - name: SPLUNK_O11Y_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
-                key: splunk_access_token
-          {{- if .Values.metricsEnabled }}
+                key: splunk_o11y_access_token
+          {{- end }}
+          {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "splunk-otel-collector.secret" . }}
+                key: splunk_platform_hec_token
+          {{- end }}
+          {{- if eq (include "splunk-otel-collector.metricsEnabled" .) "true" }}
           # Env variables for host metrics receiver
           - name: HOST_PROC
             value: {{ .Values.isWindows | ternary "C:\\hostfs\\proc" "/hostfs/proc" }}
@@ -231,13 +240,13 @@ spec:
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
-        {{- if .Values.metricsEnabled }}
+        {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\hostfs" "/hostfs" }}
           name: hostfs
           readOnly: true
           mountPropagation: HostToContainer
         {{- end }}
-        {{- if and .Values.logsEnabled .Values.logsCollection.enabled }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled }}
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -252,7 +261,7 @@ spec:
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
-      {{- if .Values.logsEnabled }}
+      {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
       {{- if .Values.fluentd.enabled }}
       - name: varlog
         hostPath:
@@ -291,7 +300,7 @@ spec:
           type: DirectoryOrCreate
       {{- end}}
       {{- end}}
-      {{- if .Values.metricsEnabled }}
+      {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
       - name: hostfs
         hostPath:
           path: {{ .Values.isWindows | ternary "C:\\" "/" }}

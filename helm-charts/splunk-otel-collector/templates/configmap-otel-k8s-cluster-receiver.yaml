@@ -1,4 +1,4 @@
-{{ if and .Values.otelK8sClusterReceiver.enabled .Values.metricsEnabled }}
+{{ if and .Values.otelK8sClusterReceiver.enabled (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

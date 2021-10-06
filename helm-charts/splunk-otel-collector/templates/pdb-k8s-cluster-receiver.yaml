@@ -1,4 +1,4 @@
-{{- if and (and .Values.otelK8sClusterReceiver.enabled .Values.metricsEnabled) .Values.podDisruptionBudget }}
+{{- if and (and .Values.otelK8sClusterReceiver.enabled (eq (include "splunk-otel-collector.metricsEnabled" $) "true")) .Values.podDisruptionBudget }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:

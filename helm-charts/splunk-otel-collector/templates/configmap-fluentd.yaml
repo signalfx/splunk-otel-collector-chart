@@ -1,4 +1,4 @@
-{{ if and .Values.logsEnabled .Values.otelAgent.enabled .Values.fluentd.enabled }}
+{{ if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.otelAgent.enabled .Values.fluentd.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

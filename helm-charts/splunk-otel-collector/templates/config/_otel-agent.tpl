@@ -4,7 +4,7 @@ The values can be overridden in .Values.otelAgent.config
 */}}
 {{- define "splunk-otel-collector.otelAgentConfig" -}}
 extensions:
-  {{- if .Values.logsCollection.enabled}}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.enabled }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
@@ -19,7 +19,7 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
-  {{- if .Values.logsEnabled }}
+  {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   fluentforward:
     endpoint: 0.0.0.0:8006
   {{- end }}
@@ -36,7 +36,7 @@ receivers:
           # Fluend metrics collection disabled by default
           # - "${K8S_POD_IP}:24231"
 
-  {{- if .Values.metricsEnabled }}
+  {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:
     collection_interval: 10s
     scrapers:
@@ -93,7 +93,7 @@ receivers:
     endpoint: 0.0.0.0:9943
   {{- end }}
 
-  {{- if .Values.tracesEnabled }}
+  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
@@ -304,9 +304,11 @@ processors:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
+      {{- with .Values.clusterName }}
       - action: insert
         key: k8s.cluster.name
-        value: "{{ .Values.clusterName }}"
+        value: "{{ . }}"
+      {{- end }}
       {{- range .Values.extraAttributes.custom }}
       - action: insert
         key: "{{ .name }}"
@@ -353,30 +355,40 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     insecure: true
   {{- else }}
-  # If collector is disabled, metrics, logs and traces will be sent to to SignalFx backend
+  # If collector is disabled, data will be sent to directly to backends.
+  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
-  {{- if .Values.logsEnabled }}
-  splunk_hec:
-    endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
-    token: "${SPLUNK_ACCESS_TOKEN}"
+  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+  splunk_hec/o11y:
+    endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
+    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
+  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
     correlation:
     {{- if .Values.otelCollector.enabled }}
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}
-    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
-    access_token: ${SPLUNK_ACCESS_TOKEN}
+    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
     sync_host_metadata: true
+  {{- end }}
 
 service:
   extensions:
-    {{- if .Values.logsCollection.enabled }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.enabled }}
     - file_storage
     {{- end }}
     - health_check
@@ -388,7 +400,7 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in otelAgent.config overrides.
   pipelines:
-    {{- if .Values.logsEnabled }}
+    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
         {{- if and .Values.logsCollection.enabled .Values.logsCollection.containers.enabled }}
@@ -414,11 +426,16 @@ service:
         {{- if .Values.otelCollector.enabled }}
         - otlp
         {{- else }}
-        - splunk_hec
+        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+        - splunk_hec/o11y
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        - splunk_hec/platform_logs
+        {{- end }}
         {{- end }}
     {{- end }}
 
-    {{- if .Values.tracesEnabled }}
+    {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
     # Default traces pipeline.
     traces:
       receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
@@ -437,13 +454,13 @@ service:
         {{- else }}
         - sapm
         {{- end }}
-        {{- if .Values.metricsEnabled }}
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
         # For trace/metric correlation.
         - signalfx
         {{- end }}
     {{- end }}
 
-    {{- if .Values.metricsEnabled }}
+    {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
       receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
@@ -459,10 +476,16 @@ service:
         {{- if .Values.otelCollector.enabled }}
         - otlp
         {{- else }}
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
     {{- end }}
 
+    {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
       receivers: [prometheus/agent]
@@ -473,7 +496,17 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
       exporters:
+        {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         # Use signalfx instead of otlp even if collector is enabled
         # in order to sync host metadata.
         - signalfx
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
+        {{- if .Values.otelCollector.enabled }}
+        - otlp
+        {{- else }}
+        - splunk_hec/platform_metrics
+        {{- end }}
+        {{- end }}
+    {{- end }}
 {{- end }}
