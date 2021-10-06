@@ -7,8 +7,6 @@ memory_limiter:
   check_interval: 2s
   # By default limit_mib is set to 80% of container memory limit
   limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
-  # Agent will set this value.
-  ballast_size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 {{- end }}
 
 {{/*

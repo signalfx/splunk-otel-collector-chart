@@ -6,6 +6,9 @@ The values can be overridden in .Values.otelK8sClusterReceiver.config
 extensions:
   health_check:
 
+  memory_ballast:
+    size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+
 receivers:
   # Prometheus receiver scraping metrics from the pod itself, both otel and fluentd
   prometheus/k8s_cluster_receiver:
@@ -111,7 +114,7 @@ exporters:
   {{- end }}
 
 service:
-  extensions: [health_check]
+  extensions: [health_check, memory_ballast]
   pipelines:
     # k8s metrics pipeline
     metrics:

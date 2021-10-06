@@ -12,6 +12,9 @@ extensions:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
   {{- end }}
 
+  memory_ballast:
+    size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+
   zpages:
 
 receivers:
@@ -143,6 +146,7 @@ exporters:
 service:
   extensions:
     - health_check
+    - memory_ballast
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
