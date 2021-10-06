@@ -302,7 +302,7 @@ The [rendered directory](rendered) contains pre-rendered Kubernetes resource man
 
 ### 0.35.3 to 0.36.0
 
-[#208 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/208)
+[#209 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/209)
 
 The following parameters required to send data to Splunk Observability are now
 deprecated and moved under `splunkObservability` group. They need to be updated
