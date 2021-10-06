@@ -479,7 +479,7 @@ service:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
