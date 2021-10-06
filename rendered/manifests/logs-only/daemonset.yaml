@@ -23,7 +23,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: abb4c1d1d9eb516027b34d18561a5b776a5d26213a4a727f2b5f53b8988d6eb7
+        checksum/config: 9a69db1310eaff3ec03d7c616908a71c5f17396b58c2caaf2d9a1f66b42ac523
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -149,11 +149,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_ACCESS_TOKEN
+          - name: SPLUNK_O11Y_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: splunk-otel-collector
-                key: splunk_access_token
+                key: splunk_o11y_access_token
 
         readinessProbe:
           httpGet:

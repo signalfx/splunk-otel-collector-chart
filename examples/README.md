@@ -11,10 +11,22 @@ helm install my-splunk-otel-collector --values my-values.yaml splunk-otel-collec
 ```
 
 All of the provided examples must also include the required parameters:
+
 ```yaml
+# Splunk Platform required parameters
+splunkPlatform:
+  token: xxxxxx
+  endpoint: http://localhost:8088/services/collector
+```
+
+or
+
+```yaml
+# Splunk Observability required parameters
 clusterName: my-cluster
-splunkRealm: us0
-splunkAccessToken: my-access-token
+splunkObservability:
+  realm: us0
+  accessToken: my-access-token
 ```
 
 ## Deploy for k8s cluster with windows worker node.

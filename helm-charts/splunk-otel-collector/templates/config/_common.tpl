@@ -15,10 +15,10 @@ memory_limiter:
 Common config for the otel-collector sapm exporter
 */}}
 {{- define "splunk-otel-collector.otelSapmExporter" -}}
-{{- if .Values.tracesEnabled }}
+{{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 sapm:
-  endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v2/trace
-  access_token: ${SPLUNK_ACCESS_TOKEN}
+  endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace
+  access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
 {{- end }}
 {{- end }}
 
@@ -33,7 +33,7 @@ otlp:
     http:
       endpoint: 0.0.0.0:55681
 
-{{- if .Values.tracesEnabled }}
+{{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 jaeger:
   protocols:
     thrift_http:
@@ -113,4 +113,60 @@ filter/logs:
     resource_attributes:
       - key: splunk.com/exclude
         value: "true"
+{{- end }}
+
+{{/*
+Splunk Platform Logs exporter
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformLogsExporter" -}}
+splunk_hec/platform_logs:
+  endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
+  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  index: {{ .Values.splunkPlatform.index | quote }}
+  source: {{ .Values.splunkPlatform.source | quote }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  max_connections: {{ .Values.splunkPlatform.max_connections }}
+  disable_compression: {{ .Values.splunkPlatform.disable_compression }}
+  timeout: {{ .Values.splunkPlatform.timeout }}
+  insecure: {{ .Values.splunkPlatform.insecure }}
+  insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_version: {{ .Chart.Version }}
+  {{- if .Values.splunkPlatform.clientCert }}
+  cert_file: /otel/etc/hec_client_cert
+  {{- end }}
+  {{- if .Values.splunkPlatform.clientKey  }}
+  key_file: /otel/etc/hec_client_key
+  {{- end }}
+  {{- if .Values.splunkPlatform.caFile }}
+  ca_file: /otel/etc/hec_ca_file
+  {{- end }}
+{{- end }}
+
+{{/*
+Splunk Platform Logs exporter
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformMetricsExporter" -}}
+splunk_hec/platform_metrics:
+  endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
+  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  index: {{ .Values.splunkPlatform.metrics_index | quote }}
+  source: {{ .Values.splunkPlatform.source | quote }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  max_connections: {{ .Values.splunkPlatform.max_connections }}
+  disable_compression: {{ .Values.splunkPlatform.disable_compression }}
+  timeout: {{ .Values.splunkPlatform.timeout }}
+  insecure: {{ .Values.splunkPlatform.insecure }}
+  insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_version: {{ .Chart.Version }}
+  {{- if .Values.splunkPlatform.clientCert }}
+  cert_file: /otel/etc/hec_client_cert
+  {{- end }}
+  {{- if .Values.splunkPlatform.clientKey  }}
+  key_file: /otel/etc/hec_client_key
+  {{- end }}
+  {{- if .Values.splunkPlatform.caFile }}
+  ca_file: /otel/etc/hec_ca_file
+  {{- end }}
 {{- end }}

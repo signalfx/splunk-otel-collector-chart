@@ -8,7 +8,7 @@ render:
 		helm template \
 			--namespace default \
 			--values rendered/values.yaml \
-			--set metricsEnabled=false,tracesEnabled=false,logsEnabled=false,$${i}Enabled=true \
+			--set splunkObservability.metricsEnabled=false,splunkObservability.tracesEnabled=false,splunkObservability.logsEnabled=false,splunkObservability.$${i}Enabled=true \
 			--output-dir "$$dir" \
 			default helm-charts/splunk-otel-collector; \
 		mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \

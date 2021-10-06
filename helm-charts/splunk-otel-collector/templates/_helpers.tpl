@@ -33,6 +33,88 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Whether to send data to Splunk Platform endpoint
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformEnabled" -}}
+{{- and (not (eq .Values.splunkPlatform.token "")) (not (eq .Values.splunkPlatform.endpoint "")) }}
+{{- end -}}
+
+{{/*
+Whether to send data to Splunk Observability endpoint
+*/}}
+{{- define "splunk-otel-collector.splunkO11yEnabled" -}}
+{{- not (eq (include "splunk-otel-collector.o11yAccessToken" .) "") }}
+{{- end -}}
+
+{{/*
+Whether metrics enabled for Splunk Observability, backward compatible.
+*/}}
+{{- define "splunk-otel-collector.o11yMetricsEnabled" -}}
+{{- if eq (toString .Values.metricsEnabled) "<nil>" }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.metricsEnabled }}
+{{- else }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.metricsEnabled }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether traces enabled for Splunk Observability, backward compatible.
+*/}}
+{{- define "splunk-otel-collector.o11yTracesEnabled" -}}
+{{- if eq (toString .Values.tracesEnabled) "<nil>" }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.tracesEnabled }}
+{{- else }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.tracesEnabled }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether logs enabled for Splunk Observability, backward compatible.
+*/}}
+{{- define "splunk-otel-collector.o11yLogsEnabled" -}}
+{{- if eq (toString .Values.logsEnabled) "<nil>" }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.logsEnabled }}
+{{- else }}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.logsEnabled }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether logs enabled for Splunk Platform.
+*/}}
+{{- define "splunk-otel-collector.platformLogsEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkObservability.logsEnabled }}
+{{- end -}}
+
+{{/*
+Whether metrics enabled for Splunk Platform.
+*/}}
+{{- define "splunk-otel-collector.platformMetricsEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkObservability.metricsEnabled }}
+{{- end -}}
+
+{{/*
+Whether metrics enabled for any destination.
+*/}}
+{{- define "splunk-otel-collector.metricsEnabled" -}}
+{{- or (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
+Whether traces enabled for any destination. (currently applicable to Splunk Observability only).
+*/}}
+{{- define "splunk-otel-collector.tracesEnabled" -}}
+{{- include "splunk-otel-collector.o11yTracesEnabled" . }}
+{{- end -}}
+
+{{/*
+Whether logs enabled for any destination.
+*/}}
+{{- define "splunk-otel-collector.logsEnabled" -}}
+{{- or (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "splunk-otel-collector.secret" -}}
@@ -51,26 +133,34 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Get Splunk Observability Realm.
+*/}}
+{{- define "splunk-otel-collector.o11yRealm" -}}
+{{- .Values.splunkObservability.realm | default .Values.splunkRealm | default "" }}
+{{- end -}}
+
+
+{{/*
 Get Splunk ingest URL
 */}}
-{{- define "splunk-otel-collector.ingestUrl" -}}
-{{- $_ := required "splunkRealm or ingestUrl must be provided" (or .Values.ingestUrl .Values.splunkRealm) }}
-{{- .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" .Values.splunkRealm) }}
+{{- define "splunk-otel-collector.o11yIngestUrl" -}}
+{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
+{{- .Values.splunkObservability.ingestUrl | default .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
 Get Splunk API URL.
 */}}
-{{- define "splunk-otel-collector.apiUrl" -}}
-{{- $_ := required "splunkRealm or apiUrl must be provided" (or .Values.apiUrl .Values.splunkRealm) }}
-{{- .Values.apiUrl | default (printf "https://api.%s.signalfx.com" .Values.splunkRealm) }}
+{{- define "splunk-otel-collector.o11yApiUrl" -}}
+{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
+{{- .Values.splunkObservability.apiUrl | default .Values.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
-Get splunkAccessToken.
+Get Splunk Observability Access Token.
 */}}
-{{- define "splunk-otel-collector.accessToken" -}}
-{{- required "splunkAccessToken value must be provided" .Values.splunkAccessToken -}}
+{{- define "splunk-otel-collector.o11yAccessToken" -}}
+{{- .Values.splunkObservability.accessToken | default .Values.splunkAccessToken | default "" -}}
 {{- end -}}
 
 {{/*

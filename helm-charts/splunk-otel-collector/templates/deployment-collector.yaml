@@ -99,17 +99,26 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_ACCESS_TOKEN
+          {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+          - name: SPLUNK_O11Y_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
-                key: splunk_access_token
+                key: splunk_o11y_access_token
+          {{- end }}
+          {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "splunk-otel-collector.secret" . }}
+                key: splunk_platform_hec_token
+          {{- end }}
           {{- with .Values.otelCollector.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
         ports:
         {{- range $key, $port := .Values.otelCollector.ports }}
-        {{- if eq true (and $.Values.metricsEnabled (has "metrics" $port.enabled_for)) (and $.Values.tracesEnabled (has "traces" $port.enabled_for)) (and $.Values.logsEnabled (has "logs" $port.enabled_for)) }}
+        {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
         {{- end }}

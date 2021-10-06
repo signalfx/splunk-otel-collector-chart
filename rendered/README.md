@@ -1,6 +1,8 @@
 # Manifests
 
-The [manifests](manifests) directory contains pre-rendered Kubernetes resource manifests that can be applied with `kubectl create`. Different sets contain different features enabled
+The [manifests](manifests) directory contains pre-rendered Kubernetes resource
+manifests that can be applied with `kubectl create`. Different sets contain
+different features enabled. For now, configured for Slunk Observability only.
 
 - [metrics-only](manifests/metrics-only)
 - [traces-only](manifests/traces-only)

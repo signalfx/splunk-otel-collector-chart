@@ -43,8 +43,11 @@ The Splunk OpenTelemetry Connector for Kubernetes is a
 of OpenTelemetry Collector](https://github.com/signalfx/splunk-otel-collector).
 This chart creates a Kubernetes DaemonSet along with other Kubernetes objects
 in a Kubernetes cluster and provides a unified way to receive, process and
-export metric, trace, and log data for [Splunk Observability
-Cloud](https://www.observability.splunk.com/).
+export metric, trace, and log data for:
+
+- [Splunk Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html)
+- [Splunk Cloud Platform](https://www.splunk.com/en_us/software/splunk-cloud-platform.html)
+- [Splunk Observability Cloud](https://www.observability.splunk.com/)
 
 **Installations that use this distribution can receive direct help from
 Splunk's support teams.** Customers are free to use the core OpenTelemetry OSS
@@ -99,27 +102,45 @@ require additional configurations applied to
 
 ### Prerequisites
 
-The following components required to use the helm chart:
+The following prerequisites are required to use the helm chart:
 
 - [Helm 3](https://helm.sh/docs/intro/install/) (Helm 2 is not supported)
 - [Kubernetes cluster](https://kubernetes.io/)
-- [Splunk Access Token](https://docs.splunk.com/Observability/admin/authentication-tokens/org-tokens.html#admin-org-tokens)
-- [Splunk Realm](https://dev.splunk.com/observability/docs/realms_in_endpoints/)
+
+- To send data to [Splunk Enterprise/Cloud](https://docs.splunk.com/Documentation/Splunk/8.2.2/Data/UsetheHTTPEventCollector)
+  - HEC Token
+  - HEC Endpoint
+
+- To send data to [Splunk Observability Cloud](https://docs.splunk.com/Observability/gdi/opentelemetry/install-k8s.html)
+  - [Splunk Access Token](https://docs.splunk.com/Observability/admin/authentication-tokens/org-tokens.html#admin-org-tokens)
+  - [Splunk Realm](https://dev.splunk.com/observability/docs/realms_in_endpoints/)
 
 ### How to install
 
-To install splunk-otel-collector in k8s cluster at least three parameters must be provided:
+To install splunk-otel-collector in k8s cluster at one of the configuration groups
+`spunkPlatform` or `splunkObservability` has to be fully configured.
 
-- `splunkRealm` (default `us0`): Splunk realm to send telemetry data to.
-- `splunkAccessToken`: Your Splunk org access token.
-- `clusterName`: arbitrary value that will identify your Kubernetes cluster in Splunk.
+For Splunk Enterprise/Cloud the following parameters are required:
 
-To deploy the chart run the following commands replacing the parameters above
-with their appropriate values.
+- `spunkPlatform.endpoint`: URL to a Splunk instance, e.g.
+  "http://localhost:8088/services/collector"
+- `spunkPlatform.token`: Splunk HTTP Event Collector token
+
+For Splunk Observability Cloud the following parameters are required:
+
+- `splunkObservability.splunkRealm` (default `us0`): Splunk realm to send
+  telemetry data to.
+- `splunkObservability.splunkAccessToken`: Your Splunk Observability org access
+  token.
+- `clusterName`: arbitrary value that will identify your Kubernetes cluster in
+  Splunk Observability Cloud.
+
+To deploy the chart to send data to Splunk Observability Cloud run the following
+commands replacing the parameters above with their appropriate values.
 
 ```bash
 $ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-$ helm install my-splunk-otel-collector --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+$ helm install my-splunk-otel-collector --set="splunkObservability.splunkRealm=us0,splunkObservability.splunkAccessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Instead of setting helm values as arguments a yaml file can be provided:
@@ -148,12 +169,23 @@ explanation. Read through it to understand how to configure this chart.
 
 Also check [examples of chart configuration](./examples/README.md). This also includes a guide to deploy for the k8s cluster with the windows worker node.
 
-At the minimum you need to configure the following values.
+At the minimum you need to configure the following values to send data to Splunk
+Enterprise/Cloud.
 
 ```yaml
+splunkPlatform:
+  token: xxxxxx
+  endpoint: http://localhost:8088/services/collector
+```
+
+At the minimum you need to configure the following values to send data to Splunk
+Observability Cloud.
+
+```yaml
+splunkObservability:
+  accessToken: xxxxxx
+  realm: us0
 clusterName: my-k8s-cluster
-splunkAccessToken: xxxxxx
-splunkRealm: us0
 ```
 
 ### Cloud provider
@@ -192,19 +224,21 @@ environment: production
 
 ### Disable particular types of telemetry
 
-By default all telemetry data (metrics, traces and logs) is collected from the Kubernetes cluster.
-It's possible to disable any kind of telemetry with the following parameters:
+By default all telemetry data (metrics, traces and logs) is collected from the
+Kubernetes cluster and sent to one of (or both) configured destinations. It's
+possible to disable any kind of telemetry for a specific destination. For
+example, the following configuration will send logs to Splunk Platform and
+metrics and traces to Splunk Observability assuming that both destinations are
+configured properly.
 
-- `metricsEnabled`: `false`
-- `tracesEnabled`: `false`
-- `logsEnabled`: `false`
-
-For example, to install the connector only for logs:
-
-```bash
-$ helm install my-splunk-otel-collector \
-  --set="splunkRealm=us0,splunkAccessToken=xxxxxx,clusterName=my-cluster,metricsEnabled=false,tracesEnabled=false" \
-  splunk-otel-collector-chart/splunk-otel-collector
+```yaml
+splunkObservability:
+  metricsEnabled: true
+  tracesEnabled: true
+  logsEnabled: false
+splunkPlatform:
+  metricsEnabled: false
+  logsEnabled: true
 ```
 
 ## Logs collection
@@ -265,6 +299,22 @@ autodetect:
 The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
 
 ## Upgrade guidelines
+
+### 0.35.3 to 0.36.0
+
+[#208 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/208)
+
+The following parameters required to send data to Splunk Observability are now
+deprecated and moved under `splunkObservability` group. They need to be updated
+in your custom values.yaml files before backward compatibility is discontinued.
+
+- `splunkRealm` changed to `splunkObservability.realm`
+- `splunkAccessToken` changed to `splunkObservability.accessToken`
+- `ingestUrl` changed to `splunkObservability.ingestUrl`
+- `apiUrl` changed to `splunkObservability.ingestUrl`
+- `metricsEnabled` changed to `splunkObservability.metricsEnabled`
+- `tracesEnabled` changed to `splunkObservability.tracesEnabled`
+- `logsEnabled` changed to `splunkObservability.logsEnabled`
 
 ### 0.26.4 to 0.27.0
 

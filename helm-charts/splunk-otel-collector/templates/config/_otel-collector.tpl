@@ -6,9 +6,11 @@ The values can be overridden in .Values.otelCollector.config
 extensions:
   health_check:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   http_forwarder:
     egress:
-      endpoint: {{ include "splunk-otel-collector.apiUrl" . }}
+      endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+  {{- end }}
 
   zpages:
 
@@ -86,16 +88,23 @@ processors:
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
 
+  {{ if or .Values.clusterName }}
   resource/add_cluster_name:
     attributes:
       - action: upsert
         value: {{ .Values.clusterName }}
         key: k8s.cluster.name
+  {{- end }}
+
+  {{- if .Values.extraAttributes.custom }}
+  resource/add_custom_attrs:
+    attributes:
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
         value: {{ .value }}
         key: {{ .name }}
       {{- end }}
+  {{- end }}
 
   {{- if .Values.environment }}
   resource/add_environment:
@@ -106,24 +115,43 @@ processors:
   {{- end }}
 
 exporters:
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
-  {{- if .Values.logsEnabled }}
-  splunk_hec:
-    endpoint: {{ include "splunk-otel-collector.ingestUrl" . }}/v1/log
-    token: "${SPLUNK_ACCESS_TOKEN}"
-  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
-    ingest_url: {{ include "splunk-otel-collector.ingestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.apiUrl" . }}
-    access_token: ${SPLUNK_ACCESS_TOKEN}
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+  {{- end }}
+
+  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- end }}
+
+  {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+  splunk_hec/o11y:
+    endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
+    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
+  {{- end }}
+
+  {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- end }}
+
+  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
+  {{- end }}
 
 service:
-  extensions: [health_check, http_forwarder, zpages]
+  extensions:
+    - health_check
+    - zpages
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    - http_forwarder
+    {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in otelCollector.config overrides.
   pipelines:
-    {{- if .Values.tracesEnabled }}
+    {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin]
@@ -131,26 +159,49 @@ service:
         - memory_limiter
         - batch
         - k8s_tagger
+        {{- if .Values.clusterName }}
         - resource/add_cluster_name
+        {{- end }}
+        {{- if .Values.extraAttributes.custom }}
+        - resource/add_custom_attrs
+        {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
       exporters: [sapm]
     {{- end }}
 
+    {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # default metrics pipeline
     metrics:
       receivers: [otlp, signalfx]
-      processors: [memory_limiter, batch, resource/add_cluster_name]
-      exporters: [signalfx]
+      processors:
+        - memory_limiter
+        - batch
+        {{- if .Values.clusterName }}
+        - resource/add_cluster_name
+        {{- end }}
+        {{- if .Values.extraAttributes.custom }}
+        - resource/add_custom_attrs
+        {{- end }}
+      exporters:
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+        - signalfx
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
+        - splunk_hec/platform_metrics
+        {{- end }}
+    {{- end }}
 
+    {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
     # logs pipeline for receiving and exporting SignalFx events
     logs/signalfx-events:
       receivers: [signalfx]
       processors: [memory_limiter, batch]
       exporters: [signalfx]
+    {{- end }}
 
-    {{- if .Values.logsEnabled }}
+    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     # default logs pipeline
     logs:
       receivers: [otlp]
@@ -160,17 +211,33 @@ service:
         - batch
         - filter/logs
         - resource/logs
-      exporters: [splunk_hec]
+      exporters:
+        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+        - splunk_hec/o11y
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        - splunk_hec/platform_logs
+        {{- end }}
     {{- end }}
 
+    {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
     # Pipeline for metrics collected about the collector pod itself.
     metrics/collector:
       receivers: [prometheus/collector]
       processors:
         - memory_limiter
         - batch
+        {{- if .Values.clusterName }}
         - resource/add_cluster_name
+        {{- end }}
         - resource/add_collector_k8s
         - resourcedetection
-      exporters: [signalfx]
+      exporters:
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+        - signalfx
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - splunk_hec/platform_metrics
+        {{- end }}
+    {{- end }}
 {{- end }}

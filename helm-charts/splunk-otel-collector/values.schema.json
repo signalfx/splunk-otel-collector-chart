@@ -4,16 +4,12 @@
   "required": [
     "clusterName",
     "provider",
-    "distro",
-    "tracesEnabled",
-    "metricsEnabled",
-    "logsEnabled"
+    "distro"
   ],
   "title": "Values",
   "properties": {
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
-      "minLength": 1,
       "type": "string"
     },
     "provider": {
@@ -26,22 +22,35 @@
       "type": "string",
       "enum": ["eks", "gke", "aks", "openshift", " ", ""]
     },
-    "metricsEnabled": {
-      "description": "Metrics telemetry enabled",
-      "type": "boolean"
+    "splunkPlatform": {
+      "description": "Splunk Data-to-Everything Platform configuration",
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
     },
-    "tracesEnabled": {
-      "description": "Traces telemetry enabled",
-      "type": "boolean"
-    },
-    "logsEnabled": {
-      "description": "Logs telemetry enabled",
-      "type": "boolean"
+    "splunkObservability": {
+      "description": "Splunk Observability configuration",
+      "type": "object",
+      "properties": {
+        "realm": {
+          "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
+        },
+        "ingestUrl": {
+          "type": "string"
+        },
+        "apiUrl": {
+          "type": "string"
+        }
+      }
     }
-  },
-  "anyOf": [
-    {"properties": {"metricsEnabled": {"const": true}}},
-    {"properties": {"tracesEnabled": {"const": true}}},
-    {"properties": {"logsEnabled": {"const": true}}}
-  ]
+  }
 }
