@@ -11,6 +11,7 @@ metadata:
     heritage: {{ .Release.Service }}
     app.kubernetes.io/name: {{ template "splunk-otel-collector.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Service }}
   {{- if .Values.otelK8sClusterReceiver.annotations }}
   annotations:
     {{- toYaml .Values.otelK8sClusterReceiver.annotations | nindent 4 }}
