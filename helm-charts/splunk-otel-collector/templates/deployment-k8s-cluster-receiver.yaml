@@ -9,6 +9,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "splunk-otel-collector.name" . }}
   {{- if .Values.otelK8sClusterReceiver.annotations }}
   annotations:
     {{- toYaml .Values.otelK8sClusterReceiver.annotations | nindent 4 }}

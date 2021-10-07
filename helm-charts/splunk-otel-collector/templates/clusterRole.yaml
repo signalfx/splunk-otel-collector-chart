@@ -7,6 +7,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "splunk-otel-collector.name" . }}
 rules:
 {{- if eq .Values.distro "openshift" }}
 - apiGroups:
