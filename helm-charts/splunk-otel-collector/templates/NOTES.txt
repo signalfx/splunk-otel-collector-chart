@@ -21,15 +21,15 @@ Splunk OpenTelemetry Connector is installed and configured to send data to Splun
 [WARNING] "apiUrl" parameter is deprecated, please use "splunkObservability.apiUrl" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
 {{ end }}
-{{- if not (empty .Values.metricsEnabled) }}
+{{- if not (eq (toString .Values.metricsEnabled) "<nil>") }}
 [WARNING] "metricsEnabled" parameter is deprecated, please use "splunkObservability.metricsEnabled" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
 {{ end }}
-{{- if not (empty .Values.tracesEnabled) }}
+{{- if not (eq (toString .Values.tracesEnabled) "<nil>") }}
 [WARNING] "tracesEnabled" parameter is deprecated, please use "splunkObservability.tracesEnabled" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
 {{ end }}
-{{- if not (empty .Values.logsEnabled) }}
+{{- if not (eq (toString .Values.logsEnabled) "<nil>") }}
 [WARNING] "logsEnabled" parameter is deprecated, please use "splunkObservability.logsEnabled" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
 {{ end }}
