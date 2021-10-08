@@ -277,6 +277,7 @@ processors:
         {{- end }}
       {{- end }}
 
+  {{- if .Values.fluentd.enabled }}
   # Move flat fluentd logs attributes to resource attributes
   groupbyattrs/logs:
     keys:
@@ -289,6 +290,7 @@ processors:
      - k8s.namespace.name
      - k8s.pod.name
      - k8s.pod.uid
+  {{- end }}
 
   {{- if not .Values.otelCollector.enabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
@@ -415,7 +417,9 @@ service:
         - otlp
       processors:
         - memory_limiter
+        {{- if .Values.fluentd.enabled }}
         - groupbyattrs/logs
+        {{- end }}
         - k8s_tagger
         - batch
         {{- if not .Values.otelCollector.enabled }}
