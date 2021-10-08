@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.36.2] - 2021-10-08
+
+### Fixed
+
+- Exclude redundant `groupbyattrs/logs` processor from native logs collection
+  pipeline (#219)
+- Fix deprecation messages for old `<telemetry>Enabled` parameters (#220)
+
 ## [0.36.1] - 2021-10-07
 
 ### Fixed
