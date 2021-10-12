@@ -12,6 +12,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/part-of: {{ .Release.Service }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Values.image.fluentd.tag }}
     helm.sh/chart: {{ .Chart.Name }}
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
     engine: fluentd
