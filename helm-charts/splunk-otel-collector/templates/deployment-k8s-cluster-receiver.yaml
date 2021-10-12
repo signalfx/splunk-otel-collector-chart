@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/part-of: {{ .Release.Service }}
     app.kubernetes.io/component: otel-k8s-cluster-receiver
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
   {{- if .Values.otelK8sClusterReceiver.annotations }}
   annotations:
     {{- toYaml .Values.otelK8sClusterReceiver.annotations | nindent 4 }}
