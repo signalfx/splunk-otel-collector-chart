@@ -51,7 +51,6 @@ Common config for resourcedetection processor
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
 resourcedetection:
   detectors:
-    - system
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
@@ -69,6 +68,9 @@ resourcedetection:
     {{- else if eq .Values.provider "azure" }}
     - azure
     {{- end }}
+    # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
+    - system
   # Don't override existing resource attributes to maintain identification of data sources
   override: false
   timeout: 10s
