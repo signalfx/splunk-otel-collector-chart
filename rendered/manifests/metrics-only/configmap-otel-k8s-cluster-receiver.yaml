@@ -53,8 +53,8 @@ data:
           value: ${K8S_NAMESPACE}
       resourcedetection:
         detectors:
-        - system
         - env
+        - system
         override: false
         timeout: 10s
     receivers:
