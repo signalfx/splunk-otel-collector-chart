@@ -15,7 +15,7 @@ metadata:
     app.kubernetes.io/component: otel-k8s-cluster-receiver
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Values.image.otelcol.tag }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- if .Values.otelK8sClusterReceiver.annotations }}
   annotations:
     {{- toYaml .Values.otelK8sClusterReceiver.annotations | nindent 4 }}

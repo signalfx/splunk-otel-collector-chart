@@ -14,7 +14,7 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Service }}
     app.kubernetes.io/component: otel-k8s-cluster-receiver
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   selector:
     matchLabels:

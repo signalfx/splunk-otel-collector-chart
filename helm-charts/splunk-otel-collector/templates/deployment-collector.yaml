@@ -15,7 +15,7 @@ metadata:
     app.kubernetes.io/component: otel-collector
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Values.image.otelcol.tag }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- if .Values.otelCollector.annotations }}
   annotations:
     {{- toYaml .Values.otelCollector.annotations | nindent 4 }}

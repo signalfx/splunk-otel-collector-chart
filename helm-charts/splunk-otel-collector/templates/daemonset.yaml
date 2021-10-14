@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Service }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Values.image.fluentd.tag }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
     engine: fluentd
     {{- end }}
