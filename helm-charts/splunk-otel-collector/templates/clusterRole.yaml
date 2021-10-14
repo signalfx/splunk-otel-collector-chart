@@ -9,7 +9,6 @@ metadata:
     heritage: {{ .Release.Service }}
     app.kubernetes.io/name: {{ template "splunk-otel-collector.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/part-of: {{ .Release.Service }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
