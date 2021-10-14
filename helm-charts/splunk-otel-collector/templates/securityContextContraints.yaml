@@ -4,14 +4,11 @@ apiVersion: security.openshift.io/v1
 metadata:
   name: {{ template "splunk-otel-collector.serviceAccountName" . }}
   labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    app.kubernetes.io/name: {{ template "splunk-otel-collector.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
 priority: 10
