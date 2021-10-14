@@ -115,7 +115,7 @@ Whether logs enabled for any destination.
 {{- end -}}
 
 {{/*
-Create chart name and version as used by the chart label.
+Define name for the Secret
 */}}
 {{- define "splunk-otel-collector.secret" -}}
 {{- if .Values.secret.name -}}
