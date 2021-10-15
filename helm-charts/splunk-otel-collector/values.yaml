@@ -221,7 +221,7 @@ otelAgent:
   extraVolumeMounts: []
 
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
-  # Default configuration defined in config/otel-agent-config.yaml
+  # Default configuration defined in templates/config/_otel-agent.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}
@@ -274,7 +274,7 @@ otelK8sClusterReceiver:
   extraVolumeMounts: []
 
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
-  # Defaul configuration defined in config/otel-k8s-cluster-receiver-config.yaml
+  # Default configuration defined in templates/config/_otel-k8s-cluster-receiver-config.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}

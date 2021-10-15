@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+- BREAKING CHANGE: Reorder resource detectors, moving the `system` detector
+  to the end of the list. Applying this change in an EC2 or Azure environment
+  may change the `host.name` dimension and the resource ID dimension
+  on some MTSes, possibly causing detectors to fire.
+
 ## [0.36.2] - 2021-10-08
 
 ### Fixed

@@ -111,8 +111,8 @@ data:
           key: splunk.com/exclude
       resourcedetection:
         detectors:
-        - system
         - env
+        - system
         override: false
         timeout: 10s
     receivers:
