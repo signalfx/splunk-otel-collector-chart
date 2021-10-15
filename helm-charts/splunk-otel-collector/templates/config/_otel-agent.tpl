@@ -106,7 +106,7 @@ receivers:
   filelog:
     include: ["/var/log/pods/*/*/*.log"]
     # Exclude logs. The file format is
-    # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
+    # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<restart_count>.log
     exclude:
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
@@ -192,13 +192,13 @@ receivers:
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
-        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<run_id>\d+)\.log$'
+        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
         parse_from: $$$$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata
         resource:
           k8s.pod.uid: 'EXPR($$.uid)'
-          run_id: 'EXPR($$.run_id)'
+          k8s.container.restart_count: 'EXPR($$.restart_count)'
           k8s.container.name: 'EXPR($$.container_name)'
           k8s.namespace.name: 'EXPR($$.namespace)'
           k8s.pod.name: 'EXPR($$.pod_name)'
