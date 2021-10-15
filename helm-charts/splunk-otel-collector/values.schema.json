@@ -31,8 +31,32 @@
         },
         "token": {
           "type": "string"
+        },
+        "logsEnabled": {
+          "description": "Send Logs to Splunk Platform",
+          "type": "boolean"
+        },
+        "metricsEnabled": {
+          "description": "Send Metrics to Splunk Platform",
+          "type": "boolean"
         }
-      }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "logsEnabled": {
+              "const": true
+            }
+          }
+        },
+        {
+          "properties": {
+            "metricsEnabled": {
+              "const": true
+            }
+          }
+        }
+      ]
     },
     "splunkObservability": {
       "description": "Splunk Observability configuration",
@@ -49,8 +73,112 @@
         },
         "apiUrl": {
           "type": "string"
+        },
+        "metricsEnabled": {
+          "description": "Send Metrics to Splunk Observability",
+          "type": "boolean"
+        },
+        "tracesEnabled": {
+          "description": "Send Traces to Splunk Observability",
+          "type": "boolean"
+        },
+        "logsEnabled": {
+          "description": "Send Logs to Splunk Observability",
+          "type": "boolean"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "metricsEnabled": {
+              "const": true
+            }
+          }
+        },
+        {
+          "properties": {
+            "tracesEnabled": {
+              "const": true
+            }
+          }
+        },
+        {
+          "properties": {
+            "logsEnabled": {
+              "const": true
+            }
+          }
+        }
+      ]
+    }
+  },
+  "anyOf": [
+    {
+      "properties": {
+        "splunkPlatform": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "description": "Splunk Platform Endpoint",
+              "type": "string",
+              "format": "uri"
+            },
+            "token": {
+              "description": "Splunk Platform HEC Token",
+              "type": "string",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          },
+          "required": [
+            "endpoint",
+            "token"
+          ]
         }
       }
+    },
+    {
+      "properties": {
+        "splunkObservability": {
+          "type": "object",
+          "properties": {
+            "realm": {
+              "description": "Splunk Observability Realm",
+              "type": "string",
+              "minLength": 3
+            },
+            "accessToken": {
+              "description": "Splunk Observability Access Token",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "realm",
+            "accessToken"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "splunkRealm": {
+          "description": "[DEPRECATED] Splunk Observability Realm",
+          "type": "string",
+          "deprecated": true,
+          "minLength": 3
+        },
+        "splunkAccessToken": {
+          "description": "[DEPRECATED] Splunk Observability Access Token",
+          "type": "string",
+          "deprecated": true,
+          "minLength": 1
+        }
+      },
+      "required": [
+        "splunkRealm",
+        "splunkAccessToken"
+      ]
     }
-  }
+  ]
 }
