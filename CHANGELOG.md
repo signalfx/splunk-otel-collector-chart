@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   to the end of the list. Applying this change in an EC2 or Azure environment
   may change the `host.name` dimension and the resource ID dimension
   on some MTSes, possibly causing detectors to fire.
+- Add recommended Kubernetes labels (#217)
 
 ## [0.36.2] - 2021-10-08
 

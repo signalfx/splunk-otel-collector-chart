@@ -7,6 +7,7 @@ kind: ConfigMap
 metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
   labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
