@@ -174,7 +174,7 @@ Create the fluentd image name.
 Create the opentelemetry collector image name.
 */}}
 {{- define "splunk-otel-collector.image.otelcol" -}}
-{{- printf "%s:%s" .Values.image.otelcol.repository .Values.image.otelcol.tag | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.image.otelcol.repository (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
 {{- end -}}
 
 {{/*

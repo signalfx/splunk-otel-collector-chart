@@ -643,8 +643,8 @@ image:
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
     repository: quay.io/signalfx/splunk-otel-collector
-    # The tag of the opentelemetry collector image to pull
-    tag: 0.36.0
+    # The tag of the Splunk OTel Collector image, default value is the chart appVersion
+    tag: ""
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
