@@ -2,6 +2,12 @@
 # This is a YAML-formatted file.
 # Declared variables will be passed into templates.
 
+# nameOverride replaces the name of the chart, when this is used to construct
+# Kubernetes object names.
+nameOverride: ""
+# fullnameOverride completely replaces the generated name.
+fullnameOverride: ""
+
 ################################################################################
 # clusterName is a REQUIRED field for Spunk Observability. It can be set to an
 # arbitrary value that identifies this K8s cluster in SignalFx. The value will
