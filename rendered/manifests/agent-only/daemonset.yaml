@@ -208,10 +208,24 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
-        - mountPath: /hostfs
-          name: hostfs
+        - mountPath: /hostfs/dev
+          name: host-dev
           readOnly: true
-          mountPropagation: HostToContainer
+        - mountPath: /hostfs/etc
+          name: host-etc
+          readOnly: true
+        - mountPath: /hostfs/proc
+          name: host-proc
+          readOnly: true
+        - mountPath: /hostfs/run/udev/data
+          name: host-run-udev-data
+          readOnly: true
+        - mountPath: /hostfs/sys
+          name: host-sys
+          readOnly: true
+        - mountPath: /hostfs/var/run/utmp
+          name: host-var-run-utmp
+          readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -237,9 +251,24 @@ spec:
       - name: fluentd-config-json
         configMap:
           name: default-splunk-otel-collector-fluentd-json
-      - name: hostfs
+      - name: host-dev
         hostPath:
-          path: /
+          path: /dev
+      - name: host-etc
+        hostPath:
+          path: /etc
+      - name: host-proc
+        hostPath:
+          path: /proc
+      - name: host-run-udev-data
+        hostPath:
+          path: /run/udev/data
+      - name: host-sys
+        hostPath:
+          path: /sys
+      - name: host-var-run-utmp
+        hostPath:
+          path: /var/run/utmp
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

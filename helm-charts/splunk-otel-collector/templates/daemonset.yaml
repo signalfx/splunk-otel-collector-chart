@@ -242,10 +242,30 @@ spec:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
         {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
-        - mountPath: {{ .Values.isWindows | ternary "C:\\hostfs" "/hostfs" }}
+        {{- if .Values.isWindows }}
+        - mountPath: "C:\\hostfs"
           name: hostfs
           readOnly: true
-          mountPropagation: HostToContainer
+        {{- else }}
+        - mountPath: /hostfs/dev
+          name: host-dev
+          readOnly: true
+        - mountPath: /hostfs/etc
+          name: host-etc
+          readOnly: true
+        - mountPath: /hostfs/proc
+          name: host-proc
+          readOnly: true
+        - mountPath: /hostfs/run/udev/data
+          name: host-run-udev-data
+          readOnly: true
+        - mountPath: /hostfs/sys
+          name: host-sys
+          readOnly: true
+        - mountPath: /hostfs/var/run/utmp
+          name: host-var-run-utmp
+          readOnly: true
+        {{- end }}
         {{- end }}
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled }}
         - name: varlog
@@ -302,9 +322,30 @@ spec:
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
+      {{- if .Values.isWindows }}
       - name: hostfs
         hostPath:
-          path: {{ .Values.isWindows | ternary "C:\\" "/" }}
+          path: "C:\\"
+      {{- else }}
+      - name: host-dev
+        hostPath:
+          path: /dev
+      - name: host-etc
+        hostPath:
+          path: /etc
+      - name: host-proc
+        hostPath:
+          path: /proc
+      - name: host-run-udev-data
+        hostPath:
+          path: /run/udev/data
+      - name: host-sys
+        hostPath:
+          path: /sys
+      - name: host-var-run-utmp
+        hostPath:
+          path: /var/run/utmp
+      {{- end }}
       {{- end }}
       - name: otel-configmap
         configMap:
