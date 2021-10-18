@@ -690,7 +690,7 @@ rbac:
 # Create or use existing secret if name is empty default name is used
 secret:
   create: true
-  name:
+  name: ""
 
 # This default tolerations allow the daemonset to be deployed on master nodes,
 # so that we can also collect logs and metrics from those nodes.

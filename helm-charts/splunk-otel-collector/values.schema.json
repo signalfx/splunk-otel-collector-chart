@@ -59,24 +59,7 @@
             }
           }
         }
-      ],
-      "if": {
-        "properties": {
-          "endpoint": {
-            "minLength": 1
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "endpoint": {
-            "format": "uri"
-          },
-          "token": {
-            "minLength": 1
-          }
-        }
-      }
+      ]
     },
     "splunkObservability": {
       "description": "Splunk Observability configuration",
@@ -132,19 +115,17 @@
             }
           }
         }
-      ],
-      "if": {
-        "properties": {
-          "realm": {
-            "minLength": 1
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "accessToken": {
-            "minLength": 1
-          }
+      ]
+    },
+    "secret": {
+      "description": "Kubernetes secret resource configuration",
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
         }
       }
     }
@@ -184,5 +165,54 @@
         }
       }
     }
-  ]
+  ],
+  "if": {
+    "$comment": "if k8s secret resource created by the chart (default behavior)",
+    "properties": {
+      "secret": {
+        "properties": {
+          "create": {
+            "const": true
+          }
+        }
+      }
+    }
+  },
+  "then": {
+    "$comment": "then require tokens to be provided for every enabled destination",
+    "properties": {
+      "splunkObservability": {
+        "if": {
+          "properties": {
+            "realm": {
+              "minLength": 1
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "accessToken": {
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "splunkPlatform": {
+        "if": {
+          "properties": {
+            "endpoint": {
+              "minLength": 1
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "token": {
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
 }
