@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Add recommended Kubernetes labels (#217)
+- Add an option to skip RBAC resources creation (#231)
 
 ### Changed
 
@@ -15,6 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   may change the `host.name` dimension and the resource ID dimension
   on some MTSes, possibly causing detectors to fire.
 - Change `run_id` log resource attribute to `k8s.container.restart_count` (#226)
+- Use only `splunkPlatform.endpoint` and `splunkObservability.realm` parameters
+  to identify which destination is enabled, remove default value for
+  `splunkObservability.realm` (#230)
 
 ## [0.36.2] - 2021-10-08
 

@@ -136,7 +136,7 @@ Create the name of the service account to use
 Get Splunk Observability Realm.
 */}}
 {{- define "splunk-otel-collector.o11yRealm" -}}
-{{- .Values.splunkObservability.realm | default .Values.splunkRealm | default "us0" }}
+{{- .Values.splunkObservability.realm | default .Values.splunkRealm }}
 {{- end -}}
 
 
