@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Add recommended Kubernetes labels (#217)
+- Add an option to skip RBAC resources creation (#231)
 
 ### Changed
 

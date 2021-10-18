@@ -682,6 +682,8 @@ serviceAccount:
   annotations: {}
 
 rbac:
+  # Create or use existing RBAC resources
+  create: true
   # Specifies additional rules that will be added to the clusterRole.
   customRules: []
 
