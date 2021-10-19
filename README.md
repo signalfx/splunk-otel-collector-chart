@@ -128,8 +128,7 @@ For Splunk Enterprise/Cloud the following parameters are required:
 
 For Splunk Observability Cloud the following parameters are required:
 
-- `splunkObservability.realm` (default `us0`): Splunk realm to send
-  telemetry data to.
+- `splunkObservability.realm`: Splunk realm to send telemetry data to.
 - `splunkObservability.accessToken`: Your Splunk Observability org access
   token.
 - `clusterName`: arbitrary value that will identify your Kubernetes cluster in
