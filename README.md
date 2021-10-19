@@ -118,18 +118,17 @@ The following prerequisites are required to use the helm chart:
 ### How to install
 
 To install splunk-otel-collector in k8s cluster at one of the configuration groups
-`spunkPlatform` or `splunkObservability` has to be fully configured.
+`splunkPlatform` or `splunkObservability` has to be fully configured.
 
 For Splunk Enterprise/Cloud the following parameters are required:
 
-- `spunkPlatform.endpoint`: URL to a Splunk instance, e.g.
+- `splunkPlatform.endpoint`: URL to a Splunk instance, e.g.
   "http://localhost:8088/services/collector"
-- `spunkPlatform.token`: Splunk HTTP Event Collector token
+- `splunkPlatform.token`: Splunk HTTP Event Collector token
 
 For Splunk Observability Cloud the following parameters are required:
 
-- `splunkObservability.realm` (default `us0`): Splunk realm to send
-  telemetry data to.
+- `splunkObservability.realm`: Splunk realm to send telemetry data to.
 - `splunkObservability.accessToken`: Your Splunk Observability org access
   token.
 - `clusterName`: arbitrary value that will identify your Kubernetes cluster in

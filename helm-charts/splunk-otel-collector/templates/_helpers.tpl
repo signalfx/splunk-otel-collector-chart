@@ -36,14 +36,14 @@ Create chart name and version as used by the chart label.
 Whether to send data to Splunk Platform endpoint
 */}}
 {{- define "splunk-otel-collector.splunkPlatformEnabled" -}}
-{{- and (not (eq .Values.splunkPlatform.token "")) (not (eq .Values.splunkPlatform.endpoint "")) }}
+{{- not (eq .Values.splunkPlatform.endpoint "") }}
 {{- end -}}
 
 {{/*
 Whether to send data to Splunk Observability endpoint
 */}}
 {{- define "splunk-otel-collector.splunkO11yEnabled" -}}
-{{- not (eq (include "splunk-otel-collector.o11yAccessToken" .) "") }}
+{{- not (eq (include "splunk-otel-collector.o11yRealm" .) "") }}
 {{- end -}}
 
 {{/*
