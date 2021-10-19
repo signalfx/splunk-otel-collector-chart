@@ -15,7 +15,7 @@ otelAgent:
           processors:
             - memory_limiter
             - probabilistic_sampler
-            - k8s_tagger
+            - k8sattributes
             - batch
             - resource
             - resourcedetection
