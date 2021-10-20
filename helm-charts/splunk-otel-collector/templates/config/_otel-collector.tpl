@@ -31,9 +31,9 @@ receivers:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true
 
-# By default k8s_tagger, memory_limiter and batch processors enabled.
+# By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
-  k8s_tagger:
+  k8sattributes:
     pod_association:
       - from: resource_attribute
         name: k8s.pod.uid
@@ -162,7 +162,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - k8s_tagger
+        - k8sattributes
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
         {{- end }}
@@ -211,7 +211,7 @@ service:
       receivers: [otlp]
       processors:
         - memory_limiter
-        - k8s_tagger
+        - k8sattributes
         - batch
         - filter/logs
         - resource/logs

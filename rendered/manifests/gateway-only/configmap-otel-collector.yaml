@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.36.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.36.0"
+    app.kubernetes.io/version: "0.37.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.36.2
     release: default
@@ -43,7 +43,7 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      k8s_tagger:
+      k8sattributes:
         extract:
           annotations:
           - from: pod
@@ -146,7 +146,7 @@ data:
           - splunk_hec/o11y
           processors:
           - memory_limiter
-          - k8s_tagger
+          - k8sattributes
           - batch
           - filter/logs
           - resource/logs
@@ -187,7 +187,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - k8s_tagger
+          - k8sattributes
           - resource/add_cluster_name
           receivers:
           - otlp

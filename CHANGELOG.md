@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Use only `splunkPlatform.endpoint` and `splunkObservability.realm` parameters
   to identify which destination is enabled, remove default value for
   `splunkObservability.realm` (#230, #233)
+- Upgrade splunk-otel-collector image to 0.37.0 (#237)
 
 ## [0.36.2] - 2021-10-08
 
