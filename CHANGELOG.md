@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Add recommended Kubernetes labels (#217)
 - Add an option to skip RBAC resources creation (#231)
+- Enable container metadata. This gives all collected logs new attributes:
+  `container.image.name` and `container.image.tag`. Also the native OTel logs
+  collection gets `container.id` attribute that allows container level
+  correlation in Splunk Observability Cloud closing a feature parity gap with
+  fluentd (#238)
 
 ### Changed
 

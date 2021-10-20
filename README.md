@@ -262,9 +262,6 @@ logsCollection:
 
 There are following known limitations of native OTel logs collection:
 
-- Container attributes `container.id` and `container.image.name` are missed.
-  This means that correlation between Splunk Log Observer and Splunk Infrastructure will not work
-  on container level, but only on kubernetes pod level.
 - `service.name` attribute will not be automatically constructed in istio environment.
   This means that correlation between logs and traces will not work in Splunk Observability.
   Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
