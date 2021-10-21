@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   to the end of the list. Applying this change in an EC2 or Azure environment
   may change the `host.name` dimension and the resource ID dimension
   on some MTSes, possibly causing detectors to fire.
+- BREAKING CHANGE: Reduce scope of host mounted volumes on linux systems. See
+  [the upgrade
+  guideline](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370)
+  (#232)
 - Change `run_id` log resource attribute to `k8s.container.restart_count` (#226)
 - Use only `splunkPlatform.endpoint` and `splunkObservability.realm` parameters
   to identify which destination is enabled, remove default value for
