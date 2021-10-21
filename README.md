@@ -297,6 +297,42 @@ The [rendered directory](rendered) contains pre-rendered Kubernetes resource man
 
 ## Upgrade guidelines
 
+### 0.36.2 to 0.37.0
+
+[#232 Access to underlying node's filesystem was reduced to the minimum scope
+required for default functionality: host metrics and logs
+collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/232)
+
+If you have any extra receivers that require access to node's files or
+directories that are not [mounted by
+default](https://github.com/signalfx/splunk-otel-collector-chart/blob/83fefe2a01effaab1e9eaba34a2557863981a2cd/helm-charts/splunk-otel-collector/templates/daemonset.yaml#L330-L347),
+you need to setup additional volume mounts.
+
+For example, if you have the following `smartagent/docker-container-stats`
+receiver added to your configuration:
+
+```yaml
+otelAgent:
+  config:
+    receivers:
+      smartagent/docker-container-stats:
+        type: docker-container-stats
+        dockerURL: unix:///hostfs/var/run/docker.sock
+```
+
+You need to mount the docker socket to your container as follows:
+
+```yaml
+  extraVolumeMounts:
+    - mountPath: /hostfs/var/run/docker.sock
+      name: host-var-run-docker
+      readOnly: true
+  extraVolumes:
+    - name: host-var-run-docker
+      hostPath:
+        path: /var/run/docker.sock
+```
+
 ### 0.35.3 to 0.36.0
 
 [#209 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/209)
