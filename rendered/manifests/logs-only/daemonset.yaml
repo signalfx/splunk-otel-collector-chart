@@ -76,8 +76,6 @@ spec:
           
           runAsUser: 0
         env:
-          - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "500"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -128,6 +126,8 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.37.0
         imagePullPolicy: IfNotPresent
         env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "500"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:

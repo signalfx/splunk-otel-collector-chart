@@ -26,6 +26,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `splunkObservability.realm` (#230, #233)
 - Upgrade splunk-otel-collector image to 0.37.0 (#237)
 
+### Fixed
+
+- Fix setting of SPLUNK_MEMORY_TOTAL_MIB env var in otelAgent daemonset (#240)
+
 ## [0.36.2] - 2021-10-08
 
 ### Fixed
