@@ -127,19 +127,19 @@ splunk_hec/platform_logs:
   max_connections: {{ .Values.splunkPlatform.max_connections }}
   disable_compression: {{ .Values.splunkPlatform.disable_compression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
-  insecure: {{ .Values.splunkPlatform.insecure }}
-  insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
   splunk_app_name: {{ .Chart.Name }}
   splunk_app_version: {{ .Chart.Version }}
-  {{- if .Values.splunkPlatform.clientCert }}
-  cert_file: /otel/etc/hec_client_cert
-  {{- end }}
-  {{- if .Values.splunkPlatform.clientKey  }}
-  key_file: /otel/etc/hec_client_key
-  {{- end }}
-  {{- if .Values.splunkPlatform.caFile }}
-  ca_file: /otel/etc/hec_ca_file
-  {{- end }}
+  tls:
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+    {{- if .Values.splunkPlatform.clientCert }}
+    cert_file: /otel/etc/hec_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.clientKey  }}
+    key_file: /otel/etc/hec_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.caFile }}
+    ca_file: /otel/etc/hec_ca_file
+    {{- end }}
 {{- end }}
 
 {{/*
@@ -155,17 +155,17 @@ splunk_hec/platform_metrics:
   max_connections: {{ .Values.splunkPlatform.max_connections }}
   disable_compression: {{ .Values.splunkPlatform.disable_compression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
-  insecure: {{ .Values.splunkPlatform.insecure }}
-  insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
   splunk_app_name: {{ .Chart.Name }}
   splunk_app_version: {{ .Chart.Version }}
-  {{- if .Values.splunkPlatform.clientCert }}
-  cert_file: /otel/etc/hec_client_cert
-  {{- end }}
-  {{- if .Values.splunkPlatform.clientKey  }}
-  key_file: /otel/etc/hec_client_key
-  {{- end }}
-  {{- if .Values.splunkPlatform.caFile }}
-  ca_file: /otel/etc/hec_ca_file
-  {{- end }}
+  tls:
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+    {{- if .Values.splunkPlatform.clientCert }}
+    cert_file: /otel/etc/hec_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.clientKey  }}
+    key_file: /otel/etc/hec_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.caFile }}
+    ca_file: /otel/etc/hec_ca_file
+    {{- end }}
 {{- end }}

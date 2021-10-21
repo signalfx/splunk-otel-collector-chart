@@ -119,7 +119,7 @@ receivers:
     include_file_name: false
     poll_interval: 200ms
     max_concurrent_files: 1024
-    encoding: nop
+    encoding: utf-8
     fingerprint_size: 1kb
     max_log_size: 1MiB
     operators:
@@ -233,10 +233,10 @@ receivers:
               to: $$
   {{- end }}
 
-# By default k8s_tagger and batch processors enabled.
+# By default k8sattributes and batch processors enabled.
 processors:
-  # k8s_tagger enriches traces and metrics with k8s metadata
-  k8s_tagger:
+  # k8sattributes enriches traces and metrics with k8s metadata
+  k8sattributes:
     # If standalone collector deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in collector, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
@@ -261,6 +261,9 @@ processors:
         - k8s.node.name
         - k8s.pod.name
         - k8s.pod.uid
+        - container.id
+        - container.image.name
+        - container.image.tag
       annotations:
         - key: splunk.com/sourcetype
           from: pod
@@ -420,7 +423,7 @@ service:
         {{- if .Values.fluentd.enabled }}
         - groupbyattrs/logs
         {{- end }}
-        - k8s_tagger
+        - k8sattributes
         - batch
         {{- if not .Values.otelCollector.enabled }}
         - filter/logs
@@ -450,7 +453,7 @@ service:
       receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
       processors:
         - memory_limiter
-        - k8s_tagger
+        - k8sattributes
         - batch
         - resource
         - resourcedetection

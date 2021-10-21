@@ -100,8 +100,6 @@ spec:
           {{ toYaml .Values.fluentd.securityContext | nindent 10 }}
         {{- end }}
         env:
-          - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelAgent.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -163,6 +161,8 @@ spec:
           {{ toYaml .Values.otelAgent.securityContext | nindent 10 }}
         {{- end }}
         env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelAgent.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
