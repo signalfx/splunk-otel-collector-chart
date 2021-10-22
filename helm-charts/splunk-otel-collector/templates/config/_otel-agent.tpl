@@ -21,7 +21,7 @@ extensions:
   zpages:
 
 receivers:
-  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
   {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   fluentforward:
     endpoint: 0.0.0.0:8006
@@ -475,7 +475,7 @@ service:
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
-      receivers: [hostmetrics, kubeletstats, receiver_creator, signalfx]
+      receivers: [hostmetrics, kubeletstats, otlp, receiver_creator, signalfx]
       processors:
         - memory_limiter
         - batch

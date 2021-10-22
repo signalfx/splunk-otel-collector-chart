@@ -18,7 +18,7 @@ extensions:
   zpages:
 
 receivers:
-  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
   # Prometheus receiver scraping metrics from the pod itself
   prometheus/collector:
     config:

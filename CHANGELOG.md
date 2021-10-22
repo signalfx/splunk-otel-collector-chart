@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fix setting of SPLUNK_MEMORY_TOTAL_MIB env var in otelAgent daemonset (#240)
+- Enable OTLP HTTP ports (4318 and 55681) in otelAgent daemonset (#243)
 
 ## [0.36.2] - 2021-10-08
 
