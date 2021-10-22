@@ -176,6 +176,14 @@ otelAgent:
       hostPort: 4317
       protocol: TCP
       enabled_for: [traces, metrics, logs]
+    otlp-http:
+      containerPort: 4318
+      protocol: TCP
+      enabled_for: [metrics, traces, logs]
+    otlp-http-old:
+      containerPort: 55681
+      protocol: TCP
+      enabled_for: [metrics, traces, logs]
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
@@ -742,6 +750,14 @@ otelCollector:
   ports:
     otlp:
       containerPort: 4317
+      protocol: TCP
+      enabled_for: [metrics, traces, logs]
+    otlp-http:
+      containerPort: 4318
+      protocol: TCP
+      enabled_for: [metrics, traces, logs]
+    otlp-http-old:
+      containerPort: 55681
       protocol: TCP
       enabled_for: [metrics, traces, logs]
     jaeger-thrift:
