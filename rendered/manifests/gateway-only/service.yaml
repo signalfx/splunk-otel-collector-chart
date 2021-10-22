@@ -35,6 +35,14 @@ spec:
     port: 4317
     targetPort: otlp
     protocol: TCP
+  - name: otlp-http
+    port: 4318
+    targetPort: otlp-http
+    protocol: TCP
+  - name: otlp-http-old
+    port: 55681
+    targetPort: otlp-http-old
+    protocol: TCP
   - name: signalfx
     port: 9943
     targetPort: signalfx

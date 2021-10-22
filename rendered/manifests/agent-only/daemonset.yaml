@@ -28,7 +28,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 20c4d8e2e7bc9a2924dba5bfe36640c2ec2fa0f32c01d2026be3a69f0fa06a15
+        checksum/config: b6365fda63714975a0357475d78ca2b29d611d88ed423a6904ab6907c2479f0e
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -131,6 +131,12 @@ spec:
         - name: otlp
           containerPort: 4317
           hostPort: 4317
+          protocol: TCP
+        - name: otlp-http
+          containerPort: 4318
+          protocol: TCP
+        - name: otlp-http-old
+          containerPort: 55681
           protocol: TCP
         - name: sfx-forwarder
           containerPort: 9080
