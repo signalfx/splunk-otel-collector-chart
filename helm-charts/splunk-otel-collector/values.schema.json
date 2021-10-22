@@ -960,30 +960,39 @@
       }
     },
     "splunkRealm": {
-      "description": "Splunk Observability Realm",
-      "type": "string"
+      "description": "[DEPRECATED] Splunk Observability Realm",
+      "type": "string",
+      "deprecated": true
     },
     "splunkAccessToken": {
-      "description": "Splunk Observability Access Token",
-      "type": "string"
+      "description": "[DEPRECATED] Splunk Observability Access Token",
+      "type": "string",
+      "deprecated": true
     },
     "ingestUrl": {
-      "type": "string"
+      "description": "[DEPRECATED] Splunk Observability ingest URL.",
+      "type": "string",
+      "deprecated": true
     },
     "apiUrl": {
-      "type": "string"
+      "description": "[DEPRECATED] Splunk Observability API URL.",
+      "type": "string",
+      "deprecated": true
     },
     "metricsEnabled": {
-      "description": "Send Metrics to Splunk Observability",
-      "type": "boolean"
+      "description": "[DEPRECATED] Send Metrics to Splunk Observability",
+      "type": "boolean",
+      "deprecated": true
     },
     "tracesEnabled": {
-      "description": "Send Traces to Splunk Observability",
-      "type": "boolean"
+      "description": "[DEPRECATED] Send Traces to Splunk Observability",
+      "type": "boolean",
+      "deprecated": true
     },
     "logsEnabled": {
-      "description": "Send Logs to Splunk Observability",
-      "type": "boolean"
+      "description": "[DEPRECATED] Send Logs to Splunk Observability",
+      "type": "boolean",
+      "deprecated": true
     }
   },
   "anyOf": [
