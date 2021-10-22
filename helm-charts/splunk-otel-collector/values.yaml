@@ -34,12 +34,12 @@ splunkPlatform:
 
   # Optional. Name of the Splunk index targeted.
   index: ""
-  metrics_index:
+  metrics_index: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
   # be container name.
-  sourcetype:
+  sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   max_connections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
@@ -424,7 +424,7 @@ fluentd:
     path: /var/log/containers/*.log
     # paths of logfiles to exclude. object type is array as per fluentd specification:
     # https://docs.fluentd.org/input/tail#exclude_path
-    excludePath:
+    excludePath: []
     #  - /var/log/containers/kube-svc-redirect*.log
     #  - /var/log/containers/tiller*.log
 
@@ -483,7 +483,7 @@ fluentd:
     #     format: "<format_of_the_timestamp>"
     #   multiline:
     #     firstline: "<regexp_to_detect_firstline_of_multiline>"
-    #     flushInterval 5s
+    #     flushInterval: 5s
     #   sourcetype: "<sourcetype_of_logs>"
     # ```
     #
@@ -684,7 +684,7 @@ serviceAccount:
   create: true
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
-  name:
+  name: ""
 
   # Service account annotations
   annotations: {}
