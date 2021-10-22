@@ -33,6 +33,7 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
+        kubectl.kubernetes.io/default-container: otel-collector
         {{- if .Values.otelAgent.podAnnotations }}
         {{- toYaml .Values.otelAgent.podAnnotations | nindent 8 }}
         {{- end }}

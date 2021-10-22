@@ -29,6 +29,7 @@ spec:
         release: default
       annotations:
         checksum/config: e95c74111b5c110623844b7e316bf9a93598f684b2cb787c4ed250ba1c528d24
+        kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
