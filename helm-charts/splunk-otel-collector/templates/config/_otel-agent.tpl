@@ -122,6 +122,9 @@ receivers:
     encoding: utf-8
     fingerprint_size: 1kb
     max_log_size: 1MiB
+    # Disable force flush until this issue is fixed:
+    # https://github.com/open-telemetry/opentelemetry-log-collection/issues/292
+    force_flush_period: "0"
     operators:
       {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
