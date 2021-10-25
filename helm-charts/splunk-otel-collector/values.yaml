@@ -95,6 +95,18 @@ splunkObservability:
   tracesEnabled: true
 
 ################################################################################
+# Logs collection engine:
+# - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to
+#   otel-collector agent for further processing.
+# - `otel`: utilize native OpenTelemetry log collection (experimental).
+#
+# Change it to `otel` to get higher throughput performance and avoid installing
+# an extra container for fluentd.
+################################################################################
+
+logsEngine: fluentd
+
+################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
 # - "aws" (Amazon Web Services)
 # - "gcp" (Google Cloud Platform)
@@ -304,9 +316,6 @@ otelK8sClusterReceiver:
 #################################################################
 
 logsCollection:
-  # Otel native logs collection is disabled by default.
-  # If you want to enabled it, make sure to disable fluentd to avoid duplication.
-  enabled: false
 
   # Container logs collection
   containers:
@@ -365,8 +374,6 @@ logsCollection:
 ################################################################################
 
 fluentd:
-  enabled: true
-
   resources:
     limits:
       cpu: 500m

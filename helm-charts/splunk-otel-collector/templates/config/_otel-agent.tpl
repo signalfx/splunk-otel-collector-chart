@@ -4,7 +4,7 @@ The values can be overridden in .Values.otelAgent.config
 */}}
 {{- define "splunk-otel-collector.otelAgentConfig" -}}
 extensions:
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.enabled }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
@@ -102,7 +102,7 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
-  {{- if and .Values.logsCollection.enabled .Values.logsCollection.containers.enabled }}
+  {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
   filelog:
     include: ["/var/log/pods/*/*/*.log"]
     # Exclude logs. The file format is
@@ -283,7 +283,7 @@ processors:
         {{- end }}
       {{- end }}
 
-  {{- if .Values.fluentd.enabled }}
+  {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
   groupbyattrs/logs:
     keys:
@@ -400,7 +400,7 @@ exporters:
 
 service:
   extensions:
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.enabled }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
     {{- end }}
     - health_check
@@ -416,14 +416,14 @@ service:
     {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
-        {{- if and .Values.logsCollection.enabled .Values.logsCollection.containers.enabled }}
+        {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
         - filelog
         {{- end }}
         - fluentforward
         - otlp
       processors:
         - memory_limiter
-        {{- if .Values.fluentd.enabled }}
+        {{- if eq .Values.logsEngine "fluentd" }}
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
