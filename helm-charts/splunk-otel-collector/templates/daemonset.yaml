@@ -157,9 +157,14 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if .Values.otelAgent.securityContext }}
+        {{- if or .Values.otelAgent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled) }}
         securityContext:
+          {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled }}
+          runAsUser: 0
+          {{- end }}
+          {{- if .Values.otelAgent.securityContext }}
           {{ toYaml .Values.otelAgent.securityContext | nindent 10 }}
+          {{- end }}
         {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
