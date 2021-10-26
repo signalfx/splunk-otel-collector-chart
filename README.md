@@ -254,10 +254,7 @@ You already have an option to use OpenTelemetry logs collection instead of fluen
 The following configuration can be used to achieve that:
 
 ```yaml
-fluentd:
-  enabled: false
-logsCollection:
-  enabled: true
+logsEngine: otel
 ```
 
 There are following known limitations of native OTel logs collection:
@@ -332,6 +329,27 @@ You need to mount the docker socket to your container as follows:
       hostPath:
         path: /var/run/docker.sock
 ```
+
+[#245 Simplify configuration for switching to native OTel logs
+collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/232)
+
+The config to enable native OTel logs collection was changed from
+
+```yaml
+fluentd:
+  enabled: false
+logsCollection:
+  enabled: true
+```
+
+to
+
+```yaml
+logsEngine: otel
+```
+
+Enabling both engines is not supported anymore. If you need that, you can
+install fluentd separately.
 
 ### 0.35.3 to 0.36.0
 

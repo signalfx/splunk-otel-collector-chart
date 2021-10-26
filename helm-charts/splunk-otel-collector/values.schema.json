@@ -152,6 +152,14 @@
         }
       ]
     },
+    "logsEngine": {
+      "description": "Logs collection engine",
+      "type": "string",
+      "enum": [
+        "fluentd",
+        "otel"
+      ]
+    },
     "provider": {
       "description": "Cloud provider where the collector is running",
       "type": "string",
@@ -436,9 +444,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
         "containers": {
           "type": "object",
           "additionalProperties": false,
@@ -482,9 +487,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
         "resources": {
           "type": "object",
           "additionalProperties": false,

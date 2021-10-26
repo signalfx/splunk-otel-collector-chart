@@ -9,7 +9,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
     engine: fluentd
     {{- end }}
   {{- if .Values.otelAgent.annotations }}
@@ -60,7 +60,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
       initContainers:
         - name: prepare-fluentd-config
           image: {{ .Values.image.fluentd.initContainer.image }}
@@ -92,7 +92,7 @@ spec:
               mountPath: /fluentd/etc/cri
       {{- end }}
       containers:
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.fluentd.enabled }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
       - name: fluentd
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -157,9 +157,9 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or .Values.otelAgent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled) }}
+        {{- if or .Values.otelAgent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled }}
+          {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
           runAsUser: 0
           {{- end }}
           {{- if .Values.otelAgent.securityContext }}
@@ -273,7 +273,7 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.logsCollection.enabled }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -289,7 +289,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-      {{- if .Values.fluentd.enabled }}
+      {{- if eq .Values.logsEngine "fluentd" }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -314,7 +314,7 @@ spec:
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
       {{- end}}
-      {{- if .Values.logsCollection.enabled }}
+      {{- if eq .Values.logsEngine "otel" }}
       - name: varlog
         hostPath:
           path: /var/log

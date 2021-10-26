@@ -1,4 +1,4 @@
-{{ if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.otelAgent.enabled .Values.fluentd.enabled }}
+{{ if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.otelAgent.enabled (eq .Values.logsEngine "fluentd") }}
 {{/*
 Fluentd config parts applied only to clusters with containerd/cri-o runtime.
 */}}
