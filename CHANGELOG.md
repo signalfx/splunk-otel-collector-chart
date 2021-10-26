@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.37.0] - 2021-10-26
+
 [Upgrade
 guidelines](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370)
 
@@ -16,6 +18,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370
   collection gets `container.id` attribute that allows container level
   correlation in Splunk Observability Cloud closing a feature parity gap with
   fluentd (#238)
+- Add strict values.yaml schema validation (#227, #234, #239)
 
 ### Changed
 
