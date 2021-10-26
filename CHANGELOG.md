@@ -29,7 +29,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370
   to identify which destination is enabled, remove default value for
   `splunkObservability.realm` (#230, #233)
 - Upgrade splunk-otel-collector image to 0.37.1 (#237, #249)
-- Simplify configuration for switching to native OTel logs collection (#245)
+- Simplify configuration for switching to native OTel logs collection (#246)
 
 ### Fixed
 
