@@ -330,8 +330,8 @@ You need to mount the docker socket to your container as follows:
         path: /var/run/docker.sock
 ```
 
-[#245 Simplify configuration for switching to native OTel logs
-collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/232)
+[#246 Simplify configuration for switching to native OTel logs
+collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/246)
 
 The config to enable native OTel logs collection was changed from
 
