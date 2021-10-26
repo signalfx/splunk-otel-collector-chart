@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add initContainer for log checkpoint migration from Fluentd to Otel agent (#253)
+
 ## [0.37.0] - 2021-10-26
 
 [Upgrade
