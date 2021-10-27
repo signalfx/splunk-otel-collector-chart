@@ -60,8 +60,9 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
+      {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
       initContainers:
+        {{- if (eq .Values.logsEngine "fluentd") }}
         - name: prepare-fluentd-config
           image: {{ .Values.image.fluentd.initContainer.image }}
           imagePullPolicy: {{ .Values.image.fluentd.initContainer.pullPolicy }}
@@ -90,6 +91,38 @@ spec:
               mountPath: /fluentd/etc/json
             - name: fluentd-config-cri
               mountPath: /fluentd/etc/cri
+        {{- else }}
+        - name: migrate-checkpoint
+          image: {{ template "splunk-otel-collector.image.otelcol" . }}
+          imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
+          command: ["/migratecheckpoint"]
+          securityContext:
+            runAsUser: 0
+          env:
+          - name: CONTAINER_LOG_PATH_FLUENTD
+            value: "{{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos"
+          - name: CONTAINER_LOG_PATH_OTEL
+            value: "/var/lib/otel_pos/receiver_filelog_"
+          - name: CUSTOM_LOG_PATH_FLUENTD
+            value: "{{ .Values.fluentd.config.posFilePrefix }}-*.pos"
+          - name: CUSTOM_LOG_PATH_OTEL
+            value: "/var/lib/otel_pos/receiver_filelog_"
+          - name: CUSTOM_LOG_CAPTURE_REGEX
+            value: '{{ regexReplaceAll "(\\W)" .Values.fluentd.config.posFilePrefix "\\${1}" }}\-(?P<name>[\w0-9-_]+)\.pos'
+          - name: JOURNALD_LOG_PATH_FLUENTD
+            value: "/var/log/splunkd-fluentd-journald-*.pos.json"
+          - name: JOURNALD_LOG_PATH_OTEL
+            value: "/var/lib/otel_pos/receiver_journald_"
+          - name: JOURNALD_LOG_CAPTURE_REGEX
+            value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/lib/otel_pos
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+        {{- end }}
       {{- end }}
       containers:
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
