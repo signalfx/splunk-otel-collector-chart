@@ -67,6 +67,12 @@ data:
           - from: pod
             key: splunk.com/exclude
             tag_name: splunk.com/exclude
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
           labels:
           - key: app
           metadata:

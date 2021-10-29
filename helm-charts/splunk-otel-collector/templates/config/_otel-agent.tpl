@@ -276,6 +276,12 @@ processors:
         - key: splunk.com/exclude
           tag_name: splunk.com/exclude
           from: pod
+        - key: splunk.com/index
+          tag_name: com.splunk.index
+          from: namespace
+        - key: splunk.com/index
+          tag_name: com.splunk.index
+          from: pod
       {{- with .Values.extraAttributes.podLabels }}
       labels:
         {{- range . }}
