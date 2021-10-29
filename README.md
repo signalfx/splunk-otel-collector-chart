@@ -267,7 +267,7 @@ There are following known limitations of native OTel logs collection:
   Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
 - Journald logs cannot be collected natively by Splunk OTel Collector yet.
 
-### Performance of Splunk Connect for Kubernetes-OpenTelemetry
+### Performance of native OpenTelemetry logs collection
 
 Some configurations used with Splunk Connect for Kubernetes-OpenTelemetry can have an impact on overall performance of log ingestion. The more receivers, processors, exporters and extensions that are added to any of the pipelines, the greater the performance impact.
 
