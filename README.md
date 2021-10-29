@@ -81,6 +81,8 @@ This distribution currently supports:
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
+The helm chart currently utilizes fluentd by default for Kubernetes logs collection and supports an option to use native OpenTelemetry logs collection for higher throughput and performance. [Go to Logs collection section for more details along with performance benchmarks run internally](#logs-collection)
+
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
 ### Supported Kubernetes distributions
@@ -264,6 +266,26 @@ There are following known limitations of native OTel logs collection:
   This means that correlation between logs and traces will not work in Splunk Observability.
   Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
 - Journald logs cannot be collected natively by Splunk OTel Collector yet.
+
+### Performance of Splunk Connect for Kubernetes-OpenTelemetry
+
+Some configurations used with Splunk Connect for Kubernetes-OpenTelemetry can have an impact on overall performance of log ingestion. The more receivers, processors, exporters and extensions that are added to any of the pipelines, the greater the performance impact.
+
+Splunk Connect for Kubernetes-OpenTelemetry can exceed the default throughput of HEC. To best address capacity needs, Splunk recommends that you monitor the HEC throughput and back pressure on Splunk Connect for Kubernetes-OpenTelemetry deployments and be prepared to add additional nodes as needed.
+
+Here is the summary of performance benchmarks run internally.
+| Log Generator Count | Total Generated EPS | Event Size (byte) | Agent CPU Usage | Agent EPS |
+|---------------------|---------------------|-------------------|-----------------|-----------|
+|                   1 |              27,000 |               256 |             1.6 |    27,000 |
+|                   1 |              49,000 |               256 |             1.8 |    30,000 |
+|                   1 |              49,000 |               516 |             1.8 |    28,000 |
+|                   1 |              49,000 |              1024 |             1.8 |    24,000 |
+|                   2 |              20,000 |               256 |             1.3 |    20,000 |
+|                   7 |              40,000 |               256 |             2.4 |    40,000 |
+|                   5 |              58,000 |               256 |             3.2 |    54,000 |
+|                   7 |              82,000 |               256 |               3 |    52,000 |
+|                  10 |              58,000 |               256 |             3.2 |    53,000 |
+
 
 ## Additional telemetry sources
 
