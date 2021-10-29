@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Add initContainer for log checkpoint migration from Fluentd to Otel agent (#253)
-- Add index routing for splunk customers.(#256)
+- Add index routing for Splunk Enterprise/Cloud customers (#256)
 
 ## [0.37.0] - 2021-10-26
 
