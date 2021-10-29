@@ -117,8 +117,9 @@ The following prerequisites are required to use the helm chart:
 
 ### How to install
 
-To install splunk-otel-collector in k8s cluster at one of the configuration groups
-`splunkPlatform` or `splunkObservability` has to be fully configured.
+In order to install Splunk OpenTelemetry Connector in a k8s cluster, at least
+one of the destinations (`splunkPlatform` or `splunkObservability`) has to be
+configured.
 
 For Splunk Enterprise/Cloud the following parameters are required:
 
