@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add initContainer for log checkpoint migration from Fluentd to Otel agent (#253)
 - Add index routing for Splunk Enterprise/Cloud customers (#256)
 
+### Fixed
+
+- Fix metrics/logs disabling for Splunk Platform destination (#259)
+
 ## [0.37.0] - 2021-10-26
 
 [Upgrade
