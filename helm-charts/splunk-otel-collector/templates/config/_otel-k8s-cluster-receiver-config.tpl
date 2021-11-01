@@ -48,6 +48,14 @@ processors:
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
+  {{- if and .Values.otelK8sClusterReceiver.k8sEventsEnabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  resource/add_event_k8s:
+    attributes:
+      - action: insert
+        key: kubernetes_cluster
+        value: {{ .Values.clusterName }}
+  {{- end }}
+
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
     attributes:
@@ -155,6 +163,7 @@ service:
         - memory_limiter
         - batch
         - resource
+        - resource/add_event_k8s
       exporters:
         - signalfx
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
