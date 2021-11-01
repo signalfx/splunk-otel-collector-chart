@@ -83,14 +83,14 @@ Whether logs enabled for Splunk Observability, backward compatible.
 Whether logs enabled for Splunk Platform.
 */}}
 {{- define "splunk-otel-collector.platformLogsEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkObservability.logsEnabled }}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkPlatform.logsEnabled }}
 {{- end -}}
 
 {{/*
 Whether metrics enabled for Splunk Platform.
 */}}
 {{- define "splunk-otel-collector.platformMetricsEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkObservability.metricsEnabled }}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkPlatform.metricsEnabled }}
 {{- end -}}
 
 {{/*
