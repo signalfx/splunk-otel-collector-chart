@@ -329,6 +329,12 @@ logsCollection:
     excludePaths: []
     # Boolean for ingesting the agent's own log
     excludeAgentLogs: true
+    # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
+    fieldNameConvention:
+      # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+      renameFieldsSck: false
+      # Boolean for keeping Otel convention fields after renaming it
+      keepOtelContention: false
     # Extra operators for container logs.
     # https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
     extraOperators: []

@@ -463,6 +463,18 @@
             "excludeAgentLogs": {
               "type": "boolean"
             },
+            "fieldNameConvention": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "renameFieldsSck": {
+                  "type": "boolean"
+                },
+                "keepOtelContention": {
+                  "type": "boolean"
+                }
+              }
+            },
             "extraOperators": {
               "type": "array",
               "items": {
