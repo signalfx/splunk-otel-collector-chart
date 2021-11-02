@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.37.1] - 2021-11-01
+
 ### Added
 
 - Add initContainer for log checkpoint migration from Fluentd to Otel agent (#253)
@@ -12,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fix metrics/logs disabling for Splunk Platform destination (#259)
+- Fix kubernetes events in Observability IMM by adding `kubernetes_cluster`
+  attribute (#261)
 
 ## [0.37.0] - 2021-10-26
 
