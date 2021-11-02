@@ -303,53 +303,6 @@ processors:
      - k8s.pod.name
      - k8s.pod.uid
   {{- end }}
-  {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-  resource/sckcompatible:
-    attributes:
-    - key: container_name
-      from_attribute: k8s.container.name
-      action: upsert
-    - key: cluster_name
-      from_attribute: k8s.cluster.name
-      action: upsert
-    - key: container_id
-      from_attribute: k8s.container.id
-      action: upsert
-    - key: pod
-      from_attribute: k8s.pod.name
-      action: upsert
-    - key: pod_uid
-      from_attribute: k8s.pod.uid
-      action: upsert
-    - key: namespace
-      from_attribute: k8s.namespace.name
-      action: upsert
-    {{- range $_, $label := .Values.extraAttributes.podLabels }}
-    - key: {{ printf "label_%s" $label }}
-      from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
-      action: upsert
-    {{- end }}
-  {{- end }}
-  {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
-  resource/removedups:
-    attributes:
-    - key: k8s.container.name
-      action: delete
-    - key: k8s.cluster.name
-      action: delete
-    - key: k8s.container.id
-      action: delete
-    - key: k8s.pod.name
-      action: delete
-    - key: k8s.pod.uid
-      action: delete
-    - key: k8s.namespace.name
-      action: delete
-    {{- range $_, $label := .Values.extraAttributes.podLabels }}
-    - key: {{ printf "k8s.pod.labels.%s" $label }}
-      action: delete
-    {{- end }}
-  {{- end }}
 
   {{- if not .Values.otelCollector.enabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
@@ -483,15 +436,11 @@ service:
         - batch
         {{- if not .Values.otelCollector.enabled }}
         - filter/logs
-        - resource/logs
-        {{- end }}
-        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-        - resource/sckcompatible
-        {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
-        - resource/removedup
-        {{- end }}
         {{- end }}
         - resource
+        {{- if not .Values.otelCollector.enabled }}
+        - resource/logs
+        {{- end }}
         - resourcedetection
         {{- if .Values.environment }}
         - resource/add_environment

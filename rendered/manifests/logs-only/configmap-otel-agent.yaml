@@ -123,8 +123,6 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resource/removedups:
-        attributes:
         - action: delete
           key: k8s.container.name
         - action: delete
@@ -178,8 +176,8 @@ data:
           - k8sattributes
           - batch
           - filter/logs
-          - resource/logs
           - resource
+          - resource/logs
           - resourcedetection
           receivers:
           - fluentforward
