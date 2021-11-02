@@ -4,13 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Field name compatibility for SCK and index routing precedence (#258)
+
 ## [0.37.1] - 2021-11-01
 
 ### Added
 
 - Add initContainer for log checkpoint migration from Fluentd to Otel agent (#253)
 - Add index routing for Splunk Enterprise/Cloud customers (#256)
-- Field name compatibility for SCK and index routing precedence (#258)
 
 ### Fixed
 

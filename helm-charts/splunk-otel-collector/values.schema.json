@@ -76,6 +76,18 @@
         "metricsEnabled": {
           "description": "Send Metrics to Splunk Platform",
           "type": "boolean"
+        },
+        "fieldNameConvention": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "renameFieldsSck": {
+              "type": "boolean"
+            },
+            "keepOtelConvention": {
+              "type": "boolean"
+            }
+          }
         }
       },
       "anyOf": [
@@ -462,18 +474,6 @@
             },
             "excludeAgentLogs": {
               "type": "boolean"
-            },
-            "fieldNameConvention": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "renameFieldsSck": {
-                  "type": "boolean"
-                },
-                "keepOtelContention": {
-                  "type": "boolean"
-                }
-              }
             },
             "extraOperators": {
               "type": "array",

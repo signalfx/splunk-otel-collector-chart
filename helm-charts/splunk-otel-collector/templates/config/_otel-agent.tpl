@@ -302,19 +302,8 @@ processors:
      - k8s.namespace.name
      - k8s.pod.name
      - k8s.pod.uid
-  {{- else }}
-  {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
-  resource/splunk:
-    attributes:
-    - key: com.splunk.index
-      from_attribute: k8s.namespace.annotations.splunk.com/index
-      action: upsert
-    - key: com.splunk.index
-      from_attribute: k8s.pod.annotations.splunk.com/index
-      action: upsert
   {{- end }}
-  {{- end }}
-  {{- if .Values.logsCollection.containers.fieldNameConvention.renameFieldsSck }}
+  {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   resource/sckcompatible:
     attributes:
     - key: container_name
@@ -341,7 +330,7 @@ processors:
       action: upsert
     {{- end }}
   {{- end }}
-  {{- if not .Values.logsCollection.containers.fieldNameConvention.keepOtelContention }}
+  {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
   resource/removedups:
     attributes:
     - key: k8s.container.name
@@ -496,12 +485,9 @@ service:
         - filter/logs
         - resource/logs
         {{- end }}
-        {{- if and (eq .Values.logsEngine "otel") (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
-        - resource/splunk
-        {{- end }}
-        {{- if .Values.logsCollection.containers.fieldNameConvention.renameFieldsSck }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
         - resource/sckcompatible
-        {{- if not .Values.logsCollection.containers.fieldNameConvention.keepOtelContention }}
+        {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
         - resource/removedup
         {{- end }}
         {{- end }}
