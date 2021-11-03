@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Field name compatibility for SCK and index routing precedence (#258)
+- Field name compatibility for SCK (#258)
 
 ## [0.37.1] - 2021-11-01
 
