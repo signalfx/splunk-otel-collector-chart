@@ -668,7 +668,7 @@ image:
 
     initContainer:
       # The image of the container for fluentd init to pull
-      image: busybox:1.33
+      image: busybox:1
       # The policy that specifies when the user wants the fluentd init image to be pulled
       pullPolicy: IfNotPresent
 

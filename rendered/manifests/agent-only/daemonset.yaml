@@ -42,7 +42,7 @@ spec:
           key: node-role.kubernetes.io/master
       initContainers:
         - name: prepare-fluentd-config
-          image: busybox:1.33
+          image: busybox:1
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
           args:
