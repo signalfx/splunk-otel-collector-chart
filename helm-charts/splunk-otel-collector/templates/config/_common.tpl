@@ -101,6 +101,49 @@ resource/logs:
     - key: istio_service_name
       action: delete
     {{- end }}
+    {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+    - key: container_name
+      from_attribute: k8s.container.name
+      action: upsert
+    - key: cluster_name
+      from_attribute: k8s.cluster.name
+      action: upsert
+    - key: container_id
+      from_attribute: container.id
+      action: upsert
+    - key: pod
+      from_attribute: k8s.pod.name
+      action: upsert
+    - key: pod_uid
+      from_attribute: k8s.pod.uid
+      action: upsert
+    - key: namespace
+      from_attribute: k8s.namespace.name
+      action: upsert
+    {{- range $_, $label := .Values.extraAttributes.podLabels }}
+    - key: {{ printf "label_%s" $label }}
+      from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
+      action: upsert
+    {{- end }}
+    {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+    - key: k8s.container.name
+      action: delete
+    - key: k8s.cluster.name
+      action: delete
+    - key: container.id
+      action: delete
+    - key: k8s.pod.name
+      action: delete
+    - key: k8s.pod.uid
+      action: delete
+    - key: k8s.namespace.name
+      action: delete
+    {{- range $_, $label := .Values.extraAttributes.podLabels }}
+    - key: {{ printf "k8s.pod.labels.%s" $label }}
+      action: delete
+    {{- end }}
+    {{- end }}
+    {{- end }}
 {{- end }}
 
 {{/*
