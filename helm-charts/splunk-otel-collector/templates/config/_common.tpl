@@ -125,7 +125,7 @@ resource/logs:
       from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
       action: upsert
     {{- end }}
-    {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
+    {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
     - key: k8s.container.name
       action: delete
     - key: k8s.cluster.name
