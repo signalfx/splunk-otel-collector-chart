@@ -436,9 +436,11 @@ service:
         - batch
         {{- if not .Values.otelCollector.enabled }}
         - filter/logs
-        - resource/logs
         {{- end }}
         - resource
+        {{- if not .Values.otelCollector.enabled }}
+        - resource/logs
+        {{- end }}
         - resourcedetection
         {{- if .Values.environment }}
         - resource/add_environment
