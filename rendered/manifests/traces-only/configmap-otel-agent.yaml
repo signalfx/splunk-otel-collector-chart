@@ -123,20 +123,6 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-        - action: delete
-          key: k8s.container.name
-        - action: delete
-          key: k8s.cluster.name
-        - action: delete
-          key: k8s.container.id
-        - action: delete
-          key: k8s.pod.name
-        - action: delete
-          key: k8s.pod.uid
-        - action: delete
-          key: k8s.namespace.name
-        - action: delete
-          key: k8s.pod.labels.app
       resourcedetection:
         detectors:
         - env

@@ -109,7 +109,7 @@ resource/logs:
       from_attribute: k8s.cluster.name
       action: upsert
     - key: container_id
-      from_attribute: k8s.container.id
+      from_attribute: container.id
       action: upsert
     - key: pod
       from_attribute: k8s.pod.name
@@ -125,13 +125,12 @@ resource/logs:
       from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
       action: upsert
     {{- end }}
-    {{- end }}
     {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelContention }}
     - key: k8s.container.name
       action: delete
     - key: k8s.cluster.name
       action: delete
-    - key: k8s.container.id
+    - key: container.id
       action: delete
     - key: k8s.pod.name
       action: delete
@@ -142,6 +141,7 @@ resource/logs:
     {{- range $_, $label := .Values.extraAttributes.podLabels }}
     - key: {{ printf "k8s.pod.labels.%s" $label }}
       action: delete
+    {{- end }}
     {{- end }}
     {{- end }}
 {{- end }}
