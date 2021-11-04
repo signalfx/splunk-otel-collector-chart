@@ -39,6 +39,8 @@ Splunk OpenTelemetry Connector is installed and configured to send data to Splun
 {{ end }}
 {{- if not (eq (toString .Values.provider) "<nil>") }}
 [WARNING] "provider" parameter is deprecated, please use "cloudProvider" instead.
+{{- if not (eq (toString .Values.extraAttributes.podLabels) "<nil>") }}
+[WARNING] ".Values.extraAttributes.podLabels" parameter is deprecated, please use ".Values.extraAttributes.fromLabels" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
 {{ end }}
 {{- if not (eq (toString .Values.extraAttributes.podLabels) "<nil>") }}
