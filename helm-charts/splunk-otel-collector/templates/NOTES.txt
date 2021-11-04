@@ -33,3 +33,7 @@ Splunk OpenTelemetry Connector is installed and configured to send data to Splun
 [WARNING] "logsEnabled" parameter is deprecated, please use "splunkObservability.logsEnabled" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
+{{- if not (eq (toString .Values.extraAttributes.podLabels) "<nil>") }}
+[WARNING] ".Values.extraAttributes.podLabels" parameter is deprecated, please use ".Values.extraAttributes.fromLabels" instead.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
+{{ end }}

@@ -14,7 +14,7 @@ fullnameOverride: ""
 # log as "k8s.cluster.name" attribute.
 ################################################################################
 
-clusterName: ""
+clusterName: "test"
 
 ################################################################################
 # Splunk Data-to-Everything Platform configuration.
@@ -159,13 +159,30 @@ autodetect:
 
 extraAttributes:
 
-  # Labels that will be collected from k8s pods (in case they are set)
-  # and added  as extra attributes to the telemetry in the following format:
-  # k8s.pod.labels.<label_name>: <label_value>
-  podLabels:
-    - app
-    # - k8s-app
-    # - release
+  # Labels that will be collected from k8s pods (or namespaces) (in case they are set)
+  # and added as extra attributes to the telemetry in the following format:
+  # k8s.<pod|namespace>.labels.<label_name>: <label_value>
+  #  For example, if you want to collect "my_key" label from your namespaces, you could use the following:
+  #  fromLabels:
+  #    - key: my_key
+  #      from: namespace
+  #  If you want to collect all labels from your pods, you could do that using a `key_regex: .*` option, e.g.:
+  #  fromLabels:
+  #    - key_regex: .*
+  #      from: pod
+  #  If you want to change the default attribute name `k8s.pod.labels.<label_name>`, you could do that using a `tag_name` field:
+  #  fromLabels:
+  #    - key: my_key
+  #      tag_name: my_tag
+  #      from: pod
+  fromLabels:
+    - key: app
+
+  # Annotations that will be collected from k8s pods (or namespaces) (in case they are set)
+  # and added as extra attributes to the telemetry in the following format:
+  # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
+  # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
+  fromAnnotations: []
 
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
