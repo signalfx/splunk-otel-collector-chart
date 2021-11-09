@@ -1,0 +1,70 @@
+# Default values for sck-otel.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Splunk Data-to-Everything Platform configuration.
+# Fields `endpoint` and `token` are required to collect and send logs to Splunk Cloud or Splunk Enterprise.
+splunkPlatform:
+  # URL to a Splunk instance to send data to. ie) "http://X.X.X.X:8088/services/collector"
+  endpoint:
+  # Splunk HTTP Event Collector token.
+  token:
+  # Optional. Name of the Splunk index targeted.
+  index: "ci_events"
+  metrics_index: "ci_metrics"
+  # Optional. Default value for `source` field.
+  source: "kubernetes"
+  # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
+  sourcetype:
+  # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
+  max_connections: 200
+  # Whether to disable gzip compression over HTTP. Defaults to true.
+  disable_compression: true
+  # HTTP timeout when sending data. Defaults to 10s.
+  timeout: 10s
+  # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
+  insecure_skip_verify: true
+  # Options to disable particular telemetry data types that will be sent to
+  # Splunk Platform.
+  logsEnabled: true
+  metricsEnabled: true
+
+logsEngine: otel
+
+clusterName: "functional-test"
+
+# Metadata to be set on the telemetry data from Kubernetes objects.
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
+#k8sMetadata:
+#  # Boolean for enriching all telemetry with k8s metadata (labels, annotations, etc)
+#  enabled: true
+#  # This option is to fetch metadata from extra annotations.
+#  annotations:
+#    - key: splunk.com/customField
+#      tag_name: customField
+#  labels:
+#    - key: app
+#      from: pod
+#    - key: app
+#      from: namespace
+
+# List of key/value pairs to set additional metadata set uniformly across the collected telemetry.
+# Can be used to define things such as cloud_account_id, cloud_account_region, etc.
+# Should be set using https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor.
+extraAttributes:
+  fromAnnotations:
+    - key: splunk.com/customField
+      tag_name: customField
+  fromLabels:
+    - key: app
+      from: pod
+    - key: app
+      from: namespace
+
+  custom:
+   - name: "cluster_name"
+     value: "ci-k8s-cluster"
+   - name: "customfield1"
+     value: "customvalue1"
+   - name: "customfield2"
+     value: "customvalue2"
