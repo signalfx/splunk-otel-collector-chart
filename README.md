@@ -289,6 +289,10 @@ autodetect:
   prometheus: true
 ```
 
+## Proxy Support
+
+Otel collector in this chart support [proxy environment variables](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter#proxy-support). You can set these proxy environment variables by setting `.Values.otelAgent.extraEnvs` for agent daemonset or `.Values.otelCollector.extraEnvs` for collector deployment.
+
 ## Pre-rendered Kubernetes resources
 
 The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
