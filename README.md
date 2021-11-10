@@ -117,7 +117,7 @@ The following prerequisites are required to use the helm chart:
 
 ### How to install
 
-In order to install Splunk OpenTelemetry Connector in a Kubernetes cluster, at
+In order to install Splunk OpenTelemetry Collector in a Kubernetes cluster, at
 least one of the destinations (`splunkPlatform` or `splunkObservability`) has
 to be configured.
 
