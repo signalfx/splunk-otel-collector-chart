@@ -165,7 +165,7 @@ deletes the release.
 ## Advanced Configuration
 
 To fully configure the Helm chart, see the [advanced
-configuration](advanced-configuration.md).
+configuration](docs/advanced-configuration.md).
 
 ## License
 
