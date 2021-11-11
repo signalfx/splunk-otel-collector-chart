@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Field name compatibility for SCK (#258)
 
+### Removed
+
+- Busybox image dependency (#275)
+
 ## [0.37.1] - 2021-11-01
 
 ### Added
