@@ -166,7 +166,7 @@ deletes the release.
 
 ## Advanced Configuration
 To fully configure the Helm chart, see the [advanced
-configuration](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md).
+configuration](docs/advanced-configuration.md).
 
 ## License
 
