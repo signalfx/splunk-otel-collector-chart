@@ -165,6 +165,7 @@ The command removes all the Kubernetes components associated with the chart and
 deletes the release.
 
 ## Advanced Configuration
+
 To fully configure the Helm chart, see the [advanced
 configuration](docs/advanced-configuration.md).
 
