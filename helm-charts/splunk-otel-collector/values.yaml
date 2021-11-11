@@ -67,6 +67,13 @@ splunkPlatform:
   logsEnabled: true
   metricsEnabled: true
 
+  # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
+  fieldNameConvention:
+    # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+    renameFieldsSck: false
+    # Boolean for keeping Otel convention fields after renaming it
+    keepOtelConvention: true
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
@@ -661,7 +668,7 @@ image:
 
     initContainer:
       # The image of the container for fluentd init to pull
-      image: busybox:1.33
+      image: busybox:1
       # The policy that specifies when the user wants the fluentd init image to be pulled
       pullPolicy: IfNotPresent
 

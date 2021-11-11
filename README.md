@@ -36,9 +36,9 @@
 
 ---
 
-# Splunk OpenTelemetry Connector for Kubernetes
+# Splunk OpenTelemetry Collector for Kubernetes
 
-The Splunk OpenTelemetry Connector for Kubernetes is a
+The Splunk OpenTelemetry Collector for Kubernetes is a
 [Helm](https://github.com/kubernetes/helm) chart for the [Splunk Distribution
 of OpenTelemetry Collector](https://github.com/signalfx/splunk-otel-collector).
 This chart creates a Kubernetes DaemonSet along with other Kubernetes objects
@@ -119,9 +119,9 @@ The following prerequisites are required to use the helm chart:
 
 ### How to install
 
-In order to install Splunk OpenTelemetry Connector in a k8s cluster, at least
-one of the destinations (`splunkPlatform` or `splunkObservability`) has to be
-configured.
+In order to install Splunk OpenTelemetry Collector in a Kubernetes cluster, at
+least one of the destinations (`splunkPlatform` or `splunkObservability`) has
+to be configured.
 
 For Splunk Enterprise/Cloud the following parameters are required:
 
@@ -145,11 +145,13 @@ $ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-ot
 $ helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-Instead of setting helm values as arguments a yaml file can be provided:
+Instead of setting helm values as arguments a YAML file can be provided:
 
 ```bash
 $ helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
 
 ### How to uninstall
 
@@ -164,6 +166,7 @@ deletes the release.
 
 ## Advanced Configuration
 
+<<<<<<< HEAD
 The
 [values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
 lists all supported configurable parameters for this chart, along with detailed
@@ -406,6 +409,10 @@ your values.yaml:
 autodetect:
   prometheus: true
 ```
+=======
+To fully configure the Helm chart, see the [advanced
+configuration](docs/advanced-configuration.md).
+>>>>>>> main
 
 ## License
 
