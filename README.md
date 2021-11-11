@@ -81,7 +81,7 @@ This distribution currently supports:
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
-The helm chart currently utilizes fluentd by default for Kubernetes logs collection and supports an option to use native OpenTelemetry logs collection for higher throughput and performance. [Go to Logs collection section for more details along with performance benchmarks run internally](#logs-collection)
+The Helm chart currently uses Fluentd by default for Kubernetes logs collection, and supports an option to use native OpenTelemetry logs collection for higher throughput and performance. See the [logs collection section] (https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for more information, along with performance benchmarks run internally.
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
