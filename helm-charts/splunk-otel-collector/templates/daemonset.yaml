@@ -64,9 +64,11 @@ spec:
       initContainers:
         {{- if (eq .Values.logsEngine "fluentd") }}
         - name: prepare-fluentd-config
-          image: {{ .Values.image.fluentd.initContainer.image }}
-          imagePullPolicy: {{ .Values.image.fluentd.initContainer.pullPolicy }}
+          image: {{ template "splunk-otel-collector.image.fluentd" . }}
+          imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
                 if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
