@@ -84,6 +84,11 @@ Resource processor for logs manipulations
 {{- define "splunk-otel-collector.resourceLogsProcessor" -}}
 resource/logs:
   attributes:
+    {{- if .Values.splunkPlatform.sourcetype }}
+    - key: com.splunk.sourcetype
+      value: "{{.Values.splunkPlatform.sourcetype }}"
+      action: upsert
+    {{- end }}
     - key: com.splunk.sourcetype
       from_attribute: k8s.pod.annotations.splunk.com/sourcetype
       action: upsert
