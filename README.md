@@ -36,9 +36,9 @@
 
 ---
 
-# Splunk OpenTelemetry Connector for Kubernetes
+# Splunk OpenTelemetry Collector for Kubernetes
 
-The Splunk OpenTelemetry Connector for Kubernetes is a
+The Splunk OpenTelemetry Collector for Kubernetes is a
 [Helm](https://github.com/kubernetes/helm) chart for the [Splunk Distribution
 of OpenTelemetry Collector](https://github.com/signalfx/splunk-otel-collector).
 This chart creates a Kubernetes DaemonSet along with other Kubernetes objects
@@ -117,9 +117,9 @@ The following prerequisites are required to use the helm chart:
 
 ### How to install
 
-In order to install Splunk OpenTelemetry Connector in a k8s cluster, at least
-one of the destinations (`splunkPlatform` or `splunkObservability`) has to be
-configured.
+In order to install Splunk OpenTelemetry Collector in a Kubernetes cluster, at
+least one of the destinations (`splunkPlatform` or `splunkObservability`) has
+to be configured.
 
 For Splunk Enterprise/Cloud the following parameters are required:
 
@@ -143,11 +143,13 @@ $ helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-ot
 $ helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-Instead of setting helm values as arguments a yaml file can be provided:
+Instead of setting helm values as arguments a YAML file can be provided:
 
 ```bash
 $ helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
 
 ### How to uninstall
 
@@ -162,228 +164,8 @@ deletes the release.
 
 ## Advanced Configuration
 
-The
-[values.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
-lists all supported configurable parameters for this chart, along with detailed
-explanation. Read through it to understand how to configure this chart.
-
-Also check [examples of chart configuration](./examples/README.md). This also includes a guide to deploy for the k8s cluster with the windows worker node.
-
-At the minimum you need to configure the following values to send data to Splunk
-Enterprise/Cloud.
-
-```yaml
-splunkPlatform:
-  token: xxxxxx
-  endpoint: http://localhost:8088/services/collector
-```
-
-At the minimum you need to configure the following values to send data to Splunk
-Observability Cloud.
-
-```yaml
-splunkObservability:
-  accessToken: xxxxxx
-  realm: us0
-clusterName: my-k8s-cluster
-```
-
-### Cloud provider
-
-Use the `provider` parameter to provide information about the cloud provider, if any.
-
-- `aws` - Amazon Web Services
-- `gcp` - Google Cloud
-- `azure` - Microsoft Azure
-
-This value can be omitted if none of the values apply.
-
-### Kubernetes distribution
-
-Use the `distro` parameter to provide information about underlying Kubernetes
-deployment. This parameter allows the connector to automatically scrape
-additional metadata. The supported options are:
-
-- `eks` - Amazon EKS
-- `gke` - Google GKE
-- `aks` - Azure AKS
-- `openshift` - Red Hat OpenShift
-
-This value can be omitted if none of the values apply.
-
-### Deployment environment
-
-Optional `environment` parameter can be used to specify an additional `deployment.environment`
-attribute that will be added to all the telemetry data. It will help Splunk Observability
-users to investigate data coming from different source separately.
-Value examples: development, staging, production, etc.
-
-```yaml
-environment: production
-```
-
-### Disable particular types of telemetry
-
-By default all telemetry data (metrics, traces and logs) is collected from the
-Kubernetes cluster and sent to one of (or both) configured destinations. It's
-possible to disable any kind of telemetry for a specific destination. For
-example, the following configuration will send logs to Splunk Platform and
-metrics and traces to Splunk Observability assuming that both destinations are
-configured properly.
-
-```yaml
-splunkObservability:
-  metricsEnabled: true
-  tracesEnabled: true
-  logsEnabled: false
-splunkPlatform:
-  metricsEnabled: false
-  logsEnabled: true
-```
-
-## Logs collection
-
-The helm chart currently utilizes [fluentd](https://docs.fluentd.org/) for Kubernetes logs
-collection. Logs collected with fluentd are sent through Splunk OTel Collector agent which
-does all the necessary metadata enrichment.
-
-OpenTelemetry Collector also has
-[native functionality for logs collection](https://github.com/open-telemetry/opentelemetry-log-collection).
-This chart soon will be migrated from fluentd to the OpenTelemetry logs collection.
-
-You already have an option to use OpenTelemetry logs collection instead of fluentd.
-The following configuration can be used to achieve that:
-
-```yaml
-logsEngine: otel
-```
-
-There are following known limitations of native OTel logs collection:
-
-- `service.name` attribute will not be automatically constructed in istio environment.
-  This means that correlation between logs and traces will not work in Splunk Observability.
-  Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
-- Journald logs cannot be collected natively by Splunk OTel Collector yet.
-
-## Additional telemetry sources
-
-Use `autodetect` config option to enable additional telemetry sources.
-
-Set `autodetect.prometheus=true` if you want the otel-collector agent to scrape
-prometheus metrics from pods that have generic prometheus-style annotations:
-- `prometheus.io/scrape: true`: Prometheus metrics will be scraped only from
-  pods having this annotation;
-- `prometheus.io/path`: path to scrape the metrics from, default `/metrics`;
-- `prometheus.io/port`: port to scrape the metrics from, default `9090`.
-
-Set `autodetect.istio=true`, if the otel-collector agent in running in Istio
-environment, to make sure that all traces, metrics and logs reported by Istio
-collected in a unified manner.
-
-For example to enable both Prometheus and Istio telemetry add the following
-lines to your `values.yaml` file:
-
-```
-autodetect:
-  istio: true
-  prometheus: true
-```
-
-## Pre-rendered Kubernetes resources
-
-The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
-
-## Upgrade guidelines
-
-### 0.36.2 to 0.37.0
-
-[#232 Access to underlying node's filesystem was reduced to the minimum scope
-required for default functionality: host metrics and logs
-collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/232)
-
-If you have any extra receivers that require access to node's files or
-directories that are not [mounted by
-default](https://github.com/signalfx/splunk-otel-collector-chart/blob/83fefe2a01effaab1e9eaba34a2557863981a2cd/helm-charts/splunk-otel-collector/templates/daemonset.yaml#L330-L347),
-you need to setup additional volume mounts.
-
-For example, if you have the following `smartagent/docker-container-stats`
-receiver added to your configuration:
-
-```yaml
-otelAgent:
-  config:
-    receivers:
-      smartagent/docker-container-stats:
-        type: docker-container-stats
-        dockerURL: unix:///hostfs/var/run/docker.sock
-```
-
-You need to mount the docker socket to your container as follows:
-
-```yaml
-  extraVolumeMounts:
-    - mountPath: /hostfs/var/run/docker.sock
-      name: host-var-run-docker
-      readOnly: true
-  extraVolumes:
-    - name: host-var-run-docker
-      hostPath:
-        path: /var/run/docker.sock
-```
-
-[#246 Simplify configuration for switching to native OTel logs
-collection](https://github.com/signalfx/splunk-otel-collector-chart/pull/246)
-
-The config to enable native OTel logs collection was changed from
-
-```yaml
-fluentd:
-  enabled: false
-logsCollection:
-  enabled: true
-```
-
-to
-
-```yaml
-logsEngine: otel
-```
-
-Enabling both engines is not supported anymore. If you need that, you can
-install fluentd separately.
-
-### 0.35.3 to 0.36.0
-
-[#209 Configuration interface changed to support both Splunk Enterprise/Cloud and Splunk Observability destinations](https://github.com/signalfx/splunk-otel-collector-chart/pull/209)
-
-The following parameters are now deprecated and moved under
-`splunkObservability` group. They need to be updated in your custom values.yaml
-files before backward compatibility is discontinued.
-
-Required parameters:
-
-- `splunkRealm` changed to `splunkObservability.realm`
-- `splunkAccessToken` changed to `splunkObservability.accessToken`
-
-Optional parameters:
-
-- `ingestUrl` changed to `splunkObservability.ingestUrl`
-- `apiUrl` changed to `splunkObservability.apiUrl`
-- `metricsEnabled` changed to `splunkObservability.metricsEnabled`
-- `tracesEnabled` changed to `splunkObservability.tracesEnabled`
-- `logsEnabled` changed to `splunkObservability.logsEnabled`
-
-### 0.26.4 to 0.27.0
-
-[#163 Auto-detection of prometheus metrics is disabled by default](https://github.com/signalfx/splunk-otel-collector-chart/pull/163):
-If you rely on automatic prometheus endpoints detection to scrape prometheus
-metrics from pods in your k8s cluster, make sure to add this configuration to
-your values.yaml:
-
-```
-autodetect:
-  prometheus: true
-```
+To fully configure the Helm chart, see the [advanced
+configuration](docs/advanced-configuration.md).
 
 ## License
 

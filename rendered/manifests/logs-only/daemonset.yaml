@@ -42,9 +42,11 @@ spec:
           key: node-role.kubernetes.io/master
       initContainers:
         - name: prepare-fluentd-config
-          image: busybox:1
+          image: splunk/fluentd-hec:1.2.7
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
                 if [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
