@@ -53,11 +53,11 @@ processors:
       annotations:
         - key: splunk.com/sourcetype
           from: pod
-        - key: splunk.com/exclude
-          tag_name: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
+          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
           from: namespace
-        - key: splunk.com/exclude
-          tag_name: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
+          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
           from: pod
         - key: splunk.com/index
           tag_name: com.splunk.index
