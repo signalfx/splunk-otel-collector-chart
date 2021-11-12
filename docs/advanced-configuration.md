@@ -110,18 +110,16 @@ Some configurations used with the OpenTelemetry Collector (as set using the Splu
 Splunk OpenTelemetry Collector for Kubernetes can exceed the default throughput of the The HTTP Event Collector (HEC). To best address capacity needs, monitor the HEC throughput and back pressure on Splunk OpenTelemetry Collector for Kubernetes deployments and be prepared to add additional nodes as needed.
 
 Here is the summary of performance benchmarks run internally.
-| Log Generator Count | Total Generated EPS | Event Size (byte) | Agent CPU Usage | Agent EPS |
-|---------------------|---------------------|-------------------|-----------------|-----------|
-|                   1 |              27,000 |               256 |             1.6 |    27,000 |
-|                   1 |              49,000 |               256 |             1.8 |    30,000 |
-|                   1 |              49,000 |               516 |             1.8 |    28,000 |
-|                   1 |              49,000 |              1024 |             1.8 |    24,000 |
-|                   2 |              20,000 |               256 |             1.3 |    20,000 |
-|                   7 |              40,000 |               256 |             2.4 |    40,000 |
-|                   5 |              58,000 |               256 |             3.2 |    54,000 |
-|                   7 |              82,000 |               256 |               3 |    52,000 |
-|                  10 |              58,000 |               256 |             3.2 |    53,000 |
+| Log Generator Count | Event Size (byte) | Agent CPU Usage | Agent EPS |
+|---------------------|-------------------|-----------------|-----------|
+|                   1 |               256 |             1.8 |    30,000 |
+|                   1 |               516 |             1.8 |    28,000 |
+|                   1 |              1024 |             1.8 |    24,000 |
+|                   5 |               256 |             3.2 |    54,000 |
+|                   7 |               256 |               3 |    52,000 |
+|                  10 |               256 |             3.2 |    53,000 |
 
+The data pipelines for these test runs involved reading container logs as they are being written, then parsing filename for metadata, enriching it with kubernetes metadata, reformatting data structure, and sending them (without compression) to Splunk HEC endpoint.
 
 ## Additional telemetry sources
 
