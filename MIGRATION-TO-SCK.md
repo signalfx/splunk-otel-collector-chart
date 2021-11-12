@@ -4,11 +4,11 @@
 
 You are running Splunk Connect for Kubernetes(SCK) 1.4.9 and want to migrate to Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL) 1.0 GA. Previous versions of SCK are out of scope, but this guide is applicable for previous versions. You might encounter some version specific issues (such as missing/changed config options) but that shouldn't prevent you from proceeding with migration.
 
-## Brief overview of Changes in Components
+## Changes in Components
 
 Splunk Connect for Kubernetes(SCK) has 3 components/applications:
-1.  Application to fetch logs from a kubernetes cluster (deployed as a DaemonSet)
-2.  Application to fetch metrics from a kubernetes cluster (deployed as a DaemonSet)
+1.  Logs, metrics and traces from a kubernetes cluster (deployed as a DaemonSet)
+2.  Application to fetch cluster metrics from a kubernetes cluster (deployed as a deployment)
 3.  Application to fetch kubernetes objects metadata from a kubernetes cluster (deployed as a deployment)
 
 All the applications in SCK use Fluentd to work with logs, metrics and objects. There are performance limitations associated with Fluentd when using the logging application to fetch logs in a kubernetes cluster with pods that have very high throughput. To solve this issue we changed the implementation of the application to use Opentelemetry agent instead of Fluentd for high throughput scenarios. You can learn more about the performance characteristics of this new application [here](https://github.com/splunk/sck-otel#performance-of-splunk-connect-for-kubernetes-opentelemetry). If you want to learn more about the application architecture, we have shared a brief summary [here](https://github.com/splunk/sck-otel#performance-of-splunk-connect-for-kubernetes-opentelemetry).
@@ -18,11 +18,21 @@ Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL) has 2 components/applica
 2.  Application to fetch metrics and objects from a kubernetes cluster (deployed as a DaemonSet).
 
 No application currently exists for fetching kubernetes objects metadata from a kubernetes cluster. 
-### Brief overview of Changes in Logs in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
+
+### Changes in Logs, Metrics and Objects
+
+| Logging | Metrics | Objects |
+|---|---|---|
+| Redhat UBI docker images for our applications are no longer available, as we now use scratch images | The naming convention of the metrics used in SCK-OTEL has changed and there are some minor differences in the names of the metrics | Not implemented/Not available |
+| SCK-OTEL does not support AWS Firelens. AWS Firelens uses Fluentd and we can achieve similar outcomes with opentelemetry. | Changes in the number of metrics (fewer metrics available) and additional metrics for the open telemetry collector |  |
+|  |  |  |
+
+
+### Changes in Logs in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
 * Redhat UBI docker images for our applications are no longer available, as we now use scratch images.
 * SCK-OTEL does not support AWS Firelens. AWS Firelens uses Fluentd and we can achieve similar outcomes with opentelemetry.
 
-### Brief overview of Changes in Metrics in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
+### Changes in Metrics in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
 * The naming convention of the metrics used in SCK-OTEL has changed and you will observe some minor differences in the names of the metrics. 
 * Previously in SCK, you could get a large number of metrics from various APIs for kubernetes. However, in recent versions of kubernetes 1.18+, these API sources are disabled by default and there are fewer metrics available. The previous list of metrics can be found [here](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md).
 
@@ -144,16 +154,8 @@ These are the metrics available in SCK-OTEL:
 * system.processes.created
 * up
 
-### Brief overview of Changes in Objects in Splunk OpenTelemetry Connector for Kubernetes (SCK-OTEL)
- With this release, you can now retrieve kubernetes objects as metadata. As such, in SCK-OTEL, you will NOT see any kubernetes objects data.
-
-### Brief summary of Changes in Logs, Metrics and Objects
-
-| Logging | Metrics | Objects |
-|---|---|---|
-| Redhat UBI docker images for our applications are no longer available, as we now use scratch images | The naming convention of the metrics used in SCK-OTEL has changed and there are some minor differences in the names of the metrics | Not implemented/Not available |
-| SCK-OTEL does not support AWS Firelens. AWS Firelens uses Fluentd and we can achieve similar outcomes with opentelemetry. | Changes in the number of metrics (fewer metrics available) and additional metrics for the open telemetry collector |  |
-|  |  |  |
+### Changes in Objects in Splunk OpenTelemetry Connector for Kubernetes (SCK-OTEL)
+This chart currently does not support the collection of Kubernetes objects. This is future functionality. You can still use SCK to collect other objects with current functionality.
 
 ## Migration Overview
 ### Migration Options/Matrix
@@ -171,11 +173,11 @@ As shown above, you can acquire logs and metrics using SCK-OTEL. If you have obj
  If you need to migrate Fluentd's position files again, you can delete Otel's checkpoint files in the ```"/var/lib/otel_pos/"``` directory from kubernetes nodes. Then restart the new helm chart Daemonet.
  
 ## Step 1: Preparing Your values.yaml file for migration
-You must translate the values.yaml file from a SCK to an appropriate format for SCK-OTEL. Before we begin, here are the configurations for SCK and SCK-OTEL. 
+You must translate the values.yaml file from SCK to an appropriate format for SCK-OTEL. Before we begin, here are the configurations for SCK and SCK-OTEL. 
 ### Current Configuration for SCK
 <https://github.com/splunk/splunk-connect-for-kubernetes/blob/develop/helm-chart/splunk-connect-for-kubernetes/values.yaml>
 ### Current Configuration for SCK-OTEL
-<https://github.com/splunk/sck-otel/blob/develop/charts/sck-otel/values.yaml>
+<https://github.com/andrewy-splunk/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml>
 
 ### Translating global/generic/splunk configurations from SCK to SCK-OTEL
 #### Specifying your Splunk Platform and HTTP Event Collector (HEC) configuration
@@ -189,9 +191,6 @@ If you are using the "indexName" option from SCK you can use the index option in
 
 ## Translating custom configs from SCK to SCK-OTEL for logs
 You can find all the configuration options used to upgrade in the values.yaml files linked above for both SCK and SCK-OTEL.
-
-#### Using non-root user/permissions for accessing log files
- If you are not using root user/permissions for accessing log files in SCK, you can follow the steps from [setup-for-non-root-user-group](https://github.com/splunk/sck-otel#setup-for-non-root-user-group) to setup your nodes for use with SCK-OTEL.
  
 #### Using Root user/permissions for accessing log files
 If you are using root user/permissions for accessing log files in SCK, you can do so by setting "runAsUser: 0" in the securityContext in SCK-OTEL.
@@ -247,7 +246,7 @@ logs:
     sourcetype: kube:apiserver-audit
 ```    
 
-[SCK-Otel values.yaml snippet]
+[SCK-OTEL values.yaml snippet]
 ```
 extraFileLogs:
  filelog/kube-audit:
@@ -301,10 +300,7 @@ If you want to delete your SCK deployment:
 
 ## Step 3: Installing SCK-OTEL
 
-* Ensure you have the necessary prerequisites for installing this application, as noted [here](https://github.com/splunk/sck-otel#prerequisites).
-* Set up Splunk to have a Splunk index, HEC and a HEC token ready to use, as noted [here](https://github.com/splunk/sck-otel#setup-splunk).
-* You can use SCK-OTEL as a non-root application on your kubernetes nodes - follow the steps [here](https://github.com/splunk/sck-otel#setup-for-non-root-user-group).
-* Install SCK-OTEL by using the .yaml file from Step 1 and follow the steps [here](https://github.com/splunk/sck-otel#deploy-with-helm-30).
+* Follow the README [here](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/README.md).
 
 ## Step 4: Check Data in Splunk
 * Check your logs index to see if you are receiving logs from your kubernetes cluster
