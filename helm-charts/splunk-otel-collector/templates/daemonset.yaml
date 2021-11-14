@@ -138,6 +138,45 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+        {{- if $agent.runInitForNonRoot }}
+        - name: chown
+          image: registry.access.redhat.com/ubi8/ubi
+          command: ['sh', '-c', '
+          mkdir -p {{ .Values.logsCollection.checkpointPath }};
+          chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};
+          chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
+          {{ if .Values.logsCollection.containers.enabled -}}
+          if [ -d "/var/lib/docker/containers" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/lib/docker/containers;
+              chmod -R g+rxs /var/lib/docker/containers;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
+          fi;
+          if [ -d "/var/log/crio/pods" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/crio/pods;
+              chmod -R g+rxs /var/log/crio/pods;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
+          fi;
+          if [ -d "/var/log/pods" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/pods;
+              chmod -R g+rxs /var/log/pods;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
+          fi;
+          {{- end }}']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: checkpoint
+              mountPath: {{ .Values.logsCollection.checkpointPath }}
+            {{- if .Values.logsCollection.containers.enabled }}
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+            {{- end }}
+        {{- end }}
         {{- end }}
       {{- end }}
       containers:
@@ -205,11 +244,12 @@ spec:
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
+          {{- if not $agent.runInitForNonRoot }}
           runAsUser: 0
-          {{- end }}
+          {{- else }}
           {{- if $agent.securityContext }}
           {{ toYaml $agent.securityContext | nindent 10 }}
+          {{- end }}
           {{- end }}
         {{- end }}
         env:

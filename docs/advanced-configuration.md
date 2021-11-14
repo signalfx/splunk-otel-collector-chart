@@ -122,6 +122,12 @@ Here is the summary of performance benchmarks run internally.
 
 The data pipelines for these test runs involved reading container logs as they are being written, then parsing filename for metadata, enriching it with kubernetes metadata, reformatting data structure, and sending them (without compression) to Splunk HEC endpoint.
 
+## Running the container in non-root user mode
+
+Collecting logs often requires reading log files that are owned by the root user. By default, the container runs with `securityContext.runAsUser = 0` which gives the `root` user permission to read those files. To run the container in `non-root` user mode, set `.agent.securityContext` to `20000` to cause the container to run the required file system operations as UID and GID `20000`. (it can be any other UID & GUI)
+
+Note: `cri-o` container runtime did not work during internal testing.
+
 ## Additional telemetry sources
 
 Use `autodetect` config option to enable additional telemetry sources.
