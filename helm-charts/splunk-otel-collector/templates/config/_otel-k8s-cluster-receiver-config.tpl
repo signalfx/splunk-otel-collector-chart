@@ -97,17 +97,17 @@ processors:
       # Extract "container.image.tag" attribute from "container.image.name" here until k8scluster
       # receiver does it natively.
       - key: container.image.name
-        pattern: ^(?P<container_image_name>[^\:]+)(?:\:(?P<container_image_tag>.*))?
+        pattern: ^(?P<temp_container_image_name>[^\:]+)(?:\:(?P<temp_container_image_tag>.*))?
         action: extract
       - key: container.image.name
-        from_attribute: container_image_name
+        from_attribute: temp_container_image_name
         action: upsert
-      - key: container_image_name
+      - key: temp_container_image_name
         action: delete
       - key: container.image.tag
-        from_attribute: container_image_tag
+        from_attribute: temp_container_image_tag
         action: upsert
-      - key: container_image_tag
+      - key: temp_container_image_tag
         action: delete
 
 exporters:
