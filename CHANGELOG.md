@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Extract `container.image.tag` attribute from `container.image.name` (#285)
+- Upgrade splunk-otel-collector image to 0.38.1 (#284)
 
 ### Fixed
 
