@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Field name compatibility for SCK (#258)
 
+### Changed
+
+- Extract `container.image.tag` attribute from `container.image.name` (#285)
+
 ### Removed
 
 - Busybox image dependency (#275)

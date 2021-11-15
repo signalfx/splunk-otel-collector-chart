@@ -94,6 +94,21 @@ processors:
         key: {{ .name }}
         value: {{ .value }}
       {{- end }}
+      # Extract "container.image.tag" attribute from "container.image.name" here until k8scluster
+      # receiver does it natively.
+      - key: container.image.name
+        pattern: ^(?P<container_image_name>[^\:]+)(?:\:(?P<container_image_tag>.*))?
+        action: extract
+      - key: container.image.name
+        from_attribute: container_image_name
+        action: upsert
+      - key: container_image_name
+        action: delete
+      - key: container.image.tag
+        from_attribute: container_image_tag
+        action: upsert
+      - key: container_image_tag
+        action: delete
 
 exporters:
   {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
