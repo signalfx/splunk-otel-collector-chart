@@ -20,7 +20,7 @@ jobs:
 
       - name: Read current version of the Chart
         id: read-chart
-        uses: cumulusds/get-yaml-paths-action@v0.1.0
+        uses: cumulusds/get-yaml-paths-action@v0.1.1
         with:
           file: helm-charts/splunk-otel-collector/Chart.yaml
           version: version
