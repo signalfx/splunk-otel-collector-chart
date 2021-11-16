@@ -1,5 +1,14 @@
 # Upgrade guidelines
 
+## 0.37.1 to 0.38.0
+
+[#295 Secret names are changed according to the GDI
+specification](https://github.com/signalfx/splunk-otel-collector-chart/pull/295)
+
+If you provide access token for Splunk Observability using a custom Kubernetes
+secret (secter.create=false), please update the secret name from
+`splunk_o11y_access_token` to `splunk_observability_access_token`
+
 ## 0.36.2 to 0.37.0
 
 [#232 Access to underlying node's filesystem was reduced to the minimum scope

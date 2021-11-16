@@ -120,14 +120,14 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
-    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
+    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     sourcetype: kube:events
     source: kubelet
   {{- end }}

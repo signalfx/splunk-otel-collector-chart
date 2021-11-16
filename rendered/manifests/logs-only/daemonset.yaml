@@ -28,7 +28,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: a31970065aabdf55dec4f5397d2d338f6b988f1599e0dca4ecf168fd294eb945
+        checksum/config: 2707d59b2e0bb73579a56c15fcd55255c8b419b2cb391ac2347fdcdbd4d08071
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -163,11 +163,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_O11Y_ACCESS_TOKEN
+          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: splunk-otel-collector
-                key: splunk_o11y_access_token
+                key: splunk_observability_access_token
 
         readinessProbe:
           httpGet:
