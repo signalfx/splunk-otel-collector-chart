@@ -8,8 +8,6 @@ splunkObservability:
 
 splunkPlatform:
   endpoint: "fake-endpoint"
-  # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
-  # HTTP Event Collector token.
   token: "fake-token"
 
   index: "main"
