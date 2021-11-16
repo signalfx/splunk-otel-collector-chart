@@ -525,6 +525,12 @@
             }
           }
         },
+        "journaldLogs": {
+          "type": "object",
+          "items": {
+            "type": "object"
+          }
+        },
         "checkpointPath": {
           "type": "string"
         },

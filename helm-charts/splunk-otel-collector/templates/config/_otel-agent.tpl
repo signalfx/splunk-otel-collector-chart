@@ -241,7 +241,35 @@ receivers:
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
   {{- end }}
   {{- end }}
-
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
+  {{- if .Values.logsCollection.journaldLogs.enabled }}
+  {{- if .Values.logsCollection.journaldLogs.units }}
+  {{- range $_, $unit := .Values.logsCollection.journaldLogs.units }}
+  {{- printf "journald/%s:" $unit.name | nindent 2 }}
+    directory: {{ $.Values.logsCollection.journaldLogs.directory }}
+    units: [{{ $unit.name }}]
+    priority: {{ $unit.priority | default $.Values.logsCollection.journaldLogs.defaultPriority }}
+    resource:
+      com.splunk.source: {{ $.Values.logsCollection.journaldLogs.directory }}
+      com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
+      com.splunk.index: {{ $.Values.logsCollection.journaldLogs.index | default $.Values.splunkPlatform.index}}
+      host.name: 'EXPR(env("K8S_NODE_NAME"))'
+      {{- if $.Values.clusterName }}
+      k8s.cluster.name: {{ $.Values.clusterName }}
+      {{- end }}
+      {{- if $.Values.environment }}
+      deployment.environment: {{ $.Values.environment }}
+      {{- end }}
+      {{- if $.Values.extraAttributes.custom }}
+      {{- toYaml $.Values.extraAttributes.custom | nindent 6 }}
+      {{- end }}
+  {{- end }}
+  {{- else }}
+  journald:
+    directory: {{- toYaml .Values.logsCollection.journaldLogs.directory | nindent 6 }}
+    priority: {{ .Values.logsCollection.journaldLogs.defaultPriority }}
+  {{- end }}
+  {{- end }}
 # By default k8sattributes and batch processors enabled.
 processors:
   # k8sattributes enriches traces and metrics with k8s metadata
@@ -557,6 +585,30 @@ service:
         - otlp
         {{- else }}
         - splunk_hec/platform_metrics
+        {{- end }}
+        {{- end }}
+    {{- end }}
+    {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journaldLogs.enabled }}
+    logs/journald:
+      receivers:
+        {{- if .Values.logsCollection.journaldLogs.units }}
+        {{- range $_, $unit := .Values.logsCollection.journaldLogs.units }}
+        {{- printf "- journald/%s" $unit.name | nindent 8 }}
+        {{- end }}
+        {{- else }}
+        - journald
+        {{- end }}
+      processors:
+        - batch
+      exporters:
+        {{- if .Values.otelCollector.enabled }}
+        - otlp
+        {{- else }}
+        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+        - splunk_hec/o11y
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
     {{- end }}

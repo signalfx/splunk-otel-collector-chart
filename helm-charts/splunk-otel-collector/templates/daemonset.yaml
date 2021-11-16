@@ -371,6 +371,11 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
+        {{- if .Values.logsCollection.journaldLogs.enabled}}
+        - mountPath: {{.Values.logsCollection.journaldLogs.directory}}
+          name: journaldlogs-otel
+          readOnly: true
+        {{- end }}
         {{- end }}
         {{- if $agent.extraVolumeMounts }}
         {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
@@ -418,6 +423,11 @@ spec:
         hostPath:
           path: /var/lib/otel_pos
           type: DirectoryOrCreate
+      {{- if .Values.logsCollection.journaldLogs.enabled}}
+      - name: journaldlogs-otel
+        hostPath:
+          path: {{.Values.logsCollection.journaldLogs.directory}}
+      {{- end}}
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
