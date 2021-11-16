@@ -1,0 +1,18 @@
+clusterName: fake-cluster
+splunkObservability:
+  realm: fake-realm
+  accessToken: fake-token
+
+  tracesEnabled: false
+  metricsEnabled: false
+
+splunkPlatform:
+  endpoint: "fake-endpoint"
+  token: "fake-token"
+
+  index: "main"
+
+  logsEnabled: true
+  metricsEnabled: false
+
+logsEngine: otel
