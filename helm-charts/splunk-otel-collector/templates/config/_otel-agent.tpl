@@ -236,7 +236,8 @@ receivers:
               to: $$
   {{- end }}
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
-  {{- if .Values.logsCollection.journaldLogs.enabled }}
+  {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journaldLogs.enabled }}
   {{- if .Values.logsCollection.journaldLogs.units }}
   {{- range $_, $unit := .Values.logsCollection.journaldLogs.units }}
   {{- printf "journald/%s:" $unit.name | nindent 2 }}
@@ -257,6 +258,7 @@ receivers:
       {{- if $.Values.extraAttributes.custom }}
       {{- toYaml $.Values.extraAttributes.custom | nindent 6 }}
       {{- end }}
+  {{- end }}
   {{- end }}
   {{- else }}
   journald:
@@ -560,6 +562,8 @@ service:
         {{- end }}
         {{- end }}
     {{- end }}
+
+    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journaldLogs.enabled }}
     logs/journald:
       receivers:
@@ -583,5 +587,6 @@ service:
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}
