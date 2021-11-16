@@ -7,29 +7,29 @@ Splunk OpenTelemetry Connector is installed and configured to send data to Splun
 
 {{- if .Values.splunkRealm }}
 [WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if .Values.splunkAccessToken }}
 [WARNING] "splunkAccessToken" parameter is deprecated, please use "splunkObservability.accessToken" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if .Values.ingestUrl }}
 [WARNING] "ingestUrl" parameter is deprecated, please use "splunkObservability.ingestUrl" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if .Values.apiUrl }}
 [WARNING] "apiUrl" parameter is deprecated, please use "splunkObservability.apiUrl" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if not (eq (toString .Values.metricsEnabled) "<nil>") }}
 [WARNING] "metricsEnabled" parameter is deprecated, please use "splunkObservability.metricsEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if not (eq (toString .Values.tracesEnabled) "<nil>") }}
 [WARNING] "tracesEnabled" parameter is deprecated, please use "splunkObservability.tracesEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if not (eq (toString .Values.logsEnabled) "<nil>") }}
 [WARNING] "logsEnabled" parameter is deprecated, please use "splunkObservability.logsEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart#0353-to-0360
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
