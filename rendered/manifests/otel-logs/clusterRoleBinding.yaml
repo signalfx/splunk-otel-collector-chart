@@ -1,0 +1,24 @@
+---
+# Source: splunk-otel-collector/templates/clusterRoleBinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: default-splunk-otel-collector
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.37.1
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.37.1"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.37.1
+    release: default
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: default-splunk-otel-collector
+subjects:
+- kind: ServiceAccount
+  name: default-splunk-otel-collector
+  namespace: default
