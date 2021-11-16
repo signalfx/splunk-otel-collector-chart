@@ -372,7 +372,7 @@ logsCollection:
     #       value: server
     #     firstEntryRegex: ^[^\s].*
 
-  checkpointPath: "/var/lib/otel_pos"
+  checkpointPath: "/var/addon/splunk/otel_pos"
 
 ################################################################################
 # Fluentd sidecar configuration for logs collection.

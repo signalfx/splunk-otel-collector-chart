@@ -31,7 +31,7 @@ data:
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       file_storage:
-        directory: /var/lib/otel_pos
+        directory: /var/addon/splunk/otel_pos
       health_check: null
       k8s_observer:
         auth_type: serviceAccount
