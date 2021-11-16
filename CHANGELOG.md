@@ -36,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.37.0] - 2021-10-26
 
 [Upgrade
-guidelines](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370)
+guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0362-to-0370)
 
 ### Added
 
@@ -182,7 +182,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart#0362-to-0370
 ### Changed
 
 - BREAKING CHANGE: Auto-detection of prometheus metrics is disabled by default (#163). See
-  [Upgrade guideline](https://github.com/signalfx/splunk-otel-collector-chart#0264-to-0270)
+  [Upgrade guideline](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0264-to-0270)
 
 ## [0.26.4] - 2021-06-09
 
