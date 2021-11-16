@@ -3,7 +3,7 @@
 This document covers troubleshooting scenarios specific to Kubernetes
 environment only. For general troubleshooting of Splunk OpenTelemetry Collector
 see [Splunk OpenTelemetry Collector troubleshooting
-documentation](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/troubleshooting.md).
+documentation](https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md).
 
 ## Gathering Support Information
 
