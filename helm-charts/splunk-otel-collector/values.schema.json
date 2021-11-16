@@ -1084,30 +1084,32 @@
     {
       "if": {
         "$comment": "if splunkPlatform.metricsEnabled is true and splunkPlatform.endpoint is provided",
+        "properties": {
+          "splunkPlatform": {
             "properties": {
-              "splunkPlatform": {
-                "properties": {
-                  "endpoint": {
-                    "minLength": 1
-                  }
-                }
+              "endpoint": {
+                "minLength": 1
               }
-            },
-              "splunkPlatform": {
-                "properties": {
-                  "metricsEnabled": {
-                    "const": true
-                  }
-                }
-              }
-            },
+            }
+          }
+        }
+      },
       "then": {
         "$comment": "then splunkPlatform.metrics_index must be provided",
         "properties": {
           "splunkPlatform": {
-            "properties": {
-              "metrics_index": {
-                "minLength": 1
+            "if" : {
+              "properties": {
+                "metricsEnabled": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "metrics_index": {
+                  "minLength": 1
+                }
               }
             }
           }
