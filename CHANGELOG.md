@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Extract `container.image.tag` attribute from `container.image.name` (#285)
 
+### Fixed
+
+- Splunk Platform client certificates (#286)
+
 ### Removed
 
 - Busybox image dependency (#275)
