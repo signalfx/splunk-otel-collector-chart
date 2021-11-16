@@ -662,15 +662,9 @@ image:
     # The registry and name of the fluentd image to pull
     repository: splunk/fluentd-hec
     # The tag of the fluentd image to pull
-    tag: 1.2.7
+    tag: 1.2.8
     # The policy that specifies when the user wants the fluentd images to be pulled
     pullPolicy: IfNotPresent
-
-    initContainer:
-      # The image of the container for fluentd init to pull
-      image: busybox:1
-      # The policy that specifies when the user wants the fluentd init image to be pulled
-      pullPolicy: IfNotPresent
 
   otelcol:
     # The registry and name of the opentelemetry collector image to pull

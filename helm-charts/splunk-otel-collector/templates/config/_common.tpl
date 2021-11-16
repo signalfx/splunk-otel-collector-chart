@@ -84,6 +84,11 @@ Resource processor for logs manipulations
 {{- define "splunk-otel-collector.resourceLogsProcessor" -}}
 resource/logs:
   attributes:
+    {{- if .Values.splunkPlatform.sourcetype }}
+    - key: com.splunk.sourcetype
+      value: "{{.Values.splunkPlatform.sourcetype }}"
+      action: upsert
+    {{- end }}
     - key: com.splunk.sourcetype
       from_attribute: k8s.pod.annotations.splunk.com/sourcetype
       action: upsert
@@ -168,7 +173,6 @@ splunk_hec/platform_logs:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
   max_connections: {{ .Values.splunkPlatform.max_connections }}
   disable_compression: {{ .Values.splunkPlatform.disable_compression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
@@ -196,7 +200,6 @@ splunk_hec/platform_metrics:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.metrics_index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
   max_connections: {{ .Values.splunkPlatform.max_connections }}
   disable_compression: {{ .Values.splunkPlatform.disable_compression }}
   timeout: {{ .Values.splunkPlatform.timeout }}

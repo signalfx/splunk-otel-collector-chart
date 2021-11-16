@@ -64,9 +64,11 @@ spec:
       initContainers:
         {{- if (eq .Values.logsEngine "fluentd") }}
         - name: prepare-fluentd-config
-          image: {{ .Values.image.fluentd.initContainer.image }}
-          imagePullPolicy: {{ .Values.image.fluentd.initContainer.pullPolicy }}
+          image: {{ template "splunk-otel-collector.image.fluentd" . }}
+          imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
                 if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
@@ -306,6 +308,11 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
+        {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
+        {{- end }}
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
         - name: varlog
           mountPath: /var/log
@@ -385,6 +392,11 @@ spec:
         hostPath:
           path: /var/run/utmp
       {{- end }}
+      {{- end }}
+      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+      - name: secret
+        secret:
+          secretName: {{ template "splunk-otel-collector.secret" . }}
       {{- end }}
       - name: otel-configmap
         configMap:
