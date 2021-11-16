@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.37.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.37.1"
+    app.kubernetes.io/version: "0.38.1"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.37.1
     release: default
@@ -42,6 +42,19 @@ data:
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
+        - action: extract
+          key: container.image.name
+          pattern: ^(?P<temp_container_image_name>[^\:]+)(?:\:(?P<temp_container_image_tag>.*))?
+        - action: upsert
+          from_attribute: temp_container_image_name
+          key: container.image.name
+        - action: delete
+          key: temp_container_image_name
+        - action: upsert
+          from_attribute: temp_container_image_tag
+          key: container.image.tag
+        - action: delete
+          key: temp_container_image_tag
       resource/add_collector_k8s:
         attributes:
         - action: insert

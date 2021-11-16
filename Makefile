@@ -15,7 +15,7 @@ render:
 		rm -rf "$$dir"/splunk-otel-collector; \
 	done
 
-	# All telemetry types but no gateway, only agent.
+	# Default configuration deployment.
 	dir=rendered/manifests/agent-only; \
 	mkdir -p "$$dir"; \
 	helm template \
@@ -26,7 +26,7 @@ render:
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
 
-	# All telemetry types but no agent, only gateway.
+	# Gateway mode deployment only.
 	dir=rendered/manifests/gateway-only; \
 	mkdir -p "$$dir"; \
 	helm template \
@@ -34,6 +34,18 @@ render:
 		--values rendered/values.yaml \
 		--output-dir "$$dir" \
 		--set otelAgent.enabled=false,otelCollector.enabled=true,otelK8sClusterReceiver.enabled=false \
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector
+
+	# Native OTel logs collection instead of fluentd.
+	dir=rendered/manifests/otel-logs; \
+	mkdir -p "$$dir"; \
+	helm template \
+		--namespace default \
+		--values rendered/values.yaml \
+		--output-dir "$$dir" \
+		--set logsEngine=otel \
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
