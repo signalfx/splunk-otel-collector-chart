@@ -16,7 +16,7 @@ Common config for the otel-collector sapm exporter
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 sapm:
   endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace
-  access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+  access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
 {{- end }}
 {{- end }}
 
@@ -181,13 +181,13 @@ splunk_hec/platform_logs:
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
     {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
+    cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}
     {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
+    key_file: /otel/etc/splunk_platform_hec_client_key
     {{- end }}
     {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
+    ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
 {{- end }}
 
@@ -208,12 +208,12 @@ splunk_hec/platform_metrics:
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
     {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
+    cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}
     {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
+    key_file: /otel/etc/splunk_platform_hec_client_key
     {{- end }}
     {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
+    ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
 {{- end }}

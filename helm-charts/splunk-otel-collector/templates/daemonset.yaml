@@ -231,11 +231,11 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
-          - name: SPLUNK_O11Y_ACCESS_TOKEN
+          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ include "splunk-otel-collector.secret" . }}
-                key: splunk_o11y_access_token
+                key: splunk_observability_access_token
           {{- end }}
           {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
           - name: SPLUNK_PLATFORM_HEC_TOKEN
