@@ -42,7 +42,7 @@ spec:
           key: node-role.kubernetes.io/master
       initContainers:
         - name: prepare-fluentd-config
-          image: splunk/fluentd-hec:1.2.7
+          image: splunk/fluentd-hec:1.2.8
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
           securityContext:
@@ -73,7 +73,7 @@ spec:
               mountPath: /fluentd/etc/cri
       containers:
       - name: fluentd
-        image: splunk/fluentd-hec:1.2.7
+        image: splunk/fluentd-hec:1.2.8
         imagePullPolicy: IfNotPresent
         securityContext:
           
