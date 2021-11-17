@@ -84,11 +84,9 @@ processors:
       - action: insert
         key: receiver
         value: k8scluster
-      {{- with .Values.clusterName }}
       - action: upsert
         key: k8s.cluster.name
-        value: {{ . }}
-      {{- end }}
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
         key: {{ .name }}
