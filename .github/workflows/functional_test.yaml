@@ -95,6 +95,7 @@ jobs:
       - name: Run functional tests
         run: |
           sleep 120
+          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/otel/{print $1}' | xargs kubectl logs
           kubectl get nodes
           export PYTHONWARNINGS="ignore:Unverified HTTPS request"
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
