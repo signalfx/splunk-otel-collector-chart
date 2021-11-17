@@ -40,6 +40,19 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
       initContainers:
+        - name: copy-old-checkpoint
+          image: quay.io/signalfx/splunk-otel-collector:0.38.1
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
+          args:
+            - cp -n /var/lib/otel_pos/* /var/addon/splunk/otel_pos/ || true
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/addon/splunk/otel_pos
+            - name: old-checkpoint
+              mountPath: /var/lib/otel_pos
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.38.1
           imagePullPolicy: IfNotPresent
@@ -50,22 +63,22 @@ spec:
           - name: CONTAINER_LOG_PATH_FLUENTD
             value: "/var/log/splunk-fluentd-containers.log.pos"
           - name: CONTAINER_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_filelog_"
+            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_PATH_FLUENTD
             value: "/var/log/splunk-fluentd-*.pos"
           - name: CUSTOM_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_filelog_"
+            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_CAPTURE_REGEX
             value: '\/var\/log\/splunk\-fluentd\-(?P<name>[\w0-9-_]+)\.pos'
           - name: JOURNALD_LOG_PATH_FLUENTD
             value: "/var/log/splunkd-fluentd-journald-*.pos.json"
           - name: JOURNALD_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_journald_"
+            value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
           volumeMounts:
             - name: checkpoint
-              mountPath: /var/lib/otel_pos
+              mountPath: /var/addon/splunk/otel_pos
             - name: varlog
               mountPath: /var/log
             - name: varlibdockercontainers
@@ -144,11 +157,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_O11Y_ACCESS_TOKEN
+          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: splunk-otel-collector
-                key: splunk_o11y_access_token
+                key: splunk_observability_access_token
           # Env variables for host metrics receiver
           - name: HOST_PROC
             value: /hostfs/proc
@@ -203,10 +216,11 @@ spec:
           mountPath: /var/lib/docker/containers
           readOnly: true
         - name: checkpoint
-          mountPath: /var/lib/otel_pos
-        - mountPath: /run/log/journal
-          name: journaldlogs-otel
+          mountPath: /var/addon/splunk/otel_pos
+        - name: journaldlogs-otel
+          mountPath: /run/log/journal
           readOnly: true
+         
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -216,6 +230,10 @@ spec:
         hostPath:
           path: /var/lib/docker/containers
       - name: checkpoint
+        hostPath:
+          path: /var/addon/splunk/otel_pos
+          type: DirectoryOrCreate
+      - name: old-checkpoint
         hostPath:
           path: /var/lib/otel_pos
           type: DirectoryOrCreate

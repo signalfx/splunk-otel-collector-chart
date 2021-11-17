@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+[Upgrade
+guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380)
+
 ### Added
 
 - Field name compatibility for SCK (#258)
@@ -12,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Extract `container.image.tag` attribute from `container.image.name` (#285)
 - Upgrade splunk-otel-collector image to 0.38.1 (#284)
+- Change secret names according to the GDI specification (#295)
+- Make `clusterName` configuration parameter generally required (#296)
+- Changed the default checkpoint path to `/var/addon/splunk/otel_pos` (#292)
+- Rename "provider" and "distro" parameters to "cloudProvider" and
+  "distribution" (#297)
 
 ### Fixed
 

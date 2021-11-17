@@ -300,11 +300,11 @@ processors:
       annotations:
         - key: splunk.com/sourcetype
           from: pod
-        - key: splunk.com/exclude
-          tag_name: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
+          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
           from: namespace
-        - key: splunk.com/exclude
-          tag_name: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
+          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
           from: pod
         - key: splunk.com/index
           tag_name: com.splunk.index
@@ -312,11 +312,13 @@ processors:
         - key: splunk.com/index
           tag_name: com.splunk.index
           from: pod
-      {{- with .Values.extraAttributes.podLabels }}
+        {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 8 }}
+      {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
       labels:
-        {{- range . }}
+        {{- range .Values.extraAttributes.podLabels }}
         - key: {{ . }}
         {{- end }}
+        {{- include "splunk-otel-collector.addExtraLabels" . | nindent 8 }}
       {{- end }}
 
   {{- if eq .Values.logsEngine "fluentd" }}
@@ -351,11 +353,9 @@ processors:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
-      {{- with .Values.clusterName }}
       - action: insert
         key: k8s.cluster.name
-        value: "{{ . }}"
-      {{- end }}
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: insert
         key: "{{ .name }}"
@@ -410,7 +410,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
+    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
@@ -430,7 +430,7 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
-    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
   {{- end }}
 

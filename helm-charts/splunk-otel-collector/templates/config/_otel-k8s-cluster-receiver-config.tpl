@@ -23,7 +23,7 @@ receivers:
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     metadata_exporters: [signalfx]
     {{- end }}
-    {{- if eq .Values.distro "openshift" }}
+    {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
     distribution: openshift
     {{- end }}
   {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
@@ -84,11 +84,9 @@ processors:
       - action: insert
         key: receiver
         value: k8scluster
-      {{- with .Values.clusterName }}
       - action: upsert
         key: k8s.cluster.name
-        value: {{ . }}
-      {{- end }}
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
         key: {{ .name }}
@@ -120,14 +118,14 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
-    access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_O11Y_ACCESS_TOKEN}"
+    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     sourcetype: kube:events
     source: kubelet
   {{- end }}

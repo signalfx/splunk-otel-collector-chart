@@ -1,5 +1,26 @@
 # Upgrade guidelines
 
+## 0.37.1 to 0.38.0
+
+[#297 "provider" and "distro" parameters are renamed to "cloudProvider" and
+"distribution"](https://github.com/signalfx/splunk-otel-collector-chart/pull/297)
+
+Please rename the following parameters accordingly:
+- `provider` -> `cloudProvider`
+- `distro` -> `distribution`
+
+[#295 Secret names are changed according to the GDI
+specification](https://github.com/signalfx/splunk-otel-collector-chart/pull/295)
+
+If you provide access token for Splunk Observability using a custom Kubernetes
+secret (secter.create=false), please update the secret name from
+`splunk_o11y_access_token` to `splunk_observability_access_token`
+
+[#273 Changed configuration to fetch attributes from labels and annotations of pods and namespaces](https://github.com/signalfx/splunk-otel-collector-chart/pull/273)
+
+The following parameter `podLabels` under the `extraAttributes` group is changed to `fromLabels`
+This parameter needs to be updated in your custom values.yaml
+
 ## 0.36.2 to 0.37.0
 
 [#232 Access to underlying node's filesystem was reduced to the minimum scope

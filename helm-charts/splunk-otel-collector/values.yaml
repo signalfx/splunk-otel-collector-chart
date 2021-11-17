@@ -9,10 +9,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 ################################################################################
-# clusterName is a REQUIRED field for Spunk Observability. It can be set to an
-# arbitrary value that identifies this K8s cluster in SignalFx. The value will
-# be associated with every trace, metric and log as "k8s.cluster.name" metadata
-# attribute.
+# clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
+# your K8s cluster. The value will be associated with every trace, metric and
+# log as "k8s.cluster.name" attribute.
 ################################################################################
 
 clusterName: ""
@@ -32,8 +31,9 @@ splunkPlatform:
   # HTTP Event Collector token.
   token: ""
 
-  # Optional. Name of the Splunk index targeted.
+  # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: ""
+  # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metrics_index: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
@@ -120,7 +120,7 @@ logsEngine: fluentd
 # - "azure" (Microsoft Azure)
 ################################################################################
 
-provider: ""
+cloudProvider: ""
 
 ################################################################################
 # Kubernetes distribution being run. Leave empty for other.
@@ -130,7 +130,7 @@ provider: ""
 # - "openshift" (RedHat OpenShift)
 ################################################################################
 
-distro: ""
+distribution: ""
 
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry
@@ -159,13 +159,30 @@ autodetect:
 
 extraAttributes:
 
-  # Labels that will be collected from k8s pods (in case they are set)
-  # and added  as extra attributes to the telemetry in the following format:
-  # k8s.pod.labels.<label_name>: <label_value>
-  podLabels:
-    - app
-    # - k8s-app
-    # - release
+  # Labels that will be collected from k8s pods (or namespaces) (in case they are set)
+  # and added as extra attributes to the telemetry in the following format:
+  # k8s.<pod|namespace>.labels.<label_name>: <label_value>
+  #  For example, if you want to collect "my_key" label from your namespaces, you could use the following:
+  #  fromLabels:
+  #    - key: my_key
+  #      from: namespace
+  #  If you want to collect all labels from your pods, you could do that using a `key_regex: .*` option, e.g.:
+  #  fromLabels:
+  #    - key_regex: .*
+  #      from: pod
+  #  If you want to change the default attribute name `k8s.pod.labels.<label_name>`, you could do that using a `tag_name` field:
+  #  fromLabels:
+  #    - key: my_key
+  #      tag_name: my_tag
+  #      from: pod
+  fromLabels:
+    - key: app
+
+  # Annotations that will be collected from k8s pods (or namespaces) (in case they are set)
+  # and added as extra attributes to the telemetry in the following format:
+  # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
+  # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
+  fromAnnotations: []
 
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
@@ -348,7 +365,6 @@ logsCollection:
     # By the time of reconstructing a multiline log the following information is available to
     # identify source of the logs: namespace, pod and container names. At least one source
     # identifier has to be specified in for each multiline config.
-    multilineConfigs: []
     # The following example shows how to setup multiline log processing for logs having subsequent
     # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
     # scheduled to run in "default" namespace with a java container called "server", and the
@@ -371,6 +387,10 @@ logsCollection:
     #     containerName:
     #       value: server
     #     firstEntryRegex: ^[^\s].*
+    multilineConfigs: []
+    # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
+    # All other logs will be ignored.
+    useSplunkIncludeAnnotation: false
 
 # Configuration for collecting journald logs using otel collector
   journaldLogs:
@@ -387,7 +407,8 @@ logsCollection:
         priority: info
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic.
     index:
-  checkpointPath: "/var/lib/otel_pos"
+
+  checkpointPath: "/var/addon/splunk/otel_pos"
 
 ################################################################################
 # Fluentd sidecar configuration for logs collection.

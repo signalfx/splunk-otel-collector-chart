@@ -3,8 +3,8 @@
   "type": "object",
   "required": [
     "clusterName",
-    "provider",
-    "distro"
+    "cloudProvider",
+    "distribution"
   ],
   "title": "Values",
   "additionalProperties": false,
@@ -19,7 +19,8 @@
     },
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "splunkPlatform": {
       "description": "Splunk Data-to-Everything Platform configuration",
@@ -172,7 +173,7 @@
         "otel"
       ]
     },
-    "provider": {
+    "cloudProvider": {
       "description": "Cloud provider where the collector is running",
       "type": "string",
       "enum": [
@@ -183,7 +184,12 @@
         ""
       ]
     },
-    "distro": {
+    "provider": {
+      "description": "[DEPRECATED] Cloud provider where the collector is running",
+      "type": "string",
+      "deprecated": true
+    },
+    "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
       "enum": [
@@ -194,6 +200,11 @@
         " ",
         ""
       ]
+    },
+    "distro": {
+      "description": "[DEPRECATED] Kubernetes distribution where the collector is running",
+      "type": "string",
+      "deprecated": true
     },
     "environment": {
       "description": "Parameter that will be added to all the telemetry data (traces/logs/metrics) as an attribute.",
@@ -221,6 +232,18 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "fromLabels": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "fromAnnotations": {
+          "type": "array",
+          "items": {
+            "type": "object"
           }
         },
         "custom": {
@@ -480,6 +503,9 @@
               "items": {
                 "type": "string"
               }
+            },
+            "useSplunkIncludeAnnotation": {
+              "type": "boolean"
             },
             "multilineConfigs": {
               "type": "array",
@@ -998,89 +1024,164 @@
       "deprecated": true
     }
   },
-  "anyOf": [
+  "allOf": [
     {
-      "properties": {
-        "splunkPlatform": {
-          "type": "object",
+      "anyOf": [
+        {
           "properties": {
-            "endpoint": {
-              "minLength": 1
-            }
-          }
-        }
-      }
-    },
-    {
-      "properties": {
-        "splunkObservability": {
-          "type": "object",
-          "properties": {
-            "realm": {
-              "minLength": 1
-            }
-          }
-        }
-      }
-    },
-    {
-      "properties": {
-        "splunkRealm": {
-          "description": "[DEPRECATED] Splunk Observability Realm",
-          "type": "string",
-          "deprecated": true,
-          "minLength": 1
-        }
-      }
-    }
-  ],
-  "if": {
-    "$comment": "if k8s secret resource created by the chart (default behavior)",
-    "properties": {
-      "secret": {
-        "properties": {
-          "create": {
-            "const": true
-          }
-        }
-      }
-    }
-  },
-  "then": {
-    "$comment": "then require tokens to be provided for every enabled destination",
-    "properties": {
-      "splunkObservability": {
-        "if": {
-          "properties": {
-            "realm": {
-              "minLength": 1
+            "splunkPlatform": {
+              "type": "object",
+              "properties": {
+                "endpoint": {
+                  "minLength": 1
+                }
+              }
             }
           }
         },
-        "then": {
+        {
           "properties": {
-            "accessToken": {
+            "splunkObservability": {
+              "type": "object",
+              "properties": {
+                "realm": {
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "splunkRealm": {
+              "description": "[DEPRECATED] Splunk Observability Realm",
+              "type": "string",
+              "deprecated": true,
               "minLength": 1
+            }
+          }
+        }
+      ]},
+    {
+      "if": {
+        "$comment": "if k8s secret resource created by the chart (default behavior)",
+        "properties": {
+          "secret": {
+            "properties": {
+              "create": {
+                "const": true
+              }
             }
           }
         }
       },
-      "splunkPlatform": {
-        "if": {
-          "properties": {
-            "endpoint": {
-              "minLength": 1
+      "then": {
+        "$comment": "then require tokens to be provided for every enabled destination",
+        "properties": {
+          "splunkObservability": {
+            "if": {
+              "properties": {
+                "realm": {
+                  "minLength": 1
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "accessToken": {
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "splunkPlatform": {
+            "if": {
+              "properties": {
+                "endpoint": {
+                  "minLength": 1
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "token": {
+                  "minLength": 1
+                }
+              }
             }
           }
-        },
-        "then": {
-          "properties": {
-            "token": {
-              "minLength": 1
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.metricsEnabled is true and splunkPlatform.endpoint is provided",
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.metrics_index must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "if" : {
+              "properties": {
+                "metricsEnabled": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "metrics_index": {
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.logsEnabled is true and splunkPlatform.endpoint is provided",
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.index must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "if" : {
+              "properties": {
+                "logsEnabled": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "index": {
+                  "minLength": 1
+                }
+              }
             }
           }
         }
       }
     }
-  }
+  ]
 }

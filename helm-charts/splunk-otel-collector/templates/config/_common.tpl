@@ -16,7 +16,7 @@ Common config for the otel-collector sapm exporter
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 sapm:
   endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace
-  access_token: ${SPLUNK_O11Y_ACCESS_TOKEN}
+  access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
 {{- end }}
 {{- end }}
 
@@ -46,6 +46,17 @@ zipkin:
 {{- end }}
 
 {{/*
+Filter Attributes Function
+*/}}
+{{- define "splunk-otel-collector.filterAttr" -}}
+{{- if .Values.logsCollection.containers.useSplunkIncludeAnnotation -}}
+splunk.com/include
+{{- else -}}
+splunk.com/exclude
+{{- end }}
+{{- end }}
+
+{{/*
 Common config for resourcedetection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
@@ -56,18 +67,18 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if eq .Values.distro "gke" }}
+    {{- if eq (include "splunk-otel-collector.distribution" .) "gke" }}
     - gke
-    {{- else if eq .Values.distro "eks" }}
+    {{- else if eq (include "splunk-otel-collector.distribution" .) "eks" }}
     - eks
-    {{- else if eq .Values.distro "aks" }}
+    {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks
     {{- end }}
-    {{- if eq .Values.provider "gcp" }}
+    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "gcp" }}
     - gce
-    {{- else if eq .Values.provider "aws" }}
+    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "aws" }}
     - ec2
-    {{- else if eq .Values.provider "azure" }}
+    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
     - azure
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
@@ -94,7 +105,7 @@ resource/logs:
       action: upsert
     - key: k8s.pod.annotations.splunk.com/sourcetype
       action: delete
-    - key: splunk.com/exclude
+    - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
     {{- if .Values.autodetect.istio }}
     - key: service.name
@@ -158,9 +169,9 @@ Filter logs processor
 # Drop logs coming from pods and namespaces with splunk.com/exclude annotation.
 filter/logs:
   logs:
-    exclude:
+    {{ .Values.logsCollection.containers.useSplunkIncludeAnnotation | ternary "include" "exclude" }}:
       resource_attributes:
-        - key: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
           value: "true"
 {{- end }}
 
@@ -181,13 +192,13 @@ splunk_hec/platform_logs:
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
     {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
+    cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}
     {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
+    key_file: /otel/etc/splunk_platform_hec_client_key
     {{- end }}
     {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
+    ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
 {{- end }}
 
@@ -208,12 +219,30 @@ splunk_hec/platform_metrics:
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
     {{- if .Values.splunkPlatform.clientCert }}
-    cert_file: /otel/etc/hec_client_cert
+    cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}
     {{- if .Values.splunkPlatform.clientKey  }}
-    key_file: /otel/etc/hec_client_key
+    key_file: /otel/etc/splunk_platform_hec_client_key
     {{- end }}
     {{- if .Values.splunkPlatform.caFile }}
-    ca_file: /otel/etc/hec_ca_file
+    ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
+{{- end }}
+
+{{/*
+Add Extra Labels
+*/}}
+{{- define "splunk-otel-collector.addExtraLabels" -}}
+{{- with .Values.extraAttributes.fromLabels }}
+{{ . | toYaml}}
+{{- end }}
+{{- end }}
+
+{{/*
+Add Extra Annotations
+*/}}
+{{- define "splunk-otel-collector.addExtraAnnotations" -}}
+{{- with .Values.extraAttributes.fromAnnotations }}
+{{ . | toYaml}}
+{{- end }}
 {{- end }}
