@@ -20,7 +20,7 @@ jobs:
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-      KUBERNETES_VERSION: v1.21.2
+      KUBERNETES_VERSION: v1.20.10
       MINIKUBE_VERSION: v1.22.0
 
     steps:
