@@ -50,9 +50,15 @@ logsEngine: otel
 # Can be used to define things such as cloud_account_id, cloud_account_region, etc.
 # Should be set using https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor.
 extraAttributes:
-  podLabels:
-    - app
-
+  fromLabels:
+    - key: app
+      from: pod
+    - key: app
+      from: namespace
+  fromAnnotations:
+    - key: splunk.com/customField
+      from: pod
+      tag_name: customField
   custom:
    - name: "cluster_name"
      value: "ci-k8s-cluster"
