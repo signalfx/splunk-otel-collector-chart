@@ -1115,6 +1115,41 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.logsEnabled is true and splunkPlatform.endpoint is provided",
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.index must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "if" : {
+              "properties": {
+                "logsEnabled": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "index": {
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
