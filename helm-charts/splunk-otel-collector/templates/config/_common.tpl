@@ -46,6 +46,17 @@ zipkin:
 {{- end }}
 
 {{/*
+Filter Attributes Function
+*/}}
+{{- define "splunk-otel-collector.filterAttr" -}}
+{{- if .Values.logsCollection.containers.useSplunkIncludeAnnotation -}}
+splunk.com/include
+{{- else -}}
+splunk.com/exclude
+{{- end }}
+{{- end }}
+
+{{/*
 Common config for resourcedetection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
@@ -94,7 +105,7 @@ resource/logs:
       action: upsert
     - key: k8s.pod.annotations.splunk.com/sourcetype
       action: delete
-    - key: splunk.com/exclude
+    - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
     {{- if .Values.autodetect.istio }}
     - key: service.name
@@ -158,9 +169,9 @@ Filter logs processor
 # Drop logs coming from pods and namespaces with splunk.com/exclude annotation.
 filter/logs:
   logs:
-    exclude:
+    {{ .Values.logsCollection.containers.useSplunkIncludeAnnotation | ternary "include" "exclude" }}:
       resource_attributes:
-        - key: splunk.com/exclude
+        - key: {{ include "splunk-otel-collector.filterAttr" . }}
           value: "true"
 {{- end }}
 
