@@ -32,8 +32,9 @@ splunkPlatform:
   # HTTP Event Collector token.
   token: ""
 
-  # Optional. Name of the Splunk index targeted.
+  # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: ""
+  # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metrics_index: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
