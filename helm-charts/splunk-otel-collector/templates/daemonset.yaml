@@ -95,7 +95,7 @@ spec:
               mountPath: /fluentd/etc/cri
         {{- else }}
         - name: copy-old-checkpoint
-          image: {{ template "splunk-otel-collector.image.fluentd" . }}
+          image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
           securityContext:

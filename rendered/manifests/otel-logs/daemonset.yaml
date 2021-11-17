@@ -27,7 +27,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: b0e737e212b52be61476ca135fde715597ec9789743b5c2f2f1078356000613b
+        checksum/config: 04f50d53a5a07b84b460bc9ff0e9411318a737d71a3823711b2ad694fce644fe
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -41,7 +41,7 @@ spec:
           key: node-role.kubernetes.io/master
       initContainers:
         - name: copy-old-checkpoint
-          image: splunk/fluentd-hec:1.2.8
+          image: quay.io/signalfx/splunk-otel-collector:0.38.1
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
           securityContext:
