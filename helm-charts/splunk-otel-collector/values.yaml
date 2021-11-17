@@ -348,8 +348,6 @@ logsCollection:
     # By the time of reconstructing a multiline log the following information is available to
     # identify source of the logs: namespace, pod and container names. At least one source
     # identifier has to be specified in for each multiline config.
-    multilineConfigs: []
-
     # The following example shows how to setup multiline log processing for logs having subsequent
     # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
     # scheduled to run in "default" namespace with a java container called "server", and the
@@ -372,7 +370,8 @@ logsCollection:
     #     containerName:
     #       value: server
     #     firstEntryRegex: ^[^\s].*
-    # Set this flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
+    multilineConfigs: []
+    # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
     # All other logs will be ignored.
     useSplunkIncludeAnnotation: false
 
