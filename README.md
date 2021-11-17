@@ -136,7 +136,7 @@ For Splunk Observability Cloud the following parameters are required:
   token.
 
 The following parameter is required for any of the destinations:
-- `clusterName`: arbitrary value that identifies your Kubernetes cluster.
+- `clusterName`: arbitrary value that identifies your Kubernetes cluster. The value will be associated with every trace, metric and log as "k8s.cluster.name" attribute.
 
 To deploy the chart to send data to Splunk Observability Cloud run the following
 commands replacing the parameters above with their appropriate values.
