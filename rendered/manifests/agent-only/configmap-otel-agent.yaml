@@ -152,9 +152,6 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      journald:
-        directory: /run/log/journal
-        priority: info
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s

@@ -259,11 +259,11 @@ receivers:
       {{- toYaml $.Values.extraAttributes.custom | nindent 6 }}
       {{- end }}
   {{- end }}
-  {{- end }}
   {{- else }}
   journald:
     directory: {{- toYaml .Values.logsCollection.journaldLogs.directory | nindent 6 }}
     priority: {{ .Values.logsCollection.journaldLogs.defaultPriority }}
+  {{- end }}
   {{- end }}
   {{- end }}
 # By default k8sattributes and batch processors enabled.

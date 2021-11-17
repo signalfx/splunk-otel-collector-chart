@@ -132,9 +132,6 @@ data:
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:8006
-      journald:
-        directory: /run/log/journal
-        priority: info
       otlp:
         protocols:
           grpc:
