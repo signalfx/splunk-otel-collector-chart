@@ -97,13 +97,11 @@ processors:
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
 
-  {{ if or .Values.clusterName }}
   resource/add_cluster_name:
     attributes:
       - action: upsert
         value: {{ .Values.clusterName }}
         key: k8s.cluster.name
-  {{- end }}
 
   {{- if .Values.extraAttributes.custom }}
   resource/add_custom_attrs:
@@ -169,9 +167,7 @@ service:
         - memory_limiter
         - batch
         - k8sattributes
-        {{- if .Values.clusterName }}
         - resource/add_cluster_name
-        {{- end }}
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
@@ -188,9 +184,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if .Values.clusterName }}
         - resource/add_cluster_name
-        {{- end }}
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
@@ -237,9 +231,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if .Values.clusterName }}
         - resource/add_cluster_name
-        {{- end }}
         - resource/add_collector_k8s
         - resourcedetection
       exporters:

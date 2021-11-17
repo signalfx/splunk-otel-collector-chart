@@ -321,11 +321,9 @@ processors:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
-      {{- with .Values.clusterName }}
       - action: insert
         key: k8s.cluster.name
-        value: "{{ . }}"
-      {{- end }}
+        value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
       - action: insert
         key: "{{ .name }}"

@@ -9,10 +9,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 ################################################################################
-# clusterName is a REQUIRED field for Spunk Observability. It can be set to an
-# arbitrary value that identifies this K8s cluster in SignalFx. The value will
-# be associated with every trace, metric and log as "k8s.cluster.name" metadata
-# attribute.
+# clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
+# your K8s cluster. The value will be associated with every trace, metric and
+# log as "k8s.cluster.name" attribute.
 ################################################################################
 
 clusterName: ""

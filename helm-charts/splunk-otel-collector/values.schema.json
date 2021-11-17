@@ -19,7 +19,8 @@
     },
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "splunkPlatform": {
       "description": "Splunk Data-to-Everything Platform configuration",

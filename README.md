@@ -134,8 +134,9 @@ For Splunk Observability Cloud the following parameters are required:
 - `splunkObservability.realm`: Splunk realm to send telemetry data to.
 - `splunkObservability.accessToken`: Your Splunk Observability org access
   token.
-- `clusterName`: arbitrary value that will identify your Kubernetes cluster in
-  Splunk Observability Cloud.
+
+The following parameter is required for any of the destinations:
+- `clusterName`: arbitrary value that identifies your Kubernetes cluster.
 
 To deploy the chart to send data to Splunk Observability Cloud run the following
 commands replacing the parameters above with their appropriate values.
