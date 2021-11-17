@@ -23,7 +23,7 @@ receivers:
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     metadata_exporters: [signalfx]
     {{- end }}
-    {{- if eq .Values.distro "openshift" }}
+    {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
     distribution: openshift
     {{- end }}
   {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}

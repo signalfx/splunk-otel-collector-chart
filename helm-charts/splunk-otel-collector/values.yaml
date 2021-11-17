@@ -120,7 +120,7 @@ logsEngine: fluentd
 # - "azure" (Microsoft Azure)
 ################################################################################
 
-provider: ""
+cloudProvider: ""
 
 ################################################################################
 # Kubernetes distribution being run. Leave empty for other.
@@ -130,7 +130,7 @@ provider: ""
 # - "openshift" (RedHat OpenShift)
 ################################################################################
 
-distro: ""
+distribution: ""
 
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry

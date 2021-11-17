@@ -56,18 +56,18 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if eq .Values.distro "gke" }}
+    {{- if eq (include "splunk-otel-collector.distribution" .) "gke" }}
     - gke
-    {{- else if eq .Values.distro "eks" }}
+    {{- else if eq (include "splunk-otel-collector.distribution" .) "eks" }}
     - eks
-    {{- else if eq .Values.distro "aks" }}
+    {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks
     {{- end }}
-    {{- if eq .Values.provider "gcp" }}
+    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "gcp" }}
     - gce
-    {{- else if eq .Values.provider "aws" }}
+    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "aws" }}
     - ec2
-    {{- else if eq .Values.provider "azure" }}
+    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
     - azure
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.

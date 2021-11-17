@@ -2,6 +2,13 @@
 
 ## 0.37.1 to 0.38.0
 
+[#297 "provider" and "distro" parameters are renamed to "cloudProvider" and
+"distribution"](https://github.com/signalfx/splunk-otel-collector-chart/pull/297)
+
+Please rename the following parameters accordingly:
+- `provider` -> `cloudProvider`
+- `distro` -> `distribution`
+
 [#295 Secret names are changed according to the GDI
 specification](https://github.com/signalfx/splunk-otel-collector-chart/pull/295)
 
