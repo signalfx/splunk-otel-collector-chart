@@ -3,8 +3,8 @@
   "type": "object",
   "required": [
     "clusterName",
-    "provider",
-    "distro"
+    "cloudProvider",
+    "distribution"
   ],
   "title": "Values",
   "additionalProperties": false,
@@ -173,7 +173,7 @@
         "otel"
       ]
     },
-    "provider": {
+    "cloudProvider": {
       "description": "Cloud provider where the collector is running",
       "type": "string",
       "enum": [
@@ -184,7 +184,12 @@
         ""
       ]
     },
-    "distro": {
+    "provider": {
+      "description": "[DEPRECATED] Cloud provider where the collector is running",
+      "type": "string",
+      "deprecated": true
+    },
+    "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
       "enum": [
@@ -195,6 +200,11 @@
         " ",
         ""
       ]
+    },
+    "distro": {
+      "description": "[DEPRECATED] Kubernetes distribution where the collector is running",
+      "type": "string",
+      "deprecated": true
     },
     "environment": {
       "description": "Parameter that will be added to all the telemetry data (traces/logs/metrics) as an attribute.",

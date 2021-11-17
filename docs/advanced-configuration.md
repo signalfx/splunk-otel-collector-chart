@@ -28,7 +28,8 @@ clusterName: my-k8s-cluster
 
 ## Cloud provider
 
-Use the `provider` parameter to provide information about the cloud provider, if any.
+Use the `cloudProvider` parameter to provide information about the cloud
+provider, if any.
 
 - `aws` - Amazon Web Services
 - `gcp` - Google Cloud
@@ -38,9 +39,9 @@ This value can be omitted if none of the values apply.
 
 ## Kubernetes distribution
 
-Use the `distro` parameter to provide information about underlying Kubernetes
-deployment. This parameter allows the connector to automatically scrape
-additional metadata. The supported options are:
+Use the `distribution` parameter to provide information about underlying
+Kubernetes deployment. This parameter allows the connector to automatically
+scrape additional metadata. The supported options are:
 
 - `eks` - Amazon EKS
 - `gke` - Google GKE
