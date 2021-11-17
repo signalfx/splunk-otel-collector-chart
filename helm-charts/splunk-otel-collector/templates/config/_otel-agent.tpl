@@ -282,11 +282,13 @@ processors:
         - key: splunk.com/index
           tag_name: com.splunk.index
           from: pod
-      {{- with .Values.extraAttributes.podLabels }}
+        {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 8 }}
+      {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
       labels:
-        {{- range . }}
+        {{- range .Values.extraAttributes.podLabels }}
         - key: {{ . }}
         {{- end }}
+        {{- include "splunk-otel-collector.addExtraLabels" . | nindent 8 }}
       {{- end }}
 
   {{- if eq .Values.logsEngine "fluentd" }}

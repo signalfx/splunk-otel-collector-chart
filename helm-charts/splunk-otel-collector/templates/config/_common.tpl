@@ -228,3 +228,21 @@ splunk_hec/platform_metrics:
     ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
 {{- end }}
+
+{{/*
+Add Extra Labels
+*/}}
+{{- define "splunk-otel-collector.addExtraLabels" -}}
+{{- with .Values.extraAttributes.fromLabels }}
+{{ . | toYaml}}
+{{- end }}
+{{- end }}
+
+{{/*
+Add Extra Annotations
+*/}}
+{{- define "splunk-otel-collector.addExtraAnnotations" -}}
+{{- with .Values.extraAttributes.fromAnnotations }}
+{{ . | toYaml}}
+{{- end }}
+{{- end }}
