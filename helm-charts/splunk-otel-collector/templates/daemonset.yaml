@@ -94,6 +94,19 @@ spec:
             - name: fluentd-config-cri
               mountPath: /fluentd/etc/cri
         {{- else }}
+        - name: copy-old-checkpoint
+          image: {{ template "splunk-otel-collector.image.otelcol" . }}
+          imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
+          command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
+          args:
+            - cp -n /var/lib/otel_pos/* /var/addon/splunk/otel_pos/ || true
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/addon/splunk/otel_pos
+            - name: old-checkpoint
+              mountPath: /var/lib/otel_pos
         - name: migrate-checkpoint
           image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
@@ -104,22 +117,22 @@ spec:
           - name: CONTAINER_LOG_PATH_FLUENTD
             value: "{{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos"
           - name: CONTAINER_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_filelog_"
+            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_PATH_FLUENTD
             value: "{{ .Values.fluentd.config.posFilePrefix }}-*.pos"
           - name: CUSTOM_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_filelog_"
+            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_CAPTURE_REGEX
             value: '{{ regexReplaceAll "(\\W)" .Values.fluentd.config.posFilePrefix "\\${1}" }}\-(?P<name>[\w0-9-_]+)\.pos'
           - name: JOURNALD_LOG_PATH_FLUENTD
             value: "/var/log/splunkd-fluentd-journald-*.pos.json"
           - name: JOURNALD_LOG_PATH_OTEL
-            value: "/var/lib/otel_pos/receiver_journald_"
+            value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
           volumeMounts:
             - name: checkpoint
-              mountPath: /var/lib/otel_pos
+              mountPath: /var/addon/splunk/otel_pos
             - name: varlog
               mountPath: /var/log
             - name: varlibdockercontainers
@@ -364,6 +377,10 @@ spec:
       - name: checkpoint
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
+          type: DirectoryOrCreate
+      - name: old-checkpoint
+        hostPath:
+          path: /var/lib/otel_pos
           type: DirectoryOrCreate
       {{- end}}
       {{- end}}
