@@ -27,8 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
 
       - name: Setup Minikube
         run: |
@@ -112,3 +112,7 @@ jobs:
           	--splunk-password $CI_SPLUNK_PASSWORD \
           	-p no:warnings -s
           sleep 601
+          echo "Getting agent logs....."
+          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
+          echo "Getting collector logs....."
+          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
