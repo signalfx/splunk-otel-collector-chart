@@ -1,4 +1,4 @@
-{{- if eq .Values.distro "openshift" }}
+{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:

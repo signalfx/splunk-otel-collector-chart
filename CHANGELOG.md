@@ -18,6 +18,8 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 - Change secret names according to the GDI specification (#295)
 - Make `clusterName` configuration parameter generally required (#296)
 - Changed the default checkpoint path to `/var/addon/splunk/otel_pos` (#292)
+- Rename "provider" and "distro" parameters to "cloudProvider" and
+  "distribution" (#297)
 
 ### Fixed
 

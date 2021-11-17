@@ -258,3 +258,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
+
+{{/*
+cloudProvider helper to support backward compatibility with the deprecated name.
+*/}}
+{{- define "splunk-otel-collector.cloudProvider" -}}
+{{- .Values.cloudProvider | default .Values.provider | default "" -}}
+{{- end -}}
+
+{{/*
+distribution helper to support backward compatibility with the deprecated name.
+*/}}
+{{- define "splunk-otel-collector.distribution" -}}
+{{- .Values.distribution | default .Values.distro | default "" -}}
+{{- end -}}
