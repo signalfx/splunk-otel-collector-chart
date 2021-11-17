@@ -17,6 +17,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 - Upgrade splunk-otel-collector image to 0.38.1 (#284)
 - Change secret names according to the GDI specification (#295)
 - Make `clusterName` configuration parameter generally required (#296)
+- Changed the default checkpoint path to `/var/addon/splunk/otel_pos` (#292)
 
 ### Fixed
 
