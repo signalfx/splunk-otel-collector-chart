@@ -4,7 +4,7 @@ on: pull_request
 
 jobs:
   e2e-test:
-    name: Functional Test Helm Chart - ${{ matrix.container_runtime }}
+    name: ${{ matrix.container_runtime }}
     runs-on: ubuntu-20.04
     strategy:
       matrix:
