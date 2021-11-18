@@ -17,7 +17,7 @@ limitations under the License.
 import pytest
 import time
 import os
-from .common import check_events_from_splunk
+from .common import check_events_from_splunk, check_metrics_from_splunk
 
 def pytest_addoption(parser):
     parser.addoption("--splunkd-url",
