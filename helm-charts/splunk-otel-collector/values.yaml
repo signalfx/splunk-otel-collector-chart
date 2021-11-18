@@ -65,6 +65,7 @@ splunkPlatform:
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
+  # If you enable metrics collection, make sure that `metrics_index` is provided as well. 
   metricsEnabled: false
 
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
