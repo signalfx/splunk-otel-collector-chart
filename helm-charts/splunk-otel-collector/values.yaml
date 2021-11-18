@@ -62,8 +62,8 @@ splunkPlatform:
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
 
-  # Options to disable particular telemetry data types that will be sent to
-  # Splunk Platform.
+  # Options to disable or enable particular telemetry data types that will be sent to
+  # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
   metricsEnabled: false
 
