@@ -55,8 +55,8 @@ This example shows how to change default OTel Collector configuration to add
 [Probabilistic Sampling Processor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/probabilisticsamplerprocessor).
 This approach can be used for any other OTel Collector re-configuration as well.
 Final OTel config will be created by merging the custom config provided in
-`otelAgent.config` into
-[default configuration of agent-mode collector](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
+`agent.config` into [default configuration of agent-mode
+collector](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
 
 ```yaml
 agent:
