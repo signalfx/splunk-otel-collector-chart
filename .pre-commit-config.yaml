@@ -12,10 +12,10 @@ repos:
     rev: v3.2.0
     hooks:
     - id: trailing-whitespace
-      exclude: "^rendered"
+      exclude: "^rendered|^test"
     - id: end-of-file-fixer
-      exclude: "^rendered"
+      exclude: "^rendered|^test"
     - id: check-yaml
       # Can't check source yaml since it has go templates in it.
-      exclude: "^helm-charts"
+      exclude: "^helm-charts|^test"
     - id: check-added-large-files
