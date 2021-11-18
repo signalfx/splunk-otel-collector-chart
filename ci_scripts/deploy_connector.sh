@@ -9,7 +9,7 @@ if [ "`helm ls --short`" == "" ]; then
 else
    helm delete $(helm ls --short)
 fi
-echo "Deploying sck-otel-connect with latest changes"
+echo "Deploying Splunk OTel Collector for Kubernetes"
 helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 --set splunkPlatform.token=$CI_SPLUNK_HEC_TOKEN \
 --set splunkPlatform.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \
