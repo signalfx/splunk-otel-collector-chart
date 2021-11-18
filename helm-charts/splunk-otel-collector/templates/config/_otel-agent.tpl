@@ -470,6 +470,10 @@ service:
       processors:
         - memory_limiter
         - batch
+        - resource
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
       exporters:
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform
