@@ -234,6 +234,10 @@ receivers:
           - move:
               from: log
               to: $$
+
+  {{- if .Values.logsCollection.extraFileLogs }}
+  {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
+  {{- end }}
   {{- end }}
 
 # By default k8sattributes and batch processors enabled.
@@ -456,6 +460,24 @@ service:
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
+
+    {{- if .Values.logsCollection.extraFileLogs }}
+    logs/extraFiles:
+      receivers:
+        {{- range $key, $exporterData := .Values.logsCollection.extraFileLogs }}
+        - {{ $key }}
+        {{ end }}
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
+        - splunk_hec/platform
+        {{- end }}
+        {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
+        - splunk_hec/o11y
+        {{- end }}
+    {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}

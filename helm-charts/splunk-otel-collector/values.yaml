@@ -394,6 +394,21 @@ logsCollection:
 
   checkpointPath: "/var/addon/splunk/otel_pos"
 
+  # Files on k8s nodes to tail.
+  # Make sure to configure volume mounts properly at `otelAgent.extraVolumes` and `otelAgent.extraVolumeMounts`.
+  extraFileLogs: {}
+  # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
+  # extraFileLogs:
+  #   filelog/audit-log:
+  #     include: [/var/log/kubernetes/apiserver/audit.log]
+  #     start_at: beginning
+  #     include_file_path: true
+  #     include_file_name: false
+  #     resource:
+  #       com.splunk.source: /var/log/kubernetes/apiserver/audit.log
+  #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
+  #       com.splunk.sourcetype: kube:apiserver-audit
+
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
 # As of now, this is the recommended way to collect k8s logs,
