@@ -86,11 +86,11 @@ receivers:
       # - volume
     # To collect metadata from underlying storage resources, set k8s_api_config and list k8s.volume.type
     # under extra_metadata_labels
-    # k8s_api_config:
-    #  auth_type: serviceAccount
+    k8s_api_config:
+      auth_type: serviceAccount
     extra_metadata_labels:
       - container.id
-      # - k8s.volume.type
+      - k8s.volume.type
 
   signalfx:
     endpoint: 0.0.0.0:9943
