@@ -38,7 +38,7 @@ def pytest_addoption(parser):
 
 # Print events ingested in splunk for debugging
 def pytest_unconfigure(config):
-    indexes = ["main", "ci_events", "ns-anno", "pod-anno", "ci_metrics"]
+    indexes = ["main", "ci_events", "ns-anno", "pod-anno"]
     for index in indexes:
         search_query = "index=" + index + "  | fields *"
         events = check_events_from_splunk(start_time="-1h@h",
@@ -51,6 +51,18 @@ def pytest_unconfigure(config):
         for event in events:
             print(event)
 
+    metric_indexes = ["ci_metrics"]
+    for index in metric_indexes:
+        events = check_metrics_from_splunk(start_time="-24h@h",
+                                      end_time="now",
+                                      url=setup["splunkd_url"],
+                                      user=setup["splunk_user"],
+                                      password=setup["splunk_password"],
+                                      index=index_metrics,
+                                      metric_name=metric)
+        print("metric index=" + index + " event count=" + str(len(events)))
+        for event in events:
+            print(event)
 
 @pytest.fixture(scope="function")
 def setup(request):
