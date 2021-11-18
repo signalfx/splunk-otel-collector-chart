@@ -20,7 +20,7 @@ Splunk OpenTelemetry Collector for Kubernetes has 2 components/applications:
 2.  Application to fetch metrics and objects from a kubernetes cluster (deployed as a DaemonSet).
 
 No application currently exists for fetching kubernetes objects metadata from a kubernetes cluster. 
-
+ 
 ### Changes in Logs, Metrics and Objects
 
 | Logging | Metrics | Objects |
