@@ -1,4 +1,4 @@
-# SCK-OTEL Integration Tests Environment Setup
+# Splunk Platform Functional Test Environment Setup
 
 ## Prerequsite
 * Python version must be > 3.x
