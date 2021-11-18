@@ -34,21 +34,21 @@ splunkPlatform:
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
-  metrics_index: ""
+  metricsIndex: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
   # be container name.
   sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
-  max_connections: 200
+  maxConnections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
-  disable_compression: true
+  disableCompression: true
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
-  insecure_skip_verify: false
+  insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the
   #       file path. The certificate will be stored as a secret in kubernetes.

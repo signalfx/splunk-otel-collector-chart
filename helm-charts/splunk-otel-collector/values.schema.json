@@ -40,7 +40,7 @@
           "description": "Name of Splunk index targeted.",
           "type": "string"
         },
-        "metrics_index": {
+        "metricsIndex": {
           "type": "string"
         },
         "source": {
@@ -49,16 +49,16 @@
         "sourcetype": {
           "type": "string"
         },
-        "max_connections": {
+        "maxConnections": {
           "type": "integer"
         },
-        "disable_compression": {
+        "disableCompression": {
           "type": "boolean"
         },
         "timeout": {
           "type": "string"
         },
-        "insecure_skip_verify": {
+        "insecureSkipVerify": {
           "type": "boolean"
         },
         "clientCert": {
@@ -1124,7 +1124,7 @@
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.metrics_index must be provided",
+        "$comment": "then splunkPlatform.metricsIndex must be provided",
         "properties": {
           "splunkPlatform": {
             "if" : {
@@ -1136,7 +1136,7 @@
             },
             "then": {
               "properties": {
-                "metrics_index": {
+                "metricsIndex": {
                   "minLength": 1
                 }
               }
