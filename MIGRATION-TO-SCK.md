@@ -2,7 +2,7 @@
 
 ## Assumptions
 
-You are running Splunk Connect for Kubernetes(SCK) 1.4.9 and want to migrate to Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL) 1.0 GA. Previous versions of SCK are out of scope, but this guide is applicable for previous versions. You might encounter some version specific issues (such as missing/changed config options) but that shouldn't prevent you from proceeding with migration.
+You are running Splunk Connect for Kubernetes (SCK) 1.4.9 and want to migrate to Splunk OpenTelemetry Collector for Kubernetes. Previous versions of the SCK are out of scope, but this guide still applies. You might encounter some version specific issues (such as missing/changed config options) but that shouldn't prevent you from proceeding with migration.
 
 ## Changes in Components
 
@@ -11,9 +11,11 @@ Splunk Connect for Kubernetes(SCK) has 3 components/applications:
 2.  Application to fetch cluster metrics from a kubernetes cluster (deployed as a deployment)
 3.  Application to fetch kubernetes objects metadata from a kubernetes cluster (deployed as a deployment)
 
-All the applications in SCK use Fluentd to work with logs, metrics and objects. There are performance limitations associated with Fluentd when using the logging application to fetch logs in a kubernetes cluster with pods that have very high throughput. To solve this issue we changed the implementation of the application to use Opentelemetry agent instead of Fluentd for high throughput scenarios. You can learn more about the performance characteristics of this new application [here](https://github.com/splunk/sck-otel#performance-of-splunk-connect-for-kubernetes-opentelemetry). If you want to learn more about the application architecture, we have shared a brief summary [here](https://github.com/splunk/sck-otel#performance-of-splunk-connect-for-kubernetes-opentelemetry).
+All the applications in SCK use Fluentd to work with logs, metrics and objects. Fluentd has significant performance issues when used to fetch logs in a Kubernetes cluster with pods that have very high throughput.  
 
-Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL) has 2 components/applications:
+Splunk OpenTelemetry Collector for Kubernetes provides significant performance improvements over the SCK through use of the OpenTelemetry Collector agent and native OpenTelemetry functionality for logs collection rather than Fluentd. You can learn more about the performance characteristics of this new application [here](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#performance-of-native-opentelemetry-logs-collection).
+
+Splunk OpenTelemetry Collector for Kubernetes has 2 components/applications:
 1.  Application to fetch logs and traces from a kubernetes cluster (deployed as a DaemonSet)
 2.  Application to fetch metrics and objects from a kubernetes cluster (deployed as a DaemonSet).
 
@@ -30,15 +32,15 @@ No application currently exists for fetching kubernetes objects metadata from a 
 
 ### Changes in Logs in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
 * Redhat UBI docker images for our applications are no longer available, as we now use scratch images.
-* SCK-OTEL does not support AWS Firelens. AWS Firelens uses Fluentd and we can achieve similar outcomes with opentelemetry.
+* Splunk OpenTelemetry Collector for Kubernetes does not support AWS Firelens. AWS Firelens uses Fluentd and we can achieve similar outcomes with OpenTelemetry.
 
 ### Changes in Metrics in Splunk OpenTelemetry Connector for Kubernetes(SCK-OTEL)
-* The naming convention of the metrics used in SCK-OTEL has changed and you will observe some minor differences in the names of the metrics. 
+* The naming convention of the metrics used in Splunk OpenTelemetry Collector for Kubernetes follows the OpenTelemetry specification and is different than SCK. You will observe some minor differences in the names of the metrics. 
 * Previously in SCK, you could get a large number of metrics from various APIs for kubernetes. However, in recent versions of kubernetes 1.18+, these API sources are disabled by default and there are fewer metrics available. The previous list of metrics can be found [here](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md).
 
-Some additional metrics that are available in SCK-OTEL are metrics about the open telemetry collector itself.
+Some additional metrics that are available in Splunk OpenTelemetry Collector for Kubernetes are metrics about the OpenTelemetry Collector itself.
 
-These are the metrics available in SCK-OTEL:
+These are the metrics available in Splunk OpenTelemetry Collector for Kubernetes:
 * container.cpu.time
 * container.cpu.utilization
 * container.filesystem.available
@@ -159,77 +161,78 @@ This chart currently does not support the collection of Kubernetes objects. This
 
 ## Migration Overview
 ### Migration Options/Matrix
- The following is a matrix for migrating from SCK to SCK-OTEL:
+ The following is a matrix for migrating from SCK to Splunk OpenTelemetry Collector for Kubernetes:
 
 | Method  | Logs | Metrics | Objects |
 |---|---|---|---|
 | SCK | Yes | Yes | Yes |
-| SCK-OTEL | Yes | Yes | No |
+| Splunk OpenTelemetry Collector for Kubernetes | Yes | Yes | No |
 
-As shown above, you can acquire logs and metrics using SCK-OTEL. If you have objects currently deployed and need objects data, we recommend you leave your objects deployment as-is.
+As shown above, you can acquire logs and metrics using Splunk OpenTelemetry Collector for Kubernetes. If you have objects currently deployed and need objects data, we recommend you leave your current SCK objects deployment as-is (helm command args --set="splunk-kubernetes-logging.enabled=false,splunk-kubernetes-metrics.enabled=false,splunk-kubernetes-objects.enabled=true").  In this way, you can use the SCK just for objects data together with Splunk OpenTelemetry Collector for Kubernetes for logs and other telemetry data. 
 ### Checkpoint Translation
- Since we changed the underlying framework/agent we use for our application, there needs to be a baton handoff for checkpoint data so that the new agent can continue where Fluentd left off. All of this occurs automatically as an initContainer when you deploy the new helm chart in your cluster for the first time. As long as you properly configured the values.yaml file for the new helm chart, it will pick up where it left off. Without proper configuration for migration, there is a possibility of either data duplication or data loss while migrating from SCK to SCK-OTEL. 
+WIth migration to the Splunk OpenTelemetry Collector for Kubernetes, the underlying framework/agent being used has changed, so there needs to be a baton handoff for checkpoint data so that the new OpenTelemetry agent can continue where Fluentd left off. All of this occurs automatically as an initContainer when you deploy the new helm chart in your cluster for the first time. As long as you properly configured the values.yaml file for the new helm chart, it will pick up where it left off. Without proper configuration for migration, there is a possibility of either data duplication or data loss while migrating from SCK to Splunk OpenTelemetry Collector for Kubernetes. 
  
- If you need to migrate Fluentd's position files again, you can delete Otel's checkpoint files in the ```"/var/lib/otel_pos/"``` directory from kubernetes nodes. Then restart the new helm chart Daemonet.
+ If you need to migrate Fluentd's position files again, you can delete the OpenTelemetry checkpoint files in the ```"/var/lib/otel_pos/"``` directory from Kubernetes nodes. Then restart the new helm chart Daemonet.
  
 ## Step 1: Preparing Your values.yaml file for migration
 You must translate the values.yaml file from SCK to an appropriate format for SCK-OTEL. Before we begin, here are the configurations for SCK and SCK-OTEL. 
 ### Current Configuration for SCK
 <https://github.com/splunk/splunk-connect-for-kubernetes/blob/develop/helm-chart/splunk-connect-for-kubernetes/values.yaml>
-### Current Configuration for SCK-OTEL
+### Current Configuration for Splunk OpenTelemetry Collector for Kubernetes
 <https://github.com/andrewy-splunk/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml>
 
-### Translating global/generic/splunk configurations from SCK to SCK-OTEL
+### Translating global/generic/splunk configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes
 #### Specifying your Splunk Platform and HTTP Event Collector (HEC) configuration
-You can combine the "host", "port" and "protocol" options from SCK to use the "endpoint" option in SCK-OTEL. This option uses this format: "<http://X.X.X.X:8088/services/collector>" which will be interpreted as "protocol://host:port/services/collector".
+You can combine the "host", "port" and "protocol" options from SCK to use the "endpoint" option in Splunk OpenTelemetry Collector for Kubernetes. This option uses this format: "<http://X.X.X.X:8088/services/collector>" which will be interpreted as "protocol://host:port/services/collector".
 
-If you are using the "clientCert", "clientKey" and "caFile" options from SCK, you can use the corresponding "clientCert", "clientKey" and "caFile" options in SCK-OTEL to specify your HEC certificate chain.
+If you are using the "clientCert", "clientKey" and "caFile" options from SCK, you can use the corresponding "clientCert", "clientKey" and "caFile" options in Splunk OpenTelemetry Collector for Kubernetes to specify your HEC certificate chain.
 
-If you are using the "insecureSSL" option from SCK, you can use the insecure_skip_verify option in SCK-OTEL to specify whether to verify the certificates on HEC.
+If you are using the "insecureSSL" option from SCK, you can use the insecure_skip_verify option in Splunk OpenTelemetry Collector for Kubernetes to specify whether to verify the certificates on HEC.
 
-If you are using the "indexName" option from SCK you can use the index option in SCK-OTEL to specify which index you want to index data into. Translating custom configs from SCK to SCK-OTEL for logs
+If you are using the "indexName" option from SCK you can use the index option in Splunk OpenTelemetry Collector for Kubernetes to specify which index you want to index data into. Translating custom configs from SCK to Splunk OpenTelemetry Collector for Kubernetes for logs
 
-## Translating custom configs from SCK to SCK-OTEL for logs
-You can find all the configuration options used to upgrade in the values.yaml files linked above for both SCK and SCK-OTEL.
+## Translating custom configs from SCK to Splunk OpenTelemetry Collector for Kubernetes for logs
+You can find all the configuration options used to upgrade in the values.yaml files linked above for both SCK and Splunk OpenTelemetry Collector for Kubernetes.
  
 #### Using Root user/permissions for accessing log files
-If you are using root user/permissions for accessing log files in SCK, you can do so by setting "runAsUser: 0" in the securityContext in SCK-OTEL.
+If you are using root user/permissions for accessing log files in SCK, you can do so by setting "runAsUser: 0" in the securityContext in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Container runtimes
-If you configured SCK for your container runtime (CRI-O, containerd and docker) note the following:
+If you configured SCK to explicitly set any of the following, you can do the same with Splunk OpenTelemetry Collector for Kubernetes:
 
 * Set the **containerRuntime** option to a value from (CRI-O, containerd and docker) depending on your runtime.
 * Set the **path** option to the location of your logs on your nodes.
-* If you are using the **exclude_path** option from SCK, you can use the **excludePaths** option in SCK-OTEL to exclude any logs you want.
-* If you are using the **"logs"** option to define **"multiline**" configs in SCK, you can use the **multilineConfigs** option in SCK-OTEL to concatenate multiline logs. 
-* If you are using the **checkpointFile** option in SCK to define a custom location for checkpointing your logs, you can also do so with the **checkpointPath** option in SCK-OTEL.
-* If you are using the **"logs"** option to ingest any other logs from your nodes, you can also do so with the **extraFileLogs** option in SCK-OTEL.
+* If you are using the **exclude_path** option from SCK, you can use the **excludePaths** option in Splunk OpenTelemetry Collector for Kubernetes to exclude any logs you want.
+* If you are using the **"logs"** option to define **"multiline**" configs in SCK, you can use the **multilineConfigs** option in Splunk OpenTelemetry Collector for Kubernetes to concatenate multiline logs. 
+* If you are using the **checkpointFile** option in SCK to define a custom location for checkpointing your logs, you can also do so with the **checkpointPath** option in Splunk OpenTelemetry Collector for Kubernetes.
+* If you are using the **"logs"** option to ingest any other logs from your nodes, you can also do so with the **extraFileLogs** option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Cluster Name
-If you are using the clusterName option to set a cluster name metadata field in your logs in SCK, you can also use the clusterName option in SCK-OTEL.
+If you are using the clusterName option to set a cluster name metadata field in your logs in SCK, you can also use the clusterName option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Pod Security Context
-If you are using the podSecurityContext option to set a pod security policy, you can use the podSecurityContext option in SCK-OTEL.
+If you are using the podSecurityContext option to set a pod security policy, you can use the podSecurityContext option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Custom Metadata
-If you are using the customMetadata option to set a custom metadata field in your logs in SCK, you can use the customMetadata option in SCK-OTEL.
+If you are using the customMetadata option to set a custom metadata field in your logs in SCK, you can use the customMetadata option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Custom Annotations
-If you are using the customMetadataAnnotations option to set custom annotation fields in your logs in SCK, you can use the "annotations" and "podAnnotations" option in SCK-OTEL.
+If you are using the customMetadataAnnotations option to set custom annotation fields in your logs in SCK, you can use the "annotations" and "podAnnotations" option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Pod Scheduling configs
-If you are using any pod scheduling operations such as nodeSelector, affinity and tolerations in SCK, you can use the nodeSelector, affinity and tolerations options in SCK-OTEL.
+If you are using any pod scheduling operations such as nodeSelector, affinity and tolerations in SCK, you can use the nodeSelector, affinity and tolerations options in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Service Accounts
-If you are using the serviceAccount option to use your own service accounts in SCK, you can use the serviceAccount option in SCK-OTEL.
+If you are using the serviceAccount option to use your own service accounts in SCK, you can use the serviceAccount option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Secrets
-If you are using the secret option to use your own service accounts in SCK, you can use the secret option in SCK-OTEL.
+If you are using the secret option to use your own service accounts in SCK, you can use the secret option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Custom docker image and pull secrets
-If you are using custom docker images, tags, pull secrets and pull policy in SCK, you can achieve the same using the "image" option in SCK-OTEL to specify the relevant configs for using docker images.
+If you are using custom docker images, tags, pull secrets and pull policy in SCK, you can achieve the same using the "image" option in Splunk OpenTelemetry Collector for Kubernetes to specify the relevant configs for using docker images.
+
 #### Limiting/Increasing Application Resources
-If you are using the resources option in SCK to limit/increase the CPU and memory usage in SCK, you can do the same using the resources option in SCK-OTEL.
+If you are using the resources option in SCK to limit/increase the CPU and memory usage in SCK, you can do the same using the resources option in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Extra Files from Host
 For tailing files other than container or journald logs (i.e., kube audit logs), you must configure "extraFileLogs" using this "[filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver)" receiver configuration. 
@@ -262,18 +265,18 @@ extraFileLogs:
 
 You must use the same keyword ("kube-audit" in the above example) for continuing to read from the translated checkpoint data.
 
-### Translating custom configs from SCK to SCK-OTEL for metrics
+### Translating custom configs from SCK to Splunk OpenTelemetry Collector for Kubernetes for metrics
 #### Limiting/Increasing Application Resources
-If you are using the resources option in SCK to limit/increase the CPU and memory usage in SCK, you can do the same using the resources option in "clusterDataCollector" section in SCK-OTEL.
+If you are using the resources option in SCK to limit/increase the CPU and memory usage in SCK, you can do the same using the resources option in "clusterDataCollector" section in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Pod Scheduling configs
-If you are using any pod scheduling operations such as nodeSelector, affinity and tolerations in SCK, you can use the nodeSelector, affinity and tolerations options in SCK-OTEL.
+If you are using any pod scheduling operations such as nodeSelector, affinity and tolerations in SCK, you can use the nodeSelector, affinity and tolerations options in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Pod Security Context
 If you are using the podSecurityContext option to set a pod security policy, you can use the podSecurityContext option in SCK-OTEL.
 
 #### Custom Annotations
-If you are using the customMetadataAnnotations option to set a custom annotation fields in your logs in SCK, you can use the "annotations" and "podAnnotations" option in SCK-OTEL.
+If you are using the customMetadataAnnotations option to set a custom annotation fields in your logs in SCK, you can use the "annotations" and "podAnnotations" option in Splunk OpenTelemetry Collector for Kubernetes.
 
 ## Step 2: Delete SCK Deployment (Optional)
 If you want to delete your SCK deployment:
@@ -298,7 +301,7 @@ If you want to delete your SCK deployment:
 
   * helm delete local-k8s
 
-## Step 3: Installing SCK-OTEL
+## Step 3: Installing Splunk OpenTelemetry Collector for Kubernetes
 
 * Follow the README [here](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/README.md).
 
