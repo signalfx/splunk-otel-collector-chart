@@ -32,7 +32,7 @@ splunkPlatform:
   token: ""
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
-  index: ""
+  index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metrics_index: ""
   # Optional. Default value for `source` field.
@@ -62,10 +62,11 @@ splunkPlatform:
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
 
-  # Options to disable particular telemetry data types that will be sent to
-  # Splunk Platform.
+  # Options to disable or enable particular telemetry data types that will be sent to
+  # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
-  metricsEnabled: true
+  # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
+  metricsEnabled: false
 
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
