@@ -2,12 +2,18 @@
 
 ## 0.37.1 to 0.38.0
 
-[#297 "provider" and "distro" parameters are renamed to "cloudProvider" and
-"distribution"](https://github.com/signalfx/splunk-otel-collector-chart/pull/297)
+[297](https://github.com/signalfx/splunk-otel-collector-chart/pull/297),
+[301](https://github.com/signalfx/splunk-otel-collector-chart/pull/301) Several
+parameters in values.yaml configuration were renamed according to [Splunk GDI
+Specification](https://github.com/signalfx/gdi-specification/blob/main/specification/configuration.md#kubernetes-package-management-solutions)
 
-Please rename the following parameters accordingly:
+If you use the following parameters in your custom values.yaml, please rename
+them accordingly:
 - `provider` -> `cloudProvider`
 - `distro` -> `distribution`
+- `otelAgent` -> `agent`
+- `otelCollector` -> `gateway`
+- `otelK8sClusterReceiver` -> `clusterReceiver`
 
 [#295 Secret names are changed according to the GDI
 specification](https://github.com/signalfx/splunk-otel-collector-chart/pull/295)
@@ -36,7 +42,7 @@ For example, if you have the following `smartagent/docker-container-stats`
 receiver added to your configuration:
 
 ```yaml
-otelAgent:
+agent:
   config:
     receivers:
       smartagent/docker-container-stats:

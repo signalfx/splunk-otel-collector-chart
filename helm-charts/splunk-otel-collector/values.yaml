@@ -200,13 +200,13 @@ extraAttributes:
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
 
-otelAgent:
+agent:
   enabled: true
 
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must
   # be unique across all the nodes in k8s cluster. Any port can be disabled,
-  # For example to disable zipkin ports set `otelAgent.ports.zipkin: null`.
+  # For example to disable zipkin ports set `agent.ports.zipkin: null`.
   ports:
     otlp:
       containerPort: 4317
@@ -287,10 +287,10 @@ otelAgent:
 # specifically for collecting metrics from kubernetes API.
 ################################################################################
 
-# Kubernetes cluster receiver collects cluster level metrics from the Kubernetes API.
+# Cluster receiver collects cluster level metrics from the Kubernetes API.
 # It has to be running on one pod, so it uses its own dedicated deployment with 1 replica.
 
-otelK8sClusterReceiver:
+clusterReceiver:
   enabled: true
 
   # Need to be adjusted based on size of the monitored cluster
@@ -315,7 +315,7 @@ otelK8sClusterReceiver:
 
   # This Flag enables k8s events collection with smartagent/kubernetes-events receiver
   # You can override list of events collected by default using the following config option:
-  # `otelK8sClusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
+  # `clusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
   k8sEventsEnabled: false
 
   # k8s cluster receiver extra pod labels
@@ -396,7 +396,7 @@ logsCollection:
   checkpointPath: "/var/addon/splunk/otel_pos"
 
   # Files on k8s nodes to tail.
-  # Make sure to configure volume mounts properly at `otelAgent.extraVolumes` and `otelAgent.extraVolumeMounts`.
+  # Make sure to configure volume mounts properly at `agent.extraVolumes` and `agent.extraVolumeMounts`.
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:
@@ -780,7 +780,7 @@ isWindows: false
 # passthrough mode is recommended for large k8s clusters, disabled by default.
 ################################################################################
 
-otelCollector:
+gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false

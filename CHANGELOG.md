@@ -21,6 +21,10 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 - Rename "provider" and "distro" parameters to "cloudProvider" and
   "distribution" (#297)
 - Changed SplunkPlatform properties to match helm best practices. (#306)
+- Rename parameter groups for Splunk OTel Collector components (#301):
+  - `otelAgent` -> `agent`
+  - `otelCollector` -> `gateway`
+  - `otelK8sClusterReceiver` -> `clusterReceiver`
 
 ### Fixed
 

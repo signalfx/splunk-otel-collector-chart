@@ -1,8 +1,9 @@
 {{/*
 Config for the optional standalone collector
-The values can be overridden in .Values.otelCollector.config
+The values can be overridden in .Values.gateway.config
 */}}
-{{- define "splunk-otel-collector.otelCollectorConfig" -}}
+{{- define "splunk-otel-collector.gatewayConfig" -}}
+{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:
   health_check:
 
@@ -77,7 +78,7 @@ processors:
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelCollector | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $gateway | nindent 2 }}
 
   batch:
 
@@ -159,7 +160,7 @@ service:
     {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
-  # In order to disable a default pipeline just set it to `null` in otelCollector.config overrides.
+  # In order to disable a default pipeline just set it to `null` in gateway.config overrides.
   pipelines:
     {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
     # default traces pipeline

@@ -1,4 +1,5 @@
-{{ if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.otelAgent.enabled (eq .Values.logsEngine "fluentd") }}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") $agent.enabled (eq .Values.logsEngine "fluentd") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

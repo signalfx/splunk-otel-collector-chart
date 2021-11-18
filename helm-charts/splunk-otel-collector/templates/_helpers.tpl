@@ -272,3 +272,39 @@ distribution helper to support backward compatibility with the deprecated name.
 {{- define "splunk-otel-collector.distribution" -}}
 {{- .Values.distribution | default .Values.distro | default "" -}}
 {{- end -}}
+
+{{/*
+Helper that returns "agent" parameter group yaml taking care of backward
+compatibility with the old config group name: "otelAgent".
+*/}}
+{{- define "splunk-otel-collector.agent" -}}
+{{- if eq (toString .Values.otelAgent) "<nil>" }}
+{{- .Values.agent | toYaml }}
+{{- else }}
+{{- deepCopy .Values.otelAgent | mustMergeOverwrite (deepCopy .Values.agent) | toYaml }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Helper that returns "gateway" parameter group yaml taking care of backward
+compatibility with the old config group name: "otelCollector".
+*/}}
+{{- define "splunk-otel-collector.gateway" -}}
+{{- if eq (toString .Values.otelCollector) "<nil>" }}
+{{- .Values.gateway | toYaml }}
+{{- else }}
+{{- deepCopy .Values.otelCollector | mustMergeOverwrite (deepCopy .Values.gateway) | toYaml }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Helper that returns "clusterReceiver" parameter group yaml taking care of backward
+compatibility with the old config group name: "otelK8sClusterReceiver".
+*/}}
+{{- define "splunk-otel-collector.clusterReceiver" -}}
+{{- if eq (toString .Values.otelK8sClusterReceiver) "<nil>" }}
+{{- .Values.clusterReceiver | toYaml }}
+{{- else }}
+{{- deepCopy .Values.otelK8sClusterReceiver | mustMergeOverwrite (deepCopy .Values.clusterReceiver) | toYaml }}
+{{- end }}
+{{- end -}}
