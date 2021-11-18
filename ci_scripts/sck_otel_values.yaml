@@ -11,19 +11,19 @@ splunkPlatform:
   token:
   # Optional. Name of the Splunk index targeted.
   index: "ci_events"
-  metrics_index: "ci_metrics"
+  metricsIndex: "ci_metrics"
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will be container name.
   sourcetype:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
-  max_connections: 200
+  maxConnections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
-  disable_compression: true
+  disableCompression: true
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
-  insecure_skip_verify: true
+  insecureSkipVerify: true
   # Options to disable particular telemetry data types that will be sent to
   # Splunk Platform.
   logsEnabled: true
