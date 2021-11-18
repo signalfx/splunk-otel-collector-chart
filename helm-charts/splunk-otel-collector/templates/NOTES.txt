@@ -45,3 +45,15 @@ Splunk OpenTelemetry Connector is installed and configured to send data to Splun
 [WARNING] ".Values.extraAttributes.podLabels" parameter is deprecated, please use ".Values.extraAttributes.fromLabels" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
 {{ end }}
+{{- if not (eq (toString .Values.otelAgent) "<nil>") }}
+[WARNING] "otelAgent" parameter group is deprecated, please rename it to "agent" in your custom values.yaml.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
+{{ end }}
+{{- if not (eq (toString .Values.otelCollector) "<nil>") }}
+[WARNING] "otelCollector" parameter group is deprecated, please rename it to "gateway" in your custom values.yaml.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
+{{ end }}
+{{- if not (eq (toString .Values.otelK8sClusterReceiver) "<nil>") }}
+[WARNING] "otelK8sClusterReceiver" parameter group is deprecated, please rename it to "clusterReceiver" in your custom values.yaml.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
+{{ end }}

@@ -51,19 +51,19 @@ guidelines](https://github.com/signalfx/splunk-otel-collector/blob/main/docs/siz
 Use the following configuration to bump resource limits for the agent:
 
 ```yaml
-otelAgent:
+agent:
   resources:
     limits:
       cpu: 500m
       memory: 1Gi
 ```
 
-Resources allocated to Kubernetes cluster receiver deployment should be based on
-the cluster size. For a cluster with 100 nodes you would need the following
+Resources allocated to cluster receiver deployment should be based on the
+cluster size. For a cluster with 100 nodes you would need the following
 resources:
 
 ```yaml
-otelK8sClusterReceiver:
+clusterReceiver:
   resources:
     limits:
       cpu: 1
@@ -92,7 +92,7 @@ sending queue of the failing exporter, e.g. to reduce `sending_queue` for the
 `sapm` exporter (tracing):
 
 ```
-otelAgent:
+agent:
   config:
     exporters:
       sapm:

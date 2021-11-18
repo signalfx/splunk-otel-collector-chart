@@ -1,5 +1,5 @@
 ---
-# Source: splunk-otel-collector/templates/deployment-k8s-cluster-receiver.yaml
+# Source: splunk-otel-collector/templates/deployment-cluster-receiver.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,7 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 59f9ce25501546034c03ac1afe9b8df53bc190f57d388290ad7c67ad2088a048
+        checksum/config: c760da301afa505e28f3cd489c8cab2784c403916a1b3e5c7f28d8ec6ff8136f
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:

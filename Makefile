@@ -33,7 +33,7 @@ render:
 		--namespace default \
 		--values rendered/values.yaml \
 		--output-dir "$$dir" \
-		--set otelAgent.enabled=false,otelCollector.enabled=true,otelK8sClusterReceiver.enabled=false \
+		--set agent.enabled=false,gateway.enabled=true,clusterReceiver.enabled=false \
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector

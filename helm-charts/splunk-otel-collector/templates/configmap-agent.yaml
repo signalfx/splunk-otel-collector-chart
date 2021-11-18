@@ -1,4 +1,5 @@
-{{ if .Values.otelAgent.enabled }}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{ if $agent.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,5 +13,5 @@ metadata:
 data:
   relay: |
     {{- $config := include "splunk-otel-collector.otelAgentConfig" . | fromYaml }}
-    {{- .Values.otelAgent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $agent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

@@ -59,7 +59,7 @@ Final OTel config will be created by merging the custom config provided in
 [default configuration of agent-mode collector](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
 
 ```yaml
-otelAgent:
+agent:
   config:
     processors:
       probabilistic_sampler:
@@ -87,11 +87,11 @@ This configuration installs collector as a gateway deployment along with
 regular components. All the telemetry will be routed through this collector.
 By default, the gateway-mode collector deployed with 3 replicas with 4 CPU
 cores and 8Gb of memory each, but this can be easily changed as in this example.
-`resources` can be adjusted for other components as well: `otelAgent`,
-`otelK8sClusterReceiver`, `fluentd`.
+`resources` can be adjusted for other components as well: `agent`,
+`clusterReceiver`, `fluentd`.
 
 ```yaml
-otelCollector:
+gateway:
   enabled: true
   replicaCount: 1
   resources:
@@ -107,9 +107,9 @@ No metrics or logs will be collector, the gateway can be used to forward
 telemetry data through it for aggregation, enrichment purposes.
 
 ```yaml
-otelCollector:
+gateway:
   enabled: true
-otelAgent:
+agent:
   enabled: false
 logsEnabled: false
 ```
@@ -120,7 +120,7 @@ The following configuration can be used to forward telemetry through an OTel
 collector gateway deployed separately.
 
 ```yaml
-otelAgent:
+agent:
   config:
     exporters:
       otlp:
@@ -137,7 +137,7 @@ otelAgent:
         metrics:
           exporters: [otlp]
 
-otelK8sClusterReceiver:
+clusterReceiver:
   config:
     exporters:
       signalfx:
@@ -157,11 +157,11 @@ Collector containers to send the traffic through a proxy server from
 both components that are enabled by default.
 
 ```yaml
-otelAgent:
+agent:
   extraEnvs:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
-otelK8sClusterReceiver:
+clusterReceiver:
   extraEnvs:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
