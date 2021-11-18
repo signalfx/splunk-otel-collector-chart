@@ -2,7 +2,7 @@
 Config for the otel-collector agent
 The values can be overridden in .Values.agent.config
 */}}
-{{- define "splunk-otel-collector.otelAgentConfig" -}}
+{{- define "splunk-otel-collector.agentConfig" -}}
 {{ $agent := fromYaml (include "splunk-otel-collector.agent" .) -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:

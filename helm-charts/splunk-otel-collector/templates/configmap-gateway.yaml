@@ -12,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.otelCollectorConfig" . | fromYaml }}
+    {{- $config := include "splunk-otel-collector.gatewayConfig" . | fromYaml }}
     {{- $gateway.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

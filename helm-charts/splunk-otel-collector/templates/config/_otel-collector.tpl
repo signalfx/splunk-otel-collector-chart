@@ -2,7 +2,7 @@
 Config for the optional standalone collector
 The values can be overridden in .Values.gateway.config
 */}}
-{{- define "splunk-otel-collector.otelCollectorConfig" -}}
+{{- define "splunk-otel-collector.gatewayConfig" -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:
   health_check:

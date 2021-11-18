@@ -12,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.otelK8sClusterReceiverConfig" . | fromYaml }}
+    {{- $config := include "splunk-otel-collector.clusterReceiverConfig" . | fromYaml }}
     {{- $clusterReceiver.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

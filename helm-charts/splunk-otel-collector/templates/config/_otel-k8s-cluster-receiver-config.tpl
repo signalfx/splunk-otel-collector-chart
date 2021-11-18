@@ -2,7 +2,7 @@
 Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
-{{- define "splunk-otel-collector.otelK8sClusterReceiverConfig" -}}
+{{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:

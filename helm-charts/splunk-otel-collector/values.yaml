@@ -396,7 +396,7 @@ logsCollection:
   checkpointPath: "/var/addon/splunk/otel_pos"
 
   # Files on k8s nodes to tail.
-  # Make sure to configure volume mounts properly at `otelAgent.extraVolumes` and `otelAgent.extraVolumeMounts`.
+  # Make sure to configure volume mounts properly at `agent.extraVolumes` and `agent.extraVolumeMounts`.
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:

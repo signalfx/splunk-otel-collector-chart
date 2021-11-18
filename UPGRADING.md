@@ -42,7 +42,7 @@ For example, if you have the following `smartagent/docker-container-stats`
 receiver added to your configuration:
 
 ```yaml
-otelAgent:
+agent:
   config:
     receivers:
       smartagent/docker-container-stats:
