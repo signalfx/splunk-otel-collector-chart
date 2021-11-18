@@ -1,5 +1,5 @@
 ---
-# Source: splunk-otel-collector/templates/configmap-otel-agent.yaml
+# Source: splunk-otel-collector/templates/configmap-agent.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,8 +30,6 @@ data:
         endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
-      file_storage:
-        directory: /var/addon/splunk/otel_pos
       health_check: null
       k8s_observer:
         auth_type: serviceAccount
@@ -47,6 +45,17 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
+      groupbyattrs/logs:
+        keys:
+        - com.splunk.source
+        - com.splunk.sourcetype
+        - container.id
+        - fluent.tag
+        - istio_service_name
+        - k8s.container.name
+        - k8s.namespace.name
+        - k8s.pod.name
+        - k8s.pod.uid
       k8sattributes:
         extract:
           annotations:
@@ -124,96 +133,6 @@ data:
         override: false
         timeout: 10s
     receivers:
-      filelog:
-        encoding: utf-8
-        exclude:
-        - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
-        fingerprint_size: 1kb
-        force_flush_period: "0"
-        include:
-        - /var/log/pods/*/*/*.log
-        include_file_name: false
-        include_file_path: true
-        max_concurrent_files: 1024
-        max_log_size: 1MiB
-        operators:
-        - id: get-format
-          routes:
-          - expr: $$$$body matches "^\\{"
-            output: parser-docker
-          - expr: $$$$body matches "^[^ Z]+ "
-            output: parser-crio
-          - expr: $$$$body matches "^[^ Z]+Z"
-            output: parser-containerd
-          type: router
-        - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
-          timestamp:
-            layout: "2006-01-02T15:04:05.000000000-07:00"
-            layout_type: gotime
-            parse_from: time
-          type: regex_parser
-        - combine_field: log
-          id: crio-recombine
-          is_last_entry: ($$.logtag) == 'F'
-          type: recombine
-        - id: crio-handle_empty_log
-          if: $$.log == nil
-          ops:
-          - add:
-              field: log
-              value: ""
-          output: filename
-          type: restructure
-        - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: time
-          type: regex_parser
-        - combine_field: log
-          id: containerd-recombine
-          is_last_entry: ($$.logtag) == 'F'
-          type: recombine
-        - id: containerd-handle_empty_log
-          if: $$.log == nil
-          ops:
-          - add:
-              field: log
-              value: ""
-          output: filename
-          type: restructure
-        - id: parser-docker
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: time
-          type: json_parser
-        - id: filename
-          resource:
-            com.splunk.source: EXPR($$$$attributes["file.path"])
-          type: metadata
-        - id: extract_metadata_from_filepath
-          parse_from: $$$$attributes["file.path"]
-          regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
-          type: regex_parser
-        - attributes:
-            stream: EXPR($$.stream)
-          resource:
-            com.splunk.sourcetype: EXPR("kube:container:"+$$.container_name)
-            k8s.container.name: EXPR($$.container_name)
-            k8s.container.restart_count: EXPR($$.restart_count)
-            k8s.namespace.name: EXPR($$.namespace)
-            k8s.pod.name: EXPR($$.pod_name)
-            k8s.pod.uid: EXPR($$.uid)
-          type: metadata
-        - id: clean-up-log-record
-          ops:
-          - move:
-              from: log
-              to: $$
-          type: restructure
-        poll_interval: 200ms
-        start_at: beginning
       fluentforward:
         endpoint: 0.0.0.0:8006
       hostmetrics:
@@ -270,7 +189,6 @@ data:
         endpoint: 0.0.0.0:9411
     service:
       extensions:
-      - file_storage
       - health_check
       - k8s_observer
       - memory_ballast
@@ -281,6 +199,7 @@ data:
           - splunk_hec/o11y
           processors:
           - memory_limiter
+          - groupbyattrs/logs
           - k8sattributes
           - batch
           - filter/logs
@@ -288,7 +207,6 @@ data:
           - resource/logs
           - resourcedetection
           receivers:
-          - filelog
           - fluentforward
           - otlp
         metrics:

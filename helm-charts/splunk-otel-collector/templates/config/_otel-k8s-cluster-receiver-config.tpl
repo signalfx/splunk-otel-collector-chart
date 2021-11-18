@@ -1,8 +1,10 @@
 {{/*
 Config for the otel-collector k8s cluster receiver deployment.
-The values can be overridden in .Values.otelK8sClusterReceiver.config
+The values can be overridden in .Values.clusterReceiver.config
 */}}
-{{- define "splunk-otel-collector.otelK8sClusterReceiverConfig" -}}
+{{- define "splunk-otel-collector.clusterReceiverConfig" -}}
+{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
+{{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
 
@@ -26,7 +28,7 @@ receivers:
     {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
     distribution: openshift
     {{- end }}
-  {{- if .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+  {{- if $clusterReceiver.k8sEventsEnabled }}
   smartagent/kubernetes-events:
     type: kubernetes-events
     alwaysClusterReporter: true
@@ -42,13 +44,13 @@ receivers:
   {{- end }}
 
 processors:
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelK8sClusterReceiver | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $clusterReceiver | nindent 2 }}
 
   batch:
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
-  {{- if and .Values.otelK8sClusterReceiver.k8sEventsEnabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  {{- if and $clusterReceiver.k8sEventsEnabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   resource/add_event_k8s:
     attributes:
       - action: insert
@@ -111,7 +113,7 @@ processors:
 exporters:
   {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
   signalfx:
-    {{- if .Values.otelCollector.enabled }}
+    {{- if $gateway.enabled }}
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}
@@ -122,7 +124,7 @@ exporters:
     timeout: 10s
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") .Values.otelK8sClusterReceiver.k8sEventsEnabled }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") $clusterReceiver.k8sEventsEnabled }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -168,7 +170,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and .Values.otelK8sClusterReceiver.k8sEventsEnabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+    {{- if and $clusterReceiver.k8sEventsEnabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
     logs/events:
       receivers:
         - smartagent/kubernetes-events

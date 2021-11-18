@@ -20,6 +20,10 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 - Changed the default checkpoint path to `/var/addon/splunk/otel_pos` (#292)
 - Rename "provider" and "distro" parameters to "cloudProvider" and
   "distribution" (#297)
+- Rename parameter groups for Splunk OTel Collector components (#301):
+  - `otelAgent` -> `agent`
+  - `otelCollector` -> `gateway`
+  - `otelK8sClusterReceiver` -> `clusterReceiver`
 
 ### Fixed
 

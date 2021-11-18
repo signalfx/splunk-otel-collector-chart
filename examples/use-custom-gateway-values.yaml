@@ -3,7 +3,7 @@ splunkObservability:
   realm: us0
   accessToken: my-access-token
 
-otelAgent:
+agent:
   config:
     exporters:
       otlp:
@@ -19,7 +19,7 @@ otelAgent:
         metrics:
           exporters: [otlp]
 
-otelK8sClusterReceiver:
+clusterReceiver:
   config:
     exporters:
       signalfx:

@@ -1,4 +1,5 @@
-{{- if .Values.otelAgent.enabled }}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{- if $agent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -12,9 +13,9 @@ metadata:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
     engine: fluentd
     {{- end }}
-  {{- if .Values.otelAgent.annotations }}
+  {{- if $agent.annotations }}
   annotations:
-    {{- toYaml .Values.otelAgent.annotations | nindent 4 }}
+    {{- toYaml $agent.annotations | nindent 4 }}
   {{- end }}
 spec:
   updateStrategy:
@@ -28,14 +29,14 @@ spec:
       labels:
         app: {{ template "splunk-otel-collector.name" . }}
         release: {{ .Release.Name }}
-        {{- if .Values.otelAgent.podLabels }}
-        {{- toYaml .Values.otelAgent.podLabels | nindent 8 }}
+        {{- if $agent.podLabels }}
+        {{- toYaml $agent.podLabels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
+        checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-agent.yaml") .) | sha256sum }}
         kubectl.kubernetes.io/default-container: otel-collector
-        {{- if .Values.otelAgent.podAnnotations }}
-        {{- toYaml .Values.otelAgent.podAnnotations | nindent 8 }}
+        {{- if $agent.podAnnotations }}
+        {{- toYaml $agent.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -193,11 +194,11 @@ spec:
         - --config=/conf/relay.yaml
         {{- end }}
         - --metrics-addr=0.0.0.0:8889
-        {{- range .Values.otelAgent.extraArgs }}
+        {{- range $agent.extraArgs }}
         - {{ . }}
         {{- end }}
         ports:
-        {{- range $key, $port := .Values.otelAgent.ports }}
+        {{- range $key, $port := $agent.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
@@ -205,18 +206,18 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or .Values.otelAgent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
           {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
           runAsUser: 0
           {{- end }}
-          {{- if .Values.otelAgent.securityContext }}
-          {{ toYaml .Values.otelAgent.securityContext | nindent 10 }}
+          {{- if $agent.securityContext }}
+          {{ toYaml $agent.securityContext | nindent 10 }}
           {{- end }}
         {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelAgent.resources.limits.memory }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -272,7 +273,7 @@ spec:
           - name: HOST_DEV
             value: {{ .Values.isWindows | ternary "C:\\hostfs\\dev" "/hostfs/dev" }}
           {{- end }}
-          {{- with .Values.otelAgent.extraEnvs }}
+          {{- with $agent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
 
@@ -291,7 +292,7 @@ spec:
             path: /
             port: 13133
         resources:
-          {{- toYaml .Values.otelAgent.resources | nindent 10 }}
+          {{- toYaml $agent.resources | nindent 10 }}
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
@@ -336,8 +337,8 @@ spec:
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
         {{- end }}
-        {{- if .Values.otelAgent.extraVolumeMounts }}
-        {{- toYaml .Values.otelAgent.extraVolumeMounts | nindent 8 }}
+        {{- if $agent.extraVolumeMounts }}
+        {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
@@ -421,8 +422,8 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if .Values.otelAgent.extraVolumes }}
-      {{- toYaml .Values.otelAgent.extraVolumes | nindent 6 }}
+      {{- if $agent.extraVolumes }}
+      {{- toYaml $agent.extraVolumes | nindent 6 }}
       {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}

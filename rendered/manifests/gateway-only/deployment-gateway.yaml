@@ -1,5 +1,5 @@
 ---
-# Source: splunk-otel-collector/templates/deployment-collector.yaml
+# Source: splunk-otel-collector/templates/deployment-gateway.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 2bd79e3573ec78f7208ea22d30e1c47dea3a2b18028bcbaed4280cb16f1825f4
+        checksum/config: 177a5fa5b2953d28890a139373ad3e78c57af4482ceee949f77bd41c4e7a8fa8
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:

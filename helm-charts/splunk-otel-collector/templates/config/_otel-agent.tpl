@@ -1,8 +1,10 @@
 {{/*
 Config for the otel-collector agent
-The values can be overridden in .Values.otelAgent.config
+The values can be overridden in .Values.agent.config
 */}}
-{{- define "splunk-otel-collector.otelAgentConfig" -}}
+{{- define "splunk-otel-collector.agentConfig" -}}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) -}}
+{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
@@ -244,10 +246,10 @@ receivers:
 processors:
   # k8sattributes enriches traces and metrics with k8s metadata
   k8sattributes:
-    # If standalone collector deployment is enabled, the `passthrough` configuration is enabled by default.
-    # It means that traces and metrics enrichment happens in collector, and the agent only passes information
+    # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
+    # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
-    {{- if .Values.otelCollector.enabled }}
+    {{- if $gateway.enabled }}
     passthrough: true
     {{- end }}
     filter:
@@ -310,12 +312,12 @@ processors:
      - k8s.pod.uid
   {{- end }}
 
-  {{- if not .Values.otelCollector.enabled }}
+  {{- if not $gateway.enabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- end }}
 
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" .Values.otelAgent | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $agent | nindent 2 }}
 
   batch:
 
@@ -370,14 +372,14 @@ processors:
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
-  {{- if .Values.otelCollector.enabled }}
-  # If collector is enabled, metrics, logs and traces will be sent to collector
+  {{- if $gateway.enabled }}
+  # If gateway is enabled, metrics, logs and traces will be sent to the gateway
   otlp:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
   {{- else }}
-  # If collector is disabled, data will be sent to directly to backends.
+  # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   {{- end }}
@@ -397,7 +399,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
     correlation:
-    {{- if .Values.otelCollector.enabled }}
+    {{- if $gateway.enabled }}
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}
@@ -419,9 +421,9 @@ service:
     - zpages
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
-  # or directly to signalfx backend depending on otelCollector.enabled configuration.
+  # or directly to signalfx backend depending on gateway.enabled configuration.
   # The default pipelines should to be changed. You can add any custom pipeline instead.
-  # In order to disable a default pipeline just set it to `null` in otelAgent.config overrides.
+  # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
     {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
@@ -438,11 +440,11 @@ service:
         {{- end }}
         - k8sattributes
         - batch
-        {{- if not .Values.otelCollector.enabled }}
+        {{- if not $gateway.enabled }}
         - filter/logs
         {{- end }}
         - resource
-        {{- if not .Values.otelCollector.enabled }}
+        {{- if not $gateway.enabled }}
         - resource/logs
         {{- end }}
         - resourcedetection
@@ -450,7 +452,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if .Values.otelCollector.enabled }}
+        {{- if $gateway.enabled }}
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
@@ -498,7 +500,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if .Values.otelCollector.enabled }}
+        {{- if $gateway.enabled }}
         - otlp
         {{- else }}
         - sapm
@@ -522,7 +524,7 @@ service:
         - metricstransform
         {{- end }}
       exporters:
-        {{- if .Values.otelCollector.enabled }}
+        {{- if $gateway.enabled }}
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
@@ -551,7 +553,7 @@ service:
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
-        {{- if .Values.otelCollector.enabled }}
+        {{- if $gateway.enabled }}
         - otlp
         {{- else }}
         - splunk_hec/platform_metrics

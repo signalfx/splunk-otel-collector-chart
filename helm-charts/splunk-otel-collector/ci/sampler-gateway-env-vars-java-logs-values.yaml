@@ -3,7 +3,7 @@ splunkObservability:
   realm: fake-realm
   accessToken: fake-token
 
-otelAgent:
+agent:
   config:
     processors:
       probabilistic_sampler:
@@ -23,12 +23,12 @@ otelAgent:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
 
-otelK8sClusterReceiver:
+clusterReceiver:
   extraEnvs:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
 
-otelCollector:
+gateway:
   enabled: true
   replicaCount: 1
   resources:

@@ -1,8 +1,9 @@
-{{ if .Values.otelCollector.enabled }}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{ if $agent.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}-otel-collector
+  name: {{ template "splunk-otel-collector.fullname" . }}-otel-agent
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
@@ -11,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.otelCollectorConfig" . | fromYaml }}
-    {{- .Values.otelCollector.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $config := include "splunk-otel-collector.agentConfig" . | fromYaml }}
+    {{- $agent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}
