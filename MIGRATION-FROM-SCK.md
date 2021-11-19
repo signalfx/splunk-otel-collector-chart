@@ -18,8 +18,9 @@ Splunk OpenTelemetry Collector for Kubernetes provides significant performance i
 
 Splunk OpenTelemetry Collector for Kubernetes has the following components and applications:
 
-1. Application to fetch logs and traces from a kubernetes cluster (deployed as a DaemonSet)
-2. Application to fetch metrics and objects from a kubernetes cluster (deployed as a DaemonSet).
+1. Splunk OpenTelemetry Collector Agent (`agent`) to fetch logs, metrics and traces from a kubernetes cluster (deployed as a Kubernetes DaemonSet)
+2. Splunk OpenTelemetry Collector Cluster Receiver (`clusterReceiver`) to fetch metrics from a Kubernetes API (deployed as a Kubernetes 1-replica Deployment).
+3. Optional Splunk OpenTelemetry Collector Gateway (`gateway`) to forward data through it to reduce load on Kubernetes API and apply additional processing (deployed as a Kubernetes Deployment).
 
 There is no application available for fetching Kubernetes objects metadata from a Kubernetes cluster.
 
@@ -183,7 +184,7 @@ With migration to the Splunk OpenTelemetry Collector for Kubernetes, the underly
 
 To migrate Fluentd's position files again:
 
-1. Delete the OpenTelemetry checkpoint files in the ```"/var/lib/otel_pos/"``` directory from Kubernetes nodes.
+1. Delete the OpenTelemetry checkpoint files in the ```"/var/addon/splunk/otel_pos/"``` directory from Kubernetes nodes.
 2. Restart the new Helm chart Daemonet."
 
 ## Step 1: Preparing your values.yaml file for migration
@@ -197,15 +198,15 @@ Translate the values.yaml file from SCK to an appropriate format for Splunk Open
 
 #### Specifying your Splunk Platform and HTTP Event Collector (HEC) configuration
 
-You can combine the `host`, `port` and `protocol` options from SCK to use the `endpoint` option in Splunk OpenTelemetry Collector for Kubernetes.
+You can combine the `host`, `port` and `protocol` options from SCK to use the `splunkPlatform.endpoint` option in Splunk OpenTelemetry Collector for Kubernetes.
 
 This option uses this format: "http://X.X.X.X:8088/services/collector" which is interpreted as "protocol://host:port/services/collector".
 
-If you are using the `clientCert`, `clientKey`, and `caFile` options from SCK, use the corresponding `clientCert`, `clientKey`, and `caFile` options in Splunk OpenTelemetry Collector for Kubernetes to specify your HEC certificate chain.
+If you are using the `clientCert`, `clientKey`, and `caFile` options from SCK, use the corresponding `clientCert`, `clientKey`, and `caFile` options under `splunkPlatform` in Splunk OpenTelemetry Collector for Kubernetes to specify your HEC certificate chain.
 
-If you are using the `insecureSSL` option from SCK, use the `insecureSkipVerify` option in Splunk OpenTelemetry Collector for Kubernetes to specify whether to verify the certificates on HEC.
+If you are using the `insecureSSL` option from SCK, use the `splunkPlatform.insecureSkipVerify` option in Splunk OpenTelemetry Collector for Kubernetes to specify whether to verify the certificates on HEC.
 
-If you are using the `indexName` option from SCK, use the index option in Splunk OpenTelemetry Collector for Kubernetes to specify which index you want to index data into
+If you are using the `indexName` option from SCK, use the `splunkPlatform.index` option in Splunk OpenTelemetry Collector for Kubernetes to specify which index you want to index data into
 
 ## Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for logs
 
@@ -219,9 +220,9 @@ If using root user/permissions to access log files in SCK, set `runAsUser: 0` in
 
 If you configured SCK to explicitly set any of the following, you can do the same with Splunk OpenTelemetry Collector for Kubernetes:
 
-* Set the `containerRuntime` to a value from CRI-O, containerd, or Docker, depending on your runtime.
+* Set the `logsCollection.containers.containerRuntime` to a value from CRI-O, containerd, or Docker, depending on your runtime.
 * Set the `path` option to the location of your logs on your nodes.
-* If using the `exclude_path` option from SCK, you can use the `excludePaths` option in Splunk OpenTelemetry Collector for Kubernetes to exclude any logs you want.
+* If using the `exclude_path` option from SCK, you can use the `logsCollection.containers.excludePaths` option in Splunk OpenTelemetry Collector for Kubernetes to exclude any logs you want.
 * If using the `logs` option to define `multiline` configs in SCK, you can use the `logsCollection.containers.multilineConfigs` option in Splunk OpenTelemetry Collector for Kubernetes to concatenate multiline logs.
 * If using the `checkpointFile` option in SCK to define a custom location for checkpointing your logs, you can also do so with the `logsCollection.checkpointPath` option in Splunk OpenTelemetry Collector for Kubernetes.
 * If using the `log` option to ingest any other logs from your nodes, you can also do so with the `logsCollection.extraFileLogs` option in Splunk OpenTelemetry Collector for Kubernetes.
