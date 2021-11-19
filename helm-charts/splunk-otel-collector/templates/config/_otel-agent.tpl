@@ -209,7 +209,7 @@ receivers:
           k8s.pod.name: 'EXPR($$.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
         attributes:
-          stream: 'EXPR($$.stream)'
+          log.iostream: 'EXPR($$.stream)'
       {{- if .Values.logsCollection.containers.multilineConfigs }}
       - type: router
         routes:
@@ -478,7 +478,7 @@ service:
         {{- end }}
       exporters:
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
-        - splunk_hec/platform
+        - splunk_hec/platform_logs
         {{- end }}
         {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
         - splunk_hec/o11y
