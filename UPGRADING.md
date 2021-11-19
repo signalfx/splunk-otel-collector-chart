@@ -55,6 +55,12 @@ extraAttributes:
     - key: git_sha
 ```
 
+[#316 Busybox dependency is removed, splunk/fluentd-hec image is used in init container
+instead](https://github.com/signalfx/splunk-otel-collector-chart/pull/316)
+
+`image.fluentd.initContainer` is not being used anymore. Please remove it from
+your custom values.yaml.
+
 ## 0.36.2 to 0.37.0
 
 [#232 Access to underlying node's filesystem was reduced to the minimum scope
