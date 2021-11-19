@@ -10,6 +10,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 ### Added
 
 - Field name compatibility for SCK (#258)
+- Add initContainer for file operations for running as non root user (#263)
 
 ### Changed
 
