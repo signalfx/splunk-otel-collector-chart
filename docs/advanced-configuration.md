@@ -106,7 +106,7 @@ There are following known limitations of native OTel logs collection:
 
 ### Add log files from Kubernetes host machines/volumes
 
-You can add additional log files to be ingested from Kubernetes host machines and kubernetes volumes by configuring `agent.extraVolumes`, `agent.extraVolumeMounts` and `logsCollection.extraFileLogs` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.
+You can add additional log files to be ingested from Kubernetes host machines and Kubernetes volumes by configuring `agent.extraVolumes`, `agent.extraVolumeMounts` and `logsCollection.extraFileLogs` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.
 
 Example of adding audit logs from Kubernetes host machines
 
@@ -132,10 +132,10 @@ agent:
         path: /var/log/kubernetes/apiserver
 ```
 
-### Processing Multi-Line Logs
+### Processing multi-line logs
 
-Splunk OpenTelemetry Collector for Kubernetes supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
-Process multiline logs by configuring `logsCollection.containers.multilineConfigs` section in values.yaml.
+Splunk OpenTelemetry Collector for Kubernetes supports parsing of multi-line logs to help read, understand, and troubleshoot the multi-line logs in a better way.
+Process multi-line logs by configuring `logsCollection.containers.multilineConfigs` section in values.yaml.
 
 ```yaml
 logsCollection:
@@ -204,4 +204,4 @@ autodetect:
 
 ## Override underlying OpenTelemetry agent configuration
 
-If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in `agent.config` parameter in the values.yaml which will be merged into the default agent configuration, list parts of the configuration (e.g. `service.pipelines.logs.processors`) to be fully re-defined.
+If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.

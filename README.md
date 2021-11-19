@@ -52,7 +52,8 @@ export metric, trace, and log data for:
 
 **Installations that use this distribution can receive direct help from
 Splunk's support teams.** Customers are free to use the core OpenTelemetry OSS
-components (several do!) and we will provide our best effort to guide them through any issues that crop up. However only the Splunk distributions are officially supported by Splunk support and support-related SLAs.
+components (several do!). We will provide best effort guidance for using these components;
+however, only the Splunk distributions are in scope for official Splunk support and support-related SLAs.
 
 This distribution currently supports:
 
@@ -106,14 +107,14 @@ The following prerequisites are required to use the helm chart:
 - [Helm 3](https://helm.sh/docs/intro/install/) (Helm 2 is not supported)
 - Administrator access to your [Kubernetes cluster](https://kubernetes.io/) and familiarity with your Kubernetes configuration. You must know where your log information is being collected in your Kubernetes deployment.
 
-#### To send data to Splunk Enterprise/Cloud
+#### To send data to Splunk Enterprise or Splunk Cloud
 
 - Splunk Enterprise 7.0 or later.
 - A minimum of one Splunk platform index ready to collect the log data. This index will be used for ingesting logs.
 - An HTTP Event Collector (HEC) token and endpoint. See the following topics for more information:
 
-  * https://docs.splunk.com/Documentation/Splunk/8.2.0/Data/UsetheHTTPEventCollector
-  * https://docs.splunk.com/Documentation/Splunk/8.2.0/Data/ScaleHTTPEventCollector
+  * [Set up and use HTTP Event Collector in Splunk Web](https://docs.splunk.com/Documentation/Splunk/8.2.0/Data/UsetheHTTPEventCollector)
+  * [Scale HTTP Event Collector with distributed deployments](https://docs.splunk.com/Documentation/Splunk/8.2.0/Data/ScaleHTTPEventCollector)
 
 #### To send data to Splunk Observability Cloud
 
@@ -148,7 +149,7 @@ The following parameter is required for any of the destinations:
 
 - `clusterName`: arbitrary value that identifies your Kubernetes cluster. The value will be associated with every trace, metric and log as "k8s.cluster.name" attribute.
 
-Run the following commands replacing the parameters above with their appropriate values.
+Run the following commands, replacing the parameters above with their appropriate values.
 
 Add Helm repo
 
@@ -162,19 +163,19 @@ Sending data to Splunk Observability Cloud
 helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-Sending data to Splunk Enterprise or Cloud
+Sending data to Splunk Enterprise or Splunk Cloud
 
 ```bash
 helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=127.0.0.1:8088,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-Sending data to both Splunk Observability Cloud and Splunk Enterprise or Cloud
+Sending data to both Splunk Observability Cloud and Splunk Enterprise or Splunk Cloud
 
 ```bash
 helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=127.0.0.1:8088,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster"
 ```
 
-Consider enabling [native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for better throughput instead of using default fluentd engine. Add the following part --set=logsEngine=otel to your installation command if you want to use native OpenTelemetry logs collection.
+Consider enabling [native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for better throughput instead of using the default fluentd engine. Add the following part --set=logsEngine=otel to your installation command if you want to use native OpenTelemetry logs collection.
 
 Instead of setting helm values as arguments a YAML file can be provided:
 
