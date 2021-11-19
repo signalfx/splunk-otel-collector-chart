@@ -8,29 +8,21 @@ You are running Splunk Connect for Kubernetes (SCK) 1.4.9 and want to migrate to
 
 SCK has 3 components/applications:
 
-1. Logs, metrics and traces from a Kubernetes cluster (deployed as a DaemonSet)
-2. Application to fetch cluster metrics from a kubernetes cluster (deployed as a deployment)
-3. Application to fetch kubernetes objects metadata from a kubernetes cluster (deployed as a deployment)
+1. Logs, metrics, and traces from a Kubernetes cluster (deployed as a DaemonSet)
+2. Application to fetch cluster metrics from a Kubernetes cluster (deployed as a deployment)
+3. Application to fetch Kubernetes objects metadata from a Kubernetes cluster (deployed as a deployment)
 
-All SCK applications use Fluentd to work with logs, metrics and objects. Fluentd has significant performance issues when used to fetch logs in a Kubernetes cluster with pods that have very high throughput.
+All SCK applications use Fluentd to work with logs, metrics, and objects. Fluentd has significant performance issues when used to fetch logs in a Kubernetes cluster with pods that have very high throughput.
 
-Splunk OpenTelemetry Collector for Kubernetes provides significant performance improvements over the SCK through use of the OpenTelemetry Collector agent and native OpenTelemetry functionality for logs collection rather than Fluentd. You can learn more about the performance characteristics of this new application [Performance of native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#performance-of-native-opentelemetry-logs-collection).
+Splunk OpenTelemetry Collector for Kubernetes provides significant performance improvements over the SCK through use of the OpenTelemetry Collector agent and native OpenTelemetry functionality for logs collection rather than Fluentd. See [Performance of native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#performance-of-native-opentelemetry-logs-collection) to learn more about the performance characteristics of this new application.
 
 Splunk OpenTelemetry Collector for Kubernetes has the following components and applications:
 
-1. Splunk OpenTelemetry Collector Agent (`agent`) to fetch logs, metrics and traces from a kubernetes cluster (deployed as a Kubernetes DaemonSet)
-2. Splunk OpenTelemetry Collector Cluster Receiver (`clusterReceiver`) to fetch metrics from a Kubernetes API (deployed as a Kubernetes 1-replica Deployment).
-3. Optional Splunk OpenTelemetry Collector Gateway (`gateway`) to forward data through it to reduce load on Kubernetes API and apply additional processing (deployed as a Kubernetes Deployment).
+1. Splunk OpenTelemetry Collector Agent (`agent`) to fetch logs, metrics, and traces from a Kubernetes cluster (deployed as a Kubernetes DaemonSet)
+2. Splunk OpenTelemetry Collector Cluster Receiver (`clusterReceiver`) to fetch metrics from a Kubernetes API (deployed as a Kubernetes 1-replica Deployment)
+3. Optional Splunk OpenTelemetry Collector Gateway (`gateway`) to forward data through it to reduce load on Kubernetes API and apply additional processing (deployed as a Kubernetes Deployment)
 
 There is no application available for fetching Kubernetes objects metadata from a Kubernetes cluster.
-
-### Changes in logs, metrics, and objects
-
-| Logging | Metrics | Objects |
-|---|---|---|
-| Redhat UBI docker images for our applications are no longer available, as we now use scratch images | The naming convention of the metrics used in Splunk OpenTelemetry Collector for Kubernetes has changed and there are minor differences in the names of the metrics | Not implemented or available |
-| AWS FireLens is not supported. | Changes in the number of metrics (fewer metrics available) and additional metrics for the OpenTelemetry Collector |  |
-|  |  |  |
 
 ### Changes in logs in Splunk OpenTelemetry Connector for Kubernetes
 
@@ -40,7 +32,7 @@ There is no application available for fetching Kubernetes objects metadata from 
 ### Changes in metrics in Splunk OpenTelemetry Connector for Kubernetes
 
 * The naming convention of the metrics used in Splunk OpenTelemetry Collector for Kubernetes follows the OpenTelemetry specification and is different than SCK. You will observe minor differences in the names of the metrics.
-* Previously in SCK, you could get a large number of metrics from various APIs for kubernetes. However, in recent versions of kubernetes 1.18+, these API sources are disabled by default and there are fewer metrics available. The previous list of metrics can be found [Metrics Information](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md).
+* Previously in SCK, you could get a large number of metrics from various APIs for Kubernetes. However, in recent versions of Kubernetes 1.18+, these API sources are disabled by default and there are fewer metrics available. See [Metrics Information](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md) for the previous list of metrics.
 
 Some additional metrics that are available in Splunk OpenTelemetry Collector for Kubernetes are metrics about the OpenTelemetry Collector itself.
 
@@ -184,9 +176,9 @@ With migration to the Splunk OpenTelemetry Collector for Kubernetes, the underly
 
 To migrate Fluentd's position files again:
 
-1. Stop OpenTelemetry Daemonset by deleting deployed Helm chart.
+1. Stop the OpenTelemetry DaemonSet by deleting deployed Helm chart.
 2. Delete the OpenTelemetry checkpoint files in the ```"/var/addon/splunk/otel_pos/"``` directory from Kubernetes nodes.
-3. Restart the new Helm chart Daemonset.
+3. Restart the new Helm chart DaemonSet.
 
 ## Step 1: Preparing your values.yaml file for migration
 
@@ -252,7 +244,7 @@ If you are using the `serviceAccount` option to use your own service accounts in
 
 If you are using the `secret` option to use your own service accounts in SCK, you can use the `secret` option in Splunk OpenTelemetry Collector for Kubernetes.
 
-#### Custom docker image and pull secrets
+#### Custom Docker image and pull secrets
 
 If you are using custom Docker images, tags, pull secrets, and pull policy in SCK, you can achieve the same using the `image` option in Splunk OpenTelemetry Collector for Kubernetes to specify the relevant configs for using docker images.
 
