@@ -25,6 +25,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
   - `otelAgent` -> `agent`
   - `otelCollector` -> `gateway`
   - `otelK8sClusterReceiver` -> `clusterReceiver`
+- Rename `stream` log attribute to `log.iostream` (#311)
 
 ### Fixed
 

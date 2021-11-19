@@ -197,7 +197,7 @@ data:
           regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
           type: regex_parser
         - attributes:
-            stream: EXPR($$.stream)
+            log.iostream: EXPR($$.stream)
           resource:
             com.splunk.sourcetype: EXPR("kube:container:"+$$.container_name)
             k8s.container.name: EXPR($$.container_name)
