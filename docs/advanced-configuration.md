@@ -104,6 +104,55 @@ There are following known limitations of native OTel logs collection:
   Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
 - Journald logs cannot be collected natively by Splunk OTel Collector yet.
 
+### Add log files from Kubernetes host machines/volumes
+
+You can add additional log files to be ingested from Kubernetes host machines and kubernetes volumes by configuring `agent.extraVolumes`, `agent.extraVolumeMounts` and `logsCollection.extraFileLogs` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.
+
+Example of adding audit logs from Kubernetes host machines
+
+```yaml
+logsCollection:
+  extraFileLogs:
+    filelog/audit-log:
+      include: [/var/log/kubernetes/apiserver/audit.log]
+      start_at: beginning
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.source: /var/log/kubernetes/apiserver/audit.log
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: kube:apiserver-audit
+agent:
+  extraVolumeMounts:
+    - name: audit-log
+      mountPath: /var/log/kubernetes/apiserver
+  extraVolumes:
+    - name: audit-log
+      hostPath:
+        path: /var/log/kubernetes/apiserver
+```
+
+### Processing Multi-Line Logs
+
+Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
+Process multiline logs by configuring `logsCollection.containers.multilineConfigs` section in values.yaml.
+
+```yaml
+logsCollection:
+  containers:
+    multilineConfigs:
+      - namespaceName:
+          value: default
+        podName:
+          value: buttercup-app-.*
+          useRegexp: true
+        containerName:
+          value: server
+        firstEntryRegex: ^[^\s].*
+```
+
+Use https://regex101.com/ to find a golang regex that works for your format and specify it in the config file for the config option `firstEntryRegex`.
+
 ### Performance of native OpenTelemetry logs collection
 
 Some configurations used with the OpenTelemetry Collector (as set using the Splunk OpenTelemetry Collector for Kubernetes helm chart) can have an impact on overall performance of log ingestion. The more receivers, processors, exporters, and extensions that are added to any of the pipelines, the greater the performance impact.
@@ -134,6 +183,7 @@ Use `autodetect` config option to enable additional telemetry sources.
 
 Set `autodetect.prometheus=true` if you want the otel-collector agent to scrape
 prometheus metrics from pods that have generic prometheus-style annotations:
+
 - `prometheus.io/scrape: true`: Prometheus metrics will be scraped only from
   pods having this annotation;
 - `prometheus.io/path`: path to scrape the metrics from, default `/metrics`;
@@ -151,3 +201,7 @@ autodetect:
   istio: true
   prometheus: true
 ```
+
+## Override underlying OpenTelemetry agent configuration
+
+If you want to use your own OpenTelemetry Agent configuration, you can override by configuring `agent.config` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.
