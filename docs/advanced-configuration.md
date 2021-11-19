@@ -134,7 +134,7 @@ agent:
 
 ### Processing Multi-Line Logs
 
-Splunk Connect for Kubernetes-OpenTelmetry supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
+Splunk OpenTelemetry Collector for Kubernetes supports parsing of multiline logs to help read, understand and troubleshoot the multiline logs in a better way.
 Process multiline logs by configuring `logsCollection.containers.multilineConfigs` section in values.yaml.
 
 ```yaml
@@ -204,4 +204,4 @@ autodetect:
 
 ## Override underlying OpenTelemetry agent configuration
 
-If you want to use your own OpenTelemetry Agent configuration, you can override by configuring `agent.config` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.
+If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in `agent.config` parameter in the values.yaml which will be merged into the default agent configuration, list parts of the configuration (e.g. `service.pipelines.logs.processors`) to be fully re-defined.
