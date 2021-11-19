@@ -180,12 +180,13 @@ As shown in the table, you can acquire logs and metrics using Splunk OpenTelemet
 
 ### Checkpoint translation
 
-With migration to the Splunk OpenTelemetry Collector for Kubernetes, the underlying framework/agent being used has changed, so there needs to be a translation for checkpoint data so that the new OpenTelemetry agent can continue where Fluentd left off. All of this occurs automatically as an initContainer when you deploy the new Helm chart in your cluster for the first time. If you have properly configured the values.yaml file for the new Helm chart, it will continue working without interruption. Without proper configuration for migration, there is a possibility of either data duplication or data loss while migrating from SCK to Splunk OpenTelemetry Collector for Kubernetes.
+With migration to the Splunk OpenTelemetry Collector for Kubernetes, the underlying framework/agent being used has changed, so there needs to be a translation for checkpoint data so that the new OpenTelemetry agent can continue where Fluentd left off. All of this occurs automatically as an initContainer when you deploy the new Helm chart in your cluster for the first time. If you are not using a custom path for checkpoint for fluentd, it should just work with default configurations for this new Helm chart.
 
 To migrate Fluentd's position files again:
 
-1. Delete the OpenTelemetry checkpoint files in the ```"/var/addon/splunk/otel_pos/"``` directory from Kubernetes nodes.
-2. Restart the new Helm chart Daemonet."
+1. Stop OpenTelemetry Daemonset by deleting deployed Helm chart.
+2. Delete the OpenTelemetry checkpoint files in the ```"/var/addon/splunk/otel_pos/"``` directory from Kubernetes nodes.
+3. Restart the new Helm chart Daemonset.
 
 ## Step 1: Preparing your values.yaml file for migration
 
@@ -211,10 +212,6 @@ If you are using the `indexName` option from SCK, use the `splunkPlatform.index`
 ## Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for logs
 
 You can find all the configuration options used to upgrade in the values.yaml files linked above for both SCK and Splunk OpenTelemetry Collector for Kubernetes.
-
-#### Using root user/permissions for accessing log files
-
-If using root user/permissions to access log files in SCK, set `runAsUser: 0` in the `securityContext` in Splunk OpenTelemetry Collector for Kubernetes.
 
 #### Container runtimes
 
@@ -285,15 +282,15 @@ logs:
 ```yaml
 logsCollection:
   extraFileLogs:
-  filelog/kube-audit:
-    include: [/var/log/kube-apiserver-audit.log]
-    start_at: beginning
-    include_file_path: true
-    include_file_name: false
-    resource:
-      service.name: /var/log/kube-apiserver-audit.log
-      host.name: 'EXPR(env("K8S_NODE_NAME"))'
-      com.splunk.sourcetype: kube:apiserver-audit
+    filelog/kube-audit:
+      include: [/var/log/kube-apiserver-audit.log]
+      start_at: beginning
+      include_file_path: true
+      include_file_name: false
+      resource:
+        service.name: /var/log/kube-apiserver-audit.log
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: kube:apiserver-audit
 ```
 
 Use the `kube-audit` keyword to continue reading from the translated checkpoint data.
@@ -343,8 +340,6 @@ To delete the SCK deployment, find the name of the deployment using the `helm ls
 ## Step 4: Check data in Splunk
 
 * Check the logs index to see if you are receiving logs from your Kubernetes cluster
-  * index="Your logs index"
+  * ```index="Your logs index"```
 * Check the metrics index to see if you are receiving logs from your Kubernetes cluster
-  * | mcatalog values(metric_name) WHERE index="Your metrics index"
-
-## Step 5: Delete SCK Deployment if not done in Step 2
+  * ```| mcatalog values(metric_name) WHERE index="Your metrics index"```
