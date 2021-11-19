@@ -209,7 +209,7 @@ receivers:
           k8s.pod.name: 'EXPR($$.pod_name)'
           com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
         attributes:
-          stream: 'EXPR($$.stream)'
+          log.iostream: 'EXPR($$.stream)'
       {{- if .Values.logsCollection.containers.multilineConfigs }}
       - type: router
         routes:
