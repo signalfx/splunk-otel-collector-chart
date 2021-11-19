@@ -33,6 +33,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 ### Removed
 
 - Busybox image dependency (#275)
+- `extraArgs` config parameter (#313)
 
 ## [0.37.1] - 2021-11-01
 
