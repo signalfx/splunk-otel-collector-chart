@@ -138,8 +138,7 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
-        {{- if $agent.securityContext }}
-        {{- if not (eq (toString $agent.securityContext.runAsUser) "0" ) }}
+        {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
         - name: chown
           image: registry.access.redhat.com/ubi8/ubi
           command: ['sh', '-c', '
@@ -177,7 +176,6 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
             {{- end }}
-        {{- end }}
         {{- end }}
         {{- end }}
       {{- end }}
