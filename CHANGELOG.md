@@ -25,14 +25,17 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
   - `otelAgent` -> `agent`
   - `otelCollector` -> `gateway`
   - `otelK8sClusterReceiver` -> `clusterReceiver`
+- Rename `stream` log attribute to `log.iostream` (#311)
 
 ### Fixed
 
 - Splunk Platform client certificates (#286)
+- `logsCollection.containers.excludePaths` config parameter (#312)
 
 ### Removed
 
 - Busybox image dependency (#275)
+- `extraArgs` config parameter (#313)
 
 ## [0.37.1] - 2021-11-01
 
