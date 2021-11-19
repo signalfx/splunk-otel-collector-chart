@@ -29,6 +29,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 ### Fixed
 
 - Splunk Platform client certificates (#286)
+- `logsCollection.containers.excludePaths` config parameter (#312)
 
 ### Removed
 

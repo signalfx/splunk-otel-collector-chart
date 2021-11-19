@@ -113,7 +113,7 @@ receivers:
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
       {{- end }}
-      {{- range $_, $excludePath := .Values.logsCollection.containers.exclude_paths }}
+      {{- range $_, $excludePath := .Values.logsCollection.containers.excludePaths }}
       - {{ $excludePath }}
       {{- end }}
     start_at: beginning
