@@ -478,7 +478,7 @@ service:
         {{- end }}
       exporters:
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
-        - splunk_hec/platform
+        - splunk_hec/platform_logs
         {{- end }}
         {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
         - splunk_hec/o11y
