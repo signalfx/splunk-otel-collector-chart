@@ -260,7 +260,8 @@ agent:
 
   # To collect container logs and journald logs, it will run the agent as a root user.
   # To run it as non root user, uncomment below `securityContext` options.
-  securityContext: {}
+
+  # securityContext:
   #   runAsUser: 20000
   #   runAsGroup: 20000
 
