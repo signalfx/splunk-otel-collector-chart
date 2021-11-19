@@ -2,8 +2,8 @@
 
 ## 0.37.1 to 0.38.0
 
-[297](https://github.com/signalfx/splunk-otel-collector-chart/pull/297),
-[301](https://github.com/signalfx/splunk-otel-collector-chart/pull/301) Several
+[#297](https://github.com/signalfx/splunk-otel-collector-chart/pull/297),
+[#301](https://github.com/signalfx/splunk-otel-collector-chart/pull/301) Several
 parameters in values.yaml configuration were renamed according to [Splunk GDI
 Specification](https://github.com/signalfx/gdi-specification/blob/main/specification/configuration.md#kubernetes-package-management-solutions)
 
@@ -15,17 +15,45 @@ them accordingly:
 - `otelCollector` -> `gateway`
 - `otelK8sClusterReceiver` -> `clusterReceiver`
 
+[#306 Some parameters under `splunkPlatform` group were
+renamed](https://github.com/signalfx/splunk-otel-collector-chart/pull/306)
+
+If you use the following parameters under `splunkPlatform` group, please make
+sure they are updated:
+- `metrics_index` -> `metricsIndex`
+- `max_connections` -> `maxConnections`
+- `disable_compression` -> `disableCompression`
+- `insecure_skip_verify` -> `insecureSkipVerify`
+
 [#295 Secret names are changed according to the GDI
 specification](https://github.com/signalfx/splunk-otel-collector-chart/pull/295)
 
 If you provide access token for Splunk Observability using a custom Kubernetes
-secret (secter.create=false), please update the secret name from
+secret (secter.create=false), please update the secret key from
 `splunk_o11y_access_token` to `splunk_observability_access_token`
 
 [#273 Changed configuration to fetch attributes from labels and annotations of pods and namespaces](https://github.com/signalfx/splunk-otel-collector-chart/pull/273)
 
-The following parameter `podLabels` under the `extraAttributes` group is changed to `fromLabels`
-This parameter needs to be updated in your custom values.yaml
+`podLabels` parameter under the `extraAttributes` group is now deprecated.
+in favor of `fromLabels`. Please update your custom values.yaml accordingly.
+
+For example, the following config:
+
+```yaml
+extraAttributes:
+  podLabels:
+    - app
+    - git_sha
+```
+
+Should be changed to:
+
+```yaml
+extraAttributes:
+  fromLabels:
+    - key: app
+    - key: git_sha
+```
 
 ## 0.36.2 to 0.37.0
 
