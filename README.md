@@ -7,6 +7,8 @@
     <a href="CONTRIBUTING.md">Getting Involved</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
+    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+    <a href="docs/migration-from-sck.md">Migrating from Splunk Connect for Kubernetes</a>
   </strong>
 </p>
 
@@ -22,6 +24,8 @@
 
 <p align="center">
   <strong>
+    <a href="docs/advanced-configuration.md">Configuration</a>
+    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/components.md">Components</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/monitoring.md">Monitoring</a>
