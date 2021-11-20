@@ -4,8 +4,6 @@
   <strong>
     <a href="#getting-started">Getting Started</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="CONTRIBUTING.md">Getting Involved</a>
-    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="https://github.com/signalfx/splunk-otel-collector/blob/main/docs/signalfx-smart-agent-migration.md">Migrating from Smart Agent</a>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <a href="docs/migration-from-sck.md">Migrating from Splunk Connect for Kubernetes</a>
