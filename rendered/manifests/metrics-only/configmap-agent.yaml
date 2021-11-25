@@ -138,39 +138,6 @@ data:
           network: null
           paging: null
           processes: null
-      journald/containerd:
-        directory: /run/log/journal
-        priority: info
-        resource:
-          com.splunk.index: null
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-          k8s.cluster.name: CHANGEME
-        units:
-        - containerd
-      journald/docker:
-        directory: /run/log/journal
-        priority: info
-        resource:
-          com.splunk.index: null
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-          k8s.cluster.name: CHANGEME
-        units:
-        - docker
-      journald/kubelet:
-        directory: /run/log/journal
-        priority: info
-        resource:
-          com.splunk.index: null
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-          k8s.cluster.name: CHANGEME
-        units:
-        - kubelet
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s

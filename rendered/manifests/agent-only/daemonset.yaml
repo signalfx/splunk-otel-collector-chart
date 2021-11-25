@@ -28,15 +28,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-<<<<<<< HEAD
-<<<<<<< HEAD
         checksum/config: f30bdb1d93a11346ba80520ca24561ebec5d1e3881c03c3e6415f00424414bab
-=======
-        checksum/config: 08aa7c2e784e9b35ae61d753b5365ca944f1e0acb111d769cea323d229b9b294
->>>>>>> b06d27b (render update)
-=======
-        checksum/config: 9e973656784660a50847a7785212d23acc81d8838062da9875b85238a7ca3528
->>>>>>> 4a6e6f1 (render update2)
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
