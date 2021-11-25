@@ -184,13 +184,13 @@ splunk_hec/platform_logs:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  max_connections: {{ .Values.splunkPlatform.max_connections }}
-  disable_compression: {{ .Values.splunkPlatform.disable_compression }}
+  max_connections: {{ .Values.splunkPlatform.maxConnections }}
+  disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   splunk_app_name: {{ .Chart.Name }}
   splunk_app_version: {{ .Chart.Version }}
   tls:
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
     {{- if .Values.splunkPlatform.clientCert }}
     cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}
@@ -209,15 +209,15 @@ Splunk Platform Logs exporter
 splunk_hec/platform_metrics:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
-  index: {{ .Values.splunkPlatform.metrics_index | quote }}
+  index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  max_connections: {{ .Values.splunkPlatform.max_connections }}
-  disable_compression: {{ .Values.splunkPlatform.disable_compression }}
+  max_connections: {{ .Values.splunkPlatform.maxConnections }}
+  disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   splunk_app_name: {{ .Chart.Name }}
   splunk_app_version: {{ .Chart.Version }}
   tls:
-    insecure_skip_verify: {{ .Values.splunkPlatform.insecure_skip_verify }}
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
     {{- if .Values.splunkPlatform.clientCert }}
     cert_file: /otel/etc/splunk_platform_hec_client_cert
     {{- end }}

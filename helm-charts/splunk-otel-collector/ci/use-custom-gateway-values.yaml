@@ -5,7 +5,7 @@ splunkAccessToken: my-access-token
 
 logsEnabled: false
 
-otelAgent:
+agent:
   config:
     exporters:
       otlp:
@@ -21,7 +21,7 @@ otelAgent:
         metrics:
           exporters: [otlp]
 
-otelK8sClusterReceiver:
+clusterReceiver:
   config:
     exporters:
       signalfx:

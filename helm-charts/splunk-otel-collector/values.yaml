@@ -32,23 +32,23 @@ splunkPlatform:
   token: ""
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
-  index: ""
+  index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
-  metrics_index: ""
+  metricsIndex: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
   # be container name.
   sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
-  max_connections: 200
+  maxConnections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.
-  disable_compression: true
+  disableCompression: true
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
-  insecure_skip_verify: false
+  insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
   # NOTE: The content of the certificate itself should be used here, not the
   #       file path. The certificate will be stored as a secret in kubernetes.
@@ -62,10 +62,11 @@ splunkPlatform:
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
 
-  # Options to disable particular telemetry data types that will be sent to
-  # Splunk Platform.
+  # Options to disable or enable particular telemetry data types that will be sent to
+  # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
-  metricsEnabled: true
+  # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
+  metricsEnabled: false
 
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
@@ -199,13 +200,13 @@ extraAttributes:
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
 
-otelAgent:
+agent:
   enabled: true
 
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must
   # be unique across all the nodes in k8s cluster. Any port can be disabled,
-  # For example to disable zipkin ports set `otelAgent.ports.zipkin: null`.
+  # For example to disable zipkin ports set `agent.ports.zipkin: null`.
   ports:
     otlp:
       containerPort: 4317
@@ -257,7 +258,14 @@ otelAgent:
       # This value is being used as a source for default memory_limiter processor configurations
       memory: 500Mi
 
+  # To collect container logs and journald logs, it will run the agent as a root user.
+  # To run it as non root user, uncomment below `securityContext` options.
+  # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
+  # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
+
   securityContext: {}
+  #   runAsUser: 20000
+  #   runAsGroup: 20000
 
   # OTel agent annotations
   annotations: {}
@@ -286,10 +294,10 @@ otelAgent:
 # specifically for collecting metrics from kubernetes API.
 ################################################################################
 
-# Kubernetes cluster receiver collects cluster level metrics from the Kubernetes API.
+# Cluster receiver collects cluster level metrics from the Kubernetes API.
 # It has to be running on one pod, so it uses its own dedicated deployment with 1 replica.
 
-otelK8sClusterReceiver:
+clusterReceiver:
   enabled: true
 
   # Need to be adjusted based on size of the monitored cluster
@@ -314,7 +322,7 @@ otelK8sClusterReceiver:
 
   # This Flag enables k8s events collection with smartagent/kubernetes-events receiver
   # You can override list of events collected by default using the following config option:
-  # `otelK8sClusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
+  # `clusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
   k8sEventsEnabled: false
 
   # k8s cluster receiver extra pod labels
@@ -409,6 +417,37 @@ logsCollection:
     index:
 
   checkpointPath: "/var/addon/splunk/otel_pos"
+
+  # Files on k8s nodes to tail.
+  # Make sure to configure volume mounts properly at `agent.extraVolumes` and `agent.extraVolumeMounts`.
+  extraFileLogs: {}
+  # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
+  # extraFileLogs:
+  #   filelog/audit-log:
+  #     include: [/var/log/kubernetes/apiserver/audit.log]
+  #     start_at: beginning
+  #     include_file_path: true
+  #     include_file_name: false
+  #     resource:
+  #       com.splunk.source: /var/log/kubernetes/apiserver/audit.log
+  #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
+  #       com.splunk.sourcetype: kube:apiserver-audit
+
+# Configuration for collecting journald logs using otel collector
+  journaldLogs:
+    enabled: true
+    directory: /run/log/journal
+    defaultPriority: info
+    # List of service units to collect and configuration for each. To collect all journald services logs, leave units blank.
+    units:
+      - name: kubelet
+        priority: info
+      - name: docker
+        priority: info
+      - name: containerd
+        priority: info
+    # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic
+    index:
 
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
@@ -780,7 +819,7 @@ isWindows: false
 # passthrough mode is recommended for large k8s clusters, disabled by default.
 ################################################################################
 
-otelCollector:
+gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false

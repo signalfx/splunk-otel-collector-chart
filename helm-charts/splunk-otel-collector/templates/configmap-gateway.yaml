@@ -1,8 +1,9 @@
-{{ if .Values.otelAgent.enabled }}
+{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
+{{ if $gateway.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}-otel-agent
+  name: {{ template "splunk-otel-collector.fullname" . }}-otel-collector
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
@@ -11,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.otelAgentConfig" . | fromYaml }}
-    {{- .Values.otelAgent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $config := include "splunk-otel-collector.gatewayConfig" . | fromYaml }}
+    {{- $gateway.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
 {{- end }}

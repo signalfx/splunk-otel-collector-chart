@@ -1,4 +1,5 @@
-{{ if .Values.otelCollector.enabled }}
+{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
+{{ if $gateway.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,12 +12,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-collector
-  {{- if .Values.otelCollector.annotations }}
+  {{- if $gateway.annotations }}
   annotations:
-    {{- toYaml .Values.otelCollector.annotations | nindent 4 }}
+    {{- toYaml $gateway.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.otelCollector.replicaCount }}
+  replicas: {{ $gateway.replicaCount }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
@@ -28,13 +29,13 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector
         release: {{ .Release.Name }}
-        {{- if .Values.otelCollector.podLabels }}
-        {{- toYaml .Values.otelCollector.podLabels | nindent 8 }}
+        {{- if $gateway.podLabels }}
+        {{- toYaml $gateway.podLabels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap-otel-collector.yaml") . | sha256sum }}
-        {{- if .Values.otelCollector.podAnnotations }}
-        {{- toYaml .Values.otelCollector.podAnnotations | nindent 8 }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-gateway.yaml") . | sha256sum }}
+        {{- if $gateway.podAnnotations }}
+        {{- toYaml $gateway.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -42,22 +43,22 @@ spec:
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
-        {{- if .Values.otelCollector.nodeSelector }}
-        {{ toYaml .Values.otelCollector.nodeSelector | nindent 8 }}
+        {{- if $gateway.nodeSelector }}
+        {{ toYaml $gateway.nodeSelector | nindent 8 }}
         {{- else }}
           kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
-      {{- if .Values.otelCollector.tolerations }}
+      {{- if $gateway.tolerations }}
       tolerations:
-        {{ toYaml .Values.otelCollector.tolerations | nindent 8 }}
+        {{ toYaml $gateway.tolerations | nindent 8 }}
       {{- end }}
-      {{- if .Values.otelCollector.affinity }}
+      {{- if $gateway.affinity }}
       affinity:
-        {{- toYaml .Values.otelCollector.affinity | nindent 8 }}
+        {{- toYaml $gateway.affinity | nindent 8 }}
       {{- end }}
-      {{- if .Values.otelCollector.securityContext }}
+      {{- if $gateway.securityContext }}
       securityContext:
-        {{ toYaml .Values.otelCollector.securityContext | nindent 8 }}
+        {{ toYaml $gateway.securityContext | nindent 8 }}
       {{- end }}
       containers:
       - name: otel-collector
@@ -72,14 +73,11 @@ spec:
         - --config=/conf/relay.yaml
         {{- end }}
         - --metrics-addr=0.0.0.0:8889
-        {{- range .Values.otelCollector.extraArgs }}
-        - {{ . }}
-        {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelCollector.resources.limits.memory }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" $gateway.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -115,11 +113,11 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_platform_hec_token
           {{- end }}
-          {{- with .Values.otelCollector.extraEnvs }}
+          {{- with $gateway.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
         ports:
-        {{- range $key, $port := .Values.otelCollector.ports }}
+        {{- range $key, $port := $gateway.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
@@ -140,14 +138,14 @@ spec:
             path: /
             port: 13133
         resources:
-          {{- toYaml .Values.otelCollector.resources | nindent 10 }}
+          {{- toYaml $gateway.resources | nindent 10 }}
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
-        {{- if .Values.otelCollector.extraVolumeMounts }}
-        {{- toYaml .Values.otelCollector.extraVolumeMounts | nindent 8 }}
+        {{- if $gateway.extraVolumeMounts }}
+        {{- toYaml $gateway.extraVolumeMounts | nindent 8 }}
         {{- end }}
-      terminationGracePeriodSeconds: {{ .Values.otelCollector.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ $gateway.terminationGracePeriodSeconds }}
       volumes:
       - name: collector-configmap
         configMap:
@@ -155,10 +153,10 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if .Values.otelCollector.extraVolumes }}
-      {{- toYaml .Values.otelCollector.extraVolumes | nindent 6 }}
+      {{- if $gateway.extraVolumes }}
+      {{- toYaml $gateway.extraVolumes | nindent 6 }}
       {{- end }}
-      {{- if .Values.otelCollector.priorityClassName }}
-      priorityClassName: {{ .Values.otelCollector.priorityClassName }}
+      {{- if $gateway.priorityClassName }}
+      priorityClassName: {{ $gateway.priorityClassName }}
       {{- end }}
 {{- end }}

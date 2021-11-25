@@ -4,30 +4,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
-[Upgrade
-guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380)
+## [0.38.0] - 2021-11-19
+
+This release completes the addition of content and documentation to easily allow
+users to send telemetry data including logs to both Splunk observability and
+Splunk platform. This will address use cases of current users of the Splunk
+Connect for Kubernetes.
+
+[Updated
+README](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/README.md)
+
+[Migration guidelines for Splunk Connect for Kubernetes
+users](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/migration-from-sck.md)
+
+[Upgrade guidelines for existing Splunk OpenTelemetry Collector for Kubernetes
+users](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380)
 
 ### Added
 
 - Field name compatibility for SCK (#258)
+- Add initContainer for file operations for running as non root user (#263)
+- Helm hook for custom secret validation (#294)
+- Add include logs functionality based on pod annotations (#260)
+- Support for tailing custom host files (#300)
 
 ### Changed
 
 - Extract `container.image.tag` attribute from `container.image.name` (#285)
 - Upgrade splunk-otel-collector image to 0.38.1 (#284)
+- Upgrade fluentd-hec image to 1.2.8 (#281)
 - Change secret names according to the GDI specification (#295)
 - Make `clusterName` configuration parameter generally required (#296)
 - Changed the default checkpoint path to `/var/addon/splunk/otel_pos` (#292)
 - Rename "provider" and "distro" parameters to "cloudProvider" and
   "distribution" (#297)
+- Changed SplunkPlatform properties to match helm best practices. (#306)
+- Rename parameter groups for Splunk OTel Collector components (#301):
+  - `otelAgent` -> `agent`
+  - `otelCollector` -> `gateway`
+  - `otelK8sClusterReceiver` -> `clusterReceiver`
+- Rename `stream` log attribute to `log.iostream` (#311)
+- Improve configuration for fetching attributes from annotations and labels of
+  pods and namespaces (#273)
+- Use `main` as default index and disable metrics by default for Splunk
+  Platform (#305)
 
 ### Fixed
 
 - Splunk Platform client certificates (#286)
+- `logsCollection.containers.excludePaths` config parameter (#312)
+- Splunk Platform sourcetype precedence order (#276)
 
 ### Removed
 
 - Busybox image dependency (#275)
+- `extraArgs` config parameter (#313)
 
 ## [0.37.1] - 2021-11-01
 

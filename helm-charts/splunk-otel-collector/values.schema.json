@@ -40,7 +40,7 @@
           "description": "Name of Splunk index targeted.",
           "type": "string"
         },
-        "metrics_index": {
+        "metricsIndex": {
           "type": "string"
         },
         "source": {
@@ -49,16 +49,16 @@
         "sourcetype": {
           "type": "string"
         },
-        "max_connections": {
+        "maxConnections": {
           "type": "integer"
         },
-        "disable_compression": {
+        "disableCompression": {
           "type": "boolean"
         },
         "timeout": {
           "type": "string"
         },
-        "insecure_skip_verify": {
+        "insecureSkipVerify": {
           "type": "boolean"
         },
         "clientCert": {
@@ -267,8 +267,8 @@
         }
       }
     },
-    "otelAgent": {
-      "description": "Splunk OpenTelemetry collector agent configuration.",
+    "agent": {
+      "description": "Splunk OpenTelemetry Collector agent configuration.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -377,8 +377,13 @@
         }
       }
     },
-    "otelK8sClusterReceiver": {
-      "description": "Splunk OpenTelemetry Kubernetes cluster receiver configuration.",
+    "otelAgent": {
+      "description": "[DEPRECATED] Splunk OpenTelemetry Collector agent configuration.",
+      "type": "object",
+      "deprecated": true
+    },
+    "clusterReceiver": {
+      "description": "Splunk OpenTelemetry Collector cluster receiver configuration.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -474,6 +479,11 @@
         }
       }
     },
+    "otelK8sClusterReceiver": {
+      "description": "[DEPRECATED] Splunk OpenTelemetry Collector cluster receiver configuration.",
+      "type": "object",
+      "deprecated": true
+    },
     "logsCollection": {
       "description": "Native OpenTelemetry logs collection configuration.",
       "type": "object",
@@ -523,6 +533,9 @@
         },
         "checkpointPath": {
           "type": "string"
+        },
+        "extraFileLogs": {
+          "type": "object"
         }
       }
     },
@@ -725,6 +738,10 @@
                 "Always",
                 "Never"
               ]
+            },
+            "initContainer": {
+              "type": "object",
+              "deprecated": "true"
             }
           }
         },
@@ -841,8 +858,8 @@
       "description": "Apply for k8s cluster with windows worker node.",
       "type": "boolean"
     },
-    "otelCollector": {
-      "description": "Splunk OpenTelemetry collector k8s deployment configuration.",
+    "gateway": {
+      "description": "Splunk OpenTelemetry Collector gateway deployment configuration.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -968,6 +985,11 @@
           "type": "object"
         }
       }
+    },
+    "otelCollector": {
+      "description": "[DEPRECATED] Splunk OpenTelemetry Collector gateway deployment configuration.",
+      "type": "object",
+      "deprecated": true
     },
     "service": {
       "description": "Splunk OpenTelemetry collector service configuration.",
@@ -1127,7 +1149,7 @@
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.metrics_index must be provided",
+        "$comment": "then splunkPlatform.metricsIndex must be provided",
         "properties": {
           "splunkPlatform": {
             "if" : {
@@ -1139,7 +1161,7 @@
             },
             "then": {
               "properties": {
-                "metrics_index": {
+                "metricsIndex": {
                   "minLength": 1
                 }
               }

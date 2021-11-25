@@ -1,4 +1,5 @@
-{{- if .Values.otelAgent.enabled }}
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{- if $agent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -12,9 +13,9 @@ metadata:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
     engine: fluentd
     {{- end }}
-  {{- if .Values.otelAgent.annotations }}
+  {{- if $agent.annotations }}
   annotations:
-    {{- toYaml .Values.otelAgent.annotations | nindent 4 }}
+    {{- toYaml $agent.annotations | nindent 4 }}
   {{- end }}
 spec:
   updateStrategy:
@@ -28,14 +29,14 @@ spec:
       labels:
         app: {{ template "splunk-otel-collector.name" . }}
         release: {{ .Release.Name }}
-        {{- if .Values.otelAgent.podLabels }}
-        {{- toYaml .Values.otelAgent.podLabels | nindent 8 }}
+        {{- if $agent.podLabels }}
+        {{- toYaml $agent.podLabels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-otel-agent.yaml") .) | sha256sum }}
+        checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-agent.yaml") .) | sha256sum }}
         kubectl.kubernetes.io/default-container: otel-collector
-        {{- if .Values.otelAgent.podAnnotations }}
-        {{- toYaml .Values.otelAgent.podAnnotations | nindent 8 }}
+        {{- if $agent.podAnnotations }}
+        {{- toYaml $agent.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -137,6 +138,45 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+        {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
+        - name: chown
+          image: registry.access.redhat.com/ubi8/ubi
+          command: ['sh', '-c', '
+          mkdir -p {{ .Values.logsCollection.checkpointPath }};
+          chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};
+          chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
+          {{ if .Values.logsCollection.containers.enabled -}}
+          if [ -d "/var/lib/docker/containers" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/lib/docker/containers;
+              chmod -R g+rxs /var/lib/docker/containers;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
+          fi;
+          if [ -d "/var/log/crio/pods" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/crio/pods;
+              chmod -R g+rxs /var/log/crio/pods;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
+          fi;
+          if [ -d "/var/log/pods" ];
+          then
+              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/pods;
+              chmod -R g+rxs /var/log/pods;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
+          fi;
+          {{- end }}']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: checkpoint
+              mountPath: {{ .Values.logsCollection.checkpointPath }}
+            {{- if .Values.logsCollection.containers.enabled }}
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+            {{- end }}
+        {{- end }}
         {{- end }}
       {{- end }}
       containers:
@@ -193,11 +233,8 @@ spec:
         - --config=/conf/relay.yaml
         {{- end }}
         - --metrics-addr=0.0.0.0:8889
-        {{- range .Values.otelAgent.extraArgs }}
-        - {{ . }}
-        {{- end }}
         ports:
-        {{- range $key, $port := .Values.otelAgent.ports }}
+        {{- range $key, $port := $agent.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
@@ -205,18 +242,17 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or .Values.otelAgent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
+          {{- if $agent.securityContext }}
+          {{- toYaml $agent.securityContext | nindent 10 }}
+          {{- else }}
           runAsUser: 0
-          {{- end }}
-          {{- if .Values.otelAgent.securityContext }}
-          {{ toYaml .Values.otelAgent.securityContext | nindent 10 }}
           {{- end }}
         {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.otelAgent.resources.limits.memory }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -272,7 +308,7 @@ spec:
           - name: HOST_DEV
             value: {{ .Values.isWindows | ternary "C:\\hostfs\\dev" "/hostfs/dev" }}
           {{- end }}
-          {{- with .Values.otelAgent.extraEnvs }}
+          {{- with $agent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
 
@@ -291,7 +327,7 @@ spec:
             path: /
             port: 13133
         resources:
-          {{- toYaml .Values.otelAgent.resources | nindent 10 }}
+          {{- toYaml $agent.resources | nindent 10 }}
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
@@ -341,8 +377,8 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
-        {{- if .Values.otelAgent.extraVolumeMounts }}
-        {{- toYaml .Values.otelAgent.extraVolumeMounts | nindent 8 }}
+        {{- if $agent.extraVolumeMounts }}
+        {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
@@ -392,6 +428,11 @@ spec:
         hostPath:
           path: /var/lib/otel_pos
           type: DirectoryOrCreate
+      {{- if .Values.logsCollection.journaldLogs.enabled}}
+      - name: journaldlogs-otel
+        hostPath:
+          path: {{.Values.logsCollection.journaldLogs.directory}}
+      {{- end}}
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
@@ -431,8 +472,8 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if .Values.otelAgent.extraVolumes }}
-      {{- toYaml .Values.otelAgent.extraVolumes | nindent 6 }}
+      {{- if $agent.extraVolumes }}
+      {{- toYaml $agent.extraVolumes | nindent 6 }}
       {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}

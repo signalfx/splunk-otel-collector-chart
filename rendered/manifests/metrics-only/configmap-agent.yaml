@@ -1,17 +1,17 @@
 ---
-# Source: splunk-otel-collector/templates/configmap-otel-agent.yaml
+# Source: splunk-otel-collector/templates/configmap-agent.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.37.1
+    helm.sh/chart: splunk-otel-collector-0.38.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.38.1"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.37.1
+    chart: splunk-otel-collector-0.38.0
     release: default
     heritage: Helm
 data:
@@ -23,9 +23,6 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
-      splunk_hec/o11y:
-        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
-        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -130,8 +127,60 @@ data:
         override: false
         timeout: 10s
     receivers:
-      fluentforward:
-        endpoint: 0.0.0.0:8006
+      hostmetrics:
+        collection_interval: 10s
+        scrapers:
+          cpu: null
+          disk: null
+          filesystem: null
+          load: null
+          memory: null
+          network: null
+          paging: null
+          processes: null
+      journald/containerd:
+        directory: /run/log/journal
+        priority: info
+        resource:
+          com.splunk.index: null
+          com.splunk.source: /run/log/journal
+          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
+          host.name: EXPR(env("K8S_NODE_NAME"))
+          k8s.cluster.name: CHANGEME
+        units:
+        - containerd
+      journald/docker:
+        directory: /run/log/journal
+        priority: info
+        resource:
+          com.splunk.index: null
+          com.splunk.source: /run/log/journal
+          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
+          host.name: EXPR(env("K8S_NODE_NAME"))
+          k8s.cluster.name: CHANGEME
+        units:
+        - docker
+      journald/kubelet:
+        directory: /run/log/journal
+        priority: info
+        resource:
+          com.splunk.index: null
+          com.splunk.source: /run/log/journal
+          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
+          host.name: EXPR(env("K8S_NODE_NAME"))
+          k8s.cluster.name: CHANGEME
+        units:
+        - kubelet
+      kubeletstats:
+        auth_type: serviceAccount
+        collection_interval: 10s
+        endpoint: ${K8S_NODE_IP}:10250
+        extra_metadata_labels:
+        - container.id
+        metric_groups:
+        - container
+        - pod
+        - node
       otlp:
         protocols:
           grpc:
@@ -146,6 +195,12 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8889
+      receiver_creator:
+        receivers: null
+        watch_observers:
+        - k8s_observer
+      signalfx:
+        endpoint: 0.0.0.0:9943
     service:
       extensions:
       - health_check
@@ -153,21 +208,20 @@ data:
       - memory_ballast
       - zpages
       pipelines:
-        logs:
+        metrics:
           exporters:
-          - splunk_hec/o11y
+          - signalfx
           processors:
           - memory_limiter
-          - groupbyattrs/logs
-          - k8sattributes
           - batch
-          - filter/logs
           - resource
-          - resource/logs
           - resourcedetection
           receivers:
-          - fluentforward
+          - hostmetrics
+          - kubeletstats
           - otlp
+          - receiver_creator
+          - signalfx
         metrics/agent:
           exporters:
           - signalfx
