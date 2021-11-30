@@ -44,7 +44,7 @@ receivers:
   {{- end }}
 
 processors:
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $clusterReceiver | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
 
