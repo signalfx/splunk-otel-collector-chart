@@ -3,7 +3,6 @@ Config for the optional standalone collector
 The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:
   health_check:
 
@@ -78,7 +77,7 @@ processors:
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $gateway | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
 
