@@ -45,7 +45,7 @@ render:
 		--namespace default \
 		--values rendered/values.yaml \
 		--output-dir "$$dir" \
-		--set logsEngine=otel \
+		--set logsEngine=otel,splunkObservability.logsEnabled=true \
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
