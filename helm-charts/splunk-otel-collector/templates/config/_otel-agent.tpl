@@ -3,7 +3,6 @@ Config for the otel-collector agent
 The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
-{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
@@ -317,7 +316,7 @@ processors:
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- end }}
 
-  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" $agent | nindent 2 }}
+  {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
 
