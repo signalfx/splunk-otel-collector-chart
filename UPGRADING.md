@@ -2,7 +2,7 @@
 
 ## 0.38.0 to 0.39.0
 
-(#325 Logs collection is now disabled by default for Splunk Observability
+[#325 Logs collection is now disabled by default for Splunk Observability
 destination](https://github.com/signalfx/splunk-otel-collector-chart/pull/325)
 
 If you send logs to Splunk Observability destination, make sure to enable logs.
