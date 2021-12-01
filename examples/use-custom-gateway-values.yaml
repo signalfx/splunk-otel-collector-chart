@@ -18,6 +18,8 @@ agent:
           exporters: [otlp, signalfx]
         metrics:
           exporters: [otlp]
+        logs:
+          exporters: [otlp]
 
 clusterReceiver:
   config:
