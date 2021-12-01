@@ -53,11 +53,10 @@ def pytest_unconfigure(config):
 
     metric_indexes = ["ci_metrics"]
     for index in metric_indexes:
-        events = check_metrics_from_splunk(start_time="-24h@h",
-                                      end_time="now",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      password=setup["splunk_password"],
+        events = check_metrics_from_splunk(start_time="-1h@h",
+                                      url=config.getoption("--splunkd-url"),
+                                      user=config.getoption("--splunk-user"),
+                                      password=config.getoption("--splunk-password"),
                                       index=index_metrics,
                                       metric_name=metric)
         print("metric index=" + index + " event count=" + str(len(events)))
