@@ -103,15 +103,17 @@ gateway:
 ## Deploy gateway-mode OTel Collector only
 
 This configuration will install collector as a gateway deployment only.
-No metrics or logs will be collector, the gateway can be used to forward
-telemetry data through it for aggregation, enrichment purposes.
+No metrics or logs will be collected from the gateway instance(s), the gateway
+can be used to forward telemetry data through it for aggregation, enrichment
+purposes.
 
 ```yaml
 gateway:
   enabled: true
 agent:
   enabled: false
-logsEnabled: false
+clusterReceiver:
+  enabled: false
 ```
 
 ## Route telemetry data through a gateway deployed separately
@@ -135,6 +137,8 @@ agent:
         traces:
           exporters: [otlp, signalfx]
         metrics:
+          exporters: [otlp]
+        logs:
           exporters: [otlp]
 
 clusterReceiver:
