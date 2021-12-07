@@ -401,7 +401,7 @@ logsCollection:
     useSplunkIncludeAnnotation: false
 
 # Configuration for collecting journald logs using otel collector
-  journaldLogs:
+  journald:
     enabled: true
     directory: /run/log/journal
     defaultPriority: info

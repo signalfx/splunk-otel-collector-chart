@@ -371,8 +371,8 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
-        {{- if .Values.logsCollection.journaldLogs.enabled}}
-        - mountPath: {{.Values.logsCollection.journaldLogs.directory}}
+        {{- if .Values.logsCollection.journald.enabled}}
+        - mountPath: {{.Values.logsCollection.journald.directory}}
           name: journaldlogs-otel
           readOnly: true
         {{- end }}
@@ -419,20 +419,15 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
-      {{- if .Values.logsCollection.journaldLogs.enabled}}
+      {{- if .Values.logsCollection.journald.enabled}}
       - name: journaldlogs-otel
         hostPath:
-          path: {{.Values.logsCollection.journaldLogs.directory}}
+          path: {{.Values.logsCollection.journald.directory}}
       {{- end}}
       - name: old-checkpoint
         hostPath:
           path: /var/lib/otel_pos
           type: DirectoryOrCreate
-      {{- if .Values.logsCollection.journaldLogs.enabled}}
-      - name: journaldlogs-otel
-        hostPath:
-          path: {{.Values.logsCollection.journaldLogs.directory}}
-      {{- end}}
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}

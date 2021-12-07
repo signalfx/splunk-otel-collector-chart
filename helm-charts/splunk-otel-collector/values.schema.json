@@ -525,10 +525,29 @@
             }
           }
         },
-        "journaldLogs": {
+        "journald": {
+          "description": "Configuration to collect journald logs",
           "type": "object",
-          "items": {
-            "type": "object"
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "directory": {
+              "type": "string"
+            },
+            "defaultPriority": {
+              "type": "string"
+            },
+            "index": {
+              "type": "string"
+            },
+            "units": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
           }
         },
         "checkpointPath": {

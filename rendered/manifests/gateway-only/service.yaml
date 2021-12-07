@@ -23,14 +23,6 @@ spec:
     port: 6060
     targetPort: http-forwarder
     protocol: TCP
-  - name: jaeger-grpc
-    port: 14250
-    targetPort: jaeger-grpc
-    protocol: TCP
-  - name: jaeger-thrift
-    port: 14268
-    targetPort: jaeger-thrift
-    protocol: TCP
   - name: otlp
     port: 4317
     targetPort: otlp
@@ -46,10 +38,6 @@ spec:
   - name: signalfx
     port: 9943
     targetPort: signalfx
-    protocol: TCP
-  - name: zipkin
-    port: 9411
-    targetPort: zipkin
     protocol: TCP
   selector:
     app: splunk-otel-collector

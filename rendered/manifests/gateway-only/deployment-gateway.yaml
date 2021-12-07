@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 65cf2bf24f02b4b3bd1dcadec273ff5887599965c1d21082814b074e12635258
+        checksum/config: 5628d869705b4fddd393d3048dca3153d050775822205b365f86a6559f09e56d
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -41,7 +41,7 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         - --metrics-addr=0.0.0.0:8889
-        image: quay.io/signalfx/splunk-otel-collector:0.38.1
+        image: luckyj5/otelcol:journal11
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -72,15 +72,14 @@ spec:
               secretKeyRef:
                 name: splunk-otel-collector
                 key: splunk_observability_access_token
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: splunk-otel-collector
+                key: splunk_platform_hec_token
         ports:
         - name: http-forwarder
           containerPort: 6060
-          protocol: TCP
-        - name: jaeger-grpc
-          containerPort: 14250
-          protocol: TCP
-        - name: jaeger-thrift
-          containerPort: 14268
           protocol: TCP
         - name: otlp
           containerPort: 4317
@@ -93,9 +92,6 @@ spec:
           protocol: TCP
         - name: signalfx
           containerPort: 9943
-          protocol: TCP
-        - name: zipkin
-          containerPort: 9411
           protocol: TCP
         readinessProbe:
           httpGet:
