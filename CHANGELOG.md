@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.39.0] - 2021-11-30
+
+[Upgrade
+guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0380-to-0390)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.39.0 (#322)
+- [BREAKING CHANGE] Logs collection is now disabled by default for Splunk
+  Observability destination (#325)
+
 ## [0.38.0] - 2021-11-19
 
 This release completes the addition of content and documentation to easily allow

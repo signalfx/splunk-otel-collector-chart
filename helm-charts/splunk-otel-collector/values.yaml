@@ -97,10 +97,10 @@ splunkObservability:
   # "https://api.<realm>.signalfx.com".
   apiUrl: ""
 
-  # Options to disable particular telemetry data types.
-  logsEnabled: true
+  # Options to disable or enable particular telemetry data types.
   metricsEnabled: true
   tracesEnabled: true
+  logsEnabled: false
 
 ################################################################################
 # Logs collection engine:

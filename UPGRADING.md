@@ -1,5 +1,19 @@
 # Upgrade guidelines
 
+## 0.38.0 to 0.39.0
+
+[#325 Logs collection is now disabled by default for Splunk Observability
+destination](https://github.com/signalfx/splunk-otel-collector-chart/pull/325)
+
+If you send logs to Splunk Observability destination, make sure to enable logs.
+Use `--set="splunkObservability.logsEnabled=true"` argument with helm
+install/upgrade command, or add the following line to your custom values.yaml:
+
+```yaml
+splunkObservability:
+  logsEnabled: true
+```
+
 ## 0.37.1 to 0.38.0
 
 [#297](https://github.com/signalfx/splunk-otel-collector-chart/pull/297),

@@ -217,9 +217,6 @@ spec:
           readOnly: true
         - name: fluentd-config
           mountPath: /fluentd/etc
-        - name: secrets
-          mountPath: /fluentd/etc/splunk
-          readOnly: true
       {{- end }}
       - name: otel-collector
         command:
@@ -393,9 +390,6 @@ spec:
       - name: journallogpath
         hostPath:
           path: {{ .Values.fluentd.config.journalLogPath | quote }}
-      - name: secrets
-        secret:
-          secretName: {{ template "splunk-otel-collector.secret" . }}
       - name: fluentd-config
         emptyDir: {}
       - name: fluentd-config-common
