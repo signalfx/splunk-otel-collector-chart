@@ -18,6 +18,7 @@ jobs:
       CI_SPLUNK_HEC_TOKEN: a6b5e77f-d5f6-415a-bd43-930cecb12959
       CI_SPLUNK_PASSWORD: helloworld
       CI_INDEX_EVENTS: ci_events
+      CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
       KUBERNETES_VERSION: v1.21.2
       MINIKUBE_VERSION: v1.22.0
@@ -25,6 +26,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+#      # Leave this here for debugging
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
 
       - name: Setup Minikube
         run: |
@@ -68,7 +73,7 @@ jobs:
           # Enable HEC services
           curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http/http/enable
           # Create new HEC token
-          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,ci_events,ns-anno,pod-anno" https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http
+          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,ci_events,ci_metrics,ns-anno,pod-anno" https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http
           # Restart Splunk
           curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
@@ -102,3 +107,9 @@ jobs:
           	--splunk-user admin \
           	--splunk-password $CI_SPLUNK_PASSWORD \
           	-p no:warnings -s
+#          # Leave this here for debugging
+#          sleep 180
+#          echo "Getting agent logs....."
+#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
+#          echo "Getting collector logs....."
+#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
