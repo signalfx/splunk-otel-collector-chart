@@ -24,12 +24,12 @@ Splunk OpenTelemetry Collector for Kubernetes has the following components and a
 
 There is no application available for fetching Kubernetes objects metadata from a Kubernetes cluster.
 
-### Changes in logs in Splunk OpenTelemetry Connector for Kubernetes
+### Changes in logs in Splunk OpenTelemetry Collector for Kubernetes
 
 * Red Hat Universal Base Image (UBI) Docker images for our applications are no longer available, as we now use scratch images.
 * AWS FireLens is not supported.
 
-### Changes in metrics in Splunk OpenTelemetry Connector for Kubernetes
+### Changes in metrics in Splunk OpenTelemetry Collector for Kubernetes
 
 * The naming convention of the metrics used in Splunk OpenTelemetry Collector for Kubernetes follows the OpenTelemetry specification and is different than SCK. You will observe minor differences in the names of the metrics.
 * Previously in SCK, you could get a large number of metrics from various APIs for Kubernetes. However, in recent versions of Kubernetes 1.18+, these API sources are disabled by default and there are fewer metrics available. See [Metrics Information](https://github.com/splunk/fluent-plugin-kubernetes-metrics/blob/master/metrics-information.md) for the previous list of metrics.
