@@ -1,8 +1,8 @@
 {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
-Splunk OpenTelemetry Connector is installed and configured to send data to Splunk Platform endpoint "{{ .Values.splunkPlatform.endpoint }}".
+Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Platform endpoint "{{ .Values.splunkPlatform.endpoint }}".
 {{ end }}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
-Splunk OpenTelemetry Connector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
+Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
 {{ end }}
 
 {{- if .Values.splunkRealm }}
