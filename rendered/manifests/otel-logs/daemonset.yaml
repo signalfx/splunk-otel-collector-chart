@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.40.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.40.0"
+    app.kubernetes.io/version: "0.41.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.40.0
     release: default
@@ -27,7 +27,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: fe21c0d4904a35cc3fbe1ebcbc19885399831d37ae27d86fe2598adaeda6fe34
+        checksum/config: 5253f1d87cdf453460880693240b6addfed16a1c36d4cbcbd8162bc5df2b966d
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -41,7 +41,7 @@ spec:
           key: node-role.kubernetes.io/master
       initContainers:
         - name: copy-old-checkpoint
-          image: quay.io/signalfx/splunk-otel-collector:0.40.0
+          image: quay.io/signalfx/splunk-otel-collector:0.41.0
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c"]
           securityContext:
@@ -54,7 +54,7 @@ spec:
             - name: old-checkpoint
               mountPath: /var/lib/otel_pos
         - name: migrate-checkpoint
-          image: quay.io/signalfx/splunk-otel-collector:0.40.0
+          image: quay.io/signalfx/splunk-otel-collector:0.41.0
           imagePullPolicy: IfNotPresent
           command: ["/migratecheckpoint"]
           securityContext:
@@ -124,7 +124,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.40.0
+        image: quay.io/signalfx/splunk-otel-collector:0.41.0
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 0
@@ -217,9 +217,6 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
-        - mountPath: /run/log/journal
-          name: journaldlogs-otel
-          readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -232,9 +229,6 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
-      - name: journaldlogs-otel
-        hostPath:
-          path: /run/log/journal
       - name: old-checkpoint
         hostPath:
           path: /var/lib/otel_pos
