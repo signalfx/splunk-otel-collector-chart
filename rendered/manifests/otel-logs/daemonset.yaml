@@ -27,7 +27,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: cc641bdc22a677c320c67f9335e7100b21b7cb654613f730df21b106da9e425d
+        checksum/config: 912625d0115f700dfb7d62a31b0e5247eac642efccb963f73e4cddfaf43c2acb
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -217,6 +217,9 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
+        - mountPath: /run/log/journal
+          name: journaldlogs-otel
+          readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -229,6 +232,9 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
+      - name: journaldlogs-otel
+        hostPath:
+          path: /run/log/journal
       - name: old-checkpoint
         hostPath:
           path: /var/lib/otel_pos
