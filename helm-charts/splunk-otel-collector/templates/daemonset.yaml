@@ -95,6 +95,7 @@ spec:
             - name: fluentd-config-cri
               mountPath: /fluentd/etc/cri
         {{- else }}
+        {{- if not (eq .Values.distribution "gke/autopilot") }}
         - name: copy-old-checkpoint
           image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -138,6 +139,7 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+        {{- end }}
         {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
         - name: chown
           image: registry.access.redhat.com/ubi8/ubi

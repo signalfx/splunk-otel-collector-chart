@@ -67,7 +67,7 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if eq (include "splunk-otel-collector.distribution" .) "gke" }}
+    {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
     - gke
     {{- else if eq (include "splunk-otel-collector.distribution" .) "eks" }}
     - eks
