@@ -63,20 +63,20 @@ environment: production
 
 ## Disable particular types of telemetry
 
-By default all telemetry data (metrics, traces and logs) is collected from the
-Kubernetes cluster and sent to one of (or both) configured destinations. It's
-possible to disable any kind of telemetry for a specific destination. For
-example, the following configuration will send logs to Splunk Platform and
-metrics and traces to Splunk Observability assuming that both destinations are
-configured properly.
+By default only metrics and traces are sent to Splunk Observability destination,
+and only logs are sent to Splunk Platform destination. It's possible to enable
+or disable any kind of telemetry for a specific destination. For example, with
+the following configuration Splunk OTel Collector will send all collected
+telemetry data to Splunk Observability and Splunk Platform assuming they are
+both properly configured.
 
 ```yaml
 splunkObservability:
   metricsEnabled: true
   tracesEnabled: true
-  logsEnabled: false
+  logsEnabled: true
 splunkPlatform:
-  metricsEnabled: false
+  metricsEnabled: true
   logsEnabled: true
 ```
 
