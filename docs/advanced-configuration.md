@@ -100,6 +100,7 @@ this will make sure that the daemonset pods are always present on each node:
 
 1. Create a new priority class for Splunk OTel Collector agent:
 
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
@@ -109,6 +110,7 @@ value: 1000000
 globalDefault: false
 description: "Higher priority class for Splunk OpenTelemetry Collector pods."
 EOF
+```
 
 2. Use the created priority class in the helm install/upgrade command:
 with `--set="priorityClassName=splunk-otel-agent-priority"` cli argument or add
