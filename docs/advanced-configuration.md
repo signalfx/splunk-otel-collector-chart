@@ -80,6 +80,44 @@ splunkPlatform:
   logsEnabled: true
 ```
 
+## GKE Autopilot support
+
+If you want to run Splunk OTel Collector in [Google Kubernetes Engine
+Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview),
+make sure to set `distribution` setting to `gke/autopilot`:
+
+```yaml
+distribution: gke/autopilot
+```
+
+**NOTE:** Native OTel logs collection is not yet supported in GKE Autopilot.
+
+Sometimes Splunk OTel Collector agent daemonset can have [problems scheduling in
+Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/daemonset#autopilot-ds-best-practices)
+If you run into these issues, you can assign the daemonset a higher [priority
+class](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/),
+this will make sure that the daemonset pods are always present on each node:
+
+1. Create a new priority class for Splunk OTel Collector agent:
+
+cat <<EOF | kubectl apply -f -
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: splunk-otel-agent-priority
+value: 1000000
+globalDefault: false
+description: "Higher priority class for Splunk OpenTelemetry Collector pods."
+EOF
+
+2. Use the created priority class in the helm install/upgrade command:
+with `--set="priorityClassName=splunk-otel-agent-priority"` cli argument or add
+the following line to your custom values.yaml:
+
+```yaml
+priorityClassName: splunk-otel-agent-priority
+```
+
 ## Logs collection
 
 The helm chart currently utilizes [fluentd](https://docs.fluentd.org/) for Kubernetes logs
@@ -103,6 +141,7 @@ There are following known limitations of native OTel logs collection:
   This means that correlation between logs and traces will not work in Splunk Observability.
   Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
 - Journald logs cannot be collected natively by Splunk OTel Collector yet.
+- Not yet supported in GKE Autopilot.
 
 ### Add log files from Kubernetes host machines/volumes
 

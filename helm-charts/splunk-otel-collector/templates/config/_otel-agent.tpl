@@ -77,8 +77,15 @@ receivers:
 
   kubeletstats:
     collection_interval: 10s
+    {{- if eq .Values.distribution "gke/autopilot" }}
+    # GKE Autopilot doesn't allow using the secure kubelet endpoint,
+    # use the read-only endpoint instead.
+    auth_type: none
+    endpoint: ${K8S_NODE_IP}:10255
+    {{- else }}
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
+    {{- end }}
     metric_groups:
       - container
       - pod
