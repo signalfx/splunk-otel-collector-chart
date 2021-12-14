@@ -44,7 +44,8 @@ Kubernetes deployment. This parameter allows the connector to automatically
 scrape additional metadata. The supported options are:
 
 - `eks` - Amazon EKS
-- `gke` - Google GKE
+- `gke` - Google GKE / Standard mode
+- `gke/autopilot` - Google GKE / Autopilot mode
 - `aks` - Azure AKS
 - `openshift` - Red Hat OpenShift
 
