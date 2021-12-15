@@ -193,6 +193,9 @@ logsCollection:
         firstEntryRegex: ^[^\s].*
 ```
 
+Use https://regex101.com/ to find a golang regex that works for your format and specify it in the config file for the config option `firstEntryRegex`.
+
+
 ### Collect journald events
 
 Splunk OpenTelemetry Collector for Kubernetes can collect journald events from kubernetes environment.
@@ -215,7 +218,6 @@ logsCollection:
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic.
     index: ""
 ```
-Use https://regex101.com/ to find a golang regex that works for your format and specify it in the config file for the config option `firstEntryRegex`.
 
 ### Performance of native OpenTelemetry logs collection
 
