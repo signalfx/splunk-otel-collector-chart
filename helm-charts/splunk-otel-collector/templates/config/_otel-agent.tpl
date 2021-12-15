@@ -489,7 +489,6 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     {{- if or (.Values.logsCollection.extraFileLogs) (.Values.logsCollection.journald) }}
     logs/host:
       receivers:
@@ -521,8 +520,8 @@ service:
         - splunk_hec/o11y
         {{- end }}
         {{- end }}
-        {{- end }}
-        {{- end }}
+    {{- end }}
+    {{- end }}
 
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
@@ -599,5 +598,4 @@ service:
         {{- end }}
         {{- end }}
     {{- end }}
-{{- end }}
 {{- end }}

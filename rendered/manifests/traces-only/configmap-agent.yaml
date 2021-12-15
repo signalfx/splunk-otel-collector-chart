@@ -161,4 +161,29 @@ data:
       - k8s_observer
       - memory_ballast
       - zpages
-      pipelines: null
+      pipelines:
+        metrics/agent:
+          exporters:
+          - signalfx
+          processors:
+          - memory_limiter
+          - batch
+          - resource
+          - resource/add_agent_k8s
+          - resourcedetection
+          receivers:
+          - prometheus/agent
+        traces:
+          exporters:
+          - sapm
+          processors:
+          - memory_limiter
+          - k8sattributes
+          - batch
+          - resource
+          - resourcedetection
+          receivers:
+          - otlp
+          - jaeger
+          - smartagent/signalfx-forwarder
+          - zipkin
