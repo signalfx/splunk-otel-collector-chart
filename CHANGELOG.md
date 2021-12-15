@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Journald support (#290)
+
 ## [0.41.0] - 2021-12-13
 
 ### Added
