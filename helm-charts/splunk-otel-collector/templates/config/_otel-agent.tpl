@@ -489,7 +489,7 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if or (.Values.logsCollection.extraFileLogs) (.Values.logsCollection.journald) }}
+    {{- if or (.Values.logsCollection.extraFileLogs) (.Values.logsCollection.journald.enabled) }}
     logs/host:
       receivers:
         {{- if .Values.logsCollection.extraFileLogs }}
