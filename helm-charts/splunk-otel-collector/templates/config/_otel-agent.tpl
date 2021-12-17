@@ -242,9 +242,11 @@ receivers:
           - move:
               from: log
               to: $$
+
   {{- if .Values.logsCollection.extraFileLogs }}
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
   {{- end }}
+  
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
   {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journald.enabled }}
@@ -268,6 +270,7 @@ receivers:
   {{- end }}
   {{- end }}
   {{- end }}
+
 # By default k8sattributes and batch processors enabled.
 processors:
   # k8sattributes enriches traces and metrics with k8s metadata
@@ -489,6 +492,7 @@ service:
         {{- end }}
         {{- end }}
 
+    {{- if (eq .Values.logsEngine "otel") }}
     {{- if or (.Values.logsCollection.extraFileLogs) (.Values.logsCollection.journald.enabled) }}
     logs/host:
       receivers:
@@ -497,7 +501,7 @@ service:
         - {{ $key }}
         {{- end }}
         {{- end }}
-        {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journald.enabled }}
+        {{- if (.Values.logsCollection.journald.enabled)}}
         {{- if .Values.logsCollection.journald.units }}
         {{- range $_, $unit := .Values.logsCollection.journald.units }}
         {{- printf "- journald/%s" $unit.name | nindent 8 }}
@@ -520,9 +524,9 @@ service:
         - splunk_hec/o11y
         {{- end }}
         {{- end }}
+        {{- end }}
     {{- end }}
     {{- end }}
-
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
     # Default traces pipeline.

@@ -168,8 +168,6 @@ data:
           receivers:
           - fluentforward
           - otlp
-        logs/host:
-          receivers: null
         metrics/agent:
           exporters:
           - signalfx

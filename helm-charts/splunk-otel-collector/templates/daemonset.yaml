@@ -372,7 +372,7 @@ spec:
           mountPath: {{ .Values.logsCollection.checkpointPath }}
         {{- if .Values.logsCollection.journald.enabled}}
         - mountPath: {{.Values.logsCollection.journald.directory}}
-          name: journaldlogs-otel
+          name: journaldlogs
           readOnly: true
         {{- end }}
         {{- end }}
@@ -416,7 +416,7 @@ spec:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
       {{- if .Values.logsCollection.journald.enabled}}
-      - name: journaldlogs-otel
+      - name: journaldlogs
         hostPath:
           path: {{.Values.logsCollection.journald.directory}}
       {{- end}}

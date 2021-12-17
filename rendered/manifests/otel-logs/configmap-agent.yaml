@@ -233,36 +233,9 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      journald/containerd:
+      journald:
         directory: /run/log/journal
         priority: info
-        resource:
-          com.splunk.index: main
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-        units:
-        - containerd
-      journald/docker:
-        directory: /run/log/journal
-        priority: info
-        resource:
-          com.splunk.index: main
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-        units:
-        - docker
-      journald/kubelet:
-        directory: /run/log/journal
-        priority: info
-        resource:
-          com.splunk.index: main
-          com.splunk.source: /run/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
-        units:
-        - kubelet
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
@@ -329,9 +302,7 @@ data:
           - batch
           - resource
           receivers:
-          - journald/kubelet
-          - journald/docker
-          - journald/containerd
+          - journald
         metrics:
           exporters:
           - signalfx
