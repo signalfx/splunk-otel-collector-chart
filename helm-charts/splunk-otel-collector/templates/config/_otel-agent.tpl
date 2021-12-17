@@ -246,7 +246,7 @@ receivers:
   {{- if .Values.logsCollection.extraFileLogs }}
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
   {{- end }}
-  
+
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
   {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journald.enabled }}
