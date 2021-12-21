@@ -110,7 +110,8 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
-  {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if .Values.logsCollection.containers.enabled }}
   filelog:
     include: ["/var/log/pods/*/*/*.log"]
     # Exclude logs. The file format is
@@ -242,14 +243,14 @@ receivers:
           - move:
               from: log
               to: $$
+  {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
   {{- end }}
 
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
-  {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-  {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.journald.enabled }}
+  {{- if .Values.logsCollection.journald.enabled }}
   {{- if .Values.logsCollection.journald.units }}
   {{- range $_, $unit := .Values.logsCollection.journald.units }}
   {{- printf "journald/%s:" $unit.name | nindent 2 }}
@@ -266,7 +267,6 @@ receivers:
   journald:
     directory: {{- toYaml .Values.logsCollection.journald.directory | nindent 6 }}
     priority: {{ .Values.logsCollection.journald.defaultPriority }}
-  {{- end }}
   {{- end }}
   {{- end }}
   {{- end }}
@@ -492,8 +492,7 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if (eq .Values.logsEngine "otel") }}
-    {{- if or (.Values.logsCollection.extraFileLogs) (.Values.logsCollection.journald.enabled) }}
+    {{- if and (eq .Values.logsEngine "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
     logs/host:
       receivers:
         {{- if .Values.logsCollection.extraFileLogs }}
@@ -525,7 +524,6 @@ service:
         {{- end }}
         {{- end }}
         {{- end }}
-    {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
