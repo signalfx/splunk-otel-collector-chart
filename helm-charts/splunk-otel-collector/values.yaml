@@ -404,7 +404,8 @@ logsCollection:
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: true
-    directory: /run/log/journal
+    # Please update directory path for journald if it's different from below default value "/var/log/journal"
+    directory: /var/log/journal
     defaultPriority: info
     # CList of service units to collect and configuration for each. To collect all journald services logs, leave units blank.
     units: []
