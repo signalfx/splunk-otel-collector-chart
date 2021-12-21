@@ -234,7 +234,7 @@ data:
           thrift_http:
             endpoint: 0.0.0.0:14268
       journald:
-        directory: /run/log/journal
+        directory: /var/log/journal
         priority: info
       kubeletstats:
         auth_type: serviceAccount
