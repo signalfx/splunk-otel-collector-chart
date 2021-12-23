@@ -508,6 +508,7 @@ service:
         {{- else }}
         - journald
         {{- end }}
+        {{- end }}
       processors:
         - memory_limiter
         - batch
@@ -521,7 +522,6 @@ service:
         {{- end }}
         {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
         - splunk_hec/o11y
-        {{- end }}
         {{- end }}
         {{- end }}
     {{- end }}
