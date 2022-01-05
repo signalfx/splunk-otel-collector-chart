@@ -257,17 +257,42 @@ receivers:
     directory: {{ $.Values.logsCollection.journald.directory }}
     units: [{{ $unit.name }}]
     priority: {{ $unit.priority | default $.Values.logsCollection.journald.defaultPriority }}
+    operators:
+    # filter to only include systemd_unit, message and priority fields and discard the rest
+    - type: restructure
+      id: clean-up
+      ops:
+        - retain:
+            - "$$._SYSTEMD_UNIT"
+            - "$$.MESSAGE"
+            - "$$.PRIORITY"
+    - type: metadata
+      resource:
+        com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
+        com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
+        com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
   {{- end }}
   {{- else }}
   journald:
     directory: {{- toYaml .Values.logsCollection.journald.directory | nindent 6 }}
     priority: {{ .Values.logsCollection.journald.defaultPriority }}
+    operators:
+    # filter to only include systemd_unit, message and priority fields and discard the rest
+    - type: restructure
+      id: clean-up
+      ops:
+        - retain:
+            - "$$._SYSTEMD_UNIT"
+            - "$$.MESSAGE"
+            - "$$.PRIORITY"
+    - type: metadata
+      resource:
+        com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
+        com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
+        com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
   {{- end }}
-    resource:
-      com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
-      com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
-      com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
-      host.name: 'EXPR(env("K8S_NODE_NAME"))'
   {{- end }}
   {{- end }}
 

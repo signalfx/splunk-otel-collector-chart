@@ -235,12 +235,21 @@ data:
             endpoint: 0.0.0.0:14268
       journald:
         directory: /var/log/journal
+        operators:
+        - id: clean-up
+          ops:
+          - retain:
+            - $$._SYSTEMD_UNIT
+            - $$.MESSAGE
+            - $$.PRIORITY
+          type: restructure
+        - resource:
+            com.splunk.index: main
+            com.splunk.source: /var/log/journal
+            com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
+            host.name: EXPR(env("K8S_NODE_NAME"))
+          type: metadata
         priority: info
-        resource:
-          com.splunk.index: main
-          com.splunk.source: /var/log/journal
-          com.splunk.sourcetype: EXPR("kube:"+$$._SYSTEMD_UNIT)
-          host.name: EXPR(env("K8S_NODE_NAME"))
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
