@@ -751,6 +751,8 @@ rbac:
 secret:
   create: true
   name: ""
+  # Specifies whether secret provided by user should be validated.
+  validateSecret: true
 
 # This default tolerations allow the daemonset to be deployed on master nodes,
 # so that we can also collect logs and metrics from those nodes.
