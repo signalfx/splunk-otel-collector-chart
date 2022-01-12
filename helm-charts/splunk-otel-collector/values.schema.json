@@ -219,6 +219,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "controlPlane": {
+          "type": "boolean"
+        },
         "prometheus": {
           "type": "boolean"
         },

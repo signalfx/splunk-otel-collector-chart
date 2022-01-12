@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Auto collect metrics for the apiserver control plane component
+
 ### Fixed
 
 - Double expansion issue splunk-otel-collector (#357). See [upgrade

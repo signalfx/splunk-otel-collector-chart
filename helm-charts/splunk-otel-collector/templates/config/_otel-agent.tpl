@@ -75,6 +75,24 @@ receivers:
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
       {{- end }}
 
+      # Receivers for collecting k8s control plane metrics.
+      {{- if .Values.autodetect.controlPlane }}
+      smartagent/kubernetes-apiserver:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else }}
+        rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-apiserver
+          # We skip verifying here because the k8s default certificate is self signed and will fail this verification.
+          skipVerify: true
+          type: kubernetes-apiserver
+          useHTTPS: true
+          useServiceAccount: true
+      {{- end}}
+
   kubeletstats:
     collection_interval: 10s
     {{- if eq .Values.distribution "gke/autopilot" }}
