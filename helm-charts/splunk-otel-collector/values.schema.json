@@ -710,13 +710,7 @@
         "imagePullSecrets": {
           "type": "array",
           "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            }
+            "type": "string"
           }
         },
         "fluentd": {
