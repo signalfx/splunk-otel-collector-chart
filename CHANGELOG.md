@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Removed
+
+- Temporary helper initContainer for OTel checkpointing log path move (#358)
+
 ## [0.41.0] - 2021-12-13
 
 ### Added
