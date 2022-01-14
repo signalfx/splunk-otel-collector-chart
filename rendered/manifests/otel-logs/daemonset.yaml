@@ -40,19 +40,6 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
       initContainers:
-        - name: copy-old-checkpoint
-          image: quay.io/signalfx/splunk-otel-collector:0.41.0
-          imagePullPolicy: IfNotPresent
-          command: [ "sh", "-c"]
-          securityContext:
-            runAsUser: 0
-          args:
-            - cp -n /var/lib/otel_pos/* /var/addon/splunk/otel_pos/ || true
-          volumeMounts:
-            - name: checkpoint
-              mountPath: /var/addon/splunk/otel_pos
-            - name: old-checkpoint
-              mountPath: /var/lib/otel_pos
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.41.0
           imagePullPolicy: IfNotPresent
@@ -228,10 +215,6 @@ spec:
       - name: checkpoint
         hostPath:
           path: /var/addon/splunk/otel_pos
-          type: DirectoryOrCreate
-      - name: old-checkpoint
-        hostPath:
-          path: /var/lib/otel_pos
           type: DirectoryOrCreate
       - name: host-dev
         hostPath:
