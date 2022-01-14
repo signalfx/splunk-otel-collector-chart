@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Double expansion issue splunk-otel-collector (#357). See [upgrade
+guideline](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0410-to-0420)
+
 ### Removed
 
 - Temporary helper initContainer for OTel checkpointing log path move (#358)

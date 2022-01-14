@@ -139,11 +139,11 @@ data:
         operators:
         - id: get-format
           routes:
-          - expr: $$$$body matches "^\\{"
+          - expr: $$body matches "^\\{"
             output: parser-docker
-          - expr: $$$$body matches "^[^ Z]+ "
+          - expr: $$body matches "^[^ Z]+ "
             output: parser-crio
-          - expr: $$$$body matches "^[^ Z]+Z"
+          - expr: $$body matches "^[^ Z]+Z"
             output: parser-containerd
           type: router
         - id: parser-crio
@@ -190,10 +190,10 @@ data:
           type: json_parser
         - id: filename
           resource:
-            com.splunk.source: EXPR($$$$attributes["file.path"])
+            com.splunk.source: EXPR($$attributes["file.path"])
           type: metadata
         - id: extract_metadata_from_filepath
-          parse_from: $$$$attributes["file.path"]
+          parse_from: $$attributes["file.path"]
           regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
           type: regex_parser
         - attributes:

@@ -139,11 +139,11 @@ receivers:
         id: get-format
         routes:
           - output: parser-docker
-            expr: '$$$$body matches "^\\{"'
+            expr: '$$body matches "^\\{"'
           - output: parser-crio
-            expr: '$$$$body matches "^[^ Z]+ "'
+            expr: '$$body matches "^[^ Z]+ "'
           - output: parser-containerd
-            expr: '$$$$body matches "^[^ Z]+Z"'
+            expr: '$$body matches "^[^ Z]+Z"'
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
       # Parse CRI-O format
@@ -199,12 +199,12 @@ receivers:
       - type: metadata
         id: filename
         resource:
-          com.splunk.source: EXPR($$$$attributes["file.path"])
+          com.splunk.source: EXPR($$attributes["file.path"])
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
-        parse_from: $$$$attributes["file.path"]
+        parse_from: $$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata
         resource:
