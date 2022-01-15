@@ -1,5 +1,13 @@
 # Upgrade guidelines
 
+## 0.41.0 to 0.42.0
+
+[#357 Double expansion issue in splunk-otel-collector is
+fixed](https://github.com/signalfx/splunk-otel-collector-chart/pull/357)
+
+If you use OTel native logs collection with any custom log processing operators
+in `filelog` receiver, please replace any occurrences of `$$$$` with `$$`.
+
 ## 0.38.0 to 0.39.0
 
 [#325 Logs collection is now disabled by default for Splunk Observability
