@@ -172,7 +172,16 @@ data:
             - targets:
               - ${K8S_POD_IP}:8889
       receiver_creator:
-        receivers: null
+        receivers:
+          smartagent/kubernetes-apiserver:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-apiserver
+              skipVerify: true
+              type: kubernetes-apiserver
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
         watch_observers:
         - k8s_observer
       signalfx:
