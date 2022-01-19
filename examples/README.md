@@ -41,7 +41,6 @@ Windows support covers traces and metrics collection only, no logs will be colle
 image:
   otelcol:
     repository: quay.io/signalfx/splunk-otel-collector-windows
-logsEnabled: false
 readinessProbe:
   initialDelaySeconds: 60
 livenessProbe:
