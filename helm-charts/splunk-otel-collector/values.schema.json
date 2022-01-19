@@ -219,6 +219,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "controlPlane": {
+          "type": "boolean"
+        },
         "prometheus": {
           "type": "boolean"
         },
@@ -735,13 +738,7 @@
         "imagePullSecrets": {
           "type": "array",
           "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            }
+            "type": "string"
           }
         },
         "fluentd": {
@@ -849,6 +846,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "validateSecret": {
+          "type": "boolean"
         }
       }
     },

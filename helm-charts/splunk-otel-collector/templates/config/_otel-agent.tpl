@@ -75,6 +75,24 @@ receivers:
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
       {{- end }}
 
+      # Receivers for collecting k8s control plane metrics.
+      {{- if .Values.autodetect.controlPlane }}
+      smartagent/kubernetes-apiserver:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else }}
+        rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-apiserver
+          # We skip verifying here because the k8s default certificate is self signed and will fail this verification.
+          skipVerify: true
+          type: kubernetes-apiserver
+          useHTTPS: true
+          useServiceAccount: true
+      {{- end}}
+
   kubeletstats:
     collection_interval: 10s
     {{- if eq .Values.distribution "gke/autopilot" }}
@@ -140,11 +158,11 @@ receivers:
         id: get-format
         routes:
           - output: parser-docker
-            expr: '$$$$body matches "^\\{"'
+            expr: '$$body matches "^\\{"'
           - output: parser-crio
-            expr: '$$$$body matches "^[^ Z]+ "'
+            expr: '$$body matches "^[^ Z]+ "'
           - output: parser-containerd
-            expr: '$$$$body matches "^[^ Z]+Z"'
+            expr: '$$body matches "^[^ Z]+Z"'
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
       # Parse CRI-O format
@@ -200,12 +218,12 @@ receivers:
       - type: metadata
         id: filename
         resource:
-          com.splunk.source: EXPR($$$$attributes["file.path"])
+          com.splunk.source: EXPR($$attributes["file.path"])
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
-        parse_from: $$$$attributes["file.path"]
+        parse_from: $$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata
         resource:

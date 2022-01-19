@@ -27,7 +27,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: ede25c3ed94716a26848bfc77635d767cc0be84a73bd61c49ceb43c2c8a71c57
+        checksum/config: 71bba5fe50521c7eeb4cd6c9196b15321be8e8139678250adf375f7bc1146035
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -60,7 +60,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.41.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:91f554caad6cc5fb52b4bcbdccc94256f0562610
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

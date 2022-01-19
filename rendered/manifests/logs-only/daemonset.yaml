@@ -129,7 +129,7 @@ spec:
         - name: otlp-http-old
           containerPort: 55681
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.41.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:91f554caad6cc5fb52b4bcbdccc94256f0562610
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

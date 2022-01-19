@@ -139,11 +139,11 @@ data:
         operators:
         - id: get-format
           routes:
-          - expr: $$$$body matches "^\\{"
+          - expr: $$body matches "^\\{"
             output: parser-docker
-          - expr: $$$$body matches "^[^ Z]+ "
+          - expr: $$body matches "^[^ Z]+ "
             output: parser-crio
-          - expr: $$$$body matches "^[^ Z]+Z"
+          - expr: $$body matches "^[^ Z]+Z"
             output: parser-containerd
           type: router
         - id: parser-crio
@@ -190,10 +190,10 @@ data:
           type: json_parser
         - id: filename
           resource:
-            com.splunk.source: EXPR($$$$attributes["file.path"])
+            com.splunk.source: EXPR($$attributes["file.path"])
           type: metadata
         - id: extract_metadata_from_filepath
-          parse_from: $$$$attributes["file.path"]
+          parse_from: $$attributes["file.path"]
           regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
           type: regex_parser
         - attributes:
@@ -276,7 +276,16 @@ data:
             - targets:
               - ${K8S_POD_IP}:8889
       receiver_creator:
-        receivers: null
+        receivers:
+          smartagent/kubernetes-apiserver:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-apiserver
+              skipVerify: true
+              type: kubernetes-apiserver
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
         watch_observers:
         - k8s_observer
       signalfx:

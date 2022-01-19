@@ -96,19 +96,6 @@ spec:
               mountPath: /fluentd/etc/cri
         {{- else }}
         {{- if not (eq .Values.distribution "gke/autopilot") }}
-        - name: copy-old-checkpoint
-          image: {{ template "splunk-otel-collector.image.otelcol" . }}
-          imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
-          command: [ "sh", "-c"]
-          securityContext:
-            runAsUser: 0
-          args:
-            - cp -n /var/lib/otel_pos/* /var/addon/splunk/otel_pos/ || true
-          volumeMounts:
-            - name: checkpoint
-              mountPath: /var/addon/splunk/otel_pos
-            - name: old-checkpoint
-              mountPath: /var/lib/otel_pos
         - name: migrate-checkpoint
           image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}

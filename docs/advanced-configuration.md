@@ -271,3 +271,31 @@ autodetect:
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.
+
+### Override a control plane configuration
+
+If your control plane is using non-standard ports or custom TLS certificates, then you can provide a custom
+configuration so the otel-collector agent can still successfully connect to it.
+
+To collect control plane metrics, we use a
+[receiver creator](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md)
+that instantiates
+[smartagent/{control_plane_component}](https://docs.splunk.com/observability/gdi/orchestration.html#nav-Orchestration)
+receivers at runtime.
+
+Below is an example configuration of how you could set up the agent to connect to an apiserver that is running on port
+8443 (instead of the normal 443) and use custom TLS configurations.
+
+```yaml
+agent:
+  config:
+    receivers:
+      receiver_creator:
+        receivers:
+          smartagent/kubernetes-apiserver:
+            rule: type == "port" && port == 8443 && pod.labels["k8s-app"] == "kube-apiserver"
+            config:
+              clientCertPath: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              clientKeyPath: /var/run/secrets/kubernetes.io/serviceaccount/token
+              useServiceAccount: false
+```
