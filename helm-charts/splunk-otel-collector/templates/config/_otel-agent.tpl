@@ -282,8 +282,10 @@ receivers:
         com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
         com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
         host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        # adding journald priority and unit as attributes
         journald.priority.number: 'EXPR($$.PRIORITY)'
         journald.unit.name: 'EXPR($$._SYSTEMD_UNIT)'
+    # extract MESSAGE field into the log body and discard rest of the fields
     - type: restructure
       id: set-body
       ops:
