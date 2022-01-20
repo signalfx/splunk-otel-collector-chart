@@ -131,7 +131,7 @@ receivers:
   {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
   filelog:
     {{- if .Values.isWindows }}
-    include: ["C:/var/log/pods/*/*/*.log"]
+    include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
     {{- else }}
     include: ["/var/log/pods/*/*/*.log"]
     {{- end }}
@@ -140,7 +140,7 @@ receivers:
     exclude:
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       {{- if .Values.isWindows }}
-      - C:/var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
+      - "C:\\var\\log\\pods\\{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
       {{- else }}
       - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
       {{- end }}

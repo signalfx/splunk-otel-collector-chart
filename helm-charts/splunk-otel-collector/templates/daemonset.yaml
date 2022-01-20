@@ -351,11 +351,11 @@ spec:
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
         {{- if .Values.isWindows }}
         - name: varlog
-          mountPath: C:/var/log
+          mountPath: C:\var\log
           readOnly: true
-          # C:/ProgramData mount is needed for access to container storage in C:/ProgramData/docker/containers and C:/ProgramData/containerd/root.
+          # C:\ProgramData mount is needed for access to container storage in C:\ProgramData\docker\containers and C:\ProgramData\containerd\root.
         - name: programdata
-          mountPath: C:/ProgramData
+          mountPath: C:\ProgramData
           readOnly: true
         {{- else }}
         - name: varlog
@@ -400,10 +400,10 @@ spec:
       {{- if .Values.isWindows }}
       - name: varlog
         hostPath:
-          path: C:/var/log
+          path: C:\var\log
       - name: programdata
         hostPath:
-          path: C:/ProgramData
+          path: C:\ProgramData
       {{- else }}
       - name: varlog
         hostPath:
