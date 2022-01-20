@@ -290,7 +290,7 @@ receivers:
     - type: metadata
       resource:
         com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
-        com.splunk.sourcetype: 'EXPR("kube:"+$$._SYSTEMD_UNIT)'
+        com.splunk.sourcetype: 'EXPR("kube:journald:"+$$._SYSTEMD_UNIT)'
         com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
         host.name: 'EXPR(env("K8S_NODE_NAME"))'
         # adding journald priority and unit as attributes
