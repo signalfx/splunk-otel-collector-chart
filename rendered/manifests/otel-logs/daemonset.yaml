@@ -216,10 +216,6 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
-      - name: old-checkpoint
-        hostPath:
-          path: /var/lib/otel_pos
-          type: DirectoryOrCreate
       - name: host-dev
         hostPath:
           path: /dev
