@@ -353,7 +353,8 @@ spec:
         - name: varlog
           mountPath: C:/var/log
           readOnly: true
-        - name: varlibdockercontainers
+          # From C:/ProgramData Container storage location C:/ProgramData/docker/containers and C:/ProgramData/containerd/root are being used.
+        - name: programdata
           mountPath: C:/ProgramData
           readOnly: true
         {{- else }}
@@ -400,7 +401,7 @@ spec:
       - name: varlog
         hostPath:
           path: C:/var/log
-      - name: varlibdockercontainers
+      - name: programdata
         hostPath:
           path: C:/ProgramData
       {{- else }}

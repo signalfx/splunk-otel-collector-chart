@@ -35,7 +35,7 @@ This configuration will install application for windows worker node only.
 
 All windows images are available in a separate `quay.io` repository: `quay.io/signalfx/splunk-otel-collector-windows`.
 
-Windows support covers traces and metrics collection only, no logs will be collected. As of now, we don’t have fluentd-hec image for the windows worker node.
+Logs collection on Windows is only available using OTel native logs collection. fluentd log engine is not supported Because, as of now we don’t have fluentd-hec image for the windows worker node.
 
 ```yaml
 image:
