@@ -233,22 +233,6 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      journald:
-        directory: /var/log/journal
-        operators:
-        - resource:
-            com.splunk.index: main
-            com.splunk.source: /var/log/journal
-            host.name: EXPR(env("K8S_NODE_NAME"))
-            journald.priority.number: EXPR($$.PRIORITY)
-          type: metadata
-        - id: set-body
-          ops:
-          - move:
-              from: MESSAGE
-              to: $$
-          type: restructure
-        priority: info
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
@@ -316,15 +300,6 @@ data:
           - filelog
           - fluentforward
           - otlp
-        logs/host:
-          exporters:
-          - splunk_hec/o11y
-          processors:
-          - memory_limiter
-          - batch
-          - resource
-          receivers:
-          - journald
         metrics:
           exporters:
           - signalfx

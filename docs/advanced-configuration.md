@@ -206,15 +206,14 @@ logsCollection:
   journald:
     enabled: true
     directory: /run/log/journal
-    defaultPriority: info
-    # List of service units to collect and configuration for each. To collect all journald services logs, leave units blank.
-    units: []
-    #  - name: kubelet
-    #    priority: info
-    #  - name: docker
-    #    priority: info
-    #  - name: containerd
-    #   priority: info
+    # List of service units to collect and configuration for each. Please update the list as needed.
+    units:
+      - name: kubelet
+        priority: info
+      - name: docker
+        priority: info
+      - name: containerd
+       priority: info
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic.
     index: ""
 ```

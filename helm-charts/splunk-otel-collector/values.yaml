@@ -408,18 +408,17 @@ logsCollection:
 
 # Configuration for collecting journald logs using otel collector
   journald:
-    enabled: true
+    enabled: false
     # Please update directory path for journald if it's different from below default value "/var/log/journal"
     directory: /var/log/journal
-    defaultPriority: info
-    # CList of service units to collect and configuration for each. To collect all journald services logs, leave units blank.
-    units: []
-    #  - name: kubelet
-    #    priority: info
-    #  - name: docker
-    #    priority: info
-    #  - name: containerd
-    #    priority: info
+    # List of service units to collect journald logs for and configuration for each.
+    units:
+      - name: kubelet
+        priority: info
+      - name: docker
+        priority: info
+      - name: containerd
+        priority: info
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic. Not applicable to Splunk Observability.
     index: ""
 

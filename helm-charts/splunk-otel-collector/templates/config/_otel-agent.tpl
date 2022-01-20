@@ -269,12 +269,11 @@ receivers:
 
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
   {{- if .Values.logsCollection.journald.enabled }}
-  {{- if .Values.logsCollection.journald.units }}
   {{- range $_, $unit := .Values.logsCollection.journald.units }}
   {{- printf "journald/%s:" $unit.name | nindent 2 }}
     directory: {{ $.Values.logsCollection.journald.directory }}
     units: [{{ $unit.name }}]
-    priority: {{ $unit.priority | default $.Values.logsCollection.journald.defaultPriority }}
+    priority: {{ $unit.priority }}
     operators:
     - type: metadata
       resource:
@@ -286,24 +285,6 @@ receivers:
         journald.priority.number: 'EXPR($$.PRIORITY)'
         journald.unit.name: 'EXPR($$._SYSTEMD_UNIT)'
     # extract MESSAGE field into the log body and discard rest of the fields
-    - type: restructure
-      id: set-body
-      ops:
-        - move:
-            from: MESSAGE
-            to: $$
-  {{- end }}
-  {{- else }}
-  journald:
-    directory: {{- toYaml .Values.logsCollection.journald.directory | nindent 6 }}
-    priority: {{ .Values.logsCollection.journald.defaultPriority }}
-    operators:
-    - type: metadata
-      resource:
-        com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
-        com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
-        host.name: 'EXPR(env("K8S_NODE_NAME"))'
-        journald.priority.number: 'EXPR($$.PRIORITY)'
     - type: restructure
       id: set-body
       ops:
@@ -544,12 +525,8 @@ service:
         {{- end }}
         {{- end }}
         {{- if (.Values.logsCollection.journald.enabled)}}
-        {{- if .Values.logsCollection.journald.units }}
         {{- range $_, $unit := .Values.logsCollection.journald.units }}
         {{- printf "- journald/%s" $unit.name | nindent 8 }}
-        {{- end }}
-        {{- else }}
-        - journald
         {{- end }}
         {{- end }}
       processors:
