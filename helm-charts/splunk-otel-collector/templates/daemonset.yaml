@@ -353,7 +353,7 @@ spec:
         - name: varlog
           mountPath: C:/var/log
           readOnly: true
-          # From C:/ProgramData Container storage location C:/ProgramData/docker/containers and C:/ProgramData/containerd/root are being used.
+          # C:/ProgramData mount is needed for access to container storage in C:/ProgramData/docker/containers and C:/ProgramData/containerd/root.
         - name: programdata
           mountPath: C:/ProgramData
           readOnly: true
