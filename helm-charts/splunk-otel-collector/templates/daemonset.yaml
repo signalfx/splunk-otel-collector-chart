@@ -426,10 +426,6 @@ spec:
         hostPath:
           path: {{.Values.logsCollection.journald.directory}}
       {{- end}}
-      - name: old-checkpoint
-        hostPath:
-          path: /var/lib/otel_pos
-          type: DirectoryOrCreate
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}

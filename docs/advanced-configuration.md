@@ -214,7 +214,7 @@ logsCollection:
         priority: info
       - name: containerd
        priority: info
-    # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic.
+    # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic (Not applicable to Splunk Observability).
     index: ""
 ```
 
