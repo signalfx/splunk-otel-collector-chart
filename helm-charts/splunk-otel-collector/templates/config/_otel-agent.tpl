@@ -131,12 +131,20 @@ receivers:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
+    {{- if .Values.isWindows }}
+    include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
+    {{- else }}
     include: ["/var/log/pods/*/*/*.log"]
+    {{- end }}
     # Exclude logs. The file format is
     # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<restart_count>.log
     exclude:
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
+      {{- if .Values.isWindows }}
+      - "C:\\var\\log\\pods\\{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
+      {{- else }}
       - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
+      {{- end }}
       {{- end }}
       {{- range $_, $excludePath := .Values.logsCollection.containers.excludePaths }}
       - {{ $excludePath }}
@@ -222,7 +230,11 @@ receivers:
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
+        {{- if .Values.isWindows }}
+        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
+        {{- else }}
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
+        {{- end }}
         parse_from: $$attributes["file.path"]
       # Move out attributes to Attributes
       - type: metadata

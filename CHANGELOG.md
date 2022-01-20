@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Journald support (#290)
 - Auto collect metrics for the apiserver control plane component
+- Add native OTel logs collection for the Windows node (#361)
 
 ### Fixed
 

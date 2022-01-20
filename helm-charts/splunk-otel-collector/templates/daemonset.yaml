@@ -61,7 +61,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) }}
       initContainers:
         {{- if (eq .Values.logsEngine "fluentd") }}
         - name: prepare-fluentd-config
@@ -349,12 +349,22 @@ spec:
           readOnly: true
         {{- end }}
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
+        {{- if .Values.isWindows }}
+        - name: varlog
+          mountPath: C:\var\log
+          readOnly: true
+          # C:\ProgramData mount is needed for access to container storage in C:\ProgramData\docker\containers and C:\ProgramData\containerd\root.
+        - name: programdata
+          mountPath: C:\ProgramData
+          readOnly: true
+        {{- else }}
         - name: varlog
           mountPath: /var/log
           readOnly: true
         - name: varlibdockercontainers
           mountPath: /var/lib/docker/containers
           readOnly: true
+        {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
         {{- if .Values.logsCollection.journald.enabled}}
@@ -392,12 +402,21 @@ spec:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
       {{- end}}
       {{- if eq .Values.logsEngine "otel" }}
+      {{- if .Values.isWindows }}
+      - name: varlog
+        hostPath:
+          path: C:\var\log
+      - name: programdata
+        hostPath:
+          path: C:\ProgramData
+      {{- else }}
       - name: varlog
         hostPath:
           path: /var/log
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
+      {{- end }}
       - name: checkpoint
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
