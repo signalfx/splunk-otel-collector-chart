@@ -195,6 +195,29 @@ logsCollection:
 
 Use https://regex101.com/ to find a golang regex that works for your format and specify it in the config file for the config option `firstEntryRegex`.
 
+
+### Collect journald events
+
+Splunk OpenTelemetry Collector for Kubernetes can collect journald events from kubernetes environment.
+Process journald events by configuring `logsCollection.journald` section in values.yaml.
+
+```yaml
+logsCollection:
+  journald:
+    enabled: true
+    directory: /run/log/journal
+    # List of service units to collect and configuration for each. Please update the list as needed.
+    units:
+      - name: kubelet
+        priority: info
+      - name: docker
+        priority: info
+      - name: containerd
+       priority: info
+    # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic (Not applicable to Splunk Observability).
+    index: ""
+```
+
 ### Performance of native OpenTelemetry logs collection
 
 Some configurations used with the OpenTelemetry Collector (as set using the Splunk OpenTelemetry Collector for Kubernetes helm chart) can have an impact on overall performance of log ingestion. The more receivers, processors, exporters, and extensions that are added to any of the pipelines, the greater the performance impact.

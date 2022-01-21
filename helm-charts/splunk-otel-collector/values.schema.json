@@ -532,6 +532,40 @@
             }
           }
         },
+        "journald": {
+          "description": "Configuration to collect journald logs",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "directory": {
+              "type": "string"
+            },
+            "index": {
+              "type": "string"
+            },
+            "units": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "checkpointPath": {
           "type": "string"
         },

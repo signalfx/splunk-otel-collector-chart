@@ -367,6 +367,11 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
+        {{- if .Values.logsCollection.journald.enabled}}
+        - mountPath: {{.Values.logsCollection.journald.directory}}
+          name: journaldlogs
+          readOnly: true
+        {{- end }}
         {{- end }}
         {{- if $agent.extraVolumeMounts }}
         {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
@@ -416,6 +421,11 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
+      {{- if .Values.logsCollection.journald.enabled}}
+      - name: journaldlogs
+        hostPath:
+          path: {{.Values.logsCollection.journald.directory}}
+      {{- end}}
       {{- end}}
       {{- end}}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
