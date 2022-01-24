@@ -128,7 +128,8 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
-  {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if .Values.logsCollection.containers.enabled }}
   filelog:
     {{- if .Values.isWindows }}
     include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
@@ -272,9 +273,37 @@ receivers:
           - move:
               from: log
               to: $$
+  {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
+  {{- end }}
+
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
+  {{- if .Values.logsCollection.journald.enabled }}
+  {{- range $_, $unit := .Values.logsCollection.journald.units }}
+  {{- printf "journald/%s:" $unit.name | nindent 2 }}
+    directory: {{ $.Values.logsCollection.journald.directory }}
+    units: [{{ $unit.name }}]
+    priority: {{ $unit.priority }}
+    operators:
+    - type: metadata
+      resource:
+        com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
+        com.splunk.sourcetype: 'EXPR("kube:journald:"+$$._SYSTEMD_UNIT)'
+        com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        # adding journald priority and unit as attributes
+        journald.priority.number: 'EXPR($$.PRIORITY)'
+        journald.unit.name: 'EXPR($$._SYSTEMD_UNIT)'
+    # extract MESSAGE field into the log body and discard rest of the fields
+    - type: restructure
+      id: set-body
+      ops:
+        - move:
+            from: MESSAGE
+            to: $$
+  {{- end }}
   {{- end }}
   {{- end }}
 
@@ -499,12 +528,19 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if .Values.logsCollection.extraFileLogs }}
-    logs/extraFiles:
+    {{- if and (eq .Values.logsEngine "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
+    logs/host:
       receivers:
+        {{- if .Values.logsCollection.extraFileLogs }}
         {{- range $key, $exporterData := .Values.logsCollection.extraFileLogs }}
         - {{ $key }}
-        {{ end }}
+        {{- end }}
+        {{- end }}
+        {{- if (.Values.logsCollection.journald.enabled)}}
+        {{- range $_, $unit := .Values.logsCollection.journald.units }}
+        {{- printf "- journald/%s" $unit.name | nindent 8 }}
+        {{- end }}
+        {{- end }}
       processors:
         - memory_limiter
         - batch
@@ -519,7 +555,7 @@ service:
         {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
         - splunk_hec/o11y
         {{- end }}
-    {{- end }}
+        {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
