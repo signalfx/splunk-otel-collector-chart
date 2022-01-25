@@ -4,16 +4,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.42.0] - 2022-01-25
+
 ### Added
 
-- Journald logs support (#290)
-- Auto collect metrics for the apiserver control plane component
-- Add native OTel logs collection for the Windows node (#361)
+- Journald logs collection (#290)
+- Automatic discovery and metrics collection from the Kubernetes API server
+  control plane component (#355)
+- Native OTel logs collection from the Windows worker nodes (#361)
+- Option to disable helm hook for custom secret validation (#350)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.42.0 (#367)
 
 ### Fixed
 
 - Double expansion issue splunk-otel-collector (#357). See [upgrade
 guideline](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0410-to-0420)
+- Schema validation for `image.imagePullSecrets` configuration option (#356)
+- Schema validation for `logsCollection.containers.extraOperators` configuration
+  option (#356)
 
 ### Removed
 
