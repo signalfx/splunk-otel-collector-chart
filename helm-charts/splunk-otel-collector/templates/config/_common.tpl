@@ -69,7 +69,7 @@ resourcedetection:
     - env
     {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
     - gke
-    {{- else if eq (include "splunk-otel-collector.distribution" .) "eks" }}
+    {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
     - eks
     {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks

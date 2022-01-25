@@ -1,5 +1,5 @@
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{ if $gateway.enabled }}
+{{ if or $gateway.enabled (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

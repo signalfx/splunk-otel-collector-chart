@@ -308,3 +308,33 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- deepCopy .Values.otelK8sClusterReceiver | mustMergeOverwrite (deepCopy .Values.clusterReceiver) | toYaml }}
 {{- end }}
 {{- end -}}
+
+{{/*
+"clusterReceiverServiceName" for the eks/fargate cluster receiver statefulSet
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverServiceName" -}}
+{{ printf "%s-k8s-cluster-receiver" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+"clusterReceiverNodeDiscovererScript" for the eks/fargate cluster receiver statefulSet initContainer
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverNodeDiscovererScript" -}}
+{{ printf "%s-cr-node-discoverer-script" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+"eksFargateClusterReceiverScript" for the eks/fargate cluster receiver statefulSet run command
+*/}}
+{{- define "splunk-otel-collector.eksFargateClusterReceiverScript" -}}
+{{ printf "%s-fargate-cr-script" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+"clusterReceiverNodeDiscovererInitContainerEnabled" that's based on clusterReceiver.enabled, o11yMetricsEnabled, and eks/fargate distribution
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverNodeDiscovererInitContainerEnabled" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- $o11yMetricsEnabled := (include "splunk-otel-collector.o11yMetricsEnabled" .) }}
+{{- and (eq (toString $clusterReceiver.enabled) "true") (eq (toString $o11yMetricsEnabled) "true") (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") -}}
+{{- end -}}

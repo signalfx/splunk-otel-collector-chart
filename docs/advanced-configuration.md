@@ -43,10 +43,11 @@ Use the `distribution` parameter to provide information about underlying
 Kubernetes deployment. This parameter allows the connector to automatically
 scrape additional metadata. The supported options are:
 
+- `aks` - Azure AKS
 - `eks` - Amazon EKS
+- `eks/fargate` - Amazon EKS with Fargate profiles
 - `gke` - Google GKE / Standard mode
 - `gke/autopilot` - Google GKE / Autopilot mode
-- `aks` - Azure AKS
 - `openshift` - Red Hat OpenShift
 
 This value can be omitted if none of the values apply.
@@ -156,6 +157,36 @@ the following line to your custom values.yaml:
 ```yaml
 priorityClassName: splunk-otel-agent-priority
 ```
+
+## EKS Fargate support
+
+If you want to run the Splunk OpenTelemetry Collector in [Amazon Elastic Kubernetes Service
+with Fargate profiles](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html),
+make sure to set the required `distribution` value to `eks/fargate`:
+
+```yaml
+distribution: eks/fargate
+```
+
+**NOTE:** Fluentd and Native OTel logs collection are not yet automatically configured in EKS with Fargate profiles
+
+This distribution will operate similarly to the `eks` distribution but with the following distinctions:
+
+1. The Collector agent daemonset is not applied since Fargate doesn't support daemonsets. Any desired Collector instances
+running as agents must be configured manually as sidecar containers in your custom deployments. This includes any application
+logging services like Fluentd. We recommend setting the `gateway.enabled` to `true` and configuring your instrumented
+applications to report metrics, traces, and logs to the gateway's `<installed-chart-name>-splunk-otel-collector` service address if no
+agent instances are used in your cluster. Any desired agent instances that would run as a daemonset should be run as a sidecar container in your pod.
+2. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups. This is to allow
+the Cluster Receiver's init container to add a `splunk-otel-is-eks-fargate-cluster-receiver-node` node label for self monitoring. This label is currently
+required for reporting kubelet and pod metrics for the cluster receiver StatefulSet described below.
+3. The configured Cluster Receiver is deployed as a 2-replica StatefulSet and uses a
+[Kubernetes Observer extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/k8sobserver/README.md)
+that discovers the cluster's nodes and pods. It uses this to dynamically create
+[Kubelet Stats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md)
+instances that will report kubelet metrics for all observed Fargate nodes, distributed across replicas. The first replica will monitor all kubelets
+except its own (due to an EKS/Fargate networking restriction) and the second will monitor the first replica's. This is made possible by the Fargate-specific
+deployment label mentioned above. The second replica will also have a k8s_cluster receiver instance.
 
 ## Logs collection
 

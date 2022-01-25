@@ -1,5 +1,8 @@
 {{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
-{{- if $agent.enabled }}
+{{/*
+Fargate doesn't support daemonsets so never use for that platform
+*/}}
+{{- if and $agent.enabled (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
