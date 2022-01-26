@@ -15,7 +15,7 @@ extensions:
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
     auth_type: serviceAccount
-    observe_pods: ${CR_K8S_OBSERVER_OBSERVE_PODS}
+    observe_pods: false
     observe_nodes: true
   {{- end }}
 
@@ -56,7 +56,7 @@ receivers:
   receiver_creator:
     receivers:
       kubeletstats:
-        rule: type == "k8s.node" && name contains "fargate" ${CR_KUBELET_STATS_NODE_FILTER}
+        rule: type == "k8s.node" && name contains "fargate"
         config:
           auth_type: serviceAccount
           collection_interval: 10s
@@ -228,7 +228,7 @@ service:
 - name: cluster-receiver-node-discoverer
   image: public.ecr.aws/amazonlinux/amazonlinux:latest
   imagePullPolicy: IfNotPresent
-  command: [ "bash", "-c", "/splunk-scripts/lookup-eks-fargate-receiver-node.sh"]
+  command: [ "bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
   securityContext:
     runAsUser: 0
   env:
@@ -241,7 +241,7 @@ service:
         fieldRef:
           fieldPath: spec.nodeName
   volumeMounts:
-    - name: eks-fargate-node-discoverer-script
+    - name: init-eks-fargate-cluster-receiver-script
       mountPath: /splunk-scripts
     - name: messages
       mountPath: /splunk-messages

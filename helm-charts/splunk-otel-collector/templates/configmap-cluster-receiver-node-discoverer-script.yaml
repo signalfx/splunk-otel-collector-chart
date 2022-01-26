@@ -12,5 +12,5 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   script: |
-  {{- (.Files.Get "scripts/lookup-eks-fargate-receiver-node.sh") | nindent 4 }}
+  {{- (.Files.Get "scripts/init-eks-fargate-cluster-receiver.sh") | nindent 4 }}
 {{- end }}

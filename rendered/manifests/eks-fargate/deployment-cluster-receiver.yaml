@@ -32,7 +32,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: fcd0a843fe7773209d4ce3b119f812608b3e7aab12bf9a645329de9120eddd7d
+        checksum/config: 9614b18c1d29819cc4908903a9ae2d41b51e8f529fc301fd7509afa262e15be5
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -42,7 +42,7 @@ spec:
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
-          command: [ "bash", "-c", "/splunk-scripts/lookup-eks-fargate-receiver-node.sh"]
+          command: [ "bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
           securityContext:
             runAsUser: 0
           env:
@@ -55,7 +55,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           volumeMounts:
-            - name: eks-fargate-node-discoverer-script
+            - name: init-eks-fargate-cluster-receiver-script
               mountPath: /splunk-scripts
             - name: messages
               mountPath: /splunk-messages
@@ -64,9 +64,8 @@ spec:
       containers:
       - name: otel-collector
         command:
-        - bash
-        - -c
-        - "/splunk-scripts/eks-fargate-otelcol-with-env.sh --config=/splunk-messages/config.yaml --metrics-addr=0.0.0.0:8889"
+        - /otelcol
+        - --config=/splunk-messages/config.yaml
         image: quay.io/signalfx/splunk-otel-collector:0.43.0
         imagePullPolicy: IfNotPresent
         env:
@@ -113,8 +112,6 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap
-        - mountPath: /splunk-scripts
-          name: eks-fargate-cr-script
         - mountPath: /splunk-messages
           name: messages
       terminationGracePeriodSeconds: 600
@@ -125,19 +122,12 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      - name: eks-fargate-cr-script
-        configMap:
-          name: default-splunk-otel-collector-fargate-cr-script
-          items:
-            - key: script
-              path: eks-fargate-otelcol-with-env.sh
-              mode: 0777
-      - name: eks-fargate-node-discoverer-script
+      - name: init-eks-fargate-cluster-receiver-script
         configMap:
           name: default-splunk-otel-collector-cr-node-discoverer-script
           items:
             - key: script
-              path: lookup-eks-fargate-receiver-node.sh
+              path: init-eks-fargate-cluster-receiver.sh
               mode: 0777
       - name: messages
         emptyDir: {}

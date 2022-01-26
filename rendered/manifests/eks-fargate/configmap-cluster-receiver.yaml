@@ -27,7 +27,7 @@ data:
       k8s_observer:
         auth_type: serviceAccount
         observe_nodes: true
-        observe_pods: ${CR_K8S_OBSERVER_OBSERVE_PODS}
+        observe_pods: false
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
@@ -96,7 +96,7 @@ data:
               - container
               - pod
               - node
-            rule: type == "k8s.node" && name contains "fargate" ${CR_KUBELET_STATS_NODE_FILTER}
+            rule: type == "k8s.node" && name contains "fargate"
         watch_observers:
         - k8s_observer
     service:
