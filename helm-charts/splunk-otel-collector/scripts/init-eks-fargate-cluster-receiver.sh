@@ -14,7 +14,7 @@ chmod a+x yq
 # This node label will be set by the second pod.
 if [[ "${K8S_POD_NAME}" == *-0 ]]; then
   echo "will configure kubelet stats receiver to follow other StatefulSet replica's node, as well as use cluster receiver."
-  ./yq e '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && labels[\"splunk-otel-is-eks-fargate-cluster-receiver-node\"] == \"true\""' /conf/relay.yaml >/splunk-messages/config.yaml
+  ./yq e '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && labels[\"splunk-otel-eks-fargate-kubeletstats-receiver-node\"] == \"true\""' /conf/relay.yaml >/splunk-messages/config.yaml
   exit 0
 fi
 
@@ -31,7 +31,7 @@ if [ "${ACTUAL}" != "e84ff8c607b2a10f635c312403f9ede40a045404957e55adcf3d663f9e3
 fi
 chmod a+x kubectl
 # label node
-./kubectl label nodes $K8S_NODE_NAME splunk-otel-is-eks-fargate-cluster-receiver-node=true
+./kubectl label nodes $K8S_NODE_NAME splunk-otel-eks-fargate-kubeletstats-receiver-node=true
 
 echo "Disabling k8s_cluster receiver for this instance"
 # strip k8s_cluster and its pipeline
