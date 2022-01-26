@@ -55,7 +55,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           volumeMounts:
-            - name: default-splunk-otel-collector-cr-node-discoverer-script
+            - name: eks-fargate-node-discoverer-script
               mountPath: /splunk-scripts
             - name: messages
               mountPath: /splunk-messages
@@ -114,7 +114,7 @@ spec:
         - mountPath: /conf
           name: collector-configmap
         - mountPath: /splunk-scripts
-          name: default-splunk-otel-collector-fargate-cr-script
+          name: eks-fargate-cr-script
         - mountPath: /splunk-messages
           name: messages
       terminationGracePeriodSeconds: 600
@@ -125,14 +125,14 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      - name: default-splunk-otel-collector-fargate-cr-script
+      - name: eks-fargate-cr-script
         configMap:
           name: default-splunk-otel-collector-fargate-cr-script
           items:
             - key: script
               path: eks-fargate-otelcol-with-env.sh
               mode: 0777
-      - name: default-splunk-otel-collector-cr-node-discoverer-script
+      - name: eks-fargate-node-discoverer-script
         configMap:
           name: default-splunk-otel-collector-cr-node-discoverer-script
           items:

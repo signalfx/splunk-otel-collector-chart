@@ -241,7 +241,7 @@ service:
         fieldRef:
           fieldPath: spec.nodeName
   volumeMounts:
-    - name: {{ template "splunk-otel-collector.clusterReceiverNodeDiscovererScript" . }}
+    - name: eks-fargate-node-discoverer-script
       mountPath: /splunk-scripts
     - name: messages
       mountPath: /splunk-messages
