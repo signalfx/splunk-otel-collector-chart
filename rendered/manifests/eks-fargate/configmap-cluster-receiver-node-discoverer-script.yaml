@@ -39,11 +39,9 @@ data:
     
     # download kubectl (verifying checksum)
     curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.15/2020-11-02/bin/linux/amd64/kubectl
-    curl -o kubectl.sha256 https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.15/2020-11-02/bin/linux/amd64/kubectl.sha256
     ACTUAL=$(sha256sum kubectl | awk '{print $1}')
-    EXPECTED=$(cat kubectl.sha256 | awk '{print $1}')
-    if [ "${ACTUAL}" != "${EXPECTED}" ]; then
-      echo "will not attempt to use kubectl with unexpected sha256 (${ACTUAL} != ${EXPECTED})"
+    if [ "${ACTUAL}" != "e76b2f1271a5046686e03d6c68a16a34de736cfff30c92d80c9d6d87fe3cdc6c" ]; then
+      echo "will not attempt to use kubectl with unexpected sha256 (${ACTUAL} != e76b2f1271a5046686e03d6c68a16a34de736cfff30c92d80c9d6d87fe3cdc6c)"
       exit 1
     fi
     chmod a+x kubectl
