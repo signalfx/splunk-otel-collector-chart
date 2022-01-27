@@ -218,7 +218,6 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         {{- end }}
-        - --metrics-addr=0.0.0.0:8889
         ports:
         {{- range $key, $port := $agent.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) }}
