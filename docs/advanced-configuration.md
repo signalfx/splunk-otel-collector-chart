@@ -177,17 +177,20 @@ running as agents must be configured manually as sidecar containers in your cust
 logging services like Fluentd. We recommend setting the `gateway.enabled` to `true` and configuring your instrumented
 applications to report metrics, traces, and logs to the gateway's `<installed-chart-name>-splunk-otel-collector` service address if no
 agent instances are used in your cluster. Any desired agent instances that would run as a daemonset should instead run as sidecar containers in your pods.
-2. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups. This is to allow
-the cluster receiver's init container to add a `splunk-otel-eks-fargate-kubeletstats-receiver-node` node label for designated self monitoring. This label is
-currently required for reporting kubelet and pod metrics for the complete cluster receiver StatefulSet.
-3. The configured cluster receiver is deployed as a 2-replica StatefulSet and uses a
-[Kubernetes Observer extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/k8sobserver/README.md)
-that discovers the cluster's nodes and, on the second replica, its pods. It uses this to dynamically create
-[Kubelet Stats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md)
-instances that will report kubelet metrics for all observed Fargate nodes, distributed across replicas. The first replica will monitor the
-cluster with a `k8s_cluster` receiver and the second will monitor all kubelets except its own (due to an EKS/Fargate networking restriction).
-The first replica's collector will monitor the second's kubelet. This is made possible by the Fargate-specific node label
-mentioned above. The second replica will have the underlying `k8s_cluster` receiver instance.
+
+2. Since Fargate nodes use a VM boundary to prevent access to host-based resources used by other pods, pods are not able to reach their own kubelet. The cluster receiver
+for the Fargate distribution has two primary differences between regular `eks` to work around this limitation:
+    * The configured cluster receiver is deployed as a 2-replica StatefulSet instead of a Deployment and uses a
+    [Kubernetes Observer extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/k8sobserver/README.md)
+    that discovers the cluster's nodes and, on the second replica, its pods. It uses this to dynamically create
+    [Kubelet Stats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md)
+    instances that will report kubelet metrics for all observed Fargate nodes. The first replica will monitor the cluster with a `k8s_cluster` receiver
+    and the second will monitor all kubelets except its own (due to an EKS/Fargate networking restriction).
+    The second replica will have the underlying `k8s_cluster` receiver instance.
+
+    * The first replica's collector will monitor the second's kubelet. This is made possible by a Fargate-specific `splunk-otel-eks-fargate-kubeletstats-receiver-node`
+    node label. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups to allow the cluster
+    receiver's init container to add this node label for designated self monitoring.
 
 ## Logs collection
 
