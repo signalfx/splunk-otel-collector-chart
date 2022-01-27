@@ -72,7 +72,6 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         {{- end }}
-        - --metrics-addr=0.0.0.0:8889
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
