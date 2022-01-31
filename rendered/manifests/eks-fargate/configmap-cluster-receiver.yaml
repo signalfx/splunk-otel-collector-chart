@@ -27,7 +27,7 @@ data:
       k8s_observer:
         auth_type: serviceAccount
         observe_nodes: true
-        observe_pods: false
+        observe_pods: true
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:

@@ -15,6 +15,7 @@ chmod a+x yq
 if [[ "${K8S_POD_NAME}" == *-0 ]]; then
   echo "will configure kubelet stats receiver to follow other StatefulSet replica's node, as well as use cluster receiver."
   ./yq e '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && labels[\"splunk-otel-eks-fargate-kubeletstats-receiver-node\"] == \"true\""' /conf/relay.yaml >/splunk-messages/config.yaml
+  ./yq e -i '.extensions.k8s_observer.observe_pods = false' /splunk-messages/config.yaml
   exit 0
 fi
 
@@ -41,4 +42,3 @@ echo "Disabling k8s_cluster receiver for this instance"
 # set kubelet stats to not monitor ourselves (all other kubelets)
 echo "Ensuring k8s_observer-based kubeletstats receivers won't monitor own node to avoid Fargate network limitation."
 ./yq e -i '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && not ( name contains \"${K8S_NODE_NAME}\" )"' /splunk-messages/config.yaml
-./yq e -i '.extensions.k8s_observer.observe_pods = true' /splunk-messages/config.yaml

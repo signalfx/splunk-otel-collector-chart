@@ -15,7 +15,7 @@ extensions:
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
     auth_type: serviceAccount
-    observe_pods: false
+    observe_pods: true
     observe_nodes: true
   {{- end }}
 
