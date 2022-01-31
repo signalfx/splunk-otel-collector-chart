@@ -194,7 +194,7 @@ spec:
           items:
             - key: script
               path: init-eks-fargate-cluster-receiver.sh
-              mode: 0777
+              mode: 0555
       - name: messages
         emptyDir: {}
       {{- end }}
