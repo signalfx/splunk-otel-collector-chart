@@ -182,11 +182,10 @@ agent instances are used in your cluster. Any desired agent instances that would
 for the Fargate distribution has two primary differences between regular `eks` to work around this limitation:
     * The configured cluster receiver is deployed as a 2-replica StatefulSet instead of a Deployment and uses a
     [Kubernetes Observer extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/k8sobserver/README.md)
-    that discovers the cluster's nodes and, on the second replica, its pods. It uses this to dynamically create
+    that discovers the cluster's nodes and, on the second replica, its pods for user-configurable receiver creator additions. It uses this observer to dynamically create
     [Kubelet Stats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md)
     instances that will report kubelet metrics for all observed Fargate nodes. The first replica will monitor the cluster with a `k8s_cluster` receiver
     and the second will monitor all kubelets except its own (due to an EKS/Fargate networking restriction).
-    The second replica will have the underlying `k8s_cluster` receiver instance.
 
     * The first replica's collector will monitor the second's kubelet. This is made possible by a Fargate-specific `splunk-otel-eks-fargate-kubeletstats-receiver-node`
     node label. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups to allow the cluster
