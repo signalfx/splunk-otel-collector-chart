@@ -37,6 +37,16 @@ spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: component
+                operator: In
+                values:
+                - otel-k8s-cluster-receiver
+            topologyKey: kubernetes.io/hostname
       initContainers:
         - name: cluster-receiver-node-labeler
           image: public.ecr.aws/amazonlinux/amazonlinux:latest

@@ -61,9 +61,9 @@ spec:
       tolerations:
         {{ toYaml $clusterReceiver.tolerations | nindent 8 }}
       {{- end }}
-      {{- if $clusterReceiver.affinity }}
+      {{- if or $clusterReceiver.affinity (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
       affinity:
-        {{- toYaml $clusterReceiver.affinity | nindent 8 }}
+        {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml (include "splunk-otel-collector.clusterReceiverPodAntiAffinity" .)) | toYaml | nindent 8 }}
       {{- end }}
       {{- if $clusterReceiver.securityContext }}
       securityContext:
