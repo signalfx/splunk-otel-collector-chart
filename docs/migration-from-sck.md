@@ -333,5 +333,5 @@ To delete the SCK deployment, find the name of the deployment using the `helm ls
 
 * Check the logs index to see if you are receiving logs from your Kubernetes cluster
   * ```index="Your logs index"```
-* Check the metrics index to see if you are receiving logs from your Kubernetes cluster
+* Check the metrics index to see if you are receiving metrics from your Kubernetes cluster
   * ```| mcatalog values(metric_name) WHERE index="Your metrics index"```
