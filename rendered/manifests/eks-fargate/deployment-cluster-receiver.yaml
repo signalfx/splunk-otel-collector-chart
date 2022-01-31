@@ -38,11 +38,10 @@ spec:
       nodeSelector:
           kubernetes.io/os: linux
       initContainers:
-                
-        - name: cluster-receiver-node-discoverer
+        - name: cluster-receiver-node-labeler
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
-          command: [ "bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
+          command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
           securityContext:
             runAsUser: 0
           env:

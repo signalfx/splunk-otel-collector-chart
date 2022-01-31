@@ -222,30 +222,3 @@ service:
         {{- end }}
     {{- end }}
 {{- end }}
-
-{{- define "splunk-otel-collector.clusterReceiverInitContainers" -}}
-{{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-- name: cluster-receiver-node-discoverer
-  image: public.ecr.aws/amazonlinux/amazonlinux:latest
-  imagePullPolicy: IfNotPresent
-  command: [ "bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
-  securityContext:
-    runAsUser: 0
-  env:
-    - name: K8S_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
-  volumeMounts:
-    - name: init-eks-fargate-cluster-receiver-script
-      mountPath: /splunk-scripts
-    - name: messages
-      mountPath: /splunk-messages
-    - mountPath: /conf
-      name: collector-configmap
-{{- end -}}
-{{- end -}}

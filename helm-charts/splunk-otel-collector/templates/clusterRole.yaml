@@ -86,7 +86,7 @@ rules:
   - get
   - list
   - watch
-{{- if eq (include "splunk-otel-collector.clusterReceiverNodeDiscovererInitContainerEnabled" .) "true" }}
+{{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
 - apiGroups:
     - ""
   resources:
