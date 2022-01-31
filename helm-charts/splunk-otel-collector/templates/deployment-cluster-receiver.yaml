@@ -71,7 +71,7 @@ spec:
       {{- end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:
-        - name: cluster-receiver-node-labeler
+        - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
