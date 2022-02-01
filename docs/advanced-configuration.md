@@ -175,8 +175,8 @@ This distribution will operate similarly to the `eks` distribution but with the 
 1. The Collector agent daemonset is not applied since Fargate doesn't support daemonsets. Any desired Collector instances
 running as agents must be configured manually as sidecar containers in your custom deployments. This includes any application
 logging services like Fluentd. We recommend setting the `gateway.enabled` to `true` and configuring your instrumented
-applications to report metrics, traces, and logs to the gateway's `<installed-chart-name>-splunk-otel-collector` service address if no
-agent instances are used in your cluster. Any desired agent instances that would run as a daemonset should instead run as sidecar containers in your pods.
+applications to report metrics, traces, and logs to the gateway's `<installed-chart-name>-splunk-otel-collector` service address.
+Any desired agent instances that would run as a daemonset should instead run as sidecar containers in your pods.
 
 2. Since Fargate nodes use a VM boundary to prevent access to host-based resources used by other pods, pods are not able to reach their own kubelet. The cluster receiver
 for the Fargate distribution has two primary differences between regular `eks` to work around this limitation:

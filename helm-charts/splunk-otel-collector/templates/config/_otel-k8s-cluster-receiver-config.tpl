@@ -222,18 +222,3 @@ service:
         {{- end }}
     {{- end }}
 {{- end }}
-
-{{/*
-Pod anti-affinity to prevent eks/fargate replicas from being on same node
-*/}}
-{{- define "splunk-otel-collector.clusterReceiverPodAntiAffinity" -}}
-podAntiAffinity:
-  requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-          - key: component
-            operator: In
-            values:
-              - otel-k8s-cluster-receiver
-      topologyKey: "kubernetes.io/hostname"
-{{- end }}
