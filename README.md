@@ -92,6 +92,7 @@ Kubernetes distributions:
 
 - [Vanilla (unmodified version) Kubernetes](https://kubernetes.io)
 - [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks)
+  including [with Fargate profiles](docs/advanced-configuration.md#eks-fargate-support)
 - [Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/aks)
 - [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
   including [GKE Autopilot](docs/advanced-configuration.md#gke-autopilot-support)

@@ -1,0 +1,14 @@
+{{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "splunk-otel-collector.clusterReceiverServiceName" . }}
+  labels:
+    app: {{ template "splunk-otel-collector.name" . }}
+spec:
+  clusterIP: None
+  selector:
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-k8s-cluster-receiver
+{{- end }}

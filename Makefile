@@ -49,3 +49,15 @@ render:
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
+
+	# eks/fargate deployment (with recommended gateway)
+	dir=rendered/manifests/eks-fargate; \
+	mkdir -p "$$dir"; \
+	helm template \
+		--namespace default \
+		--values rendered/values.yaml \
+		--output-dir "$$dir" \
+		--set distribution=eks/fargate,gateway.enabled=true,cloudProvider=aws \
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector

@@ -125,10 +125,11 @@ cloudProvider: ""
 
 ################################################################################
 # Kubernetes distribution being run. Leave empty for other.
+# - "aks" (Azure Kubernetes Service)
 # - "eks" (Amazon Elastic Kubernetes Service)
+# - "eks/fargate" (Amazon Elastic Kubernetes Service with Fargate profiles )
 # - "gke" (Google Kubernetes Engine / Standard mode)
 # - "gke/autopilot" (Google Kubernetes Engine / Autopilot mode)
-# - "aks" (Azure Kubernetes Service)
 # - "openshift" (RedHat OpenShift)
 ################################################################################
 

@@ -1,7 +1,12 @@
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
 {{- if and $clusterReceiver.enabled (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
 apiVersion: apps/v1
-kind: Deployment
+{{- /*
+eks/fargate distributions use a two-replica StatefulSet instead of a single node deployment.
+The first replica monitors all fargate node kubelets (except its own) via k8s_observer and kubeletstats receiver.
+The second replica monitors the first replica's kubelet and the cluster.
+*/}}
+kind: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} StatefulSet {{- else }} Deployment {{- end }}
 metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver
   labels:
@@ -17,7 +22,11 @@ metadata:
     {{- toYaml $clusterReceiver.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: 1
+  replicas: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} 2 {{- else }} 1 {{- end }}
+  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  serviceName: {{ template "splunk-otel-collector.clusterReceiverServiceName" . }}
+  podManagementPolicy: Parallel
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
@@ -52,13 +61,47 @@ spec:
       tolerations:
         {{ toYaml $clusterReceiver.tolerations | nindent 8 }}
       {{- end }}
-      {{- if $clusterReceiver.affinity }}
+      {{- if or $clusterReceiver.affinity (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
       affinity:
-        {{- toYaml $clusterReceiver.affinity | nindent 8 }}
+        {{- $clusterReceiverPodAntiAffinity := `
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - otel-k8s-cluster-receiver
+              topologyKey: kubernetes.io/hostname
+        ` }}
+        {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
       {{- if $clusterReceiver.securityContext }}
       securityContext:
         {{ toYaml $clusterReceiver.securityContext | nindent 8 }}
+      {{- end }}
+      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      initContainers:
+        - name: cluster-receiver-node-discoverer
+          image: public.ecr.aws/amazonlinux/amazonlinux:latest
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
+          env:
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: init-eks-fargate-cluster-receiver-script
+              mountPath: /splunk-scripts
+            - name: messages
+              mountPath: /splunk-messages
+            - mountPath: /conf
+              name: collector-configmap
       {{- end }}
       containers:
       - name: otel-collector
@@ -70,7 +113,11 @@ spec:
         - --config=C:\\conf\relay.yaml
         {{- else }}
         - /otelcol
+        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+        - --config=/splunk-messages/config.yaml
+        {{- else }}
         - --config=/conf/relay.yaml
+        {{- end }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
@@ -134,6 +181,10 @@ spec:
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
+        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+        - mountPath: /splunk-messages
+          name: messages
+        {{- end }}
         {{- if $clusterReceiver.extraVolumeMounts }}
         {{- toYaml $clusterReceiver.extraVolumeMounts | nindent 8 }}
         {{- end }}
@@ -145,6 +196,17 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      - name: init-eks-fargate-cluster-receiver-script
+        configMap:
+          name: {{ template "splunk-otel-collector.clusterReceiverNodeDiscovererScript" . }}
+          items:
+            - key: script
+              path: init-eks-fargate-cluster-receiver.sh
+              mode: 0555
+      - name: messages
+        emptyDir: {}
+      {{- end }}
       {{- if $clusterReceiver.extraVolumes }}
       {{- toYaml $clusterReceiver.extraVolumes | nindent 6 }}
       {{- end }}

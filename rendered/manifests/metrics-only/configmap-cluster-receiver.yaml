@@ -36,9 +36,6 @@ data:
         - action: insert
           key: metric_source
           value: kubernetes
-        - action: insert
-          key: receiver
-          value: k8scluster
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
@@ -56,6 +53,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/k8s_cluster:
+        attributes:
+        - action: insert
+          key: receiver
+          value: k8scluster
       resourcedetection:
         detectors:
         - env
@@ -87,6 +89,7 @@ data:
           - memory_limiter
           - batch
           - resource
+          - resource/k8s_cluster
           receivers:
           - k8s_cluster
         metrics/collector:
