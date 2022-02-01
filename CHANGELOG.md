@@ -4,9 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.43.1] - 2022-02-01
+
 ### Added
 
-- Add `eks/fargate` distribution option for 2-replica StatefulSet (#346)
+- `eks/fargate` distribution (#346)
 
 ## [0.43.0] - 2022-01-27
 
