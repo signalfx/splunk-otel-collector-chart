@@ -1,5 +1,21 @@
 # Upgrade guidelines
 
+## 0.43.1 to 0.43.2
+
+[#375 Resource detection processor is configured to override all host and cloud
+attributes](https://github.com/signalfx/splunk-otel-collector-chart/pull/375)
+
+If you still want to keep the previous behavior, use the following custom
+values.yaml configuration:
+
+```yaml
+agent:
+  config:
+    processors:
+      resourcedetection:
+        override: false
+```
+
 ## 0.41.0 to 0.42.0
 
 [#357 Double expansion issue in splunk-otel-collector is

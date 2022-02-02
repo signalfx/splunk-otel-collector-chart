@@ -194,9 +194,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource
         - resource/add_collector_k8s
         - resourcedetection
+        - resource
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

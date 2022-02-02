@@ -111,7 +111,7 @@ data:
         - eks
         - ec2
         - system
-        override: false
+        override: true
         timeout: 10s
     receivers:
       jaeger:
@@ -170,9 +170,9 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource/add_cluster_name
           - resource/add_collector_k8s
           - resourcedetection
+          - resource/add_cluster_name
           receivers:
           - prometheus/collector
         traces:

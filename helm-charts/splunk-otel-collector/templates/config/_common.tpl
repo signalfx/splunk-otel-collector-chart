@@ -60,8 +60,6 @@ splunk.com/exclude
 Common config for resourcedetection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
-# Resource detection processor picks attributes from host environment.
-# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
 resourcedetection:
   detectors:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
@@ -84,8 +82,7 @@ resourcedetection:
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
     - system
-  # Don't override existing resource attributes to maintain identification of data sources
-  override: false
+  override: true
   timeout: 10s
 {{- end }}
 

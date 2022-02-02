@@ -386,6 +386,10 @@ processors:
 
   batch:
 
+  # Resource detection processor is configured to override all host and cloud
+  # attributes because OTel Collector Agent is the source of truth for all host
+  # and cloud metadata, and instrumentation libraries can send wrong host
+  # attributes from container environments.
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
   resource:
@@ -394,7 +398,7 @@ processors:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
-      - action: insert
+      - action: upsert
         key: k8s.cluster.name
         value: {{ .Values.clusterName }}
       {{- range .Values.extraAttributes.custom }}
@@ -511,11 +515,11 @@ service:
         {{- if not $gateway.enabled }}
         - filter/logs
         {{- end }}
-        - resource
         {{- if not $gateway.enabled }}
         - resource/logs
         {{- end }}
         - resourcedetection
+        - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -569,8 +573,8 @@ service:
         - memory_limiter
         - k8sattributes
         - batch
-        - resource
         - resourcedetection
+        - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -593,8 +597,8 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource
         - resourcedetection
+        - resource
         {{- if .Values.isWindows }}
         - metricstransform
         {{- end }}
@@ -618,9 +622,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource
         - resource/add_agent_k8s
         - resourcedetection
+        - resource
       exporters:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         # Use signalfx instead of otlp even if collector is enabled

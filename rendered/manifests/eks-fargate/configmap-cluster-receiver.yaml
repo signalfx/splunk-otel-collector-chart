@@ -68,7 +68,7 @@ data:
         - eks
         - ec2
         - system
-        override: false
+        override: true
         timeout: 10s
     receivers:
       k8s_cluster:
@@ -121,9 +121,9 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource
           - resource/add_collector_k8s
           - resourcedetection
+          - resource
           receivers:
           - prometheus/k8s_cluster_receiver
         metrics/eks:
