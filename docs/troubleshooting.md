@@ -43,6 +43,35 @@ Support bundle scripts are provided to make it easier to collect information:
 
 - Kubernetes: [kubectl-splunk](https://github.com/signalfx/kubectl-splunk/blob/main/docs/kubectl-splunk_support.md)
 
+## Debug logging for the Splunk Otel Collector in Kubernetes
+You can change the logging level of the collector from info to debug for troubleshooting. This is done by setting the
+[service.telemetry.logs.level](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/troubleshooting.md)
+configuration.
+
+The collector's logs are not exported by default. If you already export your logs to Splunk Platform or Splunk
+Observability, then you may want to export the collector's logs too. This is done by setting the
+[logCollection.container.excludeAgentLogs](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
+configuration.
+
+Here is a configuration example that enables the collector to output debug logs and export them to Splunk Platform or
+Splunk Observability.
+```yaml
+agent:
+  config:
+    service:
+      telemetry:
+        logs:
+          # Enable debug logging from the collector.
+          level: debug
+# Optional for exporting logs.
+logsCollection:
+  containers:
+    # Enable the logs from the collector/agent to be collected at the container level.
+    excludeAgentLogs: false
+```
+View the logs using:
+- `kubectl logs {splunk-otel-collector-agent-pod}`
+
 ## Sizing Splunk OTel Collector containers
 
 Resources allocated to Splunk OTel Collector should be set based on the amount
