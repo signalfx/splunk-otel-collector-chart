@@ -102,6 +102,12 @@ splunkObservability:
   tracesEnabled: true
   logsEnabled: false
 
+  # This option just enables the shared pipeline for logs and profiling data.
+  # There is no active collection of profiling data.
+  # Instrumentation libraries must be configured to send it to the collector.
+  # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
+  profilingEnabled: true
+
 ################################################################################
 # Logs collection engine:
 # - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to
@@ -219,11 +225,11 @@ agent:
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
-      enabled_for: [traces, metrics, logs]
+      enabled_for: [traces, metrics, logs, profiling]
     otlp-http:
       containerPort: 4318
       protocol: TCP
-      enabled_for: [metrics, traces, logs]
+      enabled_for: [metrics, traces, logs, profiling]
     otlp-http-old:
       containerPort: 55681
       protocol: TCP

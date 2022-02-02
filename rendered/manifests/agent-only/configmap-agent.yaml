@@ -26,6 +26,9 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+      splunk_hec/o11y:
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -198,6 +201,19 @@ data:
       - memory_ballast
       - zpages
       pipelines:
+        logs:
+          exporters:
+          - splunk_hec/o11y
+          processors:
+          - memory_limiter
+          - k8sattributes
+          - batch
+          - filter/logs
+          - resource/logs
+          - resourcedetection
+          - resource
+          receivers:
+          - otlp
         metrics:
           exporters:
           - signalfx

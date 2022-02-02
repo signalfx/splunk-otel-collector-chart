@@ -142,6 +142,10 @@
         "logsEnabled": {
           "description": "Send Logs to Splunk Observability",
           "type": "boolean"
+        },
+        "profilingEnabled": {
+          "description": "Whether profiling data is enabled for Splunk Observability",
+          "type": "boolean"
         }
       },
       "anyOf": [
@@ -306,7 +310,8 @@
                     "enum": [
                       "traces",
                       "metrics",
-                      "logs"
+                      "logs",
+                      "profiling"
                     ]
                   }
                 }
@@ -925,7 +930,8 @@
                     "enum": [
                       "traces",
                       "metrics",
-                      "logs"
+                      "logs",
+                      "profiling"
                     ]
                   }
                 }

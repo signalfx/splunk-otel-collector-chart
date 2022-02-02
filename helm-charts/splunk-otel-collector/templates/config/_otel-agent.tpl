@@ -452,7 +452,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   {{- end }}
-  {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -497,17 +497,19 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
-    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     logs:
       receivers:
+        {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
         {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
         - filelog
         {{- end }}
         - fluentforward
+        {{- end }}
         - otlp
       processors:
         - memory_limiter
-        {{- if eq .Values.logsEngine "fluentd" }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
@@ -527,7 +529,7 @@ service:
         {{- if $gateway.enabled }}
         - otlp
         {{- else }}
-        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
