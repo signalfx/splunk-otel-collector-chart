@@ -97,7 +97,7 @@ data:
         - action: insert
           key: k8s.node.name
           value: ${K8S_NODE_NAME}
-        - action: insert
+        - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
       resource/add_agent_k8s:
@@ -124,7 +124,7 @@ data:
         detectors:
         - env
         - system
-        override: false
+        override: true
         timeout: 10s
     receivers:
       hostmetrics:
@@ -190,8 +190,8 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource
           - resourcedetection
+          - resource
           receivers:
           - hostmetrics
           - kubeletstats
@@ -204,9 +204,9 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource
           - resource/add_agent_k8s
           - resourcedetection
+          - resource
           receivers:
           - prometheus/agent
       telemetry:
