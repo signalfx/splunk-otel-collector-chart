@@ -80,6 +80,20 @@ Whether logs enabled for Splunk Observability, backward compatible.
 {{- end -}}
 
 {{/*
+Whether Splunk Observability Profiling is enabled.
+*/}}
+{{- define "splunk-otel-collector.o11yProfilingEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.profilingEnabled }}
+{{- end -}}
+
+{{/*
+Whether logs or profiling is enabled for Splunk Observability.
+*/}}
+{{- define "splunk-otel-collector.o11yLogsOrProfilingEnabled" -}}
+{{- or (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
 Whether logs enabled for Splunk Platform.
 */}}
 {{- define "splunk-otel-collector.platformLogsEnabled" -}}
@@ -112,6 +126,13 @@ Whether logs enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.logsEnabled" -}}
 {{- or (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
+Whether profiling data is enabled (applicable to Splunk Observability only).
+*/}}
+{{- define "splunk-otel-collector.profilingEnabled" -}}
+{{- include "splunk-otel-collector.o11yProfilingEnabled" . }}
 {{- end -}}
 
 {{/*

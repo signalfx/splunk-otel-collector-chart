@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 [Upgrade
 guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0431-to-0432)
 
+### Added
+
+- Support of profiling data for Splunk Observability (#376)
+
 ### Changed
 
 - [BREAKING CHANGE] OTel Collector Agent now overrides host and cloud attributes

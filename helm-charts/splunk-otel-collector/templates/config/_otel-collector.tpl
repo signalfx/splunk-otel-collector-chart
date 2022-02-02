@@ -135,7 +135,7 @@ exporters:
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -210,8 +210,8 @@ service:
       exporters: [signalfx]
     {{- end }}
 
-    {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-    # default logs pipeline
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+    # default logs + profiling data pipeline
     logs:
       receivers: [otlp]
       processors:
@@ -221,7 +221,7 @@ service:
         - filter/logs
         - resource/logs
       exporters:
-        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
