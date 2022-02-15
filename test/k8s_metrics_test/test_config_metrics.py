@@ -9,6 +9,12 @@ from ..common import check_metrics_from_splunk
 
 
 @pytest.mark.parametrize("metric", [
+  #Control Plane Metrics
+  ("apiserver_request_total"),
+  ("workqueue_adds_total"),
+  ("scheduler_scheduling_algorithm_duration_seconds"),
+  ("kubeproxy_sync_proxy_rules_duration_seconds_count"),
+  ("coredns_dns_requests_total"),
   #Container Metrics
   ("container.cpu.time"),
   ("container.cpu.utilization"),

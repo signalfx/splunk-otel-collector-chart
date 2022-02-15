@@ -151,10 +151,6 @@ distribution: ""
 
 ################################################################################
 # Optional: Automatic detection of additional metric sources.
-# We collect k8s control plane metrics by default, you can disable this by
-# setting autodetect.controlPlane=false. This controlPlane integration
-# relies on having access the k8s control plane which k8s clusters run as a
-# managed service do not support.
 # Set autodetect.prometheus=true if you want the otel-collector agent to scrape
 # prometheus metrics from pods that have prometheus-style annotations like
 # "prometheus.io/scrape".
@@ -162,7 +158,6 @@ distribution: ""
 ################################################################################
 
 autodetect:
-  controlPlane: true
   prometheus: false
   istio: false
 
@@ -215,6 +210,10 @@ extraAttributes:
 
 agent:
   enabled: true
+
+  # This Flag enables k8s control plane metric collection.
+  # Details about control plane monitoring and related configurations are located in docs/advanced-configuration.md
+  controlPlaneEnabled: true
 
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must

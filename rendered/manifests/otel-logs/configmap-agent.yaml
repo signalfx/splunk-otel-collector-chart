@@ -259,6 +259,23 @@ data:
               - ${K8S_POD_IP}:8889
       receiver_creator:
         receivers:
+          smartagent/coredns:
+            config:
+              extraDimensions:
+                metric_source: k8s-coredns
+              port: 9153
+              type: coredns
+            rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+          smartagent/kube-controller-manager:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-controller-manager
+              port: 10257
+              skipVerify: true
+              type: kube-controller-manager
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
           smartagent/kubernetes-apiserver:
             config:
               extraDimensions:
@@ -268,6 +285,20 @@ data:
               useHTTPS: true
               useServiceAccount: true
             rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+          smartagent/kubernetes-proxy:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-proxy
+              port: 10249
+              type: kubernetes-proxy
+            rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+          smartagent/kubernetes-scheduler:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-scheduler
+              port: 10251
+              type: kubernetes-scheduler
+            rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
         watch_observers:
         - k8s_observer
       signalfx:

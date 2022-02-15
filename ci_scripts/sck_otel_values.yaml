@@ -33,6 +33,9 @@ logsEngine: otel
 
 clusterName: "functional-test"
 
+agent:
+  controlPlaneEnabled: true
+
 # Metadata to be set on the telemetry data from Kubernetes objects.
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
 #k8sMetadata:
