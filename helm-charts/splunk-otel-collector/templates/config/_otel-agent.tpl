@@ -76,7 +76,42 @@ receivers:
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
-      {{- if .Values.autodetect.controlPlane }}
+      # Verified with Kubernetes v1.22 and Openshift v4.9.
+      # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
+      # will fail the verification.
+      {{- if (eq (include "splunk-otel-collector.controlPlaneEnabled" .) "true") }}
+      smartagent/coredns:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: k8s-coredns
+          type: coredns
+          {{- if eq .Values.distribution "openshift" }}
+          port: 9154
+          skipVerify: true
+          useHTTPS: true
+          useServiceAccount: true
+          {{- else }}
+          port: 9153
+          {{- end }}
+      smartagent/kube-controller-manager:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "kube-controller-manager" && labels["kube-controller-manager"] == "true"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-controller-manager
+          port: 10257
+          skipVerify: true
+          type: kube-controller-manager
+          useHTTPS: true
+          useServiceAccount: true
       smartagent/kubernetes-apiserver:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
@@ -86,11 +121,36 @@ receivers:
         config:
           extraDimensions:
             metric_source: kubernetes-apiserver
-          # We skip verifying here because the k8s default certificate is self signed and will fail this verification.
           skipVerify: true
           type: kubernetes-apiserver
           useHTTPS: true
           useServiceAccount: true
+      smartagent/kubernetes-proxy:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "sdn"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-proxy
+          type: kubernetes-proxy
+          {{- if eq .Values.distribution "openshift" }}
+          port: 29101
+          {{- else }}
+          port: 10249
+          {{- end }}
+      smartagent/kubernetes-scheduler:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "openshift-kube-scheduler" && labels["scheduler"] == "true"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-scheduler
+          port: 10251
+          type: kubernetes-scheduler
       {{- end}}
 
   kubeletstats:

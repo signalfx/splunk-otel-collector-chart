@@ -185,6 +185,20 @@ Get Splunk Observability Access Token.
 {{- end -}}
 
 {{/*
+Helper that returns the controlPlaneEnabled parameter taking care of backward compatibility with the old parameter
+name "autodetect.controlPlane".
+*/}}
+{{- define "splunk-otel-collector.controlPlaneEnabled" -}}
+{{- if ne (toString .Values.agent.controlPlaneEnabled) "<nil>" }}
+{{- .Values.agent.controlPlaneEnabled }}
+{{- else if ne (toString .Values.autodetect.controlPlane) "<nil>" }}
+{{- .Values.autodetect.controlPlane }}
+{{- else }}
+{{- true }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the fluentd image name.
 */}}
 {{- define "splunk-otel-collector.image.fluentd" -}}

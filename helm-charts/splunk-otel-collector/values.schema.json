@@ -225,7 +225,8 @@
       "additionalProperties": false,
       "properties": {
         "controlPlane": {
-          "type": "boolean"
+          "type": "boolean",
+          "deprecated": true
         },
         "prometheus": {
           "type": "boolean"
@@ -285,6 +286,9 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "type": "boolean"
+        },
+        "controlPlaneEnabled": {
           "type": "boolean"
         },
         "ports": {

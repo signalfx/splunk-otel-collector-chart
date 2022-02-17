@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Added support to collect control plane component metrics; controller-manager, coredns, proxy, scheduler (#383)
+
 ## [0.43.2] - 2022-02-02
 
 ### Added

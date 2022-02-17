@@ -191,6 +191,86 @@ for the Fargate distribution has two primary differences between regular `eks` t
     node label. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups to allow the cluster
     receiver's init container to add this node label for designated self monitoring.
 
+## Control Plane metrics
+
+By setting `agent.controlPlaneEnabled=true` the helm chart will set up the otel-collector agent to collect metrics from
+the control plane.
+
+To collect control plane metrics, the helm chart has the otel-collector agent on each node use the
+[receiver creator](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md)
+to instantiate control plane receivers at runtime. The receiver creator has a set of discovery rules to know
+which control plane receivers to create. The default discovery rules can vary depending on the Kubernetes distribution
+and version. If your control plane is using nonstandard specs, then you can provide a custom configuration (
+[see below](#using-custom-configurations-for-nonstandard-control-plane-components)
+) so the otel-collector agent can still successfully connect.
+
+The otel-collector agent relies on having pod level network access to collect metrics from the control plane pods.
+Since most cloud Kubernetes as a service distributions don't expose the control plane pods to the
+end user, collecting metrics from these distributions is not supported.
+
+* Supported Distributions:
+  * kubernetes 1.22 (kops created)
+  * openshift v4.9
+* Unsupported Distributions:
+  * aks
+  * eks
+  * eks/fargate
+  * gke
+  * gke/autopilot
+
+The default configurations for the control plane receivers can be found in
+[_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
+
+### Receiver documentation
+
+Here are the documentation links that contain configuration options and supported metrics information for each receiver
+used to collect metrics from the control plane.
+* [smartagent/coredns](https://docs.splunk.com/Observability/gdi/coredns/coredns.html)
+* [smartagent/kube-controller-manager](https://docs.splunk.com/Observability/gdi/kube-controller-manager/kube-controller-manager.html)
+* [smartagent/kubernetes-apiserver](https://docs.splunk.com/Observability/gdi/kubernetes-apiserver/kubernetes-apiserver.html)
+* [smartagent/kubernetes-proxy](https://docs.splunk.com/Observability/gdi/kubernetes-proxy/kubernetes-proxy.html)
+* [smartagent/kubernetes-scheduler](https://docs.splunk.com/Observability/gdi/kubernetes-scheduler/kubernetes-scheduler.html)
+
+### Using custom configurations for nonstandard control plane components
+
+A user may need to override the default configuration values used to connect to the control plane for a couple different
+reason. If your control plane uses nonstandard ports or custom TLS settings, then you will need to override the default
+configurations. Here is an example of how you could connect to a nonstandard apiserver that uses port 3443 for metrics
+and custom TLS certs stored in the /etc/myapiserver/ directory.
+
+```yaml
+agent:
+  config:
+    receivers:
+      receiver_creator:
+        receivers:
+          # Template for overriding the discovery rule and config.
+          # smartagent/{control_plane_receiver}:
+          #   rule: {rule_value}
+          #   config:
+          #     {config_value}
+          smartagent/kubernetes-apiserver:
+            rule: type == "port" && port == 3443 && pod.labels["k8s-app"] == "kube-apiserver"
+            config:
+              clientCertPath: /etc/myapiserver/clients-ca.crt
+              clientKeyPath: /etc/myapiserver/clients-ca.key
+              skipVerify: true
+              useHTTPS: true
+              useServiceAccount: false
+```
+
+### Known issues
+
+Kube Proxy
+* https://github.com/kubernetes/kops/issues/6472
+  * Problem
+    * When using a kops created Kubernetes cluster, a network connectivity issue has been reported that prevents proxy
+      metrics from being collected.
+  * Solution
+    * This issue can be addressed updating the kubeProxy metric bind address in the kops cluster spec:
+      * Set "kubeProxy.metricsBindAddress: 0.0.0.0" in the kops cluster spec.
+      * Deploy the change with "kops update cluster {cluster_name}" and "kops rolling-update cluster {cluster_name}".
+
 ## Logs collection
 
 The helm chart currently utilizes [fluentd](https://docs.fluentd.org/) for Kubernetes logs
@@ -340,31 +420,3 @@ autodetect:
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.
-
-### Override a control plane configuration
-
-If your control plane is using non-standard ports or custom TLS certificates, then you can provide a custom
-configuration so the otel-collector agent can still successfully connect to it.
-
-To collect control plane metrics, we use a
-[receiver creator](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md)
-that instantiates
-[smartagent/{control_plane_component}](https://docs.splunk.com/observability/gdi/orchestration.html#nav-Orchestration)
-receivers at runtime.
-
-Below is an example configuration of how you could set up the agent to connect to an apiserver that is running on port
-8443 (instead of the normal 443) and use custom TLS configurations.
-
-```yaml
-agent:
-  config:
-    receivers:
-      receiver_creator:
-        receivers:
-          smartagent/kubernetes-apiserver:
-            rule: type == "port" && port == 8443 && pod.labels["k8s-app"] == "kube-apiserver"
-            config:
-              clientCertPath: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-              clientKeyPath: /var/run/secrets/kubernetes.io/serviceaccount/token
-              useServiceAccount: false
-```
