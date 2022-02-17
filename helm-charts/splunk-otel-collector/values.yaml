@@ -211,9 +211,52 @@ extraAttributes:
 agent:
   enabled: true
 
-  # This Flag enables k8s control plane metric collection.
-  # Details about control plane monitoring and related configurations are located in docs/advanced-configuration.md
-  controlPlaneEnabled: true
+  # Metric collection from k8s control plane components.
+  # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
+  controlPlaneMetrics:
+    apiserver:
+      # Specifies whether to collect apiserver metrics.
+      enabled: true
+    controllerManager:
+      # Specifies whether to collect controller manager metrics.
+      enabled: true
+    coredns:
+      # Specifies whether to collect coredns metrics.
+      enabled: true
+    etcd:
+      # Specifies whether to collect etcd metrics.
+      # For set up etcd metrics details see: docs/advanced-configuration.md#setting-up-etcd-metrics
+      enabled: false
+      secret:
+        # The name of the secret the helm chart will create (if name is empty the default name is used) or the name
+        # of a secret that the user created (empty names are not valid for user created secrets).
+        name: ""
+        # Option for creating a new secret or using an existing one.
+        # When secret.create=true, a new kubernetes secret will be created by the helm chart that will contain the
+        # values from clientCert, clientKey, and caFile.
+        # When secret.create=false, the user must set secret.name to a name of a k8s secret the user created.
+        create: false
+        # Used when secret.create=true. The PEM-format CA certificate for the etcd client.
+        # NOTE: The content of the certificate itself should be used here, not the
+        #       file path. The certificate will be stored as a secret in kubernetes.
+        clientCert: ""
+        # Used when secret.create=true. The private key for the etcd client.
+        # NOTE: The content of the key itself should be used here, not the file path.
+        #       The key will be stored as a secret in kubernetes.
+        clientKey: ""
+        # Optional. Used when secret.create=true and skipVerify=false. The PEM-format CA certificate file.
+        # NOTE: The content of the file itself should be used here, not the file path.
+        #       The file will be stored as a secret in kubernetes.
+        caFile: ""
+      # Specifies whether the etcd's TLS cert will be verified. If set to false, a CA certificate must be made
+      # available as part of the etcd secret to verify the TLS cert with.
+      skipVerify: true
+    proxy:
+      # Specifies whether to collect proxy metrics.
+      enabled: true
+    scheduler:
+      # Specifies whether to collect scheduler metrics.
+      enabled: true
 
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must
