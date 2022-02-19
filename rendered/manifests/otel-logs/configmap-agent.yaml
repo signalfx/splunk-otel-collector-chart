@@ -44,6 +44,7 @@ data:
       filter/logs:
         logs:
           exclude:
+            match_type: strict
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"

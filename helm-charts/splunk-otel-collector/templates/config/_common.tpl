@@ -167,6 +167,7 @@ Filter logs processor
 filter/logs:
   logs:
     {{ .Values.logsCollection.containers.useSplunkIncludeAnnotation | ternary "include" "exclude" }}:
+      match_type: strict
       resource_attributes:
         - key: {{ include "splunk-otel-collector.filterAttr" . }}
           value: "true"
