@@ -120,6 +120,9 @@ spec:
         - --config=/conf/relay.yaml
         {{- end }}
         {{- end }}
+        {{- if .Values.clusterReceiver.featureGates }}
+        - --feature-gates={{ .Values.clusterReceiver.featureGates }}
+        {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:

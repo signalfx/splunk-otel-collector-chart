@@ -341,6 +341,9 @@ agent:
   extraVolumes: []
   extraVolumeMounts: []
 
+  # Enable or disable features of the agent.
+  featureGates: ""
+
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
   # Default configuration defined in templates/config/_otel-agent.tpl
   # Any additional fields will be merged into the defaults,
@@ -393,6 +396,9 @@ clusterReceiver:
   # Extra volumes to be mounted to the k8s cluster receiver container.
   extraVolumes: []
   extraVolumeMounts: []
+
+  # Enable or disable features of the cluster receiver.
+  featureGates: ""
 
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
   # Default configuration defined in templates/config/_otel-k8s-cluster-receiver-config.tpl
@@ -941,6 +947,9 @@ gateway:
   # Extra volumes to be mounted to the OTel Collector container.
   extraVolumes: []
   extraVolumeMounts: []
+
+  # Enable or disable features of the gateway.
+  featureGates: ""
 
   # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
   # Default configuration defined in config/otel-collector-config.yaml
