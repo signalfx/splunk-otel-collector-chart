@@ -24,9 +24,6 @@ data:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         api_url: https://api.CHANGEME.signalfx.com
         ingest_url: https://ingest.CHANGEME.signalfx.com
-      splunk_hec/o11y:
-        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
-        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
       http_forwarder:
@@ -150,17 +147,6 @@ data:
       - zpages
       - http_forwarder
       pipelines:
-        logs:
-          exporters:
-          - splunk_hec/o11y
-          processors:
-          - memory_limiter
-          - k8sattributes
-          - batch
-          - filter/logs
-          - resource/logs
-          receivers:
-          - otlp
         logs/signalfx-events:
           exporters:
           - signalfx

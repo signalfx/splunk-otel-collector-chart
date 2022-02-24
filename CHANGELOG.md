@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- [BREAKING CHANGE] Set `profilingEnabled` to default false (#388)
+
 ## [0.43.3] - 2022-02-24
 
 ### Added
