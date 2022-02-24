@@ -345,7 +345,14 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- end -}}
 
 {{/*
-"clusterReceiverServiceName" for the eks/fargate cluster receiver statefulSet
+"clusterReceiverTruncatedName" for the eks/fargate cluster receiver statefulSet name accounting for 11 appended random chars
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverTruncatedName" -}}
+{{ printf "%s-k8s-cluster-receiver" ( include "splunk-otel-collector.fullname" . ) | trunc 52 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+"clusterReceiverServiceName" for the eks/fargate cluster receiver statefulSet headless service
 */}}
 {{- define "splunk-otel-collector.clusterReceiverServiceName" -}}
 {{ printf "%s-k8s-cluster-receiver" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}

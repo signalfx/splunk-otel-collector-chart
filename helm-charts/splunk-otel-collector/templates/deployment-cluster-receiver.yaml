@@ -8,7 +8,8 @@ The second replica monitors the first replica's kubelet and the cluster.
 */}}
 kind: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} StatefulSet {{- else }} Deployment {{- end }}
 metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver
+  {{- /* StatefulSet names must be truncated or the `statefulset.kubernetes.io/pod-name` label value will be too long */}}
+  name: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} {{ template "splunk-otel-collector.clusterReceiverTruncatedName" . }} {{- else }} {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver {{- end }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
