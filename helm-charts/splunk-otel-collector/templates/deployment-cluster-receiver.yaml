@@ -180,6 +180,11 @@ spec:
         resources:
           {{- toYaml $clusterReceiver.resources | nindent 10 }}
         volumeMounts:
+        {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
+        {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
         {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
@@ -197,6 +202,11 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+      - name: secret
+        secret:
+          secretName: {{ template "splunk-otel-collector.secret" . }}
+      {{- end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       - name: init-eks-fargate-cluster-receiver-script
         configMap:
