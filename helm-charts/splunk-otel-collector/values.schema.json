@@ -362,6 +362,16 @@
         "securityContext": {
           "type": "object"
         },
+	      "maxUnavailable": {
+	        "oneOf": [
+	          {
+	            "type": "string"
+            },
+            {
+	            "type": "integer"
+	          }
+	        ]
+	      },
         "annotations": {
           "type": "object"
         },
