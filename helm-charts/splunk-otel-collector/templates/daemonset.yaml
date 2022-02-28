@@ -23,6 +23,8 @@ metadata:
 spec:
   updateStrategy:
     type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.agent.maxUnavailable }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}

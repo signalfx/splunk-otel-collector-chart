@@ -279,6 +279,10 @@ agent:
   #   runAsUser: 20000
   #   runAsGroup: 20000
 
+  # Specifies the maximum of pods that can be unavailable during update process.
+  # Can be an absolute number or a percentage. The default is 1.
+  maxUnavailable: 1
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
