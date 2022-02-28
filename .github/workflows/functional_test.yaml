@@ -89,7 +89,7 @@ jobs:
           kubectl get pods --all-namespaces
           kubectl logs -l component=agent-collector
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
 
