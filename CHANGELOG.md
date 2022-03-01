@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.43.5] - 2022-03-02
+
+### Fixed
+
+- Add missing splunk-otel-collector secret to gateway and cluster receiver deployment (#390)
+
 ## [0.43.4] - 2022-02-25
 
 ### Changed
