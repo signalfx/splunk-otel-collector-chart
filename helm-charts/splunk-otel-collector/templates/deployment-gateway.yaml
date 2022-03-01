@@ -139,6 +139,11 @@ spec:
         resources:
           {{- toYaml $gateway.resources | nindent 10 }}
         volumeMounts:
+        {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
+        {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
         {{- if $gateway.extraVolumeMounts }}
@@ -152,6 +157,11 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+      - name: secret
+        secret:
+          secretName: {{ template "splunk-otel-collector.secret" . }}
+      {{- end }}
       {{- if $gateway.extraVolumes }}
       {{- toYaml $gateway.extraVolumes | nindent 6 }}
       {{- end }}
