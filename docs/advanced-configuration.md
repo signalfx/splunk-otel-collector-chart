@@ -193,8 +193,11 @@ for the Fargate distribution has two primary differences between regular `eks` t
 
 ## Control Plane metrics
 
-By setting `agent.controlPlaneEnabled=true` the helm chart will set up the otel-collector agent to collect metrics from
-the control plane.
+By setting `agent.controlPlaneMetrics.{component}.enabled=true` the helm chart will set up the otel-collector agent to
+collect metrics from a particular control plane component. Most metrics can be collected from the control plane
+with no extra configuration, however, extra configuration steps must be taken to collect metrics from etcd (
+[see below](#setting-up-etcd-metrics)
+) due to TLS security requirements.
 
 To collect control plane metrics, the helm chart has the otel-collector agent on each node use the
 [receiver creator](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md)
@@ -226,10 +229,105 @@ The default configurations for the control plane receivers can be found in
 Here are the documentation links that contain configuration options and supported metrics information for each receiver
 used to collect metrics from the control plane.
 * [smartagent/coredns](https://docs.splunk.com/Observability/gdi/coredns/coredns.html)
+* [smartagent/etcd](https://docs.splunk.com/Observability/gdi/etcd/etcd.html)
 * [smartagent/kube-controller-manager](https://docs.splunk.com/Observability/gdi/kube-controller-manager/kube-controller-manager.html)
 * [smartagent/kubernetes-apiserver](https://docs.splunk.com/Observability/gdi/kubernetes-apiserver/kubernetes-apiserver.html)
 * [smartagent/kubernetes-proxy](https://docs.splunk.com/Observability/gdi/kubernetes-proxy/kubernetes-proxy.html)
 * [smartagent/kubernetes-scheduler](https://docs.splunk.com/Observability/gdi/kubernetes-scheduler/kubernetes-scheduler.html)
+
+### Setting up etcd metrics
+
+The etcd metrics cannot be collected out of box because etcd requires TLS authentication for communication. Below, we
+have supplied a couple methods for setting up TLS authentication between etcd and the otel-collector agent. The etcd TLS
+client certificate and key play a critical role in the security of the cluster, handle them with care and avoid storing
+them in unsecured locations. To limit unnecessary access to the etcd certificate and key, you should deploy the helm
+chart into a namespace that is isolated from other unrelated resources.
+
+#### Method 1: Deploy the helm chart with the etcd certificate and key as values
+The easiest way to set up the TLS authentication for etcd metrics is to retrieve the client certificate and key from an
+etcd pod and directly use them in the values.yaml (or using --set=). The helm chart will set up the rest. The helm chart
+will add the client certificate and key to a newly created kubernetes secret and then configure the etcd receiver to use
+them.
+
+You can get the contents of the certificate and key by running these commands. The path to the certificate and key can
+vary depending on your Kubernetes distribution.
+```bash
+# The steps for kubernetes and openshift are listed here.
+# For kubernetes:
+etcd_pod_name=$(kubectl get pods -n kube-system -l k8s-app=etcd-manager-events -o=name |  sed "s/^.\{4\}//" | head -n 1)
+kubectl exec -it -n kube-system {etcd_pod_name} cat /etc/kubernetes/pki/etcd-manager/etcd-clients-ca.crt
+kubectl exec -it -n kube-system {etcd_pod_name} cat /etc/kubernetes/pki/etcd-manager/etcd-clients-ca.key
+# For openshift:
+etcd_pod_name=$(kubectl get pods -n openshift-etcd -l k8s-app=etcd -o=name |  sed "s/^.\{4\}//" | head -n 1)
+kubectl exec -it -n openshift-etcd {etcd_pod_name} cat /etc/kubernetes/static-pod-certs/secrets/etcd-all-certs/etcd-serving-metrics-{etcd_pod_name}.crt
+kubectl exec -it -n openshift-etcd {etcd_pod_name} cat /etc/kubernetes/static-pod-certs/secrets/etcd-all-certs/etcd-serving-metrics-{etcd_pod_name}.key
+```
+
+Once you have the contents of your certificate and key, insert them into your values.yaml. Since the helm chart will
+create the secret, you must specify agent.controlPlaneMetrics.etcd.secret.create=true. Then install your helm chart.
+```yaml
+agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
+      secret:
+        create: true
+        # The PEM-format CA certificate for this client.
+        clientCert: |
+          -----BEGIN CERTIFICATE-----
+          ...
+          -----END CERTIFICATE-----
+        # The private key for this client.
+        clientKey: |
+          -----BEGIN RSA PRIVATE KEY-----
+          ...
+          -----END RSA PRIVATE KEY-----
+        # Optional. The CA cert that has signed the TLS cert.
+        # caFile: |
+```
+
+#### Method 2: Deploy the helm chart with a secret that contains the etcd certificate and key
+To set up the TLS authentication for etcd metrics with this method, the otel-collector agents will need access to a
+kubernetes secret that contains the etcd TLS client certificate and key. The name of this kubernetes secret must be
+supplied in the helm chart (.Values.agent.controlPlaneMetrics.etcd.secret.name). When installed, the helm chart will
+mount the specified kubernetes secret onto the /otel/etc/etcd directory of the otel-collector agent containers so the
+agent can use it.
+
+Here are the commands for creating a kubernetes secret named splunk-monitoring-etcd.
+```bash
+# The steps for kubernetes and openshift are listed here.
+# For kubernetes:
+etcd_pod_name=$(kubectl get pods -n kube-system -l k8s-app=etcd-manager-events -o=name |  sed "s/^.\{4\}//" | head -n 1)
+kubectl exec -it -n kube-system $etcd_pod_name -- cat /etc/kubernetes/pki/etcd-manager/etcd-clients-ca.crt > ./tls.crt
+kubectl exec -it -n kube-system $etcd_pod_name -- cat /etc/kubernetes/pki/etcd-manager/etcd-clients-ca.key > ./tls.key
+# For openshift:
+etcd_pod_name=$(kubectl get pods -n openshift-etcd -l k8s-app=etcd -o=name |  sed "s/^.\{4\}//" | head -n 1)
+kubectl exec -it -n openshift-etcd {etcd_pod_name} cat /etc/kubernetes/static-pod-certs/secrets/etcd-all-certs/etcd-serving-metrics-{etcd_pod_name}.crt > ./tls.crt
+kubectl exec -it -n openshift-etcd {etcd_pod_name} cat /etc/kubernetes/static-pod-certs/secrets/etcd-all-certs/etcd-serving-metrics-{etcd_pod_name}.key > ./tls.key
+
+# Create the the secret.
+# The input file names must be one of:  tls.crt, tls.key, cacert.pem
+kubectl create secret generic splunk-monitoring-etcd --from-file=./tls.crt --from-file=./tls.key
+# Optional. Include the CA cert that has signed the TLS cert.
+# kubectl create secret generic splunk-monitoring-etcd --from-file=./tls.crt --from-file=./tls.key --from-file=cacert.pem
+
+# Cleanup the local files.
+rm ./tls.crt
+rm ./tls.key
+```
+
+Once your kubernetes secret is created, specify the secret's name in values.yaml. Since the helm chart will be using the
+secret you created, make sure to set .Values.agent.controlPlaneMetrics.etc.secret.create=false. Then install your helm
+chart.
+```yaml
+agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
+      secret:
+        create: false
+        name: splunk-monitoring-etcd
+```
 
 ### Using custom configurations for nonstandard control plane components
 

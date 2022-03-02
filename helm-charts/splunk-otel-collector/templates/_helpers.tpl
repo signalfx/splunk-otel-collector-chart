@@ -136,13 +136,24 @@ Whether profiling data is enabled (applicable to Splunk Observability only).
 {{- end -}}
 
 {{/*
-Define name for the Secret
+Define name for the Splunk Secret
 */}}
 {{- define "splunk-otel-collector.secret" -}}
 {{- if .Values.secret.name -}}
 {{- printf "%s" .Values.secret.name -}}
 {{- else -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Define name for the etcd Secret
+*/}}
+{{- define "splunk-otel-collector.etcdSecret" -}}
+{{- if .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
+{{- printf "%s" .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
+{{- else -}}
+{{- default .Chart.Name .Values.nameOverride | printf "%s-etcd" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -182,20 +193,6 @@ Get Splunk Observability Access Token.
 */}}
 {{- define "splunk-otel-collector.o11yAccessToken" -}}
 {{- .Values.splunkObservability.accessToken | default .Values.splunkAccessToken | default "" -}}
-{{- end -}}
-
-{{/*
-Helper that returns the controlPlaneEnabled parameter taking care of backward compatibility with the old parameter
-name "autodetect.controlPlane".
-*/}}
-{{- define "splunk-otel-collector.controlPlaneEnabled" -}}
-{{- if ne (toString .Values.agent.controlPlaneEnabled) "<nil>" }}
-{{- .Values.agent.controlPlaneEnabled }}
-{{- else if ne (toString .Values.autodetect.controlPlane) "<nil>" }}
-{{- .Values.autodetect.controlPlane }}
-{{- else }}
-{{- true }}
-{{- end -}}
 {{- end -}}
 
 {{/*

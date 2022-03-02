@@ -79,7 +79,7 @@ receivers:
       # Verified with Kubernetes v1.22 and Openshift v4.9.
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
-      {{- if (eq (include "splunk-otel-collector.controlPlaneEnabled" .) "true") }}
+      {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
       smartagent/coredns:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
@@ -98,6 +98,32 @@ receivers:
           {{- else }}
           port: 9153
           {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+      smartagent/etcd:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["k8s-app"] == "etcd"
+        {{- else }}
+        rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main")
+        {{- end }}
+        config:
+          clientCertPath: /otel/etc/etcd/tls.crt
+          clientKeyPath: /otel/etc/etcd/tls.key
+          useHTTPS: true
+          type: etcd
+          {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+          skipVerify: true
+          {{- else }}
+          caCertPath: /otel/etc/etcd/cacert.pem
+          skipVerify: false
+          {{- end }}
+          {{- if eq .Values.distribution "openshift" }}
+          port: 9979
+          {{- else }}
+          port: 4001
+          {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
       smartagent/kube-controller-manager:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["app"] == "kube-controller-manager" && labels["kube-controller-manager"] == "true"
@@ -112,6 +138,8 @@ receivers:
           type: kube-controller-manager
           useHTTPS: true
           useServiceAccount: true
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
       smartagent/kubernetes-apiserver:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
@@ -125,6 +153,8 @@ receivers:
           type: kubernetes-apiserver
           useHTTPS: true
           useServiceAccount: true
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       smartagent/kubernetes-proxy:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["app"] == "sdn"
@@ -140,6 +170,8 @@ receivers:
           {{- else }}
           port: 10249
           {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       smartagent/kubernetes-scheduler:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["app"] == "openshift-kube-scheduler" && labels["scheduler"] == "true"

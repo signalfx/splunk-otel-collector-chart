@@ -352,6 +352,11 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
+        {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+        - name: etcd-secret
+          mountPath: /otel/etc/etcd
+          readOnly: true
+        {{- end }}
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
         {{- if .Values.isWindows }}
         - name: varlog
@@ -462,6 +467,11 @@ spec:
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+      - name: etcd-secret
+        secret:
+          secretName: {{ template "splunk-otel-collector.etcdSecret" . }}
       {{- end }}
       - name: otel-configmap
         configMap:

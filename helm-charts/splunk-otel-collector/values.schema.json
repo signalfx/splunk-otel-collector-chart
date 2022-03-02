@@ -289,7 +289,145 @@
           "type": "boolean"
         },
         "controlPlaneEnabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "deprecated": true
+        },
+        "controlPlaneMetrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "apiserver": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "controllerManager": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "coredns": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "etcd": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "secret": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "create": {
+                      "type": "boolean"
+                    },
+                    "clientCert": {
+                      "type": "string"
+                    },
+                    "clientKey": {
+                      "type": "string"
+                    },
+                    "caFile": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "skipVerify": {
+                  "type": "boolean"
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "$comment": "if etcd metrics are enabled",
+                    "properties": {
+                      "enabled": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "if": {
+                      "$comment": "if the helm chart will create the etcd k8s secret",
+                      "properties": {
+                        "secret": {
+                          "properties": {
+                            "create": {
+                              "const": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "then": {
+                      "$comment": "then require a clientCert and clientKey that are not empty strings",
+                      "properties": {
+                        "secret": {
+                          "properties": {
+                            "clientCert": {
+                              "minLength": 1
+                            },
+                            "clientKey": {
+                              "minLength": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "else": {
+                      "$comment": "then require a k8s secret name for a secret the user created that is not an empty string",
+                      "properties": {
+                        "secret": {
+                          "properties": {
+                            "name": {
+                              "minLength": 1
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "proxy": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "scheduler": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
         },
         "ports": {
           "type": "object",
