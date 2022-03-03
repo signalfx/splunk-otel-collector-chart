@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Added support to collect control plane component metrics; controller-manager, coredns, proxy, scheduler (#383)
+- Added support to collect control plane component metrics: controller-manager, coredns, proxy, scheduler (#383)
 
 ### Fixed
 
