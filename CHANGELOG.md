@@ -4,41 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
-## [0.44.3] - 2022-03-03
+## [0.44.4] - 2022-03-03
 
 ### Added
 
 - This is a test (#38432)
-
-## [0.44.0] - 2022-03-03
-
-### Added
-
-- Control plane metrics support: etcd (#384)
-
-## [0.43.5] - 2022-03-02
-
-### Fixed
-
-- Add missing splunk-otel-collector secret to gateway and cluster receiver deployment (#390)
-
-## [0.43.4] - 2022-02-25
-
-### Changed
-
-- [BREAKING CHANGE] Set `profilingEnabled` to default false (#388)
-
-## [0.43.2] - 2022-02-02
-
-### Added
-
-- Support of profiling data for Splunk Observability (#376)
-
-### Changed
-
-- [BREAKING CHANGE] OTel Collector Agent now overrides host and cloud attributes
-  of logs, metrics and traces that are sent through it (#375). See [upgrade
-  guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0431-to-0432)
 
 ## [0.43.1] - 2022-02-01
 
