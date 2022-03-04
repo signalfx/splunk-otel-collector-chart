@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.44.3] - 2022-03-03
+
+### Added
+
+- This is a test (#38432)
+
 ## [0.44.0] - 2022-03-03
 
 ### Added
@@ -21,17 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - [BREAKING CHANGE] Set `profilingEnabled` to default false (#388)
-
-## [0.43.3] - 2022-02-24
-
-### Added
-
-- Added support to collect control plane component metrics: controller-manager, coredns, proxy, scheduler (#383)
-
-### Fixed
-
-- Explicitly set match_type parameter in filter processor (#385)
-- Truncate eks/fargate cluster receiver StatefulSet names (#386)
 
 ## [0.43.2] - 2022-02-02
 
