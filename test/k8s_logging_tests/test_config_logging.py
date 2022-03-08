@@ -272,3 +272,56 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
     logger.info("Splunk received %s events in the last minute",
                 len(events))
     assert len(events) >= expected
+
+# Journald func test
+@pytest.mark.parametrize("test_input,expected", [
+    ("test_journald_data", 1)
+])
+def test_journald_logs(setup, test_input, expected):
+    '''
+    Test that user specified index can successfully index the
+    journald log stream from k8s. If no index is specified, default
+    index "ci_events" will be used.
+    '''
+    logger.info("testing test_journald_logs input={0} expected={1} event(s)".format(
+        test_input, expected))
+    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
+    search_query = "index=" + index_logging + " sourcetype=kube:journald*"
+#    search_query = "index=main" + " sourcetype=kube:journald*"
+
+    events = check_events_from_splunk(start_time="-1h@h",
+                                      url=setup["splunkd_url"],
+                                      user=setup["splunk_user"],
+                                      query=["search {0}".format(
+                                          search_query)],
+                                      password=setup["splunk_password"])
+    logger.info("Splunk received %s events in the last hour",
+                len(events))
+    assert len(events) >= expected
+
+@pytest.mark.parametrize("test_input,expected", [
+    ("containerd.service", 1),
+    ("docker.service", 1),
+    ("kubelet.service", 1),
+    ("empty_unit", 0)
+])
+def test_journald_unit(setup, test_input, expected):
+    '''
+    Test that all configured journald units are present in target index.
+    '''
+    logger.info("testing for presence of journald_unit={0} expected={1} event(s)".format(
+        test_input, expected))
+    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
+    source = ' source=""' if test_input == "empty_source" else ' source=' + test_input
+    unit = ' journald.unit.name=""' if test_input == "empty_unit" else ' journald.unit.name=' + test_input
+    search_query = "index=" + index_logging + " journald.unit.name=*"
+    events = check_events_from_splunk(start_time="-1h@h",
+                                      url=setup["splunkd_url"],
+                                      user=setup["splunk_user"],
+                                      query=["search {0}".format(
+                                          search_query)],
+                                      password=setup["splunk_password"])
+    logger.info("Splunk received %s events in the last minute",
+                len(events))
+    assert len(events) >= expected if test_input != "empty_source" else len(
+        events) == expected

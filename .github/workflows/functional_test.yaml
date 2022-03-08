@@ -1,6 +1,6 @@
 name: Splunk Platform Functional Test
 
-on: pull_request
+on: push
 
 jobs:
   e2e-test:
@@ -45,7 +45,7 @@ jobs:
           sudo mv minikube /usr/local/bin/
           sudo sysctl fs.protected_regular=0
           # Start Minikube and Wait
-          minikube start --driver=docker --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
+          minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
           kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
           export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
           until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
