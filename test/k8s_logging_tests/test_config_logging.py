@@ -273,7 +273,6 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
                 len(events))
     assert len(events) >= expected
 
-# Journald func test
 @pytest.mark.parametrize("test_input,expected", [
     ("test_journald_data", 1)
 ])
@@ -287,7 +286,6 @@ def test_journald_logs(setup, test_input, expected):
         test_input, expected))
     index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
     search_query = "index=" + index_logging + " sourcetype=kube:journald*"
-#    search_query = "index=main" + " sourcetype=kube:journald*"
 
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
@@ -312,16 +310,14 @@ def test_journald_unit(setup, test_input, expected):
     logger.info("testing for presence of journald_unit={0} expected={1} event(s)".format(
         test_input, expected))
     index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    source = ' source=""' if test_input == "empty_source" else ' source=' + test_input
-    unit = ' journald.unit.name=""' if test_input == "empty_unit" else ' journald.unit.name=' + test_input
-    search_query = "index=" + index_logging + " journald.unit.name=*"
+    search_query = "index=" + index_logging + " sourcetype=kube:journald:" + test_input
     events = check_events_from_splunk(start_time="-1h@h",
                                       url=setup["splunkd_url"],
                                       user=setup["splunk_user"],
                                       query=["search {0}".format(
                                           search_query)],
                                       password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected if test_input != "empty_source" else len(
+    logger.info("Splunk received %s events in the last hour",
+                    len(events))
+    assert len(events) >= expected if test_input != "empty_unit" else len(
         events) == expected
