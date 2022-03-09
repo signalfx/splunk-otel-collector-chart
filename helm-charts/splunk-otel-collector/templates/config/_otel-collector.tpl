@@ -193,6 +193,9 @@ service:
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
+        {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
+        - resource/add_environment
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

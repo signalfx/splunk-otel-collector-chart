@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.44.1] - 2022-03-08
+
+### Fixed
+
+- Add environment processor to metrics pipeline when sending metrics to Splunk Platform (#399)
+
 ## [0.44.0] - 2022-03-03
 
 ### Added

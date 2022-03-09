@@ -693,6 +693,9 @@ service:
         - batch
         - resourcedetection
         - resource
+        {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
+        - resource/add_environment
+        {{- end }}
         {{- if .Values.isWindows }}
         - metricstransform
         {{- end }}
