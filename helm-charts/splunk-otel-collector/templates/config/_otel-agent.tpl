@@ -76,7 +76,9 @@ receivers:
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
+      # Distributions besides Kubernetes and Openshift are not supported.
       # Verified with Kubernetes v1.22 and Openshift v4.9.
+      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
@@ -183,7 +185,8 @@ receivers:
             metric_source: kubernetes-scheduler
           port: 10251
           type: kubernetes-scheduler
-      {{- end}}
+      {{- end }}
+      {{- end }}
 
   kubeletstats:
     collection_interval: 10s
