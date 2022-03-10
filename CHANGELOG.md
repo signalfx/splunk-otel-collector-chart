@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.43.0 (#407)
+
 ### Fixed
 
 - Bug where Prometheus errors out using default configuration on EKS and GKE (#401, #405)
