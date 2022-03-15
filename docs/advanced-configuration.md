@@ -524,11 +524,10 @@ details see the
 
 Helm Install Example:
 ```bash
-# Due to syntax limitations, when using "," characters between feature gate identifiers you must escape them with "\\".
-helm install {name} --set agent.featureGates=+feature1 --set=clusterReceiver.featureGates=feature1\\,-feature2 {other_flags}
+helm install {name} --set agent.featureGates=+feature1 --set clusterReceiver.featureGates=feature2 --set gateway.featureGates=-feature2 {other_flags}
 ```
-Would result in the agent having feature1 enabled, the clusterReceiver having feature1 enabled, and the clusterReceiver
-having feature2 disabled.
+Would result in the agent having feature1 enabled, the clusterReceiver having feature2 enabled, and the gateway having
+feature2 disabled.
 
 ### Highlighted feature gates
 - receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
