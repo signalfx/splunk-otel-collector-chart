@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add support for otelcol feature gates to the agent, clusterReceiver, and gateway (#410)
+
 ## [0.45.0] - 2022-03-10
 
 ### Changed

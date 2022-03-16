@@ -72,6 +72,9 @@ spec:
         - /otelcol
         - --config=/conf/relay.yaml
         {{- end }}
+        {{- if .Values.gateway.featureGates }}
+        - --feature-gates={{ .Values.gateway.featureGates }}
+        {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:

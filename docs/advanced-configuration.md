@@ -515,6 +515,37 @@ autodetect:
   prometheus: true
 ```
 
+## Using feature gates
+Enable or disable features of the otel-collector agent, clusterReceiver, and gateway (respectively) using feature
+gates. Use the agent.featureGates, clusterReceiver.featureGates, and gateway.featureGates configs to enable or disable
+features, these configs will be used to populate the otelcol binary startup argument "--feature-gates". For more
+details see the
+[feature gate documentation](https://github.com/open-telemetry/opentelemetry-collector/blob/main/service/featuregate/README.md).
+
+Helm Install Example:
+```bash
+helm install {name} --set agent.featureGates=+feature1 --set clusterReceiver.featureGates=feature2 --set gateway.featureGates=-feature2 {other_flags}
+```
+Would result in the agent having feature1 enabled, the clusterReceiver having feature2 enabled, and the gateway having
+feature2 disabled.
+
+### Highlighted feature gates
+- receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
+  - Description
+    - The k8s container and node cpu metrics being reported by the k8sclusterreceiver are transitioning from being
+    reported as integer millicpu units to being reported as double cpu units to adhere to opentelemetry cpu metric
+    specifications. Please update any monitoring this might affect, the change will cause cpu metrics to be double
+    instead of integer values as well as metric values will be scaled down by 1000x.
+  - Availability
+    - v0.47.0 - v0.53.0
+  - Usage
+    - Install with the feature gate enabled:
+      - helm install {name} --set clusterReceiver.featureGates=receiver.k8sclusterreceiver.reportCpuMetricsAsDouble {other_flags}
+    - Install with the feature gate disabled:
+      - helm install {name} --set clusterReceiver.featureGates=-receiver.k8sclusterreceiver.reportCpuMetricsAsDouble {other_flags}
+  - More Information
+    - [k8sclusterreceiver feature gate configurations](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md#feature-gate-configurations)
+
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.
