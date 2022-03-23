@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Bug where the k8sclusterreceiver emits a few Kubernetes cpu metrics improperly (#419)
+  - [BREAKING CHANGE] The Splunk Otel Collector added a feature gate to enable a
+    bug fix that makes the k8sclusterreceiver emit a few Kubernetes cpu
+    metrics differently to properly adhere to OpenTelemetry specifications.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0470-to-0471)
+
 ## [0.47.0] - 2022-03-30
 
 ### Changed
