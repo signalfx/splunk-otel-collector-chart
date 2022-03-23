@@ -358,9 +358,6 @@ receivers:
         is_first_entry: '($$.log) matches {{ .firstEntryRegex | quote }}'
       {{- end }}
       {{- end }}
-      {{- with .Values.logsCollection.containers.extraOperators }}
-      {{ . | toYaml | nindent 6 }}
-      {{- end }}
       # Clean up log record
       - type: restructure
         id: clean-up-log-record
@@ -368,8 +365,10 @@ receivers:
           - move:
               from: log
               to: $$
+      {{- with .Values.logsCollection.containers.extraOperators }}
+      {{ . | toYaml | nindent 6 }}
+      {{- end }}
   {{- end }}
-
   {{- if .Values.logsCollection.extraFileLogs }}
   {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
   {{- end }}
