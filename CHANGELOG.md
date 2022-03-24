@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Bug that ignores extra operators when both `extraOperators` and `multilineConfigs` are provided (#421)
+
 ## [0.46.0] - 2022-03-17
 
 ### Added
