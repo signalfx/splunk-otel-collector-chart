@@ -354,6 +354,7 @@ receivers:
       - type: recombine
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
         output: clean-up-log-record
+        source_identifier: $$resource["com.splunk.source"]
         combine_field: log
         is_first_entry: '($$.log) matches {{ .firstEntryRegex | quote }}'
       {{- end }}
