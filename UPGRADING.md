@@ -5,8 +5,9 @@
 [#421 extra operators for container logs are inserted after all default data
 processes](https://github.com/signalfx/splunk-otel-collector-chart/pull/421)
 
-If you are referencing fields in log body (ie, `$$.pod_name`), change them
-corresponding attributes/resource (ie, `$$resource["k8s.pod.name"]`).
+If you have any custom log processing operators defined in `logsCollection.containers.extraOperators`
+configuration, change any references to log body fields (ie, `$$.pod_name`) in the operators to
+corresponding resource attributes (ie, `$$resource["k8s.pod.name"]`).
 
 ## 0.43.1 to 0.43.2
 
