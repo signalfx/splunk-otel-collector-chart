@@ -7,6 +7,7 @@ processes](https://github.com/signalfx/splunk-otel-collector-chart/pull/421)
 
 If you are referencing fields in log body (ie, `$$.pod_name`), change them
 corresponding attributes/resource (ie, `$$resource["k8s.pod.name"]`).
+If you are referencing log message itself by `$$.log`, you need to change it to `$$`.
 
 ## 0.43.1 to 0.43.2
 
