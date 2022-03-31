@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.47.1] - 2022-03-31
+
 ### Fixed
 
 - Bug where the k8sclusterreceiver emits a few Kubernetes cpu metrics improperly (#419)
