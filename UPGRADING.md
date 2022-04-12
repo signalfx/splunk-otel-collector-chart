@@ -50,17 +50,17 @@ cluster receiver logs that look like this.
 `Failed to watch *v1.CronJob: failed to list *v1.CronJob: the server could not
 find the requested resource`
 
-To better support users, in a future release we are adding a feature gate that
-will enable users to use the k8s_cluster receiver at the last version that
+To better support users, in a future release we are adding a feature that
+will allow users to use the last version of the k8s_cluster receiver that
 supported Kubernetes clusters below version 1.21.
 
 If you still want to keep the previous behavior of the k8s_cluster receiver and
 upgrade to v0.45.0 of the chart, make sure your Kubernetes cluster uses one of
 the following versions.
 - `kubernetes`, `aks`, `eks`, `eks/fargate`, `gke`,  `gke/autopilot`
-  - Use v1.21 or above
+  - Use version 1.21 or above
 - `openshift`
-  - Use v4.8 or above
+  - Use version 4.8 or above
 
 ## 0.43.1 to 0.43.2
 
