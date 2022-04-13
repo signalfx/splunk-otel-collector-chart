@@ -389,24 +389,23 @@ receivers:
     priority: {{ $unit.priority }}
     operators:
     - type: add
-        field: $$resource["com.splunk.source"]
-        value: {{ $.Values.logsCollection.journald.directory }}
+      field: $$resource["com.splunk.source"]
+      value: {{ $.Values.logsCollection.journald.directory }}
     - type: add
-        field: $$resource["com.splunk.sourcetype"]
-        value: EXPR("kube:journald:"+$$._SYSTEMD_UNIT)
+      field: $$resource["com.splunk.sourcetype"]
+      value: 'EXPR("kube:journald:"+$$._SYSTEMD_UNIT)'
     - type: add
-        field: $$resource.com.splunk.index
-        value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
+      field: $$resource["com.splunk.index"]
+      value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index }}
     - type: add
-        field: $$resource["host.name"]
-        value: EXPR(env("K8S_NODE_NAME"))
-    # adding journald priority and unit as attributes
+      field: $$resource["host.name"]
+      value: 'EXPR(env("K8S_NODE_NAME"))'
     - type: add
-        field: $$resource["journald.priority.number"]
-        value: EXPR($$.PRIORITY)
+      field: $$resource["journald.priority.number"]
+      value: 'EXPR($$.PRIORITY)'
     - type: add
-        field: $$resource["journald.unit.name"]
-        value: EXPR($$._SYSTEMD_UNIT)
+      field: $$resource["journald.unit.name"]
+      value: 'EXPR($$._SYSTEMD_UNIT)'
 
     # extract MESSAGE field into the log body and discard rest of the fields
     - type: move
