@@ -280,14 +280,12 @@ receivers:
         id: crio-recombine
         combine_field: log
         is_last_entry: "($$.logtag) == 'F'"
-      - type: restructure
+      - type: add
         id: crio-handle_empty_log
         output: filename
         if: $$.log == nil
-        ops:
-          - add:
-              field: log
-              value: ""
+        field: $$body.log
+        value: ""
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
       # Parse CRI-Containerd format
@@ -301,14 +299,12 @@ receivers:
         id: containerd-recombine
         combine_field: log
         is_last_entry: "($$.logtag) == 'F'"
-      - type: restructure
+      - type: add
         id: containerd-handle_empty_log
         output: filename
         if: $$.log == nil
-        ops:
-          - add:
-              field: log
-              value: ""
+        field: $$body.log
+        value: ""
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
       # Parse Docker format
@@ -318,10 +314,10 @@ receivers:
           parse_from: time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       {{- end }}
-      - type: metadata
+      - type: add
         id: filename
-        resource:
-          com.splunk.source: EXPR($$attributes["file.path"])
+        field: $$resource["com.splunk.source"]
+        value: EXPR($$attributes["file.path"])
       # Extract metadata from file path
       - type: regex_parser
         id: extract_metadata_from_filepath
@@ -332,16 +328,27 @@ receivers:
         {{- end }}
         parse_from: $$attributes["file.path"]
       # Move out attributes to Attributes
-      - type: metadata
-        resource:
-          k8s.pod.uid: 'EXPR($$.uid)'
-          k8s.container.restart_count: 'EXPR($$.restart_count)'
-          k8s.container.name: 'EXPR($$.container_name)'
-          k8s.namespace.name: 'EXPR($$.namespace)'
-          k8s.pod.name: 'EXPR($$.pod_name)'
-          com.splunk.sourcetype: 'EXPR("kube:container:"+$$.container_name)'
-        attributes:
-          log.iostream: 'EXPR($$.stream)'
+      - type: add
+        field: $$resource["k8s.pod.uid"]
+        value: EXPR($$.uid)
+      - type: add
+        field: $$resource["k8s.container.restart_count"]
+        value: EXPR($$.restart_count)
+      - type: add
+        field: $$resource["k8s.container.name"]
+        value: EXPR($$.container_name)
+      - type: add
+        field: $$resource["k8s.namespace.name"]
+        value: EXPR($$.namespace)
+      - type: add
+        field: $$resource["k8s.pod.name"]
+        value: EXPR($$.pod_name)
+      - type: add
+        field: $$resource["com.splunk.sourcetype"]
+        value: EXPR("kube:container:"+$$.container_name)
+      - type: add
+        field: $$attributes["log.iostream"]
+        value: EXPR($$.stream)
       {{- if .Values.logsCollection.containers.multilineConfigs }}
       - type: router
         routes:
@@ -363,12 +370,10 @@ receivers:
       {{ . | toYaml | nindent 6 }}
       {{- end }}
       # Clean up log record
-      - type: restructure
+      - type: move
         id: clean-up-log-record
-        ops:
-          - move:
-              from: log
-              to: $$
+        from: $$body.log
+        to: $$
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
@@ -383,22 +388,31 @@ receivers:
     units: [{{ $unit.name }}]
     priority: {{ $unit.priority }}
     operators:
-    - type: metadata
-      resource:
-        com.splunk.source: {{ $.Values.logsCollection.journald.directory }}
-        com.splunk.sourcetype: 'EXPR("kube:journald:"+$$._SYSTEMD_UNIT)'
-        com.splunk.index: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
-        host.name: 'EXPR(env("K8S_NODE_NAME"))'
-        # adding journald priority and unit as attributes
-        journald.priority.number: 'EXPR($$.PRIORITY)'
-        journald.unit.name: 'EXPR($$._SYSTEMD_UNIT)'
+    - type: add
+        field: $$resource["com.splunk.source"]
+        value: {{ $.Values.logsCollection.journald.directory }}
+    - type: add
+        field: $$resource["com.splunk.sourcetype"]
+        value: EXPR("kube:journald:"+$$._SYSTEMD_UNIT)
+    - type: add
+        field: $$resource.com.splunk.index
+        value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index}}
+    - type: add
+        field: $$resource["host.name"]
+        value: EXPR(env("K8S_NODE_NAME"))
+    # adding journald priority and unit as attributes
+    - type: add
+        field: $$resource["journald.priority.number"]
+        value: EXPR($$.PRIORITY)
+    - type: add
+        field: $$resource["journald.unit.name"]
+        value: EXPR($$._SYSTEMD_UNIT)
+
     # extract MESSAGE field into the log body and discard rest of the fields
-    - type: restructure
+    - type: move
       id: set-body
-      ops:
-        - move:
-            from: MESSAGE
-            to: $$
+      from: $$body.MESSAGE
+      to: $$
   {{- end }}
   {{- end }}
   {{- end }}
