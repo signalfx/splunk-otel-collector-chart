@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.48.0] - 2022-04-13
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.48.0 (#434)
+
 ## [0.47.1] - 2022-03-31
 
 ### Fixed
@@ -35,6 +41,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Upgrade splunk-otel-collector image to 0.45.0 (#407)
+- [BREAKING CHANGE] Use newer batch and autoscaling APIs in the Kubernetes
+  cluster receiver (#433). The Kubernetes cluster receiver will not be able to
+  collect all the metrics it previously did for Kubernetes clusters with
+  versions below 1.21 or Openshift clusters with versions below 4.8.
+  See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0441-to-0450)
 
 ### Fixed
 

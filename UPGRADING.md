@@ -30,6 +30,38 @@ clusterReceiver:
   featureGates: receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
 ```
 
+## 0.44.1 to 0.45.0
+
+[[receiver/k8sclusterreceiver] Use newer batch and autoscaling APIs](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/7406)
+
+Kubernetes clusters with version 1.20 stopped having active support on
+2021-12-28 and had an end of life date on
+[2022-02-28](https://kubernetes.io/releases/patch-releases/#non-active-branch-history).
+The k8s_cluster receiver was refactored to use newer Kubernetes APIs that
+are available starting in Kubernetes version 1.21. The latest version of the
+k8s_cluster receiver will no longer be able to collect all the
+[previously available metrics](https://docs.splunk.com/Observability/gdi/kubernetes-cluster/kubernetes-cluster-receiver.html#metrics)
+with Kubernetes clusters that have versions below 1.21.
+
+If version 0.45.0 of the chart cannot collect metrics from your Kubernetes
+cluster that is a version below 1.21, you will see error messages in your
+cluster receiver logs that look like this.
+
+`Failed to watch *v1.CronJob: failed to list *v1.CronJob: the server could not
+find the requested resource`
+
+To better support users, in a future release we are adding a feature that
+will allow users to use the last version of the k8s_cluster receiver that
+supported Kubernetes clusters below version 1.21.
+
+If you still want to keep the previous behavior of the k8s_cluster receiver and
+upgrade to v0.45.0 of the chart, make sure your Kubernetes cluster uses one of
+the following versions.
+- `kubernetes`, `aks`, `eks`, `eks/fargate`, `gke`,  `gke/autopilot`
+  - Use version 1.21 or above
+- `openshift`
+  - Use version 4.8 or above
+
 ## 0.43.1 to 0.43.2
 
 [#375 Resource detection processor is configured to override all host and cloud
