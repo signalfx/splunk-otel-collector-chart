@@ -24,7 +24,7 @@ spec:
   {{ $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
   {{ $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}
   {{ $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
-  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled /* Helm 3.5 (due to Go 1.15) doesn't support newlines in actions. 👉 https://github.com/signalfx/splunk-otel-collector-chart/pull/416 */ }}
+  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled /* Helm 3.5 (due to Go 1.15) doesn't support newlines in actions. 👉 https://github.com/signalfx/splunk-otel-collector-chart/pull/416#issuecomment-1076160057 */ }}
   - name: {{ $key }}
     port: {{ $port.containerPort }}
     targetPort: {{ $key }}
