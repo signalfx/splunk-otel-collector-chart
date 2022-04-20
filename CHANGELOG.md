@@ -4,6 +4,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.48.0] - 2022-04-13
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.48.0 (#434)
+
+## [0.47.1] - 2022-03-31
+
+### Fixed
+
+- Bug where the k8sclusterreceiver emits a few Kubernetes cpu metrics improperly (#419)
+  - [BREAKING CHANGE] The Splunk Otel Collector added a feature gate to enable a
+    bug fix that makes the k8sclusterreceiver emit a few Kubernetes cpu
+    metrics differently to properly adhere to OpenTelemetry specifications.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0470-to-0471)
+
+## [0.47.0] - 2022-03-30
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.47.1 (#422)
+
 ## [0.46.0] - 2022-03-17
 
 ### Added
@@ -19,6 +41,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Upgrade splunk-otel-collector image to 0.45.0 (#407)
+- [BREAKING CHANGE] Use newer batch and autoscaling APIs in the Kubernetes
+  cluster receiver (#433). The Kubernetes cluster receiver will not be able to
+  collect all the metrics it previously did for Kubernetes clusters with
+  versions below 1.21 or Openshift clusters with versions below 4.8.
+  See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0441-to-0450)
 
 ### Fixed
 

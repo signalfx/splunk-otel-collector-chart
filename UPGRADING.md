@@ -1,5 +1,67 @@
 # Upgrade guidelines
 
+## 0.47.0 to 0.47.1
+
+[[receiver/k8sclusterreceiver] Fix k8s node and container cpu metrics not being reported properly](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/8245)
+
+The Splunk Otel Collector added a feature gate to enable a bug fix for three
+metrics. These metrics have a current and a legacy name, we list both as
+pairs (current, legacy) below.
+
+- Affected Metrics
+  - `k8s.container.cpu_request`, `kubernetes.container_cpu_request`
+  - `k8s.container.cpu_limit`, `kubernetes.container_cpu_limit`
+  - `k8s.node.allocatable_cpu`, `kubernetes.node_allocatable_cpu`
+
+1. Check to see if any of your custom monitoring uses the affected metrics.
+Check for the current and legacy names of the affected metrics. If you don't
+use the affected metrics in your custom monitoring, you can stop here.
+2. Read the documentation for the
+[receiver.k8sclusterreceiver.reportCpuMetricsAsDouble](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#highlighted-feature-gates)
+feature gate and the bug fix it applies.
+3. If the bug fix will break any of your custom monitoring for the affected
+metrics, update your monitoring to accommodate the bug fix.
+4. Use the `--set clusterReceiver.featureGates=receiver.k8sclusterreceiver.reportCpuMetricsAsDouble`
+argument with the helm install/upgrade command, or add the following line to
+your custom values.yaml:
+
+```yaml
+clusterReceiver:
+  featureGates: receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
+```
+
+## 0.44.1 to 0.45.0
+
+[[receiver/k8sclusterreceiver] Use newer batch and autoscaling APIs](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/7406)
+
+Kubernetes clusters with version 1.20 stopped having active support on
+2021-12-28 and had an end of life date on
+[2022-02-28](https://kubernetes.io/releases/patch-releases/#non-active-branch-history).
+The k8s_cluster receiver was refactored to use newer Kubernetes APIs that
+are available starting in Kubernetes version 1.21. The latest version of the
+k8s_cluster receiver will no longer be able to collect all the
+[previously available metrics](https://docs.splunk.com/Observability/gdi/kubernetes-cluster/kubernetes-cluster-receiver.html#metrics)
+with Kubernetes clusters that have versions below 1.21.
+
+If version 0.45.0 of the chart cannot collect metrics from your Kubernetes
+cluster that is a version below 1.21, you will see error messages in your
+cluster receiver logs that look like this.
+
+`Failed to watch *v1.CronJob: failed to list *v1.CronJob: the server could not
+find the requested resource`
+
+To better support users, in a future release we are adding a feature that
+will allow users to use the last version of the k8s_cluster receiver that
+supported Kubernetes clusters below version 1.21.
+
+If you still want to keep the previous behavior of the k8s_cluster receiver and
+upgrade to v0.45.0 of the chart, make sure your Kubernetes cluster uses one of
+the following versions.
+- `kubernetes`, `aks`, `eks`, `eks/fargate`, `gke`,  `gke/autopilot`
+  - Use version 1.21 or above
+- `openshift`
+  - Use version 4.8 or above
+
 ## 0.43.1 to 0.43.2
 
 [#375 Resource detection processor is configured to override all host and cloud
