@@ -250,15 +250,15 @@ Create a filter expression for multiline logs configuration.
 {{- $expr := "" }}
 {{- if .namespaceName }}
 {{- $useRegexp := eq (toString .namespaceName.useRegexp | default "false") "true" }}
-{{- $expr = cat "($$resource[\"k8s.namespace.name\"])" (ternary "matches" "==" $useRegexp) (quote .namespaceName.value) "&&" }}
+{{- $expr = cat "(resource[\"k8s.namespace.name\"])" (ternary "matches" "==" $useRegexp) (quote .namespaceName.value) "&&" }}
 {{- end }}
 {{- if .podName }}
 {{- $useRegexp := eq (toString .podName.useRegexp | default "false") "true" }}
-{{- $expr = cat $expr "($$resource[\"k8s.pod.name\"])" (ternary "matches" "==" $useRegexp) (quote .podName.value) "&&" }}
+{{- $expr = cat $expr "(resource[\"k8s.pod.name\"])" (ternary "matches" "==" $useRegexp) (quote .podName.value) "&&" }}
 {{- end }}
 {{- if .containerName }}
 {{- $useRegexp := eq (toString .containerName.useRegexp | default "false") "true" }}
-{{- $expr = cat $expr "($$resource[\"k8s.container.name\"])" (ternary "matches" "==" $useRegexp) (quote .containerName.value) "&&" }}
+{{- $expr = cat $expr "(resource[\"k8s.container.name\"])" (ternary "matches" "==" $useRegexp) (quote .containerName.value) "&&" }}
 {{- end }}
 {{- $expr | trimSuffix "&&" | trim }}
 {{- end -}}
