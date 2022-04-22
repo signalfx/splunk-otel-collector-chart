@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Migrate filelog operators to follow v0.29.0 changes (#436)
+  - [BREAKING CHANGE] OpenTelemetry Logs collection has updated field syntax. Field syntax 
+    no longer requires the $ character. Instead each field must begin with body, 
+    attributes, or resource. Also they have updated/removed some of the operators.
+    If you are using `extraFileLogs` or `logsCollection.containers.extraOperators` config, 
+    see [Upgrading Guideline](https://github.com/open-telemetry/opentelemetry-log-collection/blob/v0.29.0/CHANGELOG.md#upgrading-to-v0290)
+
 ## [0.48.0] - 2022-04-13
 
 ### Changed
