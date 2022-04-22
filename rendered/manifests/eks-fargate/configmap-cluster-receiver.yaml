@@ -21,7 +21,7 @@ data:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         api_url: http://default-splunk-otel-collector:6060
         ingest_url: http://default-splunk-otel-collector:9943
-        timeout: 10s
+        timeout: 20s
     extensions:
       health_check: null
       k8s_observer:

@@ -129,6 +129,7 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -139,6 +140,7 @@ exporters:
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}

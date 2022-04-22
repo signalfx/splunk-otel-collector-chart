@@ -42,10 +42,10 @@ splunkPlatform:
   sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   maxConnections: 200
-  # Whether to disable gzip compression over HTTP. Defaults to true.
+  # Whether to disable gzip compression over HTTP.
   disableCompression: true
-  # HTTP timeout when sending data. Defaults to 10s.
-  timeout: 10s
+  # HTTP timeout for sending data.
+  timeout: 20s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
   insecureSkipVerify: false
@@ -107,6 +107,9 @@ splunkObservability:
   # Instrumentation libraries must be configured to send it to the collector.
   # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
   profilingEnabled: false
+
+  # HTTP timeout for sending data.
+  timeout: 20s
 
 ################################################################################
 # Logs collection engine:

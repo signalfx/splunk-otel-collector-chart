@@ -26,6 +26,7 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+        timeout: 20s
     extensions:
       health_check: null
       k8s_observer:

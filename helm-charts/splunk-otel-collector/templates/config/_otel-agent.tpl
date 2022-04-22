@@ -565,6 +565,7 @@ exporters:
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
@@ -586,6 +587,7 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
 
 service:

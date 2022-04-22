@@ -146,6 +146,9 @@
         "profilingEnabled": {
           "description": "Whether profiling data is enabled for Splunk Observability",
           "type": "boolean"
+        },
+        "timeout": {
+          "type": "string"
         }
       },
       "anyOf": [

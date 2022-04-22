@@ -137,7 +137,7 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    timeout: 10s
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") $clusterReceiver.k8sEventsEnabled }}
@@ -146,6 +146,7 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     sourcetype: kube:events
     source: kubelet
+    timeout: {{ .Values.splunkObservability.timeout }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}

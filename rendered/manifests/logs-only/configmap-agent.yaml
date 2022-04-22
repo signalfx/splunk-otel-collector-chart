@@ -23,8 +23,10 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+        timeout: 20s
       splunk_hec/o11y:
         endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        timeout: 20s
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
