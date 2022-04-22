@@ -310,7 +310,6 @@ receivers:
       # Parse Docker format
       - type: json_parser
         id: parser-docker
-        parse_from: body
         parse_to: body
         timestamp:
           parse_from: body.time
@@ -359,7 +358,7 @@ receivers:
           - output: {{ include "splunk-otel-collector.newlineKey" . | quote }}
             expr: {{ include "splunk-otel-collector.newlineExpr" . | quote }}
         {{- end }}
-      #   default: clean-up-log-record
+        default: clean-up-log-record
       {{- range $.Values.logsCollection.containers.multilineConfigs }}
       - type: recombine
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
