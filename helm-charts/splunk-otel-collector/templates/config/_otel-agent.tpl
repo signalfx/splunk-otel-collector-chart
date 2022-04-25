@@ -667,11 +667,15 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
+        {{- if $gateway.enabled }}
+        - otlp
+        {{- else }}
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
         - splunk_hec/o11y
+        {{- end }}
         {{- end }}
         {{- end }}
     {{- end }}
