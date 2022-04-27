@@ -389,29 +389,29 @@ receivers:
     priority: {{ $unit.priority }}
     operators:
     - type: add
-      field: $$resource["com.splunk.source"]
+      field: resource["com.splunk.source"]
       value: {{ $.Values.logsCollection.journald.directory }}
     - type: add
-      field: $$resource["com.splunk.sourcetype"]
+      field: resource["com.splunk.sourcetype"]
       value: 'EXPR("kube:journald:"+$$._SYSTEMD_UNIT)'
     - type: add
-      field: $$resource["com.splunk.index"]
+      field: resource["com.splunk.index"]
       value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index }}
     - type: add
-      field: $$resource["host.name"]
+      field: resource["host.name"]
       value: 'EXPR(env("K8S_NODE_NAME"))'
     - type: add
-      field: $$resource["journald.priority.number"]
+      field: resource["journald.priority.number"]
       value: 'EXPR($$.PRIORITY)'
     - type: add
-      field: $$resource["journald.unit.name"]
+      field: resource["journald.unit.name"]
       value: 'EXPR($$._SYSTEMD_UNIT)'
 
     # extract MESSAGE field into the log body and discard rest of the fields
     - type: move
       id: set-body
-      from: $$body.MESSAGE
-      to: $$
+      from: body.MESSAGE
+      to: body
   {{- end }}
   {{- end }}
   {{- end }}
