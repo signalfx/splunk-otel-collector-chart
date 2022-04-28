@@ -140,11 +140,11 @@ data:
         operators:
         - id: get-format
           routes:
-          - expr: $$body matches "^\\{"
+          - expr: body matches "^\\{"
             output: parser-docker
-          - expr: $$body matches "^[^ Z]+ "
+          - expr: body matches "^[^ Z]+ "
             output: parser-crio
-          - expr: $$body matches "^[^ Z]+Z"
+          - expr: body matches "^[^ Z]+Z"
             output: parser-containerd
           type: router
         - id: parser-crio
@@ -152,15 +152,15 @@ data:
           timestamp:
             layout: "2006-01-02T15:04:05.000000000-07:00"
             layout_type: gotime
-            parse_from: time
+            parse_from: attributes.time
           type: regex_parser
-        - combine_field: log
+        - combine_field: body.log
           id: crio-recombine
-          is_last_entry: ($$.logtag) == 'F'
+          is_last_entry: (body.logtag) == 'F'
           type: recombine
-        - field: $$body.log
+        - field: body.log
           id: crio-handle_empty_log
-          if: $$.log == nil
+          if: body.log == nil
           output: filename
           type: add
           value: ""
@@ -168,55 +168,57 @@ data:
           regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: time
+            parse_from: attributes.time
           type: regex_parser
-        - combine_field: log
+        - combine_field: body.log
           id: containerd-recombine
-          is_last_entry: ($$.logtag) == 'F'
+          is_last_entry: (body.logtag) == 'F'
           type: recombine
-        - field: $$body.log
+        - field: body.log
           id: containerd-handle_empty_log
-          if: $$.log == nil
+          if: body.log == nil
           output: filename
           type: add
           value: ""
         - id: parser-docker
+          parse_to: body
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: time
+            parse_from: body.time
           type: json_parser
-        - field: $$resource["com.splunk.source"]
+        - field: resource["com.splunk.source"]
           id: filename
           type: add
-          value: EXPR($$attributes["file.path"])
+          value: EXPR(attributes["log.file.path"])
         - id: extract_metadata_from_filepath
-          parse_from: $$attributes["file.path"]
+          parse_from: attributes["log.file.path"]
+          parse_to: body
           regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
           type: regex_parser
-        - field: $$resource["k8s.pod.uid"]
+        - field: resource["k8s.pod.uid"]
           type: add
-          value: EXPR($$.uid)
-        - field: $$resource["k8s.container.restart_count"]
+          value: EXPR(body.uid)
+        - field: resource["k8s.container.restart_count"]
           type: add
-          value: EXPR($$.restart_count)
-        - field: $$resource["k8s.container.name"]
+          value: EXPR(body.restart_count)
+        - field: resource["k8s.container.name"]
           type: add
-          value: EXPR($$.container_name)
-        - field: $$resource["k8s.namespace.name"]
+          value: EXPR(body.container_name)
+        - field: resource["k8s.namespace.name"]
           type: add
-          value: EXPR($$.namespace)
-        - field: $$resource["k8s.pod.name"]
+          value: EXPR(body.namespace)
+        - field: resource["k8s.pod.name"]
           type: add
-          value: EXPR($$.pod_name)
-        - field: $$resource["com.splunk.sourcetype"]
+          value: EXPR(body.pod_name)
+        - field: resource["com.splunk.sourcetype"]
           type: add
-          value: EXPR("kube:container:"+$$.container_name)
-        - field: $$attributes["log.iostream"]
+          value: EXPR("kube:container:"+body.container_name)
+        - field: attributes["log.iostream"]
           type: add
-          value: EXPR($$.stream)
-        - from: $$body.log
+          value: EXPR(body.stream)
+        - from: body.log
           id: clean-up-log-record
-          to: $$
+          to: body
           type: move
         poll_interval: 200ms
         start_at: beginning

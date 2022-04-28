@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Migrate filelog operators to follow opentelemetry-log-collection v0.29.0 changes ([#436](https://github.com/signalfx/splunk-otel-collector-chart/pull/436))
+  - [BREAKING CHANGE] Several breaking changes were made that affect the
+    filelog, syslog, tcplog, udplog, and journald receivers. Any use of the
+    [extraFileLogs](https://github.com/signalfx/splunk-otel-collector-chart/blob/941ad7f255cce585f4c06dd46c0cd63ef57d9903/helm-charts/splunk-otel-collector/values.yaml#L488) config, [logsCollection.containers.extraOperators](https://github.com/signalfx/splunk-otel-collector-chart/blob/941ad7f255cce585f4c06dd46c0cd63ef57d9903/helm-charts/splunk-otel-collector/values.yaml#L431) config,
+    and affected receivers in a custom manner should be reviewed. See
+    [upgrading guidelines](https://github.com/open-telemetry/opentelemetry-log-collection/blob/v0.29.0/CHANGELOG.md#upgrading-to-v0290)
+
 ## [0.48.0] - 2022-04-13
 
 ### Changed
