@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Migrate filelog operators to follow opentelemetry-log-collection v0.29.0 changes (#436)
+- Migrate filelog operators to follow opentelemetry-log-collection v0.29.0 changes (#436, #441)
   - [BREAKING CHANGE] Several breaking changes were made that affect the
     filelog, syslog, tcplog, and journald receivers. Any use of the
     extraFileLogs config, logsCollection.containers.extraOperators config,
