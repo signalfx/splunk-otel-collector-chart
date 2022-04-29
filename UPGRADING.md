@@ -1,5 +1,33 @@
 # Upgrade guidelines
 
+## 0.48.0 to 0.49.0
+
+New releases of opentelemetry-log-collection (
+[v0.29.0](https://github.com/open-telemetry/opentelemetry-log-collection/blob/v0.29.0/CHANGELOG.md#0290---2022-04-11),
+[v0.28.0](https://github.com/open-telemetry/opentelemetry-log-collection/blob/v0.29.0/CHANGELOG.md#0280---2022-03-28)
+) have breaking changes
+
+Several of the logging receivers supported by the Splunk Otel Collector Chart
+were updated to use v0.29.0 instead v0.27.2 of opentelemetry-log-collection.
+
+- Affected Receivers
+  - [filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver)
+  - [syslog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver)
+  - [tcplog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver)
+  - [journald](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver)
+
+1) Check to see if you have any custom log monitoring setup with the
+[extraFileLogs](https://github.com/signalfx/splunk-otel-collector-chart/blob/941ad7f255cce585f4c06dd46c0cd63ef57d9903/helm-charts/splunk-otel-collector/values.yaml#L488)
+config, the
+[logsCollection.containers.extraOperators](https://github.com/signalfx/splunk-otel-collector-chart/blob/941ad7f255cce585f4c06dd46c0cd63ef57d9903/helm-charts/splunk-otel-collector/values.yaml#L431)
+config, or any of the affected receivers. If you don't have any custom log
+monitoring setup, you can stop here.
+2) Read the documentation for
+[upgrading to opentelemetry-log-collection v0.29.0](https://github.com/open-telemetry/opentelemetry-log-collection/blob/v0.29.0/CHANGELOG.md#upgrading-to-v0290).
+3) If opentelemetry-log-collection v0.29.0 or v0.28.0 will break any of your
+custom log monitoring, update your log monitoring to accommodate the breaking
+changes.
+
 ## 0.47.0 to 0.47.1
 
 [[receiver/k8sclusterreceiver] Fix k8s node and container cpu metrics not being reported properly](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/8245)
