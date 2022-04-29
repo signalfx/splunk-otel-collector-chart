@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.49.0] - 2022-04-28
+
 ### Changed
 
 - Migrate filelog operators to follow opentelemetry-log-collection v0.29.0 changes (#436, #441)
@@ -12,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     extraFileLogs config, logsCollection.containers.extraOperators config,
     and affected receivers in a custom manner should be reviewed. See
     [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0480-to-0490)
+
+- Upgrade splunk-otel-collector image to 0.49.0 (#442)
 
 ## [0.48.0] - 2022-04-13
 
