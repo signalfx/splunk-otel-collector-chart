@@ -272,14 +272,16 @@ receivers:
       - type: regex_parser
         id: parser-crio
         regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
+        parse_to: body
         timestamp:
-          parse_from: attributes.time
+          parse_from: body.time
           layout_type: gotime
           layout: '2006-01-02T15:04:05.000000000-07:00'
       - type: recombine
         id: crio-recombine
         combine_field: body.log
         is_last_entry: "(body.logtag) == 'F'"
+        source_identifier: attributes["log.file.path"]
       - type: add
         id: crio-handle_empty_log
         output: filename
@@ -292,13 +294,15 @@ receivers:
       - type: regex_parser
         id: parser-containerd
         regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$'
+        parse_to: body
         timestamp:
-          parse_from: attributes.time
+          parse_from: body.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: recombine
         id: containerd-recombine
         combine_field: body.log
         is_last_entry: "(body.logtag) == 'F'"
+        source_identifier: attributes["log.file.path"]
       - type: add
         id: containerd-handle_empty_log
         output: filename

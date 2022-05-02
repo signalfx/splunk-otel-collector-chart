@@ -148,15 +148,17 @@ data:
             output: parser-containerd
           type: router
         - id: parser-crio
+          parse_to: body
           regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
           timestamp:
             layout: "2006-01-02T15:04:05.000000000-07:00"
             layout_type: gotime
-            parse_from: attributes.time
+            parse_from: body.time
           type: regex_parser
         - combine_field: body.log
           id: crio-recombine
           is_last_entry: (body.logtag) == 'F'
+          source_identifier: attributes["log.file.path"]
           type: recombine
         - field: body.log
           id: crio-handle_empty_log
@@ -165,14 +167,16 @@ data:
           type: add
           value: ""
         - id: parser-containerd
+          parse_to: body
           regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
+            parse_from: body.time
           type: regex_parser
         - combine_field: body.log
           id: containerd-recombine
           is_last_entry: (body.logtag) == 'F'
+          source_identifier: attributes["log.file.path"]
           type: recombine
         - field: body.log
           id: containerd-handle_empty_log
