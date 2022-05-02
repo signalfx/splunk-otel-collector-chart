@@ -297,13 +297,13 @@ receivers:
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: recombine
         id: containerd-recombine
-        combine_field: body.log
-        is_last_entry: "(body.logtag) == 'F'"
+        combine_field: body
+        is_last_entry: "attributes.logtag == 'F'"
       - type: add
         id: containerd-handle_empty_log
         output: filename
-        if: body.log == nil
-        field: body.log
+        if: attributes.log == nil
+        field: attributes.log
         value: ""
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
@@ -374,8 +374,14 @@ receivers:
       # Clean up log record
       - type: move
         id: clean-up-log-record
-        from: body.log
+        from: attributes.log
         to: body
+      - type: copy
+        from: attributes.stream
+        to: attributes.iostream
+      - type: retain
+        fields:
+          - attributes.iostream
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}

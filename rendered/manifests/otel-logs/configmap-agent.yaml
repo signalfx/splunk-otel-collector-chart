@@ -170,13 +170,13 @@ data:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
             parse_from: attributes.time
           type: regex_parser
-        - combine_field: body.log
+        - combine_field: body
           id: containerd-recombine
-          is_last_entry: (body.logtag) == 'F'
+          is_last_entry: attributes.logtag == 'F'
           type: recombine
-        - field: body.log
+        - field: attributes.log
           id: containerd-handle_empty_log
-          if: body.log == nil
+          if: attributes.log == nil
           output: filename
           type: add
           value: ""
@@ -216,10 +216,16 @@ data:
         - field: attributes["log.iostream"]
           type: add
           value: EXPR(body.stream)
-        - from: body.log
+        - from: attributes.log
           id: clean-up-log-record
           to: body
           type: move
+        - from: attributes.stream
+          to: attributes.iostream
+          type: copy
+        - fields:
+          - attributes.iostream
+          type: retain
         poll_interval: 200ms
         start_at: beginning
       fluentforward:
