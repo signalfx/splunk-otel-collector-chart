@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Make sure that logs or profiling data is sent only when it's enabled (#444)
+
 ## [0.49.0] - 2022-04-28
 
 ### Changed

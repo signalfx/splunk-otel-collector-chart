@@ -187,6 +187,7 @@ splunk_hec/platform_logs:
   timeout: {{ .Values.splunkPlatform.timeout }}
   splunk_app_name: {{ .Chart.Name }}
   splunk_app_version: {{ .Chart.Version }}
+  profiling_data_enabled: false
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
     {{- if .Values.splunkPlatform.clientCert }}

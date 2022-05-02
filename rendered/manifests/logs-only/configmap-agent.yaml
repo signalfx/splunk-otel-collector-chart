@@ -25,6 +25,8 @@ data:
         sync_host_metadata: true
       splunk_hec/o11y:
         endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        log_data_enabled: true
+        profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
