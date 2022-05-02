@@ -146,6 +146,8 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     sourcetype: kube:events
     source: kubelet
+    log_data_enabled: {{ .Values.splunkObservability.logsEnabled }}
+    profiling_data_enabled: false
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
