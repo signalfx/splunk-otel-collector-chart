@@ -225,6 +225,7 @@ data:
           type: copy
         - fields:
           - attributes.iostream
+          - attributes.file.path
           type: retain
         poll_interval: 200ms
         start_at: beginning

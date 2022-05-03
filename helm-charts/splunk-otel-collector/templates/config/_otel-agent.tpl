@@ -382,6 +382,7 @@ receivers:
       - type: retain
         fields:
           - attributes.iostream
+          - attributes.file.path
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
