@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Make sure that logs or profiling data is sent only when it's enabled (#444)
+- Fix native OTel logs collection broken after the 0.29.0 opentelemetry-logs-library changes in 0.49.0 release (#448)
 
 ## [0.49.0] - 2022-04-28
 
