@@ -61,6 +61,43 @@ In the example above, first we define a new processor, then add it to the
 default traces pipeline. The pipeline has to be fully redefined, because
 lists cannot merge - they have to be overridden.
 
+## Add Receiver Creator
+
+This example shows how to add a receiver creator to the OTel Collector configuration
+[Receiver Creator](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/receivercreator).
+In this example we will configure it to observe kubernetes pods and in case there is a pod
+using port 5432 the collector will dynamically create a smartagent/postgresql receiver to monitor it.
+
+```yaml
+agent:
+  config:
+    receivers:
+      receiver_creator:
+        watch_observers: [k8s_observer]
+        receivers:
+          smartagent/postgresql:
+            rule: type == "port" && port == 5432
+            config:
+              type: postgresql
+              connectionString: 'sslmode=disable user={{.username}} password={{.password}}'
+              params:
+                username: postgres
+                password: password
+              port: 5432
+```
+
+By default, the receiver_creator receiver is part of the metrics pipeline, for example:
+```yaml
+pipelines:
+    metrics:
+      receivers:
+      - hostmetrics
+      - kubeletstats
+      - otlp
+      - receiver_creator
+      - signalfx
+```
+
 ## Enable OTel Collector in the gateway mode
 
 This configuration installs collector as a gateway deployment along with

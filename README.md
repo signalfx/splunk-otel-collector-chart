@@ -189,6 +189,18 @@ helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collec
 
 The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
 
+### How to upgrade
+
+**Make sure you run `helm repo update` before you upgrade**
+
+To upgrade a deployment follow the instructions for installing
+but use `upgrade` instead of `install`, for example:
+
+```bash
+helm upgrade my-splunk-otel-collector --values my_values.yaml
+```
+
+
 ### How to uninstall
 
 To uninstall/delete a deployment with name `my-splunk-otel-collector`:
