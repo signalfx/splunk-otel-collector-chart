@@ -4,10 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.50.0] - 2022-05-03
+
 ### Fixed
 
+- Add gateway support for Host Logs (#437)
 - Make sure that logs or profiling data is sent only when it's enabled (#444)
 - Fix native OTel logs collection broken after the 0.29.0 opentelemetry-logs-library changes in 0.49.0 release (#448)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.50.0 (#449)
 
 ## [0.49.0] - 2022-04-28
 
