@@ -278,14 +278,10 @@ receivers:
           layout: '2006-01-02T15:04:05.000000000-07:00'
       - type: recombine
         id: crio-recombine
-        combine_field: body.log
-        is_last_entry: "(body.logtag) == 'F'"
-      - type: add
-        id: crio-handle_empty_log
-        output: filename
-        if: body.log == nil
-        field: body.log
-        value: ""
+        output: handle_empty_log
+        combine_field: attributes.log
+        source_identifier: attributes["log.file.path"]
+        is_last_entry: "attributes.logtag == 'F'"
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
       # Parse CRI-Containerd format
@@ -297,60 +293,58 @@ receivers:
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       - type: recombine
         id: containerd-recombine
-        combine_field: body.log
-        is_last_entry: "(body.logtag) == 'F'"
-      - type: add
-        id: containerd-handle_empty_log
-        output: filename
-        if: body.log == nil
-        field: body.log
-        value: ""
+        output: handle_empty_log
+        combine_field: attributes.log
+        source_identifier: attributes["log.file.path"]
+        is_last_entry: "attributes.logtag == 'F'"
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
       # Parse Docker format
       - type: json_parser
         id: parser-docker
-        parse_to: body
+        output: handle_empty_log
         timestamp:
-          parse_from: body.time
+          parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
       {{- end }}
       - type: add
-        id: filename
-        field: resource["com.splunk.source"]
-        value: EXPR(attributes["log.file.path"])
+        id: handle_empty_log
+        if: attributes.log == nil
+        field: attributes.log
+        value: ""
       # Extract metadata from file path
       - type: regex_parser
-        id: extract_metadata_from_filepath
         {{- if .Values.isWindows }}
         regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
         {{- else }}
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
         {{- end }}
-        parse_to: body
         parse_from: attributes["log.file.path"]
       # Move out attributes to Attributes
-      - type: add
-        field: resource["k8s.pod.uid"]
-        value: EXPR(body.uid)
-      - type: add
-        field: resource["k8s.container.restart_count"]
-        value: EXPR(body.restart_count)
-      - type: add
-        field: resource["k8s.container.name"]
-        value: EXPR(body.container_name)
-      - type: add
-        field: resource["k8s.namespace.name"]
-        value: EXPR(body.namespace)
-      - type: add
-        field: resource["k8s.pod.name"]
-        value: EXPR(body.pod_name)
+      - type: move
+        from: attributes.uid
+        to: resource["k8s.pod.uid"]
+      - type: move
+        from: attributes.restart_count
+        to: resource["k8s.container.restart_count"]
+      - type: move
+        from: attributes.container_name
+        to: resource["k8s.container.name"]
+      - type: move
+        from: attributes.namespace
+        to: resource["k8s.namespace.name"]
+      - type: move
+        from: attributes.pod_name
+        to: resource["k8s.pod.name"]
       - type: add
         field: resource["com.splunk.sourcetype"]
-        value: EXPR("kube:container:"+body.container_name)
-      - type: add
-        field: attributes["log.iostream"]
-        value: EXPR(body.stream)
+        value: EXPR("kube:container:"+resource["k8s.container.name"])
+      - type: move
+        from: attributes.stream
+        to: attributes["log.iostream"]
+      - type: move
+        from: attributes["log.file.path"]
+        to: resource["com.splunk.source"]
       {{- if .Values.logsCollection.containers.multilineConfigs }}
       - type: router
         routes:
@@ -364,8 +358,8 @@ receivers:
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
         output: clean-up-log-record
         source_identifier: resource["com.splunk.source"]
-        combine_field: body.log
-        is_first_entry: '(body.log) matches {{ .firstEntryRegex | quote }}'
+        combine_field: attributes.log
+        is_first_entry: '(attributes.log) matches {{ .firstEntryRegex | quote }}'
       {{- end }}
       {{- end }}
       {{- with .Values.logsCollection.containers.extraOperators }}
@@ -374,7 +368,7 @@ receivers:
       # Clean up log record
       - type: move
         id: clean-up-log-record
-        from: body.log
+        from: attributes.log
         to: body
   {{- end }}
 
