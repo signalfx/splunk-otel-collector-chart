@@ -150,7 +150,7 @@ data:
             output: parser-containerd
           type: router
         - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$
           timestamp:
             layout: "2006-01-02T15:04:05.000000000-07:00"
             layout_type: gotime
@@ -163,7 +163,7 @@ data:
           source_identifier: attributes["log.file.path"]
           type: recombine
         - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) (?P<log>.*)$
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
             parse_from: attributes.time
