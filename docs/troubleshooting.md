@@ -130,3 +130,183 @@ agent:
 ```
 
 Similar can be applied to any other failing exporter.
+
+## Possible problems with Kubernetes and container runtimes
+
+A Kubernetes cluster using an incompatible container runtime could experience:
+- Stats from containers, pods, or nodes are absent or malformed.
+  - As a result, the Splunk Otel Collector which consumes these stats to
+  produce metrics would not produce the corresponding metrics.
+- Containers, pods, and nodes fail to start successfully or stop cleanly.
+- The Kubelet process on a node is in a defunct state.
+
+Kubernetes requires you install a
+[container runtime](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+on each node in the cluster so that pods can run there. Multiple container
+runtimes such as containerd, CRI-O, Docker, and Marantis (formerly Docker
+Engine – Enterprise) are well-supported. The compatability level of a specific
+Kubernetes version and container runtime can vary, it is recommended to use a
+version of Kubernetes and a container runtime that has been documented to be
+compatible.
+
+### Troubleshooting Kubernetes and container runtime incompatibility
+
+- Find out what Kubernetes and container runtime are being used.
+   - In the example below, node-1 uses Kubernetes 1.19.6 and containerd 1.4.1.
+      ```
+      kubectl get nodes -o wide
+      NAME         STATUS   VERSION   CONTAINER-RUNTIME
+      node-1       Ready    v1.19.6   containerd://1.4.1
+      ```
+- Verify that you are using a container runtime that has been documented to
+  work with your Kubernetes version. Container runtime creators document
+  compatibility in their respective projects, you can view the documentation for
+  the mentioned container runtimes with the links below.
+   - [containerd](https://containerd.io/releases/#kubernetes-support)
+   - [CRI-O](https://github.com/cri-o/cri-o#compatibility-matrix-cri-o--kubernetes)
+   - [Mirantis](https://docs.mirantis.com/container-cloud/latest/compat-matrix.html)
+- Use the Kubelet "summary" API to verify container, pod, and node stats.
+  - In this section we will verify the cpu, memory, and networks stats that are
+    used to generate metrics by the collector are present. You can expand these
+    techniques to evaluate other Kubernetes stats that are available. All the
+    stats in these commands and sample outputs below should be present unless
+    otherwise noted. If your output is missing stats or your stat values appear
+    to be in a different format, your Kubernetes cluster and container runtime
+    might not be fully compatible.
+    <details>
+    <summary>1) Verify a node's stats</summary>
+
+    ```
+    # Get the names of the nodes in your cluster.
+    kubectl get nodes -o wide
+    # Pick a node to evaluate and set its name to an environment variable.
+    NODE_NAME=node-1
+    # Verify the node has proper stats with this command and sample output.
+    kubectl get --raw "/api/v1/nodes/"${NODE_NAME}"/proxy/stats/summary" | jq '{"node": {"name": .node.nodeName, "cpu": .node.cpu, "memory": .node.memory, "network": .node.network}} | del(.node.network.interfaces)'
+    {
+      "node": {
+        "name": "node-1",
+        "cpu": {
+          "time": "2022-05-20T18:12:08Z",
+          "usageNanoCores": 149771849,
+          "usageCoreNanoSeconds": 2962750554249399
+        },
+        "memory": {
+          "time": "2022-05-20T18:12:08Z",
+          "availableBytes": 2701385728,  # Could be absent if node memory allocations were missing.
+          "usageBytes": 3686178816,
+          "workingSetBytes": 1421492224,
+          "rssBytes": 634343424,
+          "pageFaults": 18632526,
+          "majorPageFaults": 726
+        },
+        "network": {
+          "time": "2022-05-20T18:12:08Z",
+          "name": "eth0",
+          "rxBytes": 105517219156,
+          "rxErrors": 0,
+          "txBytes": 98151853779,
+          "txErrors": 0
+        }
+      }
+    }
+    ```
+    </details>
+
+    <details>
+    <summary>2) Verify a pod's stats</summary>
+
+    ```
+    # Get the names of the pods in your node.
+    kubectl get --raw "/api/v1/nodes/"${NODE_NAME}"/proxy/stats/summary" | jq '.pods[].podRef.name'
+    # Pick a pod to evaluate and set its name to an environment variable.
+    POD_NAME=splunk-otel-collector-agent-6llkr
+    # Verify the pod has proper stats with this command and sample output.
+    kubectl get --raw "/api/v1/nodes/"${NODE_NAME}"/proxy/stats/summary" | jq '.pods[] | select(.podRef.name=='\"$POD_NAME\"') | {"pod": {"name": .podRef.name, "cpu": .cpu, "memory": .memory, "network": .network}} | del(.pod.network.interfaces)'
+    {
+      "pod": {
+        "name": "splunk-otel-collector-agent-6llkr",
+        "cpu": {
+          "time": "2022-05-20T18:38:47Z",
+          "usageNanoCores": 10774467,
+          "usageCoreNanoSeconds": 1709095026234
+        },
+        "memory": {
+          "time": "2022-05-20T18:38:47Z",
+          "availableBytes": 781959168, # Could be absent if pod memory limits were missing.
+          "usageBytes": 267563008,
+          "workingSetBytes": 266616832,
+          "rssBytes": 257036288,
+          "pageFaults": 0,
+          "majorPageFaults": 0
+        },
+        "network": {
+          "time": "2022-05-20T18:38:55Z",
+          "name": "eth0",
+          "rxBytes": 105523812442,
+          "rxErrors": 0,
+          "txBytes": 98159696431,
+          "txErrors": 0
+        }
+      }
+    }
+    ```
+    </details>
+
+    <details>
+    <summary>3) Verify a container's stats</summary>
+
+    ```
+    # Get the names of the containers in your pod.
+    kubectl get --raw "/api/v1/nodes/"${NODE_NAME}"/proxy/stats/summary" | jq '.pods[] | select(.podRef.name=='\"$POD_NAME\"') | .containers[].name'
+    # Pick a container to evaluate and set it's name to an enviroment variable.
+    CONTAINER_NAME=otel-collector
+    # Verify the container has proper stats with this command and sample output.
+    kubectl get --raw "/api/v1/nodes/"${NODE_NAME}"/proxy/stats/summary" | jq '.pods[] | select(.podRef.name=='\"$POD_NAME\"') | .containers[] | select(.name=='\"$CONTAINER_NAME\"') | {"container": {"name": .name, "cpu": .cpu, "memory": .memory}}'
+    {
+      "container": {
+        "name": "otel-collector",
+        "cpu": {
+          "time": "2022-05-20T18:42:15Z",
+          "usageNanoCores": 6781417,
+          "usageCoreNanoSeconds": 1087899649154
+        },
+        "memory": {
+          "time": "2022-05-20T18:42:15Z",
+          "availableBytes": 389480448, # Could be absent if container memory limits were missing.
+          "usageBytes": 135753728,
+          "workingSetBytes": 134807552,
+          "rssBytes": 132923392,
+          "pageFaults": 93390,
+          "majorPageFaults": 0
+        }
+      }
+    }
+    ```
+    </details>
+
+### Reported incompatible Kubernetes and container runtime issues
+
+- Note: Managed Kubernetes services might use a modified container runtime,
+  the service provider may have applied custom patches or bug fixes that aren't
+  present within an unmodified container runtime.
+- Kubernetes 1.21.0-1.21.11 using containerd
+  - Issues:
+    - Memory and network stats can be missing.
+  - Resolutions:
+    - Upgrading Kubernetes to at least 1.21.12 fixed all the missing stats.
+  - Upgrading containerd to newer version of 1.4.x or 1.5.x is still
+    recommended.
+- Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12
+  - Issues:
+    - Memory and network stats can be missing.
+  - Resolutions:
+    - Upgrading Kubernetes to at least 1.22.9 fixed the missing container
+    memory and pod network stats.
+    - Upgrading containerd to at least 1.4.13 or 1.5.0 fixed the missing pod
+    memory stats.
+- Kubernetes 1.23.0-1.23.6 using containerd
+  - Issues:
+    - The availableBytes memory stat can be missing for pods.
+  - Resolutions:
+    - No resolutions have been documented as of 2022-05-2.
