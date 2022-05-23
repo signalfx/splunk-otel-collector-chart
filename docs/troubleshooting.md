@@ -136,7 +136,7 @@ Similar can be applied to any other failing exporter.
 A Kubernetes cluster using an incompatible container runtime could experience:
 - Stats from containers, pods, or nodes are absent or malformed.
   - As a result, the Splunk Otel Collector which consumes these stats to
-  produce metrics would not produce the corresponding metrics.
+    produce metrics would not produce the corresponding metrics.
 - Containers, pods, and nodes fail to start successfully or stop cleanly.
 - The Kubelet process on a node is in a defunct state.
 
@@ -304,7 +304,7 @@ compatible.
     - Upgrading Kubernetes to at least 1.22.9 fixed the missing container
     memory and pod network stats.
     - Upgrading containerd to at least 1.4.13 or 1.5.0 fixed the missing pod
-    memory stats.
+      memory stats.
 - Kubernetes 1.23.0-1.23.6 using containerd
   - Issues:
     - The availableBytes memory stat can be missing for pods.
