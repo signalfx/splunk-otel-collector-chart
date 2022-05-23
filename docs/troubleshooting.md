@@ -295,7 +295,7 @@ compatible.
     - Memory and network stats can be missing.
   - Resolutions:
     - Upgrading Kubernetes to at least 1.21.12 fixed all the missing stats.
-  - Upgrading containerd to newer version of 1.4.x or 1.5.x is still
+  - Upgrading containerd to a newer version of 1.4.x or 1.5.x is still
     recommended.
 - Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12
   - Issues:
