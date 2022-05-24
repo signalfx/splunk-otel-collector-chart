@@ -168,14 +168,14 @@ compatible.
    - [Mirantis](https://docs.mirantis.com/container-cloud/latest/compat-matrix.html)
 - Use the Kubelet "summary" API to verify container, pod, and node stats.
   - In this section we will verify the cpu, memory, and networks stats that are
-    used to generate
+    used to generate the
     [Kubelet Stats Receiver metrics](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#metrics)
-    by the collector are present. You can expand these
-    techniques to evaluate other Kubernetes stats that are available. All the
-    stats in these commands and sample outputs below should be present unless
-    otherwise noted. If your output is missing stats or your stat values appear
-    to be in a different format, your Kubernetes cluster and container runtime
-    might not be fully compatible.
+    by the collector are present. You can expand these techniques to evaluate
+    other Kubernetes stats that are available. All the stats in these commands
+    and sample outputs below should be present unless otherwise noted. If your
+    output is missing stats or your stat values appear to be in a different
+    format, your Kubernetes cluster and container runtime might not be fully
+    compatible.
     <details>
     <summary>1) Verify a node's stats</summary>
 
