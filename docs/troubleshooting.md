@@ -339,19 +339,19 @@ compatible.
   <summary>Expand for more details</summary>
 
   - Affected metrics:
-      - k8s.pod.network.io{direction="receive"} or
-        pod_network_receive_bytes_total
-      - k8s.pod.network.errors{direction="receive"} or
-        pod_network_receive_errors_total
-      - k8s.pod.network.io{direction="transmit"} or
-        pod_network_transmit_bytes_total
-      - k8s.pod.network.error{direction="transmit"} or
-        pod_network_transmit_errors_total
-      - container.memory.available
-      - container.memory.usage
-      - container.memory.rssBytes
-      - container.memory.page_faults
-      - container.memory.major_page_faults
+    - k8s.pod.network.io{direction="receive"} or
+      pod_network_receive_bytes_total
+    - k8s.pod.network.errors{direction="receive"} or
+      pod_network_receive_errors_total
+    - k8s.pod.network.io{direction="transmit"} or
+      pod_network_transmit_bytes_total
+    - k8s.pod.network.error{direction="transmit"} or
+      pod_network_transmit_errors_total
+    - container.memory.available
+    - container.memory.usage
+    - container.memory.rssBytes
+    - container.memory.page_faults
+    - container.memory.major_page_faults
   - Resolutions:
     - Upgrading Kubernetes to at least 1.21.12 fixed all the missing metrics.
     - Upgrading containerd to a newer version of 1.4.x or 1.5.x is still
