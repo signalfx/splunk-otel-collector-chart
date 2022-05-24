@@ -333,15 +333,20 @@ compatible.
 - Note: Managed Kubernetes services might use a modified container runtime,
   the service provider may have applied custom patches or bug fixes that aren't
   present within an unmodified container runtime.
-- Kubernetes 1.21.0-1.21.11 using containerd - Memory and network stats/metrics can be missing
+- Kubernetes 1.21.0-1.21.11 using containerd - Memory and network stats/metrics
+  can be missing
   <details>
   <summary>Expand for more details</summary>
 
   - Affected metrics:
-      - k8s.pod.network.io{direction="receive"} or pod_network_receive_bytes_total
-      - k8s.pod.network.errors{direction="receive"} or pod_network_receive_errors_total
-      - k8s.pod.network.io{direction="transmit"} or pod_network_transmit_bytes_total
-      - k8s.pod.network.error{direction="transmit"} or pod_network_transmit_errors_total
+      - k8s.pod.network.io{direction="receive"} or
+        pod_network_receive_bytes_total
+      - k8s.pod.network.errors{direction="receive"} or
+        pod_network_receive_errors_total
+      - k8s.pod.network.io{direction="transmit"} or
+        pod_network_transmit_bytes_total
+      - k8s.pod.network.error{direction="transmit"} or
+        pod_network_transmit_errors_total
       - container.memory.available
       - container.memory.usage
       - container.memory.rssBytes
@@ -352,15 +357,20 @@ compatible.
     - Upgrading containerd to a newer version of 1.4.x or 1.5.x is still
       recommended.
   </details>
-- Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12 - Memory and network stats/metrics can be missing
+- Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12 - Memory and network
+  stats/metrics can be missing
   <details>
   <summary>Expand for more details</summary>
 
   - Affected metrics:
-    - k8s.pod.network.io{direction="receive"} or pod_network_receive_bytes_total
-    - k8s.pod.network.errors{direction="receive"} or pod_network_receive_errors_total
-    - k8s.pod.network.io{direction="transmit"} or pod_network_transmit_bytes_total
-    - k8s.pod.network.error{direction="transmit"} or pod_network_transmit_errors_total
+    - k8s.pod.network.io{direction="receive"} or
+      pod_network_receive_bytes_total
+    - k8s.pod.network.errors{direction="receive"} or
+      pod_network_receive_errors_total
+    - k8s.pod.network.io{direction="transmit"} or
+      pod_network_transmit_bytes_total
+    - k8s.pod.network.error{direction="transmit"} or
+      pod_network_transmit_errors_total
     - k8s.pod.memory.available
     - container.memory.available
     - container.memory.usage
@@ -373,7 +383,8 @@ compatible.
     - Upgrading containerd to at least 1.4.13 or 1.5.0 fixed the missing pod
       memory metrics.
   </details>
-- Kubernetes 1.23.0-1.23.6 using containerd - Memory stats/metrics can be missing
+- Kubernetes 1.23.0-1.23.6 using containerd - Memory stats/metrics can be
+  missing
   <details>
   <summary>Expand for more details</summary>
 
