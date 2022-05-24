@@ -133,14 +133,15 @@ Similar can be applied to any other failing exporter.
 
 ## Possible problems with Kubernetes and container runtimes
 
-A Kubernetes cluster using an incompatible container runtime could experience:
-- Stats from containers, pods, or nodes are absent or malformed.
-  - As a result, the Splunk Otel Collector which consumes these stats to
-    produce metrics would not produce the corresponding metrics.
-- Containers, pods, and nodes fail to start successfully or stop cleanly.
-- The Kubelet process on a node is in a defunct state.
+A Kubernetes cluster using an incompatible container runtime for its version or
+configuration could experience these issues cluster-wide:
+- Stats from containers, pods, or nodes being absent or malformed. As a result,
+  the Splunk OTel Collector that requires these stats will not produce the
+  desired corresponding metrics.
+- Containers, pods, and nodes failing to start successfully or stop cleanly.
+- The Kubelet process on a node being in a defunct state.
 
-Kubernetes requires you install a
+Kubernetes requires you to install a
 [container runtime](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 on each node in the cluster so that pods can run there. Multiple container
 runtimes such as containerd, CRI-O, Docker, and Marantis (formerly Docker
@@ -167,7 +168,9 @@ compatible.
    - [Mirantis](https://docs.mirantis.com/container-cloud/latest/compat-matrix.html)
 - Use the Kubelet "summary" API to verify container, pod, and node stats.
   - In this section we will verify the cpu, memory, and networks stats that are
-    used to generate metrics by the collector are present. You can expand these
+    used to generate
+    [Kubelet Stats Receiver metrics](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#metrics)
+    by the collector are present. You can expand these
     techniques to evaluate other Kubernetes stats that are available. All the
     stats in these commands and sample outputs below should be present unless
     otherwise noted. If your output is missing stats or your stat values appear
@@ -210,6 +213,20 @@ compatible.
         }
       }
     }
+
+    # For reference, here is the mapping for the node stat names to the Splunk Otel Collector metric names.
+    # cpu.usageNanoCores        -> k8s.node.cpu.utilization
+    # cpu.usageCoreNanoSeconds  -> k8s.node.cpu.time
+    # memory.availableBytes     -> k8s.node.memory.available
+    # memory.usageBytes         -> k8s.node.filesystem.usage
+    # memory.workingSetBytes    -> k8s.node.memory.working_set
+    # memory.rssBytes           -> k8s.node.memory.rss
+    # memory.pageFaults         -> k8s.node.memory.page_faults
+    # memory.majorPageFaults    -> k8s.node.memory.major_page_faults
+    # network.rxBytes           -> k8s.node.network.io{direction="receive"}
+    # network.rxErrors          -> k8s.node.network.errors{direction="receive"}
+    # network.txBytes           -> k8s.node.network.io{direction="transmit"}
+    # network.txErrors          -> k8s.node.network.error{direction="transmit"}
     ```
     </details>
 
@@ -250,7 +267,23 @@ compatible.
         }
       }
     }
+
+    # For reference, here is the mapping for the pod stat names to the Splunk Otel Collector metric names.
+    # Some of these metrics have a current and a legacy name, current names will be listed first.
+    # pod.cpu.usageNanoCores        -> k8s.pod.cpu.utilization
+    # pod.cpu.usageCoreNanoSeconds  -> k8s.pod.cpu.time
+    # pod.memory.availableBytes     -> k8s.pod.memory.available
+    # pod.memory.usageBytes         -> k8s.pod.filesystem.usage
+    # pod.memory.workingSetBytes    -> k8s.pod.memory.working_set
+    # pod.memory.rssBytes           -> k8s.pod.memory.rss
+    # pod.memory.pageFaults         -> k8s.pod.memory.page_faults
+    # pod.memory.majorPageFaults    -> k8s.pod.memory.major_page_faults
+    # pod.network.rxBytes           -> k8s.pod.network.io{direction="receive"} or pod_network_receive_bytes_total
+    # pod.network.rxErrors          -> k8s.pod.network.errors{direction="receive"} or pod_network_receive_errors_total
+    # pod.network.txBytes           -> k8s.pod.network.io{direction="transmit"} or pod_network_transmit_bytes_total
+    # pod.network.txErrors          -> k8s.pod.network.error{direction="transmit"} or pod_network_transmit_errors_total
     ```
+
     </details>
 
     <details>
@@ -282,6 +315,16 @@ compatible.
         }
       }
     }
+
+    # For reference, here is the mapping for the container stat names to the Splunk Otel Collector metric names.
+    # container.cpu.usageNanoCores        -> container.cpu.utilization
+    # container.cpu.usageCoreNanoSeconds  -> container.cpu.time
+    # container.memory.availableBytes     -> container.memory.available
+    # container.memory.usageBytes         -> container.memory.usage
+    # container.memory.workingSetBytes    -> container.memory.working_set
+    # container.memory.rssBytes           -> container.memory.rss
+    # container.memory.pageFaults         -> container.memory.page_faults
+    # container.memory.majorPageFaults    -> container.memory.major_page_faults
     ```
     </details>
 
@@ -290,23 +333,52 @@ compatible.
 - Note: Managed Kubernetes services might use a modified container runtime,
   the service provider may have applied custom patches or bug fixes that aren't
   present within an unmodified container runtime.
-- Kubernetes 1.21.0-1.21.11 using containerd
-  - Issues:
-    - Memory and network stats can be missing.
+- Kubernetes 1.21.0-1.21.11 using containerd - Memory and network stats/metrics can be missing
+  <details>
+  <summary>Expand for more details</summary>
+
+  - Affected metrics:
+      - k8s.pod.network.io{direction="receive"} or pod_network_receive_bytes_total
+      - k8s.pod.network.errors{direction="receive"} or pod_network_receive_errors_total
+      - k8s.pod.network.io{direction="transmit"} or pod_network_transmit_bytes_total
+      - k8s.pod.network.error{direction="transmit"} or pod_network_transmit_errors_total
+      - container.memory.available
+      - container.memory.usage
+      - container.memory.rssBytes
+      - container.memory.page_faults
+      - container.memory.major_page_faults
   - Resolutions:
-    - Upgrading Kubernetes to at least 1.21.12 fixed all the missing stats.
-  - Upgrading containerd to a newer version of 1.4.x or 1.5.x is still
-    recommended.
-- Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12
-  - Issues:
-    - Memory and network stats can be missing.
+    - Upgrading Kubernetes to at least 1.21.12 fixed all the missing metrics.
+    - Upgrading containerd to a newer version of 1.4.x or 1.5.x is still
+      recommended.
+  </details>
+- Kubernetes 1.22.0-1.22.8 using containerd 1.4.0-1.4.12 - Memory and network stats/metrics can be missing
+  <details>
+  <summary>Expand for more details</summary>
+
+  - Affected metrics:
+    - k8s.pod.network.io{direction="receive"} or pod_network_receive_bytes_total
+    - k8s.pod.network.errors{direction="receive"} or pod_network_receive_errors_total
+    - k8s.pod.network.io{direction="transmit"} or pod_network_transmit_bytes_total
+    - k8s.pod.network.error{direction="transmit"} or pod_network_transmit_errors_total
+    - k8s.pod.memory.available
+    - container.memory.available
+    - container.memory.usage
+    - container.memory.rssBytes
+    - container.memory.page_faults
+    - container.memory.major_page_faults
   - Resolutions:
     - Upgrading Kubernetes to at least 1.22.9 fixed the missing container
-    memory and pod network stats.
+      memory and pod network metrics.
     - Upgrading containerd to at least 1.4.13 or 1.5.0 fixed the missing pod
-      memory stats.
-- Kubernetes 1.23.0-1.23.6 using containerd
-  - Issues:
-    - The availableBytes memory stat can be missing for pods.
+      memory metrics.
+  </details>
+- Kubernetes 1.23.0-1.23.6 using containerd - Memory stats/metrics can be missing
+  <details>
+  <summary>Expand for more details</summary>
+
+  - Affected metrics:
+    - k8s.pod.memory.available
   - Resolutions:
     - No resolutions have been documented as of 2022-05-2.
+  </details>
