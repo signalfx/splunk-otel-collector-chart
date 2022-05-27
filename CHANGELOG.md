@@ -4,9 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.51.0] - 2022-05-24
+
+### Added
+
+- Add troubleshooting documentation for incompatible Kubernetes and container runtime issues (#452)
+
 ### Fixed
 
-- Fix native OTel logs collection where 0 length logs cause errors after the 0.29.0 opentelemetry-logs-library changes in 0.49.0 (#TBD)
+- Fix native OTel logs collection where 0 length logs cause errors after the 0.29.0 opentelemetry-logs-library changes in 0.49.0 (#451)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.51.0 (#453)
 
 ## [0.50.0] - 2022-05-03
 
