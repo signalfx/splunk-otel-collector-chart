@@ -189,12 +189,12 @@ autodetect:
 # Refer https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
 # for detailed examples
 batchConfig:
-  # Number of spans, metric data points, or log records after which a batch will be sent regardless of the timeout. 
+  # Number of spans, metric data points, or log records after which a batch will be sent regardless of the timeout.
   send_batch_size: 8192
   # Time duration after which a batch will be sent regardless of size.
   timeout: 200ms
-  # The upper limit of the batch size. 0 means no upper limit of the batch size. 
-  # This property ensures that larger batches are split into smaller units. 
+  # The upper limit of the batch size. 0 means no upper limit of the batch size.
+  # This property ensures that larger batches are split into smaller units.
   # It must be greater or equal to send_batch_size.
   send_batch_max_size: 0
 
