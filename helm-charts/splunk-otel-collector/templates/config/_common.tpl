@@ -199,6 +199,10 @@ splunk_hec/platform_logs:
     {{- if .Values.splunkPlatform.caFile }}
     ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
+  retry_on_failure:
+    {{- toYaml .Values.splunkPlatform.retry_on_failure | nindent 4 }}
+  sending_queue:
+    {{- toYaml .Values.splunkPlatform.sending_queue | nindent 4 }}
 {{- end }}
 
 {{/*
@@ -226,6 +230,10 @@ splunk_hec/platform_metrics:
     {{- if .Values.splunkPlatform.caFile }}
     ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
+  retry_on_failure:
+    {{- toYaml .Values.splunkPlatform.retry_on_failure | nindent 4 }}
+  sending_queue:
+    {{- toYaml .Values.splunkPlatform.sending_queue | nindent 4 }}
 {{- end }}
 
 {{/*

@@ -75,6 +75,7 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
+    {{- toYaml .Values.batchConfig | nindent 4 }}
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 

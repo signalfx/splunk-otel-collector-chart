@@ -92,6 +92,41 @@
               "type": "boolean"
             }
           }
+        },
+        "retry_on_failure": {
+          "description": "Retry configurations",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "initial_interval": {
+              "type": "string"
+            },
+            "max_interval": {
+              "type": "string"
+            },
+            "max_elapsed_time": {
+              "type": "string"
+            }
+          }
+        },
+        "sending_queue": {
+          "description": "Batching configurations for logs/traces/metrics",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "num_consumers": {
+              "type": "integer"
+            },
+            "queue_size": {
+              "type": "integer"
+            }
+          }
         }
       },
       "anyOf": [
@@ -233,6 +268,22 @@
         },
         "istio": {
           "type": "boolean"
+        }
+      }
+    },
+    "batchConfig": {
+      "description": "Batching configurations for logs/traces/metrics",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "send_batch_size": {
+          "type": "integer"
+        },
+        "timeout": {
+          "type": "string"
+        },
+        "send_batch_max_size": {
+          "type": "integer"
         }
       }
     },
