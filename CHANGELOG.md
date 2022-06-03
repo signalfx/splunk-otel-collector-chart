@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add retry_on_failure/sending_queue/batch config to values.yaml (#460)
+
 ## [0.51.0] - 2022-05-24
 
 ### Added
