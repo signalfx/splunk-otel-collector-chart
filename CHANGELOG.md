@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Add retry_on_failure/sending_queue config to values.yaml (#460)
 
+## [0.52.0] - 2022-06-07
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.52.2 (#463)
+
 ## [0.51.0] - 2022-05-24
 
 ### Added
