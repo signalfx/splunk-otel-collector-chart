@@ -27,10 +27,7 @@ data:
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
-      batch:
-        send_batch_max_size: 0
-        send_batch_size: 8192
-        timeout: 200ms
+      batch: null
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}

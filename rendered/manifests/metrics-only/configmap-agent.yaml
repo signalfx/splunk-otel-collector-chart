@@ -32,10 +32,7 @@ data:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
       zpages: null
     processors:
-      batch:
-        send_batch_max_size: 0
-        send_batch_size: 8192
-        timeout: 200ms
+      batch: null
       filter/logs:
         logs:
           exclude:
