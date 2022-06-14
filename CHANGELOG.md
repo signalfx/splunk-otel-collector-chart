@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Add retry_on_failure/sending_queue config to values.yaml (#460)
+- Add `splunkPlatform.retryOnFailure` and `splunkPlatform.sendingQueue` config options to values.yaml (#460)
 
 ## [0.52.0] - 2022-06-07
 

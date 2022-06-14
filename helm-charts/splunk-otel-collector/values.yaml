@@ -75,15 +75,15 @@ splunkPlatform:
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: true
 
-  # Refer https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md#configuration
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md#configuration
   # for detailed examples
   retryOnFailure:
     enabled: true
     # Time to wait after the first failure before retrying; ignored if enabled is false
     initialInterval: 5s
-    # Is the upper bound on backoff; ignored if enabled is false
+    # The upper bound on backoff; ignored if enabled is false
     maxInterval: 30s
-    # Is the maximum amount of time spent trying to send a batch; ignored if enabled is false
+    # The maximum amount of time spent trying to send a batch; ignored if enabled is false
     maxElapsedTime: 300s
 
   sendingQueue:
