@@ -199,6 +199,15 @@ splunk_hec/platform_logs:
     {{- if .Values.splunkPlatform.caFile }}
     ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
+  retry_on_failure:
+    enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}
+    initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
+    max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
+    max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
 {{- end }}
 
 {{/*
@@ -226,6 +235,15 @@ splunk_hec/platform_metrics:
     {{- if .Values.splunkPlatform.caFile }}
     ca_file: /otel/etc/splunk_platform_hec_ca_file
     {{- end }}
+  retry_on_failure:
+    enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}
+    initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
+    max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
+    max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
 {{- end }}
 
 {{/*

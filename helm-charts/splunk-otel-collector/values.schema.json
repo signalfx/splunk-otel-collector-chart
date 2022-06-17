@@ -92,6 +92,41 @@
               "type": "boolean"
             }
           }
+        },
+        "retryOnFailure": {
+          "description": "Retry configurations",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "initialInterval": {
+              "type": "string"
+            },
+            "maxInterval": {
+              "type": "string"
+            },
+            "maxElapsedTime": {
+              "type": "string"
+            }
+          }
+        },
+        "sendingQueue": {
+          "description": "Batching configurations for logs/traces/metrics",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "numConsumers": {
+              "type": "integer"
+            },
+            "queueSize": {
+              "type": "integer"
+            }
+          }
         }
       },
       "anyOf": [
