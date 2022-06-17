@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.53.0] - 2022-06-17
+
+- Upgrade splunk-otel-collector image to 0.53.0 (#466)
+
 ### Added
 
 - Add `splunkPlatform.retryOnFailure` and `splunkPlatform.sendingQueue` config options to values.yaml (#460)
