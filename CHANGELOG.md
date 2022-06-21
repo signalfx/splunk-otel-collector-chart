@@ -4,7 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Scrape /proc/self/mountinfo in agent pods to avoid incorrect stat attempts (#467)
+
 ## [0.53.0] - 2022-06-17
+
+### Changed
 
 - Upgrade splunk-otel-collector image to 0.53.0 (#466)
 
