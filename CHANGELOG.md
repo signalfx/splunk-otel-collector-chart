@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- A recombine operator for OTel logs collection to reconstruct multiline logs on docker engine (#465)
+- A recombine operator for OTel logs collection to reconstruct multiline logs on docker engine (#467)
 
 ### Changed
 
