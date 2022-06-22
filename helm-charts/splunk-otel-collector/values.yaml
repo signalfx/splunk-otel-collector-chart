@@ -75,6 +75,27 @@ splunkPlatform:
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: true
 
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md#configuration
+  # for detailed examples
+  retryOnFailure:
+    enabled: true
+    # Time to wait after the first failure before retrying; ignored if enabled is false
+    initialInterval: 5s
+    # The upper bound on backoff; ignored if enabled is false
+    maxInterval: 30s
+    # The maximum amount of time spent trying to send a batch; ignored if enabled is false
+    maxElapsedTime: 300s
+
+  sendingQueue:
+    enabled: true
+    # Number of consumers that dequeue batches; ignored if enabled is false
+    numConsumers: 10
+    # Maximum number of batches kept in memory before dropping; ignored if enabled is false
+    # User should calculate this as num_seconds * requests_per_second where:
+    #   num_seconds is the number of seconds to buffer in case of a backend outage
+    #   requests_per_second is the average number of requests per seconds.
+    queueSize: 5000
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
