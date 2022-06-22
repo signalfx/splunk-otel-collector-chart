@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.53.1] - 2022-06-22
+
 ### Added
 
 - A recombine operator for OTel logs collection to reconstruct multiline logs on docker engine (#467)
@@ -11,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Scrape /proc/self/mountinfo in agent pods to avoid incorrect stat attempts (#467)
+- Upgrade splunk-otel-collector image to 0.53.1 (#468)
 
 ## [0.53.0] - 2022-06-17
 
