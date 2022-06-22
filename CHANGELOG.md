@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- A recombine operator for OTel logs collection to reconstruct multiline logs on docker engine (#465)
+
 ### Changed
 
 - Scrape /proc/self/mountinfo in agent pods to avoid incorrect stat attempts (#467)
