@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Fix bug where clusterReceiver splunk_hec exporter is enabled but configured not to send o11y logs (#471)
+
 ## [0.53.1] - 2022-06-22
 
 ### Added
