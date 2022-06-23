@@ -140,13 +140,13 @@ exporters:
     timeout: 10s
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") $clusterReceiver.k8sEventsEnabled }}
+  {{- if and (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") $clusterReceiver.k8sEventsEnabled }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     sourcetype: kube:events
     source: kubelet
-    log_data_enabled: {{ .Values.splunkObservability.logsEnabled }}
+    log_data_enabled: true
     profiling_data_enabled: false
   {{- end }}
 
