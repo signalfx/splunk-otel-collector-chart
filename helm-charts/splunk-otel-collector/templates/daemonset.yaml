@@ -302,6 +302,13 @@ spec:
             value: {{ .Values.isWindows | ternary "C:\\hostfs\\run" "/hostfs/run" }}
           - name: HOST_DEV
             value: {{ .Values.isWindows | ternary "C:\\hostfs\\dev" "/hostfs/dev" }}
+          {{- if not .Values.isWindows }}
+          # until https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/5879
+          # is resolved fall back to previous gopsutil mountinfo path:
+          # https://github.com/shirou/gopsutil/issues/1271
+          - name: HOST_PROC_MOUNTINFO
+            value: /proc/self/mountinfo
+          {{- end }}
           {{- end }}
           {{- with $agent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}

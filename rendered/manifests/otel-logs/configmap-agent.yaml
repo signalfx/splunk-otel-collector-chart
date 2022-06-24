@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.51.0
+    helm.sh/chart: splunk-otel-collector-0.53.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.51.0"
+    app.kubernetes.io/version: "0.53.1"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.51.0
+    chart: splunk-otel-collector-0.53.2
     release: default
     heritage: Helm
 data:
@@ -150,7 +150,7 @@ data:
             output: parser-containerd
           type: router
         - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
             layout: "2006-01-02T15:04:05.000000000-07:00"
             layout_type: gotime
@@ -163,7 +163,7 @@ data:
           source_identifier: attributes["log.file.path"]
           type: recombine
         - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
             parse_from: attributes.time
@@ -180,6 +180,13 @@ data:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
             parse_from: attributes.time
           type: json_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: docker-recombine
+          is_last_entry: attributes.log endsWith "\n"
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
         - field: attributes.log
           id: handle_empty_log
           if: attributes.log == nil

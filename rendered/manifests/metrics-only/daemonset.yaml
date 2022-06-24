@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.51.0
+    helm.sh/chart: splunk-otel-collector-0.53.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.51.0"
+    app.kubernetes.io/version: "0.53.1"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.51.0
+    chart: splunk-otel-collector-0.53.2
     release: default
     heritage: Helm
 spec:
@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: fe2d9f2062db1d4f1c711792948b3ca1fe01fd2ab0c70cf69ef2c3b16358e4a2
+        checksum/config: 877a2a33a8d174f21c9b6c91869b2d9f1bb1b0f7572f9460739458f3fda5f643
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -61,7 +61,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.51.0
+        image: quay.io/signalfx/splunk-otel-collector:0.53.1
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -110,6 +110,11 @@ spec:
             value: /hostfs/run
           - name: HOST_DEV
             value: /hostfs/dev
+          # until https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/5879
+          # is resolved fall back to previous gopsutil mountinfo path:
+          # https://github.com/shirou/gopsutil/issues/1271
+          - name: HOST_PROC_MOUNTINFO
+            value: /proc/self/mountinfo
 
         readinessProbe:
           httpGet:

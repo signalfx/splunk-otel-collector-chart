@@ -271,7 +271,7 @@ receivers:
       # Parse CRI-O format
       - type: regex_parser
         id: parser-crio
-        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$'
+        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
@@ -287,7 +287,7 @@ receivers:
       # Parse CRI-Containerd format
       - type: regex_parser
         id: parser-containerd
-        regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)[ ]{0,1}(?P<log>.*)$'
+        regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
@@ -306,6 +306,13 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: recombine
+        id: docker-recombine
+        output: handle_empty_log
+        combine_field: attributes.log
+        source_identifier: attributes["log.file.path"]
+        is_last_entry: attributes.log endsWith "\n"
+        combine_with: ""
       {{- end }}
       - type: add
         id: handle_empty_log
