@@ -22,9 +22,11 @@ metadata:
   {{- end }}
 spec:
   updateStrategy:
-    type: RollingUpdate
+    type: {{ .Values.agent.updateStrategy }}
+    {{- if eq .Values.agent.updateStrategy "RollingUpdate" }}
     rollingUpdate:
       maxUnavailable: {{ .Values.agent.maxUnavailable }}
+    {{- end }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}

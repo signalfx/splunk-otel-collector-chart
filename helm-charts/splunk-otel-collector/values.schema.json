@@ -535,6 +535,13 @@
         "securityContext": {
           "type": "object"
         },
+        "updateStrategy": {
+            "type": "string",
+            "enum": [
+                "OnDelete",
+                "RollingUpdate"
+            ]
+        },
 	      "maxUnavailable": {
 	        "oneOf": [
 	          {

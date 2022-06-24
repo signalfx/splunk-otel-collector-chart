@@ -343,7 +343,12 @@ agent:
   #   runAsUser: 20000
   #   runAsGroup: 20000
 
+  # Specifies DaemonSet update strategy.
+  # Possible values: "OnDelete" and "RollingUpdate".
+  updateStrategy: RollingUpdate
+
   # Specifies the maximum of pods that can be unavailable during update process.
+  # Applicable only when updateStrategy is set to "RollingUpdate".
   # Can be an absolute number or a percentage. The default is 1.
   maxUnavailable: 1
 
