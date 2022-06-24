@@ -411,6 +411,10 @@ clusterReceiver:
   # This Flag enables k8s events collection with smartagent/kubernetes-events receiver
   # You can override list of events collected by default using the following config option:
   # `clusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
+  # NOTE: This flag is currently applicable only if splunkObservability.logsEnabled=true,
+  # otherwise it's a no-op. K8s events collection will be generally available once native OTel k8s
+  # events receiver is adopted in the helm chart:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   k8sEventsEnabled: false
 
   # k8s cluster receiver extra pod labels
