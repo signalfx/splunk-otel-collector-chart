@@ -282,6 +282,7 @@ receivers:
         combine_field: attributes.log
         source_identifier: attributes["log.file.path"]
         is_last_entry: "attributes.logtag == 'F'"
+        combine_with: ""
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
       # Parse CRI-Containerd format
@@ -297,6 +298,7 @@ receivers:
         combine_field: attributes.log
         source_identifier: attributes["log.file.path"]
         is_last_entry: "attributes.logtag == 'F'"
+        combine_with: ""
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
       # Parse Docker format

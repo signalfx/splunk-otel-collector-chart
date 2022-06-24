@@ -157,6 +157,7 @@ data:
             parse_from: attributes.time
           type: regex_parser
         - combine_field: attributes.log
+          combine_with: ""
           id: crio-recombine
           is_last_entry: attributes.logtag == 'F'
           output: handle_empty_log
@@ -169,6 +170,7 @@ data:
             parse_from: attributes.time
           type: regex_parser
         - combine_field: attributes.log
+          combine_with: ""
           id: containerd-recombine
           is_last_entry: attributes.logtag == 'F'
           output: handle_empty_log
