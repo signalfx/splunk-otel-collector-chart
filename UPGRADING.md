@@ -1,5 +1,53 @@
 # Upgrade guidelines
 
+## 0.53.2 to 0.54.0
+
+[OTel Kubernetes receiver is now used for events collection instead of Signalfx events receiver](https://github.com/signalfx/splunk-otel-collector-chart/pull/478)
+
+Before this change, if `clusterReceiver.k8sEventsEnabled=true`, Kubernetes events used to be collected by a Signalfx
+receiver and sent both to Splunk Observability Infrastructure Monitoring and Splunk Observability Log Observer.
+Now we utilize [a native OpenTelemetry receiver for collecting Kubernetes
+events](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver).
+Therefore `clusterReceiver.k8sEventsEnabled` option is now deprecated and replaced by the following two options:
+- `clusterReceiver.eventsEnabled`: to send Kubernetes events in the new OTel format to Splunk Observability Log Observer
+(if splunkObservability.logsEnabled=true) or to Splunk Platform (if splunkPlatform.logsEnabled=true).
+- `splunkObservability.infrastructureMonitoringEventsEnabled`: to collect Kubernetes events using the Signalfx
+Kubernetes events receiver and send them to Splunk Observability Infrastructure Monitoring.
+
+If you have `clusterReceiver.k8sEventsEnabled` set to `true` to send Kubernetes events to both Splunk Observability
+Infrastructure Monitoring and Splunk Observability Log Observer, remove `clusterReceiver.k8sEventsEnabled` from your
+custom values.yaml enable both `clusterReceiver.eventsEnabled` and
+`splunkObservability.infrastructureMonitoringEventsEnabled` options. This will send the Kubernetes events to Splunk
+Observability Log Observer in the new OpenTelemetry format.
+
+If you want to keep sending Kubernetes events to Splunk Observability Log Observer in the old Signalfx format to keep
+exactly the same behavior as before, remove `clusterReceiver.k8sEventsEnabled` from your custom values.yaml and add the
+following configuration:
+
+```yaml
+splunkObservability:
+  logsEnabled: true
+  infrastructureMonitoringEventsEnabled: true
+clusterReceiver:
+  config:
+    exporters:
+      splunk_hec/events:
+        endpoint: https://ingest.<SPLUNK_OBSERVABILITY_REALM>.signalfx.com/v1/log
+        log_data_enabled: true
+        profiling_data_enabled: false
+        source: kubelet
+        sourcetype: kube:events
+        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    service:
+      pipelines:
+        logs/events:
+          exporters:
+            - signalfx
+            - splunk_hec/events
+```
+
+where `SPLUNK_OBSERVABILITY_REALM` must be replaced by `splunkObservability.realm` value.
+
 ## 0.48.0 to 0.49.0
 
 New releases of opentelemetry-log-collection (

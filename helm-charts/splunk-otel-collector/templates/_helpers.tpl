@@ -361,3 +361,15 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- define "splunk-otel-collector.clusterReceiverNodeDiscovererScript" -}}
 {{ printf "%s-cr-node-discoverer-script" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
+
+{{/*
+"o11yInfraMonEventsEnabled" helper defines whether Observability Infrastructure monitoring events are enabled
+*/}}
+{{- define "splunk-otel-collector.o11yInfraMonEventsEnabled" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- if eq (toString $clusterReceiver.k8sEventsEnabled) "<nil>" }}
+{{- .Values.splunkObservability.infrastructureMonitoringEventsEnabled }}
+{{- else }}
+{{- $clusterReceiver.k8sEventsEnabled }}
+{{- end }}
+{{- end -}}

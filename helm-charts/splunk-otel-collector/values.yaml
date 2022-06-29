@@ -123,6 +123,12 @@ splunkObservability:
   tracesEnabled: true
   logsEnabled: false
 
+  # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring as data events:
+  # https://docs.splunk.com/Observability/alerts-detectors-notifications/view-data-events.html
+  # To send Kubernetes events to Splunk Observability Log Observer, set both clusterReceiver.eventsEnabled and
+  # splunkObservability.logsEnabled to true.
+  infrastructureMonitoringEventsEnabled: false
+
   # This option just enables the shared pipeline for logs and profiling data.
   # There is no active collection of profiling data.
   # Instrumentation libraries must be configured to send it to the collector.
@@ -408,14 +414,11 @@ clusterReceiver:
   annotations: {}
   podAnnotations: {}
 
-  # This Flag enables k8s events collection with smartagent/kubernetes-events receiver
-  # You can override list of events collected by default using the following config option:
-  # `clusterReceiver.config.receivers.smartagent/kubernetes-events.whitelistedEvents`
-  # NOTE: This flag is currently applicable only if splunkObservability.logsEnabled=true,
-  # otherwise it's a no-op. K8s events collection will be generally available once native OTel k8s
-  # events receiver is adopted in the helm chart:
+  # This flag enables Kubernetes events collection using OpenTelemetry Kubernetes Events Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
-  k8sEventsEnabled: false
+  # The receiver currently is in alpha state which means that events format might change over time.
+  # Once the receiver is stabilized, it'll be enabled by default in this helm chart
+  eventsEnabled: false
 
   # k8s cluster receiver extra pod labels
   podLabels: {}

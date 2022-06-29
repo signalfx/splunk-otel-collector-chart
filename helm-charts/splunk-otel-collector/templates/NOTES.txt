@@ -61,3 +61,8 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [WARNING] "image.fluentd.initContainer" parameter is deprecated now. Now we use the same splunk/fluentd-hec image in init container.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
 {{ end }}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- if not (eq (toString $clusterReceiver.k8sEventsEnabled) "<nil>") }}
+[WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.k8sEventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
+{{ end }}
