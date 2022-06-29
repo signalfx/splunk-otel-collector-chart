@@ -181,6 +181,10 @@
         "profilingEnabled": {
           "description": "Whether profiling data is enabled for Splunk Observability",
           "type": "boolean"
+        },
+        "infrastructureMonitoringEventsEnabled": {
+          "description": "Send Kubernetes events to Splunk Observability Infrastructure Monitoring",
+          "type": "boolean"
         }
       },
       "anyOf": [
@@ -661,6 +665,11 @@
           "type": "object"
         },
         "k8sEventsEnabled": {
+          "description": "[DEPRECATED] Use eventsEnabled instead.",
+          "type": "boolean",
+          "deprecated": true
+        },
+        "eventsEnabled": {
           "type": "boolean"
         },
         "podLabels": {
