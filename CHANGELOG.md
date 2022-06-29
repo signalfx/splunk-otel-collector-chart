@@ -4,9 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.54.0] - 2022-06-29
+
 ### Changed
 
 - OTel Kubernetes receiver is now used for events collection instead of Signalfx events receiver (#478)
+- Upgrade splunk-otel-collector image to 0.54.0 (#479)
 
 ### Fixed
 
