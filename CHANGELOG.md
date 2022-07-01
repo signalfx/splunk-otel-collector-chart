@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.54.1] - 2022-07-01
+
+### Fixed
+
+- Fix failing cluster receiver with enabled profiling and disabled logs (#481)
+
 ## [0.54.0] - 2022-06-29
 
 ### Changed
