@@ -36,7 +36,7 @@ receivers:
     {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
     distribution: openshift
     {{- end }}
-  {{- if $clusterReceiver.eventsEnabled }}
+  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -222,7 +222,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if $clusterReceiver.eventsEnabled }}
+    {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
         - k8s_events
