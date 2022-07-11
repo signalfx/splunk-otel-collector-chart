@@ -158,6 +158,15 @@ the following line to your custom values.yaml:
 priorityClassName: splunk-otel-agent-priority
 ```
 
+## GKE ARM support
+
+We support ARM workloads on GKE with default configurations of this helm chart.
+Make sure to set the required `distribution` value to `gke`:
+
+```yaml
+distribution: gke
+```
+
 ## EKS Fargate support
 
 If you want to run the Splunk OpenTelemetry Collector in [Amazon Elastic Kubernetes Service
