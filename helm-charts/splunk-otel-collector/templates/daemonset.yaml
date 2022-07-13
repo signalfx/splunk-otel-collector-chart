@@ -144,21 +144,21 @@ spec:
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
-              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/lib/docker/containers;
-              chmod -R g+rxs /var/lib/docker/containers;
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
+              find /var/lib/docker/containers -name "*.log" -exec chgrp -v {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
+              find /var/lib/docker/containers -name "*.log" -exec chmod g+rxs {} +;
+              find /var/lib/docker/containers -name "*.log" -exec setfacl -n -m d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
           fi;
           if [ -d "/var/log/crio/pods" ];
           then
-              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/crio/pods;
-              chmod -R g+rxs /var/log/crio/pods;
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
+              find /var/log/crio/pods -name "*.log" -exec chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
+              find /var/log/crio/pods -name "*.log" -exec chmod -R g+rxs {} +;
+              find /var/log/crio/pods -name "*.log" -exec setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
           fi;
           if [ -d "/var/log/pods" ];
           then
-              chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} /var/log/pods;
-              chmod -R g+rxs /var/log/pods;
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
+              find /var/log/pods -name "*.log" -exec chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
+              find /var/log/pods -name "*.log" -exec chmod -R g+rxs {} +;
+              find /var/log/pods -name "*.log" -exec setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
           fi;
           {{- end }}']
           securityContext:
