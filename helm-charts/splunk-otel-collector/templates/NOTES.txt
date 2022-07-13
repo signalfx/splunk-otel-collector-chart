@@ -63,6 +63,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{ end }}
 {{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
 {{- if not (eq (toString $clusterReceiver.k8sEventsEnabled) "<nil>") }}
-[WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.k8sEventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
+[WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
 {{ end }}
