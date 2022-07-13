@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate has been removed (#487)
+  - If you are using this feature gate, then see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0540-to-0550)
+
 ### Fixed
 
 - Make sure that logs are enabled to send k8s events (#481)
@@ -93,6 +98,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     filelog, syslog, tcplog, and journald receivers. Any use of the
     extraFileLogs config, logsCollection.containers.extraOperators config,
     and affected receivers in a custom manner should be reviewed. See
+    [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0480-to-0490)
+
+- The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate is now enabled by default (#487)
+  - [BREAKING CHANGE] The Splunk Otel Collector has a feature gate to enable a
+    bug fix that makes the k8sclusterreceiver emit a few Kubernetes cpu
+    metrics differently to properly adhere to OpenTelemetry specifications. See
     [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0480-to-0490)
 
 - Upgrade splunk-otel-collector image to 0.49.0 (#442)

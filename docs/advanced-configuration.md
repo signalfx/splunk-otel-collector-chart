@@ -538,51 +538,6 @@ helm install {name} --set agent.featureGates=+feature1 --set clusterReceiver.fea
 Would result in the agent having feature1 enabled, the clusterReceiver having feature2 enabled, and the gateway having
 feature2 disabled.
 
-### Highlighted feature gates
-- receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
-  - Description
-    - A bug was reported where three Kubernetes cpu metrics emitted by the k8sclusterreceiver do not follow
-      OpenTelemetry cpu metric specifications. To address this issue, we are slowly transitioning the affected metrics
-      to follow the proper specifications. The k8sclusterreceiver will transition emitting the affected metrics from
-      integer millicpu units to double cpu units.
-      - Example Dashboard: [k8s.container.cpu_request: 300 (millicpu units) -> k8s.container.cpu_request: 0.3 (cpu units)](https://drive.google.com/file/d/1GkrhAonJZG7aDNGAx7vggfbOn_lqtY8f/view)
-    - From a user's perspective, this change will cause the affected metrics to be double (instead of integer) values
-      as well as the metric values will be scaled down by 1000x. This can be a breaking change for current monitoring
-      involving the affected metrics, users may have to update alerts and dashboards to accommodate this change.
-    - To help mitigate user friction during this transition, we are doing a couple of things.
-      - We are rolling out the bug fix slowly behind a feature gate. The feature gate will have 3 stages that will be released with specific versions of the collector (more info below).
-      - We have included
-      [warning messages](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/2324192480395cf0c193e3c9048b02969c38003e/receiver/k8sclusterreceiver/internal/collection/collector.go#L103)
-      about this change in the k8sclusterreceiver startup logs.
-  - Affected Metrics
-    - Note: These metrics have a current and a legacy name, we list both as pairs (current, legacy) below.
-    - `k8s.container.cpu_request`, `kubernetes.container_cpu_request`
-    - `k8s.container.cpu_limit`, `kubernetes.container_cpu_limit`
-    - `k8s.node.allocatable_cpu`, `kubernetes.node_allocatable_cpu`
-  - Stages and Timeline
-    - Alpha (current stage)
-      - In this stage the feature gate is disabled by default and must be enabled by the user. This allows users to preemptively opt in and start using the bug fix by enabling the feature gate.
-      - Collector version: v0.47.0
-      - Release Date: Late March 2022
-    - Beta
-      - In this stage the feature gate is enabled by default and can be disabled by the user.
-      - Users could experience some friction in this stage, they may need to update monitoring for the affected metrics or opt out of using the bug fix by disabling the feature gate.
-      - Target Collector version: v0.50.0
-      - Target Release Date: Early May 2022
-    - Generally Available
-      - In this stage the feature gate is permanently enabled and the feature gate is no longer available for anyone.
-      - Users could experience some friction in this stage, they may have to update monitoring for the affected metrics or be blocked from upgrading the collector to versions v0.53.0 and newer.
-      - Target Collector version: v0.53.0
-      - Target Release Date:  Mid June 2022
-  - Applying The Bug Fix With The Feature Gate
-    - Install with the feature gate enabled:
-      - helm install {name} --set clusterReceiver.featureGates=receiver.k8sclusterreceiver.reportCpuMetricsAsDouble {other_flags}
-    - Install with the feature gate disabled:
-      - helm install {name} --set clusterReceiver.featureGates=-receiver.k8sclusterreceiver.reportCpuMetricsAsDouble {other_flags}
-  - More Information
-    - [receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/8c0ebe6f08d09f2c70a3d52f62b6203b6706ebe1/receiver/k8sclusterreceiver/README.md?plain=1#L56)
-    - [OpenTelemetry CPU Metric Specifications](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/system-metrics.md#systemcpu---processor-metrics)
-
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.

@@ -1,5 +1,14 @@
 # Upgrade guidelines
 
+## 0.54.0 to 0.55.0
+
+[[receiver/k8sclusterreceiver] The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate has been removed](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/10838)
+
+If you are disabling this feature gate to keep previous functionality, you will
+have to complete the steps in
+[upgrade guidelines 0.47.0 to 0.47.1](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0470-to-0471)
+to upgrade since the feature gate no longer exists.
+
 ## 0.53.2 to 0.54.0
 
 [OTel Kubernetes receiver is now used for events collection instead of Signalfx events receiver](https://github.com/signalfx/splunk-otel-collector-chart/pull/478)
@@ -76,8 +85,13 @@ monitoring setup, you can stop here.
 custom log monitoring, update your log monitoring to accommodate the breaking
 changes.
 
-## 0.47.0 to 0.47.1
+[[receiver/k8sclusterreceiver] The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate is now enabled by default](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/9367)
 
+If you haven't already completed the steps in
+[upgrade guidelines 0.47.0 to 0.47.1](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0470-to-0471)
+, then complete them.
+
+## 0.47.0 to 0.47.1
 [[receiver/k8sclusterreceiver] Fix k8s node and container cpu metrics not being reported properly](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/8245)
 
 The Splunk Otel Collector added a feature gate to enable a bug fix for three
@@ -88,23 +102,36 @@ pairs (current, legacy) below.
   - `k8s.container.cpu_request`, `kubernetes.container_cpu_request`
   - `k8s.container.cpu_limit`, `kubernetes.container_cpu_limit`
   - `k8s.node.allocatable_cpu`, `kubernetes.node_allocatable_cpu`
-
-1. Check to see if any of your custom monitoring uses the affected metrics.
-Check for the current and legacy names of the affected metrics. If you don't
-use the affected metrics in your custom monitoring, you can stop here.
-2. Read the documentation for the
-[receiver.k8sclusterreceiver.reportCpuMetricsAsDouble](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#highlighted-feature-gates)
-feature gate and the bug fix it applies.
-3. If the bug fix will break any of your custom monitoring for the affected
-metrics, update your monitoring to accommodate the bug fix.
-4. Use the `--set clusterReceiver.featureGates=receiver.k8sclusterreceiver.reportCpuMetricsAsDouble`
-argument with the helm install/upgrade command, or add the following line to
-your custom values.yaml:
-
-```yaml
-clusterReceiver:
-  featureGates: receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
-```
+- Upgrade Steps
+  1. Check to see if any of your custom monitoring uses the affected metrics.
+  Check for the current and legacy names of the affected metrics. If you don't
+  use the affected metrics in your custom monitoring, you can stop here.
+  2. Read the documentation for the
+  [receiver.k8sclusterreceiver.reportCpuMetricsAsDouble](https://github.com/signalfx/splunk-otel-collector-chart/tree/splunk-otel-collector-0.54.0/docs/advanced-configuration.md#highlighted-feature-gates)
+  feature gate and the bug fix it applies.
+  3. If the bug fix will break any of your custom monitoring for the affected
+  metrics, update your monitoring to accommodate the bug fix.
+- Feature Gate Stages and Versions
+  - Alpha (versions 0.47.1-0.48.0):
+    - The feature gate is disabled by default. Use the `--set clusterReceiver.featureGates=receiver.k8sclusterreceiver.reportCpuMetricsAsDouble`
+      argument with the helm install/upgrade command, or add the following line to
+      your custom values.yaml to enable the feature gate:
+    ```yaml
+    clusterReceiver:
+      featureGates: receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
+    ```
+  - Beta (versions 0.49.0-0.54.0):
+    - The feature gate is enabled by default. Use the `--set clusterReceiver.featureGates=-receiver.k8sclusterreceiver.reportCpuMetricsAsDouble`
+      argument with the helm install/upgrade command, or add the following line to
+      your custom values.yaml to disable the feature gate:
+    ```yaml
+    clusterReceiver:
+      featureGates: -receiver.k8sclusterreceiver.reportCpuMetricsAsDouble
+    ```
+  - Generally Available (versions +0.55.0):
+    - The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate
+      functionality is permanently enabled and the feature gate is no longer available
+      for anyone.
 
 ## 0.44.1 to 0.45.0
 
