@@ -144,21 +144,15 @@ spec:
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
-              find /var/lib/docker/containers -name "*.log" -exec chgrp -v {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
-              find /var/lib/docker/containers -name "*.log" -exec chmod g+rxs {} +;
-              find /var/lib/docker/containers -name "*.log" -exec setfacl -n -m d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
           fi;
           if [ -d "/var/log/crio/pods" ];
           then
-              find /var/log/crio/pods -name "*.log" -exec chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
-              find /var/log/crio/pods -name "*.log" -exec chmod -R g+rxs {} +;
-              find /var/log/crio/pods -name "*.log" -exec setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
           fi;
           if [ -d "/var/log/pods" ];
           then
-              find /var/log/pods -name "*.log" -exec chgrp -Rv {{ $agent.securityContext.runAsGroup | default 20000 }} {} +;
-              find /var/log/pods -name "*.log" -exec chmod -R g+rxs {} +;
-              find /var/log/pods -name "*.log" -exec setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {} +;
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
           fi;
           {{- end }}']
           securityContext:
