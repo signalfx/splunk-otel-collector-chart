@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate has been removed (#487)
   - If you are using this feature gate, then see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0540-to-0550)
+- Do not send clusterReceiver metrics through gateway (#491)
 
 ### Fixed
 
