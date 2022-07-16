@@ -152,7 +152,16 @@ exporters:
     timeout: 10s
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") $clusterReceiver.eventsEnabled }}
+  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if $gateway.enabled }}
+  # If gateway is enabled, metrics, logs and traces will be sent to the gateway
+  otlp:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    tls:
+      insecure: true
+  {{- else }}
+
+  {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -160,12 +169,15 @@ exporters:
     profiling_data_enabled: false
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
+  {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") $clusterReceiver.eventsEnabled }}
-  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- end }}
+  {{- end }}
+
+  {{- if eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true" }}
+  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
 
 service:

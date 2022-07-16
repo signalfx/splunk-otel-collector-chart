@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Make sure that logs are enabled to send k8s events (#481)
+- K8s events collection with enabled gateway (#489)
 
 ## [0.54.1] - 2022-07-01
 
