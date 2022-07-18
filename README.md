@@ -59,7 +59,7 @@ however, only the Splunk distributions are in scope for official Splunk support 
 
 This distribution currently supports:
 
-- [Splunk APM](https://www.splunk.com/en_us/software/splunk-apm.html) via the
+- [Splunk APM](https://www.splunk.com/en_us/products/apm-application-performance-monitoring.html) via the
   [`sapm`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter).
   The [`otlphttp`
@@ -69,17 +69,17 @@ This distribution currently supports:
   More information available
   [here](https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-opentelemetry-collector.html).
 - [Splunk Infrastructure
-  Monitoring](https://www.splunk.com/en_us/software/infrastructure-monitoring.html)
+  Monitoring](https://www.splunk.com/en_us/products/infrastructure-monitoring.html)
   via the [`signalfx`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter).
   More information available
   [here](https://docs.signalfx.com/en/latest/otel/imm-otel-collector.html).
-- [Splunk Log Observer](https://www.splunk.com/en_us/form/splunk-log-observer.html) via
+- [Splunk Log Observer](https://www.splunk.com/en_us/products/log-observer.html) via
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
-- [Splunk Cloud](https://www.splunk.com/en_us/software/splunk-cloud.html) or
+- [Splunk Cloud](https://www.splunk.com/en_us/products/splunk-cloud-platform.html) or
   [Splunk
-  Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html) via
+  Enterprise](https://www.splunk.com/en_us/products/splunk-enterprise.html) via
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
