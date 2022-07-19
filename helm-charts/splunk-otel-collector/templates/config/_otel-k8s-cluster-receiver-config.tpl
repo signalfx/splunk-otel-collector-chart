@@ -90,6 +90,16 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
+  # Drop high cardinality k8s event attributes
+  attributes/drop_event_attrs:
+    actions:
+      - key: k8s.event.start_time
+        action: delete
+      - key: k8s.event.name
+        action: delete
+      - key: k8s.event.uid
+        action: delete
+
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
     attributes:
@@ -230,6 +240,7 @@ service:
       processors:
         - memory_limiter
         - batch
+        - attributes/drop_event_attrs
         - resourcedetection
         - resource
         {{- if .Values.environment }}
