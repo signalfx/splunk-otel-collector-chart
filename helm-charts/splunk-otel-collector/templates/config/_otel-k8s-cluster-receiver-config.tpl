@@ -90,6 +90,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
+  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
@@ -99,6 +100,7 @@ processors:
         action: delete
       - key: k8s.event.uid
         action: delete
+  {{- end }}
 
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
