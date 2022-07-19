@@ -166,6 +166,7 @@ exporters:
 
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") $clusterReceiver.eventsEnabled }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+    sourcetype: kube:events
   {{- end }}
 
 service:
