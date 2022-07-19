@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate has been removed (#487)
   - If you are using this feature gate, then see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0540-to-0550)
+- Remove high cardinality fields from k8s events: (#484)
+  - k8s.event.start_time
+  - k8s.event.name
+  - k8s.event.uid
 
 ### Fixed
 

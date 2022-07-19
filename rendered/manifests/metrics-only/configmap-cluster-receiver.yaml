@@ -27,6 +27,14 @@ data:
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
+      attributes/drop_event_attrs:
+        actions:
+        - action: delete
+          key: k8s.event.start_time
+        - action: delete
+          key: k8s.event.name
+        - action: delete
+          key: k8s.event.uid
       batch: null
       memory_limiter:
         check_interval: 2s
