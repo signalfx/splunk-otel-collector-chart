@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.54.2
+    helm.sh/chart: splunk-otel-collector-0.55.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.54.0"
+    app.kubernetes.io/version: "0.55.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.54.2
+    chart: splunk-otel-collector-0.55.0
     release: default
     heritage: Helm
 data:
@@ -81,15 +81,20 @@ data:
         filter:
           node_from_env_var: K8S_NODE_NAME
         pod_association:
-        - from: resource_attribute
-          name: k8s.pod.uid
-        - from: resource_attribute
-          name: k8s.pod.ip
-        - from: resource_attribute
-          name: ip
-        - from: connection
-        - from: resource_attribute
-          name: host.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
+        - sources:
+          - from: resource_attribute
+            name: host.name
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
