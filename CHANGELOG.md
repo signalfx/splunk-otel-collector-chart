@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+- Removed unnecessary change of group ownership in chmod initContainer (#486)
+
 ## [0.55.0] - 2022-07-19
 
 ### Changed
