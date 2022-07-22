@@ -204,6 +204,53 @@ fluentd:
           firstline: /\d{4}-\d{1,2}-\d{1,2}/
 ```
 
+## Filter out specific pods
+
+This example shows how you can filter out specific pods from metrics
+pipelines. This could be adapted for other metadata or pipelines.
+Filters should be added to both the agent and the cluster receiver.
+
+```yaml
+agent:
+  config:
+    processors:
+      filter/exclude_containers:
+        metrics:
+          exclude:
+            match_type: regexp
+            resource_attributes:
+              - Key: k8s.container.name
+                Value: '^(coredns|metrics-server)$'
+    service:
+      pipelines:
+        metrics:
+          processors:
+            - memory_limiter
+            - batch
+            - resourcedetection
+            - resource
+            - filter/exclude_containers
+clusterReceiver:
+  config:
+    processors:
+      filter/exclude_containers:
+        metrics:
+          exclude:
+            match_type: regexp
+            resource_attributes:
+              - Key: k8s.container.name
+                Value: '^(coredns|metrics-server)$'
+    service:
+      pipelines:
+        metrics:
+          processors:
+            - memory_limiter
+            - batch
+            - resource
+            - resource/k8s_cluster
+            - filter/exclude_containers
+```
+
 # Logs collection configuration for CRI-O container runtime
 
 Default logs collection is configured for Docker container runtime.
