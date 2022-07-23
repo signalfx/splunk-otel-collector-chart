@@ -220,7 +220,7 @@ agent:
             match_type: regexp
             resource_attributes:
               - Key: k8s.container.name
-                Value: '^(coredns|metrics-server)$'
+                Value: '^(containerX|containerY)$'
     service:
       pipelines:
         metrics:
@@ -239,7 +239,7 @@ clusterReceiver:
             match_type: regexp
             resource_attributes:
               - Key: k8s.container.name
-                Value: '^(coredns|metrics-server)$'
+                Value: '^(containerX|containerY)$'
     service:
       pipelines:
         metrics:
