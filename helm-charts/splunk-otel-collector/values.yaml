@@ -239,6 +239,7 @@ agent:
 
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension: false
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
@@ -396,6 +397,7 @@ agent:
 clusterReceiver:
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension: false
   # Need to be adjusted based on size of the monitored cluster
   resources:
@@ -913,6 +915,7 @@ gateway:
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension: false
 
   # Number of collector replicas
