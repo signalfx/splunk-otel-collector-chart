@@ -327,6 +327,9 @@
         "enabled": {
           "type": "boolean"
         },
+        "pprofExtension": {
+          "type": "boolean"
+        },
         "controlPlaneEnabled": {
           "type": "boolean",
           "deprecated": true
@@ -602,6 +605,9 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "type": "boolean"
+        },
+        "pprofExtension": {
           "type": "boolean"
         },
         "resources": {
@@ -1111,6 +1117,9 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "type": "boolean"
+        },
+        "pprofExtension": {
           "type": "boolean"
         },
         "replicaCount": {

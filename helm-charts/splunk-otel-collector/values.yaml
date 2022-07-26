@@ -32,7 +32,7 @@ splunkPlatform:
   token: ""
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
-  index: "main"
+  index: ""
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metricsIndex: ""
   # Optional. Default value for `source` field.
@@ -237,7 +237,7 @@ extraAttributes:
 
 agent:
   enabled: true
-
+  pprofExtension: false
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
@@ -393,7 +393,7 @@ agent:
 
 clusterReceiver:
   enabled: true
-
+  pprofExtension: false
   # Need to be adjusted based on size of the monitored cluster
   resources:
     limits:
@@ -908,7 +908,8 @@ isWindows: false
 gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
-  enabled: false
+  enabled: true
+  pprofExtension: false
 
   # Number of collector replicas
   replicaCount: 3

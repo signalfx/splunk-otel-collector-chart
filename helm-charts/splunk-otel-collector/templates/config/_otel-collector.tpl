@@ -16,6 +16,9 @@ extensions:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
   zpages:
+  {{- if .Values.gateway.pprofExtension }}
+  pprof:
+  {{- end}}
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
@@ -186,6 +189,9 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        {{- if .Values.gateway.pprofExtension }}
+        - pprof
+        {{- end}}
       exporters: [sapm]
     {{- end }}
 
