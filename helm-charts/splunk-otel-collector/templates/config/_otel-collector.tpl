@@ -18,7 +18,7 @@ extensions:
   zpages:
   {{- if .Values.gateway.pprofExtension }}
   pprof:
-  {{- end}}
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
@@ -167,6 +167,9 @@ service:
     - health_check
     - memory_ballast
     - zpages
+    {{- if .Values.gateway.pprofExtension }}
+    - pprof
+    {{- end }}
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
     {{- end }}
@@ -189,9 +192,6 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        {{- if .Values.gateway.pprofExtension }}
-        - pprof
-        {{- end}}
       exporters: [sapm]
     {{- end }}
 

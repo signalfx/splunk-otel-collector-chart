@@ -20,9 +20,9 @@ extensions:
     node: ${K8S_NODE_NAME}
 
   zpages:
-  {{- if .Values.gateway.pprofExtension }}
+  {{- if .Values.agent.pprofExtension }}
   pprof:
-  {{- end}}
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
@@ -617,7 +617,7 @@ service:
     - zpages
     {{- if .Values.agent.pprofExtension }}
     - pprof
-    {{- end}}
+    {{- end }}
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
   # or directly to signalfx backend depending on gateway.enabled configuration.

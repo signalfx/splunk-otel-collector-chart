@@ -32,7 +32,7 @@ splunkPlatform:
   token: ""
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
-  index: ""
+  index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metricsIndex: ""
   # Optional. Default value for `source` field.
@@ -237,6 +237,7 @@ extraAttributes:
 
 agent:
   enabled: true
+  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   pprofExtension: false
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
@@ -393,6 +394,7 @@ agent:
 
 clusterReceiver:
   enabled: true
+  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   pprofExtension: false
   # Need to be adjusted based on size of the monitored cluster
   resources:
@@ -909,6 +911,7 @@ gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: true
+  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   pprofExtension: false
 
   # Number of collector replicas
