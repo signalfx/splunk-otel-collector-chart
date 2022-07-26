@@ -9,12 +9,12 @@ nameOverride: ""
 fullnameOverride: ""
 
 ################################################################################
-# clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
+# clusterName is ma REQUIRED. It can be set to an arbitrary value that identifies
 # your K8s cluster. The value will be associated with every trace, metric and
 # log as "k8s.cluster.name" attribute.
 ################################################################################
 
-clusterName: ""
+clusterName: "my-cluster"
 
 ################################################################################
 # Splunk Data-to-Everything Platform configuration.
@@ -26,10 +26,10 @@ splunkPlatform:
   # Required for Splunk Enterprise/Cloud. URL to a Splunk instance to send data
   # to. e.g. "http://X.X.X.X:8088/services/collector". Setting this parameter
   # enables Splunk Platform as a destination.
-  endpoint: ""
+  endpoint: "http://10.202.33.233:8088/services/collector"
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
   # HTTP Event Collector token.
-  token: ""
+  token: "941ed5f3-53ce-4ba3-8f2f-415beaf8b2ae"
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: "main"
@@ -237,7 +237,6 @@ extraAttributes:
 
 agent:
   enabled: true
-  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   pprofExtension: false
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
@@ -394,8 +393,7 @@ agent:
 
 clusterReceiver:
   enabled: true
-  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
-  pprofExtension: false
+  pprofExtension: true
   # Need to be adjusted based on size of the monitored cluster
   resources:
     limits:
@@ -910,9 +908,8 @@ isWindows: false
 gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
-  enabled: false
-  # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
-  pprofExtension: false
+  enabled: true
+  pprofExtension: true
 
   # Number of collector replicas
   replicaCount: 3
@@ -959,9 +956,9 @@ gateway:
 
   resources:
     limits:
-      cpu: 4
+      cpu: 1
       # Memory limit value is used as a source for default memory_limiter configuration
-      memory: 8Gi
+      memory: 2Gi
 
   # Scheduling configurations
   nodeSelector: {}
