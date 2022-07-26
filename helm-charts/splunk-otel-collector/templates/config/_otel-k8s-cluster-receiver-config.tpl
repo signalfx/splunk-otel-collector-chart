@@ -190,7 +190,7 @@ service:
       address: 0.0.0.0:8889
   extensions:
     - health_check
-    - memory_ballas
+    - memory_ballast
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
     - k8s_observer
   {{- end }}
