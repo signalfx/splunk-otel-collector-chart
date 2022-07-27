@@ -240,7 +240,7 @@ agent:
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: 
+  pprofExtension:
     enabled: false
     endpoint:
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
@@ -406,7 +406,7 @@ clusterReceiver:
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: 
+  pprofExtension:
     enabled: false
     endpoint:
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
@@ -932,7 +932,7 @@ gateway:
   enabled: false
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: 
+  pprofExtension:
     enabled: false
     endpoint:
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
