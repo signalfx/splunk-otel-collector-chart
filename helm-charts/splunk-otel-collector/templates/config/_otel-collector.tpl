@@ -16,8 +16,11 @@ extensions:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
   zpages:
-  {{- if .Values.gateway.pprofExtension }}
+  {{- if .Values.gateway.pprofExtension.enabled }}
   pprof:
+    endpoint: {{.Values.gateway.pprofExtension.endpoint}}
+    block_profile_fraction: {{.Values.gateway.pprofExtension.block_profile_fraction}}
+    mutex_profile_fraction: {{.Values.gateway.pprofExtension.mutex_profile_fraction}}
   {{- end }}
 
 receivers:
@@ -167,7 +170,7 @@ service:
     - health_check
     - memory_ballast
     - zpages
-    {{- if .Values.gateway.pprofExtension }}
+    {{- if .Values.gateway.pprofExtension.enabled }}
     - pprof
     {{- end }}
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}

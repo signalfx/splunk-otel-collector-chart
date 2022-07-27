@@ -240,7 +240,15 @@ agent:
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: false
+  pprofExtension: 
+    enabled: false
+    endpoint:
+    # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
+    block_profile_fraction: 0
+    # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
+    mutex_profile_fraction: 0
+    # (default = 0): Fraction of mutex contention events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetMutexProfileFraction for details.
+
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
@@ -398,7 +406,15 @@ clusterReceiver:
   enabled: true
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: false
+  pprofExtension: 
+    enabled: false
+    endpoint:
+    # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
+    block_profile_fraction: 0
+    # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
+    mutex_profile_fraction: 0
+    # (default = 0): Fraction of mutex contention events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetMutexProfileFraction for details.
+
   # Need to be adjusted based on size of the monitored cluster
   resources:
     limits:
@@ -916,7 +932,14 @@ gateway:
   enabled: false
   # Performance Profiler extension is typically used to collect performance profiles and investigate issues with the service.
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
-  pprofExtension: false
+  pprofExtension: 
+    enabled: false
+    endpoint:
+    # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
+    block_profile_fraction: 0
+    # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
+    mutex_profile_fraction: 0
+    # (default = 0): Fraction of mutex contention events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetMutexProfileFraction for details.
 
   # Number of collector replicas
   replicaCount: 3

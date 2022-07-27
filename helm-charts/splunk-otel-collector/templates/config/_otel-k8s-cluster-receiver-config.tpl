@@ -10,8 +10,11 @@ extensions:
 
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
-  {{- if .Values.clusterReceiver.pprofExtension }}
+  {{- if .Values.clusterReceiver.pprofExtension.enabled }}
   pprof:
+    endpoint: {{.Values.clusterReceiver.pprofExtension.endpoint}}
+    block_profile_fraction: {{.Values.clusterReceiver.pprofExtension.block_profile_fraction}}
+    mutex_profile_fraction: {{.Values.clusterReceiver.pprofExtension.mutex_profile_fraction}}
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
@@ -195,7 +198,7 @@ service:
     - k8s_observer
   {{- end }}
   
-  {{- if .Values.clusterReceiver.pprofExtension }}
+  {{- if .Values.clusterReceiver.pprofExtension.enabled }}
     - pprof
   {{- end }}
   pipelines:
