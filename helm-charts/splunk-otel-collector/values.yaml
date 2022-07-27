@@ -242,7 +242,7 @@ agent:
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension:
     enabled: false
-    endpoint:
+    endpoint: ""
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
     block_profile_fraction: 0
     # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
@@ -408,7 +408,7 @@ clusterReceiver:
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension:
     enabled: false
-    endpoint:
+    endpoint: ""
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
     block_profile_fraction: 0
     # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
@@ -934,7 +934,7 @@ gateway:
   # Refer to https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/pprofextension#performance-profiler
   pprofExtension:
     enabled: false
-    endpoint:
+    endpoint: ""
     # (default = localhost:1777)The endpoint in which the pprof will be listening to. Use localhost: to make it available only locally, or ":" to make it available on all network interfaces.
     block_profile_fraction: 0
     # (default = 0): Fraction of blocking events that are profiled. A value <= 0 disables profiling. See https://golang.org/pkg/runtime/#SetBlockProfileRate for details.
