@@ -4,7 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.56.0] - 2022-07-27
+
+### Changed
+
 - Removed unnecessary change of group ownership in chmod initContainer (#486)
+- Upgrade splunk-otel-collector image to 0.56.0 (#501)
 
 ## [0.55.0] - 2022-07-19
 
