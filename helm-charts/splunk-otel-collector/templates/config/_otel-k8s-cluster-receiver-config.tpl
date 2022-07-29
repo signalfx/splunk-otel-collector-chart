@@ -7,14 +7,10 @@ The values can be overridden in .Values.clusterReceiver.config
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
-  {{- if .Values.clusterReceiver.pprofExtension.enabled }}
-  pprof:
-    endpoint: {{.Values.clusterReceiver.pprofExtension.endpoint}}
-    block_profile_fraction: {{.Values.clusterReceiver.pprofExtension.block_profile_fraction}}
-    mutex_profile_fraction: {{.Values.clusterReceiver.pprofExtension.mutex_profile_fraction}}
-  {{- end }}
+
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
@@ -189,14 +185,10 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8889
-  extensions:
-    - health_check
-    - memory_ballast
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-    - k8s_observer
-  {{- end }}
-  {{- if .Values.clusterReceiver.pprofExtension.enabled }}
-    - pprof
+  extensions: [health_check, memory_ballast, k8s_observer]
+  {{- else }}
+  extensions: [health_check, memory_ballast]
   {{- end }}
   pipelines:
     # k8s metrics pipeline

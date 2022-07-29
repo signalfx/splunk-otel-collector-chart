@@ -327,25 +327,6 @@
         "enabled": {
           "type": "boolean"
         },
-        "pprofExtension": {
-          "description": "pprof extension",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "endpoint": {
-              "type": "string"
-            },
-            "block_profile_fraction": {
-              "type": "number"
-            },
-            "mutex_profile_fraction": {
-              "type": "number"
-            }
-          }
-        },
         "controlPlaneEnabled": {
           "type": "boolean",
           "deprecated": true
@@ -622,25 +603,6 @@
       "properties": {
         "enabled": {
           "type": "boolean"
-        },
-        "pprofExtension": {
-          "description": "pprof extension",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "endpoint": {
-              "type": "string"
-            },
-            "block_profile_fraction": {
-              "type": "number"
-            },
-            "mutex_profile_fraction": {
-              "type": "number"
-            }
-          }
         },
         "resources": {
           "type": "object",
@@ -1150,25 +1112,6 @@
       "properties": {
         "enabled": {
           "type": "boolean"
-        },
-        "pprofExtension": {
-          "description": "pprof extension",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "endpoint": {
-              "type": "string"
-            },
-            "block_profile_fraction": {
-              "type": "number"
-            },
-            "mutex_profile_fraction": {
-              "type": "number"
-            }
-          }
         },
         "replicaCount": {
           "type": "integer"
