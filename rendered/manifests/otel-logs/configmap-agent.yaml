@@ -157,7 +157,7 @@ data:
         - id: parser-crio
           regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
-            layout: "2006-01-02T15:04:05.000000000-07:00"
+            layout: "2006-01-02T15:04:05.999999999-07:00"
             layout_type: gotime
             parse_from: attributes.time
           type: regex_parser
