@@ -89,6 +89,18 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
+  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  # Drop high cardinality k8s event attributes
+  attributes/drop_event_attrs:
+    actions:
+      - key: k8s.event.start_time
+        action: delete
+      - key: k8s.event.name
+        action: delete
+      - key: k8s.event.uid
+        action: delete
+  {{- end }}
+
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
     attributes:
@@ -160,6 +172,7 @@ exporters:
 
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") $clusterReceiver.eventsEnabled }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+    sourcetype: kube:events
   {{- end }}
 
 service:
@@ -223,6 +236,7 @@ service:
       processors:
         - memory_limiter
         - batch
+        - attributes/drop_event_attrs
         - resourcedetection
         - resource
         {{- if .Values.environment }}

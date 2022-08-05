@@ -275,7 +275,7 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
-          layout: '2006-01-02T15:04:05.000000000-07:00'
+          layout: '2006-01-02T15:04:05.999999999-07:00'
       - type: recombine
         id: crio-recombine
         output: handle_empty_log
@@ -434,15 +434,20 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
     pod_association:
-      - from: resource_attribute
-        name: k8s.pod.uid
-      - from: resource_attribute
-        name: k8s.pod.ip
-      - from: resource_attribute
-        name: ip
-      - from: connection
-      - from: resource_attribute
-        name: host.name
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.uid
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.ip
+      - sources:
+        - from: resource_attribute
+          name: ip
+      - sources:
+        - from: connection
+      - sources:
+        - from: resource_attribute
+          name: host.name
     extract:
       metadata:
         - k8s.namespace.name

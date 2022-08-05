@@ -4,15 +4,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Do not send clusterReceiver metrics through gateway (#491)
+
+## [0.57.0] - 2022-08-05
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.57.0 (#TBD)
+
+## [0.56.0] - 2022-07-27
+
+### Changed
+
+- Removed unnecessary change of group ownership in chmod initContainer (#486)
+- Upgrade splunk-otel-collector image to 0.56.0 (#501)
+
+## [0.55.0] - 2022-07-19
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.55.0 (#485)
+
+## [0.54.2] - 2022-07-19
+
 ### Changed
 
 - The receiver.k8sclusterreceiver.reportCpuMetricsAsDouble feature gate has been removed (#487)
   - If you are using this feature gate, then see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0540-to-0550)
-- Do not send clusterReceiver metrics through gateway (#491)
+- Remove high cardinality fields from k8s events: (#484)
+  - k8s.event.start_time
+  - k8s.event.name
+  - k8s.event.uid
 
 ### Fixed
 
 - Make sure that logs are enabled to send k8s events (#481)
+- Make sure that "sourcetype" field is always set on k8s events (#483)
 
 ## [0.54.1] - 2022-07-01
 
