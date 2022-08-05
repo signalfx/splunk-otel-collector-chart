@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.57.1] - 2022-08-05
+
 ### Changed
 
 - Do not send clusterReceiver metrics through gateway (#491)
@@ -12,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Upgrade splunk-otel-collector image to 0.57.0 (#TBD)
+- Upgrade splunk-otel-collector image to 0.57.0 (#504)
 
 ## [0.56.0] - 2022-07-27
 
