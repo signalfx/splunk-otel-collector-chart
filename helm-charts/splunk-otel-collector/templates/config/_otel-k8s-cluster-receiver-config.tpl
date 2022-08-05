@@ -3,7 +3,6 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
@@ -153,13 +152,8 @@ processors:
 exporters:
   {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
   signalfx:
-    {{- if $gateway.enabled }}
-    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
-    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
-    {{- else }}
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
   {{- end }}
@@ -249,15 +243,11 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if $gateway.enabled }}
-        - otlp
-        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
-        {{- end }}
         {{- end }}
     {{- end }}
 

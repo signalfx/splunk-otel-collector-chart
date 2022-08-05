@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Do not send clusterReceiver metrics through gateway (#491)
+
 ## [0.57.0] - 2022-08-05
 
 ### Changed
