@@ -36,10 +36,19 @@ allowedFlexVolumes: []
 defaultAddCapabilities: []
 fsGroup:
   type: MustRunAs
-readOnlyRootFilesystem: false
+readOnlyRootFilesystem: true
 runAsUser:
   type: RunAsAny
 supplementalGroups:
   type: RunAsAny
-requiredDropCapabilities: []
+requiredDropCapabilities: 
+- CHOWN
+- DAC_OVERRIDE
+- FSETID
+- FOWNER
+- SETGID
+- SETUID
+- SETPCAP
+- NET_BIND_SERVICE
+- KILL
 {{- end }}
