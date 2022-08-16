@@ -20,7 +20,7 @@ data:
     expression /^(?<time>.+) (?<stream>stdout|stderr)( (?<partial_flag>[FP]))? (?<log>.*)$/
     time_format {{ .Values.fluentd.config.containers.criTimeFormat }}
 
-  output.concat.conf: |-
+  output.filter.conf: |-
     # = handle cri/containerd multiline format =
     <filter tail.containers.var.log.containers.**>
       @type concat
