@@ -42,13 +42,5 @@ runAsUser:
 supplementalGroups:
   type: RunAsAny
 requiredDropCapabilities:
-- CHOWN
-- DAC_OVERRIDE
-- FSETID
-- FOWNER
-- SETGID
-- SETUID
-- SETPCAP
-- NET_BIND_SERVICE
-- KILL
+- ALL
 {{- end }}
