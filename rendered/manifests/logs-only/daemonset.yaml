@@ -111,6 +111,8 @@ spec:
           readOnly: true
         - name: fluentd-config
           mountPath: /fluentd/etc
+        - name: tmp
+          mountPath: /tmp
       - name: otel-collector
         command:
         - /otelcol
@@ -204,6 +206,8 @@ spec:
       - name: fluentd-config-json
         configMap:
           name: default-splunk-otel-collector-fluentd-json
+      - name: tmp
+        emptyDir: {}
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

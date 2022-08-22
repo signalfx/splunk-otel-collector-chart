@@ -207,6 +207,8 @@ spec:
           readOnly: true
         - name: fluentd-config
           mountPath: /fluentd/etc
+        - name: tmp
+          mountPath: /tmp
       {{- end }}
       - name: otel-collector
         command:
@@ -415,6 +417,8 @@ spec:
       - name: fluentd-config-json
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
+      - name: tmp
+        emptyDir: {}
       {{- end}}
       {{- if eq .Values.logsEngine "otel" }}
       {{- if .Values.isWindows }}
