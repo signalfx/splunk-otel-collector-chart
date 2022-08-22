@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Make SCC more restrictive (#513)
+- Make Openshift SecurityContextConstraints more restrictive (#513)
 
 ## [0.57.1] - 2022-08-05
 
