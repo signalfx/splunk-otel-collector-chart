@@ -36,10 +36,11 @@ allowedFlexVolumes: []
 defaultAddCapabilities: []
 fsGroup:
   type: MustRunAs
-readOnlyRootFilesystem: false
+readOnlyRootFilesystem: true
 runAsUser:
   type: RunAsAny
 supplementalGroups:
   type: RunAsAny
-requiredDropCapabilities: []
+requiredDropCapabilities:
+- ALL
 {{- end }}
