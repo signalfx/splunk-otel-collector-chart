@@ -168,11 +168,11 @@ data:
           - memory_limiter
           - groupbyattrs/logs
           - k8sattributes
-          - batch
           - filter/logs
           - resource/logs
           - resourcedetection
           - resource
+          - batch
           receivers:
           - fluentforward
           - otlp
@@ -181,10 +181,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - batch
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - batch
           receivers:
           - prometheus/agent
       telemetry:

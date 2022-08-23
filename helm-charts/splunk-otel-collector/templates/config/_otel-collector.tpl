@@ -177,7 +177,6 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
-        - batch
         - k8sattributes
         - resource/add_cluster_name
         {{- if .Values.extraAttributes.custom }}
@@ -186,6 +185,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - batch
       exporters: [sapm]
     {{- end }}
 
@@ -195,7 +195,6 @@ service:
       receivers: [otlp, signalfx]
       processors:
         - memory_limiter
-        - batch
         - resource/add_cluster_name
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
@@ -203,6 +202,7 @@ service:
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
         - resource/add_environment
         {{- end }}
+        - batch
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -227,9 +227,9 @@ service:
       processors:
         - memory_limiter
         - k8sattributes
-        - batch
         - filter/logs
         - resource/logs
+        - batch
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -245,10 +245,10 @@ service:
       receivers: [prometheus/collector]
       processors:
         - memory_limiter
-        - batch
         - resource/add_collector_k8s
         - resourcedetection
         - resource/add_cluster_name
+        - batch
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

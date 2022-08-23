@@ -165,8 +165,8 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - batch
           - resource/add_cluster_name
+          - batch
           receivers:
           - otlp
           - signalfx
@@ -175,10 +175,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - batch
           - resource/add_collector_k8s
           - resourcedetection
           - resource/add_cluster_name
+          - batch
           receivers:
           - prometheus/collector
         traces:
@@ -186,9 +186,9 @@ data:
           - sapm
           processors:
           - memory_limiter
-          - batch
           - k8sattributes
           - resource/add_cluster_name
+          - batch
           receivers:
           - otlp
           - jaeger

@@ -340,11 +340,11 @@ data:
           processors:
           - memory_limiter
           - k8sattributes
-          - batch
           - filter/logs
           - resource/logs
           - resourcedetection
           - resource
+          - batch
           receivers:
           - filelog
           - fluentforward
@@ -354,9 +354,9 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - batch
           - resourcedetection
           - resource
+          - batch
           receivers:
           - hostmetrics
           - kubeletstats
@@ -368,10 +368,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - batch
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - batch
           receivers:
           - prometheus/agent
         traces:
@@ -381,9 +381,9 @@ data:
           processors:
           - memory_limiter
           - k8sattributes
-          - batch
           - resourcedetection
           - resource
+          - batch
           receivers:
           - otlp
           - jaeger
