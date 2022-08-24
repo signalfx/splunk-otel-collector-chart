@@ -267,3 +267,17 @@ fluentd:
 
 `criTimeFormat` can be used to configure logs collection for different log
 formats, e.g. `criTimeFormat: "%Y-%m-%dT%H:%M:%S.%NZ"` for IBM IKS.
+
+# Route log records to specific Splunk Enterprise indexes
+
+Configure log collection to set the index to target with logs to the name
+of the kubernetes namespace they originate from.
+
+```yaml
+logsCollection:
+  containers:
+    extraOperators:
+      - type: copy
+        from: resource["k8s.namespace.name"]
+        to: resource["com.splunk.index"]
+```
