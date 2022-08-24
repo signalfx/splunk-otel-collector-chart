@@ -20,6 +20,10 @@
       "description": "Override fully qualified app name.",
       "type": "string"
     },
+    "logLevel": {
+      "description": "# logLevel is to set log level of the otel collector pipeline.",
+      "type": "string"
+    },
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
       "type": "string",

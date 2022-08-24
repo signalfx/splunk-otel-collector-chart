@@ -136,5 +136,7 @@ data:
           receivers:
           - receiver_creator
       telemetry:
+        logs:
+          level: info
         metrics:
           address: 0.0.0.0:8889

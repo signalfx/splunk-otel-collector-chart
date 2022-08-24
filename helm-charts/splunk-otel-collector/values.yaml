@@ -7,6 +7,8 @@
 nameOverride: ""
 # fullnameOverride completely replaces the generated name.
 fullnameOverride: ""
+# logLevel is to set log level of the otel collector pipeline.
+logLevel: "info"
 
 ################################################################################
 # clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
