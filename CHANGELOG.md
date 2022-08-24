@@ -4,9 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.58.0] - 2022-08-24
+
 ### Changed
 
 - Make Openshift SecurityContextConstraints more restrictive (#513)
+- Upgrade splunk-otel-collector image to 0.58.0 (#517)
 
 ## [0.57.1] - 2022-08-05
 
