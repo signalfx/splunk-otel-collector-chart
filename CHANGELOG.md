@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Make Openshift SecurityContextConstraints more restrictive (#513)
-- Upgrade splunk-otel-collector image to 0.58.0 (#517)
+- Upgrade splunk-otel-collector image to 0.58.0 (#518)
 
 ## [0.57.1] - 2022-08-05
 
