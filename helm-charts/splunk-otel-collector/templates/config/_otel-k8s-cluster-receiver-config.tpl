@@ -177,8 +177,6 @@ exporters:
 
 service:
   telemetry:
-    logs:
-      level: {{ .Values.logLevel }}
     metrics:
       address: 0.0.0.0:8889
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}

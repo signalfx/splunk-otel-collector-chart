@@ -602,8 +602,6 @@ exporters:
 
 service:
   telemetry:
-    logs:
-      level: {{ .Values.logLevel }}
     metrics:
       address: 0.0.0.0:8889
   extensions:
