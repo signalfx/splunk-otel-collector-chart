@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+Fix a bug where collector internal metrics (pipeline: metrics/agent) are always exported even if metricsEnabled=false (#521)
+
 ### Changed
 
 - Make Openshift SecurityContextConstraints more restrictive (#513)

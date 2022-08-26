@@ -176,17 +176,6 @@ data:
           receivers:
           - fluentforward
           - otlp
-        metrics/agent:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          - resource/add_agent_k8s
-          - resourcedetection
-          - resource
-          receivers:
-          - prometheus/agent
       telemetry:
         metrics:
           address: 0.0.0.0:8889

@@ -743,8 +743,6 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
-    {{- end }}
-
     {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
@@ -768,5 +766,6 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}

@@ -168,17 +168,6 @@ data:
       - memory_ballast
       - zpages
       pipelines:
-        metrics/agent:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          - resource/add_agent_k8s
-          - resourcedetection
-          - resource
-          receivers:
-          - prometheus/agent
         traces:
           exporters:
           - sapm
