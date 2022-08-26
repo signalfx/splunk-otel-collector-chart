@@ -137,7 +137,8 @@ data:
         exclude:
         - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
         fingerprint_size: 1kb
-        force_flush_period: "0"
+        force_flush_period:
+          duration: "0"
         include:
         - /var/log/pods/*/*/*.log
         include_file_name: false
@@ -230,7 +231,8 @@ data:
           id: clean-up-log-record
           to: body
           type: move
-        poll_interval: 200ms
+        poll_interval:
+          duration: 200ms
         start_at: beginning
       fluentforward:
         endpoint: 0.0.0.0:8006
