@@ -66,6 +66,29 @@ entries:
     version: 0.1.0
   splunk-otel-collector:
   - apiVersion: v2
+    appVersion: 0.58.0
+    created: "2022-08-29T20:17:26.775750387Z"
+    description: Splunk OpenTelemetry Collector for Kubernetes
+    digest: 37f227171a8c0a693f0e6a4789e0ccd8a97845b82af4b3c030edca0e15224650
+    icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
+    keywords:
+    - splunk
+    - opentelemetry
+    - observability
+    - logs
+    - traces
+    - metrics
+    - apm
+    maintainers:
+    - name: dmitryax
+    - name: jvoravong
+    - name: emaderer
+    name: splunk-otel-collector
+    type: application
+    urls:
+    - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.58.0/splunk-otel-collector-0.58.0.tgz
+    version: 0.58.0
+  - apiVersion: v2
     appVersion: 0.57.0
     created: "2022-08-05T23:08:06.851903733Z"
     description: Splunk OpenTelemetry Collector for Kubernetes
@@ -2022,4 +2045,4 @@ entries:
     urls:
     - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.20.0/splunk-otel-collector-0.20.0.tgz
     version: 0.20.0
-generated: "2022-08-05T23:08:06.852938954Z"
+generated: "2022-08-29T20:17:26.776620603Z"
