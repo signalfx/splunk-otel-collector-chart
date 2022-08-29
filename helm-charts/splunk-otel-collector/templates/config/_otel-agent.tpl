@@ -634,9 +634,9 @@ service:
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
-        - batch
         {{- if not $gateway.enabled }}
         - filter/logs
+        - batch
         {{- end }}
         {{- if not $gateway.enabled }}
         - resource/logs
