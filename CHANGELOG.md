@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Make Openshift SecurityContextConstraints more restrictive (#513)
 - Upgrade splunk-otel-collector image to 0.58.0 (#518)
+  - [BREAKING CHANGE] Datatype of `filelog.force_flush_period` and `filelog.poll_interval` were
+    changed from string to map due to upstream changes.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0571-to-0580)
 
 ## [0.57.1] - 2022-08-05
 
