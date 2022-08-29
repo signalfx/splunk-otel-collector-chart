@@ -110,9 +110,9 @@ data:
           - signalfx
           processors:
           - memory_limiter
+          - batch
           - resource
           - resource/k8s_cluster
-          - batch
           receivers:
           - k8s_cluster
         metrics/collector:
@@ -120,10 +120,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
+          - batch
           - resource/add_collector_k8s
           - resourcedetection
           - resource
-          - batch
           receivers:
           - prometheus/k8s_cluster_receiver
         metrics/eks:
@@ -131,8 +131,8 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - resource
           - batch
+          - resource
           receivers:
           - receiver_creator
       telemetry:

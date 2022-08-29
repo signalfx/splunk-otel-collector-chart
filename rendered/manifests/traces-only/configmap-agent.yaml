@@ -173,10 +173,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
+          - batch
           - resource/add_agent_k8s
           - resourcedetection
           - resource
-          - batch
           receivers:
           - prometheus/agent
         traces:
@@ -185,9 +185,9 @@ data:
           processors:
           - memory_limiter
           - k8sattributes
+          - batch
           - resourcedetection
           - resource
-          - batch
           receivers:
           - otlp
           - jaeger

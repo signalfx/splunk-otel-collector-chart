@@ -634,6 +634,7 @@ service:
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
+        - batch
         {{- if not $gateway.enabled }}
         - filter/logs
         {{- end }}
@@ -645,7 +646,6 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - batch
       exporters:
         {{- if $gateway.enabled }}
         - otlp
@@ -673,11 +673,11 @@ service:
         {{- end }}
       processors:
         - memory_limiter
+        - batch
         - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - batch
       exporters:
         {{- if $gateway.enabled }}
         - otlp
@@ -699,12 +699,12 @@ service:
       processors:
         - memory_limiter
         - k8sattributes
+        - batch
         - resourcedetection
         - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - batch
       exporters:
         {{- if $gateway.enabled }}
         - otlp
@@ -723,6 +723,7 @@ service:
       receivers: [hostmetrics, kubeletstats, otlp, receiver_creator, signalfx]
       processors:
         - memory_limiter
+        - batch
         - resourcedetection
         - resource
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
@@ -731,7 +732,6 @@ service:
         {{- if .Values.isWindows }}
         - metricstransform
         {{- end }}
-        - batch
       exporters:
         {{- if $gateway.enabled }}
         - otlp
@@ -751,10 +751,10 @@ service:
       receivers: [prometheus/agent]
       processors:
         - memory_limiter
+        - batch
         - resource/add_agent_k8s
         - resourcedetection
         - resource
-        - batch
       exporters:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         # Use signalfx instead of otlp even if collector is enabled
