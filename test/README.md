@@ -45,11 +45,11 @@
     kubectl port-forward pods/splunk 8000
     You can then vistit Splunk web page: https://localhost:8000
 
-#### Deploy sck otel connector
+#### Deploy sck otel collector
     # Get Splunk Host IP
     export SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
 
-    # Use ci_scripts/sck_otel_values.yaml file to deploy sck otel connector
+    # Use ci_scripts/sck_otel_values.yaml file to deploy sck otel collector
     # Default image repository: quay.io/signalfx/splunk-otel-collector
     helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
     --set splunkPlatform.token=$CI_SPLUNK_HEC_TOKEN \

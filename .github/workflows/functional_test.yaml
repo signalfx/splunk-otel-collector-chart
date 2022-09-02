@@ -77,10 +77,10 @@ jobs:
           # Restart Splunk
           curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
-      - name: Deploy sck otel connector
+      - name: Deploy sck otel collector
         run: |
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
-          ci_scripts/deploy_connector.sh
+          ci_scripts/deploy_collector.sh
 
       - name: Deploy log generator
         run: |
