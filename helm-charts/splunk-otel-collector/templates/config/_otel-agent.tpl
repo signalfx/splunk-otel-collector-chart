@@ -636,8 +636,8 @@ service:
         - k8sattributes
         {{- if not $gateway.enabled }}
         - filter/logs
-        - batch
         {{- end }}
+        - batch
         {{- if not $gateway.enabled }}
         - resource/logs
         {{- end }}
