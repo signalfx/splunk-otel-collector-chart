@@ -40,7 +40,7 @@ This value can be omitted if none of the values apply.
 ## Kubernetes distribution
 
 Use the `distribution` parameter to provide information about underlying
-Kubernetes deployment. This parameter allows the connector to automatically
+Kubernetes deployment. This parameter allows the collector to automatically
 scrape additional metadata. The supported options are:
 
 - `aks` - Azure AKS
