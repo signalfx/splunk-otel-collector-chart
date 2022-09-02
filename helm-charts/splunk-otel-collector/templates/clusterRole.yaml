@@ -10,6 +10,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
+{{- if .Values.podSecurityPolicy.create }}
+- apiGroups:      [{{ .Values.podSecurityPolicy.apiGroup | quote }}]
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [{{ template "splunk-otel-collector.fullname" . }}]
+{{- end }}
 {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
 - apiGroups:
   - quota.openshift.io
