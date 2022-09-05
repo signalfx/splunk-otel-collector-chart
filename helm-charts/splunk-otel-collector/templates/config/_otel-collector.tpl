@@ -227,8 +227,8 @@ service:
       processors:
         - memory_limiter
         - k8sattributes
-        - batch
         - filter/logs
+        - batch
         - resource/logs
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}

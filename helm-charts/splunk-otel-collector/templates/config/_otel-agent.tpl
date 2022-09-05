@@ -636,10 +636,10 @@ service:
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
-        - batch
         {{- if not $gateway.enabled }}
         - filter/logs
         {{- end }}
+        - batch
         {{- if not $gateway.enabled }}
         - resource/logs
         {{- end }}
