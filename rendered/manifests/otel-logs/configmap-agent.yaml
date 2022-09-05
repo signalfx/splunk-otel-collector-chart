@@ -342,8 +342,8 @@ data:
           processors:
           - memory_limiter
           - k8sattributes
-          - batch
           - filter/logs
+          - batch
           - resource/logs
           - resourcedetection
           - resource

@@ -568,7 +568,7 @@ guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UP
 - Logs are sent through the OpenTelemetry Agent on the local node by default. `otelAgent.enabled` value must be set to `true` when using logs (#127)
 - `otelAgent.ports` and `otelCollector.ports` are selectively enabled depending on what telemetry types are enabled with `metricsEnabled`, `tracesEnabled`, and `logsEnabled`
 - Removed setting `host.name` through the `resource` processor as it is already set by the `resourcedetection/system` processor
-- Upgraded to Splunk OpenTelemetry Connector 0.26.0
+- Upgraded to Splunk OpenTelemetry Collector 0.26.0
 - Kubernetes cluster metrics now have a dimension `receiver:k8scluster` to ensure that
   MTS do not conflict with Kubernetes metrics sent by Smart Agent for the same cluster. (#134)
 
