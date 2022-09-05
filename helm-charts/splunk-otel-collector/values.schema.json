@@ -1060,6 +1060,21 @@
         }
       }
     },
+    "podSecurityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "apparmor_security": {
+          "type": "boolean"
+        },
+        "apiGroup": {
+          "type": "string"
+        }
+      }
+    },
     "secret": {
       "description": "Kubernetes secret resource configuration",
       "type": "object",
