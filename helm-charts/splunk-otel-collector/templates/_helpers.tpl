@@ -210,6 +210,13 @@ Create the opentelemetry collector image name.
 {{- end -}}
 
 {{/*
+Create the Universal Base image name.
+*/}}
+{{- define "splunk-otel-collector.image.ubi" -}}
+{{- printf "%s:%s" .Values.image.UniversalBaseImage.repository (.Values.image.UniversalBaseImage.tag | default "latest") -}}
+{{- end -}}
+
+{{/*
 Convert memory value from resources.limit to numeric value in MiB to be used by otel memory_limiter processor.
 */}}
 {{- define "splunk-otel-collector.convertMemToMib" -}}

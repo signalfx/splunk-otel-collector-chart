@@ -136,7 +136,7 @@ spec:
         {{- end }}
         {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
         - name: chown
-          image: registry.access.redhat.com/ubi8/ubi
+          image: {{ template "splunk-otel-collector.image.ubi" . }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
           chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};

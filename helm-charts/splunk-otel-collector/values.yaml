@@ -833,6 +833,15 @@ image:
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
+  UniversalBaseImage:
+    # The registry and name of the Universal Base Image 8 image to pull
+    repository: registry.access.redhat.com/ubi8/ubi
+    # The tag of the Splunk OTel Collector image, default value is the chart appVersion
+    tag: ""
+    # The policy that specifies when the user wants the opentelemetry collector images to be pulled
+    pullPolicy: IfNotPresent
+
+
 
 ################################################################################
 # Extra system configuration
