@@ -833,12 +833,14 @@ image:
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
 
-  UniversalBaseImage:
+    # Image to be used by init container that patches log directories on the host, so the collector can read from them as a non-root user.
+    # Effective only if `agent.securityContext.runAsUser` and `agent.securityContext.runAsGroup` are set to non-zero values.
+  chown:
     # The registry and name of the Universal Base Image 9 image to pull
     repository: registry.access.redhat.com/ubi9/ubi
     # The tag of the Universal Base Image 9, default value is latest
     tag: ""
-    # The policy that specifies when the user wants the Universal Base  images to be pulled
+    # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
 
