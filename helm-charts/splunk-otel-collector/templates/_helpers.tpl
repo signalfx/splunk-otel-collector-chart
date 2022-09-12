@@ -210,6 +210,13 @@ Create the opentelemetry collector image name.
 {{- end -}}
 
 {{/*
+Create the chown image name.
+*/}}
+{{- define "splunk-otel-collector.image.chown" -}}
+{{- printf "%s:%s" .Values.image.chown.repository (.Values.image.chown.tag | default "latest") -}}
+{{- end -}}
+
+{{/*
 Convert memory value from resources.limit to numeric value in MiB to be used by otel memory_limiter processor.
 */}}
 {{- define "splunk-otel-collector.convertMemToMib" -}}
