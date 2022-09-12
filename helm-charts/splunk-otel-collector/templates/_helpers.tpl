@@ -210,10 +210,10 @@ Create the opentelemetry collector image name.
 {{- end -}}
 
 {{/*
-Create the chown image name.
+Create the patch-log-dirs image name.
 */}}
-{{- define "splunk-otel-collector.image.chown" -}}
-{{- printf "%s:%s" .Values.image.chown.repository (.Values.image.chown.tag | default "latest") -}}
+{{- define "splunk-otel-collector.image.initPatchLogDirs" -}}
+{{- printf "%s:%s" .Values.image.initPatchLogDirs.repository .Values.image.initPatchLogDirs.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{/*
