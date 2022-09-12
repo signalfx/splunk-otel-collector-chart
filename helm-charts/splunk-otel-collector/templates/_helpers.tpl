@@ -212,7 +212,7 @@ Create the opentelemetry collector image name.
 {{/*
 Create the chown image name.
 */}}
-{{- define "splunk-otel-collector.image.ubi" -}}
+{{- define "splunk-otel-collector.image.chown" -}}
 {{- printf "%s:%s" .Values.image.chown.repository (.Values.image.chown.tag | default "latest") -}}
 {{- end -}}
 
