@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- A way to provide a custom image for init container patching host log directories (#534, #535)
+
 ## [0.58.0] - 2022-08-24
 
 ### Changed
