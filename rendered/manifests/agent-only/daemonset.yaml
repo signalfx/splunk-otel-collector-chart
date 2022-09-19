@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.59.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.59.0"
+    app.kubernetes.io/version: "0.59.1"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.59.0
     release: default
@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: d5ffee139ac31b61eda750e780bd956c881ec21bee93e610717c94fb7e5f0ba1
+        checksum/config: 6127c8202ccd5423b9659494eb0e2f6c8c7997e325a534740db946b69b33a1ab
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
