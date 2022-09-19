@@ -1,5 +1,23 @@
 # Upgrade guidelines
 
+## 0.58.0 to 0.59.0
+[receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from map to string.
+
+If you are using custom filelog receiver plugin, you need to change the config from:
+```yaml
+filelog:
+  poll_interval:
+    duration: 200ms
+  force_flush_period:
+    duration: "0"
+```
+to:
+```yaml
+filelog:
+  poll_interval: 200ms
+  force_flush_period: "0"
+```
+
 ## 0.57.1 to 0.58.0
 [receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from
 sring to map. Because of that, the default values in Helm Chart were causing problems [#519](https://github.com/signalfx/splunk-otel-collector-chart/issues/519)

@@ -4,9 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.59.0] - 2022-09-17
+
 ### Added
 
 - A way to provide a custom image for init container patching host log directories (#534, #535)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.59.1 (#536)
+  - [BREAKING CHANGE] Datatype of `filelog.force_flush_period` and `filelog.poll_interval` were
+    changed back from map to string due to upstream changes.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0580-0590)
 
 ## [0.58.0] - 2022-08-24
 
