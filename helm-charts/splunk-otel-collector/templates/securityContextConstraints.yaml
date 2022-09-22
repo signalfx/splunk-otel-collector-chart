@@ -3,7 +3,7 @@ kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
   name: {{ template "splunk-otel-collector.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ template "splunk-otel-collector.namespace" }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}

@@ -16,6 +16,10 @@ fullnameOverride: ""
 
 clusterName: ""
 
+# Kubernetes namespace to use for all components, will override the given namespace
+# on rendering if set here. If not set at rendering time or here, will set to `default`.
+namespace: ""
+
 ################################################################################
 # Splunk Data-to-Everything Platform configuration.
 ################################################################################

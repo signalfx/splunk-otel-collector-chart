@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ template "splunk-otel-collector.namespace" }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}

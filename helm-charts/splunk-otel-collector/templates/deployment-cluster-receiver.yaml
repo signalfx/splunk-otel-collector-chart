@@ -10,7 +10,7 @@ kind: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }
 metadata:
   {{- /* StatefulSet names must be truncated or the `statefulset.kubernetes.io/pod-name` label value will be too long */}}
   name: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} {{ template "splunk-otel-collector.clusterReceiverTruncatedName" . }} {{- else }} {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver {{- end }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ template "splunk-otel-collector.namespace" }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}

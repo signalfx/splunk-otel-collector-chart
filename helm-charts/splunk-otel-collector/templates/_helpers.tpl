@@ -33,6 +33,13 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Kubernetes namespace to deploy into.
+*/}}
+{{- define "splunk-otel-collector.namespace" -}}
+{{- default (default .Release.Namespace .Values.namespace) "default" -}}
+{{- end -}}
+
+{{/*
 Whether to send data to Splunk Platform endpoint
 */}}
 {{- define "splunk-otel-collector.splunkPlatformEnabled" -}}
