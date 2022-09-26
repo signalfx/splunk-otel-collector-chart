@@ -239,7 +239,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and (or (eq (include "splunk-otel-collector.splunkO11yEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true")) (or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true")) }}
+    {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
     # Pipeline for metrics collected about the collector pod itself.
     metrics/collector:
       receivers: [prometheus/collector]
