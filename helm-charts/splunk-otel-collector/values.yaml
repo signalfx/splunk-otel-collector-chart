@@ -202,15 +202,21 @@ extraAttributes:
   #  fromLabels:
   #    - key: my_key
   #      from: namespace
-  #  If you want to collect all labels from your pods, you could do that using a `key_regex: .*` option, e.g.:
-  #  fromLabels:
-  #    - key_regex: .*
-  #      from: pod
+  #
   #  If you want to change the default attribute name `k8s.pod.labels.<label_name>`, you could do that using a `tag_name` field:
   #  fromLabels:
   #    - key: my_key
   #      tag_name: my_tag
   #      from: pod
+  #
+  #  `key_regex` field can be used to get a specific set of labels that match a regex.
+  #  If `key_regex` used is used, the `key` field accepts regexp matching groups.
+  #  The following example will fetch all the pod labels and propagate them to the attributes as is,
+  #  without "k8s.pod.labels." prefix. "$" from the matching group must be escaped as "$$".
+  #  fromLabels:
+  #    - key_regex: (.*)
+  #      from: pod
+  #      tag_name: "$$1"
   fromLabels:
     - key: app
 

@@ -17,7 +17,7 @@ jobs:
           version: v3.6.3
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.0
+        uses: helm/chart-testing-action@v2.3.1
         with:
           version: v3.3.1
 
@@ -33,7 +33,7 @@ jobs:
         run: ct lint --config=ct.yaml
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.3.0
+        uses: helm/kind-action@v1.4.0
         # Only build a kind cluster if there are chart changes to test.
         if: steps.list-changed.outputs.changed == 'true'
 
