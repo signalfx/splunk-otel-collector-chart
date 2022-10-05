@@ -134,10 +134,14 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    sending_queue:
+      num_consumers: 32
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+    sending_queue:
+      num_consumers: 32
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
@@ -146,6 +150,8 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     log_data_enabled: {{ .Values.splunkObservability.logsEnabled }}
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
+    sending_queue:
+      num_consumers: 32
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}

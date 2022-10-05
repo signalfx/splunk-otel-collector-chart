@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Increase number of queue consumers in the gateway configuration (#554)
+
 ## [0.59.0] - 2022-09-17
 
 ### Added
