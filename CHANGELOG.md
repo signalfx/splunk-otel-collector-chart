@@ -4,9 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.61.0] - 2022-10-07
+
 ### Changed
 
 - Increase number of queue consumers in the gateway configuration (#554)
+- Upgrade splunk-otel-collector image to 0.61.0 (#556)
 
 ## [0.59.0] - 2022-09-17
 
