@@ -191,6 +191,9 @@ autodetect:
 ################################################################################
 # Optional: Configuration for additional metadata that will be added to all the
 # telemetry as extra attributes.
+# IMPORTANT: Additional attributes configured with `fromLabels` and
+# `fromAttributes` options are only applied to traces and logs. Pod labels are
+# always sent to Splunk Observability (if enabled) as metric properties.
 ################################################################################
 
 extraAttributes:
