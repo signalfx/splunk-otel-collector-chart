@@ -33,6 +33,7 @@ seLinuxContext:
     type: "spc_t"
     level: "s0"
 allowedFlexVolumes: []
+allowedCapabilities: []
 defaultAddCapabilities: []
 fsGroup:
   type: MustRunAs
