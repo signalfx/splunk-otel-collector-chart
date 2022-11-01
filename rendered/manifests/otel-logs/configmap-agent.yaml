@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.61.0
+    helm.sh/chart: splunk-otel-collector-0.62.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.61.0"
+    app.kubernetes.io/version: "0.62.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.61.0
+    chart: splunk-otel-collector-0.62.0
     release: default
     heritage: Helm
 data:
@@ -232,6 +232,7 @@ data:
           type: move
         poll_interval: 200ms
         start_at: beginning
+        storage: file_storage
       fluentforward:
         endpoint: 0.0.0.0:8006
       hostmetrics:
