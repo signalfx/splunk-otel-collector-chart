@@ -232,6 +232,7 @@ data:
           type: move
         poll_interval: 200ms
         start_at: beginning
+        storage: file_storage
       fluentforward:
         endpoint: 0.0.0.0:8006
       hostmetrics:
