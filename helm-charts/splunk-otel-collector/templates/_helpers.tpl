@@ -325,14 +325,44 @@ compatibility with the old config group name: "otelAgent".
 {{- end -}}
 
 {{/*
+The name of the gateway service.
+*/}}
+{{- define "splunk-otel-collector.gatewayServiceName" -}}
+{{  (include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+Whether the gateway is enabled by network explorer configuration.
+*/}}
+{{- define "splunk-otel-collector.networkExplorerGatewayEnabled" -}}
+{{- and .Values.networkExplorer.enabled .Values.networkExplorer.gateway.enabled }}
+{{- end -}}
+
+{{/*
+Whether the gateway is enabled, either through network explorer, or through its own flag.
+*/}}
+{{- define "splunk-otel-collector.gatewayEnabled" -}}
+{{- or .Values.gateway.enabled (eq (include "splunk-otel-collector.networkExplorerGatewayEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
 Helper that returns "gateway" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelCollector".
+compatibility with the old config group name: "otelCollector". It also merges
+network explorer gateway configuration, if enabled.
 */}}
 {{- define "splunk-otel-collector.gateway" -}}
 {{- if eq (toString .Values.otelCollector) "<nil>" }}
+{{- if eq (include "splunk-otel-collector.networkExplorerGatewayEnabled" .) "true" }}
+{{- mustMergeOverwrite (deepCopy .Values.gateway) (deepCopy .Values.networkExplorer.gateway) | toYaml }}
+{{- else }}
 {{- .Values.gateway | toYaml }}
+{{- end }}
+{{- else }}
+{{- if eq (include "splunk-otel-collector.networkExplorerGatewayEnabled" .) "true" }}
+{{- deepCopy .Values.otelCollector | mustMergeOverwrite (deepCopy .Values.gateway) (deepCopy .Values.networkExplorer.gateway) | toYaml }}
 {{- else }}
 {{- deepCopy .Values.otelCollector | mustMergeOverwrite (deepCopy .Values.gateway) | toYaml }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
