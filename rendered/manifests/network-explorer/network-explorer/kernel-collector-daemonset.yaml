@@ -1,0 +1,104 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/kernel-collector-daemonset.yaml
+# kernel collector daemonset: deploys the kernel collector to each node in the cluster.
+# The kernel collector needs to be able to compile and install
+# eBPF programs in the node's kernel, so needs to run as root and
+# needs to mount /lib/modules and /usr/src from the node itself.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: default-splunk-otel-collector-kernel-collector
+  annotations:
+  labels:
+    app.kubernetes.io/name: default-splunk-otel-collector-kernel-collector
+    helm.sh/chart: splunk-otel-collector-0.62.1
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: default-splunk-otel-collector-kernel-collector
+      app.kubernetes.io/instance: default
+  template:
+    metadata:
+      annotations:
+        release_number: "3"
+        charts.flowmill.com/version: 0.62.1
+      labels:
+        app.kubernetes.io/name: default-splunk-otel-collector-kernel-collector
+        app.kubernetes.io/instance: default
+    spec:
+      containers:
+        - name: kernel-collector
+          image: "quay.io/signalfx/splunk-network-explorer-kernel-collector:latest-v0.9"
+          imagePullPolicy: Always
+          args:
+            - --config-file=/etc/network-explorer/config.yaml
+            - --force-docker-metadata
+            - --disable-nomad-metadata
+            - --warning
+          # TODO: liveness probe
+          env:
+            - name: "EBPF_NET_CLUSTER_NAME"
+              value: "CHANGEME"
+            - name: "EBPF_NET_DISABLE_HTTP_METRICS"
+              value: "false"
+            - name: "EBPF_NET_KERNEL_HEADERS_AUTO_FETCH"
+              value: "true"
+            - name: "EBPF_NET_INTAKE_HOST"
+              value: default-splunk-otel-collector-reducer
+            - name: "EBPF_NET_INTAKE_PORT"
+              value: "7000"
+            - name: "EBPF_NET_HOST_DIR"
+              value: "/hostfs"
+            - name: "EBPF_NET_CRASH_METRIC_HOST"
+              value: "default-splunk-otel-collector"
+            - name: "EBPF_NET_CRASH_METRIC_PORT"
+              value: "4317"
+          resources:
+            {}
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /hostfs/
+            name: host-root
+            readOnly: true
+          - mountPath: /hostfs/var/cache
+            name: host-var-cache
+            readOnly: false
+          - mountPath: /etc/network-explorer
+            name: default-splunk-otel-collector-config
+            readOnly: true
+          - mountPath: /var/run/docker.sock
+            name: docker-sock
+            readOnly: false
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      hostPID: true
+      serviceAccountName: default
+      volumes:
+      - name: default-splunk-otel-collector-config
+        projected:
+          sources:
+          - configMap:
+              name: default-splunk-otel-collector-config
+              items:
+              - key: config.yaml
+                path: config.yaml
+      - name: host-root
+        hostPath:
+          path: /
+          type: Directory
+      - name: host-var-cache
+        hostPath:
+          path: /var/cache
+          type: DirectoryOrCreate
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists

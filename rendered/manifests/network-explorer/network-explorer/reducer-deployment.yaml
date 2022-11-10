@@ -1,0 +1,64 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/reducer-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: default-splunk-otel-collector-reducer
+  labels:
+    helm.sh/chart: splunk-otel-collector-0.62.1
+    app.kubernetes.io/name: default-splunk-otel-collector-reducer
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.62.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: default-splunk-otel-collector-reducer
+      app.kubernetes.io/instance: default
+  template:
+    metadata:
+      annotations:
+        rollingUpdateVersion: "1"
+      labels:
+        app.kubernetes.io/name: default-splunk-otel-collector-reducer
+        app.kubernetes.io/instance: default
+    spec:
+      containers:
+        - name: reducer
+          image: "quay.io/signalfx/splunk-network-explorer-reducer:latest-v0.9"
+          imagePullPolicy: Always
+          args:
+            - --port=7000
+            - --log-console
+            - --no-log-file
+            - --warning
+            - --enable-aws-enrichment
+            - --disable-prometheus-metrics
+            - --enable-otlp-grpc-metrics
+            - --otlp-grpc-metrics-host=default-splunk-otel-collector
+            - --otlp-grpc-metrics-port=4317
+            - --num-ingest-shards=1
+            - --num-matching-shards=1
+            - --num-aggregation-shards=1
+          env:
+            - name: "EBPF_NET_CRASH_METRIC_HOST"
+              value: "default-splunk-otel-collector"
+            - name: "EBPF_NET_CRASH_METRIC_PORT"
+              value: "4317"
+          ports:
+            - name: telemetry
+              containerPort: 7000
+              protocol: TCP
+          volumeMounts:
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+            exec:
+              command: ['/srv/health_check.sh', 'readiness_probe', 'localhost', "7000"]
+          resources:
+            null
+      volumes:

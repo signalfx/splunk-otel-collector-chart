@@ -1,0 +1,96 @@
+---
+# Source: splunk-otel-collector/templates/deployment-cluster-receiver.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: default-splunk-otel-collector-k8s-cluster-receiver
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.62.1
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.62.0"
+    app: splunk-otel-collector
+    component: otel-k8s-cluster-receiver
+    chart: splunk-otel-collector-0.62.1
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-k8s-cluster-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splunk-otel-collector
+      component: otel-k8s-cluster-receiver
+      release: default
+  template:
+    metadata:
+      labels:
+        app: splunk-otel-collector
+        component: otel-k8s-cluster-receiver
+        release: default
+      annotations:
+        checksum/config: eac6d8a6a769faa67f0b2d79dc87a0aae1d9afe07fe1c01f9777941321b3a1e2
+    spec:
+      serviceAccountName: default-splunk-otel-collector
+      nodeSelector:
+          kubernetes.io/os: linux
+      containers:
+      - name: otel-collector
+        command:
+        - /otelcol
+        - --config=/conf/relay.yaml
+        image: quay.io/signalfx/splunk-otel-collector:0.62.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "500"
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: K8S_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: splunk-otel-collector
+                key: splunk_observability_access_token
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /conf
+          name: collector-configmap
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: collector-configmap
+        configMap:
+          name: default-splunk-otel-collector-otel-k8s-cluster-receiver
+          items:
+            - key: relay
+              path: relay.yaml
