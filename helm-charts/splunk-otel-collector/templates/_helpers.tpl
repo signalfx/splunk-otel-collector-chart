@@ -335,7 +335,8 @@ The name of the gateway service.
 Whether the gateway is enabled, either through network explorer, or through its own flag.
 */}}
 {{- define "splunk-otel-collector.gatewayEnabled" -}}
-{{- or .Values.gateway.enabled .Values.networkExplorer.enabled }}
+{{- $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
+{{- or $gateway.enabled .Values.networkExplorer.enabled }}
 {{- end -}}
 
 {{/*
