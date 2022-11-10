@@ -1273,18 +1273,3 @@ networkExplorer:
       # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
       # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
       # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
-
-  # otel collector in gateway configuration for network explorer.
-  # these values override those specified above.
-  gateway:
-    enabled: true
-    replicaCount: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 1Gi
-    ports:
-      otlp:
-        containerPort: 4317
-        protocol: TCP
-        enabled_for: [metrics, traces, logs]
