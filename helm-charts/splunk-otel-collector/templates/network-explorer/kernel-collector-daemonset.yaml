@@ -111,7 +111,7 @@ spec:
 {{- end }}
 {{- if .Values.networkExplorer.debug.sendUnplannedExitMetric }}
             - name: "EBPF_NET_CRASH_METRIC_HOST"
-              value: {{quote (include "splunk-otel-collector.fullname" .) }}
+              value: {{quote (include "splunk-otel-collector.gatewayServiceName" .) }}
             - name: "EBPF_NET_CRASH_METRIC_PORT"
               value: {{quote ($gateway.ports.otlp.containerPort) }}
 {{- end }}
