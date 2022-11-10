@@ -157,6 +157,6 @@ spec:
     {{- end }}
     {{- with .Values.networkExplorer.k8sCollector.tolerations }}
       tolerations:
-{{ toYaml . | indent 8 }}      
+{{ toYaml . | indent 8 }}
     {{- end }}
 {{- end }}

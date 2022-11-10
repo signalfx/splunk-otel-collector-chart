@@ -1174,7 +1174,7 @@ networkExplorer:
       #- ebpf_net.collector_health
       #- ebpf_net.codetiming_sum_ns
       #- ebpf_net.otlp_grpc.failed_requests
-      #- ebpf_net.rpc_queue_buf_utilization 
+      #- ebpf_net.rpc_queue_buf_utilization
       ### to enable all metrics (including metrics turned off by default): ###
       #- none
     enableMetrics: []
@@ -1213,7 +1213,7 @@ networkExplorer:
       #- http.active_sockets
       #- http.status_code
       ### ebpf_net ###
-      #- ebpf_net.span_utilization_fraction 
+      #- ebpf_net.span_utilization_fraction
       #- ebpf_net.pipeline_metric_bytes_discarded
       #- ebpf_net.codetiming_min_ns
       #- ebpf_net.entrypoint_info
@@ -1261,7 +1261,7 @@ networkExplorer:
 
   rbac:
     create: true
-  
+
   podSecurityPolicy:
     enabled: true
     annotations: {}
