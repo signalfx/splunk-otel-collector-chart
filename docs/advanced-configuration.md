@@ -608,6 +608,7 @@ autodetect:
 ```
 
 ## Using feature gates
+
 Enable or disable features of the otel-collector agent, clusterReceiver, and gateway (respectively) using feature
 gates. Use the agent.featureGates, clusterReceiver.featureGates, and gateway.featureGates configs to enable or disable
 features, these configs will be used to populate the otelcol binary startup argument "--feature-gates". For more
@@ -624,3 +625,64 @@ feature2 disabled.
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.
+
+## Manually setting Pod Security Policy
+
+Support of Pod Security Policies (PSP) was [removed](https://kubernetes.io/docs/concepts/security/pod-security-policy/)
+in Kubernetes 1.25. If you still rely on PSPs in an older cluster, you can add them manually along with the helm chart
+installation.
+
+1. Run the following command to install the PSP (don't forget to add `--namespace` kubectl argument if needed):
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: splunk-otel-collector-psp
+  labels:
+    app: splunk-otel-collector-psp
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
+    apparmor.security.beta.kubernetes.io/defaultProfileName:  'runtime/default'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  hostNetwork: true
+  hostIPC: false
+  hostPID: false
+  volumes:
+  - 'configMap'
+  - 'emptyDir'
+  - 'hostPath'
+  - 'secret'
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+EOF
+```
+
+2. Add the following custom ClusterRole rule in your values.yaml file along with all other required fields like
+`clusterName`, `splunkObservability` or `splunkPlatform`:
+
+```yaml
+rbac:
+  customRules:
+    - apiGroups:     [extensions]
+      resources:     [podsecuritypolicies]
+      verbs:         [use]
+      resourceNames: [splunk-otel-collector-psp]
+```
+
+3. Install the helm chart (assuming your custom values.yaml is called `my_values.yaml`):
+
+```
+helm install my-splunk-otel-collector -f my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
+```
