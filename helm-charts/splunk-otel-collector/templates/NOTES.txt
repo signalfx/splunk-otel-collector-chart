@@ -69,3 +69,7 @@ Splunk Network Explorer is installed and configured.
 [WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
 {{ end }}
+{{- if not (eq (toString $clusterReceiver.eventsEnabled) "<nil>") }}
+[WARNING] "clusterReceiver.eventsEnabled" parameter is deprecated. Please use clusterReceiver.objectsEnabled and clusterReceiver.k8sObjects.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0640-to-0660
+{{ end }}

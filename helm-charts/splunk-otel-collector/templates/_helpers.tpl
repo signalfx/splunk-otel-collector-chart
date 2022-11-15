@@ -395,3 +395,12 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- $clusterReceiver.k8sEventsEnabled }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Whether clusterReceiver should be deployed
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverDeploy" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") $clusterReceiver.objectsEnabled ) -}}
+{{- end -}}
+

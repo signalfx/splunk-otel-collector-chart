@@ -1,5 +1,39 @@
 # Upgrade guidelines
 
+## 0.64.0 to 0.66.0
+Before this change, [k8s events receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver) was used to collect Kubernetes Events.
+Now we utilize [k8s objects receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) that can pull or watch any object from Kubernetes API server.
+Therefore, `clusterReceiver.eventsEnabled` is now deprecated, and to maintain the same behavior you should set
+`clusterReceiver.objectsEnabled` to `true` and configure `clusterReceiver.k8sObjects` to watch event objects:
+```yaml
+  objectsEnabled: true
+  k8sObjects:
+    - mode: watch
+      name: events
+```
+You can monitor more kubernetes objects configuring `clusterReceiver.k8sObjects` according to the instruction from
+[k8s objects receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver).
+
+Remember to define `rbac.customRules` when needed.
+
+There is a difference in the event formatting between `k8s_events` receiver and `k8sobjects` receiver results.
+`k8s_events` receiver stores event message as a log body, with the following fields added as a resource/attribute:
+* k8s.object.kind
+* k8s.object.name
+* k8s.object.uid
+* k8s.object.fieldpath
+* k8s.object.api_version
+* k8s.object.resource_version
+* k8s.event.reason
+* k8s.event.action
+* k8s.event.start_time
+* k8s.event.name
+* k8s.event.uid
+* k8s.namespace.name
+
+In case of `k8sobjects`, the whole payload is stored in the log body and `object.message` refers to the event message.
+
+
 ## 0.58.0 to 0.59.0
 [receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from map to string.
 
