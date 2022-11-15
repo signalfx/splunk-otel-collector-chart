@@ -511,7 +511,7 @@ Collecting logs often requires reading log files that are owned by the root user
 Note: `cri-o` container runtime did not work during internal testing.
 
 ## Network explorer
-[Network explorer](network-explorer-architecture) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
+[Network explorer](network-explorer-architecture.md) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
 To enable the network explorer, set the `enabled` flag to `true`
 ```yaml
 networkExplorer:

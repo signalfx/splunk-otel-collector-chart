@@ -7,4 +7,4 @@ Splunk OpenTelemetry Network Explorer is comprised of four components that work 
 * The k8s-collector, which gathers Kubernetes metadata from the Kubertnetes API.
 * The central reducer, which aggregates the data and metadata from the collectors. It sends metrics over the OpenTelemtry Protocol (OTLP) to the OpenTelemetry Collector in gateway mode.
 
-![Network Explorer Architecture Diagram](https://docs.splunk.com/observability/_images/network-explorer-architecture.png)
+![Network Explorer Architecture Diagram](network-explorer-architecture.png)
