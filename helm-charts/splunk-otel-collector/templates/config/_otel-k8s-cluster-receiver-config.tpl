@@ -36,8 +36,9 @@ receivers:
     distribution: openshift
     {{- end }}
   {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-  k8s_events:
+  k8sobjects:
     auth_type: serviceAccount
+    objects: {{ toYaml $clusterReceiver.eventsObjects | nindent 6 }}
   {{- end }}
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   smartagent/kubernetes-events:
@@ -232,7 +233,7 @@ service:
     {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
-        - k8s_events
+        - k8sobjects
       processors:
         - memory_limiter
         - batch
