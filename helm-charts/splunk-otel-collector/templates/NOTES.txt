@@ -4,6 +4,9 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
 {{ end }}
+{{- if .Values.networkExplorer.enabled }}
+Splunk Network Explorer is installed and configured.
+{{ end }}
 
 {{- if .Values.splunkRealm }}
 [WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.

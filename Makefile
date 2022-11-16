@@ -61,3 +61,15 @@ render:
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
+
+	# network-explorer deployment (with recommended gateway)
+	dir=rendered/manifests/network-explorer; \
+	mkdir -p "$$dir"; \
+	helm template \
+		--namespace default \
+		--values rendered/values.yaml \
+		--output-dir "$$dir" \
+		--set networkExplorer.enabled=true,agent.enabled=false \
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector

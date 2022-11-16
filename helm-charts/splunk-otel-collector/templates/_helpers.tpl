@@ -325,6 +325,21 @@ compatibility with the old config group name: "otelAgent".
 {{- end -}}
 
 {{/*
+The name of the gateway service.
+*/}}
+{{- define "splunk-otel-collector.gatewayServiceName" -}}
+{{  (include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+Whether the gateway is enabled, either through network explorer, or through its own flag.
+*/}}
+{{- define "splunk-otel-collector.gatewayEnabled" -}}
+{{- $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
+{{- or $gateway.enabled .Values.networkExplorer.enabled }}
+{{- end -}}
+
+{{/*
 Helper that returns "gateway" parameter group yaml taking care of backward
 compatibility with the old config group name: "otelCollector".
 */}}

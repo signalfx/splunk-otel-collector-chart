@@ -4,6 +4,7 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
+{{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
 extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
@@ -429,7 +430,7 @@ processors:
     # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
-    {{- if $gateway.enabled }}
+    {{- if $gatewayEnabled }}
     passthrough: true
     {{- end }}
     filter:
@@ -497,7 +498,7 @@ processors:
      - k8s.pod.uid
   {{- end }}
 
-  {{- if not $gateway.enabled }}
+  {{- if not $gatewayEnabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- end }}
@@ -561,7 +562,7 @@ processors:
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
-  {{- if $gateway.enabled }}
+  {{- if $gatewayEnabled }}
   # If gateway is enabled, metrics, logs and traces will be sent to the gateway
   otlp:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
@@ -590,7 +591,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
     correlation:
-    {{- if $gateway.enabled }}
+    {{- if $gatewayEnabled }}
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}
@@ -635,11 +636,11 @@ service:
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
-        {{- if not $gateway.enabled }}
+        {{- if not $gatewayEnabled }}
         - filter/logs
         {{- end }}
         - batch
-        {{- if not $gateway.enabled }}
+        {{- if not $gatewayEnabled }}
         - resource/logs
         {{- end }}
         - resourcedetection
@@ -648,7 +649,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if $gateway.enabled }}
+        {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
@@ -680,7 +681,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if $gateway.enabled }}
+        {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
@@ -707,7 +708,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if $gateway.enabled }}
+        {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
         - sapm
@@ -734,7 +735,7 @@ service:
         - metricstransform
         {{- end }}
       exporters:
-        {{- if $gateway.enabled }}
+        {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
@@ -763,7 +764,7 @@ service:
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
-        {{- if $gateway.enabled }}
+        {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
         - splunk_hec/platform_metrics
