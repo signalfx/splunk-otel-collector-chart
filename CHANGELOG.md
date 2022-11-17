@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+## [0.62.2] - 2022-11-21
+
+- Added Network Explorer components
+
 ## [0.62.1] - 2022-11-01
 
 ### Fixed

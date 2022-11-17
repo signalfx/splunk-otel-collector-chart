@@ -6,13 +6,13 @@ metadata:
   name: default-splunk-otel-collector-k8s-cluster-receiver
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.62.1
+    helm.sh/chart: splunk-otel-collector-0.62.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.62.0"
     app: splunk-otel-collector
     component: otel-k8s-cluster-receiver
-    chart: splunk-otel-collector-0.62.1
+    chart: splunk-otel-collector-0.62.2
     release: default
     heritage: Helm
     app.kubernetes.io/component: otel-k8s-cluster-receiver
@@ -30,7 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: eac6d8a6a769faa67f0b2d79dc87a0aae1d9afe07fe1c01f9777941321b3a1e2
+        checksum/config: 0934b0d7177caf6b7aa7b83a698825dc8a264137c8244cf9f625c51969d4fa76
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
