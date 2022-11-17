@@ -380,3 +380,49 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- $clusterReceiver.k8sEventsEnabled }}
 {{- end }}
 {{- end -}}
+
+{{/*
+
+*/}}
+{{- define "splunk-otel-collector.eventsObjects.clusterRole"}}
+{{/* create a map for generating the rules */}}
+{{- $groupedObjects := dict }}
+{{- range $apiGroup, $objects := .Values.clusterReceiver.objects }}
+{{- $groupName := ( or (and (ne $apiGroup "v1") $apiGroup) "" ) | quote }}
+{{- set $groupedObjects $groupName list | and nil }}
+{{- range $objects }}
+{{- $groupedObjects = set $groupedObjects $groupName (append ( index $groupedObjects $groupName ) .name ) }}
+{{- end }}
+{{- end }}
+{{- range $apiGroup, $resources := $groupedObjects }}
+{{- if $resources }}
+- apiGroups:
+  - {{ $apiGroup }}
+  resources:
+  {{- range $resources }}
+  - {{ . | quote | replace "_" "" }}
+  {{- end }}
+  verbs: ["get", "list", "watch"]
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+
+*/}}
+{{- define "splunk-otel-collector.eventsObjects"}}
+{{/* create a map for generating the rules */}}
+{{- $listObjects := list }}
+{{- range $apiGroup, $objects := .Values.clusterReceiver.objects }}
+{{- $groupName := ( or (and (ne $apiGroup "v1") $apiGroup) "" ) }}
+{{- if $groupName }}
+{{- range $object := $objects }}
+{{ $object = set $object "group" $apiGroup }}
+{{ $listObjects = append $listObjects $object }}
+{{- end }}
+{{- else }}
+{{ $listObjects = concat $listObjects $objects }}
+{{- end }}
+{{- end }}
+{{- toYaml $listObjects }}
+{{- end }}

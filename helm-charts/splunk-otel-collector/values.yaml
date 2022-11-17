@@ -432,8 +432,49 @@ clusterReceiver:
   eventsEnabled: false
 
   # Define what objects to collect (pull/watch) from the Kubernetes API server. Examples are here:
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  eventsObjects: []
+  #
+  # == Schema ==
+  # ```
+  # objects:
+  #   <apiGroup>:
+  #     - <objectDefinition>
+  # ```
+  #
+  # Each `objectDefinition` has the following fields:
+  # * mode:
+  #     define in which way it collects this type of object, either "pull" or "watch".
+  #     - "poll" mode will read all objects of this type use the list API at an interval.
+  #     - "watch" mode will setup a long connection using the watch API to just get updates.
+  # * name: [REQUIRED]
+  #     name of the object, e.g. `pods`, `namespaces`.
+  #     Note that for resource names that contains multiple words, like `daemonsets`,
+  #     words need to be separated with `_`, so `daemonsets` becomes `daemon_sets`.
+  # * namespace:
+  #     only collects objects from the specified namespace, by default it's all namespaces
+  # * labelSelector:
+  #     select objects by label(s)
+  # * fieldSelector:
+  #     select objects by field(s)
+  # * interval:
+  #     the interval at which object is pulled, default 15 minutes.
+  #     Only useful for "pull" mode.
+  #
+  #
+  # == Example ==
+  # ```
+  # objects:
+  #   v1:
+  #     - name: pods
+  #       namespace: default
+  #       mode: pull
+  #       interval: 60m
+  #     - name: events
+  #       mode: watch
+  #   apps/v1:
+  #     - name: daemon_sets
+  #       labelSelector: environment=production
+  # ```
+  objects: {}
 
   # k8s cluster receiver extra pod labels
   podLabels: {}

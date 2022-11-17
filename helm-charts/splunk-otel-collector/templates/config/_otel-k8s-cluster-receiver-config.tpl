@@ -38,7 +38,8 @@ receivers:
   {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   k8sobjects:
     auth_type: serviceAccount
-    objects: {{ toYaml $clusterReceiver.eventsObjects | nindent 6 }}
+    objects:
+{{ include "splunk-otel-collector.eventsObjects" . | nindent 6 }}
   {{- end }}
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   smartagent/kubernetes-events:
