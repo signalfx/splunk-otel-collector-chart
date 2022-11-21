@@ -457,7 +457,7 @@ it creates:
 
 {{- define "splunk-otel-collector.clusterRole.clusterReceiver.objects" }}
 {{- $groupedObjects := dict }}
-{{ if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+{{ if and .Values.clusterReceiver.objectsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
 {{/* create a map for generating the rules */}}
 {{- range $apiGroup, $objects := .Values.clusterReceiver.objects }}
 {{- $groupedObjects = set $groupedObjects $apiGroup list }}
@@ -503,7 +503,7 @@ it creates:
 
 
 */}}
-{{- define "splunk-otel-collector.eventsObjects"}}
+{{- define "splunk-otel-collector.objectsEnabled"}}
 {{/* create a map for generating the rules */}}
 {{- $listObjects := list }}
 {{- range $apiGroup, $objects := .Values.clusterReceiver.objects }}

@@ -429,7 +429,7 @@ clusterReceiver:
   # depending on where you want to send the events. Otherwise, this option will not have any effect.
   # The receiver currently is in alpha state which means that events format might change over time.
   # Once the receiver is stabilized, it'll be enabled by default in this helm chart
-  eventsEnabled: false
+  objectsEnabled: false
 
   # Define what objects to collect (pull/watch) from the Kubernetes API server. Examples are here:
   #
