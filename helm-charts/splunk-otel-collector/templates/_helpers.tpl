@@ -570,15 +570,18 @@ duplicated apiGroups keys.
 generate clusterRole.rules template
  */}}
 {{- range $apiGroup, $object := $allObjects -}}
-{{- $groupName := ((eq $apiGroup "v1") | ternary "" $apiGroup ) | quote -}}
+{{- $groupName := ((eq $apiGroup "v1") | ternary ("" | quote) $apiGroup ) -}}
 {{- if $object }}
 - apiGroups:
   - {{ $groupName }}
   resources:
   {{- range $object }}
-  - {{ . | quote }}
+  - {{ . }}
   {{- end }}
-  verbs: ["get", "list", "watch"]
+  verbs:
+  - get
+  - list
+  - watch
 {{- end -}}
 {{- end -}}
 {{- end -}}
