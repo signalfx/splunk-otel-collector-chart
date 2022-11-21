@@ -1,5 +1,4 @@
 {{ if .Values.rbac.create -}}
-{{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -11,79 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
-{{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-{{- include "splunk-otel-collector.eventsObjects.clusterRole" . }}
-{{- end }}
-{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
-- apiGroups:
-  - quota.openshift.io
-  resources:
-  - clusterresourcequotas
-  verbs:
-  - get
-  - list
-  - watch
-{{- end }}
-- apiGroups:
-  - ""
-  resources:
-  - events
-  - namespaces
-  - namespaces/status
-  - nodes
-  - nodes/spec
-  - nodes/stats
-  - nodes/proxy
-  - pods
-  - pods/status
-  - persistentvolumeclaims
-  - persistentvolumes
-  - replicationcontrollers
-  - replicationcontrollers/status
-  - resourcequotas
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - daemonsets
-  - deployments
-  - replicasets
-  - statefulsets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  - cronjobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-    - autoscaling
-  resources:
-    - horizontalpodautoscalers
-  verbs:
-    - get
-    - list
-    - watch
+{{- include "splunk-otel-collector.clusterRole.rules" . }}
 - nonResourceURLs:
   - /metrics
   verbs:

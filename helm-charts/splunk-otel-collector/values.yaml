@@ -447,8 +447,6 @@ clusterReceiver:
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
-  #     Note that for resource names that contains multiple words, like `daemonsets`,
-  #     words need to be separated with `_`, so `daemonsets` becomes `daemon_sets`.
   # * namespace:
   #     only collects objects from the specified namespace, by default it's all namespaces
   # * labelSelector:
@@ -470,7 +468,7 @@ clusterReceiver:
   #       interval: 60m
   #     - name: events
   #       mode: watch
-  #   apps/v1:
+  #   apps:
   #     - name: daemon_sets
   #       labelSelector: environment=production
   # ```
