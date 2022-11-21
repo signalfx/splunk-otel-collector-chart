@@ -369,8 +369,6 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{ printf "%s-cr-node-discoverer-script" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
-
-
 {{/*
 "o11yInfraMonEventsEnabled" helper defines whether Observability Infrastructure monitoring events are enabled
 */}}
