@@ -5,10 +5,10 @@ kind: Deployment
 metadata:
   name: default-splunk-otel-collector-reducer
   labels:
-    helm.sh/chart: splunk-otel-collector-0.62.2
+    helm.sh/chart: splunk-otel-collector-0.64.0
     app.kubernetes.io/name: default-splunk-otel-collector-reducer
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.62.0"
+    app.kubernetes.io/version: "0.64.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
