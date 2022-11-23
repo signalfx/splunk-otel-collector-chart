@@ -14,7 +14,9 @@ of `version` field.
 ### Release Procedure
 
 To make a new release of the helm chart:
-1. Bump the `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml) and create PR.
-2. When the PR gets merged, the release will automatically be made and the helm repo updated.
-3. Release notes are not populated automatically. So make sure to update them manually using the notes from
+1. Bump the `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
+2. Run `make render` to re-render the yaml rendered files.
+3. Create PR and request review from the team.
+4. When the PR gets merged, the release will automatically be made and the helm repo updated.
+5. Release notes are not populated automatically. So make sure to update them manually using the notes from
    [CHANGELOG](./CHANGELOG.md).
