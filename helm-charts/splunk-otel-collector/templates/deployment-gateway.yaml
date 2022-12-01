@@ -77,6 +77,8 @@ spec:
         - --feature-gates={{ .Values.gateway.featureGates }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
+        securityContext:
+          readOnlyRootFilesystem: true
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
