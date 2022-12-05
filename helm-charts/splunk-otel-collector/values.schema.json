@@ -670,12 +670,9 @@
           "deprecated": true
         },
         "eventsEnabled": {
-          "description": "[DEPRECATED] Use objectsEnabled instead.",
+          "description": "[DEPRECATED] Use k8sObjects instead.",
           "type": "boolean",
           "deprecated": true
-        },
-        "objectsEnabled": {
-          "type": "boolean"
         },
         "k8sObjects": {
           "type": "array",

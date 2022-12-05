@@ -423,15 +423,21 @@ clusterReceiver:
   annotations: {}
   podAnnotations: {}
 
-  # This flag enables Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
+  # This flag enables Kubernetes events collection using OpenTelemetry Kubernetes Events Receiver
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
+  # This option requires `logsEnabled` to be set to `true` for either `splunkObservability` or `splunkPlatform`
+  # depending on where you want to send the events. Otherwise this option will not have any effect.
+  # The receiver currently is in alpha state which means that events format might change over time.
+  # Once the receiver is stabilized, it'll be enabled by default in this helm chart
+  eventsEnabled: false
+
+  # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
   # This option requires `logsEnabled` to be set to `true` for either `splunkObservability` or `splunkPlatform`
   # depending on where you want to send the events. Otherwise, this option will not have any effect.
   # The receiver currently is in alpha state which means that events format might change over time.
   # Once the receiver is stabilized, it'll be enabled by default in this helm chart
-  objectsEnabled: false
 
-  # k8s objects to collect (pull/watch) from the Kubernetes API server.
   #
   # == Schema ==
   # ```

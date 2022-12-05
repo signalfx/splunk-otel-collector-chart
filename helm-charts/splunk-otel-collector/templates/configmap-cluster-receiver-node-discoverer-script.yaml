@@ -1,4 +1,4 @@
-{{ if and (eq (include "splunk-otel-collector.clusterReceiverDeploy" . ) "true" ) (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+{{ if and (eq (include "splunk-otel-collector.clusterReceiverEnabled" . ) "true" ) (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

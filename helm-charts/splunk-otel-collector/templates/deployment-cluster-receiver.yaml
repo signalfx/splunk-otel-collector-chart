@@ -1,5 +1,5 @@
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{ if eq (include "splunk-otel-collector.clusterReceiverDeploy" . ) "true" }}
+{{ if eq (include "splunk-otel-collector.clusterReceiverEnabled" . ) "true" }}
 apiVersion: apps/v1
 {{- /*
 eks/fargate distributions use a two-replica StatefulSet instead of a single node deployment.
