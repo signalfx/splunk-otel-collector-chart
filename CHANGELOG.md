@@ -4,13 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Update functional tests (#591)
+  - Update Kubernetes to v1.25 and Splunk to v9.0
+
 ## [0.64.0] - 2022-11-22
 
 ### Changed
 
 - Upgrade splunk-otel-collector image to 0.64.0 (#589)
-
-### Fixed
 
 ## [0.62.2] - 2022-11-21
 

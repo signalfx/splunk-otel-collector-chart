@@ -20,8 +20,10 @@ jobs:
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-      KUBERNETES_VERSION: v1.21.2
-      MINIKUBE_VERSION: v1.22.0
+      # Kubernetes 1.25.0 has a known issue with resolv.conf
+      # https://github.com/kubernetes/kubernetes/issues/112135
+      KUBERNETES_VERSION: 1.25.1
+      MINIKUBE_VERSION: v1.28.0
 
     steps:
       - name: Checkout
@@ -33,24 +35,15 @@ jobs:
 
       - name: Setup Minikube
         run: |
-          # Install Kubectl
-          curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubectl
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          mkdir -p ${HOME}/.kube
-          touch ${HOME}/.kube/config
           # Install Minikube
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64
-          chmod +x minikube
-          sudo mv minikube /usr/local/bin/
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
           sudo sysctl fs.protected_regular=0
           # Start Minikube and Wait
-          minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
-          kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
-          export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
-          until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
-            sleep 1;
-          done
+          minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 5368 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check  --network-plugin=cni --cni=calico
+          sleep 5
+            kubectl wait --for=condition=Ready nodes --all --timeout=180s
+          sleep 5
 
       - name: Install Splunk
         run: |
@@ -77,7 +70,7 @@ jobs:
           # Restart Splunk
           curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
-      - name: Deploy sck otel collector
+      - name: Deploy Splunk OpenTelemetry Collector
         run: |
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           ci_scripts/deploy_collector.sh
@@ -107,9 +100,10 @@ jobs:
           	--splunk-user admin \
           	--splunk-password $CI_SPLUNK_PASSWORD \
           	-p no:warnings -s
-#          # Leave this here for debugging
-#          sleep 180
-#          echo "Getting agent logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
-#          echo "Getting collector logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
+
+      - name: Debug info
+        if: always()
+        run: |
+          kubectl get pods --all-namespaces
+          kubectl get jobs --all-namespaces
+          kubectl logs -l component=agent-collector
