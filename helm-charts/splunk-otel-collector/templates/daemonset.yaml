@@ -49,9 +49,10 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
-      {{- if not .Values.isWindows }}
-      hostNetwork: true
-      {{- end }}
+      #{{- if not .Values.isWindows }}
+      #hostNetwork: true
+      #{{- end }}
+      hostNetwork: false
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
@@ -76,7 +77,12 @@ spec:
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
           securityContext:
-            runAsUser: 0
+            runAsUser: 999
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
                 if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
@@ -109,6 +115,10 @@ spec:
           command: ["/migratecheckpoint"]
           securityContext:
             runAsUser: 0
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
           env:
           - name: CONTAINER_LOG_PATH_FLUENTD
             value: "{{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos"
@@ -177,6 +187,11 @@ spec:
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
         securityContext:
           readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 999
+          allowPrivilegeEscalation: false
+          seccompProfile:
+              type: RuntimeDefault
           {{- if .Values.fluentd.securityContext }}
           {{ toYaml .Values.fluentd.securityContext | nindent 10 }}
           {{- end }}
@@ -236,6 +251,9 @@ spec:
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         securityContext:
+          allowPrivilegeEscalation: false
+          seccompProfile:
+                type: RuntimeDefault
           readOnlyRootFilesystem: true
           {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
           {{- if $agent.securityContext }}

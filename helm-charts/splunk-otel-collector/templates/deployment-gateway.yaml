@@ -42,6 +42,7 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
+      hostNetwork: false
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
         {{- if $gateway.nodeSelector }}
@@ -78,6 +79,9 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         securityContext:
+          allowPrivilegeEscalation: false
+          seccompProfile:
+              type: RuntimeDefault
           readOnlyRootFilesystem: true
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:

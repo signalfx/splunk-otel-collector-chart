@@ -51,6 +51,7 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
+      hostNetwork: false
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
         {{- if $clusterReceiver.nodeSelector }}
@@ -126,6 +127,9 @@ spec:
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          seccompProfile:
+              type: RuntimeDefault
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
