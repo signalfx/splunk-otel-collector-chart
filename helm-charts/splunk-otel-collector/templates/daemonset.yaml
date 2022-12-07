@@ -49,10 +49,9 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
-      #{{- if not .Values.isWindows }}
-      #hostNetwork: true
-      #{{- end }}
-      hostNetwork: false
+      {{- if not .Values.isWindows }}
+      hostNetwork: true
+      {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
@@ -77,8 +76,7 @@ spec:
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
           securityContext:
-            runAsUser: 999
-            runAsNonRoot: true
+            runAsUser: 0
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             seccompProfile:
@@ -187,8 +185,6 @@ spec:
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
         securityContext:
           readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 999
           allowPrivilegeEscalation: false
           seccompProfile:
               type: RuntimeDefault

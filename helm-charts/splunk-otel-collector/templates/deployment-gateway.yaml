@@ -42,7 +42,6 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
-      hostNetwork: false
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
         {{- if $gateway.nodeSelector }}
