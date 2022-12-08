@@ -265,7 +265,8 @@ spec:
           {{- if $agent.securityContext }}
           {{- toYaml $agent.securityContext | nindent 10 }}
           {{- else }}
-          runAsUser: 0
+          #runAsUser: 0
+          runAsUser: 999
           {{- end }}
           {{- end }}
         env:
