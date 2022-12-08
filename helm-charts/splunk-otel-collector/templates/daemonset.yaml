@@ -76,9 +76,7 @@ spec:
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
           securityContext:
-            runAsUser: 999
-            runAsNonRoot: true
-            #runAsUser: 0
+            runAsUser: 0
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             seccompProfile:
@@ -186,8 +184,6 @@ spec:
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
         securityContext:
-          runAsUser: 999
-          runAsNonRoot: true
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           seccompProfile:
@@ -259,7 +255,8 @@ spec:
           {{- if $agent.securityContext }}
           {{- toYaml $agent.securityContext | nindent 10 }}
           {{- else }}
-          runAsUser: 0
+          #runAsUser: 0
+          runAsUser: 999
           {{- end }}
           {{- end }}
         env:
