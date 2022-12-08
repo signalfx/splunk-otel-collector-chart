@@ -76,7 +76,9 @@ spec:
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
           command: [ "sh", "-c"]
           securityContext:
-            runAsUser: 0
+            runAsUser: 999
+            runAsNonRoot: true
+            #runAsUser: 0
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             seccompProfile:
@@ -112,7 +114,9 @@ spec:
           imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
           command: ["/migratecheckpoint"]
           securityContext:
-            runAsUser: 0
+            runAsUser: 999
+            runAsNonRoot: true
+            #runAsUser: 0
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             seccompProfile:
@@ -165,7 +169,9 @@ spec:
           fi;
           {{- end }}']
           securityContext:
-            runAsUser: 0
+            runAsUser: 999
+            runAsNonRoot: true
+            #runAsUser: 0
           volumeMounts:
             - name: checkpoint
               mountPath: {{ .Values.logsCollection.checkpointPath }}
@@ -184,6 +190,8 @@ spec:
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
         securityContext:
+          runAsUser: 999
+          runAsNonRoot: true
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           seccompProfile:
@@ -247,6 +255,8 @@ spec:
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         securityContext:
+          runAsUser: 999
+          runAsNonRoot: true
           allowPrivilegeEscalation: false
           seccompProfile:
                 type: RuntimeDefault

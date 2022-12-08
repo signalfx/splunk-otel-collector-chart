@@ -125,6 +125,8 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         securityContext:
+          runAsUser: 999
+          runAsNonRoot: true
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           seccompProfile:
