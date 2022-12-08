@@ -57,7 +57,7 @@ spec:
       affinity:
         {{- toYaml $gateway.affinity | nindent 8 }}
       {{- end }}
-      
+
       containers:
       - name: otel-collector
         command:
