@@ -360,9 +360,9 @@ agent:
     seccompProfile:
       type: RuntimeDefault
     runAsUser: 0
-    #runAsUser: 20000
-    #runAsGroup: 20000
-    #runAsNonRoot: true
+    # runAsUser: 20000
+    # runAsGroup: 20000
+    # runAsNonRoot: true
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
