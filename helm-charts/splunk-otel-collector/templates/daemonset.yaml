@@ -165,9 +165,7 @@ spec:
           fi;
           {{- end }}']
           securityContext:
-            runAsUser: 999
-            runAsNonRoot: true
-            #runAsUser: 0
+            runAsUser: 0
           volumeMounts:
             - name: checkpoint
               mountPath: {{ .Values.logsCollection.checkpointPath }}
@@ -253,15 +251,13 @@ spec:
           seccompProfile:
                 type: RuntimeDefault
           readOnlyRootFilesystem: true
-          runAsUser: 999
-          runAsNonRoot: true
-          #{{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
-          #{{- if $agent.securityContext }}
-          #{{- toYaml $agent.securityContext | nindent 10 }}
-          #{{- else }}
-          #runAsUser: 0
-          #{{- end }}
-          #{{- end }}
+          {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+          {{- if $agent.securityContext }}
+          {{- toYaml $agent.securityContext | nindent 10 }}
+          {{- else }}
+          runAsUser: 0
+          {{- end }}
+          {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory }}"
