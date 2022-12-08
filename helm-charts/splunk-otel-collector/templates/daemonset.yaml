@@ -77,10 +77,6 @@ spec:
           command: [ "sh", "-c"]
           securityContext:
             runAsUser: 0
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            seccompProfile:
-              type: RuntimeDefault
           args:
             - if [ -z "${LOG_FORMAT_TYPE}" ]; then
                 if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
@@ -113,10 +109,6 @@ spec:
           command: ["/migratecheckpoint"]
           securityContext:
             runAsUser: 0
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            seccompProfile:
-              type: RuntimeDefault
           env:
           - name: CONTAINER_LOG_PATH_FLUENTD
             value: "{{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos"
@@ -183,14 +175,10 @@ spec:
       - name: fluentd
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
+        {{- if .Values.fluentd.securityContext }}
         securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          seccompProfile:
-              type: RuntimeDefault
-          {{- if .Values.fluentd.securityContext }}
           {{ toYaml .Values.fluentd.securityContext | nindent 10 }}
-          {{- end }}
+        {{- end }}
         env:
           - name: K8S_NODE_NAME
             valueFrom:
@@ -246,18 +234,14 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
+        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          allowPrivilegeEscalation: false
-          seccompProfile:
-                type: RuntimeDefault
-          readOnlyRootFilesystem: true
-          {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
           {{- if $agent.securityContext }}
           {{- toYaml $agent.securityContext | nindent 10 }}
           {{- else }}
           runAsUser: 0
           {{- end }}
-          {{- end }}
+        {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory }}"

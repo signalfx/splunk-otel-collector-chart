@@ -47,6 +47,15 @@ spec:
                 values:
                 - otel-k8s-cluster-receiver
             topologyKey: kubernetes.io/hostname
+      securityContext:
+        
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 20000
+        runAsNonRoot: true
+        runAsUser: 20000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
@@ -74,13 +83,6 @@ spec:
         - /otelcol
         - --config=/splunk-messages/config.yaml
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
-        securityContext:
-          runAsUser: 999
-          runAsNonRoot: true
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          seccompProfile:
-              type: RuntimeDefault
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

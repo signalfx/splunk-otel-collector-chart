@@ -35,19 +35,21 @@ spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      securityContext:
+        
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 20000
+        runAsNonRoot: true
+        runAsUser: 20000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: otel-collector
         command:
         - /otelcol
         - --config=/conf/relay.yaml
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
-        securityContext:
-          runAsUser: 999
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
-          seccompProfile:
-              type: RuntimeDefault
-          readOnlyRootFilesystem: true
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

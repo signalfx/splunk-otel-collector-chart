@@ -48,10 +48,6 @@ spec:
           command: ["/migratecheckpoint"]
           securityContext:
             runAsUser: 0
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            seccompProfile:
-              type: RuntimeDefault
           env:
           - name: CONTAINER_LOG_PATH_FLUENTD
             value: "/var/log/splunk-fluentd-containers.log.pos"
@@ -69,6 +65,34 @@ spec:
             value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/addon/splunk/otel_pos
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+        - name: patch-log-dirs
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', '
+          mkdir -p /var/addon/splunk/otel_pos;
+          chown -Rv 20000:20000 /var/addon/splunk/otel_pos;
+          chmod -v g+rwxs /var/addon/splunk/otel_pos;
+          if [ -d "/var/lib/docker/containers" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/lib/docker/containers;
+          fi;
+          if [ -d "/var/log/crio/pods" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/crio/pods;
+          fi;
+          if [ -d "/var/log/pods" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/pods;
+          fi;']
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - name: checkpoint
               mountPath: /var/addon/splunk/otel_pos
@@ -120,10 +144,12 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
-          seccompProfile:
-                type: RuntimeDefault
           readOnlyRootFilesystem: true
-          runAsUser: 0
+          runAsGroup: 20000
+          runAsNonRoot: true
+          runAsUser: 20000
+          seccompProfile:
+            type: RuntimeDefault
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
