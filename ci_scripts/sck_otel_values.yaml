@@ -18,8 +18,8 @@ splunkPlatform:
   sourcetype:
   # Maximum HTTP connections to use simultaneously when sending data. Defaults to 200.
   maxConnections: 200
-  # Whether to disable gzip compression over HTTP. Defaults to true.
-  disableCompression: true
+  # Whether to disable gzip compression over HTTP. Defaults to false.
+  disableCompression: false
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending data over HTTPS. Defaults to true.
