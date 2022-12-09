@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.61.1] - 2022-12-09
+
+### Fixed
+
+- Make sure filelog receiver uses file_storage for checkpointing (#567)
+
 ## [0.61.0] - 2022-10-07
 
 ### Changed

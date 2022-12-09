@@ -255,6 +255,7 @@ receivers:
     # Disable force flush until this issue is fixed:
     # https://github.com/open-telemetry/opentelemetry-log-collection/issues/292
     force_flush_period: "0"
+    storage: file_storage
     operators:
       {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
