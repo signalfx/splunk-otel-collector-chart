@@ -26,10 +26,12 @@ spec:
         app.kubernetes.io/name: {{ include "splunk-otel-collector-reducer.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      {{- with .Values.networkExplorer.imagePullSecrets }}
+{{- if .Values.networkExplorer.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+{{- range .Values.networkExplorer.imagePullSecrets }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
       containers:
         - name: reducer
           image: "{{ default .Values.networkExplorer.images.repository .Values.networkExplorer.reducer.image.repository }}/{{ .Values.networkExplorer.reducer.image.name }}:{{ default .Values.networkExplorer.images.tag .Values.networkExplorer.reducer.image.tag }}"

@@ -28,10 +28,12 @@ spec:
         app.kubernetes.io/name: {{ include "splunk-otel-collector-kernel-collector.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      {{- with .Values.networkExplorer.imagePullSecrets }}
+{{- if .Values.networkExplorer.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+{{- range .Values.networkExplorer.imagePullSecrets }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
       containers:
         - name: kernel-collector
           image: "{{ default .Values.networkExplorer.images.repository .Values.networkExplorer.kernelCollector.image.repository }}/{{ .Values.networkExplorer.kernelCollector.image.name }}:{{ default .Values.networkExplorer.images.tag .Values.networkExplorer.kernelCollector.image.tag }}"
