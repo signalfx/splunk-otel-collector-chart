@@ -158,7 +158,7 @@ spec:
           {{- end }}
 
 
-          if [ -d /var/log/journal ];
+          if [ -d "/var/log/journal" ];
           then
               setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/journal;
           fi;']
