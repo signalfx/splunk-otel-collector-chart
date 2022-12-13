@@ -346,8 +346,8 @@ Change is reflected in `source` filed for extracted logs.
 
 ### Default `sourcetype` for containers logs
 
-Splunk Connect for Kubernetes define `sourcetype` for containers as `kube:<container_neme>`
-Splunk OpenTelemetry Collector for Kubernetes define `sourcetype` for containers as `kube:container:<container_neme>`
+Splunk Connect for Kubernetes define `sourcetype` for containers as `kube:<container_name>`
+Splunk OpenTelemetry Collector for Kubernetes define `sourcetype` for containers as `kube:container:<container_name>`
 
 ### Extracted fields for logs
 
