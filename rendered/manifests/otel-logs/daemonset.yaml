@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 87e17e20c38913d414a3e9be5b6d2f0fa7d4ba4e58c195acffc80ad0d6993652
+        checksum/config: 86bf561738f52ce3ef64eb7465f700e533132d46c39905d6a717489516720bf4
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -65,6 +65,38 @@ spec:
             value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/addon/splunk/otel_pos
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+        - name: patch-log-dirs
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', '
+          mkdir -p /var/addon/splunk/otel_pos;
+          chown -Rv 20000:20000 /var/addon/splunk/otel_pos;
+          chmod -v g+rwxs /var/addon/splunk/otel_pos;
+          if [ -d "/var/lib/docker/containers" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/lib/docker/containers;
+          fi;
+          if [ -d "/var/log/crio/pods" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/crio/pods;
+          fi;
+          if [ -d "/var/log/pods" ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/pods;
+          fi;
+          if [ -d /var/log/journal ];
+          then
+              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/journal;
+          fi;']
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - name: checkpoint
               mountPath: /var/addon/splunk/otel_pos
@@ -115,7 +147,8 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
         imagePullPolicy: IfNotPresent
         securityContext:
-          runAsUser: 0
+          runAsGroup: 20000
+          runAsUser: 20000
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
@@ -210,6 +243,9 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
+        - mountPath: /var/log/journal
+          name: journaldlogs
+          readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -222,6 +258,9 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
+      - name: journaldlogs
+        hostPath:
+          path: /var/log/journal
       - name: host-dev
         hostPath:
           path: /dev
