@@ -91,8 +91,6 @@ spec:
           then
               setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/pods;
           fi;
-
-
           if [ -d "/var/log/journal" ];
           then
               setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/journal;
@@ -106,7 +104,7 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
-            - name: varlogjournal
+            - name: journaldlogs
               mountPath: /var/log/journal
       containers:
       - name: otel-collector
