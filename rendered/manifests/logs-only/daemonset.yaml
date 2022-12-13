@@ -79,7 +79,11 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           runAsUser: 0
+          seccompProfile:
+            type: RuntimeDefault
         env:
           - name: K8S_NODE_NAME
             valueFrom:
@@ -135,8 +139,11 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
         imagePullPolicy: IfNotPresent
         securityContext:
-          runAsGroup: 20000
-          runAsUser: 20000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          seccompProfile:
+            type: RuntimeDefault
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
