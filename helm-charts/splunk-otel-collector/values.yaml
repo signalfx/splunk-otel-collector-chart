@@ -357,6 +357,12 @@ agent:
   securityContext:
     runAsUser: 20000
     runAsGroup: 20000
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    # runAsUser: 0
+    runAsNonRoot: true
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
@@ -558,7 +564,14 @@ fluentd:
       memory: 200Mi
 
   securityContext:
-    runAsUser: 0
+    # runAsUser: 0
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    runAsUser: 20000
+    runAsGroup: 20000
+    runAsNonRoot: true
 
   # Extra enviroment variables to be set in the FluentD container
   extraEnvs: []
