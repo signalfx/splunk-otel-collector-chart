@@ -173,6 +173,10 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
             {{- end }}
+            {{- if .Values.logsCollection.journald.enabled }}
+            - name: varlogjournal
+              mountPath: /var/log/journal
+            {{- end }}
         {{- end }}
         {{- end }}
       {{- end }}

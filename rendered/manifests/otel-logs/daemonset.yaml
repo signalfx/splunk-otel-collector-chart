@@ -93,7 +93,7 @@ spec:
           fi;
 
 
-          if [ -d /var/log/journal ];
+          if [ -d "/var/log/journal" ];
           then
               setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/journal;
           fi;']
@@ -106,6 +106,8 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+            - name: varlogjournal
+              mountPath: /var/log/journal
       containers:
       - name: otel-collector
         command:
