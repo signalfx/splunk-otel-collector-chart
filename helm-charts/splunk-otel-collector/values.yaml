@@ -355,10 +355,10 @@ agent:
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
 
   securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
+    # readOnlyRootFilesystem: true
+    # allowPrivilegeEscalation: false
+    # seccompProfile:
+    #  type: RuntimeDefault
     # runAsUser: 0
     runAsUser: 20000
     runAsGroup: 20000
