@@ -421,7 +421,7 @@ clusterReceiver:
   affinity: {}
 
   # Pod configurations
-  securityContext:
+  securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
@@ -1008,7 +1008,7 @@ gateway:
   affinity: {}
 
   # Pod configurations
-  securityContext:
+  securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 

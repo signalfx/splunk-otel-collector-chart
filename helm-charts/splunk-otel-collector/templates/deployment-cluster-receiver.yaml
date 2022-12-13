@@ -77,10 +77,10 @@ spec:
         ` }}
         {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
-      {{ - if $clusterReceiver.securityContext }}
+      {{- if $clusterReceiver.securityContext }}
       securityContext:
         {{ toYaml $clusterReceiver.securityContext | nindent 8 }}
-      {{ - end }}
+      {{- end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:
         - name: cluster-receiver-node-discoverer
