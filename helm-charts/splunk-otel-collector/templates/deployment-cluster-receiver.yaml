@@ -77,7 +77,10 @@ spec:
         ` }}
         {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
-
+      {{ - if $clusterReceiver.securityContext }}
+      securityContext:
+        {{ toYaml $clusterReceiver.securityContext | nindent 8 }}
+      {{ - end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:
         - name: cluster-receiver-node-discoverer
@@ -125,10 +128,6 @@ spec:
         - --feature-gates={{ .Values.clusterReceiver.featureGates }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
-        {{- if $clusterReceiver.securityContext }}
-        securityContext:
-          {{ toYaml $clusterReceiver.securityContext | nindent 10 }}
-        {{- end }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

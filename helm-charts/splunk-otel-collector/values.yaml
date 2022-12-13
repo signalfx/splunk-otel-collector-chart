@@ -355,14 +355,14 @@ agent:
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
 
   securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
+    # runAsUser: 20000
+    # runAsGroup: 20000
     # runAsNonRoot: true
-    # readOnlyRootFilesystem: true
-    # allowPrivilegeEscalation: false
-    # seccompProfile:
-    #   type: RuntimeDefault
-    # runAsUser: 0
+    runAsUser: 0
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
@@ -421,14 +421,7 @@ clusterReceiver:
   affinity: {}
 
   # Pod configurations
-  securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
+  securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
@@ -1004,14 +997,7 @@ gateway:
   affinity: {}
 
   # Pod configurations
-  securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
+  securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 

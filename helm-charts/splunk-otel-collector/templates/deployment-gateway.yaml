@@ -57,6 +57,10 @@ spec:
       affinity:
         {{- toYaml $gateway.affinity | nindent 8 }}
       {{- end }}
+      {{ - if $gateway.securityContext }}
+      securityContext:
+        {{ toYaml $gateway.securityContext | nindent 8 }}
+      {{ - end }}
 
       containers:
       - name: otel-collector
@@ -72,10 +76,6 @@ spec:
         {{- end }}
         {{- if .Values.gateway.featureGates }}
         - --feature-gates={{ .Values.gateway.featureGates }}
-        {{- end }}
-        {{- if $gateway.securityContext }}
-        securityContext:
-          {{ toYaml $gateway.securityContext | nindent 10 }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
