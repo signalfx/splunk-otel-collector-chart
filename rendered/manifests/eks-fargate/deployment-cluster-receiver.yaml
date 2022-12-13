@@ -54,13 +54,8 @@ spec:
           command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
           securityContext:
             
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
             runAsGroup: 20000
-            runAsNonRoot: true
             runAsUser: 20000
-            seccompProfile:
-              type: RuntimeDefault
           env:
             - name: K8S_POD_NAME
               valueFrom:
@@ -85,13 +80,8 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
         securityContext:
           
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
           runAsGroup: 20000
-          runAsNonRoot: true
           runAsUser: 20000
-          seccompProfile:
-            type: RuntimeDefault
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

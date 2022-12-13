@@ -144,7 +144,6 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsGroup: 20000
-          runAsNonRoot: true
           runAsUser: 20000
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

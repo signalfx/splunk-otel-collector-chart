@@ -79,13 +79,7 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsGroup: 20000
-          runAsNonRoot: true
-          runAsUser: 20000
-          seccompProfile:
-            type: RuntimeDefault
+          runAsUser: 0
         env:
           - name: K8S_NODE_NAME
             valueFrom:
@@ -142,7 +136,6 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsGroup: 20000
-          runAsNonRoot: true
           runAsUser: 20000
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
