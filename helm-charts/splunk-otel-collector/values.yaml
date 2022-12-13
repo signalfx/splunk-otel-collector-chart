@@ -354,9 +354,9 @@ agent:
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
 
-  securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
+  securityContext: {}
+    # runAsUser: 20000
+    # runAsGroup: 20000
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
@@ -511,7 +511,7 @@ logsCollection:
 
 # Configuration for collecting journald logs using otel collector
   journald:
-    enabled: true
+    enabled: false
     # Please update directory path for journald if it's different from below default value "/var/log/journal"
     directory: /var/log/journal
     # List of service units to collect journald logs for and configuration for each.
