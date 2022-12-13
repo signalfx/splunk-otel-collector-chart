@@ -1,0 +1,36 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/kernel-collector-podsecuritypolicy.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: default-splunk-otel-collector-kernel-collector
+spec:
+  privileged: true
+  allowPrivilegeEscalation: true
+  allowedHostPaths:
+  - pathPrefix: /usr/src
+    readOnly: true
+  - pathPrefix: /lib/modules
+    readOnly: true
+  - pathPrefix: /etc
+    readOnly: true
+  - pathPrefix: /var/cache
+    readOnly: false
+  - pathPrefix: /sys/fs/cgroup
+    readOnly: true
+  fsGroup:
+    rule: RunAsAny
+  hostNetwork: true
+  hostPorts:
+  - max: 65535
+    min: 0
+  hostPID: true
+  readOnlyRootFilesystem: false
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - "*"

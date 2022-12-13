@@ -1,0 +1,28 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/k8s-collector-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: default-splunk-otel-collector-k8s-collector
+    chart: splunk-otel-collector-0.66.0
+    heritage: Helm
+    release: default
+  name: default-splunk-otel-collector-k8s-collector
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
