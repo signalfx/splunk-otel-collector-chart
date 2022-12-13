@@ -354,15 +354,9 @@ agent:
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
 
-  securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
-    # runAsUser: 0
-    runAsNonRoot: true
+  securityContext: {}
+  #   runAsUser: 20000
+  #   runAsGroup: 20000
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
@@ -564,14 +558,7 @@ fluentd:
       memory: 200Mi
 
   securityContext:
-    # runAsUser: 0
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
+    runAsUser: 0
 
   # Extra enviroment variables to be set in the FluentD container
   extraEnvs: []

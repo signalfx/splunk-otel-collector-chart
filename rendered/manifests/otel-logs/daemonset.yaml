@@ -72,34 +72,6 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
-        - name: patch-log-dirs
-          image: registry.access.redhat.com/ubi9/ubi
-          imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', '
-          mkdir -p /var/addon/splunk/otel_pos;
-          chown -Rv 20000:20000 /var/addon/splunk/otel_pos;
-          chmod -v g+rwxs /var/addon/splunk/otel_pos;
-          if [ -d "/var/lib/docker/containers" ];
-          then
-              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/lib/docker/containers;
-          fi;
-          if [ -d "/var/log/crio/pods" ];
-          then
-              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/crio/pods;
-          fi;
-          if [ -d "/var/log/pods" ];
-          then
-              setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/pods;
-          fi;']
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: checkpoint
-              mountPath: /var/addon/splunk/otel_pos
-            - name: varlog
-              mountPath: /var/log
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
       containers:
       - name: otel-collector
         command:
@@ -143,13 +115,7 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.66.0
         imagePullPolicy: IfNotPresent
         securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsGroup: 20000
-          runAsNonRoot: true
-          runAsUser: 20000
-          seccompProfile:
-            type: RuntimeDefault
+          runAsUser: 0
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
