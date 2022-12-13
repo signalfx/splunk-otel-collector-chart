@@ -335,3 +335,32 @@ To delete the SCK deployment, find the name of the deployment using the `helm ls
   * ```index="Your logs index"```
 * Check the metrics index to see if you are receiving metrics from your Kubernetes cluster
   * ```| mcatalog values(metric_name) WHERE index="Your metrics index"```
+
+## Differences between Splunk Connect for Kubernetes and Splunk OpenTelemetry Collector for Kubernetes
+
+### Read logs location
+
+Splunk Connect for Kubernetes by default read containers logs from `/var/log/containers/*`
+Splunk OpenTelemetry Collector for Kubernetes by default read containers logs from `/var/log/pods/*`
+Change is reflected in `source` filed for extracted logs.
+
+### Default `sourcetype` for containers logs
+
+Splunk Connect for Kubernetes define `sourcetype` for containers as `kube:<container_neme>`
+Splunk OpenTelemetry Collector for Kubernetes define `sourcetype` for containers as `kube:container:<container_neme>`
+
+### Extracted fields for logs
+
+Splunk OpenTelemetry Collector for Kubernetes follows naming convention for OpenTelemetry for extracted fields. Table below present differences in filed names extracted by Splunk OpenTelemetry Collector for Kubernetes and Splunk Connect for Kubernetes
+
+| Splunk Connect for Kubernetes | Splunk OpenTelemetry Collector for Kubernetes |
+|-------------------------------|-----------------------------------------------|
+| container_id                  | container.id                                  |
+| container_image               | container.image.name and container.image.tag  |
+| container_name                | k8s.container.name                            |
+| cluster_name                  | k8s.cluster.name                              |
+| namespace                     | k8s.namespace.name                            |
+| pod                           | k8s.pod.name                                  |
+| pod_uid                       | k8s.pod_uid                                   |
+| label_app                     | k8s.pod.labels.app                            |
+
