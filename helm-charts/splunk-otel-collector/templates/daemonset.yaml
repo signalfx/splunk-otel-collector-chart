@@ -156,12 +156,12 @@ spec:
               setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
           fi;
           {{- end }}
-          {{ if .Values.logsCollection.journald.enabled -}}
-          if [ -d {{ .Values.logsCollection.journald.directory }} ];
+
+
+          if [ -d /var/log/journal ];
           then
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.logsCollection.journald.directory }};
-          fi;
-          {{- end }}']
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/journal;
+          fi;']
           securityContext:
             runAsUser: 0
           volumeMounts:

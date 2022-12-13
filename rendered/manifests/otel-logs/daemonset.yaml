@@ -91,6 +91,8 @@ spec:
           then
               setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/pods;
           fi;
+
+
           if [ -d /var/log/journal ];
           then
               setfacl -n -Rm d:g:20000:rx,g:20000:rx /var/log/journal;
