@@ -155,6 +155,12 @@ spec:
           then
               setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
           fi;
+          {{- end }}
+          {{ if .Values.logsCollection.journald.enabled -}}
+          if [ -d {{ .Values.logsCollection.journald.directory }} ];
+          then
+              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.logsCollection.journald.directory }};
+          fi;
           {{- end }}']
           securityContext:
             runAsUser: 0
