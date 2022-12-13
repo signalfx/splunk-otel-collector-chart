@@ -422,15 +422,19 @@ clusterReceiver:
 
   # Pod configurations
   securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Container configurations
+  container:
+    securityContext:
+      runAsUser: 20000
+      runAsGroup: 20000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
 
   # k8s cluster receiver collector annotations
   annotations: {}
@@ -571,14 +575,14 @@ fluentd:
       memory: 200Mi
 
   securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
+    # runAsUser: 20000
+    # runAsGroup: 20000
+    # runAsNonRoot: true
+    runAsUser: 0
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     seccompProfile:
       type: RuntimeDefault
-    # runAsUser: 0
 
   # Extra enviroment variables to be set in the FluentD container
   extraEnvs: []
@@ -1005,15 +1009,19 @@ gateway:
 
   # Pod configurations
   securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    seccompProfile:
-      type: RuntimeDefault
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Container configurations
+  container:
+    securityContext:
+      runAsUser: 20000
+      runAsGroup: 20000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
 
   # OTel collector annotations
   annotations: {}
