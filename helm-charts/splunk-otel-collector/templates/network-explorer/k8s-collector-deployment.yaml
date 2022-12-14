@@ -34,10 +34,12 @@ spec:
         app.kubernetes.io/name: {{ include "splunk-otel-collector-k8s-collector.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      {{- with .Values.networkExplorer.imagePullSecrets }}
+{{- if .Values.networkExplorer.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+{{- range .Values.networkExplorer.imagePullSecrets }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
       containers:
       - image: "{{ default .Values.networkExplorer.images.repository .Values.networkExplorer.k8sCollector.watcher.image.repository }}/{{ .Values.networkExplorer.k8sCollector.watcher.image.name }}:{{ default .Values.networkExplorer.images.tag .Values.networkExplorer.k8sCollector.watcher.image.tag }}"
         imagePullPolicy: {{ .Values.networkExplorer.images.pullPolicy }}
