@@ -1,0 +1,13 @@
+---
+# Source: splunk-otel-collector/templates/service-cluster-receiver-stateful-set.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-splunk-otel-collector-k8s-cluster-receiver
+  labels:
+    app: splunk-otel-collector
+spec:
+  clusterIP: None
+  selector:
+    app: splunk-otel-collector
+    component: otel-k8s-cluster-receiver
