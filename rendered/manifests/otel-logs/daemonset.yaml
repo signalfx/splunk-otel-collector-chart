@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 86bf561738f52ce3ef64eb7465f700e533132d46c39905d6a717489516720bf4
+        checksum/config: 87e17e20c38913d414a3e9be5b6d2f0fa7d4ba4e58c195acffc80ad0d6993652
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -90,10 +90,6 @@ spec:
           if [ -d "/var/log/pods" ];
           then
               setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /var/log/pods;
-          fi;
-          if [ -d "/var/log/journal" ];
-          then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /var/log/journal;
           fi;']
           securityContext:
             runAsUser: 0
@@ -104,8 +100,6 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
-            - name: journaldlogs
-              mountPath: /var/log/journal
       containers:
       - name: otel-collector
         command:
@@ -250,9 +244,6 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
-        - mountPath: /var/log/journal
-          name: journaldlogs
-          readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -265,9 +256,6 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
-      - name: journaldlogs
-        hostPath:
-          path: /var/log/journal
       - name: host-dev
         hostPath:
           path: /dev
