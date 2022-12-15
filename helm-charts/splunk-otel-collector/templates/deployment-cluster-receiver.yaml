@@ -87,10 +87,6 @@ spec:
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
-          {{- if $clusterReceiver.securityContext }}
-          securityContext:
-            {{ toYaml $clusterReceiver.securityContext | nindent 12 }}
-          {{- end }}
           env:
             - name: K8S_POD_NAME
               valueFrom:
