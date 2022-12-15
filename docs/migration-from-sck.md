@@ -346,8 +346,8 @@ Change is reflected in `source` filed for extracted logs.
 
 ### Default `sourcetype` for containers logs
 
-`sourcetype` need to be checked as Splunk Connect for Kubernetes by defualt it is defined for containers as `kube:<container_name>`. `sourcetype` configuration can be checked in `values.yaml`.
-Splunk OpenTelemetry Collector for Kubernetes by defualt define `sourcetype` for containers as `kube:container:<container_name>`. `sourcetype` configuration can be change in `values.yaml` configuration file.
+Both Splunk Connect for Kubernetes and Splunk OpenTelemetry Collector for Kubernetes define `sourcetype` for container logs as `kube:container:<container_name>` by default. But, Splunk Connect for Kubernetes explicitly defines the sourcetype of Kubernetes core components as `kube:<container_name>`. They are defined [here](https://github.com/splunk/splunk-connect-for-kubernetes/blob/2cae9b12bbd6545c9ef09b23e619b9783d9ceb38/helm-chart/splunk-connect-for-kubernetes/values.yaml#L330-L408)
+`sourcetype` configuration can be changed by adding `logsCollection.containers.extraOperators` configuration.
 
 ### Extracted fields for logs
 
