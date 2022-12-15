@@ -359,7 +359,6 @@ agent:
     allowPrivilegeEscalation: false
     seccompProfile:
       type: RuntimeDefault
-    # runAsUser: 0
     runAsUser: 20000
     runAsGroup: 20000
     runAsNonRoot: true
@@ -427,14 +426,14 @@ clusterReceiver:
 
   # Container configurations
   container:
-    securityContext: {}
-      # runAsUser: 20000
-      # runAsGroup: 20000
-      # runAsNonRoot: true
-      # seccompProfile:
-      #  type: RuntimeDefault
-      # readOnlyRootFilesystem: true
-      # allowPrivilegeEscalation: false
+    securityContext:
+      runAsUser: 20000
+      runAsGroup: 20000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
 
   # k8s cluster receiver collector annotations
   annotations: {}
@@ -575,10 +574,9 @@ fluentd:
       memory: 200Mi
 
   securityContext:
-    # runAsUser: 20000
-    # runAsGroup: 20000
-    # runAsNonRoot: true
-    runAsUser: 0
+    runAsUser: 20000
+    runAsGroup: 20000
+    runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     seccompProfile:
@@ -1014,14 +1012,14 @@ gateway:
 
   # Container configurations
   container:
-    securityContext: {}
-      # runAsUser: 20000
-      # runAsGroup: 20000
-      # runAsNonRoot: true
-      # seccompProfile:
-      #  type: RuntimeDefault
-      # readOnlyRootFilesystem: true
-      # allowPrivilegeEscalation: false
+    securityContext:
+      runAsUser: 20000
+      runAsGroup: 20000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
 
   # OTel collector annotations
   annotations: {}
