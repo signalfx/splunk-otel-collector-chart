@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Make sure the daemonset can start in GKE Autopiot (#602)
+
 ## [0.66.1] - 2022-12-08
 
 ### Fixed
