@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- Make sure the daemonset can start in GKE Autopiot (#602)
+- Make sure the daemonset can start in GKE Autopiot (#608)
+- Make containerd engine default in for fluentd logs and use always use it in GKE Autopiot (#609)
 
 ## [0.66.1] - 2022-12-08
 
