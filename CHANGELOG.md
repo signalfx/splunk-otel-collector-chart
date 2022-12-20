@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.67.0] - 2022-12-19
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.67.0 (#612)
+
 ### Fixed
 
 - Make sure the daemonset can start in GKE Autopiot (#608)
