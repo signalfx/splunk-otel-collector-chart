@@ -579,6 +579,8 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     log_data_enabled: {{ .Values.splunkObservability.logsEnabled }}
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
+    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    disable_compression: true
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}

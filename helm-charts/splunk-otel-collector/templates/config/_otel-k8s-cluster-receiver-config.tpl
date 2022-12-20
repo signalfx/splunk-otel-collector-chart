@@ -164,6 +164,8 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     log_data_enabled: true
     profiling_data_enabled: false
+    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    disable_compression: true
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}

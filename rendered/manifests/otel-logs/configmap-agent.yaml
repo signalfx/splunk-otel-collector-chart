@@ -27,6 +27,7 @@ data:
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
       splunk_hec/o11y:
+        disable_compression: true
         endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
         log_data_enabled: true
         profiling_data_enabled: false

@@ -152,6 +152,8 @@ exporters:
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     sending_queue:
       num_consumers: 32
+    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    disable_compression: true
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
