@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Make sure the daemonset can start in GKE Autopiot (#608)
 - Make containerd engine default in for fluentd logs and use always use it in GKE Autopiot (#609)
+- Temporary disable compression in Splunk Observability logs exporter until
+  0.68.0 to workaround a compression bug (#610)
 
 ## [0.66.1] - 2022-12-08
 
