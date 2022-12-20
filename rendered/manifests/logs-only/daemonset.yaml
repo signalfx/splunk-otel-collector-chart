@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 0640e5c5b99d34b55fbd125d1c34fab8387b37d8c3c5a1e7c6857867a6ad7dfc
+        checksum/config: 0dd2001a5452e85b22ed2a419f03895f9b0a0382fb9d035be838299393f6080b
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -50,14 +50,10 @@ spec:
           securityContext:
             runAsUser: 0
           args:
-            - if [ -z "${LOG_FORMAT_TYPE}" ]; then
-                if [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
-                  export LOG_FORMAT_TYPE=json;
-                else
-                  export LOG_FORMAT_TYPE=cri;
-                fi;
+            - cp /fluentd/etc/common/* /fluentd/etc/;
+              if [ "${LOG_FORMAT_TYPE}" == "json" ] || [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                  cp /fluentd/etc/json/* /fluentd/etc/;
               fi;
-              cp /fluentd/etc/common/* /fluentd/etc/${LOG_FORMAT_TYPE}/* /fluentd/etc/
           env:
             - name: LOG_FORMAT_TYPE
               value: ""
@@ -71,8 +67,6 @@ spec:
               mountPath: /fluentd/etc/common
             - name: fluentd-config-json
               mountPath: /fluentd/etc/json
-            - name: fluentd-config-cri
-              mountPath: /fluentd/etc/cri
       containers:
       - name: fluentd
         image: splunk/fluentd-hec:1.2.8
