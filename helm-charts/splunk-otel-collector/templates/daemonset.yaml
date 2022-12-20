@@ -70,7 +70,7 @@ spec:
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) }}
       initContainers:
-        {{- if (eq .Values.logsEngine "fluentd") }}
+        {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
         - name: prepare-fluentd-config
           image: {{ template "splunk-otel-collector.image.fluentd" . }}
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -78,14 +78,11 @@ spec:
           securityContext:
             runAsUser: 0
           args:
-            - if [ -z "${LOG_FORMAT_TYPE}" ]; then
-                if [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
-                  export LOG_FORMAT_TYPE=json;
-                else
-                  export LOG_FORMAT_TYPE=cri;
-                fi;
+            - cp /fluentd/etc/common/* /fluentd/etc/;
+              {{- /* Update fluentd configs if docker engine is configured or discovered from existing log files. */}}
+              if [ "${LOG_FORMAT_TYPE}" == "json" ] || [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                  cp /fluentd/etc/json/* /fluentd/etc/;
               fi;
-              cp /fluentd/etc/common/* /fluentd/etc/${LOG_FORMAT_TYPE}/* /fluentd/etc/
           env:
             - name: LOG_FORMAT_TYPE
               value: "{{ .Values.fluentd.config.containers.logFormatType }}"
@@ -99,8 +96,6 @@ spec:
               mountPath: /fluentd/etc/common
             - name: fluentd-config-json
               mountPath: /fluentd/etc/json
-            - name: fluentd-config-cri
-              mountPath: /fluentd/etc/cri
         {{- else }}
         {{- if not (eq .Values.distribution "gke/autopilot") }}
         - name: migrate-checkpoint
@@ -231,6 +226,10 @@ spec:
         {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
+        {{- if eq .Values.distribution "gke/autopilot" }}
+        {{- /* Temporary no-op argument required to run collector on GKE Autopilot */}}
+        - --metrics-addr=0.0.0.0:8889
+        {{- end }}
         {{- end }}
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
@@ -418,8 +417,10 @@ spec:
         hostPath:
           path: {{ .Values.fluentd.config.journalLogPath | quote }}
       - name: fluentd-config
+      {{- if (not (eq .Values.distribution "gke/autopilot")) }}
         emptyDir: {}
       - name: fluentd-config-common
+      {{- end }}
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
       - name: fluentd-config-cri
