@@ -1,5 +1,17 @@
 # Upgrade guidelines
 
+## 0.67.0 to 0.68.0
+[#614 Make otel as a default logsEngine](https://github.com/signalfx/splunk-otel-collector-chart/pull/614)
+The default `logsEngine` is changed from `fluentd` to `otel`.
+
+If you still want to keep the previous behavior, use the following values.yaml configuration:
+```yaml
+logsEngine: fluentd
+```
+
+If you were using fluentd and want to switch to otel, you can follow [Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for logs](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/migration-from-sck.md#translating-custom-configurations-from-sck-to-splunk-opentelemetry-collector-for-kubernetes-for-logs)
+
+
 ## 0.58.0 to 0.59.0
 [receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from map to string.
 

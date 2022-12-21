@@ -139,13 +139,10 @@ splunkObservability:
 # Logs collection engine:
 # - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to
 #   otel-collector agent for further processing.
-# - `otel`: utilize native OpenTelemetry log collection.
-#
-# Change it to `otel` to get higher throughput performance and avoid installing
-# an extra container for fluentd.
+# - `otel`: utilize native OpenTelemetry log collection. (Default)
 ################################################################################
 
-logsEngine: fluentd
+logsEngine: otel
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
