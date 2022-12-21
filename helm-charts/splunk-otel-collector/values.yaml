@@ -450,7 +450,6 @@ clusterReceiver:
 #################################################################
 # Native OtelTelemetry logs collection using
 # https://github.com/open-telemetry/opentelemetry-log-collection.
-# Disabled by default in favor of fluentd.
 #################################################################
 
 logsCollection:
@@ -541,8 +540,8 @@ logsCollection:
 
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
-# As of now, this is the recommended way to collect k8s logs,
-# but it will be replaced by the native otel logs collection soon.
+# As of now, disabled by default in favor of otel.
+# but it may be removed in future version.
 ################################################################################
 
 fluentd:
