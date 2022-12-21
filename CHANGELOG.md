@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Make otel as a default logsEngine (#614)
- - [BREAKING CHANGE] If you were using fluentd with custom configuration, the see [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680)
+  - [BREAKING CHANGE] If you were using fluentd with custom configuration, the see [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680)
 
 ## [0.67.0] - 2022-12-19
 
