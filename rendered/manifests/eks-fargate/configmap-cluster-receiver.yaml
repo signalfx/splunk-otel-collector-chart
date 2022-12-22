@@ -101,9 +101,9 @@ data:
         - k8s_observer
     service:
       extensions:
+      - k8s_observer
       - health_check
       - memory_ballast
-      - k8s_observer
       pipelines:
         metrics:
           exporters:

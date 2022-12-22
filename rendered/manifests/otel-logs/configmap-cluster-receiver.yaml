@@ -23,6 +23,8 @@ data:
         ingest_url: https://ingest.CHANGEME.signalfx.com
         timeout: 10s
     extensions:
+      file_storage/sendingQueue:
+        directory: /var/addon/splunk/otel_pos/persistent_storage
       health_check: null
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
@@ -79,6 +81,7 @@ data:
               - ${K8S_POD_IP}:8889
     service:
       extensions:
+      - file_storage/sendingQueue
       - health_check
       - memory_ballast
       pipelines:

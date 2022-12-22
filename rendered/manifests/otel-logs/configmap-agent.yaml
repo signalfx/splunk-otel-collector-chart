@@ -35,6 +35,8 @@ data:
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
+      file_storage/sendingQueue:
+        directory: /var/addon/splunk/otel_pos/persistent_storage
       health_check: null
       k8s_observer:
         auth_type: serviceAccount
@@ -331,6 +333,7 @@ data:
     service:
       extensions:
       - file_storage
+      - file_storage/sendingQueue
       - health_check
       - k8s_observer
       - memory_ballast
