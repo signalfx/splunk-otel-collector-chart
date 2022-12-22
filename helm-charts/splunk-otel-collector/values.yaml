@@ -96,7 +96,7 @@ splunkPlatform:
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
     # When set, enables persistence and uses the component specified as a storage extension for the persistent queue
-    storage: "none"
+    storage:
 
 ################################################################################
 # Splunk Observability configuration
