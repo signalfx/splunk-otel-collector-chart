@@ -127,7 +127,7 @@
               "type": "integer"
             },
             "storage": {
-              "type": "string"
+              "type": "boolean"
             }
           }
         }
@@ -785,6 +785,9 @@
           }
         },
         "checkpointPath": {
+          "type": "string"
+        },
+        "persistentStorageDirectory": {
           "type": "string"
         },
         "extraFileLogs": {

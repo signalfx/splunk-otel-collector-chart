@@ -9,7 +9,14 @@ extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
+  {{- if and .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage }}
+  file_storage/sendingQueue:
+    directory: {{ .Values.logsCollection.checkpointPath }}/{{ .Values.logsCollection.persistentStorageDirectory }}
   {{- end }}
+  {{- end }}
+
+
+
 
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
@@ -611,6 +618,9 @@ service:
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
+    {{- if and .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage }}
+    - file_storage/sendingQueue
+    {{- end }}
     {{- end }}
     - health_check
     - k8s_observer

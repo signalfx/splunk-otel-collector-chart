@@ -4,6 +4,10 @@ The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
+  {{- if and .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  file_storage/sendingQueue:
+    directory: {{ .Values.logsCollection.checkpointPath }}/{{ .Values.logsCollection.persistentStorageDirectory }}
+  {{- end }}
   health_check:
 
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -169,6 +173,9 @@ service:
     metrics:
       address: 0.0.0.0:8889
   extensions:
+    {{- if and .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+    - file_storage/sendingQueue
+    {{- end }}
     - health_check
     - memory_ballast
     - zpages

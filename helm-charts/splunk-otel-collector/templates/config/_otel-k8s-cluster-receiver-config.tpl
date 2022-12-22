@@ -5,6 +5,10 @@ The values can be overridden in .Values.clusterReceiver.config
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
+  {{- if and  .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel")}}
+  file_storage/sendingQueue:
+    directory: {{ .Values.logsCollection.checkpointPath }}/{{ .Values.logsCollection.persistentStorageDirectory }}
+  {{- end }}
   health_check:
 
   memory_ballast:
@@ -181,11 +185,15 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8889
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-  extensions: [health_check, memory_ballast, k8s_observer]
-  {{- else }}
-  extensions: [health_check, memory_ballast]
+  extensions:
+  {{- if and .Values.splunkPlatform.sendingQueue.enabled  .Values.splunkPlatform.sendingQueue.storage (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  - file_storage/sendingQueue
   {{- end }}
+  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  - k8s_observer
+  {{- end }}
+  - health_check
+  - memory_ballast
   pipelines:
     # k8s metrics pipeline
     metrics:

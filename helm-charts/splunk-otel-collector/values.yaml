@@ -96,7 +96,7 @@ splunkPlatform:
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
     # When set, enables persistence and uses the component specified as a storage extension for the persistent queue
-    storage: ""
+    storage: true
 
 ################################################################################
 # Splunk Observability configuration
@@ -528,6 +528,7 @@ logsCollection:
     index: ""
 
   checkpointPath: "/var/addon/splunk/otel_pos"
+  persistentStorageDirectory: "persistent_storage"
 
   # Files on k8s nodes to tail.
   # Make sure to configure volume mounts properly at `agent.extraVolumes` and `agent.extraVolumeMounts`.
