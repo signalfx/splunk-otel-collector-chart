@@ -350,7 +350,7 @@ agent:
       memory: 500Mi
 
   # To collect container logs and journald logs, it will run the agent as a root user.
-  # To run it as non root user, uncomment below `securityContext` options.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
 
@@ -359,9 +359,9 @@ agent:
     allowPrivilegeEscalation: false
     seccompProfile:
       type: RuntimeDefault
-    runAsUser: 20000
-    runAsGroup: 20000
-    runAsNonRoot: true
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
