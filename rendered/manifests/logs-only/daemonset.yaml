@@ -79,13 +79,7 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsGroup: 20000
-          runAsNonRoot: true
-          runAsUser: 20000
-          seccompProfile:
-            type: RuntimeDefault
+          runAsUser: 0
         env:
           - name: K8S_NODE_NAME
             valueFrom:
