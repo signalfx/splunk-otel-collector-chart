@@ -1,0 +1,62 @@
+---
+# Source: splunk-otel-collector/templates/configmap-cluster-receiver-node-discoverer-script.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-cr-node-discoverer-script
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.66.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.66.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.66.0
+    release: default
+    heritage: Helm
+data:
+  script: |
+    #! /usr/bin/bash
+    set -ex
+    
+    echo "Downloading yq"
+    curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.16.2/yq_linux_amd64
+    ACTUAL=$(sha256sum yq | awk '{print $1}')
+    if [ "${ACTUAL}" != "5c911c4da418ae64af5527b7ee36e77effb85de20c2ce732ed14c7f72743084d" ]; then
+      echo "will not attempt to use yq with unexpected sha256 (${ACTUAL} != 5c911c4da418ae64af5527b7ee36e77effb85de20c2ce732ed14c7f72743084d)"
+      exit 1
+    fi
+    chmod a+x yq
+    
+    # If we are the first pod (cluster receiver), set the kubelet stats node filter to only follow labelled nodes.
+    # This node label will be set by the second pod.
+    if [[ "${K8S_POD_NAME}" == *-0 ]]; then
+      echo "will configure kubelet stats receiver to follow other StatefulSet replica's node, as well as use cluster receiver."
+      ./yq e '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && labels[\"splunk-otel-eks-fargate-kubeletstats-receiver-node\"] == \"true\""' /conf/relay.yaml >/splunk-messages/config.yaml
+      ./yq e -i '.extensions.k8s_observer.observe_pods = false' /splunk-messages/config.yaml
+      exit 0
+    fi
+    
+    # Else we are the second pod (wide kubelet stats) label our node to be monitored by the first pod and disable the k8s_cluster receiver.
+    # Update our config to not monitor ourselves
+    echo "Labelling our fargate node to denote it hosts the cluster receiver"
+    
+    # download kubectl (verifying checksum)
+    curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.20.4/2021-04-12/bin/linux/amd64/kubectl
+    ACTUAL=$(sha256sum kubectl | awk '{print $1}')
+    if [ "${ACTUAL}" != "e84ff8c607b2a10f635c312403f9ede40a045404957e55adcf3d663f9e32c630" ]; then
+      echo "will not attempt to use kubectl with unexpected sha256 (${ACTUAL} != e84ff8c607b2a10f635c312403f9ede40a045404957e55adcf3d663f9e32c630)"
+      exit 1
+    fi
+    chmod a+x kubectl
+    # label node
+    ./kubectl label nodes $K8S_NODE_NAME splunk-otel-eks-fargate-kubeletstats-receiver-node=true
+    
+    echo "Disabling k8s_cluster receiver for this instance"
+    # strip k8s_cluster and its pipeline
+    ./yq e 'del(.service.pipelines.metrics)' /conf/relay.yaml >/splunk-messages/config.yaml
+    ./yq e -i 'del(.receivers.k8s_cluster)' /splunk-messages/config.yaml
+    
+    # set kubelet stats to not monitor ourselves (all other kubelets)
+    echo "Ensuring k8s_observer-based kubeletstats receivers won't monitor own node to avoid Fargate network limitation."
+    ./yq e -i '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && not ( name contains \"${K8S_NODE_NAME}\" )"' /splunk-messages/config.yaml
