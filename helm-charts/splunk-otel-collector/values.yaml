@@ -613,7 +613,7 @@ fluentd:
     # Prefix for pos_file tail source parameter
     # Can be used if you want to run multiple instances of fluentd on the same host
     # https://docs.fluentd.org/input/tail#pos_file-highly-recommended
-    posFilePrefix: /var/log/splunk-fluentd
+    posFilePrefix: /var/addon/splunk/fluent_pos/splunk-fluentd
 
     # `customFilters` defines the custom filters to be used.
     # This section can be used to define custom filters using plugins like https://github.com/splunk/fluent-plugin-jq
