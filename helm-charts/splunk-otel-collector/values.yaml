@@ -424,10 +424,6 @@ clusterReceiver:
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
-  # Container configurations
-  container:
-    securityContext: {}
-
   # k8s cluster receiver collector annotations
   annotations: {}
   podAnnotations: {}
@@ -996,10 +992,6 @@ gateway:
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
-
-  # Container configurations
-  container:
-    securityContext: {}
 
   # OTel collector annotations
   annotations: {}

@@ -124,10 +124,6 @@ spec:
         - --feature-gates={{ .Values.clusterReceiver.featureGates }}
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
-        {{- if $clusterReceiver.container.securityContext }}
-        securityContext:
-          {{ toYaml $clusterReceiver.container.securityContext | nindent 10 }}
-        {{- end }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

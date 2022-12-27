@@ -76,10 +76,6 @@ spec:
         {{- if .Values.gateway.featureGates }}
         - --feature-gates={{ .Values.gateway.featureGates }}
         {{- end }}
-        {{- if $gateway.container.securityContext }}
-        securityContext:
-          {{ toYaml $gateway.container.securityContext | nindent 10 }}
-        {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
