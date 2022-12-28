@@ -159,8 +159,7 @@ spec:
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
-          chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};
-          chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.logsCollection.checkpointPath }};;
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
@@ -464,6 +463,7 @@ spec:
       - name: fluentd-checkpoint-dir
         hostPath:
           path: {{- dir .Values.fluentd.config.posFilePrefix }}
+          type: DirectoryOrCreate
       {{- end }}
       {{- end}}
       {{- if eq .Values.logsEngine "otel" }}
