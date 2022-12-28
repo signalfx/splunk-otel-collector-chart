@@ -42,6 +42,24 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
       initContainers:
+        # Previously, fluentd checkpoints were written to /var/log directory.
+        # So, /var/log directory could not be mounted as read-only.
+        # Now, default fluentd checkpoint is moved to /var/addon/splunk/fluent_pos directory
+        # move-fluent-checkpoint will handle 2 scenarios
+        # - When upgrading from fluentd to fluentd, it will move checkpoint, so fluentd can continue from where it left
+        # - When migrating from fluentd to otel, it will move checkpoint, and then migrate to otel checkpoint. So, it
+        #   covers both previous and current fluentd checkpoint directory.
+        - name: move-fluent-checkpoint
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', 'find  /var/log -maxdepth 1 -name splunk-fluent*.json -exec mv -t /var/addon/splunk/fluent_pos {} +']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: fluentd-checkpoint-dir
+              mountPath: /var/addon/splunk/fluent_pos
+            - name: varlog
+              mountPath: /var/log
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.67.0
           imagePullPolicy: IfNotPresent
@@ -50,15 +68,15 @@ spec:
             runAsUser: 0
           env:
           - name: CONTAINER_LOG_PATH_FLUENTD
-            value: "/var/log/splunk-fluentd-containers.log.pos"
+            value: "/var/addon/splunk/fluent_pos/splunk-fluentd-containers.log.pos"
           - name: CONTAINER_LOG_PATH_OTEL
             value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_PATH_FLUENTD
-            value: "/var/log/splunk-fluentd-*.pos"
+            value: "/var/addon/splunk/fluent_pos/splunk-fluentd-*.pos"
           - name: CUSTOM_LOG_PATH_OTEL
             value: "/var/addon/splunk/otel_pos/receiver_filelog_"
           - name: CUSTOM_LOG_CAPTURE_REGEX
-            value: '\/var\/log\/splunk\-fluentd\-(?P<name>[\w0-9-_]+)\.pos'
+            value: '\/var\/addon\/splunk\/fluent_pos\/splunk\-fluentd\-(?P<name>[\w0-9-_]+)\.pos'
           - name: JOURNALD_LOG_PATH_FLUENTD
             value: "/var/log/splunkd-fluentd-journald-*.pos.json"
           - name: JOURNALD_LOG_PATH_OTEL
@@ -72,6 +90,8 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+            - name: fluentd-checkpoint-dir
+              mountPath: /var/addon/splunk/fluent_pos
       containers:
       - name: otel-collector
         command:
@@ -212,16 +232,20 @@ spec:
           mountPath: /var/addon/splunk/otel_pos
       terminationGracePeriodSeconds: 600
       volumes:
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
       - name: checkpoint
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
+      - name: fluentd-checkpoint-dir
+        hostPath:
+          path: /var/addon/splunk/fluent_pos
+          type: DirectoryOrCreate
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: varlog
+        hostPath:
+          path: /var/log
       - name: host-dev
         hostPath:
           path: /dev

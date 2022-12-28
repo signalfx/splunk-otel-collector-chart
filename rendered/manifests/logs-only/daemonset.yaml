@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 3f26384bd74849568f07d76e43867944f957a4681c542480b0a974b79fcd9473
+        checksum/config: 2146cfc5df12fc1eff1a838ccdb435c941a38a7d001b24e23c3d5e1571c8cf00
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -43,6 +43,24 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
       initContainers:
+        # Previously, fluentd checkpoints were written to /var/log directory.
+        # So, /var/log directory could not be mounted as read-only.
+        # Now, default fluentd checkpoint is moved to /var/addon/splunk/fluent_pos directory
+        # move-fluent-checkpoint will handle 2 scenarios
+        # - When upgrading from fluentd to fluentd, it will move checkpoint, so fluentd can continue from where it left
+        # - When migrating from fluentd to otel, it will move checkpoint, and then migrate to otel checkpoint. So, it
+        #   covers both previous and current fluentd checkpoint directory.
+        - name: move-fluent-checkpoint
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', 'find  /var/log -maxdepth 1 -name splunk-fluent*.json -exec mv -t /var/addon/splunk/fluent_pos {} +']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: fluentd-checkpoint-dir
+              mountPath: /var/addon/splunk/fluent_pos
+            - name: varlog
+              mountPath: /var/log
         - name: prepare-fluentd-config
           image: splunk/fluentd-hec:1.2.8
           imagePullPolicy: IfNotPresent
@@ -97,6 +115,7 @@ spec:
         volumeMounts:
         - name: varlog
           mountPath: /var/log
+          readOnly: true
         - name: varlogdest
           mountPath: /var/lib/docker/containers
           readOnly: true
@@ -105,6 +124,8 @@ spec:
           readOnly: true
         - name: fluentd-config
           mountPath: /fluentd/etc
+        - name: fluentd-checkpoint-dir
+          mountPath: /var/addon/splunk/fluent_pos
         - name: tmp
           mountPath: /tmp
       - name: otel-collector
@@ -180,6 +201,17 @@ spec:
           name: otel-configmap
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: checkpoint
+        hostPath:
+          path: /var/addon/splunk/otel_pos
+          type: DirectoryOrCreate
+      - name: fluentd-checkpoint-dir
+        hostPath:
+          path: /var/addon/splunk/fluent_pos
+          type: DirectoryOrCreate
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
       - name: varlog
         hostPath:
           path: /var/log

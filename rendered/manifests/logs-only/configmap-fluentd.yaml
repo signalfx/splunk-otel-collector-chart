@@ -70,7 +70,7 @@ data:
       @label @CONCAT
       tag tail.containers.*
       path /var/log/containers/*.log
-      pos_file /var/log/splunk-fluentd-containers.log.pos
+      pos_file /var/addon/splunk/fluent_pos/splunk-fluentd-containers.log.pos
       path_key source
       read_from_head true
       <parse>
@@ -89,7 +89,7 @@ data:
       @label @CONCAT
       tag tail.file.kube:apiserver-audit
       path /var/log/kube-apiserver-audit.log
-      pos_file /var/log/splunk-fluentd-kube-audit.pos
+      pos_file /var/addon/splunk/fluent_pos/splunk-fluentd-kube-audit.pos
       read_from_head true
       path_key source
       <parse>
