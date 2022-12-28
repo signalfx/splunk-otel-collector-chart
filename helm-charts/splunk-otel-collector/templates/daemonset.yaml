@@ -134,7 +134,7 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
         {{- end }}
-        {{- if or (ne $agent.securityContext.runAsUser "0") (ne $agent.securityContext.runAsGroup "0") }}
+        {{- if and (ne .Values.agent.securityContext.runAsUser "0") (ne .Values.securityContext.runAsGroup "0") }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
