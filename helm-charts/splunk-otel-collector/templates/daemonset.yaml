@@ -82,7 +82,10 @@ spec:
         - name: move-fluent-checkpoint
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
-          command: ['sh', '-c', 'find  /var/log -maxdepth 1 -name splunk-fluent*.json -exec mv -t {{ dir .Values.fluentd.config.posFilePrefix }} {} +']
+          command: ['sh', '-c', '
+          mkdir -p {{ dir .Values.fluentd.config.posFilePrefix }};
+          find /var/log -maxdepth 1 -name *.json | xargs -I{} mv {} -t {{ dir .Values.fluentd.config.posFilePrefix }};
+          find /var/log -maxdepth 1 -name *.pos | xargs -I{} mv {} -t {{ dir .Values.fluentd.config.posFilePrefix }};']
           securityContext:
             runAsUser: 0
           volumeMounts:
@@ -154,15 +157,14 @@ spec:
             {{- end }}
         {{- end }}
         {{- end }}
-        {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
+        {{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup)) (and ($agent.securityContext.runAsUser) ($agent.securityContext.runAsGroup)) }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
           setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.logsCollection.checkpointPath }};
-          mkdir -p {{ dir .Values.fluentd.config.posFilePrefix }};
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ dir .Values.fluentd.config.posFilePrefix }};
+          setfacl -n -Rm d:m::rwx,m::rwx,d:g:{{ .Values.fluentd.securityContext.runAsGroup | default 20000 }}:rwx,g:{{ .Values.fluentd.securityContext.runAsGroup | default 20000 }}:rwx {{ dir .Values.fluentd.config.posFilePrefix }};
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
