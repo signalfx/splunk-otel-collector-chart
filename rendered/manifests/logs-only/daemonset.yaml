@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 2146cfc5df12fc1eff1a838ccdb435c941a38a7d001b24e23c3d5e1571c8cf00
+        checksum/config: 07d20cfa439fb03429bae92ef7ccefc569e2a95245ff4ed6aac5b53bc8e2faf7
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -53,7 +53,10 @@ spec:
         - name: move-fluent-checkpoint
           image: registry.access.redhat.com/ubi9/ubi
           imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', 'find  /var/log -maxdepth 1 -name splunk-fluent*.json -exec mv -t /var/addon/splunk/fluent_pos {} +']
+          command: ['sh', '-c', '
+          mkdir -p /var/addon/splunk/fluent_pos;
+          find /var/log -maxdepth 1 -name *.json | xargs -I{} mv {} -t /var/addon/splunk/fluent_pos;
+          find /var/log -maxdepth 1 -name *.pos | xargs -I{} mv {} -t /var/addon/splunk/fluent_pos;']
           securityContext:
             runAsUser: 0
           volumeMounts:
@@ -149,6 +152,14 @@ spec:
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.67.0
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 0
+          runAsNonRoot: false
+          runAsUser: 0
+          seccompProfile:
+            type: RuntimeDefault
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
