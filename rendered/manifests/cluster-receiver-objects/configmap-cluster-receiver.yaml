@@ -71,7 +71,8 @@ data:
         override: true
         timeout: 10s
       transform/add_sourcetype:
-        logs:
+        log_statements:
+        - context: log
           statements:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["event.name"]], ""))
     receivers:

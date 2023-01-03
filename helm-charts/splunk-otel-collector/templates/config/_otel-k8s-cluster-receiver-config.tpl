@@ -107,12 +107,11 @@ processors:
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-  # TODO: After updating to 0.66.0, change syntax according to
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor
   transform/add_sourcetype:
-    logs:
-      statements:
-        - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["event.name"]], ""))
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["event.name"]], ""))
   {{- end }}
 
   # Resource attributes specific to the collector itself.

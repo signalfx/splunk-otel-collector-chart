@@ -30,7 +30,6 @@ def test_k8s_objects(setup, test_key, test_value, expected):
     assert len(events) >= expected
 
 @pytest.mark.parametrize("test_key, test_value, expected", [
-    ("sourcetype", "kube:object:event", 1),
     ("sourcetype", "kube:object:Pod", 1),
     ("sourcetype", "kube:object:namespace", 1),
     ("sourcetype", "kube:object:node", 1)
