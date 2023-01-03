@@ -451,11 +451,13 @@ spec:
           path: {{ dir .Values.fluentd.config.posFilePrefix }}
           type: DirectoryOrCreate
       {{- end }}
+      {{- end }}
+      {{- if eq .Values.logsEngine "fluentd" }}
+      {{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup)) (and ($agent.securityContext.runAsUser) ($agent.securityContext.runAsGroup)) }}
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
       {{- end }}
-      {{- if eq .Values.logsEngine "fluentd" }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -493,6 +495,9 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
       {{- end }}
       {{- if .Values.logsCollection.journald.enabled}}
       - name: journaldlogs

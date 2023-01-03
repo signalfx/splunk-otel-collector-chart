@@ -42,6 +42,8 @@ spec:
     volumeMounts:
       - name: checkpoint
         mountPath: {{ .Values.logsCollection.checkpointPath }}
+      - name: fluentd-checkpoint-dir
+        mountPath: {{ dir .Values.fluentd.config.posFilePrefix }}
       {{- if .Values.logsCollection.containers.enabled }}
       - name: varlog
         mountPath: /var/log
@@ -62,6 +64,10 @@ spec:
     - name: varlibdockercontainers
       hostPath:
         path: /var/lib/docker/containers
+    - name: fluentd-checkpoint-dir
+      hostPath:
+        path: {{ dir .Values.fluentd.config.posFilePrefix }}
+        type: DirectoryOrCreate
     {{- if .Values.logsCollection.journald.enabled}}
     - name: journaldlogs
       hostPath:
