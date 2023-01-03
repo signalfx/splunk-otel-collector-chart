@@ -68,10 +68,12 @@ spec:
     - name: varlibdockercontainers
       hostPath:
         path: /var/lib/docker/containers
+    {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
     - name: fluentd-checkpoint-dir
       hostPath:
         path: {{ dir .Values.fluentd.config.posFilePrefix }}
         type: DirectoryOrCreate
+    {{- end }}
     {{- if .Values.logsCollection.journald.enabled}}
     - name: journaldlogs
       hostPath:
