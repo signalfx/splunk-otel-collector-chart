@@ -353,6 +353,7 @@ agent:
   # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
+  # NOTE: during internal tests running this container as a non-root user with cri-o runntime didn't work.
 
   securityContext:
     readOnlyRootFilesystem: true
@@ -613,6 +614,7 @@ fluentd:
 
 # To run fluentd container as a non root user and enable other seccurity features,
 # delete runAsUser: 0 and uncomment other securityContext settings
+# NOTE: during internal tests running this container as a non-root user with cri-o runntime didn't work.
 
   securityContext:
     runAsUser: 0

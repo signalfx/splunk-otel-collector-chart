@@ -35,9 +35,6 @@ clusterName: "functional-test"
 
 agent:
   controlPlaneEnabled: true
-  securityContext:
-    runAsUser: 20000
-    runAsGroup: 20000
 
 # Metadata to be set on the telemetry data from Kubernetes objects.
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
