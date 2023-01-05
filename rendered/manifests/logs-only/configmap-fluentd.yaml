@@ -114,7 +114,7 @@ data:
       <storage>
         @type local
         persistent true
-        path /var/addon/splunk/fluent_pos/splunk-fluentd-docker.pos.json
+        path /var/addon/splunk/fluent_pos/splunk-fluentd-journald-docker.pos.json
       </storage>
       <entry>
         field_map {"MESSAGE": "log", "_SYSTEMD_UNIT": "source"}
@@ -132,7 +132,7 @@ data:
       <storage>
         @type local
         persistent true
-        path /var/addon/splunk/fluent_pos/splunk-fluentd-kubelet.pos.json
+        path /var/addon/splunk/fluent_pos/splunk-fluentd-journald-kubelet.pos.json
       </storage>
       <entry>
         field_map {"MESSAGE": "log", "_SYSTEMD_UNIT": "source"}
