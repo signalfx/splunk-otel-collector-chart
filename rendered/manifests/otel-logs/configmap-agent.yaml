@@ -183,7 +183,6 @@ data:
           source_identifier: attributes["log.file.path"]
           type: recombine
         - id: parser-docker
-          output: handle_empty_log
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
             parse_from: attributes.time
