@@ -306,7 +306,6 @@ receivers:
       # Parse Docker format
       - type: json_parser
         id: parser-docker
-        output: handle_empty_log
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
