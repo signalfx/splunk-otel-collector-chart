@@ -211,13 +211,49 @@ splunk_hec/platform_logs:
 {{- end }}
 
 {{/*
-Splunk Platform Logs exporter
+Splunk Platform Metrics exporter
 */}}
 {{- define "splunk-otel-collector.splunkPlatformMetricsExporter" -}}
 splunk_hec/platform_metrics:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
+  source: {{ .Values.splunkPlatform.source | quote }}
+  max_connections: {{ .Values.splunkPlatform.maxConnections }}
+  disable_compression: {{ .Values.splunkPlatform.disableCompression }}
+  timeout: {{ .Values.splunkPlatform.timeout }}
+  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_version: {{ .Chart.Version }}
+  tls:
+    insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
+    {{- if .Values.splunkPlatform.clientCert }}
+    cert_file: /otel/etc/splunk_platform_hec_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.clientKey  }}
+    key_file: /otel/etc/splunk_platform_hec_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.caFile }}
+    ca_file: /otel/etc/splunk_platform_hec_ca_file
+    {{- end }}
+  retry_on_failure:
+    enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}
+    initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
+    max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
+    max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+{{- end }}
+
+{{/*
+Splunk Platform Traces exporter
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformTracesExporter" -}}
+splunk_hec/platform_traces:
+  endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
+  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  index: {{ .Values.splunkPlatform.tracesIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   max_connections: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
