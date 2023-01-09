@@ -108,6 +108,13 @@ Whether metrics enabled for Splunk Platform.
 {{- end -}}
 
 {{/*
+Whether traces enabled for Splunk Platform.
+*/}}
+{{- define "splunk-otel-collector.platformTracesEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkPlatform.tracesEnabled }}
+{{- end -}}
+
+{{/*
 Whether metrics enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.metricsEnabled" -}}
@@ -115,10 +122,10 @@ Whether metrics enabled for any destination.
 {{- end -}}
 
 {{/*
-Whether traces enabled for any destination. (currently applicable to Splunk Observability only).
+Whether traces enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.tracesEnabled" -}}
-{{- include "splunk-otel-collector.o11yTracesEnabled" . }}
+{{- or (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
 {{- end -}}
 
 {{/*
