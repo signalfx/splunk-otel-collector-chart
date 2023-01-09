@@ -402,11 +402,7 @@ Whether object collection by k8s object receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsEnabled" -}}
 {{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- if gt (len $clusterReceiver.k8sObjects) 0 }}
-{{- printf "true" }}
-{{- else }}
-{{- printf "false" }}
-{{- end -}}
+{{- gt (len $clusterReceiver.k8sObjects) 0 }}
 {{- end -}}
 
 {{/*
@@ -414,7 +410,7 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 */}}
 {{- define "splunk-otel-collector.objectsOrEventsEnabled" -}}
 {{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- or $clusterReceiver.eventsEnabled ( eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
+{{- or $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
 {{- end -}}
 
 
