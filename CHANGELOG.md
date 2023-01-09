@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Default recombine operator for the docker container engine (#627)
+
 ## [0.67.0] - 2022-12-19
 
 ### Changed
