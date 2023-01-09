@@ -247,7 +247,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and $clusterReceiver.eventsEnabled  (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
         - k8s_events
