@@ -129,8 +129,8 @@ splunkObservability:
 
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring as data events:
   # https://docs.splunk.com/Observability/alerts-detectors-notifications/view-data-events.html
-  # To send Kubernetes events to Splunk Observability Log Observer, set both clusterReceiver.eventsEnabled and
-  # splunkObservability.logsEnabled to true.
+  # To send Kubernetes events to Splunk Observability Log Observer, configure clusterReceiver.k8sObjects
+  # and set splunkObservability.logsEnabled to true.
   infrastructureMonitoringEventsEnabled: false
 
   # This option just enables the shared pipeline for logs and profiling data.
@@ -434,6 +434,55 @@ clusterReceiver:
   # The receiver currently is in alpha state which means that events format might change over time.
   # Once the receiver is stabilized, it'll be enabled by default in this helm chart
   eventsEnabled: false
+
+  # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
+  # This option requires `logsEnabled` to be set to `true` for either `splunkObservability` or `splunkPlatform`
+  # depending on where you want to send the events. Otherwise, this option will not have any effect.
+  # The receiver currently is in alpha state which means that events format might change over time.
+  # Once the receiver is stabilized, it'll be enabled by default in this helm chart
+
+  #
+  # == Schema ==
+  # ```
+  # k8sObjects:
+  #   - <objectDefinition>
+  # ```
+  # Each `objectDefinition` has the following fields:
+  # * mode:
+  #     define in which way it collects this type of object, either "pull" or "watch".
+  #     - "poll" mode will read all objects of this type use the list API at an interval. Default mode.
+  #     - "watch" mode will setup a long connection using the watch API to just get updates.
+  # * name: [REQUIRED]
+  #     name of the object, e.g. `pods`, `namespaces`.
+  # * namespace:
+  #     only collects objects from the specified namespace, by default it's all namespaces
+  # * labelSelector:
+  #     select objects by label(s)
+  # * fieldSelector:
+  #     select objects by field(s)
+  # * interval:
+  #     the interval at which object is pulled, default 60 seconds.
+  #     Only useful for "pull" mode.
+  #
+  #
+  # == Example ==
+  # ```
+  #  k8sObjects:
+  #    - name: pods
+  #      mode: pull
+  #      label_selector: environment in (production),tier in (frontend)
+  #      field_selector: status.phase=Running
+  #      interval: 15m
+  #    - name: events
+  #      mode: watch
+  #      group: events.k8s.io
+  #      namespaces: [default]
+  # ```
+  #
+  # The configuration format in details is described here:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
+  k8sObjects: []
 
   # k8s cluster receiver extra pod labels
   podLabels: {}

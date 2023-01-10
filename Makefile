@@ -73,3 +73,15 @@ render:
 		default helm-charts/splunk-otel-collector; \
 	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
 	rm -rf "$$dir"/splunk-otel-collector
+
+	# cluster-receiver objects collection enabled
+	dir=rendered/manifests/cluster-receiver-objects; \
+	mkdir -p "$$dir"; \
+	helm template \
+		--namespace default \
+		--values rendered/values.yaml \
+		--output-dir "$$dir" \
+		--set logsEngine=otel,splunkObservability.logsEnabled=true,clusterReceiver.k8sObjects[0].name=pods,clusterReceiver.k8sObjects[0].mode=pull,clusterReceiver.k8sObjects[0].interval=20,clusterReceiver.k8sObjects[1].name=events,clusterReceiver.k8sObjects[1].mode=watch \
+		default helm-charts/splunk-otel-collector; \
+	mv "$$dir"/splunk-otel-collector/templates/* "$$dir"; \
+	rm -rf "$$dir"/splunk-otel-collector
