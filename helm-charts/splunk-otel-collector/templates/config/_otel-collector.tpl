@@ -198,7 +198,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-      exporters: [sapm]
+      exporters:
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
         - sapm
         {{- end }}
