@@ -698,7 +698,13 @@ service:
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
     # Default traces pipeline.
     traces:
-      receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
+      receivers:
+        - otlp
+        - jaeger
+        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
+        - smartagent/signalfx-forwarder
+        {{- end }}
+        - zipkin
       processors:
         - memory_limiter
         - k8sattributes
