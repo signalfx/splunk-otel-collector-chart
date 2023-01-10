@@ -1,5 +1,66 @@
 # Upgrade guidelines
 
+## $CURRENT_VERSION to $NEXT_VERSION
+
+There is a new receiver: [Kubernetes Objects Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) that can pull or watch any object from Kubernetes API server.
+It will replace the [Kubernetes Events Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver) in the future.
+
+To migrate from Kubernetes Events Receiver to Kubernetes Object Receiver, configure `clusterReceiver` values.yaml section with:
+
+```yaml
+k8sObjects:
+  - mode: watch
+    name: events
+```
+
+There are differences in the log record formatting between the previous `k8s_events` receiver and the now adopted `k8sobjects` receiver results.
+The `k8s_events` receiver stores event messages their log body, with the following fields added as attributes:
+
+* `k8s.object.kind`
+* `k8s.object.name`
+* `k8s.object.uid`
+* `k8s.object.fieldpath`
+* `k8s.object.api_version`
+* `k8s.object.resource_version`
+* `k8s.event.reason`
+* `k8s.event.action`
+* `k8s.event.start_time`
+* `k8s.event.name`
+* `k8s.event.uid`
+* `k8s.namespace.name`
+
+Now with the `k8sobjects` receiver, the whole payload is stored in the log body and `object.message` refers to the event message.
+
+
+You can monitor more Kubernetes objects configuring by `clusterReceiver.k8sObjects` according to the instructions from the
+[Kubernetes Objects Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) documentation.
+
+Remember to define `rbac.customRules` when needed. For example, when configuring:
+
+```yaml
+objectsEnabled: true
+k8sObjects:
+  - name: events
+    mode: watch
+    group: events.k8s.io
+    namespaces: [default]
+```
+
+You should add `events.k8s.io` API group to the `rbac.customRules`:
+
+```yaml
+rbac:
+  customRules:
+    - apiGroups:
+      - "events.k8s.io"
+      resources:
+      - events
+      verbs:
+      - get
+      - list
+      - watch
+```
+
 ## 0.58.0 to 0.59.0
 [receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from map to string.
 

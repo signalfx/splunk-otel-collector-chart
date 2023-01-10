@@ -670,7 +670,15 @@
           "deprecated": true
         },
         "eventsEnabled": {
-          "type": "boolean"
+          "description": "[DEPRECATED] Use k8sObjects instead.",
+          "type": "boolean",
+          "deprecated": true
+        },
+        "k8sObjects": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
         },
         "podLabels": {
           "type": "object"
