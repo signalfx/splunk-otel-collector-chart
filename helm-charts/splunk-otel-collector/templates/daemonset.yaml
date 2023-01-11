@@ -135,27 +135,39 @@ spec:
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
-          chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};
+          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.logsCollection.checkpointPath }};
           chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/lib/docker/containers;
           fi;
           if [ -d "/var/log/crio/pods" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/crio/pods;
           fi;
           if [ -d "/var/log/pods" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/pods;
           fi;
           {{- end }}
           {{- if .Values.logsCollection.journald.enabled }}
           if [ -d "{{ .Values.logsCollection.journald.directory }}" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.logsCollection.journald.directory }};
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
+          {{- end }}
+          {{- if .Values.logsCollection.journald.enabled }}
+          if [ -d "{{ .Values.logsCollection.journald.directory }}" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
+          fi;
+          {{- end }}
+          {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+          mkdir -p {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
+          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
           {{- end }}']
           securityContext:
             runAsUser: 0
@@ -167,6 +179,10 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+            {{- end }}
+            {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+            - name: persistent-queue
+              mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
             {{- end }}
         {{- end }}
         {{- end }}
@@ -390,6 +406,10 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
+        {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+        - name: persistent-queue
+          mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
+        {{- end }}
         {{- if .Values.logsCollection.journald.enabled}}
         - mountPath: {{.Values.logsCollection.journald.directory}}
           name: journaldlogs
@@ -448,6 +468,12 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
+      {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+      - name: persistent-queue
+        hostPath:
+          path: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
+          type: DirectoryOrCreate
+      {{- end }}
       {{- if .Values.logsCollection.journald.enabled}}
       - name: journaldlogs
         hostPath:

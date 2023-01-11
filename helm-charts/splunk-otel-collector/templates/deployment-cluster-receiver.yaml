@@ -81,8 +81,9 @@ spec:
       securityContext:
         {{ toYaml $clusterReceiver.securityContext | nindent 8 }}
       {{- end }}
-      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      {{- if or (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") (.Values.splunkPlatform.persistentQueueEnabled.logs) (.Values.splunkPlatform.persistentQueueEnabled.metrics) }}
       initContainers:
+        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
@@ -103,6 +104,22 @@ spec:
               mountPath: /splunk-messages
             - mountPath: /conf
               name: collector-configmap
+        {{- end }}
+        {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+        - name: patch-log-dirs
+          image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
+          imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
+          command: ['sh', '-c', '
+          mkdir -p {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver;
+          chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 999 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver;']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: persistent-queue
+              mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver
+        {{- end }}
       {{- end }}
       containers:
       - name: otel-collector
@@ -188,6 +205,10 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
+        {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+        - name: persistent-queue
+          mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver
+        {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
         {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
@@ -205,6 +226,12 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+      - name: persistent-queue
+        hostPath:
+          path: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver
+          type: DirectoryOrCreate
+      {{- end }}
       {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
       - name: secret
         secret:

@@ -99,6 +99,16 @@ splunkPlatform:
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
 
+  # When enabled, it uses file_storage extension to persist the queue data.
+  # This can be used to prevent data-loss during restart
+  # NOTE: The File Storage extension will persist state to the node's local file system.
+  persistentQueueEnabled:
+    # Specifies whether to persist log data.
+    logs: false
+    # Specifies whether to persist metric data.
+    metrics: false
+    storagePath: "/var/addon/splunk/persist"
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################

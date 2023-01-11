@@ -11,6 +11,11 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
+  {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+  file_storage/persistent_queue:
+    directory: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
+  {{- end }}
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
@@ -613,6 +618,9 @@ service:
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
+    {{- end }}
+    {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+    - file_storage/persistent_queue
     {{- end }}
     - health_check
     - k8s_observer
