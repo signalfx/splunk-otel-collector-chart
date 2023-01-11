@@ -12,6 +12,11 @@ extensions:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  file_storage/persistent_queue:
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway
+  {{- end }}
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
@@ -172,6 +177,9 @@ service:
     metrics:
       address: 0.0.0.0:8889
   extensions:
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    - file_storage/persistent_queue
+    {{- end }}
     - health_check
     - memory_ballast
     - zpages

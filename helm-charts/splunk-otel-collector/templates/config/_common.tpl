@@ -213,6 +213,10 @@ splunk_hec/platform_logs:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs }}
+    storage: file_storage/persistent_queue
+    {{- end }}
+
 {{- end }}
 
 {{/*
@@ -249,6 +253,9 @@ splunk_hec/platform_metrics:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics }}
+    storage: file_storage/persistent_queue
+    {{- end }}
 {{- end }}
 
 {{/*

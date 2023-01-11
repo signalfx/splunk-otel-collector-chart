@@ -1,0 +1,18 @@
+clusterName: CHANGEME
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+  metricsEnabled: true
+  metricsIndex: em_metrics
+  sendingQueue:
+    persistentQueueEnabled:
+      logs: true
+agent:
+  resources:
+    limits:
+      memory: 1Gi
+  securityContext:
+    runAsUser: 20000
+    runAsGroup: 20000
+logsEngine: otel

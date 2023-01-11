@@ -61,6 +61,22 @@ spec:
       securityContext:
         {{ toYaml $gateway.securityContext | nindent 8 }}
       {{- end }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      initContainers:
+        - name: patch-log-dirs
+          image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
+          imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
+          command: ['sh', '-c', '
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway;
+          chown -Rv {{ $gateway.securityContext.runAsUser | default 999 }}:{{ $gateway.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx,g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway;']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: persistent-queue
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway
+      {{- end }}
       containers:
       - name: otel-collector
         command:
@@ -148,6 +164,10 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+        - name: persistent-queue
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway
+        {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
         {{- if $gateway.extraVolumeMounts }}
@@ -161,6 +181,12 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      - name: persistent-queue
+        hostPath:
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway
+          type: DirectoryOrCreate
+      {{- end }}
       {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
       - name: secret
         secret:
