@@ -353,8 +353,8 @@ agent:
   # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
-  # NOTE: during internal tests running this container as a non-root user with cri-o runntime didn't work.
-
+  # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
+  # See https://github.com/cri-o/cri-o/issues/6519 for more details.
   securityContext:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -612,9 +612,12 @@ fluentd:
       cpu: 100m
       memory: 200Mi
 
-# To run fluentd container as a non root user and enable other seccurity features,
-# delete runAsUser: 0 and uncomment other securityContext settings
-# NOTE: during internal tests running this container as a non-root user with cri-o runntime didn't work.
+  # To collect container logs and journald logs, it will run the fluentd sidecar as a root user.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
+  # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
+  # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
+  # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
+  # See https://github.com/cri-o/cri-o/issues/6519 for more details.
 
   securityContext:
     runAsUser: 0
