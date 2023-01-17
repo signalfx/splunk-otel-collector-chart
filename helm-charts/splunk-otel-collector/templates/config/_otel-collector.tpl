@@ -203,7 +203,7 @@ service:
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
-        {{- end }}        
+        {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
