@@ -71,7 +71,6 @@ splunkPlatform:
   metricsEnabled: false
   # If you enable traces collection, make sure that `tracesIndex` is provided as well.
   tracesEnabled: false
-  
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
     # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
