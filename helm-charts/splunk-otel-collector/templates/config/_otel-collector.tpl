@@ -167,7 +167,6 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
-  
 service:
   telemetry:
     metrics:
