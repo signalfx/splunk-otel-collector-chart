@@ -350,7 +350,7 @@ agent:
       memory: 500Mi
 
   # To collect container logs and journald logs, it will run the agent as a root user.
-  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 999) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
   # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
@@ -613,7 +613,7 @@ fluentd:
       memory: 200Mi
 
   # To collect container logs and journald logs, it will run the fluentd sidecar as a root user.
-  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 20000) and change runAsNonRoot to true.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 999) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
   # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
@@ -626,8 +626,8 @@ fluentd:
   #  allowPrivilegeEscalation: false
   #  seccompProfile:
   #    type: RuntimeDefault
-  #  runAsUser: 20000
-  #  runAsGroup: 20000
+  #  runAsUser: 999
+  #  runAsGroup: 999
   #  runAsNonRoot: true
 
   # Extra enviroment variables to be set in the FluentD container
