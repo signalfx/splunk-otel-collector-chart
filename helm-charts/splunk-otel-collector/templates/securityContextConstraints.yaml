@@ -42,6 +42,8 @@ runAsUser:
   type: RunAsAny
 supplementalGroups:
   type: RunAsAny
+seccompProfiles:
+- runtime/default
 requiredDropCapabilities:
 - ALL
 {{- end }}

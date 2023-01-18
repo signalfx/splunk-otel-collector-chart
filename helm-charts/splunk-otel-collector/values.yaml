@@ -350,13 +350,19 @@ agent:
       memory: 500Mi
 
   # To collect container logs and journald logs, it will run the agent as a root user.
-  # To run it as non root user, uncomment below `securityContext` options.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 999) and change runAsNonRoot to true.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
-
-  securityContext: {}
-  #   runAsUser: 20000
-  #   runAsGroup: 20000
+  # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
+  # See https://github.com/cri-o/cri-o/issues/6519 for more details.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
 
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
@@ -606,8 +612,23 @@ fluentd:
       cpu: 100m
       memory: 200Mi
 
+  # To collect container logs and journald logs, it will run the fluentd sidecar as a root user.
+  # To run it as non root user, change runAsUser and runAsGroup to non-zero value (e.g. 999) and change runAsNonRoot to true.
+  # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
+  # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
+  # NOTE: Running this container as a non-root user doesn't work with openshift cluser or cri-o runntime.
+  # See https://github.com/cri-o/cri-o/issues/6519 for more details.
+
   securityContext:
     runAsUser: 0
+  #  securityContext:
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  seccompProfile:
+  #    type: RuntimeDefault
+  #  runAsUser: 999
+  #  runAsGroup: 999
+  #  runAsNonRoot: true
 
   # Extra enviroment variables to be set in the FluentD container
   extraEnvs: []
@@ -662,7 +683,7 @@ fluentd:
     # Prefix for pos_file tail source parameter
     # Can be used if you want to run multiple instances of fluentd on the same host
     # https://docs.fluentd.org/input/tail#pos_file-highly-recommended
-    posFilePrefix: /var/log/splunk-fluentd
+    posFilePrefix: /var/addon/splunk/fluent_pos/splunk-fluentd
 
     # `customFilters` defines the custom filters to be used.
     # This section can be used to define custom filters using plugins like https://github.com/splunk/fluent-plugin-jq

@@ -70,7 +70,31 @@ spec:
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) }}
       initContainers:
-        {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
+        {{- if ne .Values.distribution "gke/autopilot" }}
+        # Previously, fluentd checkpoints were written to /var/log directory.
+        # So, /var/log directory could not be mounted as read-only.
+        # Now, default fluentd checkpoint is moved to /var/addon/splunk/fluent_pos directory
+        # move-fluent-checkpoint will handle 2 scenarios
+        # - When upgrading from fluentd to fluentd, it will move checkpoint, so fluentd can continue from where it left
+        # - When migrating from fluentd to otel, it will move checkpoint, and then migrate to otel checkpoint. So, it
+        #   covers both previous and current fluentd checkpoint directory.
+        {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+        - name: move-fluent-checkpoint
+          image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
+          imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
+          command: ['sh', '-c', '
+          mkdir -p {{ dir .Values.fluentd.config.posFilePrefix }};
+          find /var/log -maxdepth 1 -name *.json | xargs -I{} mv {} -t {{ dir .Values.fluentd.config.posFilePrefix }};
+          find /var/log -maxdepth 1 -name *.pos | xargs -I{} mv {} -t {{ dir .Values.fluentd.config.posFilePrefix }};']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: fluentd-checkpoint-dir
+              mountPath: {{ dir .Values.fluentd.config.posFilePrefix }}
+            - name: varlog
+              mountPath: /var/log
+        {{- end }}
+        {{- if eq .Values.logsEngine "fluentd" }}
         - name: prepare-fluentd-config
           image: {{ template "splunk-otel-collector.image.fluentd" . }}
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -97,7 +121,6 @@ spec:
             - name: fluentd-config-json
               mountPath: /fluentd/etc/json
         {{- else }}
-        {{- if not (eq .Values.distribution "gke/autopilot") }}
         - name: migrate-checkpoint
           image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
@@ -128,27 +151,40 @@ spec:
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
+            {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+            - name: fluentd-checkpoint-dir
+              mountPath: {{ dir .Values.fluentd.config.posFilePrefix -}}
+            {{- end }}
         {{- end }}
-        {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
+        {{- end }}
+        {{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup)) (and ($agent.securityContext.runAsUser) ($agent.securityContext.runAsGroup)) }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
-          chown -Rv {{ $agent.securityContext.runAsUser | default 20000 }}:{{ $agent.securityContext.runAsGroup | default 20000 }} {{ .Values.logsCollection.checkpointPath }};
-          chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
+          setfacl -n -Rm d:m::rwx,m::rwx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rwx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rwx {{ .Values.logsCollection.checkpointPath }};
+          {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+          setfacl -n -Rm d:m::rwx,m::rwx,d:g:{{ .Values.fluentd.securityContext.runAsGroup | default 999 }}:rwx,g:{{ .Values.fluentd.securityContext.runAsGroup | default 999 }}:rwx {{ dir .Values.fluentd.config.posFilePrefix }};
+          {{- end }}
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/lib/docker/containers;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/lib/docker/containers;
           fi;
           if [ -d "/var/log/crio/pods" ];
           then
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/crio/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/crio/pods;
           fi;
           if [ -d "/var/log/pods" ];
           then
-              setfacl -n -Rm d:g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 20000 }}:rx /var/log/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/pods;
+          fi;
+          {{- end }}
+          {{- if .Values.logsCollection.journald.enabled }}
+          if [ -d "{{ .Values.logsCollection.journald.directory }}" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
           {{- end }}']
           securityContext:
@@ -156,13 +192,20 @@ spec:
           volumeMounts:
             - name: checkpoint
               mountPath: {{ .Values.logsCollection.checkpointPath }}
+            {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+            - name: fluentd-checkpoint-dir
+              mountPath: {{ dir .Values.fluentd.config.posFilePrefix }}
+            {{- end }}
             {{- if .Values.logsCollection.containers.enabled }}
             - name: varlog
               mountPath: /var/log
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
             {{- end }}
-        {{- end }}
+            {{- if .Values.logsCollection.journald.enabled }}
+            - name: journaldlogs
+              mountPath: {{.Values.logsCollection.journald.directory}}
+            {{- end }}
         {{- end }}
       {{- end }}
       containers:
@@ -195,6 +238,7 @@ spec:
         volumeMounts:
         - name: varlog
           mountPath: {{ .Values.fluentd.config.containers.path }}
+          readOnly: true
         - name: varlogdest
           mountPath: {{ .Values.fluentd.config.containers.pathDest }}
           readOnly: true
@@ -203,6 +247,10 @@ spec:
           readOnly: true
         - name: fluentd-config
           mountPath: /fluentd/etc
+        {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+        - name: fluentd-checkpoint-dir
+          mountPath: {{ dir .Values.fluentd.config.posFilePrefix }}
+        {{- end }}
         - name: tmp
           mountPath: /tmp
       {{- end }}
@@ -396,7 +444,24 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
       {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+      {{- if not .Values.isWindows }}
+      - name: checkpoint
+        hostPath:
+          path: {{ .Values.logsCollection.checkpointPath }}
+          type: DirectoryOrCreate
+      {{- if ne .Values.fluentd.config.posFilePrefix "/var/log/splunk-fluentd" }}
+      - name: fluentd-checkpoint-dir
+        hostPath:
+          path: {{ dir .Values.fluentd.config.posFilePrefix }}
+          type: DirectoryOrCreate
+      {{- end }}
+      {{- end }}
       {{- if eq .Values.logsEngine "fluentd" }}
+      {{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup)) (and ($agent.securityContext.runAsUser) ($agent.securityContext.runAsGroup)) }}
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      {{- end }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -438,10 +503,6 @@ spec:
         hostPath:
           path: /var/lib/docker/containers
       {{- end }}
-      - name: checkpoint
-        hostPath:
-          path: {{ .Values.logsCollection.checkpointPath }}
-          type: DirectoryOrCreate
       {{- if .Values.logsCollection.journald.enabled}}
       - name: journaldlogs
         hostPath:
