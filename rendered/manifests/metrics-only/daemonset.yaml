@@ -63,14 +63,6 @@ spec:
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.67.0
         imagePullPolicy: IfNotPresent
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsGroup: 0
-          runAsNonRoot: false
-          runAsUser: 0
-          seccompProfile:
-            type: RuntimeDefault
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
