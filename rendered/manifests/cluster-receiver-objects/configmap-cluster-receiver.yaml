@@ -75,7 +75,7 @@ data:
         - context: log
           statements:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
-            attributes["event.name"]], ""))
+            attributes["k8s.resource.name"]], ""))
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
