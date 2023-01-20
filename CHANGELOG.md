@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Default recombine operator for the docker container engine (#627)
+- Added acl to journald log directory (#639)
 
 ## [0.67.0] - 2022-12-19
 
