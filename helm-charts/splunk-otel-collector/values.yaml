@@ -964,6 +964,10 @@ livenessProbe:
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
 
+# Openshift SecurityContextConstraints can be overriden in this field.
+# NOTE: This config will only be used when distribution=openshift
+securityContextConstraintsOverwrite: {}
+
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
 # This is an additional deployment of Open-telemetry collector that can be used
