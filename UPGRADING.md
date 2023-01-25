@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## $CURRENT_VERSION to $NEXT_VERSION
+## 0.67.0 to 0.68.0
 
 There is a new receiver: [Kubernetes Objects Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) that can pull or watch any object from Kubernetes API server.
 It will replace the [Kubernetes Events Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver) in the future.
