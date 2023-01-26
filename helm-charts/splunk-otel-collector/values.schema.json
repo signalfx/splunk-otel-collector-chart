@@ -46,6 +46,9 @@
         "metricsIndex": {
           "type": "string"
         },
+        "tracesIndex": {
+          "type": "string"
+        },
         "source": {
           "type": "string"
         },
@@ -79,6 +82,10 @@
         },
         "metricsEnabled": {
           "description": "Send Metrics to Splunk Platform",
+          "type": "boolean"
+        },
+        "tracesEnabled": {
+          "description": "Send Traces to Splunk Platform",
           "type": "boolean"
         },
         "fieldNameConvention": {

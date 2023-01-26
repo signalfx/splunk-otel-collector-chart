@@ -587,6 +587,9 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
+  {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
+  {{- end }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -698,7 +701,13 @@ service:
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
     # Default traces pipeline.
     traces:
-      receivers: [otlp, jaeger, smartagent/signalfx-forwarder, zipkin]
+      receivers:
+        - otlp
+        - jaeger
+        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
+        - smartagent/signalfx-forwarder
+        {{- end }}
+        - zipkin
       processors:
         - memory_limiter
         - k8sattributes
@@ -712,7 +721,12 @@ service:
         {{- if $gatewayEnabled }}
         - otlp
         {{- else }}
+        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
         - sapm
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
+        - splunk_hec/platform_traces
+        {{- end }}
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
         # For trace/metric correlation.

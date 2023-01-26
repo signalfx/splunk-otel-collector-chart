@@ -35,6 +35,8 @@ splunkPlatform:
   index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metricsIndex: ""
+  # Name of the Splunk event type index targeted. Required when ingesting traces to Splunk Platform.
+  tracesIndex: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
@@ -67,7 +69,8 @@ splunkPlatform:
   logsEnabled: true
   # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
   metricsEnabled: false
-
+  # If you enable traces collection, make sure that `tracesIndex` is provided as well.
+  tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
     # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
