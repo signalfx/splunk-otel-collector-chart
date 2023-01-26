@@ -1140,6 +1140,10 @@
       "description": "Apply for k8s cluster with windows worker node.",
       "type": "boolean"
     },
+    "securityContextConstraintsOverwrite": {
+      "description": "Openshift SecurityContextConstraints can be overriden in this field.",
+      "type": "object"
+    },
     "gateway": {
       "description": "Splunk OpenTelemetry Collector gateway deployment configuration.",
       "type": "object",
