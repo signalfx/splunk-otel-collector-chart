@@ -51,5 +51,5 @@ metadata:
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
 {{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
-{{- .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
+{{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
 {{- end }}
