@@ -4,6 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.70.0] - 2022-01-31
+
+### Added
+
+- Support sending traces via Splunk HEC exporter ([#629](https://github.com/signalfx/splunk-otel-collector-chart/pull/629) - thanks to @mr-miles)
+
+### Changed
+
+- Upgrade splunk-otel-collector image to 0.70.0, skipping 0.69.0 release ([#653](https://github.com/signalfx/splunk-otel-collector-chart/pull/653))
+
+### Fixed
+
+- Fix invalid OpenShift SecurityContextConstraints template ([#652](https://github.com/signalfx/splunk-otel-collector-chart/pull/652))
+- Limit `clusterReceiver.eventsEnabled` deprecation warning to feature users ([#648](https://github.com/signalfx/splunk-otel-collector-chart/pull/648))
+- Fix noop validation for missing platform info ([#649](https://github.com/signalfx/splunk-otel-collector-chart/pull/649))
+
 ## [0.68.0] - 2022-01-25
 
 ### Added
