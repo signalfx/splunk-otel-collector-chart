@@ -1,0 +1,20 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+agent:
+  config:
+    receivers:
+      receiver_creator:
+        watch_observers: [k8s_observer]
+        receivers:
+          smartagent/postgresql:
+            rule: type == "port" && port == 5432
+            config:
+              type: postgresql
+              connectionString: 'sslmode=disable user={{.username}} password={{.password}}'
+              params:
+                username: postgres
+                password: password
+              port: 5432
