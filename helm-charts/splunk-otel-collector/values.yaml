@@ -450,7 +450,7 @@ clusterReceiver:
   # Each `objectDefinition` has the following fields:
   # * mode:
   #     define in which way it collects this type of object, either "pull" or "watch".
-  #     - "poll" mode will read all objects of this type use the list API at an interval. Default mode.
+  #     - "pull" mode will read all objects of this type use the list API at an interval. Default mode.
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
