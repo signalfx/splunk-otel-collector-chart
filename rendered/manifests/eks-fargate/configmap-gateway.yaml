@@ -190,8 +190,8 @@ data:
           - sapm
           processors:
           - memory_limiter
-          - batch
           - k8sattributes
+          - batch
           - resource/add_cluster_name
           receivers:
           - otlp
