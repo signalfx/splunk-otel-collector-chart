@@ -188,8 +188,8 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
-        - batch
         - k8sattributes
+        - batch
         - resource/add_cluster_name
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
