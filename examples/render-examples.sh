@@ -11,11 +11,11 @@ render_task(){
   # Clear out all rendered manifests
   rm -rf $rendered_manifests_dir
 
-	helm template \
-		--namespace default \
-		--values $values_yaml \
-		--output-dir $rendered_manifests_dir \
-		default helm-charts/splunk-otel-collector &>/dev/null
+  helm template \
+    --namespace default \
+    --values $values_yaml \
+    --output-dir $rendered_manifests_dir \
+    default helm-charts/splunk-otel-collector &>/dev/null
 
   if [ $? -ne 0 ]; then
       echo $values_yaml FAIL
