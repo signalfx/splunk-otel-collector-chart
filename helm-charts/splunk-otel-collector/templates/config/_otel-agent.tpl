@@ -644,11 +644,11 @@ service:
         - filter/logs
         {{- end }}
         - batch
+        - resource
         {{- if not $gatewayEnabled }}
         - resource/logs
         {{- end }}
         - resourcedetection
-        - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
