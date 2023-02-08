@@ -179,6 +179,12 @@ data:
               - ${K8S_POD_IP}:8889
       receiver_creator:
         receivers:
+          postgresql:
+            config:
+              endpoint: localhost:5433
+              password: password
+              username: postgres
+            rule: type == "port" && port == 5433
           smartagent/coredns:
             config:
               extraDimensions:

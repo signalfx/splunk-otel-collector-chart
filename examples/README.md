@@ -17,12 +17,16 @@ helm install my-splunk-otel-collector --values path-to-values-file.yaml splunk-o
 
 ## Common Configurations
 
-The Splunk OpenTelemetry Collector Chart can be configured to send data to
-various backends, each example needs at least one of the following configuration
-to know which backend to send data to.
+The Splunk OpenTelemetry Collector Chart can be configured to export data to
+to the following targets:
+- [Splunk Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html)
+- [Splunk Cloud Platform](https://www.splunk.com/en_us/software/splunk-cloud-platform.html)
+- [Splunk Observability Cloud](https://www.observability.splunk.com/)
 
-All the provided examples must include one of these required parameter sets.
+All the provided examples must include one of these two configuration sets to
+know which target to export data to.
 
+Use these configurations for exporting data to Splunk Enterprise or Splunk Cloud Platform.
 ```yaml
 # Splunk Platform required parameters
 clusterName: CHANGEME
@@ -31,8 +35,7 @@ splunkPlatform:
   endpoint: http://localhost:8088/services/collector
 ```
 
-or
-
+Use these configurations for exporting data to Splunk Observability Cloud.
 ```yaml
 # Splunk Observability required parameters
 clusterName: CHANGEME
