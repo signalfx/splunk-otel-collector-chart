@@ -1,8 +1,0 @@
-logsCollection:
-  containers:
-    extraOperators:
-      - type: copy
-        # Copy the name of the namespace associated with the log record.
-        from: resource["k8s.namespace.name"]
-        # Copy to the index key, so the record will be ingested under the index named after the k8s namespace.
-        to: resource["com.splunk.index"]

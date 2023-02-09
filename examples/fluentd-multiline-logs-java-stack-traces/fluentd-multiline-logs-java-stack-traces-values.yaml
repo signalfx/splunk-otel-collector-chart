@@ -1,0 +1,13 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+fluentd:
+  config:
+    logs:
+      java-app:
+        from:
+          pod: "java-app"
+        multiline:
+          firstline: /\d{4}-\d{1,2}-\d{1,2}/

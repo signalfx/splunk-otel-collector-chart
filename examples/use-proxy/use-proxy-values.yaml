@@ -1,0 +1,13 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+agent:
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"
+clusterReceiver:
+  extraEnvs:
+    - name: HTTPS_PROXY
+      value: "192.168.0.10"

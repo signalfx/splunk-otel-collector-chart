@@ -1,0 +1,30 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: <custom-gateway-url>:4317
+        tls:
+          insecure: true
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060
+    service:
+      pipelines:
+        traces:
+          exporters: [otlp, signalfx]
+        metrics:
+          exporters: [otlp]
+        logs:
+          exporters: [otlp]
+
+clusterReceiver:
+  config:
+    exporters:
+      signalfx:
+        ingest_url: http://<custom-gateway-url>:9943
+        api_url: http://<custom-gateway-url>:6060

@@ -80,7 +80,7 @@ any 'help wanted' issues is a great place to start.
 
 ## Building
 
-When changing the helm chart the files under `rendered` need to be rebuilt with `make render`. It's strongly recommended to use [pre-commit](https://pre-commit.com/) which will do this automatically for each commit (as well as run some linting).
+When changing the helm chart the files under `examples/*/rendered_manifests` need to be rebuilt with `make render`. It's strongly recommended to use [pre-commit](https://pre-commit.com/) which will do this automatically for each commit (as well as run some linting).
 
 ## Running locally
 
