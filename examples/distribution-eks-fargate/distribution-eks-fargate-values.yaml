@@ -1,0 +1,11 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+distribution: eks/fargate
+cloudProvider: aws
+
+# Enabling the gateway is recommended when deploying to eks/fargate
+gateway:
+  enabled: true
