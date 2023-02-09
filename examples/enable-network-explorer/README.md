@@ -1,6 +1,7 @@
 # Example of chart configuration
 
 ## Enable Network Explorer
+
 As part of your existing Splunk Infrastructure Monitoring experience,
 Network Explorer is a network observability capability designed for cloud and
 micro-service environments. Network Explorer lets you ingest and analyze
