@@ -1,0 +1,23 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  logsEnabled: true
+
+agent:
+  enabled: false
+
+# Enabled by default.
+clusterReceiver:
+  k8sObjects:
+    - name: pods
+      mode: pull
+      label_selector: environment in (production),tier in (frontend)
+      field_selector: status.phase=Running
+      interval: 15m
+    - name: events
+      mode: watch
+      group: events.k8s.io
+      namespaces: [default]
+
+logsEngine: otel
