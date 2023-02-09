@@ -1,0 +1,210 @@
+---
+# Source: splunk-otel-collector/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: default-splunk-otel-collector-agent
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.70.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.70.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.70.0
+    release: default
+    heritage: Helm
+    engine: fluentd
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: splunk-otel-collector
+      release: default
+  template:
+    metadata:
+      labels:
+        app: splunk-otel-collector
+        release: default
+      annotations:
+        checksum/config: 06c3daf120705029797394a1b5faee57ac67280eb59715fc8719517e72b9079b
+        kubectl.kubernetes.io/default-container: otel-collector
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: default-splunk-otel-collector
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      initContainers:
+        - name: prepare-fluentd-config
+          image: splunk/fluentd-hec:1.2.8
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
+          args:
+            - cp /fluentd/etc/common/* /fluentd/etc/;
+              if [ "${LOG_FORMAT_TYPE}" == "json" ] || [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                  cp /fluentd/etc/json/* /fluentd/etc/;
+              fi;
+          env:
+            - name: LOG_FORMAT_TYPE
+              value: ""
+          volumeMounts:
+            - name: varlogdest
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: fluentd-config
+              mountPath: /fluentd/etc
+            - name: fluentd-config-common
+              mountPath: /fluentd/etc/common
+            - name: fluentd-config-json
+              mountPath: /fluentd/etc/json
+      containers:
+      - name: fluentd
+        image: splunk/fluentd-hec:1.2.8
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          
+          runAsUser: 0
+        env:
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlogdest
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: journallogpath
+          mountPath: "/run/log/journal"
+          readOnly: true
+        - name: fluentd-config
+          mountPath: /fluentd/etc
+        - name: tmp
+          mountPath: /tmp
+      - name: otel-collector
+        command:
+        - /otelcol
+        - --config=/conf/relay.yaml
+        ports:
+        - name: fluentforward
+          containerPort: 8006
+          hostPort: 8006
+          protocol: TCP
+        - name: otlp
+          containerPort: 4317
+          hostPort: 4317
+          protocol: TCP
+        - name: otlp-http
+          containerPort: 4318
+          protocol: TCP
+        - name: otlp-http-old
+          containerPort: 55681
+          protocol: TCP
+        image: quay.io/signalfx/splunk-otel-collector:0.70.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "500"
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: K8S_NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: K8S_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: splunk-otel-collector
+                key: splunk_platform_hec_token
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /conf
+          name: otel-configmap
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlogdest
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: journallogpath
+        hostPath:
+          path: "/run/log/journal"
+      - name: fluentd-config
+        emptyDir: {}
+      - name: fluentd-config-common
+        configMap:
+          name: default-splunk-otel-collector-fluentd
+      - name: fluentd-config-cri
+        configMap:
+          name: default-splunk-otel-collector-fluentd-cri
+      - name: fluentd-config-json
+        configMap:
+          name: default-splunk-otel-collector-fluentd-json
+      - name: tmp
+        emptyDir: {}
+      - name: otel-configmap
+        configMap:
+          name: default-splunk-otel-collector-otel-agent
+          items:
+            - key: relay
+              path: relay.yaml
