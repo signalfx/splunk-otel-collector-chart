@@ -133,6 +133,9 @@ resource/logs:
     - key: namespace
       from_attribute: k8s.namespace.name
       action: upsert
+    - key: label_app
+      from_attribute: k8s.pod.labels.app
+      action: upsert
     {{- range $_, $label := .Values.extraAttributes.podLabels }}
     - key: {{ printf "label_%s" $label }}
       from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
@@ -150,6 +153,8 @@ resource/logs:
     - key: k8s.pod.uid
       action: delete
     - key: k8s.namespace.name
+      action: delete
+    - key: k8s.pod.labels.app
       action: delete
     {{- range $_, $label := .Values.extraAttributes.podLabels }}
     - key: {{ printf "k8s.pod.labels.%s" $label }}
