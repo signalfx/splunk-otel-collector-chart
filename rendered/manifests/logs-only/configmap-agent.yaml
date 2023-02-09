@@ -171,9 +171,9 @@ data:
           - k8sattributes
           - filter/logs
           - batch
+          - resource
           - resource/logs
           - resourcedetection
-          - resource
           receivers:
           - fluentforward
           - otlp
