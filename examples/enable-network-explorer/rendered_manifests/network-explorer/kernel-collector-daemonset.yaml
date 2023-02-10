@@ -34,7 +34,6 @@ spec:
           imagePullPolicy: Always
           args:
             - --config-file=/etc/network-explorer/config.yaml
-            - --force-docker-metadata
             - --disable-nomad-metadata
             - --warning
           # TODO: liveness probe
@@ -69,9 +68,6 @@ spec:
           - mountPath: /etc/network-explorer
             name: default-splunk-otel-collector-config
             readOnly: true
-          - mountPath: /var/run/docker.sock
-            name: docker-sock
-            readOnly: false
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       hostPID: true
@@ -93,10 +89,6 @@ spec:
         hostPath:
           path: /var/cache
           type: DirectoryOrCreate
-      - name: docker-sock
-        hostPath:
-          path: /var/run/docker.sock
-          type: Socket
       tolerations:
         - effect: NoExecute
           operator: Exists
