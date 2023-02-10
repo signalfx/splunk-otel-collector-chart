@@ -132,6 +132,12 @@ data:
         - system
         override: true
         timeout: 10s
+      transform/sck_fields:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
+            resource.attributes["container.image.tag"]], ":"))
     receivers:
       filelog:
         encoding: utf-8
@@ -344,6 +350,7 @@ data:
           - filter/logs
           - batch
           - resource
+          - transform/sck_fields
           - resource/logs
           - resourcedetection
           receivers:

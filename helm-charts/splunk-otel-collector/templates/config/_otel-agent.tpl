@@ -646,6 +646,9 @@ service:
         - batch
         - resource
         {{- if not $gatewayEnabled }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/sck_fields
+        {{- end }}
         - resource/logs
         {{- end }}
         - resourcedetection
