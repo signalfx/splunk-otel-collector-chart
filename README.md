@@ -187,7 +187,7 @@ Instead of setting helm values as arguments a YAML file can be provided:
 helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
+The [examples directory](examples) contains examples of typical use cases with pre-rendered Kubernetes resource manifests for each example.
 
 ### How to upgrade
 
