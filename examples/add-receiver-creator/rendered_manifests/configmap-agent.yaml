@@ -138,9 +138,7 @@ data:
       transform/sck_fields:
         log_statements:
         - context: log
-          statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
-            resource.attributes["container.image.tag"]], ":"))
+          statements: null
     receivers:
       hostmetrics:
         collection_interval: 10s
@@ -256,22 +254,6 @@ data:
       - memory_ballast
       - zpages
       pipelines:
-        logs:
-          exporters:
-          - splunk_hec/o11y
-          processors:
-          - memory_limiter
-          - k8sattributes
-          - filter/logs
-          - batch
-          - resource
-          - transform/sck_fields
-          - resource/logs
-          - resourcedetection
-          receivers:
-          - filelog
-          - fluentforward
-          - otlp
         metrics:
           exporters:
           - signalfx

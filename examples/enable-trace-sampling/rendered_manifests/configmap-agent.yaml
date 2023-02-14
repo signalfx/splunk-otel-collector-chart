@@ -138,6 +138,10 @@ data:
         - system
         override: true
         timeout: 10s
+      transform/sck_fields:
+        log_statements:
+        - context: log
+          statements: null
     receivers:
       jaeger:
         protocols:
