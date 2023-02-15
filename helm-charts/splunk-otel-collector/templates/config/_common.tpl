@@ -162,14 +162,6 @@ resource/logs:
     {{- end }}
     {{- end }}
     {{- end }}
-  
-transform/sck_fields:
-  log_statements:
-    - context: log
-      statements:
-        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],resource.attributes["container.image.tag"]], ":"))
-        {{- end}}
 {{- end }}
 
 {{/*
