@@ -26,7 +26,7 @@
       "minLength": 1
     },
     "splunkPlatform": {
-      "description": "Splunk Data-to-Everything Platform configuration",
+      "description": "Splunk Cloud / Splunk Enterprise configuration",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -44,6 +44,9 @@
           "type": "string"
         },
         "metricsIndex": {
+          "type": "string"
+        },
+        "tracesIndex": {
           "type": "string"
         },
         "source": {
@@ -79,6 +82,10 @@
         },
         "metricsEnabled": {
           "description": "Send Metrics to Splunk Platform",
+          "type": "boolean"
+        },
+        "tracesEnabled": {
+          "description": "Send Traces to Splunk Platform",
           "type": "boolean"
         },
         "fieldNameConvention": {
@@ -670,7 +677,15 @@
           "deprecated": true
         },
         "eventsEnabled": {
-          "type": "boolean"
+          "description": "[DEPRECATED] Use k8sObjects instead.",
+          "type": "boolean",
+          "deprecated": true
+        },
+        "k8sObjects": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
         },
         "podLabels": {
           "type": "object"
@@ -1124,6 +1139,10 @@
     "isWindows": {
       "description": "Apply for k8s cluster with windows worker node.",
       "type": "boolean"
+    },
+    "securityContextConstraintsOverwrite": {
+      "description": "Openshift SecurityContextConstraints can be overriden in this field.",
+      "type": "object"
     },
     "gateway": {
       "description": "Splunk OpenTelemetry Collector gateway deployment configuration.",

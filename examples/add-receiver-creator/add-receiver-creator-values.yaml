@@ -1,0 +1,30 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+agent:
+  config:
+    receivers:
+      receiver_creator:
+        watch_observers: [k8s_observer]
+        receivers:
+          # Legacy Smart Agent PostgreSQL receiver
+          # See: https://docs.splunk.com/Observability/gdi/postgresql/postgresql.html
+          smartagent/postgresql:
+            rule: type == "port" && port == 5432
+            config:
+              type: postgresql
+              connectionString: 'sslmode=disable user={{.username}} password={{.password}}'
+              params:
+                username: postgres
+                password: password
+              port: 5432
+          # Current OpenTelemetry PostgreSQL receiver
+          # See: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/postgresqlreceiver
+          postgresql:
+            rule: type == "port" && port == 5433
+            config:
+              username: postgres
+              password: password
+              endpoint: localhost:5433

@@ -113,7 +113,7 @@ The following prerequisites are required to use the helm chart:
 
 #### To send data to Splunk Enterprise or Splunk Cloud
 
-- Splunk Enterprise 7.0 or later.
+- Splunk Enterprise 8.0 or later.
 - A minimum of one Splunk platform index ready to collect the log data. This index will be used for ingesting logs.
 - An HTTP Event Collector (HEC) token and endpoint. See the following topics for more information:
 
@@ -170,13 +170,13 @@ helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splun
 Sending data to Splunk Enterprise or Splunk Cloud
 
 ```bash
-helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=127.0.0.1:8088,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Sending data to both Splunk Observability Cloud and Splunk Enterprise or Splunk Cloud
 
 ```bash
-helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=127.0.0.1:8088,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Consider enabling [native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for better throughput instead of using the default fluentd engine. Add the following part --set=logsEngine=otel to your installation command if you want to use native OpenTelemetry logs collection.
@@ -187,7 +187,7 @@ Instead of setting helm values as arguments a YAML file can be provided:
 helm install my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-The [rendered directory](rendered) contains pre-rendered Kubernetes resource manifests.
+The [examples directory](examples) contains examples of typical use cases with pre-rendered Kubernetes resource manifests for each example.
 
 ### How to upgrade
 

@@ -22,8 +22,6 @@ Splunk OpenTelemetry Collector for Kubernetes has the following components and a
 2. Splunk OpenTelemetry Collector Cluster Receiver (`clusterReceiver`) to fetch metrics from a Kubernetes API (deployed as a Kubernetes 1-replica Deployment)
 3. Optional Splunk OpenTelemetry Collector Gateway (`gateway`) to forward data through it to reduce load on Kubernetes API and apply additional processing (deployed as a Kubernetes Deployment)
 
-There is no application available for fetching Kubernetes objects metadata from a Kubernetes cluster.
-
 ### Changes in logs in Splunk OpenTelemetry Collector for Kubernetes
 
 * Red Hat Universal Base Image (UBI) Docker images for our applications are no longer available, as we now use scratch images.
@@ -153,9 +151,6 @@ These are the metrics available in Splunk OpenTelemetry Collector for Kubernetes
 * system.processes.created
 * up
 
-### Changes in objects in Splunk OpenTelemetry Collector for Kubernetes
-
-This chart does not support the collection of Kubernetes objects. This is future functionality. You can use SCK to collect other objects.
 
 ## Migration overview
 
@@ -166,9 +161,9 @@ The following table shows the options for migrating from SCK to Splunk OpenTelem
 | Method  | Logs | Metrics | Objects |
 |---|---|---|---|
 | SCK | Yes | Yes | Yes |
-| Splunk OpenTelemetry Collector for Kubernetes | Yes | Yes | No |
+| Splunk OpenTelemetry Collector for Kubernetes | Yes | Yes | Yes |
 
-As shown in the table, you can acquire logs and metrics using Splunk OpenTelemetry Collector for Kubernetes. If you have objects currently deployed and need objects data, leave your current SCK objects deployment as-is (Helm command args --set="splunk-kubernetes-logging.enabled=false,splunk-kubernetes-metrics.enabled=false,splunk-kubernetes-objects.enabled=true"). This allows you to use only the SCK for objects data together with Splunk OpenTelemetry Collector for Kubernetes for logs and other telemetry data.
+As shown in the table, you can acquire logs, metrics and objects using Splunk OpenTelemetry Collector for Kubernetes.
 
 ### Checkpoint translation
 
@@ -287,6 +282,49 @@ logsCollection:
 
 Use the `kube-audit` keyword to continue reading from the translated checkpoint data.
 
+### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for objects
+
+For collecting Kubernetes objects, configure `clusterReceiver.k8sObjects` using the [k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) receiver configurations.
+
+If you are using the following values for objects in `splunk-kubernetes-objects`:
+
+[SCK values.yaml snippet]
+
+```yaml
+splunk-kubernetes-objects:
+objects:
+  core:
+    v1:
+      - name: pods
+        namespace: default
+        mode: pull
+        interval: 60m
+      - name: events
+        mode: watch
+  apps:
+    v1:
+      - name: daemon_sets
+        labelSelector: environment=production
+```
+
+Equivalent configuration for Splunk OpenTelemetry Collector for Kubernetes:
+
+```yaml
+clusterReceiver:
+  k8sObjects:
+    - name: pods
+      namespaces: [default]
+      mode: pull
+      interval: 60m
+    - name: events
+      mode: watch
+    - name: daemonsets
+      label_selector: environment=production
+```
+
+[k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) pulls objects every 60m by default. But, SCK pulls at every 15m. If you wish to use the same interval, you can define the `interval` config. The important change in `k8sObjects` is that you don't need to specify resource group and version. It automatically detects it.
+
+
 ### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for metrics
 
 #### Limiting or increasing application resources"
@@ -363,3 +401,14 @@ Splunk OpenTelemetry Collector for Kubernetes follows naming convention for Open
 | pod                           | k8s.pod.name                                  |
 | pod_uid                       | k8s.pod_uid                                   |
 | label_app                     | k8s.pod.labels.app                            |
+
+If you wish to continue using Splunk Connect for Kubernetes's naming convention, you can use the following configuration:
+
+```yaml
+splunkPlatform:
+  fieldNameConvention:
+    # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+    renameFieldsSck: true
+    # Boolean for keeping Otel convention fields after renaming it
+    keepOtelConvention: false
+```

@@ -1,0 +1,78 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/k8s-collector-deployment.yaml
+# The k8s-collector consists of two services:
+# 1) k8s-watcher: talks to the Kubernetes API server to determine the current state of
+#    the cluster; sets up watches to be notified of subsequent changes to pods, services
+#    and other resources.
+# 2) k8s-relay: relays the information collected by k8s-watcher to the reducer.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: default-splunk-otel-collector-k8s-collector
+  labels:
+    app.kubernetes.io/name: default-splunk-otel-collector-k8s-collector
+    helm.sh/chart: splunk-otel-collector-0.70.0
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/managed-by: Helm
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: default-splunk-otel-collector-k8s-collector
+      app.kubernetes.io/instance: default
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # This is here to allow us to do "zero-downtime" updates without an image change.
+        rollingUpdateVersion: "1"
+        charts.flowmill.com/version: 0.70.0
+      labels:
+        app.kubernetes.io/name: default-splunk-otel-collector-k8s-collector
+        app.kubernetes.io/instance: default
+    spec:
+      containers:
+      - image: "quay.io/signalfx/splunk-network-explorer-k8s-watcher:latest-v0.9"
+        imagePullPolicy: Always
+        name: k8s-watcher
+        args:
+          - --log-console
+          - --log-level=warning
+      # k8s-relay, which is a service that the k8s-watcher talks to.
+      # Currently not configurable, has to be reachable on localhost:8172, so must
+      # share a pod with the k8s-watcher above.
+      - image: "quay.io/signalfx/splunk-network-explorer-k8s-relay:latest-v0.9"
+        imagePullPolicy: Always
+        name: k8s-relay
+        args:
+          - --config-file=/etc/network-explorer/config.yaml
+          - --warning
+        env:
+          - name: "EBPF_NET_CLUSTER_NAME"
+            value: "CHANGEME"
+          - name: "EBPF_NET_INTAKE_HOST"
+            value: default-splunk-otel-collector-reducer
+          - name: "EBPF_NET_INTAKE_PORT"
+            value: "7000"
+          - name: "EBPF_NET_CRASH_METRIC_HOST"
+            value: "default-splunk-otel-collector"
+          - name: "EBPF_NET_CRASH_METRIC_PORT"
+            value: "4317"
+        volumeMounts:
+        - mountPath: /etc/network-explorer
+          name: k8s-relay-config
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: k8s-relay-config
+        projected:
+          sources:
+            - configMap:
+                name: default-splunk-otel-collector-config
+                items:
+                - key: config.yaml
+                  path: config.yaml
+      securityContext: {}
+      serviceAccountName: default

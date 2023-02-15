@@ -108,6 +108,13 @@ Whether metrics enabled for Splunk Platform.
 {{- end -}}
 
 {{/*
+Whether traces enabled for Splunk Platform.
+*/}}
+{{- define "splunk-otel-collector.platformTracesEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") .Values.splunkPlatform.tracesEnabled }}
+{{- end -}}
+
+{{/*
 Whether metrics enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.metricsEnabled" -}}
@@ -115,10 +122,10 @@ Whether metrics enabled for any destination.
 {{- end -}}
 
 {{/*
-Whether traces enabled for any destination. (currently applicable to Splunk Observability only).
+Whether traces enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.tracesEnabled" -}}
-{{- include "splunk-otel-collector.o11yTracesEnabled" . }}
+{{- or (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -394,4 +401,30 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 {{- else }}
 {{- $clusterReceiver.k8sEventsEnabled }}
 {{- end }}
+{{- end -}}
+
+
+{{/*
+Whether object collection by k8s object receiver is enabled
+*/}}
+{{- define "splunk-otel-collector.objectsEnabled" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- gt (len $clusterReceiver.k8sObjects) 0 }}
+{{- end -}}
+
+{{/*
+Whether object collection by k8s object receiver or/and event collection by k8s event receiver is enabled
+*/}}
+{{- define "splunk-otel-collector.objectsOrEventsEnabled" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- or $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
+{{- end -}}
+
+
+{{/*
+Whether clusterReceiver should be enabled
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverEnabled" -}}
+{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
+{{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
 {{- end -}}

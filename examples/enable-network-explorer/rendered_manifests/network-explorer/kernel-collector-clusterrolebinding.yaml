@@ -1,0 +1,19 @@
+---
+# Source: splunk-otel-collector/templates/network-explorer/kernel-collector-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: default-splunk-otel-collector-kernel-collector
+    chart: splunk-otel-collector-0.70.0
+    heritage: Helm
+    release: default
+  name: default-splunk-otel-collector-kernel-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: default-splunk-otel-collector-kernel-collector
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
