@@ -61,7 +61,7 @@ spec:
       securityContext:
         {{ toYaml $gateway.securityContext | nindent 8 }}
       {{- end }}
-      {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
       initContainers:
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
@@ -164,7 +164,7 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
-        {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
         - name: persistent-queue
           mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/gateway
         {{- end }}
@@ -181,7 +181,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
       - name: persistent-queue
         hostPath:
           path: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/gateway

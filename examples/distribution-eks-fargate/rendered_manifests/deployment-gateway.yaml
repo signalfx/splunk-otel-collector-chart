@@ -35,20 +35,6 @@ spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
-      initContainers:
-        - name: patch-log-dirs
-          image: registry.access.redhat.com/ubi9/ubi
-          imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', '
-          mkdir -p /var/addon/splunk/persist/gateway;
-          chown -Rv 999:999 /var/addon/splunk/persist/gateway;
-          chmod -v g+rwxs /var/addon/splunk/persist/gateway;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:999:rx,g:999:rx /var/addon/splunk/persist/gateway;']
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: persistent-queue
-              mountPath: /var/addon/splunk/persist/gateway
       containers:
       - name: otel-collector
         command:
@@ -123,8 +109,6 @@ spec:
             cpu: 4
             memory: 8Gi
         volumeMounts:
-        - name: persistent-queue
-          mountPath: /var/addon/splunk/persist/gateway
         - mountPath: /conf
           name: collector-configmap
       terminationGracePeriodSeconds: 600
@@ -135,7 +119,3 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      - name: persistent-queue
-        hostPath:
-          path: /var/addon/splunk/persist/gateway
-          type: DirectoryOrCreate

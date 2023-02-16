@@ -105,7 +105,7 @@ spec:
             - mountPath: /conf
               name: collector-configmap
         {{- end }}
-        {{- if (include "splunk-otel-collector.persistentQueueEnabled" .)}}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
@@ -205,7 +205,7 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
-        {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
         - name: persistent-queue
           mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver
         {{- end }}
@@ -226,7 +226,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
       - name: persistent-queue
         hostPath:
           path: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/clusterReceiver

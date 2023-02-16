@@ -154,8 +154,6 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
-        - name: persistent-queue
-          mountPath: /var/addon/splunk/persist/agent
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -167,10 +165,6 @@ spec:
       - name: checkpoint
         hostPath:
           path: /var/addon/splunk/otel_pos
-          type: DirectoryOrCreate
-      - name: persistent-queue
-        hostPath:
-          path: /var/addon/splunk/persist/agent
           type: DirectoryOrCreate
       - name: otel-configmap
         configMap:

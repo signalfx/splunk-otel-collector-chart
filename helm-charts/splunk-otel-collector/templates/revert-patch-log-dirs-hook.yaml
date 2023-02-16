@@ -41,7 +41,7 @@ spec:
     fi;
     {{- end }}
     {{- end }}
-    {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
     if [ -d "{{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent" ];
     then
       setfacl --recursive --remove-all {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
@@ -74,7 +74,7 @@ spec:
         mountPath: {{.Values.logsCollection.journald.directory}}
       {{- end }}
       {{- end }}
-      {{- if (include "splunk-otel-collector.persistentQueueEnabled" .)}}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
       {{- if .Values.agent.enabled }}
       - name: persistent-queue-agent
         mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
@@ -112,7 +112,7 @@ spec:
         path: {{.Values.logsCollection.journald.directory}}
     {{- end}}
     {{- end }}
-    {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
     {{- if .Values.agent.enabled }}
     - name: persistent-queue-agent
       hostPath:
