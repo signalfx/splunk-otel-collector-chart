@@ -86,6 +86,8 @@ spec:
             cpu: 200m
             memory: 500Mi
         volumeMounts:
+        - name: persistent-queue
+          mountPath: /var/addon/splunk/persist/clusterReceiver
         - mountPath: /conf
           name: collector-configmap
       terminationGracePeriodSeconds: 600
@@ -96,3 +98,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - name: persistent-queue
+        hostPath:
+          path: /var/addon/splunk/persist/clusterReceiver
+          type: DirectoryOrCreate
