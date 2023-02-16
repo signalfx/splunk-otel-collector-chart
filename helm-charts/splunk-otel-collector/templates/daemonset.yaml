@@ -163,7 +163,7 @@ spec:
               setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
           {{- end }}
-          {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+          {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
           mkdir -p {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
           chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
           chmod -v g+rwxs {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent;
@@ -180,7 +180,7 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
             {{- end }}
-            {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+            {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
             - name: persistent-queue
               mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
             {{- end }}
@@ -406,7 +406,7 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
-        {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+        {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
         - name: persistent-queue
           mountPath: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent
         {{- end }}
@@ -468,7 +468,7 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
-      {{- if or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics }}
+      {{- if (include "splunk-otel-collector.persistentQueueEnabled" .) }}
       - name: persistent-queue
         hostPath:
           path: {{ .Values.splunkPlatform.persistentQueueEnabled.storagePath }}/agent

@@ -428,3 +428,11 @@ Whether clusterReceiver should be enabled
 {{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
 {{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
 {{- end -}}
+
+
+{{/*
+Whether persistentQueue should be enabled
+*/}}
+{{- define "splunk-otel-collector.persistentQueueEnabled" -}}
+{{- or .Values.splunkPlatform.persistentQueueEnabled.logs .Values.splunkPlatform.persistentQueueEnabled.metrics  -}}
+{{- end -}}
