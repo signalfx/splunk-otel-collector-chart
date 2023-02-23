@@ -500,6 +500,13 @@ processors:
   {{- if not $gatewayEnabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
+  {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],resource.attributes["container.image.tag"]], ":"))
+  {{- end }}
   {{- end }}
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
@@ -644,11 +651,14 @@ service:
         - filter/logs
         {{- end }}
         - batch
+        - resource
         {{- if not $gatewayEnabled }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/logs
+        {{- end }}
         - resource/logs
         {{- end }}
         - resourcedetection
-        - resource
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
