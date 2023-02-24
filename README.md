@@ -179,6 +179,12 @@ Sending data to both Splunk Observability Cloud and Splunk Enterprise or Splunk 
 helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+You can specify a namespace to deploy the chart to with the `-n` argument. Here is an example showing how to deploy in the `otel` namespace:
+
+```bash
+helm -n otel install my-splunk-otel-collector -f values.yaml splunk-otel-collector-chart/splunk-otel-collector
+```
+
 Consider enabling [native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for better throughput instead of using the default fluentd engine. Add the following part --set=logsEngine=otel to your installation command if you want to use native OpenTelemetry logs collection.
 
 Instead of setting helm values as arguments a YAML file can be provided:
