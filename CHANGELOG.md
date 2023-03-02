@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Update Kubernetes to 1.26 in our functional tests ([#678](https://github.com/signalfx/splunk-otel-collector-chart/pull/678)
 - Added examples for supported Kubernetes distributions and Kubernetes clusters with windows nodes ([#663](https://github.com/signalfx/splunk-otel-collector-chart/pull/663)
 - Refactored the examples and rendered directories into one for better usability ([#658](https://github.com/signalfx/splunk-otel-collector-chart/pull/658)
 
