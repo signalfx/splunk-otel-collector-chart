@@ -17,7 +17,7 @@ fullnameOverride: ""
 clusterName: ""
 
 ################################################################################
-# Splunk Data-to-Everything Platform configuration.
+# Splunk Cloud / Splunk Enterprise configuration.
 ################################################################################
 
 # Specify `endpoint` and `token` in order to send data to Splunk Cloud or Splunk
@@ -35,6 +35,8 @@ splunkPlatform:
   index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
   metricsIndex: ""
+  # Name of the Splunk event type index targeted. Required when ingesting traces to Splunk Platform.
+  tracesIndex: ""
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
@@ -67,7 +69,8 @@ splunkPlatform:
   logsEnabled: true
   # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
   metricsEnabled: false
-
+  # If you enable traces collection, make sure that `tracesIndex` is provided as well.
+  tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
     # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
@@ -447,7 +450,7 @@ clusterReceiver:
   # Each `objectDefinition` has the following fields:
   # * mode:
   #     define in which way it collects this type of object, either "pull" or "watch".
-  #     - "poll" mode will read all objects of this type use the list API at an interval. Default mode.
+  #     - "pull" mode will read all objects of this type use the list API at an interval. Default mode.
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
@@ -964,6 +967,12 @@ livenessProbe:
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
 
+# Openshift SecurityContextConstraints can be overriden in this field.
+# This fields will be merged into the default config that can be found at
+# https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/securityContextConstraints.yaml
+# NOTE: This config will only be used when distribution=openshift
+securityContextConstraintsOverwrite: {}
+
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
 # This is an additional deployment of Open-telemetry collector that can be used
@@ -1117,8 +1126,8 @@ networkExplorer:
     # uncomment the line below to disable automatic kernel headers fetching
     # fetchKernelHeaders: false
 
-    # assumes docker is being used for kubernetes containers
-    useDockerMetadata: true
+    # uncomment to enable enrichment using Docker metadata
+    # useDockerMetadata: true
 
     # uncomment to enable enrichment using Nomad metadata (https://www.nomadproject.io/)
     # collectNomadMetadata: true

@@ -4,7 +4,7 @@ repos:
 -   repo: local
     hooks:
     - id: render
-      name: Pre-render Kubernetes resources
+      name: Create the rendered Kubernetes manifest resources for the project examples
       entry: make render
       language: system
       pass_filenames: false
@@ -12,9 +12,9 @@ repos:
     rev: v3.2.0
     hooks:
     - id: trailing-whitespace
-      exclude: "^rendered|^test"
+      exclude: "^examples|^test"
     - id: end-of-file-fixer
-      exclude: "^rendered|^test"
+      exclude: "^examples|^test"
     - id: check-yaml
       # Can't check source yaml since it has go templates in it.
       exclude: "^helm-charts|^test"

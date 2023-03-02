@@ -1,3 +1,8 @@
+{{/* Current jsonschema doesn't enforce below requirement while `splunkRealm` not provided as (an undesired) default value. */}}
+{{- if and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "false") (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "false") -}}
+{{ fail "[ERROR] Please set at least one of required `splunkObservability.realm` or `splunkPlatform.endpoint` and corresponding token values to specify the platform(s) to send data." }}
+{{- end -}}
+
 {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Platform endpoint "{{ .Values.splunkPlatform.endpoint }}".
 {{ end }}
@@ -69,7 +74,8 @@ Splunk Network Explorer is installed and configured.
 [WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
 {{ end }}
-{{- if not (eq (toString $clusterReceiver.eventsEnabled) "<nil>") }}
+{{- $crEventsEnabled := toString $clusterReceiver.eventsEnabled }}
+{{- if not (or (eq $crEventsEnabled "<nil>") (eq $crEventsEnabled "false")) }}
 [WARNING] "clusterReceiver.eventsEnabled" parameter is deprecated. Soon it will be replaced with "clusterReceiver.k8sObjects".
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#$CURRENT_VERSION-to-$NEXT_VERSION
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680
 {{ end }}

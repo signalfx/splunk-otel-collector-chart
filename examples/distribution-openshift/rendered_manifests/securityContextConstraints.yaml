@@ -1,0 +1,50 @@
+---
+# Source: splunk-otel-collector/templates/securityContextConstraints.yaml
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: default-splunk-otel-collector
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.70.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.70.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.70.0
+    release: default
+    heritage: Helm
+users:
+- system:serviceaccount:default:default-splunk-otel-collector
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+allowPrivilegedContainer: false
+allowedCapabilities: []
+allowedFlexVolumes: []
+defaultAddCapabilities: []
+fsGroup:
+  type: MustRunAs
+priority: 10
+readOnlyRootFilesystem: true
+requiredDropCapabilities:
+- ALL
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  seLinuxOptions:
+    level: s0
+    role: system_r
+    type: spc_t
+    user: system_u
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- hostPath
+- secret

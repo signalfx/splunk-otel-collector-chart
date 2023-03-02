@@ -1,0 +1,192 @@
+---
+# Source: splunk-otel-collector/templates/configmap-agent.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-otel-agent
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.70.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.70.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.70.0
+    release: default
+    heritage: Helm
+data:
+  relay: |
+    exporters:
+      splunk_hec/platform_logs:
+        disable_compression: true
+        endpoint: http://localhost:8088/services/collector
+        index: main
+        max_connections: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 5000
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.70.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+    extensions:
+      health_check: null
+      k8s_observer:
+        auth_type: serviceAccount
+        node: ${K8S_NODE_NAME}
+      memory_ballast:
+        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+      zpages: null
+    processors:
+      batch: null
+      filter/logs:
+        logs:
+          exclude:
+            match_type: strict
+            resource_attributes:
+            - key: splunk.com/exclude
+              value: "true"
+      groupbyattrs/logs:
+        keys:
+        - com.splunk.source
+        - com.splunk.sourcetype
+        - container.id
+        - fluent.tag
+        - istio_service_name
+        - k8s.container.name
+        - k8s.namespace.name
+        - k8s.pod.name
+        - k8s.pod.uid
+      k8sattributes:
+        extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: pod
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          labels:
+          - key: app
+          metadata:
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - container.id
+          - container.image.name
+          - container.image.tag
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
+        - sources:
+          - from: resource_attribute
+            name: host.name
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+      resource:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: upsert
+          key: k8s.cluster.name
+          value: CHANGEME
+      resource/add_agent_k8s:
+        attributes:
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resource/logs:
+        attributes:
+        - action: upsert
+          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          key: com.splunk.sourcetype
+        - action: delete
+          key: k8s.pod.annotations.splunk.com/sourcetype
+        - action: delete
+          key: splunk.com/exclude
+      resourcedetection:
+        detectors:
+        - env
+        - system
+        override: true
+        timeout: 10s
+    receivers:
+      fluentforward:
+        endpoint: 0.0.0.0:8006
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      prometheus/agent:
+        config:
+          scrape_configs:
+          - job_name: otel-agent
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - ${K8S_POD_IP}:8889
+    service:
+      extensions:
+      - health_check
+      - k8s_observer
+      - memory_ballast
+      - zpages
+      pipelines:
+        logs:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - memory_limiter
+          - groupbyattrs/logs
+          - k8sattributes
+          - filter/logs
+          - batch
+          - resource
+          - resource/logs
+          - resourcedetection
+          receivers:
+          - fluentforward
+          - otlp
+      telemetry:
+        metrics:
+          address: 0.0.0.0:8889

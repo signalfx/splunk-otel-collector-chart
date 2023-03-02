@@ -111,7 +111,7 @@ processors:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["event.name"]], ""))
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["k8s.resource.name"]], ""))
   {{- end }}
 
   # Resource attributes specific to the collector itself.

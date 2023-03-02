@@ -164,6 +164,9 @@ exporters:
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
+  {{- end }}
 service:
   telemetry:
     metrics:
@@ -179,14 +182,14 @@ service:
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in gateway.config overrides.
   pipelines:
-    {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
+    {{- if (eq (include "splunk-otel-collector.tracesEnabled" $) "true") }}
     # default traces pipeline
     traces:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
-        - batch
         - k8sattributes
+        - batch
         - resource/add_cluster_name
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
@@ -194,7 +197,13 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-      exporters: [sapm]
+      exporters:
+        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
+        - sapm
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
+        - splunk_hec/platform_traces
+        {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}

@@ -1,16 +1,7 @@
-{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
-kind: SecurityContextConstraints
-apiVersion: security.openshift.io/v1
-metadata:
-  name: {{ template "splunk-otel-collector.serviceAccountName" . }}
-  labels:
-    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
-    app: {{ template "splunk-otel-collector.name" . }}
-    chart: {{ template "splunk-otel-collector.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-users:
-- system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
+{{/*
+Default values for SecurityContextConstraints
+*/}}
+{{- define "splunk-otel-collector.defaultSecurityContextConstraints" -}}
 priority: 10
 allowHostNetwork: true
 allowHostPorts: true
@@ -44,4 +35,21 @@ supplementalGroups:
   type: RunAsAny
 requiredDropCapabilities:
 - ALL
+{{- end -}}
+
+{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: {{ template "splunk-otel-collector.serviceAccountName" . }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+users:
+- system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
+{{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
+{{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
 {{- end }}
