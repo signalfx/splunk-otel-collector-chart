@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add functional test coverage for Network Explorer metrics ([#684](https://github.com/signalfx/splunk-otel-collector-chart/pull/684)
+
 ## [0.71.0] - 2023-03-01
 
 ### Added
