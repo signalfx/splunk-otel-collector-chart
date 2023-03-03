@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- Fix naming convention issues ([#660](https://github.com/signalfx/splunk-otel-collector-chart/pull/660))
+- Translation of `k8s.pod.labels.app` attribute to SCK format ([#660](https://github.com/signalfx/splunk-otel-collector-chart/pull/660))
 
 ## [0.70.0] - 2023-01-31
 
