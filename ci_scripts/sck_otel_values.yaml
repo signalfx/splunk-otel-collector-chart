@@ -103,3 +103,13 @@ clusterReceiver:
     - name: nodes
     - name: events
       mode: watch
+
+gateway:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+
+networkExplorer:
+  enabled: true
