@@ -393,6 +393,7 @@ receivers:
     directory: {{ $.Values.logsCollection.journald.directory }}
     units: [{{ $unit.name }}]
     priority: {{ $unit.priority }}
+    storage: file_storage
     operators:
     - type: add
       field: resource["com.splunk.source"]
