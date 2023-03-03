@@ -4,7 +4,7 @@
 
 Each example has a directory where each of the following is included.
 - README.md: A short description about the example.
-- A Helm values configuration file to demonstrate the example.
+- A Helm values configuration file to demonstrate the example, the file name always ends in values.yaml.
 - A rendered_manifests directory that contains the rendered Kubernetes manifests for the example.
   - Search for "CHANGEME" to find the values that must be changed in order to use the rendered manifests directly.
 
