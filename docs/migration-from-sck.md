@@ -274,10 +274,11 @@ logsCollection:
       start_at: beginning
       include_file_path: true
       include_file_name: false
+      storage: file_storage
       resource:
-        service.name: /var/log/kube-apiserver-audit.log
         host.name: 'EXPR(env("K8S_NODE_NAME"))'
         com.splunk.sourcetype: kube:apiserver-audit
+        com.splunk.source: /var/log/kube-apiserver-audit.log
 ```
 
 Use the `kube-audit` keyword to continue reading from the translated checkpoint data.
