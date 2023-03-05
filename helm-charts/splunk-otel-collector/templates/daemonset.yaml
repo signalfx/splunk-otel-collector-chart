@@ -168,6 +168,10 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
             {{- end }}
+            {{- if .Values.logsCollection.journald.enabled }}
+            - name: journaldlogs
+              mountPath: {{ .Values.logsCollection.journald.directory }}
+            {{- end }}
         {{- end }}
         {{- end }}
       {{- end }}
@@ -390,7 +394,7 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
-        {{- if .Values.logsCollection.journald.enabled}}
+        {{- if .Values.logsCollection.journald.enabled }}
         - mountPath: {{.Values.logsCollection.journald.directory}}
           name: journaldlogs
           readOnly: true
@@ -448,7 +452,7 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
-      {{- if .Values.logsCollection.journald.enabled}}
+      {{- if .Values.logsCollection.journald.enabled }}
       - name: journaldlogs
         hostPath:
           path: {{.Values.logsCollection.journald.directory}}
