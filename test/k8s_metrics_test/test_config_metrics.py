@@ -139,7 +139,30 @@ from ..common import check_metrics_from_splunk
   ("system.processes.count"),
   ("system.processes.created"),
   #Up Metrics
-  ("up")
+  ("up"),
+  # Network Explorer Metrics
+  ("tcp.bytes"),
+  ("tcp.active"),
+  ("tcp.packets"),
+  ("tcp.retrans"),
+  ("tcp.syn.timeouts"),
+  ("tcp.new_sockets"),
+  ("tcp.resets"),
+  ("tcp.rtt.num_measurements"),
+  ("tcp.rtt.average"),
+  ("udp.bytes"),
+  ("udp.packets"),
+  ("udp.active"),
+  ("udp.drops"),
+  ("http.status_code"),
+  ("http.active_sockets"),
+  ("http.client.duration_average"),
+  ("http.server.duration_average"),
+  ("dns.active_sockets"),
+  ("dns.responses"),
+  ("dns.timeouts"),
+  ("dns.client.duration_average"),
+  ("dns.server.duration_average")
 ])
 def test_metric_name(setup, metric):
   '''
