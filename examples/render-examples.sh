@@ -6,7 +6,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 render_task(){
   example_dir=$1
   rendered_manifests_dir=$example_dir"rendered_manifests"
-	values_yaml=$example_dir`ls $example_dir | grep yaml`
+	values_yaml=$example_dir`ls $example_dir | grep values.yaml`
 
   # Clear out all rendered manifests
   rm -rf $rendered_manifests_dir
