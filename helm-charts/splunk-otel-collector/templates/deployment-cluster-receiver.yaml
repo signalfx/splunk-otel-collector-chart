@@ -111,9 +111,9 @@ spec:
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;
-          chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 20000 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 20000 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;
+          chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 999 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;
           chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 20000 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 20000 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;']
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver;']
           securityContext:
             runAsUser: 0
           volumeMounts:
