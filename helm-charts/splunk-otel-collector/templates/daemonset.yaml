@@ -86,6 +86,8 @@ spec:
           env:
             - name: LOG_FORMAT_TYPE
               value: "{{ .Values.fluentd.config.containers.logFormatType }}"
+          resources:
+            {{- toYaml $agent.resources | nindent 12 }}
           volumeMounts:
             - name: varlogdest
               mountPath: {{ .Values.fluentd.config.containers.pathDest }}
@@ -121,6 +123,8 @@ spec:
             value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
+          resources:
+            {{- toYaml $agent.resources | nindent 12 }}
           volumeMounts:
             - name: checkpoint
               mountPath: /var/addon/splunk/otel_pos
@@ -159,6 +163,8 @@ spec:
           {{- end }}']
           securityContext:
             runAsUser: 0
+          resources:
+            {{- toYaml $agent.resources | nindent 12 }}
           volumeMounts:
             - name: checkpoint
               mountPath: {{ .Values.logsCollection.checkpointPath }}
