@@ -17,3 +17,9 @@ maintainers:
 - name: dmitryax
 - name: jvoravong
 - name: emaderer
+dependencies:
+  - name: opentelemetry-operator
+    version: 0.24.0
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+    alias: operator
+    condition: operator.enabled

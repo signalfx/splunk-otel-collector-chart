@@ -15,8 +15,12 @@ of `version` field.
 
 To make a new release of the helm chart:
 1. Bump the `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
-2. Run `make render` to render all the examples with the latest changes.
-3. Create PR and request review from the team.
-4. When the PR gets merged, the release will automatically be made and the helm repo updated.
-5. Release notes are not populated automatically. So make sure to update them manually using the notes from
+2. Check for Helm Subchart version updates.
+  - Look for a new version at https://github.com/open-telemetry/opentelemetry-operator/releases.
+  - If needed, in the [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
+    update the operator version and run `helm dependency build`.
+3. Run `make render` to render all the examples with the latest changes.
+4. Create PR and request review from the team.
+5. When the PR gets merged, the release will automatically be made and the helm repo updated.
+6. Release notes are not populated automatically. So make sure to update them manually using the notes from
    [CHANGELOG](./CHANGELOG.md).
