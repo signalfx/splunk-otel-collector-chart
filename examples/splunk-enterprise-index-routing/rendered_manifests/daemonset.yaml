@@ -57,6 +57,10 @@ spec:
           env:
             - name: LOG_FORMAT_TYPE
               value: ""
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
           volumeMounts:
             - name: varlogdest
               mountPath: /var/lib/docker/containers

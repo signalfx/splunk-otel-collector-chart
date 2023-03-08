@@ -65,6 +65,10 @@ spec:
             value: "/var/addon/splunk/otel_pos/receiver_journald_"
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
           volumeMounts:
             - name: checkpoint
               mountPath: /var/addon/splunk/otel_pos
