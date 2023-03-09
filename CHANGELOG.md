@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+### Changed
+
+## [0.72.0] - 2023-03-09
+
+### Added
+
 - Add functional test coverage for Network Explorer metrics ([#684](https://github.com/signalfx/splunk-otel-collector-chart/pull/684)
 - Apply the same resources to init containers as allocated to the otel agent container ([#690](https://github.com/signalfx/splunk-otel-collector-chart/pull/690)
 
