@@ -28,6 +28,7 @@ splunkPlatform:
   # enables Splunk Platform as a destination.
   endpoint: ""
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
+  # Alternatively the token can be provided as a secret.
   # HTTP Event Collector token.
   token: ""
 
@@ -52,14 +53,20 @@ splunkPlatform:
   # data over HTTPS.
   insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
+  # Alternatively the certificate can be provided as a secret. 
+  # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md
   # NOTE: The content of the certificate itself should be used here, not the
   #       file path. The certificate will be stored as a secret in kubernetes.
   clientCert: ""
   # The private key for this client.
+  # Alternatively the key can be provided as a secret.
+  # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md
   # NOTE: The content of the key itself should be used here, not the file path.
   #       The key will be stored as a secret in kubernetes.
   clientKey: ""
   # The PEM-format CA certificate file.
+  # Alternatively the certficate can be provided as a secret.
+  # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md
   # NOTE: The content of the file itself should be used here, not the file path.
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
@@ -111,6 +118,8 @@ splunkObservability:
   # destination.
   realm: ""
   # Required for Splunk Observability (if `realm` is specified). Splunk
+  # Alternatively the accessToken can be provided as a secret.
+  # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md
   # Observability org access token.
   accessToken: ""
 
