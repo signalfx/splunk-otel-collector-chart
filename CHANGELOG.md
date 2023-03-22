@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Add experimental support for deploying OpenTelemetry Operator as a subchart [#691](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)
+- Improve documentation about providing tokens as Kubernetes secrets [#707](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)
 
 ## [0.72.0] - 2023-03-09
 
