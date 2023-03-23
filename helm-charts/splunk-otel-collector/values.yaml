@@ -54,7 +54,7 @@ splunkPlatform:
   # data over HTTPS.
   insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
-  # Alternatively the clientCert, clientKey and caFile can be provided as a secret. 
+  # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   # NOTE: The content of the certificate itself should be used here, not the
   #       file path. The certificate will be stored as a secret in kubernetes.
