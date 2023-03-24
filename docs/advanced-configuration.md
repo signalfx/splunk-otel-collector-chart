@@ -26,6 +26,16 @@ splunkObservability:
 clusterName: my-k8s-cluster
 ```
 
+## Provide tokens as a secret
+
+Instead of having the tokens as clear text in the values, those can be provided via a secret that is created before deploying the chart. See [secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml) for the required fields.
+
+```yaml
+secret:
+  create: false
+  name: your-secret
+```
+
 ## Cloud provider
 
 Use the `cloudProvider` parameter to provide information about the cloud
