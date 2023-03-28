@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Update the port used to monitor the Kubernetes scheduler (10251->10259) [#711](https://github.com/signalfx/splunk-otel-collector-chart/pull/711)
+- Update the Kubernetes scheduler monitor to stop using insecure port 10251 and start using secure port 10259 with authentication [#711](https://github.com/signalfx/splunk-otel-collector-chart/pull/711)
 
 ### Added
 
