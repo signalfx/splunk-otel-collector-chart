@@ -207,8 +207,11 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-scheduler
-              port: 10251
+              port: 10259
+              skipVerify: true
               type: kubernetes-scheduler
+              useHTTPS: true
+              useServiceAccount: true
             rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
         watch_observers:
         - k8s_observer

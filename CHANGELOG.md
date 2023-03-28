@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Update the port used to monitor the Kubernetes scheduler (10251->10259) [#711](https://github.com/signalfx/splunk-otel-collector-chart/pull/711)
+
 ### Added
 
 - Add experimental support for deploying OpenTelemetry Operator as a subchart [#691](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)

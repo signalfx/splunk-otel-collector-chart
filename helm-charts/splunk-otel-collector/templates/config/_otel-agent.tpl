@@ -184,8 +184,11 @@ receivers:
         config:
           extraDimensions:
             metric_source: kubernetes-scheduler
-          port: 10251
+          skipVerify: true
+          port: 10259
           type: kubernetes-scheduler
+          useHTTPS: true
+          useServiceAccount: true
       {{- end }}
       {{- end }}
 
