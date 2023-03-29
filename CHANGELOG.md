@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Update the Kubernetes scheduler monitor to stop using insecure port 10251 and start using secure port 10259 with authentication [#711](https://github.com/signalfx/splunk-otel-collector-chart/pull/711)
+
 ### Added
 
 - Add experimental support for deploying OpenTelemetry Operator as a subchart [#691](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)
