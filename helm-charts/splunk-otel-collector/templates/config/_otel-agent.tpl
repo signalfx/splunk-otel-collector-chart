@@ -288,7 +288,7 @@ receivers:
         source_identifier: attributes["log.file.path"]
         is_last_entry: "attributes.logtag == 'F'"
         combine_with: ""
-        max_batch_size: 16
+        max_batch_size: 8
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
       # Parse CRI-Containerd format
@@ -305,7 +305,7 @@ receivers:
         source_identifier: attributes["log.file.path"]
         is_last_entry: "attributes.logtag == 'F'"
         combine_with: ""
-        max_batch_size: 8
+        max_batch_size: 16
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
       # Parse Docker format
@@ -321,7 +321,7 @@ receivers:
         source_identifier: attributes["log.file.path"]
         is_last_entry: attributes.log endsWith "\n"
         combine_with: ""
-        max_batch_size: 8
+        max_batch_size: 16
       {{- end }}
       - type: add
         id: handle_empty_log

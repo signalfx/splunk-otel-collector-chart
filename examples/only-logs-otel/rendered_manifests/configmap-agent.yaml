@@ -163,7 +163,7 @@ data:
           combine_with: ""
           id: crio-recombine
           is_last_entry: attributes.logtag == 'F'
-          max_batch_size: 16
+          max_batch_size: 8
           output: handle_empty_log
           source_identifier: attributes["log.file.path"]
           type: recombine
@@ -177,7 +177,7 @@ data:
           combine_with: ""
           id: containerd-recombine
           is_last_entry: attributes.logtag == 'F'
-          max_batch_size: 8
+          max_batch_size: 16
           output: handle_empty_log
           source_identifier: attributes["log.file.path"]
           type: recombine
@@ -190,7 +190,7 @@ data:
           combine_with: ""
           id: docker-recombine
           is_last_entry: attributes.log endsWith "\n"
-          max_batch_size: 8
+          max_batch_size: 16
           output: handle_empty_log
           source_identifier: attributes["log.file.path"]
           type: recombine
