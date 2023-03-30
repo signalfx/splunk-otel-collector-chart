@@ -566,6 +566,9 @@ logsCollection:
     # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
     # All other logs will be ignored.
     useSplunkIncludeAnnotation: false
+    # maxRecombineLogsSize sets the maximum size in bytes of a message recombined from cri-o, containerd and docker log entries.
+    # Set to 0 to remove any size limit.
+    maxRecombineLogSize: 1048576
 
 # Configuration for collecting journald logs using otel collector
   journald:
