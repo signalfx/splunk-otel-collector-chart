@@ -24,7 +24,7 @@ clusterName: ""
 # Enterprise.
 splunkPlatform:
   # Required for Splunk Enterprise/Cloud. URL to a Splunk instance to send data
-  # to. e.g. "http://X.X.X.X:8088/services/collector". Setting this parameter
+  # to. e.g. "http://X.X.X.X:8088/services/collector/event". Setting this parameter
   # enables Splunk Platform as a destination.
   endpoint: ""
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
