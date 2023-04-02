@@ -83,6 +83,7 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
+    send_batch_max_size: 32768
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
