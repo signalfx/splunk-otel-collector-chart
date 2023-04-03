@@ -27,7 +27,8 @@ data:
       memory_ballast:
         size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
-      batch: null
+      batch:
+        send_batch_max_size: 32768
       filter/exclude_containers:
         metrics:
           exclude:
