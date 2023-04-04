@@ -17,14 +17,14 @@ kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petcli
 
 ### 2. Complete the [Getting start with auto-instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/docs/auto-instrumentation-install.md#getting-start-with-auto-instrumentation) steps
 When you get to the `3. Deploy the opentelemetry.io/v1alpha1 Instrumentation` step, you can use the following
-Instrumentation spec.
+Instrumentation spec:
 
 ```
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation-java.yaml -n spring-petclinic
 ```
 
-When you get to the ` 4.Verify all the OpenTelemetry resources...` step, you can use the following sample out
-for validation.
+When you get to the ` 4.Verify all the OpenTelemetry resources...` step, you can use the following sample output
+for validation:
 
 <details open>
 <summary>Expand for kubectl commands to run and output</summary>
@@ -60,7 +60,7 @@ kubectl get otelinst -n spring-petclinic
 
 </details>
 
-When you get to the `5. Instrument application by setting an annotation` step, you can use the following commands.
+When you get to the `5. Instrument application by setting an annotation` step, you can use the following commands:
 <details open>
 <summary>Expand for commands to run to add the annotation</summary>
 
