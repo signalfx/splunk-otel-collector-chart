@@ -1,0 +1,42 @@
+---
+# Source: splunk-otel-collector/charts/operator/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    helm.sh/chart: operator-0.24.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/version: "0.70.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: controller-manager
+  name: default-operator-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: default-operator-manager
+subjects:
+  - kind: ServiceAccount
+    name: operator
+    namespace: default
+---
+# Source: splunk-otel-collector/charts/operator/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    helm.sh/chart: operator-0.24.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/version: "0.70.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: controller-manager
+  name: default-operator-proxy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: default-operator-proxy
+subjects:
+  - kind: ServiceAccount
+    name: operator
+    namespace: default
