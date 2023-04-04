@@ -15,7 +15,7 @@ TODO: Add the Kubernetes manifests for spring-petclinic to this example in a fol
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R
 ```
 
-### 2. Complete the [Getting start with auto-instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/docs/auto-instrumentation-install.md#getting-start-with-auto-instrumentation) steps
+### 2. Complete the [Getting started with auto-instrumentation](../../docs/auto-instrumentation-install.md#getting-started-with-auto-instrumentation) steps
 When you get to the `3. Deploy the opentelemetry.io/v1alpha1 Instrumentation` step, you can use the following
 Instrumentation spec:
 
@@ -23,7 +23,7 @@ Instrumentation spec:
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation-java.yaml -n spring-petclinic
 ```
 
-When you get to the ` 4.Verify all the OpenTelemetry resources...` step, you can use the following sample output
+When you get to the `4. Verify all the OpenTelemetry resources...` step, you can use the following sample output
 for validation:
 
 <details open>
