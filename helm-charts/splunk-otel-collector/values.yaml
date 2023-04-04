@@ -1357,8 +1357,7 @@ operator:
   enabled: false
   manager:
     autoInstrumentationImage:
-      # Only the following instrumentation libraries and images have be verified
-      # to work properly (or at least well). More coming soon...
+      # More coming soon...
       java:
         repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
         tag: "v1.22.0"
