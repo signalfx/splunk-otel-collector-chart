@@ -18,7 +18,7 @@ extensions:
     observe_nodes: true
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics }}
   file_storage/persistent_queue:
     directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver
   {{- end }}
@@ -208,7 +208,7 @@ service:
     {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
     - k8s_observer
     {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics }}
     - file_storage/persistent_queue
     {{- end }}
   pipelines:
