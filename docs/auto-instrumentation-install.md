@@ -25,22 +25,20 @@ these frameworks often have pre-built instrumentation capabilities already avail
 
 ### 1. Deploy the Helm Chart with the Operator enabled
 
-If a cert-manager is not available in the cluster, then you'll need to deploy it using `--set cert-manager.enabled=true`.
-The cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the
-process of obtaining, renewing and using those certificates. The operator requires a certificates from the cert-manager
-or other source. You can pass `--set opentelemetry-operator.enabled=true` when deploying the chart to enable the
-operator. You can use commands like in the following example to run these steps..
+Set `operator.enabled=true` when deploying the chart to enable deploying the operator as well.
+If a cert-manager is not available in the cluster (or other TLS certificate source), then you'll need to deploy it
+using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
+commands below to run these steps.
 
 ```
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
 kubectl get pods -l app=cert-manager --all-namespaces
 
-helm install splunk-otel-collector \
--f ./my_values.yaml \
---set cert-manager.enabled=true \
---set opentelemetry-operator.enabled=true \
--n monitoring \
-helm-charts/splunk-otel-collector
+# If cert-manager is not deployed.
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,certmanager.enabled=true -n monitoring helm-charts/splunk-otel-collector
+
+# If cert-manager is already deployed.
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true -n monitoring helm-charts/splunk-otel-collector
 ```
 
 ### 2. Deploy the opentelemetry.io/v1alpha1 Instrumentation
@@ -268,7 +266,7 @@ provides best effort support with issues related to native OpenTelemetry instrum
 | nodejs                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-nodejs)                                       |                                                                                |
 | python                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-python)                                       |                                                                                |
 | java                    | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
-| dotnet                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet       |
+| dotnet                  | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet       |
 | nodejs                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-nodejs-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodes        |
 | python                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | apache-httpd            | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |

@@ -53,7 +53,7 @@ kubectl  get pods -n monitoring
 
 kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io -n monitoring
 # NAME                                      WEBHOOKS   AGE
-# cert-manager-webhook                      1          8m
+# splunk-otel-collector-certmanager-webhooh 1          8m
 # splunk-otel-collector-operator-mutation   3          2m
 
 kubectl get pods -n spring-petclinic
@@ -82,7 +82,7 @@ When you get to the `5. Instrument application by setting an annotation` step, y
 ```
 # The pods created by spring-petclinic deployments will be restarted with
 # instrumentation injected.
-kubectl patch deployment admin-server  -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"true"}}}} }' -n spring-petclinic
+kubectl patch deployment admin-server -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"true"}}}} }' -n spring-petclinic
 kubectl patch deployment api-gateway -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"true"}}}} }' -n spring-petclinic
 kubectl patch deployment config-server -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"true"}}}} }' -n spring-petclinic
 kubectl patch deployment customers-service -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"true"}}}} }' -n spring-petclinic
@@ -92,7 +92,7 @@ kubectl patch deployment visits-service -p '{"spec": {"template":{"metadata":{"a
 
 # If you need to disable instrumentation, patch the pod deploymentss with these
 # annotations.
-kubectl patch deployment admin-server  -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
+kubectl patch deployment admin-server -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
 kubectl patch deployment api-gateway -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
 kubectl patch deployment config-server -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
 kubectl patch deployment customers-service -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic

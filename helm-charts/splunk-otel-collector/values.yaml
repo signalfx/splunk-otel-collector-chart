@@ -1348,20 +1348,29 @@ networkExplorer:
 #
 # The OpenTelemetry Operator running as a deployment with a replica count of 1.
 # It auto-instruments applications to emit telemetry data.
-# - Related Example: examples/enable-operator-and-auto-instrumentation/README.md
-# - Related documentation: docs/auto-instrumentation-install.md
-# - Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
+# Related documentation: docs/auto-instrumentation-install.md
+# Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
-opentelemetry-operator:
+operator:
   enabled: false
+  defaultAutoinstrumentation:
+    enabled: true
+    # Export traces to the local host collector agent
+    endpoint: https://$(SPLUNK_OTEL_AGENT):4317
   manager:
     autoInstrumentationImage:
-      # More coming soon...
       java:
         repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
         tag: "v1.22.0"
+    # name: nameOverride
+    # By default, the operator manager will watch all namespaces for instrumentation purposes.
+    # Use this env var to reduce the scope of watched environments.
+    # env:
+    #  - name: WATCH_NAMESPACE
+    #    value: targetNamespaceAlpha,targetNamespaceBravo
 
+# The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
-cert-manager:
+certmanager:
   enabled: false

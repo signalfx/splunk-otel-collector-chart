@@ -12,13 +12,13 @@ render_task(){
   rm -rf "${rendered_manifests_dir}"
 
   # Generate rendered files
-  helm template \
+  out=$(helm template \
     --namespace default \
     --values "${values_yaml}" \
     --output-dir "${rendered_manifests_dir}" \
-    default helm-charts/splunk-otel-collector &>/dev/null
+    default helm-charts/splunk-otel-collector)
   if [ $? -ne 0 ]; then
-      echo "$values_yaml FAIL - helm template"
+      echo "$values_yaml FAIL - helm template:\n$out\n"
       exit 1
   fi
   # Move the chart renders

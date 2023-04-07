@@ -20,9 +20,11 @@ maintainers:
 dependencies:
   - name: cert-manager
     version: 1.11.0
+    alias: certmanager
     repository: https://charts.jetstack.io
-    condition: cert-manager.enabled
+    condition: certmanager.enabled
   - name: opentelemetry-operator
     version: 0.26.0
+    alias: operator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-    condition: opentelemetry-operator.enabled
+    condition: operator.enabled
