@@ -122,7 +122,7 @@ kubectl get otelinst -n spring-petclinic
 
 </details>
 
-### 5. Instrument application by setting an annotation
+### 4. Instrument application by setting an annotation
 
 An _instrumentation.opentelemetry.io/inject-{instrumentation_library}_ annotation can be added to the following:
 - Namespace: All pods within that namespace will be instrumented.
@@ -140,7 +140,7 @@ The instrumentation annotations can have the following values:
 - "my-other-namespace/my-instrumentation" - name and namespace of Instrumentation CR instance in another namespace to use.
 - "false" - do not inject.
 
-### 6. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
+### 5. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 The trace and metrics data should populate the APM dashboard.To better
 visualize this example as a whole, we have also included a an image

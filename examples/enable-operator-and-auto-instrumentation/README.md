@@ -14,16 +14,30 @@ TODO: Add the Kubernetes manifests for spring-petclinic to this example in a fol
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R
 ```
 
-### 2. Complete the [Getting started with auto-instrumentation](../../docs/auto-instrumentation-install.md#getting-started-with-auto-instrumentation) steps
-When you get to the `3. Deploy the opentelemetry.io/v1alpha1 Instrumentation` step, you can use the following
-Instrumentation spec:
+### 2. Complete the steps outlined in [Getting started with auto-instrumentation](../../docs/auto-instrumentation-install.md#steps-for-setting-up-auto-instrumentation)
+
+#### 2.1 Deploy the Helm Chart with the Operator enabled
+
+Check if cert-manager is already installed, don't deploy a second cert-manager.
+
+```
+kubectl get pods -l app=cert-manager --all-namespaces
+
+helm install splunk-otel-collector \
+-f ./my_values.yaml \
+--set cert-manager.enabled=true \
+--set opentelemetry-operator.enabled=true \
+-n monitoring \
+helm-charts/splunk-otel-collector
+```
+
+#### 2.2 Deploy the opentelemetry.io/v1alpha1 Instrumentation
 
 ```
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation-java.yaml -n spring-petclinic
 ```
 
-When you get to the `4. Verify all the OpenTelemetry resources...` step, you can use the following sample output
-for validation:
+### 2.3 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
 <details open>
 <summary>Expand for kubectl commands to run and output</summary>
@@ -58,6 +72,8 @@ kubectl get otelinst -n spring-petclinic
 ```
 
 </details>
+
+#### 2.4 Instrument application by setting an annotation
 
 When you get to the `5. Instrument application by setting an annotation` step, you can use the following commands:
 <details open>
@@ -126,7 +142,7 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr  -n spring-petclinic
 
 </details>
 
-### 3. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
+#### 2.5 Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 <details open>
 <summary> Expand for visual results </summary>
