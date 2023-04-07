@@ -40,8 +40,6 @@
 
 # Splunk OpenTelemetry Collector for Kubernetes
 
-> :construction: This project is currently in **BETA**. Splunk **officially supports** this project; however, there may be breaking changes.
->
 The Splunk OpenTelemetry Collector for Kubernetes is a [Helm](https://github.com/kubernetes/helm) chart for the [Splunk Distribution
 of OpenTelemetry Collector](https://github.com/signalfx/splunk-otel-collector).
 This chart creates a Kubernetes DaemonSet along with other Kubernetes objects
@@ -51,6 +49,12 @@ export metric, trace, and log data for:
 - [Splunk Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html)
 - [Splunk Cloud Platform](https://www.splunk.com/en_us/software/splunk-cloud-platform.html)
 - [Splunk Observability Cloud](https://www.observability.splunk.com/)
+
+## Current Status
+
+- The Splunk OpenTelemetry Collector for Kubernetes Helm chart is production tested; it is in use by a number of customers in their production environments
+- Customers using the helm chart can receive direct help from official Splunk support within SLA's
+- Customers can use or migrate to the Splunk OpenTelemetry Collector for Kubernetes Helm chart without worrying about future breaking changes to its core configuration experience for metrics and traces collection (OpenTelemetry logs collection configuration is in beta). There may be breaking changes to the Collector's own metrics.
 
 **Installations that use this distribution can receive direct help from
 Splunk's support teams.** Customers are free to use the core OpenTelemetry OSS
