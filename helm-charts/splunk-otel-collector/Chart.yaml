@@ -18,8 +18,11 @@ maintainers:
 - name: jvoravong
 - name: emaderer
 dependencies:
+  - name: cert-manager
+    version: 1.11.0
+    repository: https://charts.jetstack.io
+    condition: cert-manager.enabled
   - name: opentelemetry-operator
-    version: 0.24.0
+    version: 0.26.0
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-    alias: operator
-    condition: operator.enabled
+    condition: opentelemetry-operator.enabled

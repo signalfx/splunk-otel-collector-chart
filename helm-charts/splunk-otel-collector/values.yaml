@@ -1350,10 +1350,10 @@ networkExplorer:
 # It auto-instruments applications to emit telemetry data.
 # - Related Example: examples/enable-operator-and-auto-instrumentation/README.md
 # - Related documentation: docs/auto-instrumentation-install.md
-# - Full list of Helm value configurations: https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml
+# - Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
-operator:
+opentelemetry-operator:
   enabled: false
   manager:
     autoInstrumentationImage:
@@ -1361,3 +1361,7 @@ operator:
       java:
         repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
         tag: "v1.22.0"
+
+# Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
+cert-manager:
+  enabled: false

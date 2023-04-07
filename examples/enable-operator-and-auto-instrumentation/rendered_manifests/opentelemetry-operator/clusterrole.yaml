@@ -1,16 +1,16 @@
 ---
-# Source: splunk-otel-collector/charts/operator/templates/clusterrole.yaml
+# Source: splunk-otel-collector/charts/opentelemetry-operator/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.24.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.70.0"
+    helm.sh/chart: opentelemetry-operator-0.26.0
+    app.kubernetes.io/name: opentelemetry-operator
+    app.kubernetes.io/version: "0.74.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: controller-manager
-  name: default-operator-manager
+  name: default-opentelemetry-operator-manager
 rules:
   - apiGroups:
       - ""
@@ -187,37 +187,45 @@ rules:
     - patch
     - update
     - watch
+  - apiGroups:
+    - discovery.k8s.io
+    resources:
+    - endpointslices
+    verbs:
+    - get
+    - list
+    - watch
 ---
-# Source: splunk-otel-collector/charts/operator/templates/clusterrole.yaml
+# Source: splunk-otel-collector/charts/opentelemetry-operator/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.24.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.70.0"
+    helm.sh/chart: opentelemetry-operator-0.26.0
+    app.kubernetes.io/name: opentelemetry-operator
+    app.kubernetes.io/version: "0.74.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: controller-manager
-  name: default-operator-metrics
+  name: default-opentelemetry-operator-metrics
 rules:
   - nonResourceURLs:
       - /metrics
     verbs:
       - get
 ---
-# Source: splunk-otel-collector/charts/operator/templates/clusterrole.yaml
+# Source: splunk-otel-collector/charts/opentelemetry-operator/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.24.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.70.0"
+    helm.sh/chart: opentelemetry-operator-0.26.0
+    app.kubernetes.io/name: opentelemetry-operator
+    app.kubernetes.io/version: "0.74.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: controller-manager
-  name: default-operator-proxy
+  name: default-opentelemetry-operator-proxy
 rules:
   - apiGroups:
       - authentication.k8s.io

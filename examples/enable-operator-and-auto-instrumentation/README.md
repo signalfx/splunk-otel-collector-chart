@@ -5,7 +5,6 @@
 In the following example we will show how to instrument a project based on
 [spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices).
 
-## Getting started
 ### 1. Setup the spring-petclinic demo application to instrument
 
 You can use the provided demo or you can use a Java application you already have access to.

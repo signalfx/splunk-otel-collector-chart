@@ -1,16 +1,16 @@
 ---
-# Source: splunk-otel-collector/charts/operator/templates/service.yaml
+# Source: splunk-otel-collector/charts/opentelemetry-operator/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    helm.sh/chart: operator-0.24.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.70.0"
+    helm.sh/chart: opentelemetry-operator-0.26.0
+    app.kubernetes.io/name: opentelemetry-operator
+    app.kubernetes.io/version: "0.74.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: controller-manager
-  name: default-operator
+  name: default-opentelemetry-operator
   namespace: default
 spec:
   ports:
@@ -23,21 +23,21 @@ spec:
       protocol: TCP
       targetPort: metrics
   selector:
-      app.kubernetes.io/name: operator
+      app.kubernetes.io/name: opentelemetry-operator
       app.kubernetes.io/component: controller-manager
 ---
-# Source: splunk-otel-collector/charts/operator/templates/service.yaml
+# Source: splunk-otel-collector/charts/opentelemetry-operator/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    helm.sh/chart: operator-0.24.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.70.0"
+    helm.sh/chart: opentelemetry-operator-0.26.0
+    app.kubernetes.io/name: opentelemetry-operator
+    app.kubernetes.io/version: "0.74.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: controller-manager
-  name: default-operator-webhook
+  name: default-opentelemetry-operator-webhook
   namespace: default
 spec:
   ports:
@@ -45,5 +45,5 @@ spec:
       protocol: TCP
       targetPort: webhook-server
   selector:
-      app.kubernetes.io/name: operator
+      app.kubernetes.io/name: opentelemetry-operator
       app.kubernetes.io/component: controller-manager
