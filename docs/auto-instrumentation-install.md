@@ -63,24 +63,12 @@ spec:
     - tracecontext
     - baggage
     - b3
-  java:
-    env:
-      - name: SPLUNK_OTEL_AGENT
-        valueFrom:
-          fieldRef:
-            apiVersion: v1
-            fieldPath: status.hostIP
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: https://$(SPLUNK_OTEL_AGENT):4318
-      - name: OTEL_TRACES_EXPORTER
-        value: otlp
-  dotnet:
-    image: your-customized-auto-instrumentation-image:dotnet
-    env:
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://{TARGET}:4317
-  # nodjs:
-  # python:
+  env:
+    - name: SPLUNK_OTEL_AGENT
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.hostIP
 ```
 
 </details>

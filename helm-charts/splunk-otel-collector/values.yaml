@@ -1354,10 +1354,6 @@ networkExplorer:
 
 operator:
   enabled: false
-  defaultAutoinstrumentation:
-    enabled: true
-    # Export traces to the local host collector agent
-    endpoint: https://$(SPLUNK_OTEL_AGENT):4317
   manager:
     autoInstrumentationImage:
       java:
@@ -1374,3 +1370,5 @@ operator:
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
 certmanager:
   enabled: false
+  # Installed using Helm and the /crds directory
+  installCRDs: false

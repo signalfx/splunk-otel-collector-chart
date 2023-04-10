@@ -14,15 +14,18 @@ of `version` field.
 ### Release Procedure
 
 To make a new release of the helm chart:
-1. Bump the `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
-2. Check for Helm Subchart version updates.
-  - Look for a new version at https://github.com/open-telemetry/opentelemetry-operator/releases.
-  - If needed, in the [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
-    update the operator version and run `helm dependency build`.
-  - If the cert-manager subchart is updated, the helm-charts/splunk-otel-collector/crds/cert-manager.crds.yaml file
-    will need to be updated as well to match. You can run `wget -P helm-charts/splunk-otel-collector/crds https://github.com/cert-manager/cert-manager/releases/download/{VERSION}/cert-manager.crds.yaml"`.
-3. Run `make render` to render all the examples with the latest changes.
-4. Create PR and request review from the team.
-5. When the PR gets merged, the release will automatically be made and the helm repo updated.
-6. Release notes are not populated automatically. So make sure to update them manually using the notes from
-   [CHANGELOG](./CHANGELOG.md).
+1. Bump the chart `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
+1. Bump dependencies versions as needed
+   - Look for new releases
+     - https://cert-manager.io/docs/installation/supported-releases/
+     - https://github.com/open-telemetry/opentelemetry-operator/releases
+   - Increment versions under `dependencies` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml#)
+   - Run: `helm dependency build`
+   - If the cert-manager subchart is updated
+     - Run: `wget -P helm-charts/splunk-otel-collector/crds https://github.com/cert-manager/cert-manager/releases/download/{VERSION}/cert-manager.crds.yaml"`.
+     - The cert-manager chart installs the crds that the operator chart requires for install, resulting in order of operations errors (helm install & upgrade).
+     - To fix the order of operations errors, the cert-manager crds are added to the /crds dir so Helm will make them available for Helm install and upgrade actions.
+1. Run `make render` to render all the examples with the latest changes.
+1. Create PR and request review from the team.
+1. When the PR gets merged, the release will automatically be made and the helm repo updated.
+1. Release notes are not populated automatically. So make sure to update them manually using the notes from [CHANGELOG](./CHANGELOG.md).

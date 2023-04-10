@@ -9,14 +9,9 @@ spec:
     - tracecontext
     - baggage
     - b3
-  java:
-    env:
-      - name: SPLUNK_OTEL_AGENT
-        valueFrom:
-          fieldRef:
-            apiVersion: v1
-            fieldPath: status.hostIP
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://$(SPLUNK_OTEL_AGENT):4317
-      - name: OTEL_TRACES_EXPORTER
-        value: otlp
+  env:
+    - name: SPLUNK_OTEL_AGENT
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.hostIP
