@@ -89,7 +89,7 @@ spec:
 # Install
 kubectl apply -f splunk-instrumentation.yaml
 # Check the current deployed values
-kubectl get otelint -o yaml
+kubectl get otelinst -o yaml
 ```
 
 ### 3. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
