@@ -18,6 +18,9 @@ maintainers:
 - name: jvoravong
 - name: emaderer
 dependencies:
+  # Subchart Notes:
+  # - Avoid uppercase letters in subchart names and aliases, they cause install failure due to subchart resource naming
+  # - Avoid hyphen characters in subchart names and aliases, they introduce template rendering complications (https://github.com/helm/helm/issues/2192)
   - name: cert-manager
     version: 1.11.0
     alias: certmanager
