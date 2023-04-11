@@ -7,7 +7,10 @@ In the following example we will show how to instrument a project based on
 
 ### 1. Setup the spring-petclinic demo application to instrument
 
-You can use the provided demo or you can use a Java application you already have access to.
+The Java spring-petclinic demo will create a spring-petclinic namespace and deploy the related Java applications to it.
+If you have your own Java application you want to instrument, you can still use the steps below as an example for how
+to intrument your application.
+
 TODO: Add the Kubernetes manifests for spring-petclinic to this example in a followup PR
 
 ```
@@ -18,23 +21,29 @@ kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petcli
 
 #### 2.1 Deploy the Helm Chart with the Operator enabled
 
-Check if cert-manager is already installed, don't deploy a second cert-manager.
+To install the chart with operator in an existing cluster, make sure you have cert-manager installed and available.
+Both the cert-manager and operator are subcharts of this chart and can be enabled with `--set certmanager.enabled=true,operator.enabled=true`.
+These helm install commands will deploy the chart to the monitoring namespace for this example.
 
 ```
+# Check if a cert-manager is already installed by looking for cert-manager pods.
 kubectl get pods -l app=cert-manager --all-namespaces
 
-helm install splunk-otel-collector \
--f ./my_values.yaml \
---set cert-manager.enabled=true \
---set opentelemetry-operator.enabled=true \
--n monitoring \
-helm-charts/splunk-otel-collector
+# If cert-manager is not already, you can install it with this chart.
+helm install splunk-otel-collector -f ./my_values.yaml --set certmanager.enabled=true,operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
+
+# If cert-manager is already installed
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
 ```
 
 #### 2.2 Deploy the opentelemetry.io/v1alpha1 Instrumentation
 
+The Instrumentation object is a spec to configure what instrumentation libraries to use in the target namespace
+to use for instrumentation. This Instrumentation will be used to know how to instrument the spring-clinic applications
+in the spring-petclinic namespace.
+
 ```
-kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation-java.yaml -n spring-petclinic
+kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation.yaml -n spring-petclinic
 ```
 
 ### 2.3 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully

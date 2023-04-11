@@ -1365,10 +1365,18 @@ operator:
     # env:
     #  - name: WATCH_NAMESPACE
     #    value: targetNamespaceAlpha,targetNamespaceBravo
+  admissionWebhooks:
+    certManager:
+      # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
 
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
 certmanager:
   enabled: false
-  # Installed using Helm and the /crds directory
-  installCRDs: false
+  installCRDs: true

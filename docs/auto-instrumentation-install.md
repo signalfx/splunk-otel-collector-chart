@@ -30,15 +30,20 @@ If a cert-manager is not available in the cluster (or other TLS certificate sour
 using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
 commands below to run these steps.
 
+_Note: In order for trace telemetry data to be properly ingested, the attribute `deployment.environment` must be on board
+the exported traces. There are two ways to set this attribute._
+- _Use the values.yaml optional `environment` configuration_
+- _Use the Instrumentation spec with the env var OTEL_RESOURCE_ATTRIBUTES_
+
 ```
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
 kubectl get pods -l app=cert-manager --all-namespaces
 
 # If cert-manager is not deployed.
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,certmanager.enabled=true -n monitoring helm-charts/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set certmanager.enabled=true,operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
 
 # If cert-manager is already deployed.
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true -n monitoring helm-charts/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
 ```
 
 ### 2. Deploy the opentelemetry.io/v1alpha1 Instrumentation

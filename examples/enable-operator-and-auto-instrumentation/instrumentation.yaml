@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
-  name: splunk-instrumentation-java
+  name: splunk-instrumentation
 spec:
   exporter:
     endpoint: http://$(SPLUNK_OTEL_AGENT):4317
@@ -15,3 +15,5 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: status.hostIP
+    # - name: OTEL_RESOURCE_ATTRIBUTES
+    #  value: deployment.environment=dev
