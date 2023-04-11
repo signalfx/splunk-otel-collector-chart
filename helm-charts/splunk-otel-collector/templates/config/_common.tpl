@@ -6,7 +6,7 @@ memory_limiter:
   # check_interval is the time between measurements of memory usage.
   check_interval: 2s
   # By default limit_mib is set to 90% of container memory limit
-  limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+  limit_mib: 500
 {{- end }}
 
 {{/*

@@ -118,7 +118,7 @@ spec:
         - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
         {{- else }}
-        - /otelcol
+        - /otelcontribcol
         {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
         - --config=/splunk-messages/config.yaml
         {{- else }}

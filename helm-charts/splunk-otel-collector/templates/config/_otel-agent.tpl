@@ -392,23 +392,6 @@ receivers:
     endpoint: 0.0.0.0:9943
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  smartagent/signalfx-forwarder:
-    type: signalfx-forwarder
-    listenAddress: 0.0.0.0:9080
-  {{- end }}
-
-  {{- if .Values.targetAllocator.enabled  }}
-  prometheus/ta:
-    config:
-      global:
-        scrape_interval: 30s
-    target_allocator:
-      endpoint: http://{{ template "splunk-otel-collector.fullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
-      interval: 30s
-      collector_id: ${env:K8S_POD_NAME}
-  {{- end }}
-
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
@@ -1008,9 +991,6 @@ service:
       receivers:
         - otlp
         - jaeger
-        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
-        - smartagent/signalfx-forwarder
-        {{- end }}
         - zipkin
       processors:
         - memory_limiter

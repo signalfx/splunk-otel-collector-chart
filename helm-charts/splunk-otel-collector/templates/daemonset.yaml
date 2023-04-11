@@ -250,7 +250,7 @@ spec:
         - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
         {{- else }}
-        - /otelcol
+        - /otelcontribcol
         - --config=/conf/relay.yaml
         {{- end }}
         {{- if .Values.agent.featureGates }}
