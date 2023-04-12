@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Sending request timeouts in k8s cluster receiver deployment on big k8s clusters [#717](https://github.com/signalfx/splunk-otel-collector-chart/pull/717)
+- Properly handle enableMetrics in Network Explorer Reducer template [#724](https://github.com/signalfx/splunk-otel-collector-chart/pull/724)
 
 ### Added
 
