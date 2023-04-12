@@ -79,6 +79,7 @@ jobs:
 
       - name: Deploy sck otel collector
         run: |
+          make repo-update dep-build
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           ci_scripts/deploy_collector.sh
 

@@ -5,7 +5,7 @@ repos:
     hooks:
     - id: render
       name: Create the rendered Kubernetes manifest resources for the project examples
-      entry: make render
+      entry: make repo-update dep-build render
       language: system
       pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks

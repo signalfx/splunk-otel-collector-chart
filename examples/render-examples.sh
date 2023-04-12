@@ -18,7 +18,7 @@ render_task(){
     --output-dir "${rendered_manifests_dir}" \
     default helm-charts/splunk-otel-collector)
   if [ $? -ne 0 ]; then
-      echo "$values_yaml FAIL - helm template:\n$out\n"
+      echo "$values_yaml FAIL - helm template: $out"
       exit 1
   fi
   # Move the chart renders
