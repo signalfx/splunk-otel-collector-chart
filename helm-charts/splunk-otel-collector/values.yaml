@@ -51,6 +51,8 @@ splunkPlatform:
   disableCompression: true
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
+  # Idle connection timeout. defaults to 10s
+  idleConnTimeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
   insecureSkipVerify: false

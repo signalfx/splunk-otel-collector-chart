@@ -51,6 +51,9 @@ spec:
             {{- if .Values.networkExplorer.reducer.disableMetrics }}
             - --disable-metrics={{join "," .Values.networkExplorer.reducer.disableMetrics}}
             {{- end }}
+            {{- if .Values.networkExplorer.reducer.enableMetrics }}
+            - --enable-metrics={{join "," .Values.networkExplorer.reducer.enableMetrics}}
+            {{- end }}
             {{- if .Values.networkExplorer.reducer.ingestShards }}
             - --num-ingest-shards={{- .Values.networkExplorer.reducer.ingestShards }}
             {{- end }}
