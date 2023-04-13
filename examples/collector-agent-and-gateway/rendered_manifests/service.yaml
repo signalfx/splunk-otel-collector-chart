@@ -1,0 +1,57 @@
+---
+# Source: splunk-otel-collector/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-splunk-otel-collector
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.72.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.72.0"
+    app: splunk-otel-collector
+    component: otel-collector
+    chart: splunk-otel-collector-0.72.0
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-collector
+spec:
+  type: ClusterIP
+  ports:
+  - name: http-forwarder
+    port: 6060
+    targetPort: http-forwarder
+    protocol: TCP
+  - name: jaeger-grpc
+    port: 14250
+    targetPort: jaeger-grpc
+    protocol: TCP
+  - name: jaeger-thrift
+    port: 14268
+    targetPort: jaeger-thrift
+    protocol: TCP
+  - name: otlp
+    port: 4317
+    targetPort: otlp
+    protocol: TCP
+  - name: otlp-http
+    port: 4318
+    targetPort: otlp-http
+    protocol: TCP
+  - name: otlp-http-old
+    port: 55681
+    targetPort: otlp-http-old
+    protocol: TCP
+  - name: signalfx
+    port: 9943
+    targetPort: signalfx
+    protocol: TCP
+  - name: zipkin
+    port: 9411
+    targetPort: zipkin
+    protocol: TCP
+  selector:
+    app: splunk-otel-collector
+    component: otel-collector
+    release: default
