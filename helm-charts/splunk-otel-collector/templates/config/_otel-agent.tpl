@@ -30,16 +30,9 @@ receivers:
   {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus/agent:
-    config:
-      scrape_configs:
-      - job_name: 'otel-agent'
-        scrape_interval: 10s
-        static_configs:
-        - targets:
-          - "${K8S_POD_IP}:8889"
-          # Fluend metrics collection disabled by default
-          # - "${K8S_POD_IP}:24231"
+  lightprometheus/agent:
+    collection_interval: 10s
+    endpoint: "http://${K8S_POD_IP}:8889"
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:
@@ -63,7 +56,7 @@ receivers:
     watch_observers: [k8s_observer]
     receivers:
       {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-      prometheus_simple:
+      lightprometheus:
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
@@ -71,9 +64,7 @@ receivers:
         # Enable prometheus scraping for istio pods only
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
         {{- end }}
-        config:
-          metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-          endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+        endpoint: 'http://`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090``"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`"
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
@@ -782,7 +773,7 @@ service:
     {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
     # Pipeline for metrics collected about the agent pod itself.
     metrics/agent:
-      receivers: [prometheus/agent]
+      receivers: [lightprometheus/agent]
       processors:
         - memory_limiter
         - batch
