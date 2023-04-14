@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.72.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.72.0"
+    app.kubernetes.io/version: "0.75.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.72.0
     release: default
@@ -176,20 +176,15 @@ data:
         - container
         - pod
         - node
+      lightprometheus/agent:
+        collection_interval: 10s
+        endpoint: http://${K8S_POD_IP}:8889
       otlp:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
-      prometheus/agent:
-        config:
-          scrape_configs:
-          - job_name: otel-agent
-            scrape_interval: 10s
-            static_configs:
-            - targets:
-              - ${K8S_POD_IP}:8889
       receiver_creator:
         receivers:
           smartagent/coredns:
@@ -291,7 +286,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - prometheus/agent
+          - lightprometheus/agent
         traces:
           exporters:
           - sapm

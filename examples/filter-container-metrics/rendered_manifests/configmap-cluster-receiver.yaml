@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.72.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.72.0"
+    app.kubernetes.io/version: "0.75.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.72.0
     release: default
@@ -77,14 +77,9 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
-      prometheus/k8s_cluster_receiver:
-        config:
-          scrape_configs:
-          - job_name: otel-k8s-cluster-receiver
-            scrape_interval: 10s
-            static_configs:
-            - targets:
-              - ${K8S_POD_IP}:8889
+      lightprometheus/k8s_cluster_receiver:
+        collection_interval: 10s
+        endpoint: http://${K8S_POD_IP}:8889
     service:
       extensions:
       - health_check
@@ -111,7 +106,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - prometheus/k8s_cluster_receiver
+          - lightprometheus/k8s_cluster_receiver
       telemetry:
         metrics:
           address: 0.0.0.0:8889

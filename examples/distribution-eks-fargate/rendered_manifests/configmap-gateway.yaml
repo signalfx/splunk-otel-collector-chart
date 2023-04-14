@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.72.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.72.0"
+    app.kubernetes.io/version: "0.75.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.72.0
     release: default
@@ -130,20 +130,15 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
+      lightprometheus/collector:
+        collection_interval: 10s
+        endpoint: http://${K8S_POD_IP}:8889
       otlp:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
-      prometheus/collector:
-        config:
-          scrape_configs:
-          - job_name: otel-collector
-            scrape_interval: 10s
-            static_configs:
-            - targets:
-              - ${K8S_POD_IP}:8889
       signalfx:
         access_token_passthrough: true
         endpoint: 0.0.0.0:9943
@@ -184,7 +179,7 @@ data:
           - resourcedetection
           - resource/add_cluster_name
           receivers:
-          - prometheus/collector
+          - lightprometheus/collector
         traces:
           exporters:
           - sapm
