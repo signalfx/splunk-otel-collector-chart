@@ -224,6 +224,10 @@ helm delete my-splunk-otel-collector
 To fully configure the Helm chart, see the [advanced
 configuration](docs/advanced-configuration.md).
 
+## Auto-instrumentation
+
+For setting up auto-instrumentation, see the [auto-instrumentation-introduction.md](docs/auto-instrumentation-introduction.md).
+
 ## Contributing
 
 We welcome feedback and contributions from the community! Please see our ([contribution guidelines](CONTRIBUTING.md)) for more information on how to get involved.

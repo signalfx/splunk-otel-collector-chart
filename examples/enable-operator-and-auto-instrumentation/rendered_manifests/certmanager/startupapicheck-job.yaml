@@ -1,0 +1,53 @@
+---
+# Source: splunk-otel-collector/charts/certmanager/templates/startupapicheck-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: default-certmanager-startupapicheck
+  namespace: default
+  labels:
+    app: startupapicheck
+    app.kubernetes.io/name: startupapicheck
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: "startupapicheck"
+    app.kubernetes.io/version: "v1.11.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: certmanager-v1.11.0
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "1"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        app: startupapicheck
+        app.kubernetes.io/name: startupapicheck
+        app.kubernetes.io/instance: default
+        app.kubernetes.io/component: "startupapicheck"
+        app.kubernetes.io/version: "v1.11.0"
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: certmanager-v1.11.0
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: default-certmanager-startupapicheck
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: certmanager-startupapicheck
+          image: "quay.io/jetstack/cert-manager-ctl:v1.11.0"
+          imagePullPolicy: IfNotPresent
+          args:
+          - check
+          - api
+          - --wait=1m
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+      nodeSelector:
+        kubernetes.io/os: linux

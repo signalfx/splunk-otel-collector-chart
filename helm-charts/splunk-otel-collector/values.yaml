@@ -1345,13 +1345,41 @@ networkExplorer:
       # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
 
 ################################################################################
-# Open-telemetry operator running as a deployment with a replica count of 1.
+# Notice: Operator related features should be considered to have an alpha
+# maturity level and be experimental. There may be breaking changes or Operator
+# features may be replaced entirely with a better alternative in the future.
+#
+# The OpenTelemetry Operator running as a deployment with a replica count of 1.
 # It auto-instruments applications to emit telemetry data.
-# The operator is imported as a subchart into this chart. For a full list of
-# values, see:
-# https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml
+# Related documentation: docs/auto-instrumentation-install.md
+# Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
 operator:
-  # Currently, this feature cannot be enabled. Coming soon.
   enabled: false
+  manager:
+    autoInstrumentationImage:
+      java:
+        repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
+        tag: "v1.22.0"
+    # name: nameOverride
+    # By default, the operator manager will watch all namespaces for instrumentation purposes.
+    # Use this env var to reduce the scope of watched environments.
+    # env:
+    #  - name: WATCH_NAMESPACE
+    #    value: targetNamespaceAlpha,targetNamespaceBravo
+  admissionWebhooks:
+    certManager:
+      # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+
+# The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
+# Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
+certmanager:
+  enabled: false
+  installCRDs: true
