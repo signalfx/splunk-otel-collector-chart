@@ -27,6 +27,9 @@ jobs:
         with:
           version: v3.5.4
 
+      - name: Set up chart dependencies
+        run: make repo-update dep-build
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
