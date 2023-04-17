@@ -20,12 +20,7 @@ To make a new release of the helm chart:
      - https://cert-manager.io/docs/installation/supported-releases/
      - https://github.com/open-telemetry/opentelemetry-operator/releases
    - Increment versions under `dependencies` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml#)
-   - Run: `helm dependency build`
-   - If the cert-manager subchart is updated
-     - Run: `wget -P helm-charts/splunk-otel-collector/crds https://github.com/cert-manager/cert-manager/releases/download/{VERSION}/cert-manager.crds.yaml"`.
-     - The cert-manager chart installs the crds that the operator chart requires for install, resulting in order of operations errors (helm install & upgrade).
-     - To fix the order of operations errors, the cert-manager crds are added to the /crds dir so Helm will make them available for Helm install and upgrade actions.
-1. Run `make render` to render all the examples with the latest changes.
+1. Run `make repo-update dep-build render` to update Helm dependencies and render all the examples with the latest changes.
 1. Create PR and request review from the team.
 1. When the PR gets merged, the release will automatically be made and the helm repo updated.
 1. Release notes are not populated automatically. So make sure to update them manually using the notes from [CHANGELOG](./CHANGELOG.md).

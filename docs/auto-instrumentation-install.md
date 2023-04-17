@@ -40,49 +40,28 @@ the exported traces. There are two ways to set this attribute._
 kubectl get pods -l app=cert-manager --all-namespaces
 
 # If cert-manager is not deployed.
-helm install splunk-otel-collector -f ./my_values.yaml --set certmanager.enabled=true,operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set certmanager.enabled=true,operator.enabled=true,environment=dev helm-charts/splunk-otel-collector
 
 # If cert-manager is already deployed.
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev -n monitoring helm-charts/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev helm-charts/splunk-otel-collector
 ```
 
 ### 2. Deploy the opentelemetry.io/v1alpha1 Instrumentation
 
-This Instrumentation object is a spec to configure what instrumentation libraries to use for instrumentation. An
-Instrumentation object must be available to the target pod for auto-instrumentation to function. Here is an example
-of a Instrumentation yaml file and how to install it.
+The [Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
+object is used to configure how your applications will be auto-instrumented. An Instrumentation object must be
+available to the target pod being auto-instrumented in order for instrumentation to be successful.
 
-<details open>
-<summary>Expand for sample splunk-instrumentation.yaml</summary>
-
-```yaml
-# splunk-instrumentation.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: Instrumentation
-metadata:
-  name: splunk-instrumentation
-spec:
-  exporter:
-    endpoint: http://$(SPLUNK_OTEL_AGENT):4317
-  propagators:
-    - tracecontext
-    - baggage
-    - b3
-  env:
-    - name: SPLUNK_OTEL_AGENT
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: status.hostIP
-```
-
-</details>
+For Splunk Instrumentation configurations, please see or use this [instrumentation.yaml](../examples/enable-operator-and-auto-instrumentation/instrumentation.yaml)
+in our examples directory. The Splunk Instrumentation object should be installed in the namespace target applications
+resides in. For example, for instrumenting applications in a namespace called `my-app-namespace` the Instrumentation
+object could be installed with the following command.
 
 ```
 # Install
-kubectl apply -f splunk-instrumentation.yaml
+kubectl apply -f instrumentation.yaml -n my-app-namespace
 # Check the current deployed values
-kubectl get otelinst -o yaml
+kubectl get otelinst -o yaml -n my-app-namespace
 ```
 
 ### 3. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
@@ -91,8 +70,7 @@ kubectl get otelinst -o yaml
 <summary>Expand for sample output to verify against</summary>
 
 ```
-kubectl  get pods -n monitoring
-# NAME                                                          READY
+kubectl get pods -n default
 # NAMESPACE     NAME                                                            READY   STATUS
 # monitoring    splunk-otel-collector-agent-lfthw                               2/2     Running
 # monitoring    splunk-otel-collector-cert-manager-6b9fb8b95f-2lmv4             1/1     Running
@@ -101,12 +79,12 @@ kubectl  get pods -n monitoring
 # monitoring    splunk-otel-collector-k8s-cluster-receiver-856f5fbcf9-pqkwg     1/1     Running
 # monitoring    splunk-otel-collector-opentelemetry-operator-56c4ddb4db-zcjgh   2/2     Running
 
-kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io -n monitoring
+kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io -n default
 # NAME                                      WEBHOOKS   AGE
 # splunk-otel-collector-cert-manager-webhook              1          14m
 # splunk-otel-collector-opentelemetry-operator-mutation   3          14m
 
-kubectl get otelinst -n spring-petclinic
+kubectl get otelinst -n my-app-namespace
 # NAME                          AGE   ENDPOINT
 # splunk-instrumentation        3m   http://$(SPLUNK_OTEL_AGENT):4317
 ```
@@ -134,7 +112,7 @@ The instrumentation annotations can have the following values:
 ### 5. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 The trace and metrics data should populate the APM dashboard.To better
-visualize this example as a whole, we have also included a an image
+visualize this example as a whole, we have also included an image
 of what the APM dashboard should look like and a architecture diagram to show
 how everything is set up.
 
