@@ -20,8 +20,8 @@ jobs:
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-      KUBERNETES_VERSION: v1.24.7
-      MINIKUBE_VERSION: v1.30.1
+      KUBERNETES_VERSION: v1.21.2
+      MINIKUBE_VERSION: v1.22.0
 
     steps:
       - name: Checkout
@@ -46,7 +46,7 @@ jobs:
           sudo sysctl fs.protected_regular=0
           # Start Minikube and Wait
           minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
-          kubectl apply -f https://docs.projectcalico.org/v3.25.1/manifests/calico.yaml
+          kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
           export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
           until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
             sleep 1;
