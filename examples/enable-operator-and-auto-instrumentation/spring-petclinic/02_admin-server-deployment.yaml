@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --file spring-petclinic/spring-petclinic-microservices/docker-compose.yml  convert
+    kompose.version: 1.28.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: admin-server
+  name: admin-server
+  namespace: spring-petclinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: admin-server
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --file spring-petclinic/spring-petclinic-microservices/docker-compose.yml  convert
+        kompose.version: 1.28.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-microservices-default: "true"
+        io.kompose.service: admin-server
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-admin-server
+          name: admin-server
+          ports:
+            - containerPort: 9090
+          resources:
+            limits:
+              memory: "350Mi"
+      restartPolicy: Always
+status: {}

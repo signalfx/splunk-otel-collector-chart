@@ -9,9 +9,7 @@ In the following example we will show how to instrument a project based on
 
 The Java spring-petclinic demo will create a spring-petclinic namespace and deploy the related Java applications to it.
 If you have your own Java application you want to instrument, you can still use the steps below as an example for how
-to intrument your application.
-
-TODO: Add the Kubernetes manifests for spring-petclinic to this example in a followup PR
+to instrument your application.
 
 ```
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R
