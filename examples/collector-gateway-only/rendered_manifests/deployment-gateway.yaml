@@ -17,7 +17,7 @@ metadata:
     heritage: Helm
     app.kubernetes.io/component: otel-collector
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: splunk-otel-collector
@@ -44,7 +44,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "8192"
+            value: "4096"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -106,8 +106,8 @@ spec:
             port: 13133
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 2
+            memory: 4Gi
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap

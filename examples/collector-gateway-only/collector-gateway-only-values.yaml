@@ -5,6 +5,11 @@ splunkObservability:
 
 gateway:
   enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
 agent:
   enabled: false
 clusterReceiver:
