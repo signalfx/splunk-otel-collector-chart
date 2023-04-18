@@ -11,6 +11,11 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  file_storage/persistent_queue:
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent
+  {{- end }}
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
@@ -639,9 +644,17 @@ exporters:
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+      {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs }}
+      storage: file_storage/persistent_queue
+      {{- end }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+      {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics }}
+      storage: file_storage/persistent_queue
+      {{- end }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
@@ -669,6 +682,9 @@ service:
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    - file_storage/persistent_queue
     {{- end }}
     - health_check
     - k8s_observer

@@ -160,10 +160,12 @@ exporters:
 
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
