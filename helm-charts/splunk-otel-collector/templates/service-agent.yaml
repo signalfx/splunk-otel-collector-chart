@@ -1,0 +1,44 @@
+{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{- if .Values.agent.service.enabled }}
+{{/*
+Fargate doesn't support daemonsets so never use for that platform
+*/}}
+{{- if and $agent.enabled (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "splunk-otel-collector.fullname" . }}-agent
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-collector-agent
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: otel-collector-agent
+{{- with .Values.service.annotations }}
+  annotations:
+{{ toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- range $key, $port := $agent.ports }}
+  {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
+  {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
+  {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}
+  {{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
+  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
+  - name: {{ $key }}
+    port: {{ $port.containerPort }}
+    targetPort: {{ $key }}
+    protocol: {{ $port.protocol }}
+  {{- end }}
+  {{- end }}
+  selector:
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-collector-agent
+    release: {{ .Release.Name }}
+  internalTrafficPolicy: Local
+{{- end }}
+{{- end }}
