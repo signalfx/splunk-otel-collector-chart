@@ -2,9 +2,6 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: admin-server
@@ -23,9 +20,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: api-gateway
@@ -44,9 +38,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: config-server
@@ -65,9 +56,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: customers-service
@@ -86,9 +74,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: discovery-server
@@ -107,9 +92,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: grafana-server
@@ -128,9 +110,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: prometheus-server
@@ -149,9 +128,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: tracing-server
@@ -170,9 +146,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: vets-service
@@ -191,9 +164,6 @@ status:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: visits-service
@@ -212,9 +182,6 @@ status:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: admin-server
@@ -227,9 +194,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -273,9 +237,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: api-gateway
@@ -288,9 +249,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -318,9 +276,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: config-server
@@ -333,9 +288,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -356,9 +308,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: customers-service
@@ -371,9 +320,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -401,9 +347,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: discovery-server
@@ -416,9 +359,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -446,9 +386,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: grafana-server
@@ -461,9 +398,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -484,9 +418,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: prometheus-server
@@ -499,9 +430,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -522,9 +450,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: tracing-server
@@ -537,9 +462,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -563,9 +485,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: vets-service
@@ -578,9 +497,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"
@@ -608,9 +524,6 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-    kompose.version: 1.28.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: visits-service
@@ -623,9 +536,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert --file examples/enable-operator-and-auto-instrumentation/spring-petclinic/docker-compose.yaml --out examples/enable-operator-and-auto-instrumentation/spring-petclinic/02_install_resources.yaml
-        kompose.version: 1.28.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.network/spring-petclinic-default: "true"

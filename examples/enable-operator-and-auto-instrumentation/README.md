@@ -12,7 +12,7 @@ If you have your own Java application you want to instrument, you can still use 
 to instrument your application.
 
 ```
-kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R
+kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R -n spring-petclinic
 ```
 
 ### 2. Complete the steps outlined in [Getting started with auto-instrumentation](../../docs/auto-instrumentation-install.md#steps-for-setting-up-auto-instrumentation)
