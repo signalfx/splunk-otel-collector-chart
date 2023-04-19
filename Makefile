@@ -1,6 +1,5 @@
 .PHONY: render
-render:
-	make repo-update dep-build > /dev/null # Always make sure the required helm repos are added and up to date.
+render: repo-update dep-build
 	bash ./examples/render-examples.sh
 
 .PHONY: repo-update
