@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Add `logsCollection.containers.maxRecombineLogSize` config option with default 1Mb value which is applied
+  to `max_log_size` option of the multiline recombine operators
+
 ## [0.75.0] - 2023-04-17
 
 ### Changed
