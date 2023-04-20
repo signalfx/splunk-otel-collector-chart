@@ -35,7 +35,7 @@ the exported traces. There are two ways to set this attribute._
 - _Use the values.yaml optional `environment` configuration_
 - _Use the Instrumentation spec with the env var OTEL_RESOURCE_ATTRIBUTES_
 
-```
+```bash
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
 kubectl get pods -l app=cert-manager --all-namespaces
 
@@ -57,7 +57,7 @@ in our examples directory. The Splunk Instrumentation object should be installed
 resides in. For example, for instrumenting applications in a namespace called `my-app-namespace` the Instrumentation
 object could be installed with the following command.
 
-```
+```bash
 # Install
 kubectl apply -f instrumentation.yaml -n my-app-namespace
 # Check the current deployed values
@@ -66,10 +66,10 @@ kubectl get otelinst -o yaml -n my-app-namespace
 
 ### 3. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
-<details open>
+<details>
 <summary>Expand for sample output to verify against</summary>
 
-```
+```bash
 kubectl get pods -n default
 # NAMESPACE     NAME                                                            READY   STATUS
 # monitoring    splunk-otel-collector-agent-lfthw                               2/2     Running
@@ -156,7 +156,7 @@ everything needed to set up auto-instrumentation and I want to instrument my Jav
 
 Below is a breakdown of the main and related components involved in auto-instrumentation:
 
-<details open>
+<details>
 <summary>Splunk OTel Collector Chart</summary>
 
 - Description
@@ -166,7 +166,7 @@ Below is a breakdown of the main and related components involved in auto-instrum
 
 </details>
 
-<details open>
+<details>
 <summary>OpenTelemetry Operator</summary>
 
 - Description
@@ -187,7 +187,7 @@ Below is a breakdown of the main and related components involved in auto-instrum
 
 </details>
 
-<details open>
+<details>
 <summary> Kubernetes Object - opentelemetry.io/v1alpha1 Instrumentation </summary>
 
 - Description
@@ -197,7 +197,7 @@ Below is a breakdown of the main and related components involved in auto-instrum
 
 </details>
 
-<details open>
+<details>
 <summary>OpenTelemetry SDK</summary>
 
 - Description
@@ -213,7 +213,7 @@ Below is a breakdown of the main and related components involved in auto-instrum
 
 </details>
 
-<details open>
+<details>
 
 <summary>OpenTelemetry Instrumentation Libraries</summary>
 
