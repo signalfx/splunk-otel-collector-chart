@@ -16,4 +16,10 @@ repo-update:
 
 .PHONY: dep-build
 dep-build:
-	helm dependencies build ./helm-charts/splunk-otel-collector
+	@{ \
+  OK=true ;\
+  DIR=helm-charts/splunk-otel-collector ;\
+	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then OK=false ; fi ;\
+	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then OK=false ; fi ;\
+	if ! $$OK ; then helm dependencies build $$DIR ; fi ;\
+	}
