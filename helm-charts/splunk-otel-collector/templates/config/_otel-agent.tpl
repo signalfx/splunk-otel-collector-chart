@@ -376,6 +376,7 @@ receivers:
         source_identifier: resource["com.splunk.source"]
         combine_field: attributes.log
         is_first_entry: '(attributes.log) matches {{ .firstEntryRegex | quote }}'
+        max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
       {{- end }}
       {{- end }}
       {{- with .Values.logsCollection.containers.extraOperators }}

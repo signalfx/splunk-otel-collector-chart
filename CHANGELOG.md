@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Add `logsCollection.containers.maxRecombineLogSize` config option with default 1Mb value which is applied
+  to `max_log_size` option of the multiline recombine operators
+
+## [0.75.0] - 2023-04-17
+
+### Changed
+
 - Update the Kubernetes scheduler monitor to stop using insecure port 10251 and start using secure port 10259 with authentication [#711](https://github.com/signalfx/splunk-otel-collector-chart/pull/711)
+- Upgrade splunk-otel-collector image to 0.75.0
 
 ### Fixed
 
@@ -18,7 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add support for Operator based Java auto-instrumentation [#701](https://github.com/signalfx/splunk-otel-collector-chart/pull/701)
 - Add experimental support for deploying OpenTelemetry Operator as a subchart [#691](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)
 - Improve documentation about providing tokens as Kubernetes secrets [#707](https://github.com/signalfx/splunk-otel-collector-chart/pull/691)
-- Expose idle_conn_timeout on the splunk HEC exporters [#728](https://github.com/signalfx/splunk-otel-collector-chart/pull/728)
+- Expose `idle_conn_timeout` on the splunk HEC exporters [#728](https://github.com/signalfx/splunk-otel-collector-chart/pull/728)
+- Add `logsCollection.containers.maxRecombineLogSize` config option with default 1Mb value which is applied
+  to `max_log_size` option of the default recombine operators [#713](https://github.com/signalfx/splunk-otel-collector-chart/pull/713)
 
 ## [0.72.0] - 2023-03-09
 

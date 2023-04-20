@@ -180,7 +180,7 @@ To migrate Fluentd's position files again:
 Translate the values.yaml file from SCK to an appropriate format for Splunk OpenTelemetry Collector for Kubernetes. The following are the configurations for SCK and Splunk OpenTelemetry Collector for Kubernetes:
 
 * [SCK configuration](https://github.com/splunk/splunk-connect-for-kubernetes/blob/develop/helm-chart/splunk-connect-for-kubernetes/values.yaml)
-* [Splunk OpenTelemetry Collector for Kubernetes configuration](https://github.com/andrewy-splunk/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
+* [Splunk OpenTelemetry Collector for Kubernetes configuration](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/values.yaml)
 
 ### Translating global/generic/splunk configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes
 
