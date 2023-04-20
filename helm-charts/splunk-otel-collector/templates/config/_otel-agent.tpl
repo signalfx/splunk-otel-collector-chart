@@ -32,7 +32,7 @@ receivers:
   # Prometheus receiver scraping metrics from the pod itself
   lightprometheus/agent:
     collection_interval: 10s
-    endpoint: "http://${K8S_POD_IP}:8889"
+    endpoint: "http://${K8S_POD_IP}:8889/metrics"
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:

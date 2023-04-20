@@ -22,7 +22,7 @@ receivers:
   # Prometheus receiver scraping metrics from the pod itself
   lightprometheus/collector:
     collection_interval: 10s
-    endpoint: "http://${K8S_POD_IP}:8889"
+    endpoint: "http://${K8S_POD_IP}:8889/metrics"
   signalfx:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true

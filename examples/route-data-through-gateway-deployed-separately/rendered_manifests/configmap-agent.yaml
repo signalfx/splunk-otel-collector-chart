@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.72.0
+    helm.sh/chart: splunk-otel-collector-0.72.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.75.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.72.0
+    chart: splunk-otel-collector-0.72.1
     release: default
     heritage: Helm
 data:
@@ -169,7 +169,7 @@ data:
         - node
       lightprometheus/agent:
         collection_interval: 10s
-        endpoint: http://${K8S_POD_IP}:8889
+        endpoint: http://${K8S_POD_IP}:8889/metrics
       otlp:
         protocols:
           grpc:

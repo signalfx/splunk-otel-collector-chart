@@ -22,7 +22,7 @@ receivers:
   # Prometheus receiver scraping metrics from the pod itself, both otel and fluentd
   lightprometheus/k8s_cluster_receiver:
     collection_interval: 10s
-    endpoint: "http://${K8S_POD_IP}:8889"
+    endpoint: "http://${K8S_POD_IP}:8889/metrics"
   k8s_cluster:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
