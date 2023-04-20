@@ -4,7 +4,7 @@ metadata:
   name: splunk-instrumentation
 spec:
   exporter:
-    endpoint: http://$(SPLUNK_OTEL_AGENT):4318
+    endpoint: http://$(SPLUNK_OTEL_AGENT):4317
   propagators:
     - tracecontext
     - baggage

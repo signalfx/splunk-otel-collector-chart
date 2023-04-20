@@ -11,7 +11,7 @@ The Java spring-petclinic demo will create a spring-petclinic namespace and depl
 If you have your own Java application you want to instrument, you can still use the steps below as an example for how
 to instrument your application.
 
-```
+```bash
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/spring-petclinic -R -n spring-petclinic
 ```
 
@@ -40,13 +40,13 @@ The Instrumentation object is a spec to configure what instrumentation libraries
 to use for instrumentation. This Instrumentation will be used to know how to instrument the spring-clinic applications
 in the spring-petclinic namespace.
 
-```
+```bash
 kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation.yaml -n spring-petclinic
 ```
 
 ### 2.3 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
-<details open>
+<details>
 <summary>Expand for kubectl commands to run and output</summary>
 
 ```
@@ -83,7 +83,7 @@ kubectl get otelinst -n spring-petclinic
 #### 2.4 Instrument application by setting an annotation
 
 When you get to the `5. Instrument application by setting an annotation` step, you can use the following commands:
-<details open>
+<details>
 <summary>Expand for commands to run to add the annotation</summary>
 
 ```
@@ -151,7 +151,7 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr  -n spring-petclinic
 
 #### 2.5 Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
-<details open>
+<details>
 <summary> Expand for visual results </summary>
 
 ![APM](auto-instrumentation-java-apm-result.png)
