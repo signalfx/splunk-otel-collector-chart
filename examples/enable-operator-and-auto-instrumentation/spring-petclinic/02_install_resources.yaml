@@ -1,0 +1,561 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: admin-server
+  name: admin-server
+spec:
+  ports:
+    - name: "9090"
+      port: 9090
+      targetPort: 9090
+  selector:
+    io.kompose.service: admin-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api-gateway
+  name: api-gateway
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+  selector:
+    io.kompose.service: api-gateway
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: config-server
+  name: config-server
+spec:
+  ports:
+    - name: "8888"
+      port: 8888
+      targetPort: 8888
+  selector:
+    io.kompose.service: config-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: customers-service
+  name: customers-service
+spec:
+  ports:
+    - name: "8081"
+      port: 8081
+      targetPort: 8081
+  selector:
+    io.kompose.service: customers-service
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: discovery-server
+  name: discovery-server
+spec:
+  ports:
+    - name: "8761"
+      port: 8761
+      targetPort: 8761
+  selector:
+    io.kompose.service: discovery-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: grafana-server
+  name: grafana-server
+spec:
+  ports:
+    - name: "3000"
+      port: 3000
+      targetPort: 3000
+  selector:
+    io.kompose.service: grafana-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: prometheus-server
+  name: prometheus-server
+spec:
+  ports:
+    - name: "9091"
+      port: 9091
+      targetPort: 9090
+  selector:
+    io.kompose.service: prometheus-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: tracing-server
+  name: tracing-server
+spec:
+  ports:
+    - name: "9411"
+      port: 9411
+      targetPort: 9411
+  selector:
+    io.kompose.service: tracing-server
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: vets-service
+  name: vets-service
+spec:
+  ports:
+    - name: "8083"
+      port: 8083
+      targetPort: 8083
+  selector:
+    io.kompose.service: vets-service
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: visits-service
+  name: visits-service
+spec:
+  ports:
+    - name: "8082"
+      port: 8082
+      targetPort: 8082
+  selector:
+    io.kompose.service: visits-service
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: admin-server
+  name: admin-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: admin-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: admin-server
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-admin-server
+          name: admin-server
+          ports:
+            - containerPort: 9090
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: null
+  name: spring-petclinic-default
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              io.kompose.network/spring-petclinic-default: "true"
+  podSelector:
+    matchLabels:
+      io.kompose.network/spring-petclinic-default: "true"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api-gateway
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: api-gateway
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: api-gateway
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-api-gateway
+          name: api-gateway
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: config-server
+  name: config-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: config-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: config-server
+    spec:
+      containers:
+        - image: springcommunity/spring-petclinic-config-server
+          name: config-server
+          ports:
+            - containerPort: 8888
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: customers-service
+  name: customers-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: customers-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: customers-service
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-customers-service
+          name: customers-service
+          ports:
+            - containerPort: 8081
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: discovery-server
+  name: discovery-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: discovery-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: discovery-server
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://config-server:8888
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-discovery-server
+          name: discovery-server
+          ports:
+            - containerPort: 8761
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: grafana-server
+  name: grafana-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: grafana-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: grafana-server
+    spec:
+      containers:
+        - image: grafana-server
+          name: grafana-server
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "268435456"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: prometheus-server
+  name: prometheus-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: prometheus-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: prometheus-server
+    spec:
+      containers:
+        - image: prometheus-server
+          name: prometheus-server
+          ports:
+            - containerPort: 9090
+          resources:
+            limits:
+              memory: "268435456"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: tracing-server
+  name: tracing-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: tracing-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: tracing-server
+    spec:
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: -XX:+UnlockExperimentalVMOptions -Djava.security.egd=file:/dev/./urandom
+          image: openzipkin/zipkin
+          name: tracing-server
+          ports:
+            - containerPort: 9411
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: vets-service
+  name: vets-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: vets-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: vets-service
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-vets-service
+          name: vets-service
+          ports:
+            - containerPort: 8083
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: visits-service
+  name: visits-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: visits-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/spring-petclinic-default: "true"
+        io.kompose.service: visits-service
+    spec:
+      containers:
+        - command:
+            - ./dockerize
+            - -wait=tcp://discovery-server:8761
+            - -timeout=60s
+            - --
+            - java
+            - org.springframework.boot.loader.JarLauncher
+          image: springcommunity/spring-petclinic-visits-service
+          name: visits-service
+          ports:
+            - containerPort: 8082
+          resources:
+            limits:
+              memory: "536870912"
+      restartPolicy: Always
+status: {}
+
