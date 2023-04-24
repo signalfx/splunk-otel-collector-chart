@@ -1,0 +1,56 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: false
+  logsEnabled: true
+  tracesEnabled: false
+
+logsEngine: otel
+agent:
+  config:
+    extensions:
+      another_file_storage:
+        directory: /var/addon/splunk/otel_another
+logsCollection:
+  extraFileLogs:
+    filelog/example-with-storage:
+      include:
+      - /tmp/*/*/*/kubernetes.io~empty-dir/emptydir/*.log
+      start_at: beginning
+      storage: file_storage
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.index: otel_events
+        com.splunk.source: /var/log/emptydir/emptydir-mario
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: example
+      operators:
+      - from: attributes.volume_name
+        to: resource["k8s.volume.name"]
+        type: move
+    filelog/example-without-storage:
+      include:
+        - /tmp/*/*/*/kubernetes.io~empty-dir/emptydir/catalina*.log
+      start_at: beginning
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.index: otel_events
+        com.splunk.source: /var/log/emptydir/example-without-storage
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: example
+    filelog/example-with-another-storage:
+      include:
+        - /tmp/*/*/*/kubernetes.io~empty-dir/*/*.log
+      start_at: beginning
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.index: otel_events
+        com.splunk.source: /var/log/emptydir/example-with-another-storage
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: example
+      storage: another_file_storage
+

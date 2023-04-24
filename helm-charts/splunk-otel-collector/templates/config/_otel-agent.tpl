@@ -405,7 +405,14 @@ receivers:
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
-  {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
+  {{- $extraFileLogsList := .Values.logsCollection.extraFileLogs }}
+  {{- range $extraFileLogKey, $extraFileLogValue := $extraFileLogsList }}
+  {{- printf "%s:" $extraFileLogKey | nindent 2 }}
+  {{- if not $extraFileLogValue.storage }}
+    storage: file_storage
+  {{- end }}
+  {{- $extraFileLogValue | toYaml | nindent 4 }}
+  {{- end }}
   {{- end }}
 
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
