@@ -1344,6 +1344,7 @@ networkExplorer:
       # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
       # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
 
+
 ################################################################################
 # Notice: Operator related features should be considered to have an alpha
 # maturity level and be experimental. There may be breaking changes or Operator
@@ -1383,3 +1384,18 @@ operator:
 certmanager:
   enabled: false
   installCRDs: true
+
+
+################################################################################
+# Helm Chart Feature Gates.
+# The following feature gates are used to enable/disable features in the Helm chart
+# that are not yet ready for general availability.
+# Options in this section are not guaranteed to be stable and may change at any time.
+################################################################################
+
+featureGates:
+  # Use Light Prometheus Receiver for metrics collection from discovered Prometheus endpoints.
+  # https://github.com/signalfx/splunk-otel-collector/tree/main/internal/receiver/lightprometheusreceiver
+  # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
+  # From the other hand, it does not support all Prometheus configuration options.
+  useLightPrometheusReceiver: false
