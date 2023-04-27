@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Option to use lightprometheus receiver through a feature gate for metrics collection from discovered Prometheus endpoints [757](https://github.com/signalfx/splunk-otel-collector-chart/pull/757)
+
 ### Changed
 
 - Add `logsCollection.containers.maxRecombineLogSize` config option with default 1Mb value which is applied
