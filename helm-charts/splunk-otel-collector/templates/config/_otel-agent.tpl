@@ -369,6 +369,9 @@ receivers:
       - type: move
         from: attributes["log.file.path"]
         to: resource["com.splunk.source"]
+      {{- with .Values.logsCollection.containers.extraOperators }}
+      {{ . | toYaml | nindent 6 }}
+      {{- end }}
       {{- if .Values.logsCollection.containers.multilineConfigs }}
       - type: router
         routes:
@@ -386,9 +389,6 @@ receivers:
         is_first_entry: '(attributes.log) matches {{ .firstEntryRegex | quote }}'
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
       {{- end }}
-      {{- end }}
-      {{- with .Values.logsCollection.containers.extraOperators }}
-      {{ . | toYaml | nindent 6 }}
       {{- end }}
       # Clean up log record
       - type: move
