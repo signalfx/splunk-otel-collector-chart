@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Add `logsCollection.containers.maxRecombineLogSize` config option with default 1Mb value which is applied
   to `max_log_size` option of the multiline recombine operators
+- Move `extraOperators` above `multilineConfig` in _otel_agent.tpl, as `extraOperators` gets
+  skipped when we use both `multilineConfig` AND `extraOperators` in values.yaml
 
 ## [0.75.0] - 2023-04-17
 
