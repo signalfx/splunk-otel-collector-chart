@@ -273,6 +273,8 @@ receivers:
     # https://github.com/open-telemetry/opentelemetry-log-collection/issues/292
     force_flush_period: "0"
     storage: file_storage
+    retry_on_failure:
+      enabled: true
     operators:
       {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
