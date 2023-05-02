@@ -586,6 +586,30 @@ processors:
         new_name: container.memory.usage
   {{- end }}
 
+  {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+  # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
+  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios,
+  # you may need to adjust this configuration.
+  attributes/istio:
+    include:
+      match_type: regexp
+      metric_names:
+        - istio_.*
+    actions:
+      - action: delete
+        key: source_cluster
+      - action: delete
+        key: destination_cluster
+      - action: delete
+        key: source_canonical_service
+      - action: delete
+        key: destination_canonical_service
+      - action: delete
+        key: source_canonical_revision
+      - action: delete
+        key: destination_canonical_revision
+  {{- end }}
+
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
 # These values should not be specified manually and will be set in the templates.
@@ -774,6 +798,9 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        {{- end }}
         - resourcedetection
         - resource
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}

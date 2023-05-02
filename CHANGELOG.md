@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   skipped when we use both `multilineConfig` AND `extraOperators` in values.yaml
 - Enable retry mechanism in filelog receiver to avoid dropping logs on backpressure from the downstream
   pipeline components [#764](https://github.com/signalfx/splunk-otel-collector-chart/pull/764)
+- Drop excessive istio attributes to avoid running into the dimensions limit when scraping istio metrics is enabled [765](https://github.com/signalfx/splunk-otel-collector-chart/pull/765)
 
 ## [0.75.0] - 2023-04-17
 
