@@ -9,6 +9,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "helm-charts/splunk-otel-collector"
+    directory: "examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator"
     schedule:
       interval: "daily"
