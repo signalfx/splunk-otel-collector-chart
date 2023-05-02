@@ -78,6 +78,11 @@ receivers:
         config:
           {{- if .Values.featureGates.useLightPrometheusReceiver }}
           endpoint: 'http://`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090``"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
+          resource_attributes:
+            service.name:
+              enabled: false
+            service.instance.id:
+              enabled: false
           {{- else }}
           metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
