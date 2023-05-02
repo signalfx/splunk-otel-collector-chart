@@ -231,6 +231,8 @@ data:
           to: body
           type: move
         poll_interval: 200ms
+        retry_on_failure:
+          enabled: true
         start_at: beginning
         storage: file_storage
       fluentforward:
