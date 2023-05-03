@@ -588,7 +588,7 @@ processors:
 
   {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
   # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
-  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios,
+  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios or make use of the canonical service and revision labels,
   # you may need to adjust this configuration.
   attributes/istio:
     include:
