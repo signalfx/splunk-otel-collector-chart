@@ -9,5 +9,5 @@ curl -L wget https://raw.githubusercontent.com/spring-petclinic/spring-petclinic
 yq -i 'del(.services.grafana-server)' $SCRIPT_DIR/spring-petclinic/docker-compose.yaml
 yq -i 'del(.services.prometheus-server)' $SCRIPT_DIR/spring-petclinic/docker-compose.yaml
 yq -i 'del(.services.tracing-server)' $SCRIPT_DIR/spring-petclinic/docker-compose.yaml
-kompose convert --file=$SCRIPT_DIR/spring-petclinic/docker-compose.yaml --out=$SCRIPT_DIR/spring-petclinic/02_install_resources.yaml --with-kompose-annotation=false
+kompose convert --file=$SCRIPT_DIR/spring-petclinic/docker-compose.yaml --out=$SCRIPT_DIR/spring-petclinic/spring-petclinic.yaml --with-kompose-annotation=false
 rm -rf $SCRIPT_DIR/spring-petclinic/docker-compose.yaml
