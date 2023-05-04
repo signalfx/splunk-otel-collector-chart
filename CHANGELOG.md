@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.76.0] - 2023-05-04
+
 ### Added
 
 - Option to use lightprometheus receiver through a feature gate for metrics collection from discovered Prometheus endpoints [757](https://github.com/signalfx/splunk-otel-collector-chart/pull/757)
@@ -16,6 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   skipped when we use both `multilineConfig` AND `extraOperators` in values.yaml
 - Enable retry mechanism in filelog receiver to avoid dropping logs on backpressure from the downstream
   pipeline components [#764](https://github.com/signalfx/splunk-otel-collector-chart/pull/764)
+- Drop excessive istio attributes to avoid running into the dimensions limit when scraping istio metrics is enabled [765](https://github.com/signalfx/splunk-otel-collector-chart/pull/765)
+
+### Fixed
+
+- Fix k8s.cluster.name resource attribute for logs in GCP [#771](https://github.com/signalfx/splunk-otel-collector-chart/pull/771)
 
 ## [0.75.0] - 2023-04-17
 
