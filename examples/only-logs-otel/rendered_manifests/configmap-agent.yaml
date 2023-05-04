@@ -267,9 +267,9 @@ data:
           - k8sattributes
           - filter/logs
           - batch
+          - resourcedetection
           - resource
           - resource/logs
-          - resourcedetection
           receivers:
           - filelog
           - fluentforward

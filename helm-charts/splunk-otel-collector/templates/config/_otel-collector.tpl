@@ -104,6 +104,8 @@ processors:
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
 
+  # It's important to put this processor after resourcedetection to make sure that
+  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}".
   resource/add_cluster_name:
     attributes:
       - action: upsert

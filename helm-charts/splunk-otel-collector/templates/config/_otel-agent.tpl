@@ -542,8 +542,10 @@ processors:
   # attributes from container environments.
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
+  # General resource attributes that apply to all telemetry passing through the agent.
+  # It's important to put this processor after resourcedetection to make sure that
+  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}".
   resource:
-    # General resource attributes that apply to all telemetry passing through the agent.
     attributes:
       - action: insert
         key: k8s.node.name
@@ -698,6 +700,7 @@ service:
         - filter/logs
         {{- end }}
         - batch
+        - resourcedetection
         - resource
         {{- if not $gatewayEnabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
@@ -705,7 +708,6 @@ service:
         {{- end }}
         - resource/logs
         {{- end }}
-        - resourcedetection
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
