@@ -542,8 +542,10 @@ processors:
   # attributes from container environments.
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
+  # General resource attributes that apply to all telemetry passing through the agent.
+  # It's important to put this processor after resourcedetection to make sure that
+  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}".
   resource:
-    # General resource attributes that apply to all telemetry passing through the agent.
     attributes:
       - action: insert
         key: k8s.node.name
@@ -584,6 +586,30 @@ processors:
       - include: container.memory.working_set
         action: insert
         new_name: container.memory.usage
+  {{- end }}
+
+  {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+  # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
+  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios or make use of the canonical service and revision labels,
+  # you may need to adjust this configuration.
+  attributes/istio:
+    include:
+      match_type: regexp
+      metric_names:
+        - istio_.*
+    actions:
+      - action: delete
+        key: source_cluster
+      - action: delete
+        key: destination_cluster
+      - action: delete
+        key: source_canonical_service
+      - action: delete
+        key: destination_canonical_service
+      - action: delete
+        key: source_canonical_revision
+      - action: delete
+        key: destination_canonical_revision
   {{- end }}
 
 # By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
@@ -674,6 +700,7 @@ service:
         - filter/logs
         {{- end }}
         - batch
+        - resourcedetection
         - resource
         {{- if not $gatewayEnabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
@@ -681,7 +708,6 @@ service:
         {{- end }}
         - resource/logs
         {{- end }}
-        - resourcedetection
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -774,6 +800,9 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        {{- end }}
         - resourcedetection
         - resource
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
