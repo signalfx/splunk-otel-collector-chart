@@ -10,9 +10,9 @@ metadata:
     app.kubernetes.io/name: startupapicheck
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "startupapicheck"
-    app.kubernetes.io/version: "v1.11.0"
+    app.kubernetes.io/version: "v1.11.1"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.11.0
+    helm.sh/chart: certmanager-v1.11.1
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -26,9 +26,9 @@ spec:
         app.kubernetes.io/name: startupapicheck
         app.kubernetes.io/instance: default
         app.kubernetes.io/component: "startupapicheck"
-        app.kubernetes.io/version: "v1.11.0"
+        app.kubernetes.io/version: "v1.11.1"
         app.kubernetes.io/managed-by: Helm
-        helm.sh/chart: certmanager-v1.11.0
+        helm.sh/chart: certmanager-v1.11.1
     spec:
       restartPolicy: OnFailure
       serviceAccountName: default-certmanager-startupapicheck
@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: certmanager-startupapicheck
-          image: "quay.io/jetstack/cert-manager-ctl:v1.11.0"
+          image: "quay.io/jetstack/cert-manager-ctl:v1.11.1"
           imagePullPolicy: IfNotPresent
           args:
           - check
