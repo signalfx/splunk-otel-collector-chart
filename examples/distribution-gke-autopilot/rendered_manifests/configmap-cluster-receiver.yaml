@@ -62,8 +62,7 @@ data:
       resourcedetection:
         detectors:
         - env
-        - gke
-        - gce
+        - gcp
         - system
         override: true
         timeout: 10s
