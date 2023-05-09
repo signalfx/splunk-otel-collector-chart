@@ -644,14 +644,14 @@ exporters:
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
       {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs }}
       storage: file_storage/persistent_queue
       {{- end }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
       {{- if .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics }}
       storage: file_storage/persistent_queue
       {{- end }}

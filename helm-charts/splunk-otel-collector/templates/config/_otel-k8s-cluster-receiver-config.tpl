@@ -185,12 +185,12 @@ exporters:
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkSendingQueue" . | nindent 4 }}
+  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- if $clusterReceiver.eventsEnabled }}
     sourcetype: kube:events
   {{- end }}

@@ -283,7 +283,7 @@ splunk_hec/platform_traces:
 {{/*
 Splunk sending queue
 */}}
-{{- define "splunk-otel-collector.splunkSendingQueue" -}}
+{{- define "splunk-otel-collector.splunkPlatformSendingQueue" -}}
 sending_queue:
   enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
   num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
