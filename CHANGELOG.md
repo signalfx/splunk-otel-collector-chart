@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add `serviceAccountName` to secret validation hook pod [#781](https://github.com/signalfx/splunk-otel-collector-chart/pull/781)
+
 ## [0.76.0] - 2023-05-04
 
 ### Added
