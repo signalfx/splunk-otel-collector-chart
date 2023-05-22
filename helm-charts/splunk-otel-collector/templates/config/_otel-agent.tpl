@@ -805,7 +805,7 @@ service:
         {{- end }}
         - resourcedetection
         - resource
-        {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
+        {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
         {{- if .Values.isWindows }}
