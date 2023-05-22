@@ -110,7 +110,7 @@ splunkPlatform:
     # This can be used as an alternative redundancy mechanism for data being exported.
     # NOTE: The File Storage extension will persist state to the node's local file system.
     # While using the persistent queue it is advised to increase memory limit for agent (agent.resources.limits.memory)
-    # to 1Gi.
+    # to 1Gi. Persistent queue is currently supported only for logs and metrics of the agent.
     persistentQueueEnabled:
       # Specifies whether to persist log data.
       logs: false
