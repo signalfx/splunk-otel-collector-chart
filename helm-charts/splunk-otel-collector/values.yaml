@@ -184,6 +184,7 @@ distribution: ""
 # Optional "environment" parameter that will be added to all the telemetry
 # data (traces/logs/metrics) as an attribute. It will allow Splunk Observability
 # users to investigate data coming from different source separately.
+# See: https://docs.splunk.com/observability/apm/set-up-apm/environments.html#setting-the-deployment-environment-span-tag
 ################################################################################
 
 # environment: production
@@ -1360,12 +1361,35 @@ networkExplorer:
 #
 # The OpenTelemetry Operator running as a deployment with a replica count of 1.
 # It auto-instruments applications to emit telemetry data.
-# Related documentation: docs/auto-instrumentation-install.md
+# Related documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
 operator:
   enabled: false
+  # For more details, refer to: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
+  instrumentation:
+    # Overrides for default instrumentation configurations can be specified here.
+    spec:
+    # Optional "endpoint" parameter for exporting data to a specific target.
+    # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
+    # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
+    # must be overridden here.
+    # exporter:
+    #   endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+
+    # Optional "sampler" parameter for enabling trace sampling.
+    # Refer to: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
+    # sampler:
+    #   type: traceidratio
+    #   argument: "0.95"
+
+    # Optional "environment variable" parameters that can configure all instrumentation libraries.
+    # env:
+    #   # Sets the deployment.environment tag on spans
+    #   - name: OTEL_RESOURCE_ATTRIBUTES
+    #     value: "deployment.environment=dev"
+
   manager:
     autoInstrumentationImage:
       java:

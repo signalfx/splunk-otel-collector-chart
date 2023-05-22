@@ -1,0 +1,47 @@
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation.yaml
+# Description: Add a trace sampler to control how many traces are exported
+# Input values.yaml:
+# splunkObservability:
+#   accessToken: CHANGEME
+#   realm: us0
+# clusterName: CHANGEME
+# environment: CHANGEME
+# operator:
+#   enabled: true
+#   instrumentation:
+#     spec:
+#       sampler:
+#         type: traceidratio
+#         argument: "0.95"
+# certmanager:
+#   enabled: true
+# Output instrumentation.yaml:
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: splunk-instrumentation
+spec:
+    dotnet:
+      env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
+    env:
+    - name: SPLUNK_OTEL_AGENT
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.hostIP
+    exporter:
+      endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+    propagators:
+    - tracecontext
+    - baggage
+    - b3
+    python:
+      env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
+    sampler:
+      argument: "0.95"
+      type: traceidratio

@@ -1,0 +1,39 @@
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: default-splunk-otel-collector
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.80.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.80.0"
+    app: splunk-otel-collector
+    component: otel-operator
+    chart: splunk-otel-collector-0.80.0
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-operator
+spec:
+    dotnet:
+      env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
+    env:
+    - name: SPLUNK_OTEL_AGENT
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.hostIP
+    exporter:
+      endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+    propagators:
+    - tracecontext
+    - baggage
+    - b3
+    python:
+      env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
