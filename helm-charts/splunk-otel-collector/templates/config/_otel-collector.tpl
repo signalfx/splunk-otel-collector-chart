@@ -219,6 +219,10 @@ service:
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
+        {{/*
+        `deployment.environment` atributes is not being set on metrics sent to Splunk Observability because it's already synced as `sf_environment` property.
+        More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
+        */}}
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
         - resource/add_environment
         {{- end }}
