@@ -1,0 +1,51 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: false
+  logsEnabled: true
+  tracesEnabled: false
+
+logsEngine: otel
+agent:
+  extraVolumes:
+    - name: example-with-storage-logs
+      hostPath:
+        path: /tmp/directory_one
+    - name: example-without-storage
+      hostPath:
+        path: /var/log/catalina
+  extraVolumeMounts:
+    - name: example-with-storage-logs
+      mountPath: /tmp/directory_one
+    - name: example-without-storage
+      mountPath: /var/log/catalina
+logsCollection:
+  extraFileLogs:
+    filelog/example-with-storage:
+      include:
+      - /tmp/directory_one/*.log
+      start_at: beginning
+      storage: file_storage
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.index: otel_events
+        com.splunk.source: /tmp/directory_one
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: example
+      operators:
+      - from: attributes.volume_name
+        to: resource["k8s.volume.name"]
+        type: move
+    filelog/example-without-storage:
+      include:
+        - /var/log/catalina/catalina*.log
+      start_at: beginning
+      include_file_path: true
+      include_file_name: false
+      resource:
+        com.splunk.index: otel_events
+        com.splunk.source: /var/log/catalina
+        host.name: 'EXPR(env("K8S_NODE_NAME"))'
+        com.splunk.sourcetype: example
