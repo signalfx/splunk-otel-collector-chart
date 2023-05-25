@@ -30,8 +30,6 @@ data:
         profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
-      another_file_storage:
-        directory: /var/addon/splunk/otel_another
       file_storage:
         directory: /var/addon/splunk/otel_pos
       health_check: null
@@ -237,21 +235,9 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      filelog/example-with-another-storage:
-        include:
-        - /tmp/*/*/*/kubernetes.io~empty-dir/*/*.log
-        include_file_name: false
-        include_file_path: true
-        resource:
-          com.splunk.index: otel_events
-          com.splunk.source: /var/log/emptydir/example-with-another-storage
-          com.splunk.sourcetype: example
-          host.name: EXPR(env("K8S_NODE_NAME"))
-        start_at: beginning
-        storage: another_file_storage
       filelog/example-with-storage:
         include:
-        - /tmp/*/*/*/kubernetes.io~empty-dir/emptydir/*.log
+        - /tmp/directory_one/*.log
         include_file_name: false
         include_file_path: true
         operators:
@@ -260,19 +246,19 @@ data:
           type: move
         resource:
           com.splunk.index: otel_events
-          com.splunk.source: /var/log/emptydir/emptydir-mario
+          com.splunk.source: /tmp/directory_one
           com.splunk.sourcetype: example
           host.name: EXPR(env("K8S_NODE_NAME"))
         start_at: beginning
         storage: file_storage
       filelog/example-without-storage:
         include:
-        - /tmp/*/*/*/kubernetes.io~empty-dir/emptydir/catalina*.log
+        - /var/log/catalina/catalina*.log
         include_file_name: false
         include_file_path: true
         resource:
           com.splunk.index: otel_events
-          com.splunk.source: /var/log/emptydir/example-without-storage
+          com.splunk.source: /var/log/catalina
           com.splunk.sourcetype: example
           host.name: EXPR(env("K8S_NODE_NAME"))
         start_at: beginning
@@ -324,7 +310,6 @@ data:
           - batch
           - resource
           receivers:
-          - filelog/example-with-another-storage
           - filelog/example-with-storage
           - filelog/example-without-storage
         metrics/agent:

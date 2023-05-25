@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 803763cc1e4021de0da232ecd68e792bd01a6a0d7d446bd0d4ea94eba85f323c
+        checksum/config: 57704101d2accd76aa3664fe80510b3e9df81516be24a482ea9cf797e93870b0
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -158,6 +158,10 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
+        - mountPath: /tmp/directory_one
+          name: example-with-storage-logs
+        - mountPath: /var/log/catalina
+          name: example-without-storage
       terminationGracePeriodSeconds: 600
       volumes:
       - name: varlog
@@ -176,3 +180,9 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - hostPath:
+          path: /tmp/directory_one
+        name: example-with-storage-logs
+      - hostPath:
+          path: /var/log/catalina
+        name: example-without-storage
