@@ -5,3 +5,34 @@ splunkObservability:
 
 distribution: eks
 cloudProvider: aws
+
+clusterReceiver:
+  config:
+    receivers:
+     # -- Example receiver to collect k8s api server metrics from EKS
+     # You can find the list of metrics available by running
+     # "kubectl get --raw /metrics" command against an EKS cluster
+      prometheus/k8s-api-server:
+        config:
+          scrape_configs:
+            - job_name: 'api-server-metrics'
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              authorization:
+                credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              scheme: https
+              scrape_interval: 120s
+              static_configs:
+                - targets:
+                  - ${KUBERNETES_SERVICE_HOST}:443
+              metric_relabel_configs:
+                - action: keep
+                  source_labels:
+                  - __name__
+                  regex: "(apiserver_request_total|etcd_db_total_size_in_bytes|apiserver_storage_objects)"
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - k8s_cluster
+            - prometheus/k8s-api-server
