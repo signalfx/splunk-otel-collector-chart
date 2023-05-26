@@ -252,7 +252,7 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# Open-telemetry collector running as an deamonset agent on every node.
+# OpenTelemetry collector running as an deamonset agent on every node.
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
 
@@ -512,9 +512,11 @@ clusterReceiver:
   config: {}
 
 #################################################################
-# Native OtelTelemetry logs collection using
-# https://github.com/open-telemetry/opentelemetry-log-collection.
+# Native OpenTelemetry logs collection
 # Disabled by default in favor of fluentd.
+# Can be enabled by setting "logsEngine: otel".
+# Receiver Documentation: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
+# OpenTelemetry Logging Documentation: https://opentelemetry.io/docs/specs/otel/logs
 #################################################################
 
 logsCollection:
@@ -532,7 +534,7 @@ logsCollection:
     # Boolean for ingesting the agent's own log
     excludeAgentLogs: true
     # Extra operators for container logs.
-    # https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md
     extraOperators: []
 
     # Multiline logs processing configuration. Multiline logs that written by containers to stdout
