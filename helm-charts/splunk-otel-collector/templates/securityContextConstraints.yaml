@@ -50,6 +50,9 @@ metadata:
     heritage: {{ .Release.Service }}
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector-kernel-collector.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector-k8s-collector.serviceAccountName" . }}
+
 {{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
 {{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
 {{- end }}
