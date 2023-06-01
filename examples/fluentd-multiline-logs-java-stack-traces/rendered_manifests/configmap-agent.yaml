@@ -26,6 +26,12 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+      splunk_hec/o11y:
+        disable_compression: true
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        log_data_enabled: false
+        profiling_data_enabled: false
+        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -136,6 +142,8 @@ data:
         override: true
         timeout: 10s
     receivers:
+      fluentforward:
+        endpoint: 0.0.0.0:8006
       hostmetrics:
         collection_interval: 10s
         scrapers:
@@ -238,6 +246,21 @@ data:
       - memory_ballast
       - zpages
       pipelines:
+        logs:
+          exporters:
+          - splunk_hec/o11y
+          processors:
+          - memory_limiter
+          - groupbyattrs/logs
+          - k8sattributes
+          - filter/logs
+          - batch
+          - resourcedetection
+          - resource
+          - resource/logs
+          receivers:
+          - fluentforward
+          - otlp
         metrics:
           exporters:
           - signalfx
