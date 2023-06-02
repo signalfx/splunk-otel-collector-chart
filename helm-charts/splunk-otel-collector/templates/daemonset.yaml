@@ -251,11 +251,7 @@ spec:
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          {{- if $agent.securityContext }}
-          {{- toYaml $agent.securityContext | nindent 10 }}
-          {{- else }}
-          runAsUser: 0
-          {{- end }}
+          {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB

@@ -1,4 +1,4 @@
-{{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup)) (and (.Values.agent.securityContext.runAsUser) (.Values.agent.securityContext.runAsGroup)) }}
+{{- if or (and (.Values.fluentd.securityContext.runAsUser) (.Values.fluentd.securityContext.runAsGroup) (not .Values.isWindows) ) (and (.Values.agent.securityContext.runAsUser) (.Values.agent.securityContext.runAsGroup) (not .Values.isWindows) ) }}
 apiVersion: v1
 kind: Pod
 metadata:
