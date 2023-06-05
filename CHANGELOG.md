@@ -4,9 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.77.0] - 2023-06-05
+
 ### Added
 
 - Add `serviceAccountName` to secret validation hook pod [#781](https://github.com/signalfx/splunk-otel-collector-chart/pull/781)
+- Allow enabling profiling only for Observability [#788](https://github.com/signalfx/splunk-otel-collector-chart/pull/788)
+- Add storage to filelog receiver for extraFileLog [#755](https://github.com/signalfx/splunk-otel-collector-chart/pull/755)
+
+### Changed
+
+- Avoid `runAsUser` in SecurityContext for Windows [#797](https://github.com/signalfx/splunk-otel-collector-chart/pull/797)
 
 ## [0.76.0] - 2023-05-04
 
