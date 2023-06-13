@@ -214,9 +214,12 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-proxy
-              port: 29101
+              skipVerify: true
               type: kubernetes-proxy
-            rule: type == "pod" && labels["app"] == "sdn"
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port
+              == 29101)
           smartagent/kubernetes-scheduler:
             config:
               extraDimensions:
