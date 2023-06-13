@@ -59,7 +59,11 @@ spec:
       {{- end }}
       {{- if $gateway.securityContext }}
       securityContext:
-        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $gateway.securityContext) | nindent 8 }}
+        {{- if .Values.isWindows }}
+        {{- include "splunk-otel-collector.windowsSecurityContext" (dict "securityContext" $gateway.securityContext) | nindent 8 }}
+        {{- else }}
+        {{- include "splunk-otel-collector.securityContext" (dict "securityContext" $gateway.securityContext) | nindent 8 }}
+        {{- end }}
       {{- end }}
       containers:
       - name: otel-collector
