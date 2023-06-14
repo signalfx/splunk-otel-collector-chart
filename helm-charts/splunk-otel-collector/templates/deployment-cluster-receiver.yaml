@@ -79,11 +79,7 @@ spec:
       {{- end }}
       {{- if $clusterReceiver.securityContext }}
       securityContext:
-        {{- if .Values.isWindows }}
-        {{- include "splunk-otel-collector.windowsSecurityContext" (dict "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
-        {{- else }}
-        {{- include "splunk-otel-collector.securityContext" (dict "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
-        {{- end }}
+        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
       {{- end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:

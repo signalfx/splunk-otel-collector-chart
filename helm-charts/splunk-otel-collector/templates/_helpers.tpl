@@ -429,10 +429,12 @@ Whether clusterReceiver should be enabled
 {{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
 {{- end -}}
 
+
 {{/*
-Build the securityContext for Windows
+Build the securityContext for Linux and Windows
 */}}
-{{- define "splunk-otel-collector.windowsSecurityContext" -}}
+{{- define "splunk-otel-collector.securityContext" -}}
+{{- if .isWindows }}
 {{- $_ := unset .securityContext "runAsUser" }}
 {{- if not (hasKey .securityContext "windowsOptions")}}
 {{- $_ := set .securityContext "windowsOptions" dict }}
@@ -440,15 +442,10 @@ Build the securityContext for Windows
 {{- if and (not (hasKey .securityContext.windowsOptions "runAsUserName")) (.setRunAsUser) }}
 {{- $_ := set .securityContext.windowsOptions "runAsUserName" "ContainerAdministrator"}}
 {{- end }}
-{{- toYaml .securityContext }}
-{{- end -}}
-
-{{/*
-Build the securityContext for Linux
-*/}}
-{{- define "splunk-otel-collector.securityContext" -}}
+{{- else }}
 {{- if and (eq (toString .securityContext.runAsUser) "<nil>") (.setRunAsUser) }}
 {{- $_ := set .securityContext "runAsUser" 0 }}
+{{- end }}
 {{- end }}
 {{- toYaml .securityContext }}
 {{- end -}}
