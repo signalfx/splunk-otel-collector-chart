@@ -575,6 +575,14 @@ logsCollection:
     # Set to 0 to remove any size limit.
     maxRecombineLogSize: 1048576
 
+    # timestampExtraction.layout: The exact layout of the timestamp to be parsed.
+    # timestampExtraction.layoutType: The type of timestamp. Valid values are strptime, gotime, and epoch.
+    # For more details about each layoutType, refer:
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/types/timestamp.md 
+    timestampExtraction:
+      layout: ""
+      layoutType: ""
+
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false

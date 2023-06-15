@@ -5,6 +5,7 @@ The values can be overridden in .Values.agent.config
 {{- define "splunk-otel-collector.agentConfig" -}}
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 {{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
+{{ $timestampExtraction := .Values.logsCollection.containers.timestampExtraction }}
 extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
@@ -294,8 +295,8 @@ receivers:
         regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
-          layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999-07:00'
+          layout_type: {{ $timestampExtraction.layoutType | default "gotime" }}
+          layout: {{ $timestampExtraction.layout | default "2006-01-02T15:04:05.999999999-07:00" }}
       - type: recombine
         id: crio-recombine
         output: handle_empty_log
@@ -312,7 +313,8 @@ receivers:
         regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+          layout_type: {{ $timestampExtraction.layoutType | default "strptime" }}
+          layout: {{ $timestampExtraction.layout | default "'%Y-%m-%dT%H:%M:%S.%LZ'" }}
       - type: recombine
         id: containerd-recombine
         output: handle_empty_log
@@ -328,7 +330,8 @@ receivers:
         id: parser-docker
         timestamp:
           parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+          layout: {{ $timestampExtraction.layout | default "'%Y-%m-%dT%H:%M:%S.%LZ'" }}
+          layout_type: {{ $timestampExtraction.layoutType | default "strptime" }}
       - type: recombine
         id: docker-recombine
         output: handle_empty_log

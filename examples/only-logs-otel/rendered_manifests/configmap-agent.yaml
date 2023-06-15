@@ -171,6 +171,7 @@ data:
           regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            layout_type: strptime
             parse_from: attributes.time
           type: regex_parser
         - combine_field: attributes.log
@@ -184,6 +185,7 @@ data:
         - id: parser-docker
           timestamp:
             layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            layout_type: strptime
             parse_from: attributes.time
           type: json_parser
         - combine_field: attributes.log
