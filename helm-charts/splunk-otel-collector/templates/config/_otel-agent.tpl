@@ -292,7 +292,7 @@ receivers:
       # Parse CRI-O format
       - type: regex_parser
         id: parser-crio
-        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
+        regex: {{ .Values.logsCollection.containers.regexp | default "^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$" }}
         timestamp:
           parse_from: attributes.time
           layout_type: {{ $timestampExtraction.layoutType | default "gotime" }}
@@ -310,7 +310,7 @@ receivers:
       # Parse CRI-Containerd format
       - type: regex_parser
         id: parser-containerd
-        regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
+        regex:  {{ .Values.logsCollection.containers.regexp | default "^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$" }}
         timestamp:
           parse_from: attributes.time
           layout_type: {{ $timestampExtraction.layoutType | default "strptime" }}
