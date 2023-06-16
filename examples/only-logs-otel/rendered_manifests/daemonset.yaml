@@ -41,6 +41,8 @@ spec:
         
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
       initContainers:
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.78.1

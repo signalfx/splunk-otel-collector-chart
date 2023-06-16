@@ -41,6 +41,8 @@ spec:
         
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
       containers:
       - name: fluentd
         image: splunk/fluentd-hec:1.2.8
