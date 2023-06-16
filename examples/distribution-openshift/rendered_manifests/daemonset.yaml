@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 9308e59c21f2728caccbf91037441f223382a6ccb0ca2c8078abd4a70cd55c78
+        checksum/config: df37aa051c0b472af4d7106d5759de82c7efab76a58102bef3b9ac7659329b14
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -38,7 +38,7 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
-
+        
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
         - effect: NoSchedule
