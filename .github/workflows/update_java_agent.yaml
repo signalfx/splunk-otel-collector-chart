@@ -52,3 +52,4 @@ jobs:
           body: Use the new version of the java agent
           branch: "update-java-${{ steps.swizzle_version.outputs.LATEST_VER }}"
           base: main
+          
