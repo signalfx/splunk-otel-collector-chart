@@ -297,7 +297,7 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999-07:00'
+          layout: '2006-01-02T15:04:05.999999999Z07:00'
       - type: recombine
         id: crio-recombine
         output: handle_empty_log
