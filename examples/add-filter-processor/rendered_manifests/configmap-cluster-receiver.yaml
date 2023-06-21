@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-k8s-cluster-receiver
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.78.0
+    helm.sh/chart: splunk-otel-collector-0.79.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.78.1"
+    app.kubernetes.io/version: "0.79.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.78.0
+    chart: splunk-otel-collector-0.79.0
     release: default
     heritage: Helm
 data:
@@ -29,13 +29,6 @@ data:
     processors:
       batch:
         send_batch_max_size: 32768
-      filter/exclude_containers:
-        metrics:
-          exclude:
-            match_type: regexp
-            resource_attributes:
-            - Key: k8s.container.name
-              Value: ^(containerX|containerY)$
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
@@ -98,7 +91,6 @@ data:
           - batch
           - resource
           - resource/k8s_cluster
-          - filter/exclude_containers
           receivers:
           - k8s_cluster
         metrics/collector:
