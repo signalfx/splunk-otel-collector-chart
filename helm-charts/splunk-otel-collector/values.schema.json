@@ -773,10 +773,13 @@
             "maxRecombineLogSize": {
               "type": "integer"
             },
-            "regexp": {
-              "type":"string"
+            "docker": {
+              "type": "object"
             },
-            "timestampExtraction": {
+            "crio": {
+              "type": "object"
+            },
+            "containerd": {
               "type": "object"
             }
           }
