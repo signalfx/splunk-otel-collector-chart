@@ -475,7 +475,6 @@ processors:
      - com.splunk.sourcetype
      - container.id
      - fluent.tag
-     - istio_service_name
      - k8s.container.name
      - k8s.namespace.name
      - k8s.pod.name
@@ -484,13 +483,16 @@ processors:
 
   {{- if not $gatewayEnabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- if .Values.autodetect.istio }}
+  {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
+  {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   transform/logs:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],resource.attributes["container.image.tag"]], ":"))
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
   {{- end }}
   {{- end }}
 
@@ -667,6 +669,9 @@ service:
         {{- if not $gatewayEnabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
         - transform/logs
+        {{- end }}
+        {{- if .Values.autodetect.istio }}
+        - transform/istio_service_name
         {{- end }}
         - resource/logs
         {{- end }}

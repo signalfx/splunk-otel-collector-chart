@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Add `service.name` resource attribute to logs if `autodetect.istio` is enabled using transform processor. This change
+  removes the limitation of `service.name` attribute being available only with logsEngine=fluentd.
+  [#823](https://github.com/signalfx/splunk-otel-collector-chart/pull/823)
+
 ## [0.79.1] - 2023-06-22
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.79.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.79.1).

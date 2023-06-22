@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: af7400ed3ac68ca7068436ff14ea959fbf5674221428be4ebea8da50e6ebfd06
+        checksum/config: 23e792e836f91801b7fb680f3680e1e241dfd137435aa40916061d6fc75ded0e
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       dnsPolicy: ClusterFirstWithHostNet
