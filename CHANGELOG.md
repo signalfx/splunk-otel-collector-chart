@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fix cri-o log format time layout [#817](https://github.com/signalfx/splunk-otel-collector-chart/pull/817)
-- Align the set of default resource attributes added by k8s attributes processor if the gateway is enabled [#818](https://github.com/signalfx/splunk-otel-collector-chart/pull/818)
+- Align the set of default resource attributes added by k8s attributes processor if the gateway is enabled [#820](https://github.com/signalfx/splunk-otel-collector-chart/pull/820)
 
 ## [0.79.0] - 2023-16-07
 
