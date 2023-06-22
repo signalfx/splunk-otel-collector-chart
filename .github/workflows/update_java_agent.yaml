@@ -25,6 +25,10 @@ jobs:
           if [ "$LATEST_VER" == "$LOCAL_VER" ]; then
             echo We are already up to date. Nothing else to do.
           else
+            echo 'Verifying that the image is pullable...'
+            echo '(If this fails, the agent version is out of sync with ghcr version)'
+            docker pull $JAVA_REPO:$LATEST_VER
+            echo 'Looks like we are good to update...'
             echo Updating to new version
             echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
             VLINE=$(grep -n -A 1 $JAVA_REPO $VALUES_YAML | tail -1 | sed -e "s/-.*//")
