@@ -91,7 +91,7 @@ receivers:
 
       # Receivers for collecting k8s control plane metrics.
       # Distributions besides Kubernetes and Openshift are not supported.
-      # Verified with Kubernetes v1.22 and Openshift v4.9.
+      # Verified with Kubernetes v1.22 and Openshift v4.10.59.
       {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
@@ -173,7 +173,7 @@ receivers:
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       smartagent/kubernetes-proxy:
         {{- if eq .Values.distribution "openshift" }}
-        rule: type == "pod" && labels["app"] == "sdn"
+        rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port == 29101)
         {{- else }}
         rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
         {{- end }}
@@ -182,7 +182,9 @@ receivers:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
           {{- if eq .Values.distribution "openshift" }}
-          port: 29101
+          skipVerify: true
+          useHTTPS: true
+          useServiceAccount: true
           {{- else }}
           port: 10249
           {{- end }}
@@ -295,7 +297,7 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999-07:00'
+          layout: '2006-01-02T15:04:05.999999999Z07:00'
       - type: recombine
         id: crio-recombine
         output: handle_empty_log

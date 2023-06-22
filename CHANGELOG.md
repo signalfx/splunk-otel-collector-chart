@@ -4,6 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Fix cri-o log format time layout [#817](https://github.com/signalfx/splunk-otel-collector-chart/pull/817)
+
+## [0.79.0] - 2023-16-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.79.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.79.0).
+
+### Added
+
+- Adopt new control-plane node toleration [#814](https://github.com/signalfx/splunk-otel-collector-chart/pull/814)
+
+### Changed
+
+- Update the Kubernetes Proxy monitor for OpenShift clusters to start using secure ports 9101 or 29101 with authentication [#810](https://github.com/signalfx/splunk-otel-collector-chart/pull/810)
+
 ## [0.78.0] - 2023-06-07
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.78.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.78.1).

@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.78.0
+    helm.sh/chart: splunk-otel-collector-0.79.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.78.1"
+    app.kubernetes.io/version: "0.79.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.78.0
+    chart: splunk-otel-collector-0.79.0
     release: default
     heritage: Helm
 data:
@@ -214,9 +214,12 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-proxy
-              port: 29101
+              skipVerify: true
               type: kubernetes-proxy
-            rule: type == "pod" && labels["app"] == "sdn"
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port
+              == 29101)
           smartagent/kubernetes-scheduler:
             config:
               extraDimensions:
