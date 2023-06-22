@@ -33,52 +33,7 @@ receivers:
 
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
-  k8sattributes:
-    pod_association:
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.uid
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.ip
-      - sources:
-        - from: resource_attribute
-          name: ip
-      - sources:
-        - from: connection
-      - sources:
-        - from: resource_attribute
-          name: host.name
-    extract:
-      metadata:
-        - k8s.namespace.name
-        - k8s.node.name
-        - k8s.pod.name
-        - k8s.pod.uid
-      annotations:
-        - key: splunk.com/sourcetype
-          from: pod
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: namespace
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: pod
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: namespace
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: pod
-        {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 8 }}
-      {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
-      labels:
-        {{- range .Values.extraAttributes.podLabels }}
-        - key: {{ . }}
-        {{- end }}
-        {{- include "splunk-otel-collector.addExtraLabels" . | nindent 8 }}
-      {{- end }}
-
+  {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
