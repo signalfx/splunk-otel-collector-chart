@@ -1,0 +1,58 @@
+name: Check for new java agent
+
+on:
+  schedule:
+    - cron: "45 */4 * * *"
+  workflow_dispatch:
+
+env:
+  JAVA_REPO: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
+  VALUES_YAML: helm-charts/splunk-otel-collector/values.yaml
+  LATEST_API: https://api.github.com/repos/signalfx/splunk-otel-java/releases/latest
+
+jobs:
+  maybe_update_java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - name: swizzle version
+        id: swizzle_version
+        run: |
+          LOCAL_VER=$(grep -A 1 $JAVA_REPO $VALUES_YAML | tail -1 | sed -e 's/.*tag: //' | tr -d '"')
+          LATEST_VER=$(curl -qs -H "Accept: application/vnd.github+json" $LATEST_API | jq -r .tag_name)
+          echo "LATEST_VER=$LATEST_VER" >> $GITHUB_OUTPUT
+          echo "Current version is $LOCAL_VER, latest is $LATEST_VER"
+          if [ "$LATEST_VER" == "$LOCAL_VER" ]; then
+            echo We are already up to date. Nothing else to do.
+          else
+            echo 'Verifying that the image is pullable...'
+            echo '(If this fails, the agent version is out of sync with ghcr version)'
+            docker pull $JAVA_REPO:$LATEST_VER
+            echo 'Looks like we are good to update...'
+            echo Updating to new version
+            echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
+            VLINE=$(grep -n -A 1 $JAVA_REPO $VALUES_YAML | tail -1 | sed -e "s/-.*//")
+            echo sed -i "${VLINE}s/\"v.*\"/\"${LATEST_VER}\"/" $VALUES_YAML
+            sed -i "${VLINE}s/\"v.*\"/\"${LATEST_VER}\"/" $VALUES_YAML
+            git --no-pager diff
+          fi
+      - name: render some templates
+        if: ${{ steps.swizzle_version.outputs.NEED_UPDATE == 1 }}
+        run: |
+          echo Making the templates
+          curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+          apt install -y apt-transport-https
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+          apt update
+          apt install -y build-essential zip helm gh
+          make render
+          git --no-pager diff
+      - name: PR the new version
+        if: ${{ steps.swizzle_version.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: update java agent version
+          title: Update Java agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}"
+          body: Use the new version of the java agent
+          branch: "update-java-${{ steps.swizzle_version.outputs.LATEST_VER }}"
+          base: main
