@@ -85,6 +85,60 @@ resourcedetection:
 {{- end }}
 
 {{/*
+Common config for K8s attributes processor adding k8s metadata to resource attributes.
+*/}}
+{{- define "splunk-otel-collector.k8sAttributesProcessor" -}}
+k8sattributes:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.ip
+    - sources:
+      - from: resource_attribute
+        name: ip
+    - sources:
+      - from: connection
+    - sources:
+      - from: resource_attribute
+        name: host.name
+  extract:
+    metadata:
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.name
+      - k8s.pod.uid
+      - container.id
+      - container.image.name
+      - container.image.tag
+    annotations:
+      - key: splunk.com/sourcetype
+        from: pod
+      - key: {{ include "splunk-otel-collector.filterAttr" . }}
+        tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
+        from: namespace
+      - key: {{ include "splunk-otel-collector.filterAttr" . }}
+        tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
+        from: pod
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: namespace
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: pod
+      {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
+    {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
+    labels:
+      {{- range .Values.extraAttributes.podLabels }}
+      - key: {{ . }}
+      {{- end }}
+      {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
+    {{- end }}
+{{- end }}
+
+{{/*
 Resource processor for logs manipulations
 */}}
 {{- define "splunk-otel-collector.resourceLogsProcessor" -}}
