@@ -52,7 +52,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: update java agent version
-          title: Update Java agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}"
+          title: Update Java agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}
           body: Use the new version of the java agent
           branch: "update-java-${{ steps.swizzle_version.outputs.LATEST_VER }}"
           base: main
