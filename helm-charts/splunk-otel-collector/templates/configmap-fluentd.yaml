@@ -204,20 +204,6 @@ data:
         jq '.record | . + (.source | capture("^/var/log/containers/(?<k8s.pod.name>[^_]+)_(?<k8s.namespace.name>[^_]+)_(?<k8s.container.name>[-0-9a-z]+)-(?<container.id>[^.]+).log$")) | . + (.pods_source | capture("^/var/log/pods/[^_]+_[^_]+_(?<k8s.pod.uid>[^/]+)/[^._]+/[0-9]+.log$") // {}) | .sourcetype = ("kube:container:" + .["k8s.container.name"])'
       </filter>
 
-      {{- if .Values.autodetect.istio }}
-      # This filter prepares a temporary "istio_service_name" attribute, the same way as istio service name is generated:
-      # https://github.com/istio/istio/blob/77e00b47a61f0e995a29b33438c9dae7e8aace82/galley/pkg/config/analysis/analyzers/testdata/common/sidecar-injector-configmap.yaml#L110-L115
-      # The temporary "istio_service_name" attribute will be used to set "service.name" attribute in otel-collector
-      # if the pod doesn't have "app" label that should be used instead.
-      # Name of the k8s deployment (or another object owning the pod, if any) is taken from "k8s.pod.name" attribute
-      # using regex to filter out name suffix according to the k8s name generation rules:
-      # https://github.com/kubernetes/apimachinery/blob/ff522ab81c745a9ac5f7eeb7852fac134194a3b6/pkg/util/rand/rand.go#L92-L127
-      <filter tail.containers.**>
-        @type jq_transformer
-        jq '.record | . + (.istio_service_name = (.["k8s.pod.name"] // "istio-proxy" | (capture("^(?<owner_obj>.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$") | .owner_obj) // .) + "." + (.["k8s.namespace.name"] // "default"))'
-      </filter>
-      {{- end }}
-
       @include output.transform.conf
 
       # create source and sourcetype

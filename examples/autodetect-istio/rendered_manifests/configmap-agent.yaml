@@ -73,7 +73,6 @@ data:
         - com.splunk.sourcetype
         - container.id
         - fluent.tag
-        - istio_service_name
         - k8s.container.name
         - k8s.namespace.name
         - k8s.pod.name
@@ -153,20 +152,29 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-        - action: insert
-          from_attribute: k8s.pod.labels.app
-          key: service.name
-        - action: insert
-          from_attribute: istio_service_name
-          key: service.name
-        - action: delete
-          key: istio_service_name
       resourcedetection:
         detectors:
         - env
         - system
         override: true
         timeout: 10s
+      transform/istio_service_name:
+        error_mode: ignore
+        log_statements:
+        - context: resource
+          statements:
+          - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"],
+            attributes["k8s.namespace.name"]], ".")) where attributes["service.name"]
+            == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"]
+            != nil
+          - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"]
+            == nil and attributes["k8s.pod.name"] != nil
+          - replace_pattern(cache["owner_name"], "^(.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$$",
+            "$$1") where attributes["service.name"] == nil and cache["owner_name"] !=
+            nil
+          - set(attributes["service.name"], Concat([cache["owner_name"], attributes["k8s.namespace.name"]],
+            ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil
+            and attributes["k8s.namespace.name"] != nil
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:8006
@@ -291,6 +299,7 @@ data:
           - batch
           - resourcedetection
           - resource
+          - transform/istio_service_name
           - resource/logs
           receivers:
           - fluentforward

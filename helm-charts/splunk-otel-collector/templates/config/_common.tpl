@@ -156,16 +156,6 @@ resource/logs:
       action: delete
     - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
-    {{- if .Values.autodetect.istio }}
-    - key: service.name
-      from_attribute: k8s.pod.labels.app
-      action: insert
-    - key: service.name
-      from_attribute: istio_service_name
-      action: insert
-    - key: istio_service_name
-      action: delete
-    {{- end }}
     {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
     - key: container_name
       from_attribute: k8s.container.name
@@ -214,6 +204,26 @@ resource/logs:
     {{- end }}
     {{- end }}
     {{- end }}
+{{- end }}
+
+{{/*
+The transform processor adds service.name attribute to logs the same way as it's done by istio for the generated traces
+https://github.com/istio/istio/blob/6237cb4e63cf9a332327cc0a815d6b46257e6f8a/pkg/config/analysis/analyzers/testdata/common/sidecar-injector-configmap.yaml#L110-L115
+This enables the correlation between logs and traces in Splunk Observability Cloud.
+*/}}
+{{- define "splunk-otel-collector.transformLogsProcessor" -}}
+transform/istio_service_name:
+  error_mode: ignore
+  log_statements:
+    - context: resource
+      statements:
+        - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"] != nil
+        - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"] == nil and attributes["k8s.pod.name"] != nil
+        # Name of the object owning the pod is taken from "k8s.pod.name" attribute by striping the pod suffix according
+        # to the k8s name generation rules (we don't want to put pressure on the k8s API server to get the owner name):
+        # https://github.com/kubernetes/apimachinery/blob/ff522ab81c745a9ac5f7eeb7852fac134194a3b6/pkg/util/rand/rand.go#L92-L127
+        - replace_pattern(cache["owner_name"], "^(.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$$", "$$1") where attributes["service.name"] == nil and cache["owner_name"] != nil
+        - set(attributes["service.name"], Concat([cache["owner_name"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil and attributes["k8s.namespace.name"] != nil
 {{- end }}
 
 {{/*

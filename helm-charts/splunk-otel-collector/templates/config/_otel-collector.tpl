@@ -35,6 +35,9 @@ receivers:
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- if .Values.autodetect.istio }}
+  {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
+  {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
@@ -207,6 +210,9 @@ service:
         - k8sattributes
         - filter/logs
         - batch
+        {{- if .Values.autodetect.istio }}
+        - transform/istio_service_name
+        {{- end }}
         - resource/logs
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}

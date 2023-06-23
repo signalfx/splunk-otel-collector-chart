@@ -405,13 +405,7 @@ The following configuration can be used to achieve that:
 logsEngine: otel
 ```
 
-There are following known limitations of native OTel logs collection:
-
-- `service.name` attribute will not be automatically constructed in istio environment.
-  This means that correlation between logs and traces will not work in Splunk Observability.
-  Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
-- Not yet supported in GKE Autopilot.
-
+**NOTE:** Native OTel logs collection is not yet supported in GKE Autopilot.
 
 ### Add log files from Kubernetes host machines/volumes
 
