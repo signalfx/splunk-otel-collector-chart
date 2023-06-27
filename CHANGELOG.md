@@ -20,6 +20,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - Upgrade the Splunk OpenTelemetry Collector for Kubernetes subchart dependencies [#828](https://github.com/signalfx/splunk-otel-collector-chart/pull/828)
   - cert-manager upgraded from 1.11.1 to [1.12.2](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.2)
   - opentelemetry-operator upgraded from 0.28.0 to [0.32.0)](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.32.0)
+- Update the log level for metric scrape failures of the smartagent/kubernetes-proxy receiver from error to debug when distribution='' [#832](https://github.com/signalfx/splunk-otel-collector-chart/pull/832)
 
 ## [0.79.1] - 2023-06-22
 

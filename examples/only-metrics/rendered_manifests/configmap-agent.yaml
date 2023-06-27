@@ -200,6 +200,7 @@ data:
               extraDimensions:
                 metric_source: kubernetes-proxy
               port: 10249
+              scrapeFailureLogLevel: debug
               type: kubernetes-proxy
             rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
           smartagent/kubernetes-scheduler:

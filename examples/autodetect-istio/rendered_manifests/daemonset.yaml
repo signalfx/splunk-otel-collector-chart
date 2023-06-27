@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: 22405d5dcb6df5e5fe9659e825eb000d3d9659707d4d4993e98685ac6f6b779c
+        checksum/config: d664606cbf1f109b692576cd806fdce467655d1e42e55ced0e9095f567b58771
         kubectl.kubernetes.io/default-container: otel-collector
         sidecar.istio.io/inject: "false"
     spec:
