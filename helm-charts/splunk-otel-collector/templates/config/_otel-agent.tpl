@@ -456,8 +456,8 @@ receivers:
 
 # By default k8sattributes and batch processors enabled.
 processors:
-  # k8sattributes enriches traces and metrics with k8s metadata
-  k8sattributes:
+  {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
+    # Agent specific configuration of k8sattributes:
     # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
@@ -466,53 +466,6 @@ processors:
     {{- end }}
     filter:
       node_from_env_var: K8S_NODE_NAME
-    pod_association:
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.uid
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.ip
-      - sources:
-        - from: resource_attribute
-          name: ip
-      - sources:
-        - from: connection
-      - sources:
-        - from: resource_attribute
-          name: host.name
-    extract:
-      metadata:
-        - k8s.namespace.name
-        - k8s.node.name
-        - k8s.pod.name
-        - k8s.pod.uid
-        - container.id
-        - container.image.name
-        - container.image.tag
-      annotations:
-        - key: splunk.com/sourcetype
-          from: pod
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: namespace
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: pod
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: namespace
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: pod
-        {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 8 }}
-      {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
-      labels:
-        {{- range .Values.extraAttributes.podLabels }}
-        - key: {{ . }}
-        {{- end }}
-        {{- include "splunk-otel-collector.addExtraLabels" . | nindent 8 }}
-      {{- end }}
 
   {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
@@ -522,7 +475,6 @@ processors:
      - com.splunk.sourcetype
      - container.id
      - fluent.tag
-     - istio_service_name
      - k8s.container.name
      - k8s.namespace.name
      - k8s.pod.name
@@ -531,13 +483,16 @@ processors:
 
   {{- if not $gatewayEnabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- if .Values.autodetect.istio }}
+  {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
+  {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   transform/logs:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],resource.attributes["container.image.tag"]], ":"))
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
   {{- end }}
   {{- end }}
 
@@ -714,6 +669,9 @@ service:
         {{- if not $gatewayEnabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
         - transform/logs
+        {{- end }}
+        {{- if .Values.autodetect.istio }}
+        - transform/istio_service_name
         {{- end }}
         - resource/logs
         {{- end }}

@@ -5,7 +5,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: default-splunk-otel-collector-k8s-collector
-    chart: splunk-otel-collector-0.79.0
+    chart: splunk-otel-collector-0.79.1
     heritage: Helm
     release: default
   name: default-splunk-otel-collector-k8s-collector

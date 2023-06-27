@@ -198,6 +198,10 @@ distribution: ""
 
 autodetect:
   prometheus: false
+  # This option is recommended for istio environments. It does the following things:
+  # - Enables scraping istio control plane metrics from Promethes endpoints.
+  # - Add a `service.name` resource attribute to logs with the same value as istio generates for
+  #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
 
 ################################################################################
@@ -1366,7 +1370,7 @@ operator:
     autoInstrumentationImage:
       java:
         repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
-        tag: "v1.22.0"
+        tag: "v1.25.0"
     # name: nameOverride
     # By default, the operator manager will watch all namespaces for instrumentation purposes.
     # Use this env var to reduce the scope of watched environments.
