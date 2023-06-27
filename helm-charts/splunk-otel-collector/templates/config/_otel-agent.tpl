@@ -106,6 +106,7 @@ receivers:
           extraDimensions:
             metric_source: k8s-coredns
           type: coredns
+          scrapeFailureLogLevel: debug
           {{- if eq .Values.distribution "openshift" }}
           port: 9154
           skipVerify: true
@@ -127,6 +128,7 @@ receivers:
           clientKeyPath: /otel/etc/etcd/tls.key
           useHTTPS: true
           type: etcd
+          scrapeFailureLogLevel: debug
           {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
           skipVerify: true
           {{- else }}
@@ -154,6 +156,7 @@ receivers:
           type: kube-controller-manager
           useHTTPS: true
           useServiceAccount: true
+          scrapeFailureLogLevel: debug
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
       smartagent/kubernetes-apiserver:
@@ -169,6 +172,7 @@ receivers:
           type: kubernetes-apiserver
           useHTTPS: true
           useServiceAccount: true
+          scrapeFailureLogLevel: debug
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       smartagent/kubernetes-proxy:
@@ -181,6 +185,7 @@ receivers:
           extraDimensions:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
+          scrapeFailureLogLevel: debug
           {{- if eq .Values.distribution "openshift" }}
           skipVerify: true
           useHTTPS: true
@@ -204,6 +209,7 @@ receivers:
           type: kubernetes-scheduler
           useHTTPS: true
           useServiceAccount: true
+          scrapeFailureLogLevel: debug
       {{- end }}
       {{- end }}
 

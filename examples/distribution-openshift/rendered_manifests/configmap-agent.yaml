@@ -183,6 +183,7 @@ data:
               extraDimensions:
                 metric_source: k8s-coredns
               port: 9154
+              scrapeFailureLogLevel: debug
               skipVerify: true
               type: coredns
               useHTTPS: true
@@ -193,6 +194,7 @@ data:
               extraDimensions:
                 metric_source: kubernetes-controller-manager
               port: 10257
+              scrapeFailureLogLevel: debug
               skipVerify: true
               type: kube-controller-manager
               useHTTPS: true
@@ -203,6 +205,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-apiserver
+              scrapeFailureLogLevel: debug
               skipVerify: true
               type: kubernetes-apiserver
               useHTTPS: true
@@ -213,6 +216,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-proxy
+              scrapeFailureLogLevel: debug
               skipVerify: true
               type: kubernetes-proxy
               useHTTPS: true
@@ -224,6 +228,7 @@ data:
               extraDimensions:
                 metric_source: kubernetes-scheduler
               port: 10259
+              scrapeFailureLogLevel: debug
               skipVerify: true
               type: kubernetes-scheduler
               useHTTPS: true
