@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+## [0.80.0] - 2023-06-27
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.80.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.80.0).
 ### Changed
 
 - Add `service.name` resource attribute to logs if `autodetect.istio` is enabled using transform processor. This change
