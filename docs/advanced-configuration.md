@@ -379,7 +379,7 @@ agent:
 ### Known issues
 
 Kube Proxy
-* `10249: connect: connection refuse`
+* `10249: connect: connection refused`
   * Issue
     * When using a Kubernetes cluster with non-default configurations for kube proxy, there is a reported network connectivity issue that prevents the collection of proxy metrics.
   * Solution
