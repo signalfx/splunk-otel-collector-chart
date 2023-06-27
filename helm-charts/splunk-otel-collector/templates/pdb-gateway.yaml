@@ -1,7 +1,7 @@
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
 {{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
 {{- if and $gatewayEnabled .Values.podDisruptionBudget }}
-apiVersion: policy/v1beta1
+apiVersion: {{ include "splunk-otel-collector.PDB-apiVersion" . }}
 kind: PodDisruptionBudget
 metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}

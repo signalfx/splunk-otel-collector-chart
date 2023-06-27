@@ -332,6 +332,17 @@ compatibility with the old config group name: "otelAgent".
 {{- end -}}
 
 {{/*
+The apiVersion for podDisruptionBudget policies.
+*/}}
+{{- define "splunk-otel-collector.PDB-apiVersion" -}}
+{{- if (semverCompare ">= 1.21.0" .Capabilities.KubeVersion.Version) -}}
+{{- print "policy/v1" -}}
+{{- else -}}
+{{- print "policy/v1beta1" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 The name of the gateway service.
 */}}
 {{- define "splunk-otel-collector.gatewayServiceName" -}}
