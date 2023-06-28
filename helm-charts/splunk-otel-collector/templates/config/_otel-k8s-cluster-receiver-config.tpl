@@ -9,7 +9,7 @@ extensions:
   {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forAgent" false) | nindent 2 }}
   {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" false) | nindent 2 }}
   {{- end }}
-  
+
   health_check:
 
   memory_ballast:

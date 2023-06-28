@@ -125,7 +125,7 @@ spec:
           mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
           chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 999 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
           chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;          
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
           {{- end }}']
           securityContext:
             runAsUser: 0
