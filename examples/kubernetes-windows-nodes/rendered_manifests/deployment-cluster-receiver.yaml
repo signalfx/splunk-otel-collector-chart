@@ -88,6 +88,9 @@ spec:
         volumeMounts:
         - mountPath: C:\conf
           name: collector-configmap
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
       - name: collector-configmap
@@ -96,3 +99,6 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi

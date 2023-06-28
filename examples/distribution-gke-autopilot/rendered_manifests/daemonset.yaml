@@ -168,8 +168,14 @@ spec:
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
           readOnly: true
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: host-dev
         hostPath:
           path: /dev
