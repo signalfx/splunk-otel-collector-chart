@@ -176,6 +176,30 @@ filter/logs:
           value: "true"
 {{- end }}
 
+{{- define "splunk-otel-collector.persistentQueueLogs" -}}
+file_storage/persistent_queue_logs:
+  {{- if .forAgent }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+  {{- else if .forGateway }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs
+  {{- else }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
+  {{- end }}
+  timeout: 0
+{{- end }}
+
+{{- define "splunk-otel-collector.persistentQueueMetrics" -}}
+file_storage/persistent_queue_metrics:
+  {{- if .forAgent }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
+  {{- else if .forGateway }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics
+  {{- else }}
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
+  {{- end }}
+  timeout: 0
+{{- end }}
+
 {{/*
 Splunk Platform Logs exporter
 */}}
@@ -208,6 +232,13 @@ splunk_hec/platform_logs:
     initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
     max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
     max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
+    storage: file_storage/persistent_queue_logs
+    {{- end }}
 {{- end }}
 
 {{/*
@@ -241,6 +272,13 @@ splunk_hec/platform_metrics:
     initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
     max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
     max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
+    storage: file_storage/persistent_queue_metrics
+    {{- end }}
 {{- end }}
 
 {{/*
@@ -278,16 +316,6 @@ splunk_hec/platform_traces:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
-{{- end }}
-
-{{/*
-Splunk sending queue
-*/}}
-{{- define "splunk-otel-collector.splunkPlatformSendingQueue" -}}
-sending_queue:
-  enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
-  num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
-  queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
 {{- end }}
 
 {{/*

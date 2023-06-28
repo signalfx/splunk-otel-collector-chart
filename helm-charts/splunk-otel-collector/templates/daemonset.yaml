@@ -161,10 +161,17 @@ spec:
               setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
           {{- end }}
-          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent;
-          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent;
-          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent;
+          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs;
+          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs;
+          {{- end }}
+          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics;
+          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics;
           {{- end }}']
           securityContext:
             runAsUser: 0
@@ -184,8 +191,10 @@ spec:
               mountPath: {{ .Values.logsCollection.journald.directory }}
             {{- end }}
             {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-            - name: persistent-queue
-              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent
+            - name: persistent-queue-logs
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+            - name: persistent-queue-metrics
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
             {{- end }}
         {{- end }}
         {{- end }}
@@ -410,8 +419,10 @@ spec:
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
         {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-        - name: persistent-queue
-          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent
+        - name: persistent-queue-logs
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+        - name: persistent-queue-metrics
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
         {{- end }}
         {{- if .Values.logsCollection.journald.enabled }}
         - mountPath: {{.Values.logsCollection.journald.directory}}
@@ -472,9 +483,13 @@ spec:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
       {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-      - name: persistent-queue
+      - name: persistent-queue-logs
         hostPath:
-          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+          type: DirectoryOrCreate
+      - name: persistent-queue-metrics
+        hostPath:
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
           type: DirectoryOrCreate
       {{- end }}
       {{- if .Values.logsCollection.journald.enabled }}

@@ -430,9 +430,17 @@ Whether clusterReceiver should be enabled
 {{- end -}}
 
 
+{{- define "splunk-otel-collector.persistentQueueEnabledLogs" -}}
+{{- .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs -}}
+{{- end -}}
+
+{{- define "splunk-otel-collector.persistentQueueEnabledMetrics" -}}
+{{- .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics -}}
+{{- end -}}
+
 {{/*
 Whether persistentQueue should be enabled
 */}}
 {{- define "splunk-otel-collector.persistentQueueEnabled" -}}
-{{- or .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics  -}}
+{{- or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
 {{- end -}}

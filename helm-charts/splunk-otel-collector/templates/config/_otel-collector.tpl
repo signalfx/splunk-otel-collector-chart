@@ -12,6 +12,11 @@ extensions:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forGateway" true) | nindent 2 }}
+  {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forGateway" true) | nindent 2 }}
+  {{- end }}
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
@@ -160,12 +165,10 @@ exporters:
 
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
@@ -181,6 +184,10 @@ service:
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    - file_storage/persistent_queue_metrics
+    - file_storage/persistent_queue_logs
     {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.

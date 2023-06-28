@@ -61,6 +61,32 @@ spec:
       securityContext:
         {{ toYaml $gateway.securityContext | nindent 8 }}
       {{- end }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      initContainers:
+        - name: patch-log-dirs
+          image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
+          imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
+          command: ['sh', '-c', '
+          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs;
+          chown -Rv {{ $gateway.securityContext.runAsUser | default 999 }}:{{ $gateway.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx,g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs;
+          {{- end }}
+          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics;
+          chown -Rv {{ $gateway.securityContext.runAsUser | default 999 }}:{{ $gateway.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx,g:{{ $gateway.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics;
+          {{- end }}']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: persistent-queue-logs
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs
+            - name: persistent-queue-metrics
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics
+      {{- end }}
       containers:
       - name: otel-collector
         command:
@@ -150,6 +176,12 @@ spec:
         {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+        - name: persistent-queue-metrics
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics
+        - name: persistent-queue-logs
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs
+        {{- end }}
         {{- if $gateway.extraVolumeMounts }}
         {{- toYaml $gateway.extraVolumeMounts | nindent 8 }}
         {{- end }}
@@ -165,6 +197,16 @@ spec:
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
+      {{- end }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      - name: persistent-queue-logs
+        hostPath:
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs
+          type: DirectoryOrCreate
+      - name: persistent-queue-metrics
+        hostPath:
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics
+          type: DirectoryOrCreate
       {{- end }}
       {{- if $gateway.extraVolumes }}
       {{- toYaml $gateway.extraVolumes | nindent 6 }}

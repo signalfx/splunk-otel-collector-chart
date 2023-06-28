@@ -5,6 +5,11 @@ The values can be overridden in .Values.clusterReceiver.config
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forAgent" false) | nindent 2 }}
+  {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" false) | nindent 2 }}
+  {{- end }}
+  
   health_check:
 
   memory_ballast:
@@ -185,12 +190,10 @@ exporters:
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
-  {{- include "splunk-otel-collector.splunkPlatformSendingQueue" . | nindent 4 }}
   {{- if $clusterReceiver.eventsEnabled }}
     sourcetype: kube:events
   {{- end }}
@@ -200,11 +203,16 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8889
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-  extensions: [health_check, memory_ballast, k8s_observer]
-  {{- else }}
-  extensions: [health_check, memory_ballast]
-  {{- end }}
+  extensions:
+    - health_check
+    - memory_ballast
+    {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+    - k8s_observer
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    - file_storage/persistent_queue_metrics
+    - file_storage/persistent_queue_logs
+    {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
     # k8s metrics pipeline
