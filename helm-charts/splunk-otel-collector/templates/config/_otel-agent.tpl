@@ -283,53 +283,29 @@ receivers:
     retry_on_failure:
       enabled: true
     operators:
-      {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
         id: get-format
         routes:
           - output: parser-docker
             expr: 'body matches "^\\{"'
-          - output: parser-crio
-            expr: 'body matches "^[^ Z]+ "'
-          - output: parser-containerd
-            expr: 'body matches "^[^ Z]+Z"'
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
+          - output: parser-containerd-crio
+            expr: 'body matches "^[^ ]+ "'
       # Parse CRI-O format
       - type: regex_parser
-        id: parser-crio
-        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
+        id: parser-containerd-crio
+        regex: '^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
           layout: '2006-01-02T15:04:05.999999999Z07:00'
       - type: recombine
-        id: crio-recombine
+        id: containerd-crio-recombine
         output: handle_empty_log
         combine_field: attributes.log
         source_identifier: attributes["log.file.path"]
         is_last_entry: "attributes.logtag == 'F'"
         combine_with: ""
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
-      # Parse CRI-Containerd format
-      - type: regex_parser
-        id: parser-containerd
-        regex: '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-      - type: recombine
-        id: containerd-recombine
-        output: handle_empty_log
-        combine_field: attributes.log
-        source_identifier: attributes["log.file.path"]
-        is_last_entry: "attributes.logtag == 'F'"
-        combine_with: ""
-        max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
       # Parse Docker format
       - type: json_parser
         id: parser-docker
@@ -344,7 +320,6 @@ receivers:
         is_last_entry: attributes.log endsWith "\n"
         combine_with: ""
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
       - type: add
         id: handle_empty_log
         if: attributes.log == nil

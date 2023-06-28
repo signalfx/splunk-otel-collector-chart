@@ -528,9 +528,6 @@ logsCollection:
   # Container logs collection
   containers:
     enabled: true
-    # Container runtime. One of `docker`, `cri-o`, or `containerd`
-    # Automatically discovered if not set.
-    containerRuntime: ""
     # Paths of logfiles to exclude. object type is array:
     # i.e. to exclude `kube-system` namespace,
     # excludePaths: ["/var/log/pods/kube-system_*/*/*.log"]
