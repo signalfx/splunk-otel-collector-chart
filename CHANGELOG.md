@@ -6,7 +6,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
+
+## [0.80.0] - 2023-06-27
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.80.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.80.0).
+
+### Changed
+
+- Add `service.name` resource attribute to logs if `autodetect.istio` is enabled using transform processor. This change
+  removes the limitation of `service.name` attribute being available only with logsEngine=fluentd.
+  [#823](https://github.com/signalfx/splunk-otel-collector-chart/pull/823)
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes subchart dependencies [#828](https://github.com/signalfx/splunk-otel-collector-chart/pull/828)
+  - cert-manager upgraded from 1.11.1 to [1.12.2](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.2)
+  - opentelemetry-operator upgraded from 0.28.0 to [0.32.0)](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.32.0)
+- Update the log level for metric scrape failures of the smartagent/kubernetes-proxy receiver from error to debug when distribution='' [#832](https://github.com/signalfx/splunk-otel-collector-chart/pull/832)
+
+## [0.79.1] - 2023-06-22
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.79.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.79.1).
+
+### Fixed
+
+- Fix cri-o log format time layout [#817](https://github.com/signalfx/splunk-otel-collector-chart/pull/817)
+- Align the set of default resource attributes added by k8s attributes processor if the gateway is enabled [#820](https://github.com/signalfx/splunk-otel-collector-chart/pull/820)
+
+## [0.79.0] - 2023-06-16
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.79.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.79.0).
+
+### Added
+
+- Adopt new control-plane node toleration [#814](https://github.com/signalfx/splunk-otel-collector-chart/pull/814)
+
+### Changed
+
+- Update the Kubernetes Proxy monitor for OpenShift clusters to start using secure ports 9101 or 29101 with authentication [#810](https://github.com/signalfx/splunk-otel-collector-chart/pull/810)
+
+## [0.78.0] - 2023-06-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.78.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.78.1).
+
+### Added
+
+- Adopt Openshift distribution in Network Explorer [#804](https://github.com/signalfx/splunk-otel-collector-chart/pull/804)
+
+## [0.77.0] - 2023-06-05
+
+### Added
+
 - Add `serviceAccountName` to secret validation hook pod [#781](https://github.com/signalfx/splunk-otel-collector-chart/pull/781)
+- Allow enabling profiling only for Observability [#788](https://github.com/signalfx/splunk-otel-collector-chart/pull/788)
+- Add storage to filelog receiver for extraFileLog [#755](https://github.com/signalfx/splunk-otel-collector-chart/pull/755)
+- Add Openshift support for Network-Explorer [804](https://github.com/signalfx/splunk-otel-collector-chart/pull/804)
+
+### Changed
+
+- Avoid `runAsUser` in SecurityContext for Windows [#797](https://github.com/signalfx/splunk-otel-collector-chart/pull/797)
 
 ## [0.76.0] - 2023-05-04
 

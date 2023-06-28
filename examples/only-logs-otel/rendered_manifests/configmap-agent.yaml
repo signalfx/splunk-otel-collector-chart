@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.76.0
+    helm.sh/chart: splunk-otel-collector-0.80.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.76.0"
+    app.kubernetes.io/version: "0.80.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.76.0
+    chart: splunk-otel-collector-0.80.0
     release: default
     heritage: Helm
 data:
@@ -155,7 +155,7 @@ data:
         - id: parser-crio
           regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
-            layout: "2006-01-02T15:04:05.999999999-07:00"
+            layout: 2006-01-02T15:04:05.999999999Z07:00
             layout_type: gotime
             parse_from: attributes.time
           type: regex_parser

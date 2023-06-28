@@ -85,6 +85,60 @@ resourcedetection:
 {{- end }}
 
 {{/*
+Common config for K8s attributes processor adding k8s metadata to resource attributes.
+*/}}
+{{- define "splunk-otel-collector.k8sAttributesProcessor" -}}
+k8sattributes:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.ip
+    - sources:
+      - from: resource_attribute
+        name: ip
+    - sources:
+      - from: connection
+    - sources:
+      - from: resource_attribute
+        name: host.name
+  extract:
+    metadata:
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.name
+      - k8s.pod.uid
+      - container.id
+      - container.image.name
+      - container.image.tag
+    annotations:
+      - key: splunk.com/sourcetype
+        from: pod
+      - key: {{ include "splunk-otel-collector.filterAttr" . }}
+        tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
+        from: namespace
+      - key: {{ include "splunk-otel-collector.filterAttr" . }}
+        tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
+        from: pod
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: namespace
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: pod
+      {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
+    {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
+    labels:
+      {{- range .Values.extraAttributes.podLabels }}
+      - key: {{ . }}
+      {{- end }}
+      {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
+    {{- end }}
+{{- end }}
+
+{{/*
 Resource processor for logs manipulations
 */}}
 {{- define "splunk-otel-collector.resourceLogsProcessor" -}}
@@ -102,16 +156,6 @@ resource/logs:
       action: delete
     - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
-    {{- if .Values.autodetect.istio }}
-    - key: service.name
-      from_attribute: k8s.pod.labels.app
-      action: insert
-    - key: service.name
-      from_attribute: istio_service_name
-      action: insert
-    - key: istio_service_name
-      action: delete
-    {{- end }}
     {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
     - key: container_name
       from_attribute: k8s.container.name
@@ -160,6 +204,26 @@ resource/logs:
     {{- end }}
     {{- end }}
     {{- end }}
+{{- end }}
+
+{{/*
+The transform processor adds service.name attribute to logs the same way as it's done by istio for the generated traces
+https://github.com/istio/istio/blob/6237cb4e63cf9a332327cc0a815d6b46257e6f8a/pkg/config/analysis/analyzers/testdata/common/sidecar-injector-configmap.yaml#L110-L115
+This enables the correlation between logs and traces in Splunk Observability Cloud.
+*/}}
+{{- define "splunk-otel-collector.transformLogsProcessor" -}}
+transform/istio_service_name:
+  error_mode: ignore
+  log_statements:
+    - context: resource
+      statements:
+        - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"] != nil
+        - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"] == nil and attributes["k8s.pod.name"] != nil
+        # Name of the object owning the pod is taken from "k8s.pod.name" attribute by striping the pod suffix according
+        # to the k8s name generation rules (we don't want to put pressure on the k8s API server to get the owner name):
+        # https://github.com/kubernetes/apimachinery/blob/ff522ab81c745a9ac5f7eeb7852fac134194a3b6/pkg/util/rand/rand.go#L92-L127
+        - replace_pattern(cache["owner_name"], "^(.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$$", "$$1") where attributes["service.name"] == nil and cache["owner_name"] != nil
+        - set(attributes["service.name"], Concat([cache["owner_name"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil and attributes["k8s.namespace.name"] != nil
 {{- end }}
 
 {{/*

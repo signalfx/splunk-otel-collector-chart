@@ -84,7 +84,7 @@ spec:
       {{- end }}
       {{- if $clusterReceiver.securityContext }}
       securityContext:
-        {{ toYaml $clusterReceiver.securityContext | nindent 8 }}
+        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
       {{- end }}
       {{- if or (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs) (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics) }}
       initContainers:

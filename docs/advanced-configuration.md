@@ -379,14 +379,19 @@ agent:
 ### Known issues
 
 Kube Proxy
-* https://github.com/kubernetes/kops/issues/6472
-  * Problem
-    * When using a kops created Kubernetes cluster, a network connectivity issue has been reported that prevents proxy
-      metrics from being collected.
+* `10249: connect: connection refused`
+  * Issue
+    * When using a Kubernetes cluster with non-default configurations for kube proxy, there is a reported network connectivity issue that prevents the collection of proxy metrics.
   * Solution
-    * This issue can be addressed updating the kubeProxy metric bind address in the kops cluster spec:
-      * Set "kubeProxy.metricsBindAddress: 0.0.0.0" in the kops cluster spec.
-      * Deploy the change with "kops update cluster {cluster_name}" and "kops rolling-update cluster {cluster_name}".
+    * Update the kube proxy metric bind address (--metrics-bind-address) in the cluster spec.
+Set the kubeProxy metrics bind address to 0.0.0.0 or another value based on your Kubernetes cluster distribution.
+For this particular issue, the solution may vary depending on the Kubernetes cluster distribution. It is recommended to research what your Kubernetes distribution recommends for addressing this issue.
+  * Related Issue Links
+    * [kubernetes - Expose kube-proxy metrics on 0.0.0.0 by default ](https://github.com/kubernetes/kubernetes/pull/74300)
+    * [kubernetes - kube-proxy TLS support](https://github.com/kubernetes/kubernetes/issues/106870)
+    * [splunk-otel-collector-chart - Error connecting to kubernetes-proxy](https://github.com/signalfx/splunk-otel-collector-chart/issues/758)
+    * [kops - expose metrics-bind-address configuration for kube-proxy](https://github.com/kubernetes/kops/issues/6472)
+    * [prometheus - prometheus-kube-stack - kube-proxy metrics status with connection refused](https://github.com/prometheus-community/helm-charts/issues/977)
 
 ## Logs collection
 
@@ -405,13 +410,7 @@ The following configuration can be used to achieve that:
 logsEngine: otel
 ```
 
-There are following known limitations of native OTel logs collection:
-
-- `service.name` attribute will not be automatically constructed in istio environment.
-  This means that correlation between logs and traces will not work in Splunk Observability.
-  Logs collection with fluentd is still recommended if chart deployed with `autodetect.istio=true`.
-- Not yet supported in GKE Autopilot.
-
+**NOTE:** Native OTel logs collection is not yet supported in GKE Autopilot.
 
 ### Add log files from Kubernetes host machines/volumes
 

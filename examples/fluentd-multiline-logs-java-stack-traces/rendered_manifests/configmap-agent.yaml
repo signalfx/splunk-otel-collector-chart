@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.76.0
+    helm.sh/chart: splunk-otel-collector-0.80.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.76.0"
+    app.kubernetes.io/version: "0.80.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.76.0
+    chart: splunk-otel-collector-0.80.0
     release: default
     heritage: Helm
 data:
@@ -26,6 +26,12 @@ data:
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
         sync_host_metadata: true
+      splunk_hec/o11y:
+        disable_compression: true
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
+        log_data_enabled: false
+        profiling_data_enabled: false
+        token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
       health_check: null
       k8s_observer:
@@ -49,7 +55,6 @@ data:
         - com.splunk.sourcetype
         - container.id
         - fluent.tag
-        - istio_service_name
         - k8s.container.name
         - k8s.namespace.name
         - k8s.pod.name
@@ -136,6 +141,8 @@ data:
         override: true
         timeout: 10s
     receivers:
+      fluentforward:
+        endpoint: 0.0.0.0:8006
       hostmetrics:
         collection_interval: 10s
         scrapers:
@@ -210,6 +217,7 @@ data:
               extraDimensions:
                 metric_source: kubernetes-proxy
               port: 10249
+              scrapeFailureLogLevel: debug
               type: kubernetes-proxy
             rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
           smartagent/kubernetes-scheduler:
@@ -238,6 +246,21 @@ data:
       - memory_ballast
       - zpages
       pipelines:
+        logs:
+          exporters:
+          - splunk_hec/o11y
+          processors:
+          - memory_limiter
+          - groupbyattrs/logs
+          - k8sattributes
+          - filter/logs
+          - batch
+          - resourcedetection
+          - resource
+          - resource/logs
+          receivers:
+          - fluentforward
+          - otlp
         metrics:
           exporters:
           - signalfx

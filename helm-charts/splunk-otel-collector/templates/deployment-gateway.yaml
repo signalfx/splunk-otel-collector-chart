@@ -59,7 +59,7 @@ spec:
       {{- end }}
       {{- if $gateway.securityContext }}
       securityContext:
-        {{ toYaml $gateway.securityContext | nindent 8 }}
+        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $gateway.securityContext) | nindent 8 }}
       {{- end }}
       {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
       initContainers:

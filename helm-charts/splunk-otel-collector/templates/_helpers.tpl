@@ -332,6 +332,17 @@ compatibility with the old config group name: "otelAgent".
 {{- end -}}
 
 {{/*
+The apiVersion for podDisruptionBudget policies.
+*/}}
+{{- define "splunk-otel-collector.PDB-apiVersion" -}}
+{{- if (semverCompare ">= 1.21.0" .Capabilities.KubeVersion.Version) -}}
+{{- print "policy/v1" -}}
+{{- else -}}
+{{- print "policy/v1beta1" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 The name of the gateway service.
 */}}
 {{- define "splunk-otel-collector.gatewayServiceName" -}}
@@ -430,17 +441,32 @@ Whether clusterReceiver should be enabled
 {{- end -}}
 
 
+{{/*
+Whether persistentQueue should be enabled
+*/}}
 {{- define "splunk-otel-collector.persistentQueueEnabledLogs" -}}
 {{- .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs -}}
 {{- end -}}
+
 
 {{- define "splunk-otel-collector.persistentQueueEnabledMetrics" -}}
 {{- .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics -}}
 {{- end -}}
 
-{{/*
-Whether persistentQueue should be enabled
-*/}}
+
 {{- define "splunk-otel-collector.persistentQueueEnabled" -}}
 {{- or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
+{{- end -}}
+
+
+{{/*
+Build the securityContext for Linux and Windows
+*/}}
+{{- define "splunk-otel-collector.securityContext" -}}
+{{- if .isWindows }}
+{{- $_ := unset .securityContext "runAsUser" }}
+{{- else if and (eq (toString .securityContext.runAsUser) "<nil>") (.setRunAsUser) }}
+{{- $_ := set .securityContext "runAsUser" 0 }}
+{{- end }}
+{{- toYaml .securityContext }}
 {{- end -}}

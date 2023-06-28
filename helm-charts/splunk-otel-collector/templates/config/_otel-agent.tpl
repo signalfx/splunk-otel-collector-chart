@@ -96,7 +96,7 @@ receivers:
 
       # Receivers for collecting k8s control plane metrics.
       # Distributions besides Kubernetes and Openshift are not supported.
-      # Verified with Kubernetes v1.22 and Openshift v4.9.
+      # Verified with Kubernetes v1.22 and Openshift v4.10.59.
       {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
@@ -178,7 +178,7 @@ receivers:
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       smartagent/kubernetes-proxy:
         {{- if eq .Values.distribution "openshift" }}
-        rule: type == "pod" && labels["app"] == "sdn"
+        rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port == 29101)
         {{- else }}
         rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
         {{- end }}
@@ -186,8 +186,15 @@ receivers:
           extraDimensions:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
+          # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
+          # For now, set the scrape failure log level to debug when no specific distribution is selected
+          {{- if eq .Values.distribution "" }}
+          scrapeFailureLogLevel: debug
+          {{- end }}
           {{- if eq .Values.distribution "openshift" }}
-          port: 29101
+          skipVerify: true
+          useHTTPS: true
+          useServiceAccount: true
           {{- else }}
           port: 10249
           {{- end }}
@@ -300,7 +307,7 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999-07:00'
+          layout: '2006-01-02T15:04:05.999999999Z07:00'
       - type: recombine
         id: crio-recombine
         output: handle_empty_log
@@ -410,7 +417,14 @@ receivers:
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
-  {{- toYaml .Values.logsCollection.extraFileLogs | nindent 2 }}
+  {{- $extraFileLogsList := .Values.logsCollection.extraFileLogs }}
+  {{- range $extraFileLogKey, $extraFileLogValue := $extraFileLogsList }}
+  {{- printf "%s:" $extraFileLogKey | nindent 2 }}
+  {{- if not $extraFileLogValue.storage }}
+    storage: file_storage
+  {{- end }}
+  {{- $extraFileLogValue | toYaml | nindent 4 }}
+  {{- end }}
   {{- end }}
 
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
@@ -452,8 +466,8 @@ receivers:
 
 # By default k8sattributes and batch processors enabled.
 processors:
-  # k8sattributes enriches traces and metrics with k8s metadata
-  k8sattributes:
+  {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
+    # Agent specific configuration of k8sattributes:
     # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
@@ -462,53 +476,6 @@ processors:
     {{- end }}
     filter:
       node_from_env_var: K8S_NODE_NAME
-    pod_association:
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.uid
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.ip
-      - sources:
-        - from: resource_attribute
-          name: ip
-      - sources:
-        - from: connection
-      - sources:
-        - from: resource_attribute
-          name: host.name
-    extract:
-      metadata:
-        - k8s.namespace.name
-        - k8s.node.name
-        - k8s.pod.name
-        - k8s.pod.uid
-        - container.id
-        - container.image.name
-        - container.image.tag
-      annotations:
-        - key: splunk.com/sourcetype
-          from: pod
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: namespace
-        - key: {{ include "splunk-otel-collector.filterAttr" . }}
-          tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
-          from: pod
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: namespace
-        - key: splunk.com/index
-          tag_name: com.splunk.index
-          from: pod
-        {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 8 }}
-      {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
-      labels:
-        {{- range .Values.extraAttributes.podLabels }}
-        - key: {{ . }}
-        {{- end }}
-        {{- include "splunk-otel-collector.addExtraLabels" . | nindent 8 }}
-      {{- end }}
 
   {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
@@ -518,7 +485,6 @@ processors:
      - com.splunk.sourcetype
      - container.id
      - fluent.tag
-     - istio_service_name
      - k8s.container.name
      - k8s.namespace.name
      - k8s.pod.name
@@ -527,13 +493,16 @@ processors:
 
   {{- if not $gatewayEnabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- if .Values.autodetect.istio }}
+  {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
+  {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   transform/logs:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],resource.attributes["container.image.tag"]], ":"))
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
   {{- end }}
   {{- end }}
 
@@ -715,6 +684,9 @@ service:
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
         - transform/logs
         {{- end }}
+        {{- if .Values.autodetect.istio }}
+        - transform/istio_service_name
+        {{- end }}
         - resource/logs
         {{- end }}
         {{- if .Values.environment }}
@@ -814,6 +786,10 @@ service:
         {{- end }}
         - resourcedetection
         - resource
+        {{/*
+        The attribute `deployment.environment` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
+        More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
+        */}}
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
         - resource/add_environment
         {{- end }}

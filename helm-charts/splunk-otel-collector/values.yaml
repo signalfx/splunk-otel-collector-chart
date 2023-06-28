@@ -210,6 +210,10 @@ distribution: ""
 
 autodetect:
   prometheus: false
+  # This option is recommended for istio environments. It does the following things:
+  # - Enables scraping istio control plane metrics from Promethes endpoints.
+  # - Add a `service.name` resource attribute to logs with the same value as istio generates for
+  #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
 
 ################################################################################
@@ -264,7 +268,7 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# Open-telemetry collector running as an deamonset agent on every node.
+# OpenTelemetry collector running as an deamonset agent on every node.
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
 
@@ -524,9 +528,11 @@ clusterReceiver:
   config: {}
 
 #################################################################
-# Native OtelTelemetry logs collection using
-# https://github.com/open-telemetry/opentelemetry-log-collection.
+# Native OpenTelemetry logs collection
 # Disabled by default in favor of fluentd.
+# Can be enabled by setting "logsEngine: otel".
+# Receiver Documentation: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
+# OpenTelemetry Logging Documentation: https://opentelemetry.io/docs/specs/otel/logs
 #################################################################
 
 logsCollection:
@@ -544,7 +550,7 @@ logsCollection:
     # Boolean for ingesting the agent's own log
     excludeAgentLogs: true
     # Extra operators for container logs.
-    # https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md
     extraOperators: []
 
     # Multiline logs processing configuration. Multiline logs that written by containers to stdout
@@ -964,10 +970,12 @@ secret:
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
 
-# This default tolerations allow the daemonset to be deployed on master nodes,
-# so that we can also collect logs and metrics from those nodes.
+# This default tolerations allow the daemonset to be deployed on control-plane
+# nodes, so that we can also collect logs and metrics from those nodes.
 tolerations:
   - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
     effect: NoSchedule
 
 # Defines which nodes should be selected to deploy the o11y collector daemonset.
@@ -1374,7 +1382,7 @@ operator:
     autoInstrumentationImage:
       java:
         repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
-        tag: "v1.22.0"
+        tag: "v1.25.0"
     # name: nameOverride
     # By default, the operator manager will watch all namespaces for instrumentation purposes.
     # Use this env var to reduce the scope of watched environments.

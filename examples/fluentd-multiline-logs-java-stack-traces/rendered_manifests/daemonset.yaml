@@ -6,14 +6,15 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.76.0
+    helm.sh/chart: splunk-otel-collector-0.80.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.76.0"
+    app.kubernetes.io/version: "0.80.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.76.0
+    chart: splunk-otel-collector-0.80.0
     release: default
     heritage: Helm
+    engine: fluentd
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -29,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: a73273529d6c7e4b13f9aece9ea358ceb2feaccfef08dc4129d04cfe0eb76346
+        checksum/config: 04a6c8511fee6a54c7f1368df1cfbb90e7d8eb78989fcd7e2d27ee0f8fd26a44
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -41,12 +42,86 @@ spec:
         
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+      initContainers:
+        - name: prepare-fluentd-config
+          image: splunk/fluentd-hec:1.2.8
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c"]
+          securityContext:
+            runAsUser: 0
+          args:
+            - cp /fluentd/etc/common/* /fluentd/etc/;
+              if [ "${LOG_FORMAT_TYPE}" == "json" ] || [ "$(ls /var/lib/docker/containers/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
+                  cp /fluentd/etc/json/* /fluentd/etc/;
+              fi;
+          env:
+            - name: LOG_FORMAT_TYPE
+              value: ""
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
+          volumeMounts:
+            - name: varlogdest
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: fluentd-config
+              mountPath: /fluentd/etc
+            - name: fluentd-config-common
+              mountPath: /fluentd/etc/common
+            - name: fluentd-config-json
+              mountPath: /fluentd/etc/json
       containers:
+      - name: fluentd
+        image: splunk/fluentd-hec:1.2.8
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          
+          runAsUser: 0
+        env:
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlogdest
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: journallogpath
+          mountPath: "/run/log/journal"
+          readOnly: true
+        - name: fluentd-config
+          mountPath: /fluentd/etc
+        - name: tmp
+          mountPath: /tmp
       - name: otel-collector
         command:
         - /otelcol
         - --config=/conf/relay.yaml
         ports:
+        - name: fluentforward
+          containerPort: 8006
+          hostPort: 8006
+          protocol: TCP
         - name: jaeger-grpc
           containerPort: 14250
           hostPort: 14250
@@ -77,7 +152,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.76.0
+        image: quay.io/signalfx/splunk-otel-collector:0.80.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -167,6 +242,28 @@ spec:
           readOnly: true
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlogdest
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: journallogpath
+        hostPath:
+          path: "/run/log/journal"
+      - name: fluentd-config
+        emptyDir: {}
+      - name: fluentd-config-common
+        configMap:
+          name: default-splunk-otel-collector-fluentd
+      - name: fluentd-config-cri
+        configMap:
+          name: default-splunk-otel-collector-fluentd-cri
+      - name: fluentd-config-json
+        configMap:
+          name: default-splunk-otel-collector-fluentd-json
+      - name: tmp
+        emptyDir: {}
       - name: host-dev
         hostPath:
           path: /dev
