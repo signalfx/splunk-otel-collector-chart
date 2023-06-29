@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Set cluster_name for host logs too if renameFieldsSck is enabled [#837](https://github.com/signalfx/splunk-otel-collector-chart/pull/837)
+
 ### Added
 
 - Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
