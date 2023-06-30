@@ -94,6 +94,16 @@ rules:
   verbs:
     - patch
 {{- end }}
+{{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  resourceNames:
+  - aws-auth
+{{- end }}
 {{- with .Values.rbac.customRules }}
 {{ toYaml . }}
 {{- end }}
