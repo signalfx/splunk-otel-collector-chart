@@ -87,7 +87,6 @@ def upgrade_helm(yaml_file, fields_dict=None):
     check_if_upgrade_successful(upgrade_sck_log)
     os.system("env | grep CI_")
     logger.info("=====================================================================")
-    # time.sleep(10)
     wait_for_pods_initialization()
 
 
@@ -99,12 +98,11 @@ def wait_for_pods_initialization():
         get_pods_logs = DEFAULT_LOGS_DIR + "get_pods_wait_for_pods.log"
         os.system(f"kubectl get pods > {get_pods_logs}")
         lines = get_log_file_content(get_pods_logs)
-        for line in lines:
+        for line in lines[1:]:
             if "Running" == line.split()[2]:
                 counter += 1
             else:
                 logger.info(f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}")
-
-        # -1 here because the first line is header with column names
-        if counter == len(lines) - 1:
+        if counter == len(lines):
             break
+    time.sleep(5)  # wait for ingesting logs into splunk after connector is ready
