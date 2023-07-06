@@ -54,7 +54,7 @@ def test_agent_logs_metadata(setup):
 
     """
     # prepare connector for test
-    yaml_file = "k8s_agent_pod_tests/local_config/agent_test_values.yaml"
+    yaml_file = "config_yaml_files/agent_test_values.yaml"
     yaml_fields = {
         "splunkPlatform.index": INDEX_MAIN,
         "splunkPlatform.token": os.environ.get("CI_SPLUNK_HEC_TOKEN"),
@@ -107,7 +107,7 @@ def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     """
     logger.info("testing that agent logs are correctly ingested into Splunk")
     # prepare connector for test
-    yaml_file = "local_config/agent_test_values.yaml"
+    yaml_file = "config_yaml_files/agent_test_values.yaml"
     yaml_fields = {
         "splunkPlatform.index": INDEX_MAIN,
         "splunkPlatform.token": os.environ.get("CI_SPLUNK_HEC_TOKEN"),
@@ -152,7 +152,7 @@ def test_no_agent_logs_ingested_into_splunk_with_exclude_agent_logs_flag(setup):
     """
     logger.info("Testing that that agent logs are not ingested into Splunk while exclude agent logs flag is set")
     # prepare connector for test
-    yaml_file = "local_config/agent_test_values.yaml"
+    yaml_file = "config_yaml_files/agent_test_values.yaml"
     # Open the YAML file for reading
     with open(yaml_file, "r") as file:
         data = yaml.safe_load(file)  # Parse the YAML data
