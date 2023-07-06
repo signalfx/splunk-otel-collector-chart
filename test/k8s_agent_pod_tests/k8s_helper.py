@@ -72,21 +72,13 @@ def upgrade_helm(yaml_file, fields_dict=None):
     logger.info("=======================")
     create_dir_if_not_exists(DEFAULT_LOGS_DIR)
     upgrade_sck_log = DEFAULT_LOGS_DIR + "upgrade.log"
-
     set_yaml_fields_cmd = prepare_set_yaml_fields_cmd(fields_dict)
-    os.system("pwd")
-    logger.info("=====================================================================")
-    # token = os.environ.get("CI_SPLUNK_HEC_TOKEN")
-    # os.system("echo $CI_SPLUNK_HEC_TOKEN")
-    # logger.info(token)
     os.system(
         f"helm upgrade ci-sck --values {yaml_file}"
         + set_yaml_fields_cmd
         + f" ./../helm-charts/splunk-otel-collector/ > {upgrade_sck_log}"
     )
     check_if_upgrade_successful(upgrade_sck_log)
-    os.system("env | grep CI_")
-    logger.info("=====================================================================")
     wait_for_pods_initialization()
 
 
@@ -98,11 +90,12 @@ def wait_for_pods_initialization():
         get_pods_logs = DEFAULT_LOGS_DIR + "get_pods_wait_for_pods.log"
         os.system(f"kubectl get pods > {get_pods_logs}")
         lines = get_log_file_content(get_pods_logs)
+        # skip first line/row - header row
         for line in lines[1:]:
             if "Running" == line.split()[2]:
                 counter += 1
             else:
                 logger.info(f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}")
-        if counter == len(lines):
+        if counter == len(lines)-1:
             break
     time.sleep(5)  # wait for ingesting logs into splunk after connector is ready

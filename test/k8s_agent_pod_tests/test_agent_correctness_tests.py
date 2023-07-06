@@ -46,7 +46,6 @@ def setup_for_agent_tests():
     }
     k8s_helper.upgrade_helm(default_yaml_file, yaml_fields_recall)
 
-# @pytest.mark.skip("skipping test case execution")
 def test_agent_logs_metadata(setup):
     """
     Test that agent logs have correct metadata:
@@ -102,7 +101,6 @@ def test_agent_logs_metadata(setup):
     ), f"Source does not match the pattern {source_pattern}"
 
 
-# @pytest.mark.skip("skipping test case execution")
 def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     """
     Test that agent logs are correctly ingested into Splunk
@@ -139,10 +137,8 @@ def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     agent_logs = k8s_helper.get_pod_logs(full_pod_name)
     match_counter = 0
     for event in events:
-        # logger.info(event["_raw"])
         for line in agent_logs:
             if event["_raw"] == line:
-                # logger.info("match")
                 match_counter += 1
                 break
     assert len(events) == match_counter
