@@ -1,8 +1,19 @@
 import os
 import time
+import logging
+import sys
 
-GET_PODS_FILE_NAME = "../k8s_correctness_tests/get_pods.out"
-AGENT_POD_LOGS = "agent_pod_logs.out"
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(message)s")
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
+DEFAULT_LOGS_DIR = "logs/"
+GET_PODS_FILE_NAME = DEFAULT_LOGS_DIR + "get_pods.out"
+AGENT_POD_LOGS = DEFAULT_LOGS_DIR + "agent_pod_logs.out"
 
 
 def get_pod_full_name(pod):
@@ -10,9 +21,9 @@ def get_pod_full_name(pod):
     lines = get_log_file_content(GET_PODS_FILE_NAME)
     for line in lines:
         tmp = line.split()
-        print(tmp)
+        logger.info(tmp)
         if pod in tmp[0]:
-            print(f"{pod} full name is: {tmp[0]}")
+            logger.info(f"{pod} full name is: {tmp[0]}")
             return tmp[0]
     return "pod_name_not_found"
 
@@ -34,69 +45,66 @@ def check_if_upgrade_successful(upgrade_log_name):
     lines = get_log_file_content(upgrade_log_name)
     for line in lines:
         if upgrade_success_log in line:
-            print("upgrade successful")
+            logger.info("upgrade successful")
             return True
-    print("upgrade failed")
-    print(lines)
+    logger.error("upgrade failed")
+    logger.info(lines)
     return False
 
 
-def upgrade_helm(yaml_file):
-    print("=======================")
-    upgrade_sck_log = "upgrade.log"
+def prepare_set_yaml_fields_cmd(fields_dict):
+    cmd = ""
+    if fields_dict != None:
+        for k, v in fields_dict.items():
+            cmd = cmd + " --set " + k + "=" + v
+    return cmd
 
-    # print(yaml_file)
-    # os.system(f"cat {yaml_file}")
+
+def create_dir_if_not_exists(dir_name):
+    # Check whether the specified path exists or not
+    is_exist = os.path.exists(dir_name)
+    if not is_exist:
+        os.makedirs(dir_name)
+        logger.info("The new directory is created!")
+
+
+def upgrade_helm(yaml_file, fields_dict=None):
+    logger.info("=======================")
+    create_dir_if_not_exists(DEFAULT_LOGS_DIR)
+    upgrade_sck_log = DEFAULT_LOGS_DIR + "upgrade.log"
+
+    set_yaml_fields_cmd = prepare_set_yaml_fields_cmd(fields_dict)
     os.system("pwd")
-    print("=====================================================================")
-    # os.system(f"helm install ci-sck --values {yaml_file} ./../../splunk-otel-collector-chart/splunk-otel-collector")
-    # os.system(f"helm install ci-sck --values {yaml_file} ./../../helm-charts/splunk-otel-collector/")
-    host = os.environ.get("CI_SPLUNK_HOST")
-    token = os.environ.get("CI_SPLUNK_HEC_TOKEN")
-    os.system('echo $CI_SPLUNK_HEC_TOKEN')
-    print(token)
-    # print(f"host {host}")
-    # print(f"helm upgrade ci-sck --values {yaml_file} --set splunkPlatform.endpoint=https://{host}:8088/services/collector \ ./../../helm-charts/splunk-otel-collector/ > {upgrade_sck_log}")
+    logger.info("=====================================================================")
+    # token = os.environ.get("CI_SPLUNK_HEC_TOKEN")
+    # os.system("echo $CI_SPLUNK_HEC_TOKEN")
+    # logger.info(token)
     os.system(
-        # f"helm upgrade ci-sck --values {yaml_file} --set splunkPlatform.endpoint=https://{host}:8088/services/collector \ ./../helm-charts/splunk-otel-collector/ > {upgrade_sck_log}"
-        f"helm upgrade ci-sck --values {yaml_file} --set splunkPlatform.endpoint=https://{host}:8088/services/collector \ ./../../helm-charts/splunk-otel-collector/ > {upgrade_sck_log}"
+        f"helm upgrade ci-sck --values {yaml_file}"
+        + set_yaml_fields_cmd
+        + f" ./../helm-charts/splunk-otel-collector/ > {upgrade_sck_log}"
     )
     check_if_upgrade_successful(upgrade_sck_log)
     os.system("env | grep CI_")
-    print("=====================================================================")
+    logger.info("=====================================================================")
     # time.sleep(10)
     wait_for_pods_initialization()
 
 
 def wait_for_pods_initialization():
-    #   script_body = f"""
-    # until kubectl get pod | grep Running | [[ $(wc -l) == 1 ]]; do
-    #   sleep 1;
-    # done"""
-    #   with open("check_for_pods.sh", "w") as fp:
-    #       fp.write(script_body)
-    #   os.system("chmod a+x check_for_pods.sh && ./check_for_pods.sh")
     break_infinite_looping_counter = 60
     for x in range(break_infinite_looping_counter):
         time.sleep(1)
         counter = 0
-        get_pods_logs = "get_pods_wait_for_pods.log"
+        get_pods_logs = DEFAULT_LOGS_DIR + "get_pods_wait_for_pods.log"
         os.system(f"kubectl get pods > {get_pods_logs}")
         lines = get_log_file_content(get_pods_logs)
         for line in lines:
             if "Running" == line.split()[2]:
                 counter += 1
             else:
-                print(f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}")
+                logger.info(f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}")
 
+        # -1 here because the first line is header with column names
         if counter == len(lines) - 1:
             break
-
-
-if __name__ == "__main__":
-    print("start")
-    agent_pod = get_pod_full_name("agent")
-    print(agent_pod)
-    logs = get_pod_logs(agent_pod)
-    print(len(logs))
-    print("stop")
