@@ -95,7 +95,9 @@ def wait_for_pods_initialization():
             if "Running" == line.split()[2]:
                 counter += 1
             else:
-                logger.info(f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}")
-        if counter == len(lines)-1:
+                logger.info(
+                    f"Not ready pod: {line.split()[0]}, status: {line.split()[2]}"
+                )
+        if counter == len(lines) - 1:
             break
     time.sleep(5)  # wait for ingesting logs into splunk after connector is ready

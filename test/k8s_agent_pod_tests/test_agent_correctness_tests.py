@@ -46,6 +46,7 @@ def setup_for_agent_tests():
     }
     k8s_helper.upgrade_helm(default_yaml_file, yaml_fields_recall)
 
+
 def test_agent_logs_metadata(setup):
     """
     Test that agent logs have correct metadata:
@@ -148,7 +149,9 @@ def test_no_agent_logs_ingested_into_splunk_with_exclude_agent_logs_flag(setup):
     """
     Test that agent logs are not ingested into Splunk while exclude agent logs flag is set
     """
-    logger.info("Testing that that agent logs are not ingested into Splunk while exclude agent logs flag is set")
+    logger.info(
+        "Testing that that agent logs are not ingested into Splunk while exclude agent logs flag is set"
+    )
     # prepare connector for test
     yaml_file = AGENT_VALUES_YAML
     # Open the YAML file for reading
