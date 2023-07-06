@@ -11,7 +11,7 @@ import yaml
 from ..common import check_events_from_splunk
 from k8s_agent_pod_tests import k8s_helper
 
-AGENT_VALUES_YAML = "../config_yaml_files/agent_tests_values.yaml"
+AGENT_VALUES_YAML = "config_yaml_files/agent_tests_values.yaml"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
