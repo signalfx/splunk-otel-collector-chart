@@ -74,7 +74,7 @@ def test_agent_logs_metadata(setup):
         + full_pod_name
         + ' "Everything is ready. Begin running and processing data."'
     )
-    logger.info(f"query: {search_query}")
+    logger.info(f"Query: {search_query}")
     events = check_events_from_splunk(
         start_time="-5m@m",
         url=setup["splunkd_url"],
@@ -126,6 +126,7 @@ def test_all_agent_logs_correctly_ingested_into_splunk(setup):
         + full_pod_name
         + " source=*/otel-collector/*.log"
     )
+    logger.info(f"Query: {search_query}")
     events = check_events_from_splunk(
         start_time="-5m@m",
         url=setup["splunkd_url"],
@@ -183,6 +184,7 @@ def test_no_agent_logs_ingested_into_splunk_with_exclude_agent_logs_flag(setup):
         + k8s_helper.get_pod_full_name("agent")
         + " source=*/otel-collector/*.log"
     )
+    logger.info(f"Query: {search_query}")
     events = check_events_from_splunk(
         start_time="-5m@m",
         url=setup["splunkd_url"],
