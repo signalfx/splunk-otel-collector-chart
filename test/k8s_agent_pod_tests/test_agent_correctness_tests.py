@@ -140,7 +140,8 @@ def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     match_counter = 0
     for event in events:
         for line in agent_logs:
-            if event["_raw"].strip() == line.strip():
+            # if event["_raw"].strip() == line.strip():
+            if event["_raw"] == line:
                 match_counter += 1
                 break
     assert len(events) == match_counter

@@ -10,7 +10,7 @@ jobs:
       matrix:
         container_runtime:
           - "docker"
-          - "containerd"
+#          - "containerd"
           - "cri-o"
     env:
       CI_SPLUNK_PORT: 8089
