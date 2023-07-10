@@ -1153,6 +1153,15 @@
       "description": "Apply for k8s cluster with windows worker node.",
       "type": "boolean"
     },
+    "securityContextConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "boolean"
+        }
+      }
+    },
     "securityContextConstraintsOverwrite": {
       "description": "Openshift SecurityContextConstraints can be overriden in this field.",
       "type": "object"
