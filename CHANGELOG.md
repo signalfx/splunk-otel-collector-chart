@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
-
+- Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
 ## [0.80.0] - 2023-06-27
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.80.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.80.0).
