@@ -960,11 +960,11 @@ secret:
 
 # This default tolerations allow the daemonset to be deployed on control-plane
 # nodes, so that we can also collect logs and metrics from those nodes.
-tolerations:
-  - key: node-role.kubernetes.io/master
-    effect: NoSchedule
-  - key: node-role.kubernetes.io/control-plane
-    effect: NoSchedule
+#tolerations:
+  #- key: node-role.kubernetes.io/master
+    #effect: NoSchedule
+  #- key: node-role.kubernetes.io/control-plane
+    #effect: NoSchedule
 
 # Defines which nodes should be selected to deploy the o11y collector daemonset.
 nodeSelector: {}
