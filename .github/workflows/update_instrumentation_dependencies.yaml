@@ -1,4 +1,4 @@
-name: Check for new java agent
+name: Check for new instrumentation versions
 
 on:
   schedule:
@@ -6,34 +6,37 @@ on:
   workflow_dispatch:
 
 env:
-  JAVA_REPO: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
   VALUES_YAML: helm-charts/splunk-otel-collector/values.yaml
-  LATEST_API: https://api.github.com/repos/signalfx/splunk-otel-java/releases/latest
+  LATEST_API: https://api.github.com/repos/signalfx/splunk-otel-{lang}/releases/latest
 
 jobs:
-  maybe_update_java:
+  maybe_update:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: ['java'] # Add other languages here
     steps:
       - uses: actions/checkout@v3.5.3
       - name: swizzle version
         id: swizzle_version
         run: |
-          LOCAL_VER=$(grep -A 1 $JAVA_REPO $VALUES_YAML | tail -1 | sed -e 's/.*tag: //' | tr -d '"')
-          LATEST_VER=$(curl -qs -H "Accept: application/vnd.github+json" $LATEST_API | jq -r .tag_name)
+          REPO=ghcr.io/signalfx/splunk-otel-${{ matrix.language }}/splunk-otel-${{ matrix.language }}
+          LOCAL_VER=$(grep $REPO $VALUES_YAML | awk -F: '{print $2}' | tr -d ' "')
+          LATEST_VER=$(curl -qs -H "Accept: application/vnd.github+json" $(echo $LATEST_API | sed "s/{lang}/${{ matrix.language }}/g") | jq -r .tag_name)
           echo "LATEST_VER=$LATEST_VER" >> $GITHUB_OUTPUT
-          echo "Current version is $LOCAL_VER, latest is $LATEST_VER"
+          echo "Current version of ${{ matrix.language }} is $LOCAL_VER, latest is $LATEST_VER"
           if [ "$LATEST_VER" == "$LOCAL_VER" ]; then
             echo We are already up to date. Nothing else to do.
           else
             echo 'Verifying that the image is pullable...'
             echo '(If this fails, the agent version is out of sync with ghcr version)'
-            docker pull $JAVA_REPO:$LATEST_VER
+            docker pull $REPO:$LATEST_VER
             echo 'Looks like we are good to update...'
             echo Updating to new version
             echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
-            VLINE=$(grep -n -A 1 $JAVA_REPO $VALUES_YAML | tail -1 | sed -e "s/-.*//")
-            echo sed -i "${VLINE}s/\"v.*\"/\"${LATEST_VER}\"/" $VALUES_YAML
-            sed -i "${VLINE}s/\"v.*\"/\"${LATEST_VER}\"/" $VALUES_YAML
+            VLINE=$(grep -n $REPO $VALUES_YAML | cut -f1 -d:)
+            echo sed -i "${VLINE}s|:${LOCAL_VER}|:${LATEST_VER}|" $VALUES_YAML
+            sed -i "${VLINE}s|:${LOCAL_VER}|:${LATEST_VER}|" $VALUES_YAML
             git --no-pager diff
           fi
       - name: render some templates
@@ -51,8 +54,8 @@ jobs:
         if: ${{ steps.swizzle_version.outputs.NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: update java agent version
-          title: Update Java agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}
-          body: Use the new version of the java agent
-          branch: "update-java-${{ steps.swizzle_version.outputs.LATEST_VER }}"
+          commit-message: Update ${{ matrix.language }} instrumentation version
+          title: Update ${{ matrix.language }} agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}
+          body: Use the new version of the ${{ matrix.language }} instrumentation library
+          branch: "update-${{ matrix.language }}-${{ steps.swizzle_version.outputs.LATEST_VER }}"
           base: main
