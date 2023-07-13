@@ -21,11 +21,11 @@
 
 {{- define "splunk-otel-collector.operator.instrumentation.exporter.endpoint" -}}
 {{- if and .Values.operator.instrumentation.spec .Values.operator.instrumentation.spec.exporter .Values.operator.instrumentation.spec.exporter.endpoint (ne .Values.operator.instrumentation.spec.exporter.endpoint "") }}
-  "{{ .Values.operator.instrumentation.spec.exporter.endpoint }}"
+  {{ .Values.operator.instrumentation.spec.exporter.endpoint }}
 {{- else if .Values.agent.enabled }}
-  "http://$(SPLUNK_OTEL_AGENT):4317"
+  http://$(SPLUNK_OTEL_AGENT):4317
 {{- else if .Values.gateway.enabled }}
-  "http://{{ include "splunk-otel-collector.fullname" . }}:4317"
+  http://{{ include "splunk-otel-collector.fullname" . }}:4317
 {{- else -}}
   {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), and .Values.operator.instrumentation.spec.exporter.endpoint is not set, either environment must be a non-empty string or operator.instrumentation.spec.env must contain an item with {name: OTEL_RESOURCE_ATTRIBUTES, value: non-empty string}" -}}
 {{- end }}
@@ -48,18 +48,17 @@ env:
   - name: SPLUNK_PROFILER_MEMORY_ENABLED
     value: "true"
   {{- end }}
+{{- if include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | toString | hasSuffix ":4317" }}
+# Required if endpoint is set to 4317.
+# Python and dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
+# # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
 python:
   env:
-    # Required if endpoint is set to 4317.
-    # Python auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-    # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: {{- include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | replace "4317" "4318" | nindent 6 }}
+      value: {{- include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | replace ":4317" ":4318" | nindent 6 }}
 dotnet:
   env:
-    # Required if endpoint is set to 4317.
-    # Dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-    # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: {{- include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | replace "4317" "4318" | nindent 6 }}
+      value: {{- include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | replace ":4317" ":4318" | nindent 6 }}
+{{- end }}
 {{- end }}
