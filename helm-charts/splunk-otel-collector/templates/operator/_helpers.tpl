@@ -7,13 +7,13 @@
     {{- $envSet := false -}}
     {{- if and .Values.operator.instrumentation.spec .Values.operator.instrumentation.spec.env -}}
       {{- range .Values.operator.instrumentation.spec.env -}}
-        {{- if and (eq .name "OTEL_RESOURCE_ATTRIBUTES") .value -}}
+        {{- if and (eq .name "OTEL_RESOURCE_ATTRIBUTES") .value (has "deployment.environment" .value) -}}
           {{- $envSet = true -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}
     {{- if not $envSet -}}
-      {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), and .Values.operator.instrumentation.spec.exporter.endpoint is not set, either environment must be a non-empty string or operator.instrumentation.spec.env must contain an item with {name: OTEL_RESOURCE_ATTRIBUTES, value: non-empty string}" -}}
+      {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), and .Values.operator.instrumentation.spec.exporter.endpoint is not set, either environment must be a non-empty string or operator.instrumentation.spec.env must contain an item with {name: OTEL_RESOURCE_ATTRIBUTES, value: non-empty string containing 'deployment.environment'}" -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
@@ -27,7 +27,7 @@
 {{- else if .Values.gateway.enabled }}
   http://{{ include "splunk-otel-collector.fullname" . }}:4317
 {{- else -}}
-  {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), and .Values.operator.instrumentation.spec.exporter.endpoint is not set, either environment must be a non-empty string or operator.instrumentation.spec.env must contain an item with {name: OTEL_RESOURCE_ATTRIBUTES, value: non-empty string}" -}}
+  {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), either agent.enabled=true, gateway.enabled=true, or .Values.operator.instrumentation.spec.exporter.endpoint must be set" -}}
 {{- end }}
 {{- end }}
 
