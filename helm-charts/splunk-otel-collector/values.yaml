@@ -1370,37 +1370,53 @@ operator:
   # For more details, refer to: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
   instrumentation:
     # Overrides for default instrumentation configurations can be specified here.
+    # Source: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/operator/instrumentation.yaml
+    # Rendered Default: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml
     spec:
-    # Optional "endpoint" parameter for exporting data to a specific target.
-    # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
-    # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
-    # must be overridden here.
-    # exporter:
-    #   endpoint: http://$(SPLUNK_OTEL_AGENT):4317
-
-    # Optional "sampler" parameter for enabling trace sampling.
-    # Refer to: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
-    # sampler:
-    #   type: traceidratio
-    #   argument: "0.95"
-
-    # Optional "environment variable" parameters that can configure all instrumentation libraries.
-    # env:
-    #   # Sets the deployment.environment tag on spans
-    #   - name: OTEL_RESOURCE_ATTRIBUTES
-    #     value: "deployment.environment=dev"
-
-  manager:
-    autoInstrumentationImage:
+      # Optional "endpoint" parameter for exporting data to a specific target.
+      # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
+      # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
+      # must be overridden here.
+      # exporter:
+        # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+      propagators:
+        - tracecontext
+        - baggage
+        - b3
+      # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
+      # sampler:
+        # type: traceidratio
+        # argument: "0.95"
+      # Optional "environment variable" parameters that can configure all instrumentation libraries.
+      # env:
+        # Sets the deployment.environment tag on spans.
+        # - name: OTEL_RESOURCE_ATTRIBUTES
+        #   value: "deployment.environment=dev"
+        # Parameters that can enable profiling for all instrumentation libraries.
+        # Both environment variables will be set to "true" when splunkObservability.profilingEnabled=true using Helm templates.
+        # - name: SPLUNK_PROFILER_ENABLED
+        #   value: "true"
+        # - name: SPLUNK_PROFILER_MEMORY_ENABLED
+        #   value: "true"
+      # Splunk Instrumentation Libraries
       java:
-        repository: "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java"
-        tag: "v1.25.0"
-    # name: nameOverride
-    # By default, the operator manager will watch all namespaces for instrumentation purposes.
-    # Use this env var to reduce the scope of watched environments.
-    # env:
-    #  - name: WATCH_NAMESPACE
-    #    value: targetNamespaceAlpha,targetNamespaceBravo
+        # TODO: Moving the image definitition here break a github workflow that updates this image. Update the workflow before merge.
+        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.25.0
+      # OpenTelemetry Instrumentation Libraries
+      # For default version values, see: https://github:com/open-telemetry/opentelemetry-operator/releases
+      # apacheHttpd:
+        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:X.X.X
+      # dotnet:
+        # Port 4318 is used for dotnet instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
+        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:X.X.X
+      # go:
+        # image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:X.X.X
+      # nodejs:
+        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:X.X.X
+      # python:
+        # Port 4318 is used for python instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
+        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:X.X.X
+
   admissionWebhooks:
     certManager:
       # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.

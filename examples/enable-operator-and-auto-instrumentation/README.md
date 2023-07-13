@@ -28,8 +28,8 @@ These helm install commands will deploy the chart to the current namespace for t
 # Check if a cert-manager is already installed by looking for cert-manager pods.
 kubectl get pods -l app=cert-manager --all-namespaces
 
-# If cert-manager is not deployed, make sure to add certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+# If cert-manager is deployed, make sure to remove certmanager.enabled=true to the list of values to set
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 #### 2.2 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully

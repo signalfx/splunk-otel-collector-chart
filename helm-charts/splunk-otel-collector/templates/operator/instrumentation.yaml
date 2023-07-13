@@ -13,6 +13,6 @@ metadata:
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-operator
 spec:
-    {{- $spec := include "splunk-otel-collector.operator.instrumentation.spec" . | fromYaml }}
-    {{- .Values.operator.instrumentation.spec | mustMergeOverwrite $spec | toYaml | nindent 4 }}
+{{- $spec := include "splunk-otel-collector.operator.instrumentation.spec-base" . | fromYaml }}
+{{- .Values.operator.instrumentation.spec | mustMergeOverwrite $spec | toYaml | nindent 4 }}
 {{- end }}
