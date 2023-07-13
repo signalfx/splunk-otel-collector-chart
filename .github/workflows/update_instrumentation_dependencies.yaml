@@ -56,6 +56,6 @@ jobs:
         with:
           commit-message: Update ${{ matrix.language }} instrumentation version
           title: Update ${{ matrix.language }} agent version to ${{ steps.swizzle_version.outputs.LATEST_VER }}
-          body: Use the new version of the ${{ matrix.language }} agent
+          body: Use the new version of the ${{ matrix.language }} instrumentation library
           branch: "update-${{ matrix.language }}-${{ steps.swizzle_version.outputs.LATEST_VER }}"
           base: main

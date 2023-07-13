@@ -1415,7 +1415,6 @@ operator:
       # python:
         # Port 4318 is used for python instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
         # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:X.X.X
-
   admissionWebhooks:
     certManager:
       # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.
