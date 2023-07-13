@@ -1400,7 +1400,6 @@ operator:
         #   value: "true"
       # Splunk Instrumentation Libraries
       java:
-        # TODO: Moving the image definitition here break a github workflow that updates this image. Update the workflow before merge.
         image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.25.0
       # OpenTelemetry Instrumentation Libraries
       # For default version values, see: https://github:com/open-telemetry/opentelemetry-operator/releases
