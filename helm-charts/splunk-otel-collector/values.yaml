@@ -1389,9 +1389,6 @@ operator:
         # argument: "0.95"
       # Optional "environment variable" parameters that can configure all instrumentation libraries.
       # env:
-        # Sets the deployment.environment tag on spans.
-        # - name: OTEL_RESOURCE_ATTRIBUTES
-        #   value: "deployment.environment=dev"
         # Parameters that can enable profiling for all instrumentation libraries.
         # Both environment variables will be set to "true" when splunkObservability.profilingEnabled=true using Helm templates.
         # - name: SPLUNK_PROFILER_ENABLED
