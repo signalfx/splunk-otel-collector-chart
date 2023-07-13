@@ -1388,14 +1388,8 @@ operator:
         # type: traceidratio
         # argument: "0.95"
       # Optional "environment variable" parameters that can configure all instrumentation libraries.
+      # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
       # env:
-        # Parameters that can enable profiling for all instrumentation libraries.
-        # Both environment variables will be set to "true" when splunkObservability.profilingEnabled=true using Helm templates.
-        # - name: SPLUNK_PROFILER_ENABLED
-        #   value: "true"
-        # - name: SPLUNK_PROFILER_MEMORY_ENABLED
-        #   value: "true"
-      # Splunk Instrumentation Libraries
       java:
         image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.25.0
       # OpenTelemetry Instrumentation Libraries
