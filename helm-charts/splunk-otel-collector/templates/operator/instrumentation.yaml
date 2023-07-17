@@ -1,0 +1,18 @@
+{{- if .Values.operator.enabled }}
+{{- include "validation-rules" . -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: {{ template "splunk-otel-collector.fullname" . }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-operator
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: otel-operator
+spec:
+{{- $spec := include "splunk-otel-collector.operator.instrumentation.spec-base" . | fromYaml }}
+{{- .Values.operator.instrumentation.spec | mustMergeOverwrite $spec | toYaml | nindent 4 }}
+{{- end }}
