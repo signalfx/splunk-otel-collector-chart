@@ -48,8 +48,9 @@ def pytest_unconfigure(config):
                                             search_query)],
                                         password=config.getoption("--splunk-password"))
         print("index=" + index + " event count=" + str(len(events)))
-        for event in events:
-            print(event)
+        print(f"Number of events for index: {index}: {len(events)}")
+        # for event in events:
+        #     print(event)
 
 
 @pytest.fixture(scope="function")
