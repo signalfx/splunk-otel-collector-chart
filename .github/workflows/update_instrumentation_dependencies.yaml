@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Currently this workflow will update the listed operator instrumentatipon dependencies in values.yaml
+        # Currently this workflow will update the listed operator instrumentation dependencies in values.yaml
         language: ['java'] # Add other languages here
     steps:
       - uses: actions/checkout@v3.5.3
