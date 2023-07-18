@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Set cluster_name for host logs too if renameFieldsSck is enabled [#837](https://github.com/signalfx/splunk-otel-collector-chart/pull/837)
+
+### Added
+
+- Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
+- Update clusterrole to allow collector to check for the `aws-auth` configmap in EKS clusters [#840](https://github.com/signalfx/splunk-otel-collector-chart/pull/840)
+- Add support to create default Instrumentation for operator based auto-instrumentation [#836](https://github.com/signalfx/splunk-otel-collector-chart/pull/836)
+
+## [0.80.0] - 2023-06-27
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.80.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.80.0).
+
 ### Changed
 
 - Add `service.name` resource attribute to logs if `autodetect.istio` is enabled using transform processor. This change
@@ -12,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Upgrade the Splunk OpenTelemetry Collector for Kubernetes subchart dependencies [#828](https://github.com/signalfx/splunk-otel-collector-chart/pull/828)
   - cert-manager upgraded from 1.11.1 to [1.12.2](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.2)
   - opentelemetry-operator upgraded from 0.28.0 to [0.32.0)](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.32.0)
+- Update the log level for metric scrape failures of the smartagent/kubernetes-proxy receiver from error to debug when distribution='' [#832](https://github.com/signalfx/splunk-otel-collector-chart/pull/832)
 
 ## [0.79.1] - 2023-06-22
 

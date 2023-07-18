@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.79.1
+    helm.sh/chart: splunk-otel-collector-0.80.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.79.1"
+    app.kubernetes.io/version: "0.80.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.79.1
+    chart: splunk-otel-collector-0.80.0
     release: default
     heritage: Helm
 data:
@@ -34,7 +34,7 @@ data:
           queue_size: 5000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.79.1
+        splunk_app_version: 0.80.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -216,6 +216,7 @@ data:
               extraDimensions:
                 metric_source: kubernetes-proxy
               port: 10249
+              scrapeFailureLogLevel: debug
               type: kubernetes-proxy
             rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
           smartagent/kubernetes-scheduler:

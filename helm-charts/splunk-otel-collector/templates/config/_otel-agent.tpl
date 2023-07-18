@@ -181,6 +181,11 @@ receivers:
           extraDimensions:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
+          # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
+          # For now, set the scrape failure log level to debug when no specific distribution is selected
+          {{- if eq .Values.distribution "" }}
+          scrapeFailureLogLevel: debug
+          {{- end }}
           {{- if eq .Values.distribution "openshift" }}
           skipVerify: true
           useHTTPS: true
@@ -521,6 +526,15 @@ processors:
       - action: insert
         key: "{{ .name }}"
         value: "{{ .value }}"
+      {{- end }}
+      {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+      - key: cluster_name
+        from_attribute: k8s.cluster.name
+        action: upsert
+      {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+      - key: k8s.cluster.name
+        action: delete
+      {{- end }}
       {{- end }}
 
   # Resource attributes specific to the agent itself.

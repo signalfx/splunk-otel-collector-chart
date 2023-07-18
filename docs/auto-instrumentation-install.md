@@ -30,10 +30,32 @@ If a cert-manager is not available in the cluster (or other TLS certificate sour
 using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
 commands below to run these steps.
 
-_Note: In order for trace telemetry data to be properly ingested, the attribute `deployment.environment` must be on board
-the exported traces. There are two ways to set this attribute._
-- _Use the values.yaml optional `environment` configuration_
-- _Use the Instrumentation spec with the env var OTEL_RESOURCE_ATTRIBUTES_
+<details>
+<summary>Expand for extended Instrumentation configuration details</summary>
+
+- An [opentelemetry.io/v1alpha1 Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
+object is used to configure the auto-instrumentation of your applications. To successfully enable instrumentation, the
+target pod must have an Instrumentation object available.
+- When `operator.enabled=true`, the helm chart deploys a
+[default](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml)
+opentelemetry.io/v1alpha1 Instrumentation object.
+  - The default Instrumentation supports [AlwaysOn Profiling](https://docs.splunk.com/Observability/apm/profiling/intro-profiling.html) when `splunkObservability.profilingEnabled=true`.
+    - These environment variables will be set when auto-instrumenting applications.
+      - SPLUNK_PROFILER_ENABLED="true"
+      - SPLUNK_PROFILER_MEMORY_ENABLED="true"
+    - Example
+      - [Enable always-on profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling.yaml)
+  - Users can override the specifications of the default deployed instrumentation by setting override values under `operator.instrumentation.spec`.
+    - Examples
+      - [Add custom environment span tag](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
+      - [Add trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
+      - [Enable always-on profiling partially](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
+- To view a deployed Instrumentation, you can use the command: `kubectl get otelinst {instrumentation_name} -o yaml`.
+- For proper ingestion of trace telemetry data, the `deployment.environment` attribute must be present in the exported traces. There are two ways to set this attribute:
+  - Use the optional `environment` configuration in `values.yaml`.
+  - Use the Instrumentation spec (`operator.instrumentation.spec.env`) with the environment variable `OTEL_RESOURCE_ATTRIBUTES`.
+
+</details>
 
 ```bash
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
@@ -43,31 +65,13 @@ kubectl get pods -l app=cert-manager --all-namespaces
 helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-### 2. Deploy the opentelemetry.io/v1alpha1 Instrumentation
-
-The [Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
-object is used to configure how your applications will be auto-instrumented. An Instrumentation object must be
-available to the target pod being auto-instrumented in order for instrumentation to be successful.
-
-For Splunk Instrumentation configurations, please see or use this [instrumentation.yaml](../examples/enable-operator-and-auto-instrumentation/instrumentation.yaml)
-in our examples directory. The Splunk Instrumentation object should be installed in the namespace target applications
-resides in. For example, for instrumenting applications in a namespace called `my-app-namespace` the Instrumentation
-object could be installed with the following command.
-
-```bash
-# Install
-kubectl apply -f instrumentation.yaml -n my-app-namespace
-# Check the current deployed values
-kubectl get otelinst -o yaml -n my-app-namespace
-```
-
-### 3. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
+### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
 <details>
 <summary>Expand for sample output to verify against</summary>
 
 ```bash
-kubectl get pods -n default
+kubectl get pods
 # NAME                                                            READY   STATUS
 # splunk-otel-collector-agent-lfthw                               2/2     Running
 # splunk-otel-collector-cert-manager-6b9fb8b95f-2lmv4             1/1     Running
@@ -76,19 +80,19 @@ kubectl get pods -n default
 # splunk-otel-collector-k8s-cluster-receiver-856f5fbcf9-pqkwg     1/1     Running
 # splunk-otel-collector-opentelemetry-operator-56c4ddb4db-zcjgh   2/2     Running
 
-kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io -n default
+kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io
 # NAME                                      WEBHOOKS   AGE
 # splunk-otel-collector-cert-manager-webhook              1          14m
 # splunk-otel-collector-opentelemetry-operator-mutation   3          14m
 
-kubectl get otelinst -n my-app-namespace
-# NAME                          AGE   ENDPOINT
-# splunk-instrumentation        3m   http://$(SPLUNK_OTEL_AGENT):4317
+kubectl get otelinst
+# NAME                    AGE   ENDPOINT
+# splunk-otel-collector   3s    http://$(SPLUNK_OTEL_AGENT):4317
 ```
 
 </details>
 
-### 4. Instrument application by setting an annotation
+### 3. Instrument application by setting an annotation
 
 An _instrumentation.opentelemetry.io/inject-{instrumentation_library}_ annotation can be added to the following:
 - Namespace: All pods within that namespace will be instrumented.
@@ -106,7 +110,7 @@ The instrumentation annotations can have the following values:
 - "my-other-namespace/my-instrumentation" - name and namespace of Instrumentation CR instance in another namespace to use.
 - "false" - do not inject.
 
-### 5. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
+### 4. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 The trace and metrics data should populate the APM dashboard.To better
 visualize this example as a whole, we have also included an image
