@@ -28,23 +28,11 @@ These helm install commands will deploy the chart to the current namespace for t
 # Check if a cert-manager is already installed by looking for cert-manager pods.
 kubectl get pods -l app=cert-manager --all-namespaces
 
-# If cert-manager is not deployed, make sure to add certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+# If cert-manager is deployed, make sure to remove certmanager.enabled=true to the list of values to set
+helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-#### 2.2 Deploy the opentelemetry.io/v1alpha1 Instrumentation
-
-The Instrumentation object is a spec to configure what instrumentation libraries to use in the target namespace
-to use for instrumentation. This Instrumentation will be used to know how to instrument the spring-clinic applications
-in the spring-petclinic namespace.
-
-```bash
-curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/examples/enable-operator-and-auto-instrumentation/instrumentation.yaml | kubectl apply -n spring-petclinic -f -
-# Note: You can use this command if you want to use a local custom instrumentation file.
-# kubectl apply -f examples/enable-operator-and-auto-instrumentation/instrumentation.yaml -n spring-petclinic
-```
-
-#### 2.3 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
+#### 2.2 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
 <details>
 <summary>Expand for kubectl commands to run and output</summary>
@@ -79,7 +67,7 @@ kubectl get otelinst -n spring-petclinic
 
 </details>
 
-#### 2.4 Instrument application by setting an annotation
+#### 2.3 Instrument application by setting an annotation
 
 The required annotation can exist on pods or namespaces. Depending on the variety of applications you are instrumenting,
 you may want to use either of these options. We show how to annotate pods and namespaces below.
@@ -129,6 +117,7 @@ kubectl patch deployment customers-service -p '{"spec": {"template":{"metadata":
 kubectl patch deployment vets-service -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
 kubectl patch deployment discovery-server -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
 kubectl patch deployment visits-service -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-java":"false"}}}} }' -n spring-petclinic
+
 ```
 </details>
 
@@ -178,7 +167,7 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr  -n spring-petclinic
 
 </details>
 
-#### 2.5 Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
+#### 2.4 Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 <details>
 <summary> Expand for visual results </summary>

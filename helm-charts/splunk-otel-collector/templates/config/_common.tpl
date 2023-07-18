@@ -160,9 +160,6 @@ resource/logs:
     - key: container_name
       from_attribute: k8s.container.name
       action: upsert
-    - key: cluster_name
-      from_attribute: k8s.cluster.name
-      action: upsert
     - key: container_id
       from_attribute: container.id
       action: upsert
@@ -185,8 +182,6 @@ resource/logs:
     {{- end }}
     {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
     - key: k8s.container.name
-      action: delete
-    - key: k8s.cluster.name
       action: delete
     - key: container.id
       action: delete

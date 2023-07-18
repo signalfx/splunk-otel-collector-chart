@@ -527,6 +527,15 @@ processors:
         key: "{{ .name }}"
         value: "{{ .value }}"
       {{- end }}
+      {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+      - key: cluster_name
+        from_attribute: k8s.cluster.name
+        action: upsert
+      {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+      - key: k8s.cluster.name
+        action: delete
+      {{- end }}
+      {{- end }}
 
   # Resource attributes specific to the agent itself.
   resource/add_agent_k8s:
