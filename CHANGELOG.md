@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
 - Update clusterrole to allow collector to check for the `aws-auth` configmap in EKS clusters [#840](https://github.com/signalfx/splunk-otel-collector-chart/pull/840)
 - Add support to create default Instrumentation for operator based auto-instrumentation [#836](https://github.com/signalfx/splunk-otel-collector-chart/pull/836)
+- Add Github workflow coverage to update values.yaml and Chart.yaml dependency versions [#852](https://github.com/signalfx/splunk-otel-collector-chart/pull/852)
 
 ## [0.80.0] - 2023-06-27
 
