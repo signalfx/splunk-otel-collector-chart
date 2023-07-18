@@ -127,8 +127,14 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

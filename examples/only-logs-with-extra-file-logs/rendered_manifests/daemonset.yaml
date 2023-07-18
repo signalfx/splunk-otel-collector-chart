@@ -160,12 +160,18 @@ spec:
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
         - mountPath: /tmp/directory_one
           name: example-with-storage-logs
         - mountPath: /var/log/catalina
           name: example-without-storage
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: varlog
         hostPath:
           path: /var/log

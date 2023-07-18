@@ -121,6 +121,9 @@ spec:
           name: collector-configmap
         - mountPath: /splunk-messages
           name: messages
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
       - name: collector-configmap
@@ -129,6 +132,9 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: init-eks-fargate-cluster-receiver-script
         configMap:
           name: default-splunk-otel-collector-cr-node-discoverer-script
