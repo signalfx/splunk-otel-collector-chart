@@ -234,6 +234,9 @@ spec:
         - mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
           name: persistent-queue-logs
         {{- end }}
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
         {{- if $clusterReceiver.extraVolumeMounts }}
         {{- toYaml $clusterReceiver.extraVolumeMounts | nindent 8 }}
         {{- end }}
@@ -245,6 +248,9 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
       - name: secret
         secret:

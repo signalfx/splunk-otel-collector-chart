@@ -428,11 +428,17 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
         {{- if $agent.extraVolumeMounts }}
         {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
       {{- if eq .Values.logsEngine "fluentd" }}
       - name: varlog

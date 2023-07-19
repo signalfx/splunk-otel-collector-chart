@@ -87,3 +87,11 @@ rules:
     - nodes
   verbs:
     - patch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  resourceNames:
+  - aws-auth
