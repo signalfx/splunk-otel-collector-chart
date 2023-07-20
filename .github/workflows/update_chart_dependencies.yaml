@@ -1,0 +1,63 @@
+name: Check for new chart dependency updates
+
+on:
+  schedule:
+    # Run every Monday at noon.
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+env:
+  CHART_YAML: helm-charts/splunk-otel-collector/Chart.yaml
+
+jobs:
+  maybe_update:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Currently this worfklow will update the listed dependencies in the Chart.yaml
+        repo: ['cert-manager', 'opentelemetry-operator'] # Add other repos here
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - name: Update Chart
+        id: update_chart
+        run: |
+          # Run make repo-update to ensure repositories are up-to-date
+          make repo-update
+
+          # Fetch the latest version using helm search repo
+          LATEST_VER=$(helm search repo ${{ matrix.repo }} --versions | awk 'NR==2{print $2}')
+          echo "LATEST_VER=$LATEST_VER" >> $GITHUB_OUTPUT
+
+          # Retrieve the current version from chart.yaml
+          DEP_PATH=$(yq eval ".dependencies[] | select(.name == \"${{ matrix.repo }}\") | .version" $CHART_YAML)
+
+          echo "Current version of ${{ matrix.repo }} is $DEP_PATH, latest is $LATEST_VER"
+
+          if [ "$LATEST_VER" == "$DEP_PATH" ]; then
+            echo We are already up to date. Nothing else to do.
+          else
+            echo 'Looks like we need to update...'
+            echo Updating to new version in chart.yaml
+            echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
+
+            # Update the version in chart.yaml using yq and jq
+            DEP_LINE=$(yq eval ".dependencies | keys | map(tonumber) | map(select(. != null)) | map(select(. < 10000)) | map(. + 1)" $CHART_YAML | jq ".[] | select(.[\"name\"] == \"${{ matrix.repo }}\")")
+            sed -i "${DEP_LINE}s/$DEP_PATH/$LATEST_VER/" $CHART_YAML
+
+            echo Updating rendered examples
+            make render
+
+            echo "Current git diff:"
+            git --no-pager diff
+          fi
+      - name: PR the new version
+        if: ${{ steps.update_chart.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update ${{ matrix.repo }} chart version
+          title: Update ${{ matrix.repo }} chart version to ${{ steps.update_chart.outputs.LATEST_VER }}
+          body: Use the new version of the ${{ matrix.repo }} chart
+          branch: "update-${{ matrix.repo }}-${{ steps.update_chart.outputs.LATEST_VER }}"
+          base: main
+          delete-branch: true
+          modify-outputs: false
