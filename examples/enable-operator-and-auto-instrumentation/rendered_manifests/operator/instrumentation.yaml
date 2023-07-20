@@ -30,7 +30,7 @@ spec:
     exporter:
       endpoint: http://$(SPLUNK_OTEL_AGENT):4317
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.25.0
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.26.0
     propagators:
     - tracecontext
     - baggage
