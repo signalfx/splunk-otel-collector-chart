@@ -1,0 +1,68 @@
+name: Check for new chart release
+
+on:
+  schedule:
+    # Run every weekday (Mon-Fri) at 12:00pm.
+    - cron: "0 12 * * 1-5"
+  workflow_dispatch:
+
+env:
+  CHART_YAML: helm-charts/splunk-otel-collector/Chart.yaml
+  LATEST_API: https://api.github.com/repos/signalfx/splunk-otel-collector/releases/latest
+
+jobs:
+  auto_draft_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - name: Update Chart Version
+        id: update_chart_version
+        run: |
+          # Fetch the latest version from the GitHub repository
+          LATEST_APP_TAG=$(curl -qs -H "Accept: application/vnd.github+json" $LATEST_API | jq -r .tag_name)
+          LATEST_APP_VER=${LATEST_APP_TAG#v} # removes 'v' from the start of the string
+          echo "LATEST_APP_VER=$LATEST_APP_VER" >> $GITHUB_OUTPUT
+
+          # Retrieve the current version from Chart.yaml
+          CURRENT_CHART_VERSION=$(yq eval '.version' $CHART_YAML)
+          CURRENT_APP_VERSION=$(yq eval '.appVersion' $CHART_YAML)
+
+          echo "Current version is $CURRENT_APP_VERSION, latest appVersion is $LATEST_APP_VER"
+
+          # Split the current and latest app versions into three strings for validation
+          IFS='.' read -ra CURRENT_VERSION <<< "$CURRENT_APP_VERSION"
+          IFS='.' read -ra LATEST_VERSION <<< "$LATEST_APP_VER"
+
+          # Check if a major or minor version update has occurred.
+          # - We currently support creating releases for major or minor version updates.
+          # - Incremental patch releases have to be made manually.
+          # - TODO: Add support for patch releases by handling the version != appVersion case in Chart.yaml.
+          if [[ "${LATEST_VERSION[0]}" -gt "${CURRENT_VERSION[0]}" || ("${LATEST_VERSION[0]}" -eq "${CURRENT_VERSION[0]}" && "${LATEST_VERSION[1]}" -gt "${CURRENT_VERSION[1]}") ]]; then
+            echo "Updating appVersion in Chart.yaml"
+            echo "NEED_UPDATE=1" >> $GITHUB_ENV
+            yq eval ".version = \"${LATEST_VERSION[0]}.${LATEST_VERSION[1]}.0\"" $CHART_YAML > temp_chart.yaml && mv temp_chart.yaml $CHART_YAML
+            yq eval ".appVersion = \"$LATEST_APP_VER\"" $CHART_YAML > temp_chart.yaml && mv temp_chart.yaml $CHART_YAML
+
+            echo Updating rendered examples
+            make render
+
+            echo Updating CHANGELOG.md
+            make generate-changelog-release
+
+            echo "Current git diff:"
+            git --no-pager diff
+          else
+            echo "No major or minor version update detected. Skipping the update."
+          fi
+      - name: PR the new version
+        if: env.NEED_UPDATE == '1'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update chart version
+          title: Prepare release ${{ steps.update_chart_version.outputs.LATEST_APP_VER }}
+          body: |
+            Update the appVersion in the Chart.yaml file to ${{ steps.update_chart_version.outputs.LATEST_APP_VER }}.
+            This will reflect the latest version from the repository.
+          branch: "update-chart-version-${{ steps.update_chart_version.outputs.LATEST_APP_VER }}"
+          base: main
+          draft: true

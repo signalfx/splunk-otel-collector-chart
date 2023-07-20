@@ -1,0 +1,6 @@
+name, name_documentation, version,release_url,source_reference,query
+chart,Splunk OpenTelemetry Collector Chart,0.80.0,https://github.com/signalfx/splunk-otel-collector-chart/releases/tag/splunk-otel-collector-0.80.0,helm-charts/splunk-otel-collector/Chart.yaml,.version
+collector,Splunk OpenTelemetry Collector App Version,0.80.0,https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.80.0,helm-charts/splunk-otel-collector/Chart.yaml,.appVersion
+networkExplorer,Splunk Network Explorer,latest-v0.9,https://quay.io/repository/signalfx/splunk-network-explorer-kernel-collector?tab=tags,helm-charts/splunk-otel-collector/Chart.yaml,.Values.networkExplorer.images.tag
+cert-manager,cert-manager chart,1.12.2,https://charts.jetstack.io,helm-charts/splunk-otel-collector/Chart.yaml,.dependencies[] | select(.name == "cert-manager").version
+opentelemetry-operator,opentelemetry-operator chart,0.32.0,https://open-telemetry.github.io/opentelemetry-helm-charts,helm-charts/splunk-otel-collector/Chart.yaml,.dependencies[] | select(.name == "opentelemetry-operator").version

@@ -1,5 +1,5 @@
 .PHONY: render
-render: repo-update dep-build
+render: repo-update dep-build generate-components-csv
 	bash ./examples/render-examples.sh
 
 .PHONY: repo-update
@@ -23,3 +23,11 @@ dep-build:
 	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then OK=false ; fi ;\
 	if ! $$OK ; then helm dependencies build $$DIR ; fi ;\
 	}
+
+.PHONY: generate-components-csv
+generate-components-csv:
+	bash ci_scripts/generate-components-csv.sh
+
+.PHONY: generate-changelog-release
+generate-changelog-release: generate-components-csv
+	bash ./ci_scripts/generate-changelog-release.sh
