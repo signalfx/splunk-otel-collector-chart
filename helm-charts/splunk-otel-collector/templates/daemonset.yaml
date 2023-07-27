@@ -190,9 +190,11 @@ spec:
             - name: journaldlogs
               mountPath: {{ .Values.logsCollection.journald.directory }}
             {{- end }}
-            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
             - name: persistent-queue-logs
               mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+            {{- end }}
+            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
             - name: persistent-queue-metrics
               mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
             {{- end }}
@@ -416,9 +418,11 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
-        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
         - name: persistent-queue-logs
           mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
         - name: persistent-queue-metrics
           mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
         {{- end }}
@@ -488,11 +492,13 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
-      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
       - name: persistent-queue-logs
         hostPath:
           path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
           type: DirectoryOrCreate
+      {{- end }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
       - name: persistent-queue-metrics
         hostPath:
           path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics

@@ -130,9 +130,11 @@ spec:
           securityContext:
             runAsUser: 0
           volumeMounts:
-            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
             - name: persistent-queue-metrics
               mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
+            {{- end }}
+            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
             - name: persistent-queue-logs
               mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
             {{- end }}
@@ -228,9 +230,11 @@ spec:
         - mountPath: /splunk-messages
           name: messages
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
         - mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
           name: persistent-queue-metrics
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
         - mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
           name: persistent-queue-logs
         {{- end }}
@@ -267,11 +271,13 @@ spec:
       - name: messages
         emptyDir: {}
       {{- end }}
-      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
       - name: persistent-queue-metrics
         hostPath:
           path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
           type: DirectoryOrCreate
+      {{- end }}
+      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
       - name: persistent-queue-logs
         hostPath:
           path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
