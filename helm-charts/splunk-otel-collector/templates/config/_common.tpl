@@ -239,8 +239,6 @@ filter/logs:
 file_storage/persistent_queue_logs:
   {{- if .forAgent }}
   directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
-  {{- else if .forGateway }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/logs
   {{- else }}
   directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
   {{- end }}
@@ -251,8 +249,6 @@ file_storage/persistent_queue_logs:
 file_storage/persistent_queue_metrics:
   {{- if .forAgent }}
   directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
-  {{- else if .forGateway }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/gateway/metrics
   {{- else }}
   directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
   {{- end }}

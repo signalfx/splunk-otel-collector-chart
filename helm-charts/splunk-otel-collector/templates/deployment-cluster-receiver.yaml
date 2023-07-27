@@ -36,7 +36,7 @@ spec:
   {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
   strategy:
     rollingUpdate:
-      maxUnavailable: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} 2 {{- else }} 1 {{- end }}
+      maxUnavailable: 1
   {{- end }}
   template:
     metadata:
