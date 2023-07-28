@@ -114,5 +114,6 @@ jobs:
           kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
 
       - name: Sleep for 1 hours
+        if: always()
         run: sleep 60m
         shell: bash
