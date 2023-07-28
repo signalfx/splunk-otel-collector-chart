@@ -27,9 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-#      # Leave this here for debugging
-#      - name: Setup upterm session
-#        uses: lhotari/action-upterm@v1
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
 
       - name: Setup Minikube
         run: |
