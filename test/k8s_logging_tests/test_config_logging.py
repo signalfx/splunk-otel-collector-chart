@@ -257,7 +257,7 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
 
     '''
     Test that user specified labels are resolved from the user specified annotations and attached as a metadata
-    to all the logs
+    to all the logs.
     '''
     logger.info("testing custom metadata annotation label={0} value={1} expected={2} event(s)".format(
         label, value, expected))
