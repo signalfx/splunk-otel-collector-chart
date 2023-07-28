@@ -107,9 +107,12 @@ jobs:
           	--splunk-user admin \
           	--splunk-password $CI_SPLUNK_PASSWORD \
           	-p no:warnings -s
-#          # Leave this here for debugging
-#          sleep 180
-#          echo "Getting agent logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
-#          echo "Getting collector logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
+          sleep 180
+          echo "Getting agent logs....."
+          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
+          echo "Getting collector logs....."
+          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
+
+      - name: Sleep for 1 hours
+        run: sleep 60m
+        shell: bash
