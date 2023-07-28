@@ -33,7 +33,7 @@ spec:
       app: {{ template "splunk-otel-collector.name" . }}
       component: otel-k8s-cluster-receiver
       release: {{ .Release.Name }}
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- if or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
   strategy:
     rollingUpdate:
       maxUnavailable: 1
@@ -110,7 +110,7 @@ spec:
             - mountPath: /conf
               name: collector-configmap
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+        {{- if or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}

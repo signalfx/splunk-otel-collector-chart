@@ -456,11 +456,6 @@ Whether persistentQueue should be enabled
 {{- end -}}
 
 
-{{- define "splunk-otel-collector.persistentQueueEnabled" -}}
-{{- or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-{{- end -}}
-
-
 {{/*
 Build the securityContext for Linux and Windows
 */}}

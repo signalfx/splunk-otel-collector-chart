@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Configuration of persistent buffering for agent and clusterReceiver [861](https://github.com/signalfx/splunk-otel-collector-chart/pull/861)
+
+
 ## [0.81.0] - 2023-07-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.81.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.81.0).
@@ -86,7 +91,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 ### Added
 
 - Option to use lightprometheus receiver through a feature gate for metrics collection from discovered Prometheus endpoints [757](https://github.com/signalfx/splunk-otel-collector-chart/pull/757)
-- Configuration of persistent buffering for agent [753](https://github.com/signalfx/splunk-otel-collector-chart/pull/753)
 
 ### Changed
 
