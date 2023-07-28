@@ -11,8 +11,10 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
   {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forAgent" true) | nindent 2 }}
+  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
   {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" true) | nindent 2 }}
   {{- end }}
 
@@ -653,8 +655,10 @@ service:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
     {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
     - file_storage/persistent_queue_logs
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
     - file_storage/persistent_queue_metrics
     {{- end }}
     - health_check

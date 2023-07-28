@@ -5,8 +5,10 @@ The values can be overridden in .Values.clusterReceiver.config
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
   {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forAgent" false) | nindent 2 }}
+  {{- end }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
   {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" false) | nindent 2 }}
   {{- end }}
 
@@ -209,9 +211,11 @@ service:
     {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
     - k8s_observer
     {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-    - file_storage/persistent_queue_metrics
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
     - file_storage/persistent_queue_logs
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
+    - file_storage/persistent_queue_metrics
     {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
