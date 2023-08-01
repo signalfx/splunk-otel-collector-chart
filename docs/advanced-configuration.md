@@ -695,3 +695,29 @@ rbac:
 ```
 helm install my-splunk-otel-collector -f my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+## Data Persistence
+
+By default, without any configuration, data is queued in memory only. When data cannot be sent it is retried a few times (up to 5 mins. by default) and then dropped.
+
+If for any reason, the collector is restarted in this period, the queued data will be gone.
+
+If you want the queue to be persisted on disk across collector restarts, set `splunkPlatform.sendingQueue.persistentQueueEnabled.logs` to enable support for logs and `splunkPlatform.sendingQueue.persistentQueueEnabled.metrics` to enable support for metrics.
+
+By default, data is persisted in `/var/addon/splunk/persist` directory. 
+Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath` option.
+
+Check [Data Persistence in the OpenTelemetry Collector
+](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explantion.
+
+### Support for persistent queue
+
+* `GKE/Autopilot` and `EKS/Fargate` support
+  * Both of the above distributions doesn't allow volume mounts, as they are kind of `serverless` and we don't manage the underlying infrastructure.
+  * Persistent buffering is not supported for them, as directory needs to be mounted via `hostPath`.
+  * Refer [aws/fargate](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) and [gke/autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-security#built-in-security).
+* Gateway support
+  * The filestorage extention acquires an exclusive lock for the queue directory.
+  * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
+  * If we provide support anyhow, only of those pods will be in running state and the other will be blocked to acquire the lock.
+  * https://github.com/signalfx/splunk-otel-collector-chart/issues/800
