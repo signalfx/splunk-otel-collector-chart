@@ -1,0 +1,133 @@
+---
+# Source: splunk-otel-collector/templates/configmap-cluster-receiver.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-otel-k8s-cluster-receiver
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.81.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.81.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.81.0
+    release: default
+    heritage: Helm
+data:
+  relay: |
+    exporters:
+      splunk_hec/platform_metrics:
+        disable_compression: true
+        endpoint: CHANGEME
+        idle_conn_timeout: 10s
+        index: CHANGEME
+        max_connections: 200
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 5000
+          storage: file_storage/persistent_queue_metrics
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.81.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+    extensions:
+      file_storage/persistent_queue_logs:
+        directory: /var/addon/splunk/persist/clusterReceiver/logs
+        timeout: 0
+      file_storage/persistent_queue_metrics:
+        directory: /var/addon/splunk/persist/clusterReceiver/metrics
+        timeout: 0
+      health_check: null
+      memory_ballast:
+        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
+    processors:
+      batch:
+        send_batch_max_size: 32768
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+      resource:
+        attributes:
+        - action: insert
+          key: metric_source
+          value: kubernetes
+        - action: upsert
+          key: k8s.cluster.name
+          value: CHANGEME
+      resource/add_collector_k8s:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resource/k8s_cluster:
+        attributes:
+        - action: insert
+          key: receiver
+          value: k8scluster
+      resourcedetection:
+        detectors:
+        - env
+        - system
+        override: true
+        timeout: 10s
+    receivers:
+      k8s_cluster:
+        auth_type: serviceAccount
+      prometheus/k8s_cluster_receiver:
+        config:
+          scrape_configs:
+          - job_name: otel-k8s-cluster-receiver
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - ${K8S_POD_IP}:8889
+    service:
+      extensions:
+      - health_check
+      - memory_ballast
+      - file_storage/persistent_queue_logs
+      - file_storage/persistent_queue_metrics
+      pipelines:
+        metrics:
+          exporters:
+          - splunk_hec/platform_metrics
+          processors:
+          - memory_limiter
+          - batch
+          - resource
+          - resource/k8s_cluster
+          receivers:
+          - k8s_cluster
+        metrics/collector:
+          exporters:
+          - splunk_hec/platform_metrics
+          processors:
+          - memory_limiter
+          - batch
+          - resource/add_collector_k8s
+          - resourcedetection
+          - resource
+          receivers:
+          - prometheus/k8s_cluster_receiver
+      telemetry:
+        metrics:
+          address: 0.0.0.0:8889

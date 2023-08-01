@@ -1,0 +1,140 @@
+---
+# Source: splunk-otel-collector/templates/deployment-cluster-receiver.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: default-splunk-otel-collector-k8s-cluster-receiver
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.81.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.81.0"
+    app: splunk-otel-collector
+    component: otel-k8s-cluster-receiver
+    chart: splunk-otel-collector-0.81.0
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-k8s-cluster-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splunk-otel-collector
+      component: otel-k8s-cluster-receiver
+      release: default
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: splunk-otel-collector
+        component: otel-k8s-cluster-receiver
+        release: default
+      annotations:
+        checksum/config: 557216343673d5673239fd25ccc0e33aad02d4e3201488b9e405cec0b18b1942
+    spec:
+      serviceAccountName: default-splunk-otel-collector
+      nodeSelector:
+          kubernetes.io/os: linux
+      securityContext:
+        runAsGroup: 999
+        runAsUser: 999
+      initContainers:
+        - name: patch-log-dirs
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', '
+          mkdir -p /var/addon/splunk/persist/clusterReceiver/logs;
+          chown -Rv 999:999 /var/addon/splunk/persist/clusterReceiver/logs;
+          chmod -v g+rwxs /var/addon/splunk/persist/clusterReceiver/logs;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:999:rx,g:999:rx /var/addon/splunk/persist/clusterReceiver/logs;
+          mkdir -p /var/addon/splunk/persist/clusterReceiver/metrics;
+          chown -Rv 999:999 /var/addon/splunk/persist/clusterReceiver/metrics;
+          chmod -v g+rwxs /var/addon/splunk/persist/clusterReceiver/metrics;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:999:rx,g:999:rx /var/addon/splunk/persist/clusterReceiver/metrics;']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: persistent-queue-metrics
+              mountPath: /var/addon/splunk/persist/clusterReceiver/metrics
+            - name: persistent-queue-logs
+              mountPath: /var/addon/splunk/persist/clusterReceiver/logs
+      containers:
+      - name: otel-collector
+        command:
+        - /otelcol
+        - --config=/conf/relay.yaml
+        image: quay.io/signalfx/splunk-otel-collector:0.81.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            value: "500"
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: K8S_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: splunk-otel-collector
+                key: splunk_platform_hec_token
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /conf
+          name: collector-configmap
+        - mountPath: /var/addon/splunk/persist/clusterReceiver/metrics
+          name: persistent-queue-metrics
+        - mountPath: /var/addon/splunk/persist/clusterReceiver/logs
+          name: persistent-queue-logs
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: collector-configmap
+        configMap:
+          name: default-splunk-otel-collector-otel-k8s-cluster-receiver
+          items:
+            - key: relay
+              path: relay.yaml
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
+      - name: persistent-queue-metrics
+        hostPath:
+          path: /var/addon/splunk/persist/clusterReceiver/metrics
+          type: DirectoryOrCreate
+      - name: persistent-queue-logs
+        hostPath:
+          path: /var/addon/splunk/persist/clusterReceiver/logs
+          type: DirectoryOrCreate

@@ -1,0 +1,54 @@
+---
+# Source: splunk-otel-collector/templates/revert-patch-log-dirs-hook.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: default-splunk-otel-collector-revert-patch-log-dir
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.81.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.81.0"
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+  - name: revert-patch-log-dirs
+    image: registry.access.redhat.com/ubi9/ubi
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      runAsUser: 0
+    command: ['sh', '-c', '
+    setfacl --recursive --remove-all  /var/addon/splunk/otel_pos;
+    if [ -d "/var/lib/docker/containers" ];
+    then
+        setfacl --recursive --remove-all  /var/lib/docker/containers;
+    fi;
+    if [ -d "/var/log/crio/pods" ];
+    then
+        setfacl --recursive --remove-all  /var/log/crio/pods;
+    fi;
+    if [ -d "/var/log/pods" ];
+    then
+        setfacl --recursive --remove-all  /var/log/pods;
+    fi;']
+    volumeMounts:
+      - name: checkpoint
+        mountPath: /var/addon/splunk/otel_pos
+      - name: varlog
+        mountPath: /var/log
+      - name: varlibdockercontainers
+        mountPath: /var/lib/docker/containers
+  volumes:
+    - name: checkpoint
+      hostPath:
+        path: /var/addon/splunk/otel_pos
+    - name: varlog
+      hostPath:
+        path: /var/log
+    - name: varlibdockercontainers
+      hostPath:
+        path: /var/lib/docker/containers

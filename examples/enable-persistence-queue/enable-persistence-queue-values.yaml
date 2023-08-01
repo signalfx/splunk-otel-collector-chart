@@ -1,0 +1,28 @@
+clusterName: CHANGEME
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  index: CHANGEME
+  metricsIndex: CHANGEME
+  metricsEnabled: true
+  tracesEnabled: false
+  logsEnabled: true
+  sendingQueue:
+    persistentQueueEnabled:
+      logs: true
+      metrics: true
+      storagePath: "/var/addon/splunk/persist"
+
+logsEngine: otel
+
+agent:
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+
+
+clusterReceiver:
+  enabled: true
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
