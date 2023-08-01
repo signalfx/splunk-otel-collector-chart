@@ -64,6 +64,29 @@ data:
         tls:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+      splunk_hec/platform_traces:
+        disable_compression: true
+        endpoint: CHANGEME
+        idle_conn_timeout: 10s
+        index: ""
+        max_connections: 200
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 5000
+          storage: file_storage/persistent_queue_traces
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.81.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
@@ -72,6 +95,9 @@ data:
         timeout: 0
       file_storage/persistent_queue_metrics:
         directory: /var/addon/splunk/persist/agent/metrics
+        timeout: 0
+      file_storage/persistent_queue_traces:
+        directory: /var/addon/splunk/persist/agent/traces
         timeout: 0
       health_check: null
       k8s_observer:
@@ -289,6 +315,12 @@ data:
           network: null
           paging: null
           processes: null
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_http:
+            endpoint: 0.0.0.0:14268
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
@@ -363,11 +395,14 @@ data:
         - k8s_observer
       signalfx:
         endpoint: 0.0.0.0:9943
+      zipkin:
+        endpoint: 0.0.0.0:9411
     service:
       extensions:
       - file_storage
       - file_storage/persistent_queue_logs
       - file_storage/persistent_queue_metrics
+      - file_storage/persistent_queue_traces
       - health_check
       - k8s_observer
       - memory_ballast
@@ -413,6 +448,19 @@ data:
           - resource
           receivers:
           - prometheus/agent
+        traces:
+          exporters:
+          - splunk_hec/platform_traces
+          processors:
+          - memory_limiter
+          - k8sattributes
+          - batch
+          - resourcedetection
+          - resource
+          receivers:
+          - otlp
+          - jaeger
+          - zipkin
       telemetry:
         metrics:
           address: 0.0.0.0:8889

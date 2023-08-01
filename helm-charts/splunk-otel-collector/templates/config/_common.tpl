@@ -255,6 +255,12 @@ file_storage/persistent_queue_metrics:
   timeout: 0
 {{- end }}
 
+{{- define "splunk-otel-collector.persistentQueueTraces" -}}
+file_storage/persistent_queue_traces:
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/traces
+  timeout: 0
+{{- end }}
+
 {{/*
 Splunk Platform Logs exporter
 */}}
@@ -371,6 +377,9 @@ splunk_hec/platform_traces:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
+    storage: file_storage/persistent_queue_traces
+    {{- end }}
 {{- end }}
 
 {{/*

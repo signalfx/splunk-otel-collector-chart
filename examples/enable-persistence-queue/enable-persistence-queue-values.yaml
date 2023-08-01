@@ -5,12 +5,13 @@ splunkPlatform:
   index: CHANGEME
   metricsIndex: CHANGEME
   metricsEnabled: true
-  tracesEnabled: false
+  tracesEnabled: true
   logsEnabled: true
   sendingQueue:
     persistentQueueEnabled:
       logs: true
       metrics: true
+      traces: true
       storagePath: "/var/addon/splunk/persist"
 
 logsEngine: otel

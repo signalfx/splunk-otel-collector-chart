@@ -455,6 +455,11 @@ Whether persistentQueue should be enabled
 {{- and $gatewayDisabled (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics) (and (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") (ne (include "splunk-otel-collector.distribution" .) "gke/autopilot")) -}}
 {{- end -}}
 
+{{- define "splunk-otel-collector.persistentQueueEnabledTraces" -}}
+{{ $gatewayDisabled := ne (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
+{{- and $gatewayDisabled (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.traces) (and (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") (ne (include "splunk-otel-collector.distribution" .) "gke/autopilot")) -}}
+{{- end -}}
+
 
 {{/*
 Build the securityContext for Linux and Windows

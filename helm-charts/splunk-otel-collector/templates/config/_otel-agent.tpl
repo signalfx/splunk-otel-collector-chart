@@ -17,6 +17,9 @@ extensions:
   {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
   {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" true) | nindent 2 }}
   {{- end }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
+  {{- include "splunk-otel-collector.persistentQueueTraces" . | nindent 2 }}
+  {{- end }}
 
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
@@ -660,6 +663,9 @@ service:
     {{- end }}
     {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
     - file_storage/persistent_queue_metrics
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
+    - file_storage/persistent_queue_traces
     {{- end }}
     - health_check
     - k8s_observer
