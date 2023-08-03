@@ -149,7 +149,12 @@ Define name for the Splunk Secret
 {{- if .Values.secret.name -}}
 {{- printf "%s" .Values.secret.name -}}
 {{- else -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{ $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -160,7 +165,12 @@ Define name for the etcd Secret
 {{- if .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
 {{- printf "%s" .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
 {{- else -}}
-{{- default .Chart.Name .Values.nameOverride | printf "%s-etcd" | trunc 63 | trimSuffix "-" -}}
+{{ $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
