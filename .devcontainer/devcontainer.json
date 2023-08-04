@@ -1,0 +1,61 @@
+{
+  "name": "splunk-otel-collector-chart-dev-container",
+  "dockerFile": "Dockerfile",
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "latest",
+      "minikube": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+      "packages": [
+        "apt-transport-https",
+        "build-essential",
+        "ca-certificates",
+        "curl",
+        "gnupg",
+        "jq",
+        "libbz2-dev",
+        "libffi-dev",
+        "liblzma-dev",
+        "libncurses5-dev",
+        "libncursesw5-dev",
+        "libreadline-dev",
+        "libsqlite3-dev",
+        "libssl-dev",
+        "llvm",
+        "procps",
+        "python-openssl",
+        "tk-dev",
+        "wget",
+        "xz-utils",
+        "zsh"
+        // Add other packages as needed
+      ]
+    }
+    // Add other features as needed
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/zsh"
+  },
+  "extensions": [
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "ms-azuretools.vscode-docker"
+  ],
+  "forwardPorts": [8080],
+  "postCreateCommand": "echo 'Devcontainer is ready!'"
+}
