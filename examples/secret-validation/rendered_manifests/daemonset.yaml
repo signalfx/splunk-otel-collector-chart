@@ -34,7 +34,7 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      serviceAccountName: splunk-collector
+      serviceAccountName: default-splunk-otel-collector
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
