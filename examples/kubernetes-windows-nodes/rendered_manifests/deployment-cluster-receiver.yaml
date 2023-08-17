@@ -42,7 +42,7 @@ spec:
         - -command
         - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
-        image: quay.io/signalfx/splunk-otel-collector:0.82.0
+        image: quay.io/signalfx/splunk-otel-collector-windows:0.82.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -71,13 +71,15 @@ spec:
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: splunk-otel-collector
+                name: default-splunk-otel-collector
                 key: splunk_observability_access_token
         readinessProbe:
+          initialDelaySeconds: 60
           httpGet:
             path: /
             port: 13133
         livenessProbe:
+          initialDelaySeconds: 60
           httpGet:
             path: /
             port: 13133
