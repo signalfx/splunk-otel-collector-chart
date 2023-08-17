@@ -523,9 +523,8 @@ agent:
      runAsGroup: 20000
 ```
 
-Note: Running the collector agent for log collection in non-root mode is currently unsupported in CRI-O and OpenShift environments due to platform limitations, for more details see the related
-[OpenShift Container Platform Documentation - InitContainers won't help resolve permission issues](https://developers.redhat.com/blog/2020/10/26/adapting-docker-and-kubernetes-containers-to-run-on-red-hat-openshift-container-platform)
-documentation.
+Note: Running the collector agent for log collection in non-root mode is not currently supported in CRI-O and OpenShift environments at this time, for more details see the
+[related GitHub feature request issue](https://github.com/signalfx/splunk-otel-collector-chart/issues/891).
 
 ## Network explorer
 [Network explorer](network-explorer-architecture.md) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
