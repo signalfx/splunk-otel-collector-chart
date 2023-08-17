@@ -97,7 +97,7 @@ spec:
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: splunk-otel-collector
+                name: default-splunk-otel-collector
                 key: splunk_observability_access_token
           # Env variables for host metrics receiver
           - name: HOST_PROC
