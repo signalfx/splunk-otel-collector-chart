@@ -11,7 +11,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 ### Changed
 
 - Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#885](https://github.com/signalfx/splunk-otel-collector-chart/pull/885),[#876](https://github.com/signalfx/splunk-otel-collector-chart/pull/876)
-  - opentelemetry-operator upgraded to (https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.35.0)
+  - opentelemetry-operator upgraded to [v0.35.0](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.35.0)
   - cert-manager upgraded to [v1.12.3](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.3)
 
 ### Fixed
