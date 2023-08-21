@@ -1395,25 +1395,22 @@ operator:
       # Optional "environment variable" parameters that can configure all instrumentation libraries.
       # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
       # env:
+      # Auto-instrumentation Libraries
       java:
-        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.27.0
-      # OpenTelemetry Instrumentation Libraries
-      # For default version values, see: https://github:com/open-telemetry/opentelemetry-operator/releases
-      # apacheHttpd:
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:X.X.X
-      # dotnet:
-        # Port 4318 is used for dotnet instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:X.X.X
-      # go:
-        # image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:X.X.X
-      # nodejs:
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:X.X.X
-      # python:
-        # Port 4318 is used for python instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:X.X.X
+        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.26.0
+      nodejs:
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.41.1
+      python:
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
+      dotnet:
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.0-rc.1
+      go:
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.2.2-alpha
+      apache-httpd:
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.3
   admissionWebhooks:
     certManager:
-      # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.
+      # The cert and issuer are annotated so they are instantiated after the cert-manager CRDs are installed.
       certificateAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
