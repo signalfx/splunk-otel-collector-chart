@@ -37,7 +37,7 @@ requiredDropCapabilities:
 - ALL
 {{- end -}}
 
-{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
+{{- if and (eq (include "splunk-otel-collector.distribution" .) "openshift") .Values.securityContextConstraints.create  }}
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
