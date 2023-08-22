@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.82.0
+    helm.sh/chart: splunk-otel-collector-0.83.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.82.0"
+    app.kubernetes.io/version: "0.83.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.82.0
+    chart: splunk-otel-collector-0.83.0
     release: default
     heritage: Helm
 data:
@@ -33,6 +33,8 @@ data:
         profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
+      file_storage:
+        directory: /var/addon/splunk/otel_pos
       health_check: null
       k8s_observer:
         auth_type: serviceAccount
@@ -49,16 +51,6 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      groupbyattrs/logs:
-        keys:
-        - com.splunk.source
-        - com.splunk.sourcetype
-        - container.id
-        - fluent.tag
-        - k8s.container.name
-        - k8s.namespace.name
-        - k8s.pod.name
-        - k8s.pod.uid
       k8sattributes:
         extract:
           annotations:
@@ -146,6 +138,111 @@ data:
         override: true
         timeout: 10s
     receivers:
+      filelog:
+        encoding: utf-8
+        exclude:
+        - C:\var\log\pods\default_default-splunk-otel-collector*_*\otel-collector\*.log
+        fingerprint_size: 1kb
+        force_flush_period: "0"
+        include:
+        - C:\var\log\pods\*\*\*.log
+        include_file_name: false
+        include_file_path: true
+        max_concurrent_files: 1024
+        max_log_size: 1MiB
+        operators:
+        - id: get-format
+          routes:
+          - expr: body matches "^\\{"
+            output: parser-docker
+          - expr: body matches "^[^ Z]+ "
+            output: parser-crio
+          - expr: body matches "^[^ Z]+Z"
+            output: parser-containerd
+          type: router
+        - id: parser-crio
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: 2006-01-02T15:04:05.999999999Z07:00
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: crio-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-containerd
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: containerd-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-docker
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: json_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: docker-recombine
+          is_last_entry: attributes.log endsWith "\n"
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - field: attributes.log
+          id: handle_empty_log
+          if: attributes.log == nil
+          type: add
+          value: ""
+        - parse_from: attributes["log.file.path"]
+          regex: ^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$
+          type: regex_parser
+        - from: attributes.uid
+          to: resource["k8s.pod.uid"]
+          type: move
+        - from: attributes.restart_count
+          to: resource["k8s.container.restart_count"]
+          type: move
+        - from: attributes.container_name
+          to: resource["k8s.container.name"]
+          type: move
+        - from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+          type: move
+        - from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+          type: move
+        - field: resource["com.splunk.sourcetype"]
+          type: add
+          value: EXPR("kube:container:"+resource["k8s.container.name"])
+        - from: attributes.stream
+          to: attributes["log.iostream"]
+          type: move
+        - from: attributes["log.file.path"]
+          to: resource["com.splunk.source"]
+          type: move
+        - from: attributes.log
+          id: clean-up-log-record
+          to: body
+          type: move
+        poll_interval: 200ms
+        retry_on_failure:
+          enabled: true
+        start_at: beginning
+        storage: file_storage
       fluentforward:
         endpoint: 0.0.0.0:8006
       hostmetrics:
@@ -246,6 +343,7 @@ data:
         endpoint: 0.0.0.0:9411
     service:
       extensions:
+      - file_storage
       - health_check
       - k8s_observer
       - memory_ballast
@@ -256,7 +354,6 @@ data:
           - splunk_hec/o11y
           processors:
           - memory_limiter
-          - groupbyattrs/logs
           - k8sattributes
           - filter/logs
           - batch
@@ -264,6 +361,7 @@ data:
           - resource
           - resource/logs
           receivers:
+          - filelog
           - fluentforward
           - otlp
         metrics:
