@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
+
 ## [0.83.0] - 2023-08-18
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.83.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.83.0).
@@ -44,7 +48,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 ### Added
 
-- Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
 - Update PodDisruptionBudgets API version to allow both `policy/v1beta1` and `policy/v1` [#835](https://github.com/signalfx/splunk-otel-collector-chart/pull/835)
 - Update clusterrole to allow collector to check for the `aws-auth` configmap in EKS clusters [#840](https://github.com/signalfx/splunk-otel-collector-chart/pull/840)
 - Add support to create default Instrumentation for operator based auto-instrumentation [#836](https://github.com/signalfx/splunk-otel-collector-chart/pull/836)
