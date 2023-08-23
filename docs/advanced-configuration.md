@@ -719,5 +719,5 @@ Check [Data Persistence in the OpenTelemetry Collector
 * Gateway support
   * The filestorage extention acquires an exclusive lock for the queue directory.
   * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
-  * If we provide support anyhow, only of those pods will be in running state and the other will be blocked to acquire the lock.
+  * Even if support is somehow provided, only one of the pods will be able to acquire the lock and run, while the others will be blocked and unable to operate.
   * https://github.com/signalfx/splunk-otel-collector-chart/issues/800
