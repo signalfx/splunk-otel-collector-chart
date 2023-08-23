@@ -6,9 +6,9 @@ metadata:
   name: "default-operator-cert-manager"
   namespace: default
   labels:
-    helm.sh/chart: operator-0.32.0
+    helm.sh/chart: operator-0.35.2
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.79.0"
+    app.kubernetes.io/version: "0.82.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: webhook

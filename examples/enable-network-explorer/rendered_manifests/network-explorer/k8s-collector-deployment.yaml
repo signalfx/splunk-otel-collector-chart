@@ -11,7 +11,7 @@ metadata:
   name: default-splunk-otel-collector-k8s-collector
   labels:
     app.kubernetes.io/name: default-splunk-otel-collector-k8s-collector
-    helm.sh/chart: splunk-otel-collector-0.80.0
+    helm.sh/chart: splunk-otel-collector-0.83.0
     app.kubernetes.io/instance: default
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -29,7 +29,7 @@ spec:
       annotations:
         # This is here to allow us to do "zero-downtime" updates without an image change.
         rollingUpdateVersion: "1"
-        charts.flowmill.com/version: 0.80.0
+        charts.flowmill.com/version: 0.83.0
       labels:
         app.kubernetes.io/name: default-splunk-otel-collector-k8s-collector
         app.kubernetes.io/instance: default

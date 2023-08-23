@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.80.0
+    helm.sh/chart: splunk-otel-collector-0.83.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.80.0"
+    app.kubernetes.io/version: "0.83.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.80.0
+    chart: splunk-otel-collector-0.83.0
     release: default
     heritage: Helm
     engine: fluentd
@@ -30,7 +30,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: c4df589c18d141ca31edf747acb2ea6f258a43c065574de163ca8c4ff0edb426
+        checksum/config: 65c5eb459ca7216bc7a63beaf9fed4c9e699df9ac428635debd9f068c10e0d5b
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -132,7 +132,7 @@ spec:
         - name: otlp-http-old
           containerPort: 55681
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.80.0
+        image: quay.io/signalfx/splunk-otel-collector:0.83.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -166,7 +166,7 @@ spec:
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: splunk-otel-collector
+                name: default-splunk-otel-collector
                 key: splunk_observability_access_token
 
         readinessProbe:
@@ -184,8 +184,14 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: varlog
         hostPath:
           path: /var/log

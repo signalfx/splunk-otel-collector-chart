@@ -4,9 +4,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
+
+## [0.83.0] - 2023-08-18
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.83.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.83.0).
+
+### Changed
+
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#885](https://github.com/signalfx/splunk-otel-collector-chart/pull/885),[#876](https://github.com/signalfx/splunk-otel-collector-chart/pull/876)
+  - opentelemetry-operator upgraded to [v0.35.0](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.35.0)
+  - cert-manager upgraded to [v1.12.3](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.3)
+
+### Fixed
+
+- Fix for secret name which now respects the same overrides as other resources in the chart [#873](https://github.com/signalfx/splunk-otel-collector-chart/pull/873)
+- Update the secret validation hook pod to use imagePullSecrets instead of possible non-existing serviceAccountName [#888](https://github.com/signalfx/splunk-otel-collector-chart/pull/888)
+
+## [0.82.0] - 2023-08-02
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.82.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.82.0).
+
+### Fixed
+
+- Use "ContainerAdministrator" user for windows nodes by default [#809](https://github.com/signalfx/splunk-otel-collector-chart/pull/809)
+
+## [0.81.0] - 2023-07-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.81.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.81.0).
+
+### Changed
+
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#856](https://github.com/signalfx/splunk-otel-collector-chart/pull/856),[#858](https://github.com/signalfx/splunk-otel-collector-chart/pull/858)
+  - opentelemetry-operator upgraded from 0.32.0 to [0.34.0](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.34.0)
+  - Java auto-instrumentation upgraded from 1.24.0 to [1.26.0](https://github.com/signalfx/splunk-otel-java/releases/tag/v1.26.0)
+
 ### Fixed
 
 - Set cluster_name for host logs too if renameFieldsSck is enabled [#837](https://github.com/signalfx/splunk-otel-collector-chart/pull/837)
+- Fix `smartagent` collectd based monitors on read-only filesystems [#839](https://github.com/signalfx/splunk-otel-collector-chart/pull/839)
 
 ### Added
 
@@ -23,9 +61,9 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - Add `service.name` resource attribute to logs if `autodetect.istio` is enabled using transform processor. This change
   removes the limitation of `service.name` attribute being available only with logsEngine=fluentd.
   [#823](https://github.com/signalfx/splunk-otel-collector-chart/pull/823)
-- Upgrade the Splunk OpenTelemetry Collector for Kubernetes subchart dependencies [#828](https://github.com/signalfx/splunk-otel-collector-chart/pull/828)
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#828](https://github.com/signalfx/splunk-otel-collector-chart/pull/828)
   - cert-manager upgraded from 1.11.1 to [1.12.2](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.2)
-  - opentelemetry-operator upgraded from 0.28.0 to [0.32.0)](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.32.0)
+  - opentelemetry-operator upgraded from 0.28.0 to [0.32.0](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.32.0)
 - Update the log level for metric scrape failures of the smartagent/kubernetes-proxy receiver from error to debug when distribution='' [#832](https://github.com/signalfx/splunk-otel-collector-chart/pull/832)
 
 ## [0.79.1] - 2023-06-22

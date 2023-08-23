@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.80.0
+    helm.sh/chart: splunk-otel-collector-0.83.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.80.0"
+    app.kubernetes.io/version: "0.83.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.80.0
+    chart: splunk-otel-collector-0.83.0
     release: default
     heritage: Helm
 spec:
@@ -29,7 +29,7 @@ spec:
         app: splunk-otel-collector
         release: default
       annotations:
-        checksum/config: b99e72496b5965538304a4b73241b0a28373ac6bd6da666cc37eeead18e96a5c
+        checksum/config: 9e723e9fec9665b955c6b3ccfec561ac754efb41739ca10bbd02c660f38d0252
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -63,7 +63,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.80.0
+        image: quay.io/signalfx/splunk-otel-collector:0.83.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -97,7 +97,7 @@ spec:
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
-                name: splunk-otel-collector
+                name: default-splunk-otel-collector
                 key: splunk_observability_access_token
           # Env variables for host metrics receiver
           - name: HOST_PROC
@@ -151,8 +151,14 @@ spec:
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
           readOnly: true
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
       terminationGracePeriodSeconds: 600
       volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
       - name: host-dev
         hostPath:
           path: /dev

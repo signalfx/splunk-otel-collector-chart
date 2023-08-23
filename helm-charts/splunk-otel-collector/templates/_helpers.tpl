@@ -146,11 +146,7 @@ Whether profiling data is enabled (applicable to Splunk Observability only).
 Define name for the Splunk Secret
 */}}
 {{- define "splunk-otel-collector.secret" -}}
-{{- if .Values.secret.name -}}
-{{- printf "%s" .Values.secret.name -}}
-{{- else -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- default (include "splunk-otel-collector.fullname" .) .Values.secret.name }}
 {{- end -}}
 
 {{/*
@@ -160,7 +156,8 @@ Define name for the etcd Secret
 {{- if .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
 {{- printf "%s" .Values.agent.controlPlaneMetrics.etcd.secret.name -}}
 {{- else -}}
-{{- default .Chart.Name .Values.nameOverride | printf "%s-etcd" | trunc 63 | trimSuffix "-" -}}
+{{- $name := (include "splunk-otel-collector.fullname" .) -}}
+{{- printf "%s-etcd" $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -447,8 +444,16 @@ Build the securityContext for Linux and Windows
 {{- define "splunk-otel-collector.securityContext" -}}
 {{- if .isWindows }}
 {{- $_ := unset .securityContext "runAsUser" }}
-{{- else if and (eq (toString .securityContext.runAsUser) "<nil>") (.setRunAsUser) }}
+{{- if not (hasKey .securityContext "windowsOptions")}}
+{{- $_ := set .securityContext "windowsOptions" dict }}
+{{- end }}
+{{- if and (not (hasKey .securityContext.windowsOptions "runAsUserName")) (.setRunAsUser) }}
+{{- $_ := set .securityContext.windowsOptions "runAsUserName" "ContainerAdministrator"}}
+{{- end }}
+{{- else }}
+{{- if and (eq (toString .securityContext.runAsUser) "<nil>") (.setRunAsUser) }}
 {{- $_ := set .securityContext "runAsUser" 0 }}
+{{- end }}
 {{- end }}
 {{- toYaml .securityContext }}
 {{- end -}}
