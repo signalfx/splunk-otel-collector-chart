@@ -155,13 +155,11 @@ data:
           routes:
           - expr: body matches "^\\{"
             output: parser-docker
-          - expr: body matches "^[^ Z]+ "
-            output: parser-crio
-          - expr: body matches "^[^ Z]+Z"
-            output: parser-containerd
+          - expr: body matches "^[^ ]+ "
+            output: parser-containerd-crio
           type: router
-        - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+        - id: parser-containerd-crio
+          regex: ^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
             layout: 2006-01-02T15:04:05.999999999Z07:00
             layout_type: gotime
@@ -169,21 +167,7 @@ data:
           type: regex_parser
         - combine_field: attributes.log
           combine_with: ""
-          id: crio-recombine
-          is_last_entry: attributes.logtag == 'F'
-          max_log_size: 1048576
-          output: handle_empty_log
-          source_identifier: attributes["log.file.path"]
-          type: recombine
-        - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: regex_parser
-        - combine_field: attributes.log
-          combine_with: ""
-          id: containerd-recombine
+          id: containerd-crio-recombine
           is_last_entry: attributes.logtag == 'F'
           max_log_size: 1048576
           output: handle_empty_log
