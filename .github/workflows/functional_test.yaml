@@ -4,11 +4,17 @@ on: pull_request
 
 jobs:
   e2e-test:
-    name: ${{ matrix.container_runtime }}
+    name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
+        kubernetes_version:
+          - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
+          - v1.27.4  # Support: 28 Apr 2024 - 28 Jun 2024
+          - v1.26.7 # Support: 28 Dec 2023 - 28 Feb 2024
+          - v1.25.12 # Support: 27 Aug 2023 - 27 Oct 2023
+          - v1.24.16  # Support: 28 May 2023 - 28 Jul 2023
         container_runtime:
           - "docker"
           - "containerd"
@@ -21,8 +27,8 @@ jobs:
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-      KUBERNETES_VERSION: v1.21.2
-      MINIKUBE_VERSION: v1.22.0
+      KUBERNETES_VERSION: ${{ matrix.kubernetes_version }}
+      MINIKUBE_VERSION: latest
 
     steps:
       - name: Checkout
@@ -47,11 +53,11 @@ jobs:
           sudo sysctl fs.protected_regular=0
           # Start Minikube and Wait
           minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
-          kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
           export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
           until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
             sleep 1;
           done
+          echo "Kubernetes $(kubectl version --short | grep -E 'Client|Server')" && echo "Container Runtime for Node: $(kubectl get node -o=jsonpath='{.items[0].metadata.name}'): $(kubectl get node -o=jsonpath='{.items[0].status.nodeInfo.containerRuntimeVersion}')"
 
       - name: Install Splunk
         run: |
@@ -78,18 +84,21 @@ jobs:
           # Restart Splunk
           curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
-      - name: Deploy sck otel collector
+      - name: Deploy splunk-otel-collector chart
         run: |
           make repo-update dep-build
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
+          # TODO: Remove NETWORK_EXPLORER_ENABLED after https://github.com/signalfx/splunk-otel-collector-chart/issues/896
+          if [[ "$KUBERNETES_VERSION" == *1.24* ]]; then
+            echo "Detected Kubernetes version 1.24. Setting NETWORK_EXPLORER_ENABLED to true."
+            export NETWORK_EXPLORER_ENABLED=true
+          fi
           ci_scripts/deploy_collector.sh
 
       - name: Deploy log generator
         run: |
           kubectl apply -f test/test_setup.yaml
           sleep 60
-          kubectl get pods --all-namespaces
-          kubectl logs -l component=agent-collector
 
       - uses: actions/setup-python@v4
         with:
@@ -115,3 +124,16 @@ jobs:
 #          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
 #          echo "Getting collector logs....."
 #          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
+
+      - name: Print splunk-otel-collector logs
+        if: always()
+        run: |
+          # Echo logs for the collector for debugging and visablity purposes
+          mkdir pod-logs
+          pods=$(kubectl get pods -l app=splunk-otel-collector -o jsonpath='{.items[*].metadata.name}')
+          for pod in $pods; do
+            echo "Fetching logs for $pod..."
+            kubectl logs $pod | head -n 2000 > pod-logs/${pod}.log
+            echo "Log for $pod:"
+            cat pod-logs/${pod}.log
+          done
