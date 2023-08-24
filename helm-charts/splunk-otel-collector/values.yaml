@@ -1002,6 +1002,11 @@ livenessProbe:
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
 
+# Whether to automatically create Openshift SCC or to create it manually.
+# NOTE: This config will only be used when distribution=openshift
+securityContextConstraints:
+  create: true
+
 # Openshift SecurityContextConstraints can be overriden in this field.
 # This fields will be merged into the default config that can be found at
 # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/securityContextConstraints.yaml
@@ -1405,7 +1410,7 @@ operator:
       # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
       # env:
       java:
-        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.26.0
+        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.27.0
       # OpenTelemetry Instrumentation Libraries
       # For default version values, see: https://github:com/open-telemetry/opentelemetry-operator/releases
       # apacheHttpd:

@@ -6,7 +6,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 render_task(){
   example_dir=$1
   rendered_manifests_dir="${example_dir}rendered_manifests"
-	values_yaml=$example_dir`ls "${example_dir}" | grep values.yaml`
+	values_yaml=$example_dir`ls "${example_dir}" | grep values.`
 
   # Clear out all rendered manifests
   rm -rf "${rendered_manifests_dir}"
@@ -41,12 +41,6 @@ render_task(){
       fi
     done; \
   fi
-  # Temporary space cleanup
-  rm -rf "${rendered_manifests_dir}/splunk-otel-collector"
-  if [ $? -ne 0 ]; then
-      echo "${values_yaml} FAIL - Temporary space cleanup"
-      exit 1
-  fi
 
   echo "${values_yaml} SUCCESS"
 }
@@ -61,6 +55,17 @@ for example_dir in $SCRIPT_DIR/*/; do
   if [ ! -d "${rendered_manifests_dir}" ]; then
     echo "Examples were rendered, failure occurred"
     exit 1
+  else
+    # Temporary space cleanup
+    if ls "${example_dir}" | grep -q ".norender."; then
+        rm -rf "${rendered_manifests_dir}"
+    else
+        rm -rf "${rendered_manifests_dir}/splunk-otel-collector"
+    fi
+    if [ $? -ne 0 ]; then
+        echo "${values_yaml} FAIL - Temporary space cleanup"
+        exit 1
+    fi
   fi
 done
 

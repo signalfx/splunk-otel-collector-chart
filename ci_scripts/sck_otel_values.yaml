@@ -111,5 +111,6 @@ gateway:
       cpu: 300m
       memory: 300Mi
 
-networkExplorer:
-  enabled: true
+# TODO: Enable this after https://github.com/signalfx/splunk-otel-collector-chart/issues/896
+#networkExplorer:
+#  enabled: false

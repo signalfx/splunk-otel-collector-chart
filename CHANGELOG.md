@@ -7,7 +7,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Configuration of persistent buffering for agent and clusterReceiver [861](https://github.com/signalfx/splunk-otel-collector-chart/pull/861)
+- Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
 
+## [0.83.0] - 2023-08-18
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.83.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.83.0).
+
+### Changed
+
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#885](https://github.com/signalfx/splunk-otel-collector-chart/pull/885),[#876](https://github.com/signalfx/splunk-otel-collector-chart/pull/876)
+  - opentelemetry-operator upgraded to [v0.35.0](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.35.0)
+  - cert-manager upgraded to [v1.12.3](https://github.com/cert-manager/cert-manager/releases/tag/v1.12.3)
+
+### Fixed
+
+- Fix for secret name which now respects the same overrides as other resources in the chart [#873](https://github.com/signalfx/splunk-otel-collector-chart/pull/873)
+- Update the secret validation hook pod to use imagePullSecrets instead of possible non-existing serviceAccountName [#888](https://github.com/signalfx/splunk-otel-collector-chart/pull/888)
+
+## [0.82.0] - 2023-08-02
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.82.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.82.0).
+
+### Fixed
+
+- Use "ContainerAdministrator" user for windows nodes by default [#809](https://github.com/signalfx/splunk-otel-collector-chart/pull/809)
 
 ## [0.81.0] - 2023-07-21
 

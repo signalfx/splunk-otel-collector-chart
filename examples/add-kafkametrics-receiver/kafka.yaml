@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper-deployment
+  labels:
+    app: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:latest
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafka-deployment
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: broker
+          image: confluentinc/cp-kafka:latest
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_BROKER_ID
+              value: "1"
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: 'zookeeper-service:2181'
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: PLAINTEXT://:29092,PLAINTEXT_INTERNAL://kafka-service:9092
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-service
+spec:
+  selector:
+    app: zookeeper
+  ports:
+    - protocol: TCP
+      port: 2181
+      targetPort: 2181
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+spec:
+  selector:
+    app: kafka
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-producer-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: kafka-producer
+          image: confluentinc/cp-kafka:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              while true; do
+                # Check service availability
+                if nc -zv kafka-service.kafka.svc.cluster.local 9092; then
+                  # Check and create topic if not exists
+                  kafka-topics --list --bootstrap-server kafka-service.kafka.svc.cluster.local:9092 | grep demo-topic-name || kafka-topics --create --bootstrap-server kafka-service.kafka.svc.cluster.local:9092 --replication-factor 1 --partitions 1 --topic demo-topic-name;
+
+                  # Produce message (assuming topic is available)
+                  echo 'This is a demo Kafka Message that generates every 5s' | kafka-console-producer --broker-list kafka-service.kafka.svc.cluster.local:9092 --topic demo-topic-name;
+                else
+                  echo 'Waiting Kafka service availability...';
+                fi
+                sleep 5;
+              done
+      restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-consumer-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: kafka-consumer
+          image: confluentinc/cp-kafka:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Wait until the topic is ready to be consumed
+              until kafka-topics --list --bootstrap-server kafka-service.kafka.svc.cluster.local:9092 | grep demo-topic-name; do
+                echo 'Waiting for topic to be ready...';
+                sleep 5;
+              done
+
+              # Start consuming messages indefinitely
+              kafka-console-consumer --bootstrap-server kafka-service.kafka.svc.cluster.local:9092 --topic demo-topic-name
+      restartPolicy: OnFailure
+

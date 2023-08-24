@@ -10,3 +10,11 @@ distribution: ""
 cloudProvider: ""
 
 isWindows: true
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-windows
+logsEngine: otel
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
