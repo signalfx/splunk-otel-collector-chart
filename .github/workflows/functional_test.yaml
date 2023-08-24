@@ -9,7 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO: Automate updating this
+        # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
+        # TODO: Automate updating this and expand/contract matrix coverage for other Kubernetes distributions
         kubernetes_version:
           - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
           - v1.27.4  # Support: 28 Apr 2024 - 28 Jun 2024
