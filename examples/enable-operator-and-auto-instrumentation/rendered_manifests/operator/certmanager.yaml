@@ -7,9 +7,9 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "1"
   labels:
-    helm.sh/chart: operator-0.35.2
+    helm.sh/chart: operator-0.36.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.82.0"
+    app.kubernetes.io/version: "0.83.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: webhook
@@ -35,9 +35,9 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "1"
   labels:
-    helm.sh/chart: operator-0.35.2
+    helm.sh/chart: operator-0.36.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.82.0"
+    app.kubernetes.io/version: "0.83.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: webhook
