@@ -11,14 +11,8 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-  {{- include "splunk-otel-collector.persistentQueueLogs" (dict "Values" .Values "forAgent" true) | nindent 2 }}
-  {{- end }}
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-  {{- include "splunk-otel-collector.persistentQueueMetrics" (dict "Values" .Values "forAgent" true) | nindent 2 }}
-  {{- end }}
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
-  {{- include "splunk-otel-collector.persistentQueueTraces" . | nindent 2 }}
+  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.persistentQueue" . | nindent 2 }}
   {{- end }}
 
   memory_ballast:
@@ -626,13 +620,13 @@ exporters:
     disable_compression: true
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformLogsExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformMetricsExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformTracesExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
   {{- end }}
   {{- end }}
 
@@ -658,14 +652,8 @@ service:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
     {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-    - file_storage/persistent_queue_logs
-    {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-    - file_storage/persistent_queue_metrics
-    {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
-    - file_storage/persistent_queue_traces
+    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    - file_storage/persistent_queue
     {{- end }}
     - health_check
     - k8s_observer

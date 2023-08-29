@@ -709,13 +709,44 @@ By default, without any configuration, data is queued in memory only. When data 
 
 If for any reason, the collector is restarted in this period, the queued data will be gone.
 
-If you want the queue to be persisted on disk across collector restarts, set `splunkPlatform.sendingQueue.persistentQueueEnabled.logs`, `splunkPlatform.sendingQueue.persistentQueueEnabled.metrics` and `splunkPlatform.sendingQueue.persistentQueueEnabled.traces` to enable support for logs, metrics and traces respectively.
+If you want the queue to be persisted on disk across collector restarts, set `splunkPlatform.sendingQueue.persistentQueue.enabled` to enable support for logs, metrics and traces.
 
 By default, data is persisted in `/var/addon/splunk/persist` directory. 
-Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath` option.
+Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueue.storagePath` option.
 
 Check [Data Persistence in the OpenTelemetry Collector
 ](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explantion.
+
+Note: Data Persistence is effective only if `agent.securityContext.runAsUser` and `agent.securityContext.runAsGroup` are set to non-zero values.
+
+Use following in values.yaml to disable data persistense for logs or metrics or traces:
+
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_logs:
+         sending_queue:
+           storage: null
+```
+or
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_metrics:
+         sending_queue:
+           storage: null
+```
+or
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_traces:
+         sending_queue:
+           storage: null
+```
 
 ### Support for persistent queue
 
@@ -727,4 +758,7 @@ Check [Data Persistence in the OpenTelemetry Collector
   * The filestorage extention acquires an exclusive lock for the queue directory.
   * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
   * Even if support is somehow provided, only one of the pods will be able to acquire the lock and run, while the others will be blocked and unable to operate.
-  * https://github.com/signalfx/splunk-otel-collector-chart/issues/800
+* Cluster Receiver support
+  * Cluster receiver is a 1-replica deployment of Open-temlemetry collector.
+  * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such envrionments.
+  * Data Persistence is currently not applicable to the k8s cluster metrics and k8s events.

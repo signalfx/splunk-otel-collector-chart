@@ -111,13 +111,10 @@ splunkPlatform:
     # NOTE: The File Storage extension will persist state to the node's local file system.
     # While using the persistent queue it is advised to increase memory limit for agent (agent.resources.limits.memory)
     # to 1Gi.
-    persistentQueueEnabled:
-      # Specifies whether to persist log data.
-      logs: false
-      # Specifies whether to persist metric data.
-      metrics: false
-      # Specifies whether to persist trace data.
-      traces: false
+    # Refer to: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#data-persistence
+    persistentQueue:
+      # Specifies whether to persist log/metric/trace data.
+      enabled: false
       storagePath: "/var/addon/splunk/persist"
 
 ################################################################################

@@ -33,11 +33,6 @@ spec:
       app: {{ template "splunk-otel-collector.name" . }}
       component: otel-k8s-cluster-receiver
       release: {{ .Release.Name }}
-  {{- if or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-  strategy:
-    rollingUpdate:
-      maxUnavailable: 1
-  {{- end }}
   template:
     metadata:
       labels:
@@ -86,9 +81,8 @@ spec:
       securityContext:
         {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
       {{- end }}
-      {{- if or (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs) (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics) }}
+      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:
-        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
@@ -109,36 +103,6 @@ spec:
               mountPath: /splunk-messages
             - mountPath: /conf
               name: collector-configmap
-        {{- end }}
-        {{- if or (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-        - name: patch-log-dirs
-          image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
-          imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
-          command: ['sh', '-c', '
-          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs;
-          chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 999 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs;
-          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs;
-          {{- end }}
-          {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
-          chown -Rv {{ $clusterReceiver.securityContext.runAsUser | default 999 }}:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
-          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx,g:{{ $clusterReceiver.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics;
-          {{- end }}']
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-            - name: persistent-queue-metrics
-              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
-            {{- end }}
-            {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-            - name: persistent-queue-logs
-              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
-            {{- end }}
-        {{- end }}
       {{- end }}
       containers:
       - name: otel-collector
@@ -230,14 +194,6 @@ spec:
         - mountPath: /splunk-messages
           name: messages
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-        - mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
-          name: persistent-queue-metrics
-        {{- end }}
-        {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-        - mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
-          name: persistent-queue-logs
-        {{- end }}
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -270,18 +226,6 @@ spec:
               mode: 0555
       - name: messages
         emptyDir: {}
-      {{- end }}
-      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-      - name: persistent-queue-metrics
-        hostPath:
-          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
-          type: DirectoryOrCreate
-      {{- end }}
-      {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-      - name: persistent-queue-logs
-        hostPath:
-          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
-          type: DirectoryOrCreate
       {{- end }}
       {{- if $clusterReceiver.extraVolumes }}
       {{- toYaml $clusterReceiver.extraVolumes | nindent 6 }}

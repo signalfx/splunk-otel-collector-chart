@@ -235,29 +235,9 @@ filter/logs:
           value: "true"
 {{- end }}
 
-{{- define "splunk-otel-collector.persistentQueueLogs" -}}
-file_storage/persistent_queue_logs:
-  {{- if .forAgent }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/logs
-  {{- else }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/logs
-  {{- end }}
-  timeout: 0
-{{- end }}
-
-{{- define "splunk-otel-collector.persistentQueueMetrics" -}}
-file_storage/persistent_queue_metrics:
-  {{- if .forAgent }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/metrics
-  {{- else }}
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/clusterReceiver/metrics
-  {{- end }}
-  timeout: 0
-{{- end }}
-
-{{- define "splunk-otel-collector.persistentQueueTraces" -}}
-file_storage/persistent_queue_traces:
-  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueueEnabled.storagePath }}/agent/traces
+{{- define "splunk-otel-collector.persistentQueue" -}}
+file_storage/persistent_queue:
+  directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
   timeout: 0
 {{- end }}
 
@@ -297,9 +277,6 @@ splunk_hec/platform_logs:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledLogs" .) "true") }}
-    storage: file_storage/persistent_queue_logs
-    {{- end }}
 {{- end }}
 
 {{/*
@@ -337,9 +314,6 @@ splunk_hec/platform_metrics:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledMetrics" .) "true") }}
-    storage: file_storage/persistent_queue_metrics
-    {{- end }}
 {{- end }}
 
 {{/*
@@ -377,9 +351,15 @@ splunk_hec/platform_traces:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabledTraces" .) "true") }}
-    storage: file_storage/persistent_queue_traces
-    {{- end }}
+{{- end }}
+
+{{- define "splunk-otel-collector.addPersistentStorage" -}}
+{{- if eq .isEnabled "true" }}
+{{- $exporter := .exporter | fromYaml }}
+{{- $key := index (keys $exporter) 0 }}
+{{- $exporterMerge := dict $key (dict "sending_queue" (dict "storage" "file_storage/persistent_queue"))}}
+{{- $exporter | mustMergeOverwrite $exporterMerge | toYaml}}
+{{- end }}
 {{- end }}
 
 {{/*

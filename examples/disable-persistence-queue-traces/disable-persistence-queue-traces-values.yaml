@@ -18,7 +18,11 @@ agent:
   securityContext:
     runAsUser: 999
     runAsGroup: 999
-
+  config:
+    exporters:
+       splunk_hec/platform_traces:
+         sending_queue:
+           storage: null
 
 clusterReceiver:
   enabled: true

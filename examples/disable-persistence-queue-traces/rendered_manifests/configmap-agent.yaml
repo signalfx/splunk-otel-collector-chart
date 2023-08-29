@@ -79,7 +79,7 @@ data:
           enabled: true
           num_consumers: 10
           queue_size: 5000
-          storage: file_storage/persistent_queue
+          storage: null
         source: kubernetes
         splunk_app_name: splunk-otel-collector
         splunk_app_version: 0.83.0

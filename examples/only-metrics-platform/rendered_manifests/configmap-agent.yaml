@@ -16,29 +16,7 @@ metadata:
     heritage: Helm
 data:
   relay: |
-    exporters:
-      splunk_hec/platform_metrics:
-        disable_compression: true
-        endpoint: CHANGEME
-        idle_conn_timeout: 10s
-        index: CHANGEME
-        max_connections: 200
-        retry_on_failure:
-          enabled: true
-          initial_interval: 5s
-          max_elapsed_time: 300s
-          max_interval: 30s
-        sending_queue:
-          enabled: true
-          num_consumers: 10
-          queue_size: 5000
-        source: kubernetes
-        splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.83.0
-        timeout: 10s
-        tls:
-          insecure_skip_verify: false
-        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+    exporters: null
     extensions:
       health_check: null
       k8s_observer:

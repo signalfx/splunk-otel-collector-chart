@@ -441,21 +441,9 @@ Whether clusterReceiver should be enabled
 {{/*
 Whether persistentQueue should be enabled
 */}}
-{{- define "splunk-otel-collector.persistentQueueEnabledLogs" -}}
-{{ $gatewayDisabled := ne (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{- and $gatewayDisabled (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.logs) (and (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") (ne (include "splunk-otel-collector.distribution" .) "gke/autopilot")) -}}
-{{- end -}}
-
-
-{{- define "splunk-otel-collector.persistentQueueEnabledMetrics" -}}
-{{ $gatewayDisabled := ne (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{- and $gatewayDisabled (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.metrics) (and (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") (ne (include "splunk-otel-collector.distribution" .) "gke/autopilot")) -}}
-{{- end -}}
-
-{{- define "splunk-otel-collector.persistentQueueEnabledTraces" -}}
-{{ $gatewayDisabled := ne (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{- and $gatewayDisabled (.Values.splunkPlatform.sendingQueue.persistentQueueEnabled.traces) (and (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") (ne (include "splunk-otel-collector.distribution" .) "gke/autopilot")) -}}
-{{- end -}}
+{{- define "splunk-otel-collector.persistentQueueEnabled" }}
+{{- .Values.splunkPlatform.sendingQueue.persistentQueue.enabled -}}
+{{- end }}
 
 
 {{/*
