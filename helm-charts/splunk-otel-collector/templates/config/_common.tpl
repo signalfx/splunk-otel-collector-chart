@@ -359,6 +359,8 @@ splunk_hec/platform_traces:
 {{- $key := index (keys $exporter) 0 }}
 {{- $exporterMerge := dict $key (dict "sending_queue" (dict "storage" "file_storage/persistent_queue"))}}
 {{- $exporter | mustMergeOverwrite $exporterMerge | toYaml}}
+{{- else }}
+{{- .exporter }}
 {{- end }}
 {{- end }}
 
