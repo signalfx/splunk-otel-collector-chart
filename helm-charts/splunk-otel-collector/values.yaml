@@ -1384,10 +1384,6 @@ operator:
       # must be overridden here.
       # exporter:
         # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
-      propagators:
-        - tracecontext
-        - baggage
-        - b3
       # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
       # sampler:
         # type: traceidratio
@@ -1397,17 +1393,28 @@ operator:
       # env:
       # Auto-instrumentation Libraries
       java:
-        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.26.0
+        repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
+        tag: v1.26.0
+        env:
+          - name: SPLUNK_PROFILER_ENABLED
+            value: "true"
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "environment=dev"
       nodejs:
-        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.41.1
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
+        tag: 0.41.1
       python:
-        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+        tag: 0.40b0
       dotnet:
-        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.0-rc.1
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
+        tag: 1.0.0-rc.1
       go:
-        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.2.2-alpha
+        repository:  ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
+        tag: 0.2.2-alpha
       apache-httpd:
-        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.3
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+        tag: 1.0.3
   admissionWebhooks:
     certManager:
       # The cert and issuer are annotated so they are instantiated after the cert-manager CRDs are installed.

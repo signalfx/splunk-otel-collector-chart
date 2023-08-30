@@ -13,6 +13,72 @@ metadata:
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-operator
 spec:
-{{- $spec := include "splunk-otel-collector.operator.instrumentation.spec-base" . | fromYaml }}
-{{- .Values.operator.instrumentation.spec | mustMergeOverwrite $spec | toYaml | nindent 4 }}
+  exporter:
+    endpoint: {{ include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | trim }}
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  {{- if .Values.operator.instrumentation.spec.sampler }}
+  {{ include .Values.operator.instrumentation.spec.sampler }}
+  {{- end }}
+  env:
+    {{- if .Values.operator.instrumentation.spec.env }}
+    {{- include .Values.operator.instrumentation.spec.env }}
+    {{- end }}
+    {{- if .Values.splunkObservability.profilingEnabled }}
+    {{- if not hasKey (include "get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_ENABLED" }}
+    - name: SPLUNK_PROFILER_ENABLED
+      value: "true"
+    {{- end }}
+    {{- if not hasKey (include "get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_MEMORY_ENABLED" }}
+    - name: SPLUNK_PROFILER_MEMORY_ENABLED
+      value: "true"
+    {{- end }}
+    {{- end }}
+    {{- if .Values.agent.enabled }}
+    - name: SPLUNK_OTEL_AGENT
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.hostIP
+    {{- end }}
+  {{- /* Include instrumentation libraries with environment variables */ -}}
+  {{- if .Values.operator.instrumentation.spec }}
+    {{- range $key, $value := .Values.operator.instrumentation.spec }}
+      {{- if and $value.repository $value.tag }}
+        {{- $imageName := include "extract-image-name" $value.repository }}
+        {{- $envList := list }}
+        {{- /* If needed, add user supplied to chart default otel resource attributes */ -}}
+        {{- $defaultOtelResourceAttributes := printf "splunk.zc.method=%s:%s" $imageName $value.tag }}
+        {{- $customOtelResourceAttributes := "" }}
+        {{- if $value.env }}
+          {{- $envList = $value.env }}
+          {{- range $env := $value.env }}
+            {{- if eq $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
+              {{- $customOtelResourceAttributes = printf "%s,%s" $env.value $defaultOtelResourceAttributes }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- if not $customOtelResourceAttributes }}
+          {{- $customOtelResourceAttributes = $defaultOtelResourceAttributes }}
+        {{- end }}
+  {{ $key }}:
+    image: {{ printf "%s:%s" $value.repository $value.tag }}
+    env:
+    {{- /* Append additional user supplied env variables*/ -}}
+    {{- range $env := $envList }}
+    {{- if ne $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
+      - name: {{ $env.name }}
+        value: {{ $env.value }}
+    {{- end }}
+    {{- end }}
+      - name: OTEL_RESOURCE_ATTRIBUTES
+        value: {{ $customOtelResourceAttributes }}
+    {{- /* Append special instrumentation library env variables*/ -}}
+      {{- end }}
+    {{- end }}
+  {{- end }}
 {{- end }}
+
+
