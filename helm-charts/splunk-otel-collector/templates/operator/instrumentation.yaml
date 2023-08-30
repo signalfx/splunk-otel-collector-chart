@@ -1,5 +1,5 @@
 {{- if .Values.operator.enabled }}
-{{- include "validation-rules" . -}}
+{{- include "splunk-otel-collector.operator.validation-rules" . -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
@@ -14,7 +14,7 @@ metadata:
     app.kubernetes.io/component: otel-operator
 spec:
   exporter:
-    endpoint: {{ include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" . | trim }}
+    endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . | trim }}
   propagators:
     - tracecontext
     - baggage
@@ -27,11 +27,11 @@ spec:
     {{- include .Values.operator.instrumentation.spec.env }}
     {{- end }}
     {{- if .Values.splunkObservability.profilingEnabled }}
-    {{- if not hasKey (include "get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_ENABLED" }}
+    {{- if not hasKey (include "splunk-otel-collector.operator.get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_ENABLED" }}
     - name: SPLUNK_PROFILER_ENABLED
       value: "true"
     {{- end }}
-    {{- if not hasKey (include "get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_MEMORY_ENABLED" }}
+    {{- if not hasKey (include "splunk-otel-collector.operator.get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_MEMORY_ENABLED" }}
     - name: SPLUNK_PROFILER_MEMORY_ENABLED
       value: "true"
     {{- end }}
@@ -43,42 +43,5 @@ spec:
           apiVersion: v1
           fieldPath: status.hostIP
     {{- end }}
-  {{- /* Include instrumentation libraries with environment variables */ -}}
-  {{- if .Values.operator.instrumentation.spec }}
-    {{- range $key, $value := .Values.operator.instrumentation.spec }}
-      {{- if and $value.repository $value.tag }}
-        {{- $imageName := include "extract-image-name" $value.repository }}
-        {{- $envList := list }}
-        {{- /* If needed, add user supplied to chart default otel resource attributes */ -}}
-        {{- $defaultOtelResourceAttributes := printf "splunk.zc.method=%s:%s" $imageName $value.tag }}
-        {{- $customOtelResourceAttributes := "" }}
-        {{- if $value.env }}
-          {{- $envList = $value.env }}
-          {{- range $env := $value.env }}
-            {{- if eq $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
-              {{- $customOtelResourceAttributes = printf "%s,%s" $env.value $defaultOtelResourceAttributes }}
-            {{- end }}
-          {{- end }}
-        {{- end }}
-        {{- if not $customOtelResourceAttributes }}
-          {{- $customOtelResourceAttributes = $defaultOtelResourceAttributes }}
-        {{- end }}
-  {{ $key }}:
-    image: {{ printf "%s:%s" $value.repository $value.tag }}
-    env:
-    {{- /* Append additional user supplied env variables*/ -}}
-    {{- range $env := $envList }}
-    {{- if ne $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
-      - name: {{ $env.name }}
-        value: {{ $env.value }}
-    {{- end }}
-    {{- end }}
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: {{ $customOtelResourceAttributes }}
-    {{- /* Append special instrumentation library env variables*/ -}}
-      {{- end }}
-    {{- end }}
-  {{- end }}
+{{ include "splunk-otel-collector.operator.instrumentation-libraries" . }}
 {{- end }}
-
-
