@@ -11,8 +11,10 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.persistentQueue" . | nindent 2 }}
+  {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+  file_storage/persistent_queue:
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+    timeout: 0
   {{- end }}
 
   memory_ballast:
@@ -619,15 +621,17 @@ exporters:
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
   {{- end }}
+  {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformLogsExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformMetricsExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.addPersistentStorage" (dict "exporter" (include "splunk-otel-collector.splunkPlatformTracesExporter" .) "isEnabled" (include "splunk-otel-collector.persistentQueueEnabled" .)) | nindent 2 }}
+  {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
+  {{- $_ := unset . "addPersistentStorage" }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -652,7 +656,7 @@ service:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
     {{- end }}
-    {{- if (eq (include "splunk-otel-collector.persistentQueueEnabled" .) "true") }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
     - file_storage/persistent_queue
     {{- end }}
     - health_check

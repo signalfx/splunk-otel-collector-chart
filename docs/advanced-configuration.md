@@ -711,7 +711,7 @@ If for any reason, the collector is restarted in this period, the queued data wi
 
 If you want the queue to be persisted on disk across collector restarts, set `splunkPlatform.sendingQueue.persistentQueue.enabled` to enable support for logs, metrics and traces.
 
-By default, data is persisted in `/var/addon/splunk/persist` directory.
+By default, data is persisted in `/var/addon/splunk/exporter_queue` directory.
 Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueue.storagePath` option.
 
 Check [Data Persistence in the OpenTelemetry Collector

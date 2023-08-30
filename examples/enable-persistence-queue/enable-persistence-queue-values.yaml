@@ -10,7 +10,6 @@ splunkPlatform:
   sendingQueue:
     persistentQueue:
       enabled: true
-      storagePath: "/var/addon/splunk/persist"
 
 logsEngine: otel
 

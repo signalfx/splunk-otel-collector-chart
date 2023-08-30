@@ -115,7 +115,7 @@ splunkPlatform:
     persistentQueue:
       # Specifies whether to persist log/metric/trace data.
       enabled: false
-      storagePath: "/var/addon/splunk/persist"
+      storagePath: "/var/addon/splunk/exporter_queue"
 
 ################################################################################
 # Splunk Observability configuration

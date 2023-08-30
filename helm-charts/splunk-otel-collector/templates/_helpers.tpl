@@ -439,14 +439,6 @@ Whether clusterReceiver should be enabled
 
 
 {{/*
-Whether persistentQueue should be enabled
-*/}}
-{{- define "splunk-otel-collector.persistentQueueEnabled" }}
-{{- .Values.splunkPlatform.sendingQueue.persistentQueue.enabled -}}
-{{- end }}
-
-
-{{/*
 Build the securityContext for Linux and Windows
 */}}
 {{- define "splunk-otel-collector.securityContext" -}}

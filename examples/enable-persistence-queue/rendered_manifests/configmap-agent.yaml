@@ -91,7 +91,7 @@ data:
       file_storage:
         directory: /var/addon/splunk/otel_pos
       file_storage/persistent_queue:
-        directory: /var/addon/splunk/persist/agent
+        directory: /var/addon/splunk/exporter_queue/agent
         timeout: 0
       health_check: null
       k8s_observer:

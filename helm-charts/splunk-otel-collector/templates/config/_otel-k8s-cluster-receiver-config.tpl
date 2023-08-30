@@ -198,12 +198,11 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8889
-  extensions:
-    - health_check
-    - memory_ballast
-    {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-    - k8s_observer
-    {{- end }}
+  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  extensions: [health_check, memory_ballast, k8s_observer]
+  {{- else }}
+  extensions: [health_check, memory_ballast]
+  {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
     # k8s metrics pipeline
