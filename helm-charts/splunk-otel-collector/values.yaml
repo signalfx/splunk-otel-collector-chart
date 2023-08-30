@@ -106,8 +106,8 @@ splunkPlatform:
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
 
-    # When enabled, it uses file_storage extension to persist the queue data.
-    # This can be used as an alternative redundancy mechanism for data being exported.
+    # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
+    # It allows setting higher queue limits and preserving the data across restarts of the collector container.
     # NOTE: The File Storage extension will persist state to the node's local file system.
     # While using the persistent queue it is advised to increase memory limit for agent (agent.resources.limits.memory)
     # to 1Gi.
