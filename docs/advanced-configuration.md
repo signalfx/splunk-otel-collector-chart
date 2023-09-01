@@ -138,8 +138,6 @@ make sure to set `distribution` setting to `gke/autopilot`:
 distribution: gke/autopilot
 ```
 
-**NOTE:** Native OTel logs collection is not yet supported in GKE Autopilot.
-
 Sometimes Splunk OTel Collector agent daemonset can have [problems scheduling in
 Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/daemonset#autopilot-ds-best-practices)
 If you run into these issues, you can assign the daemonset a higher [priority
@@ -409,8 +407,6 @@ The following configuration can be used to achieve that:
 ```yaml
 logsEngine: otel
 ```
-
-**NOTE:** Native OTel logs collection is not yet supported in GKE Autopilot.
 
 ### Add log files from Kubernetes host machines/volumes
 

@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Enable native OTel logs collection (logsEngine=otel) in GKE Autopilot [#809](https://github.com/signalfx/splunk-otel-collector-chart/pull/809)
+
 ### Added
 
 - Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
