@@ -157,7 +157,8 @@ splunkObservability:
 # an extra container for fluentd.
 ################################################################################
 
-logsEngine: fluentd
+# The default value is "fluentd" which will be changed to "otel" in 0.86.0.
+logsEngine: ""
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.

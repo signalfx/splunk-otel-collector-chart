@@ -399,14 +399,36 @@ does all the necessary metadata enrichment.
 
 OpenTelemetry Collector also has
 [native functionality for logs collection](https://github.com/open-telemetry/opentelemetry-log-collection).
-This chart soon will be migrated from fluentd to the OpenTelemetry logs collection.
 
-You already have an option to use OpenTelemetry logs collection instead of fluentd.
-The following configuration can be used to achieve that:
+**IMPORTANT:** This chart will be migrated from Fluentd to the OpenTelemetry logs collection, which will be the default
+starting from version 0.86.0. Please ensure that the `logsEngine` parameter is explicitly set to avoid unexpected
+changes during upgrade.
+
+Use the following configuration to switch between Fluentd and OpenTelemetry logs collection:
 
 ```yaml
-logsEngine: otel
+logsEngine: <fluentd|otel>
 ```
+
+### Difference between Fluentd and OpenTelemetry logs collection
+
+#### Emitted logs
+
+There is almost no difference in the logs emitted by default by the two engines. The only difference is that
+Fluentd logs have an additional attribute called `fluent.tag`, which has a value similar to the `source` HEC field.
+
+#### Performance and resource usage
+
+Fluend logs collection requires an additional sidecar container responsible for collecting logs and sending them to the
+OTel collector container for further enrichment. No sidecar containers are required for the OpenTelemetry logs collection.
+OpenTelemetry logs collection is multi-threaded, so it can handle more logs per second without additional configuration.
+Our internal benchmarks show that OpenTelemetry logs collection provides higher throughput with less resource usage.
+
+#### Configuration
+
+Fluentd logs collection is configured using the `fluentd.config` section in values.yaml. OpenTelemetry logs
+collection is configured using the `logsCollection` section in values.yaml. The configuration options are
+different between the two engines, but they provide similar functionality.
 
 ### Add log files from Kubernetes host machines/volumes
 
