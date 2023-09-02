@@ -12,15 +12,3 @@ splunkPlatform:
       enabled: true
 
 logsEngine: otel
-
-agent:
-  securityContext:
-    runAsUser: 999
-    runAsGroup: 999
-
-
-clusterReceiver:
-  enabled: true
-  securityContext:
-    runAsUser: 999
-    runAsGroup: 999

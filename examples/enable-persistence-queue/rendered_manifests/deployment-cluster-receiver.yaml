@@ -35,9 +35,6 @@ spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
-      securityContext:
-        runAsGroup: 999
-        runAsUser: 999
       containers:
       - name: otel-collector
         command:

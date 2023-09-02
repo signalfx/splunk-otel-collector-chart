@@ -717,7 +717,7 @@ Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueue.
 Check [Data Persistence in the OpenTelemetry Collector
 ](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explantion.
 
-Note: Data Persistence is only applicable for agent daemonset and is effective only if `agent.securityContext.runAsUser` and `agent.securityContext.runAsGroup` are set to non-zero values.
+Note: Data Persistence is only applicable for agent daemonset.
 
 Use following in values.yaml to disable data persistense for logs or metrics or traces:
 
