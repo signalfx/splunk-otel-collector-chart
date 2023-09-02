@@ -4,9 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Fixed
+
+- Enable native OTel logs collection (logsEngine=otel) in GKE Autopilot [#809](https://github.com/signalfx/splunk-otel-collector-chart/pull/809)
+
 ### Added
 
-- Configuration of persistent buffering for agent and clusterReceiver [861](https://github.com/signalfx/splunk-otel-collector-chart/pull/861)
+- Configuration of persistent buffering for agent [861](https://github.com/signalfx/splunk-otel-collector-chart/pull/861)
 - Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
 
 ## [0.83.0] - 2023-08-18
