@@ -194,3 +194,54 @@ def test_no_agent_logs_ingested_into_splunk_with_exclude_agent_logs_flag(setup):
     )
     logger.info("Splunk received %s events in the 5 minutes", len(events))
     assert len(events) == 0  # ensure that we are not getting any logs
+
+@pytest.mark.parametrize("persistence_enabled", [
+    "true",
+    "false",
+])
+def test_agent_logs_with_persistent_storage(setup, persistence_enabled):
+        yaml_file = AGENT_VALUES_YAML
+        yaml_fields = {
+            "splunkPlatform.index": INDEX_MAIN,
+            "splunkPlatform.token": os.environ.get("CI_SPLUNK_HEC_TOKEN"),
+            "splunkPlatform.endpoint": "http://" # incorrect protocol, to trigger non-permanent retryable error
+            + os.environ.get("CI_SPLUNK_HOST")
+            + ":8088/services/collector",
+            "splunkPlatform.sendingQueue.persistentQueue.enabled": persistence_enabled,
+        }
+        k8s_helper.upgrade_helm(yaml_file, yaml_fields)
+        full_pod_name = k8s_helper.get_pod_full_name("agent")
+        search_query = (
+            "index="
+            + INDEX_MAIN
+            + " k8s.pod.name="
+            + full_pod_name
+            + " source=*/otel-collector/*.log"
+        )
+        logger.info(f"Query: {search_query}")
+        events = check_events_from_splunk(
+            start_time="-5m@m",
+            url=setup["splunkd_url"],
+            user=setup["splunk_user"],
+            query=["search {0}".format(search_query)],
+            password=setup["splunk_password"],
+        )
+        logger.info("Splunk received %s events in the last minute", len(events))
+        assert len(events) == 0 # shouldn't receive any events, incorrect protocol!!
+
+        yaml_fields["splunkPlatform.endpoint"] = "https://" \
+            + os.environ.get("CI_SPLUNK_HOST") \
+            + ":8088/services/collector"  # correct protocol
+        k8s_helper.upgrade_helm(yaml_file, yaml_fields)
+        time.sleep(5)  # wait for some time to have more time for potential logs ingestion
+
+        # check logs from previous pod
+        events = check_events_from_splunk(
+            start_time="-5m@m",
+            url=setup["splunkd_url"],
+            user=setup["splunk_user"],
+            query=["search {0}".format(search_query)],
+            password=setup["splunk_password"],
+        )
+        logger.info("Splunk received %s events in the last minute", len(events))
+        assert len(events) >= 1 if persistence_enabled == "true" else len(events) == 0
