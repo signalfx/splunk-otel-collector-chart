@@ -18,7 +18,7 @@ jobs:
         # Currently this workflow will update the listed operator instrumentation dependencies in values.yaml
         language: ['java'] # Add other languages here
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4
       - name: swizzle version
         id: swizzle_version
         run: |
