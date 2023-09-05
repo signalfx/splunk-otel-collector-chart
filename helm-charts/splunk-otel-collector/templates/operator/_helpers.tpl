@@ -35,6 +35,15 @@ Define an endpoint for exporting telemetry data related to auto-instrumentation.
 {{- end }}
 
 {{/*
+Define a helper to extract the image name from a repository URL.
+- Takes the repository URL as input and returns the last part as the image name.
+*/}}
+{{- define "splunk-otel-collector.operator.extract-image-name" -}}
+{{- $repository := . -}}
+{{- (splitList "/" $repository) | last -}}
+{{- end -}}
+
+{{/*
 Define entries for instrumentation libraries with the following key features:
 - Dynamic Value Generation: Allows for easy addition of new libraries.
 - Custom Environment Variables: Each library can be customized with specific attributes or use-cases.
@@ -48,11 +57,9 @@ Define entries for instrumentation libraries with the following key features:
       {{- if and $value.repository $value.tag }}
         {{- $imageName := include "splunk-otel-collector.operator.extract-image-name" $value.repository }}
         {{- /* Needed to add user supplied and chart default otel resource attributes */ -}}
-        {{- $instEnvList := list }}
         {{- $defaultOtelResourceAttributes := printf "splunk.zc.method=%s:%s" $imageName $value.tag }}
         {{- $customOtelResourceAttributes := "" }}
         {{- if $value.env }}
-          {{- $instEnvList = $value.env }}
           {{- range $env := $value.env }}
             {{- if eq $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
               {{- $customOtelResourceAttributes = printf "%s,%s" $env.value $defaultOtelResourceAttributes }}
@@ -62,11 +69,21 @@ Define entries for instrumentation libraries with the following key features:
         {{- if not $customOtelResourceAttributes }}
           {{- $customOtelResourceAttributes = $defaultOtelResourceAttributes }}
         {{- end }}
+        {{- /* Needed to add user supplied and chart default otel exporter endpoint */ -}}
+        {{- $customOtelExporterEndpoint := "" }}
+        {{- if or (eq $key "dotnet") (eq $key "python") }}
+        {{- $customOtelExporterEndpoint = include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ | trim | replace ":4317" ":4318" }}
+        {{- end }}
+        {{- range $env := $value.env }}
+          {{- if eq $env.name "OTEL_EXPORTER_OTLP_ENDPOINT" }}
+            {{- $customOtelExporterEndpoint = $env.value }}
+          {{- end }}
+        {{- end }}
   {{ $key }}:
     image: {{ printf "%s:%s" $value.repository $value.tag }}
     env:
       {{- /* Append additional user supplied env variables */ -}}
-      {{- range $env := $instEnvList }}
+      {{- range $env := $value.env }}
       {{- if ne $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
       - name: {{ $env.name }}
         value: {{ $env.value }}
@@ -76,43 +93,11 @@ Define entries for instrumentation libraries with the following key features:
         value: {{ $customOtelResourceAttributes }}
       {{- /* Append special instrumentation library env variables */ -}}
       {{- /* Insert a special endpoint value if not overriden by the user */ -}}
-      {{- if and (eq $key "dotnet") (not (hasKey (include "splunk-otel-collector.operator.get-dict-keys" $instEnvList) "OTEL_EXPORTER_OTLP_ENDPOINT" )) }}
-      # Dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
+      {{- if not (eq $customOtelExporterEndpoint "") }}
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: {{ include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" $ | trim | replace ":4317" ":4318" }}
-      {{- end }}
-      {{- /* Insert a special endpoint value if not overriden by the user */ -}}
-      {{- if and (eq $key "python") (not (hasKey (include "splunk-otel-collector.operator.get-dict-keys" $instEnvList) "OTEL_EXPORTER_OTLP_ENDPOINT" )) }}
-      # Python auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: {{ include "splunk-otel-collector.operator.instrumentation.exporter.endpoint" $ | trim | replace ":4317" ":4318" }}
+        value: {{ $customOtelExporterEndpoint }}
       {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
-{{- end }}
-
-{{/*
-Define a helper to extract the image name from a repository URL.
-- Takes the repository URL as input and returns the last part as the image name.
-*/}}
-{{- define "splunk-otel-collector.operator.extract-image-name" -}}
-{{- $repository := . -}}
-{{- (splitList "/" $repository) | last -}}
-{{- end -}}
-
-{{/*
-Define a helper to convert a list of dictionaries into a list of keys.
-- Iterates through a list of dictionaries and collects the 'name' field from each.
-- Returns a list of these 'name' keys.
-*/}}
-{{- define "splunk-otel-collector.operator.get-dict-keys" -}}
-  {{- $listOfDicts := . }}
-  {{- $keyList := list }}
-  {{- range $listOfDicts }}
-    {{- $keyList = append $keyList .name }}
-  {{- end }}
-  {{- $keyList }}
 {{- end }}

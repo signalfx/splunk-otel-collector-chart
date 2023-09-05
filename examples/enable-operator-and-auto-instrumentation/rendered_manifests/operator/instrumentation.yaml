@@ -29,6 +29,7 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: status.hostIP
+
   apache-httpd:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.3
     env:
@@ -37,8 +38,12 @@ spec:
   dotnet:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.0-rc.1
     env:
+      - name: SPLUNK_PROFILER_ENABLED
+        value: true
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-dotnet:1.0.0-rc.1
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
   go:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:0.2.2-alpha
     env:
@@ -59,5 +64,9 @@ spec:
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
     env:
+      - name: SPLUNK_PROFILER_ENABLED
+        value: true
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-python:0.40b0
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
