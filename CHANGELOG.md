@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Configuration of persistent buffering for agent [861](https://github.com/signalfx/splunk-otel-collector-chart/pull/861)
 - Add option to disable Openshift SecurityContextConstraint resource [#843](https://github.com/signalfx/splunk-otel-collector-chart/pull/843)
 
 ## [0.83.0] - 2023-08-18

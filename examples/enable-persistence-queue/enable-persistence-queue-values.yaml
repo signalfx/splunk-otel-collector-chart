@@ -1,0 +1,14 @@
+clusterName: CHANGEME
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  index: CHANGEME
+  metricsIndex: CHANGEME
+  metricsEnabled: true
+  tracesEnabled: true
+  logsEnabled: true
+  sendingQueue:
+    persistentQueue:
+      enabled: true
+
+logsEngine: otel

@@ -135,6 +135,17 @@
             },
             "queueSize": {
               "type": "integer"
+            },
+            "persistentQueue": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "storagePath": {
+                  "type": "string"
+                }
+              }
             }
           }
         }

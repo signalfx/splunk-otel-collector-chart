@@ -11,6 +11,12 @@ extensions:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
 
+  {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+  file_storage/persistent_queue:
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+    timeout: 0
+  {{- end }}
+
   memory_ballast:
     size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
 
@@ -615,6 +621,7 @@ exporters:
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
   {{- end }}
+  {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
@@ -624,6 +631,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
+  {{- $_ := unset . "addPersistentStorage" }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -647,6 +655,9 @@ service:
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel") }}
     - file_storage
+    {{- end }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+    - file_storage/persistent_queue
     {{- end }}
     - health_check
     - k8s_observer

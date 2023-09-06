@@ -106,6 +106,17 @@ splunkPlatform:
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
 
+    # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
+    # It allows setting higher queue limits and preserving the data across restarts of the collector container.
+    # NOTE: The File Storage extension will persist state to the node's local file system.
+    # While using the persistent queue it is advised to increase memory limit for agent (agent.resources.limits.memory)
+    # to 1Gi.
+    # Refer to: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#data-persistence
+    persistentQueue:
+      # Specifies whether to persist log/metric/trace data.
+      enabled: false
+      storagePath: "/var/addon/splunk/exporter_queue"
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
