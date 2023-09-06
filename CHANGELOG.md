@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Disable `opencensus.resourcetype` resource attribute in k8s_cluster receiver [#914](https://github.com/signalfx/splunk-otel-collector-chart/pull/914)
+  - This change does not affect Splunk Observability users since it has already been disabled in the default translation rules of the Signalfx exporter
+
 ### Fixed
 
 - Enable native OTel logs collection (logsEngine=otel) in GKE Autopilot [#809](https://github.com/signalfx/splunk-otel-collector-chart/pull/809)
