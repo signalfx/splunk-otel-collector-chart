@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Disable `opencensus.resourcetype` resource attribute in k8s_cluster receiver [#914](https://github.com/signalfx/splunk-otel-collector-chart/pull/914)
   - This change does not affect Splunk Observability users since it has already been disabled in the default translation rules of the Signalfx exporter
+- Disable signalfx exporter default translations in clusterReceiver deployment [#915](https://github.com/signalfx/splunk-otel-collector-chart/pull/915)
+  - This change improves performance of clusterReceiver, but can be breaking if the deprecated signalfx exporter `translation_rules` option is being used
 
 ### Fixed
 

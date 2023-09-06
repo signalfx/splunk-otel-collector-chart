@@ -174,6 +174,7 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
+    disable_default_translation_rules: true
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
