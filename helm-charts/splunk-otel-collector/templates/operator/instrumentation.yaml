@@ -14,7 +14,7 @@ metadata:
     app.kubernetes.io/component: otel-operator
 spec:
   exporter:
-    endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . | trim }}
+    endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . }}
   propagators:
     - tracecontext
     - baggage
@@ -27,11 +27,11 @@ spec:
     {{- include .Values.operator.instrumentation.spec.env }}
     {{- end }}
     {{- if .Values.splunkObservability.profilingEnabled }}
-    {{- if not hasKey (include "splunk-otel-collector.operator.get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_ENABLED" }}
+    {{- if not hasKey (include "splunk-otel-collector.operator.extract-name-keys-from-dict-list" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_ENABLED" }}
     - name: SPLUNK_PROFILER_ENABLED
       value: "true"
     {{- end }}
-    {{- if not hasKey (include "splunk-otel-collector.operator.get-dict-keys" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_MEMORY_ENABLED" }}
+    {{- if not hasKey (include "splunk-otel-collector.operator.extract-name-keys-from-dict-list" .Values.operator.instrumentation.spec.env) "SPLUNK_PROFILER_MEMORY_ENABLED" }}
     - name: SPLUNK_PROFILER_MEMORY_ENABLED
       value: "true"
     {{- end }}
