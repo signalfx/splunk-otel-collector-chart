@@ -6,7 +6,7 @@ The values can be overridden in .Values.agent.config
 {{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) -}}
 {{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
 extensions:
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel") }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
   {{- end }}
@@ -247,7 +247,7 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
     {{- if .Values.isWindows }}
@@ -472,7 +472,7 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
 
-  {{- if eq .Values.logsEngine "fluentd" }}
+  {{- if eq (include "splunk-otel-collector.logsEngine" .) "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
   groupbyattrs/logs:
     keys:
@@ -645,7 +645,7 @@ service:
     metrics:
       address: 0.0.0.0:8889
   extensions:
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel") }}
     - file_storage
     {{- end }}
     - health_check
@@ -662,7 +662,7 @@ service:
     logs:
       receivers:
         {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-        {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
+        {{- if and (eq (include "splunk-otel-collector.logsEngine" .) "otel") .Values.logsCollection.containers.enabled }}
         - filelog
         {{- end }}
         - fluentforward
@@ -670,7 +670,7 @@ service:
         - otlp
       processors:
         - memory_limiter
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "fluentd") }}
         - groupbyattrs/logs
         {{- end }}
         - k8sattributes
@@ -704,7 +704,7 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if and (eq .Values.logsEngine "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
+    {{- if and (eq (include "splunk-otel-collector.logsEngine" .) "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
     logs/host:
       receivers:
         {{- if .Values.logsCollection.extraFileLogs }}
