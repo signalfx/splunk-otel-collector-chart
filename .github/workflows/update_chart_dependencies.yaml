@@ -17,7 +17,7 @@ jobs:
         # Currently this worfklow will update the listed dependencies in the Chart.yaml
         repo: ['cert-manager', 'opentelemetry-operator'] # Add other repos here
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4
       - name: Update Chart
         id: update_chart
         run: |
