@@ -1,77 +1,101 @@
 {{/*
-Define validation rules to ensure the correct usage of the operator.
-- Check for a valid endpoint: The endpoint can either be derived from the agent/gateway or provided by the user.
+Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operator.
+- Checks for a valid endpoint for exporting telemetry data.
+- Validates that the operator is configured correctly according to user input and default settings.
 */}}
 {{- define "splunk-otel-collector.operator.validation-rules" -}}
-{{- $tracesEnabled := or (include "splunk-otel-collector.platformTracesEnabled" .) (include "splunk-otel-collector.o11yTracesEnabled" .) -}}
-{{- $endpointOverridden := and .Values.operator.instrumentation.spec .Values.operator.instrumentation.spec.exporter .Values.operator.instrumentation.spec.exporter.endpoint (ne .Values.operator.instrumentation.spec.exporter.endpoint "") -}}
-{{- if and .Values.operator.enabled $tracesEnabled (not $endpointOverridden) (not (default "" .Values.environment)) -}}
-  {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), then environment must be a non-empty string" -}}
-{{- end -}}
+  {{- /* Check if traces are enabled either through the platform or through observability */ -}}
+  {{- $tracesEnabled := or
+      (include "splunk-otel-collector.platformTracesEnabled" .)
+      (include "splunk-otel-collector.o11yTracesEnabled" .)
+  -}}
+
+  {{- /* Check if the endpoint is overridden in the Helm values */ -}}
+  {{- $endpointOverridden := and
+      .Values.operator.instrumentation.spec
+      .Values.operator.instrumentation.spec.exporter
+      .Values.operator.instrumentation.spec.exporter.endpoint
+      (ne .Values.operator.instrumentation.spec.exporter.endpoint "")
+  -}}
+
+  {{- /* Validate the configuration */ -}}
+  {{- if and
+      .Values.operator.enabled
+      $tracesEnabled
+      (not $endpointOverridden)
+      (not (default "" .Values.environment))
+  -}}
+      {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), (agent.enabled=true or gateway.enabled=true), then environment must be a non-empty string" -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
-Define an endpoint for exporting telemetry data related to auto-instrumentation.
-- Order of precedence for the endpoint value:
-  1. User-defined value
-  2. Agent endpoint
-  3. Gateway endpoint
+Helper to define an endpoint for exporting telemetry data related to auto-instrumentation.
+- Determines the endpoint based on user-defined values or default agent/gateway settings.
+- Order of precedence: User-defined > Agent endpoint > Gateway endpoint
 */}}
 {{- define "splunk-otel-collector.operator.instrumentation-exporter-endpoint" -}}
-  {{- $endpoint := "" }}
+  {{- /* Initialize endpoint variable */ -}}
+  {{- $endpoint := "" -}}
+
+  {{- /* Use the user-defined endpoint if specified in the Helm values */ -}}
   {{- if and
     .Values.operator.instrumentation.spec
     .Values.operator.instrumentation.spec.exporter
     .Values.operator.instrumentation.spec.exporter.endpoint
     (ne .Values.operator.instrumentation.spec.exporter.endpoint "")
   }}
-    {{ $endpoint = .Values.operator.instrumentation.spec.exporter.endpoint }}
-  {{- else if .Values.agent.enabled }}
-    {{- $endpoint = "http://$(SPLUNK_OTEL_AGENT):4317" }}
-  {{- else if .Values.gateway.enabled }}
-     {{- $endpoint = printf "http://%s:4317" (include "splunk-otel-collector.fullname" .) }}
-  {{- else }}
+  {{- $endpoint = .Values.operator.instrumentation.spec.exporter.endpoint -}}
+  {{- /* Use the agent endpoint if the agent is enabled */ -}}
+  {{- else if .Values.agent.enabled -}}
+    {{- $endpoint = "http://$(SPLUNK_OTEL_AGENT):4317" -}}
+  {{- /* Use the gateway endpoint if the gateway is enabled */ -}}
+  {{- else if .Values.gateway.enabled -}}
+    {{- $endpoint = printf "http://%s:4317" (include "splunk-otel-collector.fullname" .) -}}
+  {{- /* Fail if no valid endpoint is available */ -}}
+  {{- else -}}
     {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), either agent.enabled=true, gateway.enabled=true, or .Values.operator.instrumentation.spec.exporter.endpoint must be set" -}}
-  {{- end }}
-  {{- printf "%s" $endpoint }}
-{{- end }}
+  {{- end -}}
+
+  {{- /* Return the determined endpoint */ -}}
+  {{- printf "%s" $endpoint -}}
+{{- end -}}
 
 {{/*
-Define entries for instrumentation libraries with the following key features:
-- Dynamic Value Generation: Allows for easy addition of new libraries.
-- Custom Environment Variables: Each library can be customized with specific attributes or use-cases.
-- Broad Support: Compatible with both native OpenTelemetry and Splunk-specific libraries.
-- Comprehensive Output: The final output combines user input with chart defaults for a complete configuration.
+Helper to define entries for instrumentation libraries.
+- Iterates over user-defined and default configuration settings for each library.
+- Generates a YAML configuration block for each library, containing:
+  - The library name.
+  - The image repository and tag.
+  - Environment variables, including special handling for 'OTEL_RESOURCE_ATTRIBUTES' and 'OTEL_EXPORTER_OTLP_ENDPOINT'.
 */}}
-{{- define "splunk-otel-collector.operator.instrumentation-libraries" }}
-  {{- $defaultEndpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
+{{- define "splunk-otel-collector.operator.instrumentation-libraries" -}}
+  {{- /* Store the endpoint in a variable to avoid context changes in nested loops.  */ -}}
+  {{- /* Helm template loops change the context, making direct access to variables in parent scopes unreliable. */ -}}
+  {{- $endpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
+
   {{- /* Iterate over each specified instrumentation library */ -}}
   {{- if .Values.operator.instrumentation.spec -}}
     {{- range $key, $value := .Values.operator.instrumentation.spec -}}
-      {{- /* Check for required fields to determine if it is an  instrumentation library */ -}}
+
+      {{- /* Check for required fields to determine if it is an instrumentation library */ -}}
       {{- if and $value.repository $value.tag -}}
 
-        {{- /* Generate YAML for each instrumentation library */ -}}
-        {{- printf "%s:\n" $key | indent 2 -}}
+        {{- /* Generate YAML keys for each instrumentation library */ -}}
+        {{- printf "%s:" $key | indent 2 -}}
+        {{- printf "\n" -}}
 
-        {{- printf "image: %s\n" (include "splunk-otel-collector.operator.extract-image-name" $value.repository) | indent 2 -}}
+        {{- /* Generate YAML for the image field */ -}}
+        {{- printf "image: %s/%s" $value.repository $value.tag | indent 4 -}}
+        {{- printf "\n" -}}
 
-        {{- /* Instrumentation library environment variables */}}
-        {{- printf "env:" | indent 2 -}}
-        {{- include "splunk-otel-collector.operator.extract-instrumentation-env" (dict "key" $key "env" $value.env "endpoint" $defaultEndpoint "repo" $value.repository) -}}
+        {{- /* Output environment variables for the instrumentation library */ -}}
+        {{- printf "env:" | indent 4 -}}
+        {{- include "splunk-otel-collector.operator.extract-instrumentation-env" (dict "endpoint" $endpoint "key" $key "env" $value.env  "repository" $value.repository "tag" $value.tag) -}}
 
-      {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-{{/*
-Helper to extract the image name from a repository URL.
-- Takes the repository URL as input and returns the last part as the image name.
-*/}}
-{{- define "splunk-otel-collector.operator.extract-image-name" -}}
-{{- $repository := . -}}
-{{- (splitList "/" $repository) | last -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -80,49 +104,46 @@ Helper to convert a list of dictionaries into a list of keys.
 - Returns a list of these 'name' keys.
 */}}
 {{- define "splunk-otel-collector.operator.extract-name-keys-from-dict-list" -}}
-  {{- $listOfDicts := . }}
-  {{- $keyList := list }}
-  {{- range $listOfDicts }}
-    {{- $keyList = append $keyList .name }}
-  {{- end }}
-  {{- $keyList }}
-{{- end }}
+  {{- /* Initialize variables */ -}}
+  {{- $listOfDicts := . -}}
+  {{- $keyList := list -}}
+
+  {{- /* Collect 'name' field from each dictionary */ -}}
+  {{- range $listOfDicts -}}
+    {{- $keyList = append $keyList .name -}}
+  {{- end -}}
+
+  {{- /* Return the list of 'name' keys */ -}}
+  {{- $keyList -}}
+{{- end -}}
 
 {{/*
-Helper for generating custom OTEL exporter endpoint.
-*/}}
-{{- define "splunk-otel-collector.operator.custom-exporter-endpoint" }}
-
-{{- end }}
-
-{{/*
-Helper for getting environment variables for each instrumentation library.
-- Add users supplied environemtn variables
-- Add merged default and user supplied values for for OTEL_RESOURCE_ATTRIBUTES
-  - Both inputs will be appended together.
-- Add speical case values or user supplied values for OTEL_EXPORTER_OTLP_ENDPOINT
-  - User supplied values will overrided any default special cases.
+Helper for generating environment variables for each instrumentation library.
+- Prioritizes user-supplied environment variables over defaults.
+- For OTEL_RESOURCE_ATTRIBUTES, combines default attributes with any user-supplied values.
+- For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python'), but user-supplied values will override these.
 */}}
 {{- define "splunk-otel-collector.operator.extract-instrumentation-env" }}
-  {{- /* Splunk default resource attribute, it is always included. */}}
-  {{- $otelResourceAttributes := printf "splunk.zc.method=%s:%s" (include "splunk-otel-collector.operator.extract-image-name" .repo) .tag }}
+  {{- /* Initialize Splunk default Otel resource attribute; always included */ -}}
+  {{- $imageShortName := printf "%s:%s" (splitList "/" .repository | last) .tag  -}}
+  {{- $otelResourceAttributes := printf "splunk.zc.method=%s" $imageShortName }}
 
-  {{- /* Add custom resource attributes */}}
+  {{- /* Loop through user-supplied environment variables */ -}}
   {{- range $env := .env }}
     {{- if eq $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
       {{- $otelResourceAttributes = printf "%s,%s" $env.value $otelResourceAttributes }}
     {{- else }}
       {{- printf "- name: %s" $env.name | nindent 6 -}}
-      {{- printf "value: %s" $env.value | nindent 6 -}}
+      {{- printf "  value: %s" $env.value | nindent 6 -}}
     {{- end }}
   {{- end }}
 
-  {{- /* Add resource attributes that container standard default and possibly custom values. */}}
+  {{- /* Output OTEL_RESOURCE_ATTRIBUTES with merged values */ -}}
   {{- printf "- name: %s" "OTEL_RESOURCE_ATTRIBUTES" | nindent 6 -}}
-  {{- printf "value: %s" $otelResourceAttributes | nindent 6 -}}
+  {{- printf "  value: %s" $otelResourceAttributes | nindent 6 -}}
   {{- printf "\n" -}}
 
-  {{- /* Add custom or default exporter endpoint */}}
+  {{- /* Handle custom or default exporter endpoint */ -}}
   {{- $customOtelExporterEndpoint := "" }}
   {{- if or (eq .key "dotnet") (eq .key "python") }}
     {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
@@ -132,13 +153,18 @@ Helper for getting environment variables for each instrumentation library.
       {{- if eq $env.name "OTEL_EXPORTER_OTLP_ENDPOINT" }}
         {{- $customOtelExporterEndpoint = $env.value }}
       {{- end }}
-    {{- end }}
+    {{- end }
   {{- end }}
+
+  {{- /* Output final OTEL_EXPORTER_OTLP_ENDPOINT, if applicable based on input conditions */ -}}
   {{- if $customOtelExporterEndpoint }}
-    {{- if contains $customOtelExporterEndpoint "4318" }}
-      {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.\n # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection" .key }}
+    {{- if contains "4318" $customOtelExporterEndpoint }}
+      {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .key | indent 6 -}}
+      {{- printf "\n" -}}
+      {{- printf "# See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection" | indent 6 -}}
     {{- end }}
-    {{- printf "- name: OTEL_EXPORTER_OTLP_ENDPOINT\n  value: %s\n" $customOtelExporterEndpoint | indent 6 }}
+    {{- printf "- name: %s" "OTEL_EXPORTER_OTLP_ENDPOINT" | nindent 6 -}}
+    {{- printf "  value: %s" $customOtelExporterEndpoint | nindent 6 -}}
     {{- printf "\n" -}}
   {{- end }}
 {{- end }}

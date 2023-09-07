@@ -15,7 +15,7 @@ render_task(){
   out=$(helm template \
     --namespace default \
     --values "${values_yaml}" \
-    --output-dir "${rendered_manifests_dir}" --debug\
+    --output-dir "${rendered_manifests_dir}" \
     default helm-charts/splunk-otel-collector)
   if [ $? -ne 0 ]; then
       echo "$values_yaml FAIL - helm template: $out"
