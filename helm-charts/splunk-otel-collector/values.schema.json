@@ -135,6 +135,17 @@
             },
             "queueSize": {
               "type": "integer"
+            },
+            "persistentQueue": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "storagePath": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -232,6 +243,7 @@
       "description": "Logs collection engine",
       "type": "string",
       "enum": [
+        "",
         "fluentd",
         "otel"
       ]

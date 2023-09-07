@@ -399,14 +399,36 @@ does all the necessary metadata enrichment.
 
 OpenTelemetry Collector also has
 [native functionality for logs collection](https://github.com/open-telemetry/opentelemetry-log-collection).
-This chart soon will be migrated from fluentd to the OpenTelemetry logs collection.
 
-You already have an option to use OpenTelemetry logs collection instead of fluentd.
-The following configuration can be used to achieve that:
+**IMPORTANT:** This chart will be migrated from Fluentd to the OpenTelemetry logs collection, which will be the default
+starting from version 0.86.0. Please ensure that the `logsEngine` parameter is explicitly set to avoid unexpected
+changes during upgrade.
+
+Use the following configuration to switch between Fluentd and OpenTelemetry logs collection:
 
 ```yaml
-logsEngine: otel
+logsEngine: <fluentd|otel>
 ```
+
+### Difference between Fluentd and OpenTelemetry logs collection
+
+#### Emitted logs
+
+There is almost no difference in the logs emitted by default by the two engines. The only difference is that
+Fluentd logs have an additional attribute called `fluent.tag`, which has a value similar to the `source` HEC field.
+
+#### Performance and resource usage
+
+Fluend logs collection requires an additional sidecar container responsible for collecting logs and sending them to the
+OTel collector container for further enrichment. No sidecar containers are required for the OpenTelemetry logs collection.
+OpenTelemetry logs collection is multi-threaded, so it can handle more logs per second without additional configuration.
+Our internal benchmarks show that OpenTelemetry logs collection provides higher throughput with less resource usage.
+
+#### Configuration
+
+Fluentd logs collection is configured using the `fluentd.config` section in values.yaml. OpenTelemetry logs
+collection is configured using the `logsCollection` section in values.yaml. The configuration options are
+different between the two engines, but they provide similar functionality.
 
 ### Add log files from Kubernetes host machines/volumes
 
@@ -698,3 +720,63 @@ rbac:
 ```
 helm install my-splunk-otel-collector -f my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+## Data Persistence
+
+By default, without any configuration, data is queued in memory only. When data cannot be sent it is retried a few times (up to 5 mins. by default) and then dropped.
+
+If for any reason, the collector is restarted in this period, the queued data will be gone.
+
+If you want the queue to be persisted on disk across collector restarts, set `splunkPlatform.sendingQueue.persistentQueue.enabled` to enable support for logs, metrics and traces.
+
+By default, data is persisted in `/var/addon/splunk/exporter_queue` directory.
+Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueue.storagePath` option.
+
+Check [Data Persistence in the OpenTelemetry Collector
+](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explantion.
+
+Note: Data Persistence is only applicable for agent daemonset.
+
+Use following in values.yaml to disable data persistense for logs or metrics or traces:
+
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_logs:
+         sending_queue:
+           storage: null
+```
+or
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_metrics:
+         sending_queue:
+           storage: null
+```
+or
+```yaml
+agent:
+  config:
+    exporters:
+       splunk_hec/platform_traces:
+         sending_queue:
+           storage: null
+```
+
+### Support for persistent queue
+
+* `GKE/Autopilot` and `EKS/Fargate` support
+  * Both of the above distributions doesn't allow volume mounts, as they are kind of `serverless` and we don't manage the underlying infrastructure.
+  * Persistent buffering is not supported for them, as directory needs to be mounted via `hostPath`.
+  * Refer [aws/fargate](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) and [gke/autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-security#built-in-security).
+* Gateway support
+  * The filestorage extention acquires an exclusive lock for the queue directory.
+  * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
+  * Even if support is somehow provided, only one of the pods will be able to acquire the lock and run, while the others will be blocked and unable to operate.
+* Cluster Receiver support
+  * Cluster receiver is a 1-replica deployment of Open-temlemetry collector.
+  * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such envrionments.
+  * Data Persistence is currently not applicable to the k8s cluster metrics and k8s events.

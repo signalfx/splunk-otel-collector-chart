@@ -13,7 +13,7 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
+    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "fluentd") }}
     engine: fluentd
     {{- end }}
   {{- if $agent.annotations }}
@@ -70,7 +70,7 @@ spec:
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) }}
       initContainers:
-        {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
+        {{- if and (eq (include "splunk-otel-collector.logsEngine" .) "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
         - name: prepare-fluentd-config
           image: {{ template "splunk-otel-collector.image.fluentd" . }}
           imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -160,6 +160,12 @@ spec:
           then
               setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
+          {{- end }}
+          {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+          mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
+          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
+          chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
           {{- end }}']
           securityContext:
             runAsUser: 0
@@ -178,11 +184,15 @@ spec:
             - name: journaldlogs
               mountPath: {{ .Values.logsCollection.journald.directory }}
             {{- end }}
+            {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+            - name: persistent-queue
+              mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+            {{- end }}
         {{- end }}
         {{- end }}
       {{- end }}
       containers:
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEngine" .) "fluentd") }}
       - name: fluentd
         image: {{ template "splunk-otel-collector.image.fluentd" . }}
         imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
@@ -232,7 +242,7 @@ spec:
         {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
-        {{- if and (eq .Values.distribution "gke/autopilot") (eq .Values.logsEngine "fluentd") }}
+        {{- if and (eq .Values.distribution "gke/autopilot") (eq (include "splunk-otel-collector.logsEngine" .) "fluentd") }}
         {{- /* Temporary no-op argument required to run collector on GKE Autopilot */}}
         - --metrics-addr=0.0.0.0:8889
         {{- end }}
@@ -249,7 +259,7 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel")) }}
         securityContext:
           {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
@@ -377,7 +387,7 @@ spec:
           mountPath: /otel/etc/etcd
           readOnly: true
         {{- end }}
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq (include "splunk-otel-collector.logsEngine" .) "otel") }}
         {{- if .Values.isWindows }}
         - name: varlog
           mountPath: C:\var\log
@@ -398,6 +408,10 @@ spec:
         {{- end }}
         - name: checkpoint
           mountPath: {{ .Values.logsCollection.checkpointPath }}
+        {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+        - name: persistent-queue
+          mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+        {{- end }}
         {{- if .Values.logsCollection.journald.enabled }}
         - mountPath: {{.Values.logsCollection.journald.directory}}
           name: journaldlogs
@@ -416,7 +430,7 @@ spec:
         emptyDir:
           sizeLimit: 25Mi
       {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-      {{- if eq .Values.logsEngine "fluentd" }}
+      {{- if eq (include "splunk-otel-collector.logsEngine" .) "fluentd" }}
       - name: varlog
         hostPath:
           path: {{ .Values.fluentd.config.containers.path }}
@@ -442,7 +456,7 @@ spec:
       - name: tmp
         emptyDir: {}
       {{- end}}
-      {{- if eq .Values.logsEngine "otel" }}
+      {{- if eq (include "splunk-otel-collector.logsEngine" .) "otel" }}
       {{- if .Values.isWindows }}
       - name: varlog
         hostPath:
@@ -464,6 +478,12 @@ spec:
         hostPath:
           path: {{ .Values.logsCollection.checkpointPath }}
           type: DirectoryOrCreate
+      {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+      - name: persistent-queue
+        hostPath:
+          path: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+          type: DirectoryOrCreate
+      {{- end }}
       {{- if .Values.logsCollection.journald.enabled }}
       - name: journaldlogs
         hostPath:
