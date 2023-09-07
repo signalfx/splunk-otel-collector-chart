@@ -157,7 +157,7 @@ data:
             output: parser-docker
           - expr: body matches "^[^ Z]+ "
             output: parser-crio
-          - expr: body matches "^[^ Z]+Z"
+          - expr: body matches "^[^ ]+ "
             output: parser-containerd
           type: router
         - id: parser-crio
@@ -176,9 +176,10 @@ data:
           source_identifier: attributes["log.file.path"]
           type: recombine
         - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          regex: ^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
           timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            layout: 2006-01-02T15:04:05.999999999Z07:00
+            layout_type: gotime
             parse_from: attributes.time
           type: regex_parser
         - combine_field: attributes.log
