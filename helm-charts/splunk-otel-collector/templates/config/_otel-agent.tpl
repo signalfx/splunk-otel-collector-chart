@@ -298,7 +298,7 @@ receivers:
           - output: parser-crio
             expr: 'body matches "^[^ Z]+ "'
           - output: parser-containerd
-            expr: 'body matches "^[^ Z]+Z"'
+            expr: 'body matches "^[^ ]+ "'
       {{- end }}
       {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
       # Parse CRI-O format
