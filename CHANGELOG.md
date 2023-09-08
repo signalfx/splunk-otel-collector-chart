@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This change does not affect Splunk Observability users since it has already been disabled in the default translation rules of the Signalfx exporter
 - Disable signalfx exporter default translations in clusterReceiver deployment [#915](https://github.com/signalfx/splunk-otel-collector-chart/pull/915)
   - This change improves performance of clusterReceiver, but can be breaking if the deprecated signalfx exporter `translation_rules` option is being used
+- Update OpenTelemetry Operator to v0.37.0 [#919](https://github.com/signalfx/splunk-otel-collector-chart/pull/919)
 
 ### Fixed
 
