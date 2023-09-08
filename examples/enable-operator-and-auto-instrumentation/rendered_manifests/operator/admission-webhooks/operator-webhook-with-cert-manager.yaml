@@ -6,7 +6,7 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: default/default-operator-serving-cert
   labels:
-    helm.sh/chart: operator-0.36.0
+    helm.sh/chart: operator-0.37.0
     app.kubernetes.io/name: operator
     app.kubernetes.io/version: "0.83.0"
     app.kubernetes.io/managed-by: Helm
@@ -85,7 +85,7 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: default/default-operator-serving-cert
   labels:
-    helm.sh/chart: operator-0.36.0
+    helm.sh/chart: operator-0.37.0
     app.kubernetes.io/name: operator
     app.kubernetes.io/version: "0.83.0"
     app.kubernetes.io/managed-by: Helm
