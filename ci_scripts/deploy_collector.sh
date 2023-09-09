@@ -16,6 +16,7 @@ helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 --set splunkPlatform.token=$CI_SPLUNK_HEC_TOKEN \
 --set splunkPlatform.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \
 --set networkExplorer.enabled=${NETWORK_EXPLORER_ENABLED:-false} \
+--set logsEngine=${LOGS_ENGINE:-fluentd} \
 -f ci_scripts/sck_otel_values.yaml helm-charts/splunk-otel-collector/
 #--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
 #wait for deployment to finish

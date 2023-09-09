@@ -4,7 +4,7 @@ on: pull_request
 
 jobs:
   e2e-test:
-    name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
+    name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }} ${{ matrix.logs_engine }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -21,6 +21,9 @@ jobs:
           - "docker"
           - "containerd"
           - "cri-o"
+        logs_engine:
+          - "fluentd"
+          - "otel"
     env:
       CI_SPLUNK_PORT: 8089
       CI_SPLUNK_USERNAME: admin
@@ -30,6 +33,7 @@ jobs:
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
       KUBERNETES_VERSION: ${{ matrix.kubernetes_version }}
+      LOGS_ENGINE: ${{ matrix.logs_engine }}
       MINIKUBE_VERSION: latest
 
     steps:
