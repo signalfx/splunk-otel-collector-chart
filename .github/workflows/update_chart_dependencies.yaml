@@ -1,10 +1,23 @@
 name: Check for new chart dependency updates
 
+# Description:
+# This workflow automates the process of checking for and updating Helm chart dependencies.
+# Specifically, it:
+#   1. Checks for new versions of (subchart) dependencies listed in chart.yaml.
+#   2. Updates chart.yaml with new versions where applicable.
+#   3. If the 'opentelemetry-operator' subchart is updated in chart.yaml, it also updates related
+#      image tags in values.yaml.
+
 on:
   schedule:
     # Run every Monday at noon.
     - cron: "0 12 * * 1"
   workflow_dispatch:
+    inputs:
+      DEBUG_MODE:
+        description: 'Enable debug mode'
+        required: false
+        default: 'false'
 
 env:
   CHART_YAML: helm-charts/splunk-otel-collector/Chart.yaml
@@ -21,7 +34,15 @@ jobs:
       - name: Update Chart
         id: update_chart
         run: |
-          # Run make repo-update to ensure repositories are up-to-date
+          echo "Update dependencies for Helm chart"
+
+          # Set debug argument if DEBUG_MODE is true
+          DEBUG_ARG=""
+          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
+            DEBUG_ARG="--debug"
+          fi
+
+          # Ensure repositories are up-to-date
           make repo-update
 
           # Fetch the latest version using helm search repo
@@ -43,6 +64,11 @@ jobs:
             # Update the version in chart.yaml using yq and jq
             DEP_LINE=$(yq eval ".dependencies | keys | map(tonumber) | map(select(. != null)) | map(select(. < 10000)) | map(. + 1)" $CHART_YAML | jq ".[] | select(.[\"name\"] == \"${{ matrix.repo }}\")")
             sed -i "${DEP_LINE}s/$DEP_PATH/$LATEST_VER/" $CHART_YAML
+
+            if [ ${{ matrix.repo }} == "opentelemetry-operator" ]; then
+              echo "Update Splunk Operator Instrumentation Images if Needed"
+              ./ci_scripts/update-images-operator-otel.sh ${{ matrix.language }} $DEBUG_ARG || exit 1
+            fi
 
             echo Updating rendered examples
             make render
