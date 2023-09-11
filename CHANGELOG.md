@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Update Splunk Fluend HEC docker image to v1.3.3 [#924](https://github.com/signalfx/splunk-otel-collector-chart/pull/924)
+- Add ability to update and track operator auto-instrumentation images [#917](https://github.com/signalfx/splunk-otel-collector-chart/pull/917)
+  - [BREAKING CHANGE] Refactored auto-instrumentation image definition from operator.instrumentation.spec.{library}.image
+    to operator.instrumentation.spec.{library}.repository and operator.instrumentation.spec.{library}.tag.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0840-0850)
 
 ## [0.84.0] - 2023-09-11
 
