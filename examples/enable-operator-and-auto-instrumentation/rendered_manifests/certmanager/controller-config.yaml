@@ -1,15 +1,15 @@
 ---
-# Source: splunk-otel-collector/charts/certmanager/templates/webhook-config.yaml
+# Source: splunk-otel-collector/charts/certmanager/templates/controller-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: default-certmanager-webhook
+  name: default-certmanager
   namespace: default
   labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
+    app: certmanager
+    app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
-    app.kubernetes.io/component: "webhook"
+    app.kubernetes.io/component: "controller"
     app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: certmanager-v1.13.0
