@@ -10,9 +10,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 spec:
   replicas: 1
   selector:
@@ -27,28 +27,29 @@ spec:
         app.kubernetes.io/name: certmanager
         app.kubernetes.io/instance: default
         app.kubernetes.io/component: "controller"
-        app.kubernetes.io/version: "v1.12.4"
+        app.kubernetes.io/version: "v1.13.0"
         app.kubernetes.io/managed-by: Helm
-        helm.sh/chart: certmanager-v1.12.4
+        helm.sh/chart: certmanager-v1.13.0
       annotations:
         prometheus.io/path: "/metrics"
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9402'
     spec:
       serviceAccountName: default-certmanager
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: certmanager-controller
-          image: "quay.io/jetstack/cert-manager-controller:v1.12.4"
+          image: "quay.io/jetstack/cert-manager-controller:v1.13.0"
           imagePullPolicy: IfNotPresent
           args:
           - --v=2
           - --cluster-resource-namespace=$(POD_NAMESPACE)
           - --leader-election-namespace=kube-system
-          - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.12.4
+          - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.13.0
           - --max-concurrent-challenges=60
           ports:
           - containerPort: 9402
