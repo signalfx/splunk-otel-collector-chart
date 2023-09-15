@@ -10,9 +10,9 @@ metadata:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 spec:
   replicas: 1
   selector:
@@ -27,18 +27,19 @@ spec:
         app.kubernetes.io/name: cainjector
         app.kubernetes.io/instance: default
         app.kubernetes.io/component: "cainjector"
-        app.kubernetes.io/version: "v1.12.4"
+        app.kubernetes.io/version: "v1.13.0"
         app.kubernetes.io/managed-by: Helm
-        helm.sh/chart: certmanager-v1.12.4
+        helm.sh/chart: certmanager-v1.13.0
     spec:
       serviceAccountName: default-certmanager-cainjector
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: certmanager-cainjector
-          image: "quay.io/jetstack/cert-manager-cainjector:v1.12.4"
+          image: "quay.io/jetstack/cert-manager-cainjector:v1.13.0"
           imagePullPolicy: IfNotPresent
           args:
           - --v=2

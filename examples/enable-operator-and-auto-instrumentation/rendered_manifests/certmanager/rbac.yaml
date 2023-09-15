@@ -10,9 +10,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["issuers", "issuers/status"]
@@ -38,9 +38,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["clusterissuers", "clusterissuers/status"]
@@ -66,9 +66,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates", "certificates/status", "certificaterequests", "certificaterequests/status"]
@@ -103,9 +103,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["acme.cert-manager.io"]
     resources: ["orders", "orders/status"]
@@ -143,9 +143,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   # Use to update challenge resource status
   - apiGroups: ["acme.cert-manager.io"]
@@ -205,9 +205,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates", "certificaterequests"]
@@ -238,18 +238,38 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: default-certmanager-cluster-view
+  labels:
+    app: certmanager
+    app.kubernetes.io/name: certmanager
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: "controller"
+    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: certmanager-v1.13.0
+    rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true"
+rules:
+  - apiGroups: ["cert-manager.io"]
+    resources: ["clusterissuers"]
+    verbs: ["get", "list", "watch"]
+---
+# Source: splunk-otel-collector/charts/certmanager/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   name: default-certmanager-view
   labels:
     app: certmanager
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
     rbac.authorization.k8s.io/aggregate-to-view: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true"
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates", "certificaterequests", "issuers"]
@@ -268,9 +288,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
@@ -295,9 +315,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cert-manager"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["signers"]
@@ -317,9 +337,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cert-manager"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["certificates.k8s.io"]
     resources: ["certificatesigningrequests"]
@@ -345,9 +365,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -367,9 +387,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -389,9 +409,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -411,9 +431,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -433,9 +453,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -455,9 +475,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -477,9 +497,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cert-manager"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -499,9 +519,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cert-manager"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -522,9 +542,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 rules:
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
@@ -547,9 +567,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.12.4"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.12.4
+    helm.sh/chart: certmanager-v1.13.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
