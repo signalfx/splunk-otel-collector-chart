@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- Add `component` label to daemonset pods and optional k8s service for agent daemonset which can be enabled with `agent.service.enabled` config. [#740](https://github.com/signalfx/splunk-otel-collector-chart/pull/740)
+
 ### Changed
 
 - Update Splunk Fluend HEC docker image to v1.3.3 [#924](https://github.com/signalfx/splunk-otel-collector-chart/pull/924)
