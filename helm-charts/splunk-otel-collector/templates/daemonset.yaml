@@ -10,6 +10,7 @@ metadata:
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
+    component: otel-collector-agent
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -30,11 +31,14 @@ spec:
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
+      {{- /* component: otel-collector-agent - needs to be added when label names are standardised
+*/}}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
         app: {{ template "splunk-otel-collector.name" . }}
+        component: otel-collector-agent
         release: {{ .Release.Name }}
         {{- if $agent.podLabels }}
         {{- toYaml $agent.podLabels | nindent 8 }}

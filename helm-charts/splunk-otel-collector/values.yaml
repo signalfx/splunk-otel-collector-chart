@@ -396,6 +396,11 @@ agent:
   # Can be an absolute number or a percentage. The default is 1.
   maxUnavailable: 1
 
+  service:
+    # create a service for the agents with a local internalTrafficPolicy
+    # so that agent pods can be discovered via dns etc
+    enabled: false
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
