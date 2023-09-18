@@ -41,7 +41,7 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
         # Only build a kind cluster if there are chart changes to test.
-        if: steps.list-chaznged.outputs.changed == 'true'
+        if: steps.list-changed.outputs.changed == 'true'
         # TODO: make this test runnable from a makefile command
       - name: Run chart-testing (install)
         run: ct install --config=ct.yaml

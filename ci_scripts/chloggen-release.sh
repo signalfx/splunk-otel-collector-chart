@@ -48,7 +48,7 @@ mv "$TEMP_CHANGELOG" "CHANGELOG.md"
 # Insert the line about the Splunk OpenTelemetry Collector version adopted in this Kubernetes release
 appVersion=$(grep "appVersion:" helm-charts/splunk-otel-collector/Chart.yaml | awk '{print $2}')
 insert_line="This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v${appVersion}](https://github.com/signalfx/splunk-otel-collector/releases/tag/v${appVersion}).\n"
-awk -v n=11 -v s="$insert_line" 'NR == n {print s} {print}' CHANGELOG.md > $TEMP_CHANGELOG
+awk -v n=9 -v s="$insert_line" 'NR == n {print s} {print}' CHANGELOG.md > $TEMP_CHANGELOG
 mv "$TEMP_CHANGELOG" "CHANGELOG.md"
 
 echo "Successfully updated PR links in CHANGELOG.md"

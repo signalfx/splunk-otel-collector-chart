@@ -11,12 +11,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run chart-testing (lint)
+      - name: Setup Helm
+        uses: azure/setup-helm@v3.5
+
+      - name: Setup ct (chart testing)
+        uses: helm/chart-testing-action@v2.4.0
+
+      - name: Run Helm chart-testing (lint)
         run: make lint
 
       - name: Validate changelog files
         run: make chlog-validate
 
+      - name: Read current version of the Chart
+        id: read-chart
         uses: cumulusds/get-yaml-paths-action@v1
         with:
           file: helm-charts/splunk-otel-collector/Chart.yaml
