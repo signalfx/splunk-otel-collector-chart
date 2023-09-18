@@ -5,8 +5,13 @@ repos:
     hooks:
     - id: render
       name: Create the rendered Kubernetes manifest resources for the project examples
-      entry: make repo-update dep-build render
+      entry: make render
       language: system
+      pass_filenames: false
+    - id: changelog-pr-validate
+      name: Check for Changelog Entry if changes updated templates
+      entry: ./ci_scripts/chloggen-pr-validate.sh
+      language: script
       pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
