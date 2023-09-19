@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - [BREAKING CHANGE] Refactored auto-instrumentation image definition from operator.instrumentation.spec.{library}.image
     to operator.instrumentation.spec.{library}.repository and operator.instrumentation.spec.{library}.tag.
     See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0840-0850)
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#TBD](https://github.com/signalfx/splunk-otel-collector-chart/pull/856))
+  - Java auto-instrumentation upgraded from 1.28.0 to [1.28.0](https://github.com/signalfx/splunk-otel-java/releases/tag/v1.28.0)
 
 ## [0.84.0] - 2023-09-11
 
