@@ -5,6 +5,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: admin-server
+    app.kubernetes.io/part-of: spring-petclinic
   name: admin-server
 spec:
   ports:
@@ -15,7 +16,6 @@ spec:
     io.kompose.service: admin-server
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -23,6 +23,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: api-gateway
+    app.kubernetes.io/part-of: spring-petclinic
   name: api-gateway
 spec:
   ports:
@@ -33,7 +34,6 @@ spec:
     io.kompose.service: api-gateway
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -41,6 +41,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: config-server
+    app.kubernetes.io/part-of: spring-petclinic
   name: config-server
 spec:
   ports:
@@ -51,7 +52,6 @@ spec:
     io.kompose.service: config-server
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -59,6 +59,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: customers-service
+    app.kubernetes.io/part-of: spring-petclinic
   name: customers-service
 spec:
   ports:
@@ -69,7 +70,6 @@ spec:
     io.kompose.service: customers-service
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -77,6 +77,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: discovery-server
+    app.kubernetes.io/part-of: spring-petclinic
   name: discovery-server
 spec:
   ports:
@@ -87,7 +88,6 @@ spec:
     io.kompose.service: discovery-server
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -95,6 +95,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: vets-service
+    app.kubernetes.io/part-of: spring-petclinic
   name: vets-service
 spec:
   ports:
@@ -105,7 +106,6 @@ spec:
     io.kompose.service: vets-service
 status:
   loadBalancer: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -113,6 +113,7 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: visits-service
+    app.kubernetes.io/part-of: spring-petclinic
   name: visits-service
 spec:
   ports:
@@ -123,7 +124,6 @@ spec:
     io.kompose.service: visits-service
 status:
   loadBalancer: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -131,7 +131,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: admin-server
-  name: admin-server
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-admin-server
 spec:
   replicas: 1
   selector:
@@ -144,6 +145,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: admin-server
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -162,7 +164,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -178,7 +179,6 @@ spec:
   podSelector:
     matchLabels:
       io.kompose.network/spring-petclinic-default: "true"
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -186,7 +186,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: api-gateway
-  name: api-gateway
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-api-gateway
 spec:
   replicas: 1
   selector:
@@ -199,6 +200,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: api-gateway
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -217,7 +219,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -225,7 +226,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: config-server
-  name: config-server
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-config-server
 spec:
   replicas: 1
   selector:
@@ -238,6 +240,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: config-server
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - image: springcommunity/spring-petclinic-config-server
@@ -249,7 +252,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -257,7 +259,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: customers-service
-  name: customers-service
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-customers-service
 spec:
   replicas: 1
   selector:
@@ -270,6 +273,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: customers-service
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -288,7 +292,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -296,7 +299,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: discovery-server
-  name: discovery-server
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-discovery-server
 spec:
   replicas: 1
   selector:
@@ -309,6 +313,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: discovery-server
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -327,7 +332,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -335,7 +339,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: vets-service
-  name: vets-service
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-vets-service
 spec:
   replicas: 1
   selector:
@@ -348,6 +353,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: vets-service
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -366,7 +372,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -374,7 +379,8 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: visits-service
-  name: visits-service
+    app.kubernetes.io/part-of: spring-petclinic
+  name: spring-petclinic-visits-service
 spec:
   replicas: 1
   selector:
@@ -387,6 +393,7 @@ spec:
       labels:
         io.kompose.network/spring-petclinic-default: "true"
         io.kompose.service: visits-service
+        app.kubernetes.io/part-of: spring-petclinic
     spec:
       containers:
         - command:
@@ -405,4 +412,3 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 status: {}
-

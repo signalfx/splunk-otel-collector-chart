@@ -1401,10 +1401,6 @@ operator:
       # must be overridden here.
       # exporter:
         # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
-      propagators:
-        - tracecontext
-        - baggage
-        - b3
       # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
       # sampler:
         # type: traceidratio
@@ -1412,25 +1408,38 @@ operator:
       # Optional "environment variable" parameters that can configure all instrumentation libraries.
       # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
       # env:
+      # Auto-instrumentation Libraries (Start)
+      # Below are configurations for the instrumentation libraries utilized in Auto-instrumentation.
+      # Highlights:
+      #   - Maturity varies among libraries (e.g., Java is more mature than Go). Check each library's stability here: https://opentelemetry.io/docs/instrumentation/#status-and-releases
+      #   - Some libraries may be enabled by default. The current status can be checked here: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
+      #   - Splunk provides best-effort support for native OpenTelemetry libraries, while offering full support for its own distributions.
+      # Each library supports the following fields:
+      #   - repository: Specifies the Docker image repository.
+      #   - tag: Indicates the Docker image tag.
+      #   - env: (Optional) Allows you to add any additional environment variables.
       java:
-        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.28.0
-      # OpenTelemetry Instrumentation Libraries
-      # For default version values, see: https://github:com/open-telemetry/opentelemetry-operator/releases
-      # apacheHttpd:
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:X.X.X
-      # dotnet:
-        # Port 4318 is used for dotnet instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:X.X.X
-      # go:
-        # image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:X.X.X
-      # nodejs:
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:X.X.X
-      # python:
-        # Port 4318 is used for python instead of 4317 if the default endpoint value is not overridden, see: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-        # image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:X.X.X
+        repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
+        tag: v1.27.0
+      nodejs:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
+        tag: 0.41.1
+      go:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
+        tag: v0.2.2-alpha
+      apache-httpd:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+        tag: 1.0.3
+      python:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+        tag: 0.40b0
+      dotnet:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
+        tag: 1.0.0-rc.2
+      # Auto-instrumentation Libraries (End)
   admissionWebhooks:
     certManager:
-      # The cert and issuer are annoted so they are instantiated after the cert-manager CRDs are installed.
+      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
       certificateAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"

@@ -1,5 +1,36 @@
 # Upgrade guidelines
 
+## 0.84.0 to 0.85.0
+
+The format for defining auto-instrumentation images has been refactored. Previously, the image was
+defined using the `operator.instrumentation.spec.{library}.image` format. This has been changed to
+separate the repository and tag into two distinct fields: `operator.instrumentation.spec.{library}.repository`
+and `operator.instrumentation.spec.{library}.tag`.
+
+If you were defining a custom image under  `operator.instrumentation.spec.{library}.image`, update
+your `values.yaml` to accommodate this change.
+
+- Before:
+
+```yaml
+operator:
+  instrumentation:
+    spec:
+      java:
+        image: ghcr.io/custom-owner/splunk-otel-java/custom-splunk-otel-java:v1.27.0
+```
+
+- After:
+
+```yaml
+operator:
+  instrumentation:
+    spec:
+      java:
+        repository: ghcr.io/custom-owner/splunk-otel-java/custom-splunk-otel-java
+        tag: v1.27.0
+```
+
 ## 0.67.0 to 0.68.0
 
 There is a new receiver: [Kubernetes Objects Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) that can pull or watch any object from Kubernetes API server.
