@@ -29,7 +29,7 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: status.hostIP
-  apache-httpd:
+  apacheHttpd:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd/1.0.3
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES

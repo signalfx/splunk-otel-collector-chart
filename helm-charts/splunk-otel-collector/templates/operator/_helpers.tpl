@@ -73,16 +73,20 @@ Helper to define entries for instrumentation libraries.
   {{- /* Store the endpoint in a variable to avoid context changes in nested loops.  */ -}}
   {{- /* Helm template loops change the context, making direct access to variables in parent scopes unreliable. */ -}}
   {{- $endpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
+  {{- /* Define a map (versions.txt name -> Instrumentation spec name) for instrumentation library names */ -}}
+  {{- /* This is a simple workaround to accommodate one unique case that should be removed in the future */ -}}
+  {{- $instLibAliases := dict "apache-httpd" "apacheHttpd" -}}
 
   {{- /* Iterate over each specified instrumentation library */ -}}
   {{- if .Values.operator.instrumentation.spec -}}
     {{- range $key, $value := .Values.operator.instrumentation.spec -}}
+      {{- $instLibName := get $instLibAliases $key | default $key -}}
 
       {{- /* Check for required fields to determine if it is an instrumentation library */ -}}
       {{- if and $value.repository $value.tag -}}
 
         {{- /* Generate YAML keys for each instrumentation library */ -}}
-        {{- printf "%s:" $key | indent 2 -}}
+        {{- printf "%s:" $instLibName | indent 2 -}}
         {{- printf "\n" -}}
 
         {{- /* Generate YAML for the image field */ -}}
@@ -91,7 +95,7 @@ Helper to define entries for instrumentation libraries.
 
         {{- /* Output environment variables for the instrumentation library */ -}}
         {{- printf "env:" | indent 4 -}}
-        {{- include "splunk-otel-collector.operator.extract-instrumentation-env" (dict "endpoint" $endpoint "key" $key "env" $value.env  "repository" $value.repository "tag" $value.tag) -}}
+        {{- include "splunk-otel-collector.operator.extract-instrumentation-env" (dict "endpoint" $endpoint "instLibName" $instLibName "env" $value.env  "repository" $value.repository "tag" $value.tag) -}}
 
       {{- end -}}
     {{- end -}}
@@ -145,7 +149,7 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Handle custom or default exporter endpoint */ -}}
   {{- $customOtelExporterEndpoint := "" }}
-  {{- if or (eq .key "dotnet") (eq .key "python") }}
+  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") }}
     {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
   {{- end }}
   {{- if .env }}
@@ -159,7 +163,7 @@ Helper for generating environment variables for each instrumentation library.
   {{- /* Output final OTEL_EXPORTER_OTLP_ENDPOINT, if applicable based on input conditions */ -}}
   {{- if $customOtelExporterEndpoint }}
     {{- if contains "4318" $customOtelExporterEndpoint }}
-      {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .key | indent 6 -}}
+      {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .instLibName | indent 6 -}}
       {{- printf "\n" -}}
       {{- printf "# See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection" | indent 6 -}}
     {{- end }}

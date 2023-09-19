@@ -1439,7 +1439,7 @@ operator:
       # Auto-instrumentation Libraries (End)
   admissionWebhooks:
     certManager:
-      # The cert and issuer are annotated so they are instantiated after the cert-manager CRDs are installed.
+      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
       certificateAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
