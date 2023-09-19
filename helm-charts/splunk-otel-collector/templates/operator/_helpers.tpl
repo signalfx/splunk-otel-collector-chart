@@ -90,7 +90,7 @@ Helper to define entries for instrumentation libraries.
         {{- printf "\n" -}}
 
         {{- /* Generate YAML for the image field */ -}}
-        {{- printf "image: %s/%s" $value.repository $value.tag | indent 4 -}}
+        {{- printf "image: %s:%s" $value.repository $value.tag | indent 4 -}}
         {{- printf "\n" -}}
 
         {{- /* Output environment variables for the instrumentation library */ -}}

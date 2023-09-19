@@ -30,12 +30,12 @@ spec:
           apiVersion: v1
           fieldPath: status.hostIP
   apacheHttpd:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd/1.0.3
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.3
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.3
   dotnet:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet/1.0.0-rc.2
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.0-rc.2
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-dotnet:1.0.0-rc.2
@@ -44,22 +44,22 @@ spec:
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: http://$(SPLUNK_OTEL_AGENT):4318
   go:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go/v0.2.2-alpha
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.2.2-alpha
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-go:v0.2.2-alpha
   java:
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java/v1.27.0
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.27.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-java:v1.27.0
   nodejs:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs/0.41.1
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.41.1
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-nodejs:0.41.1
   python:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python/0.40b0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-python:0.40b0
