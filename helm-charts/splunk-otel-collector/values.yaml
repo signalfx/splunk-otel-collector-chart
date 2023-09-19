@@ -7,15 +7,12 @@
 nameOverride: ""
 # fullnameOverride completely replaces the generated name.
 fullnameOverride: ""
-
 ################################################################################
 # clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
 # your K8s cluster. The value will be associated with every trace, metric and
 # log as "k8s.cluster.name" attribute.
 ################################################################################
-
 clusterName: ""
-
 ################################################################################
 # Splunk Cloud / Splunk Enterprise configuration.
 ################################################################################
@@ -33,7 +30,6 @@ splunkPlatform:
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   # HTTP Event Collector token.
   token: ""
-
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: "main"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
@@ -70,7 +66,6 @@ splunkPlatform:
   # NOTE: The content of the file itself should be used here, not the file path.
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
-
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
@@ -84,7 +79,6 @@ splunkPlatform:
     renameFieldsSck: false
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: true
-
   # Refer to https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md#configuration
   # for detailed examples
   retryOnFailure:
@@ -95,7 +89,6 @@ splunkPlatform:
     maxInterval: 30s
     # The maximum amount of time spent trying to send a batch; ignored if enabled is false
     maxElapsedTime: 300s
-
   sendingQueue:
     enabled: true
     # Number of consumers that dequeue batches; ignored if enabled is false
@@ -105,7 +98,6 @@ splunkPlatform:
     #   num_seconds is the number of seconds to buffer in case of a backend outage
     #   requests_per_second is the average number of requests per seconds.
     queueSize: 5000
-
     # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
     # It allows setting higher queue limits and preserving the data across restarts of the collector container.
     # NOTE: The File Storage extension will persist state to the node's local file system.
@@ -116,7 +108,6 @@ splunkPlatform:
       # Specifies whether to persist log/metric/trace data.
       enabled: false
       storagePath: "/var/addon/splunk/exporter_queue"
-
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
@@ -133,31 +124,26 @@ splunkObservability:
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   # Observability org access token.
   accessToken: ""
-
   # Optional. Splunk Observability ingest URL, default:
   # "https://ingest.<realm>.signalfx.com".
   ingestUrl: ""
   # Optional. Splunk Observability API URL, default:
   # "https://api.<realm>.signalfx.com".
   apiUrl: ""
-
   # Options to disable or enable particular telemetry data types.
   metricsEnabled: true
   tracesEnabled: true
   logsEnabled: false
-
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring as data events:
   # https://docs.splunk.com/Observability/alerts-detectors-notifications/view-data-events.html
   # To send Kubernetes events to Splunk Observability Log Observer, configure clusterReceiver.k8sObjects
   # and set splunkObservability.logsEnabled to true.
   infrastructureMonitoringEventsEnabled: false
-
   # This option just enables the shared pipeline for logs and profiling data.
   # There is no active collection of profiling data.
   # Instrumentation libraries must be configured to send it to the collector.
   # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
   profilingEnabled: false
-
 ################################################################################
 # Logs collection engine:
 # - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to
@@ -170,16 +156,13 @@ splunkObservability:
 
 # The default value is "fluentd" which will be changed to "otel" in 0.86.0.
 logsEngine: ""
-
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
 # - "aws" (Amazon Web Services)
 # - "gcp" (Google Cloud Platform)
 # - "azure" (Microsoft Azure)
 ################################################################################
-
 cloudProvider: ""
-
 ################################################################################
 # Kubernetes distribution being run. Leave empty for other.
 # - "aks" (Azure Kubernetes Service)
@@ -189,9 +172,7 @@ cloudProvider: ""
 # - "gke/autopilot" (Google Kubernetes Engine / Autopilot mode)
 # - "openshift" (RedHat OpenShift)
 ################################################################################
-
 distribution: ""
-
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry
 # data (traces/logs/metrics) as an attribute. It will allow Splunk Observability
@@ -208,7 +189,6 @@ distribution: ""
 # "prometheus.io/scrape".
 # Set autodetect.istio=true in istio environment.
 ################################################################################
-
 autodetect:
   prometheus: false
   # This option is recommended for istio environments. It does the following things:
@@ -216,7 +196,6 @@ autodetect:
   # - Add a `service.name` resource attribute to logs with the same value as istio generates for
   #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
-
 ################################################################################
 # Optional: Configuration for additional metadata that will be added to all the
 # telemetry as extra attributes.
@@ -224,9 +203,7 @@ autodetect:
 # `fromAttributes` options are only applied to traces and logs. Pod labels are
 # always sent to Splunk Observability (if enabled) as metric properties.
 ################################################################################
-
 extraAttributes:
-
   # Labels that will be collected from k8s pods (or namespaces) (in case they are set)
   # and added as extra attributes to the telemetry in the following format:
   # k8s.<pod|namespace>.labels.<label_name>: <label_value>
@@ -251,19 +228,16 @@ extraAttributes:
   #      tag_name: "$$1"
   fromLabels:
     - key: app
-
   # Annotations that will be collected from k8s pods (or namespaces) (in case they are set)
   # and added as extra attributes to the telemetry in the following format:
   # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
   # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
   fromAnnotations: []
-
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
   custom: []
-    # - name: "account_id"
-    #   value: "1234567890"
-
+  # - name: "account_id"
+  #   value: "1234567890"
 ################################################################################
 # OPTIONAL CONFIGURATIONS OF PARTICULAR O11Y COLLECTOR COMPONENTS
 ################################################################################
@@ -272,10 +246,8 @@ extraAttributes:
 # OpenTelemetry collector running as an deamonset agent on every node.
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
-
 agent:
   enabled: true
-
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
@@ -322,7 +294,6 @@ agent:
     scheduler:
       # Specifies whether to collect scheduler metrics.
       enabled: true
-
   # The ports to be exposed by the agent to the host.
   # Make sure that only necessary ports are exposed, <hostIP, hostPort, protocol> combination must
   # be unique across all the nodes in k8s cluster. Any port can be disabled,
@@ -371,18 +342,15 @@ agent:
       hostPort: 9943
       protocol: TCP
       enabled_for: [metrics]
-
   resources:
     limits:
       cpu: 200m
       # This value is being used as a source for default memory_limiter processor configurations
       memory: 500Mi
-
   # To collect container logs and journald logs, it will run the agent as a root user.
   # To run it as non root user, uncomment below `securityContext` options.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
-
   securityContext: {}
   #   runAsUser: 20000
   #   runAsGroup: 20000
@@ -390,41 +358,32 @@ agent:
   # Specifies DaemonSet update strategy.
   # Possible values: "OnDelete" and "RollingUpdate".
   updateStrategy: RollingUpdate
-
   # Specifies the maximum of pods that can be unavailable during update process.
   # Applicable only when updateStrategy is set to "RollingUpdate".
   # Can be an absolute number or a percentage. The default is 1.
   maxUnavailable: 1
-
   service:
     # create a service for the agents with a local internalTrafficPolicy
     # so that agent pods can be discovered via dns etc
     enabled: false
-
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
-
   # OTel agent extra pod labels
   podLabels: {}
-
   # Extra enviroment variables to be set in the OTel agent container
   extraEnvs: []
-
   # Extra volumes to be mounted to the agent daemonset.
   # The volumes will be available for both OTel agent and fluentd containers.
   extraVolumes: []
   extraVolumeMounts: []
-
   # Enable or disable features of the agent.
   featureGates: ""
-
   # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
   # Default configuration defined in templates/config/_otel-agent.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}
-
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
 # This is an extra 1-replica deployment of Open-temlemetry collector used
@@ -433,30 +392,24 @@ agent:
 
 # Cluster receiver collects cluster level metrics from the Kubernetes API.
 # It has to be running on one pod, so it uses its own dedicated deployment with 1 replica.
-
 clusterReceiver:
   enabled: true
-
   # Need to be adjusted based on size of the monitored cluster
   resources:
     limits:
       cpu: 200m
       memory: 500Mi
-
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
   # Pod configurations
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
-
   # k8s cluster receiver collector annotations
   annotations: {}
   podAnnotations: {}
-
   # This flag enables Kubernetes events collection using OpenTelemetry Kubernetes Events Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   # This option requires `logsEnabled` to be set to `true` for either `splunkObservability` or `splunkPlatform`
@@ -464,7 +417,6 @@ clusterReceiver:
   # The receiver currently is in alpha state which means that events format might change over time.
   # Once the receiver is stabilized, it'll be enabled by default in this helm chart
   eventsEnabled: false
-
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
   # This option requires `logsEnabled` to be set to `true` for either `splunkObservability` or `splunkPlatform`
@@ -513,26 +465,20 @@ clusterReceiver:
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
   k8sObjects: []
-
   # k8s cluster receiver extra pod labels
   podLabels: {}
-
   # Extra enviroment variables to be set in the OTel Cluster Receiver container
   extraEnvs: []
-
   # Extra volumes to be mounted to the k8s cluster receiver container.
   extraVolumes: []
   extraVolumeMounts: []
-
   # Enable or disable features of the cluster receiver.
   featureGates: ""
-
   # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
   # Default configuration defined in templates/config/_otel-k8s-cluster-receiver-config.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
   config: {}
-
 #################################################################
 # Native OpenTelemetry logs collection
 # Disabled by default in favor of fluentd.
@@ -540,9 +486,7 @@ clusterReceiver:
 # Receiver Documentation: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
 # OpenTelemetry Logging Documentation: https://opentelemetry.io/docs/specs/otel/logs
 #################################################################
-
 logsCollection:
-
   # Container logs collection
   containers:
     enabled: true
@@ -558,7 +502,6 @@ logsCollection:
     # Extra operators for container logs.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md
     extraOperators: []
-
     # Multiline logs processing configuration. Multiline logs that written by containers to stdout
     # are usually broken down into several one-line logs and can be reconstructed with a regex
     # expression that matches the first line of each logs batch. The following operator is being
@@ -596,8 +539,7 @@ logsCollection:
     # maxRecombineLogsSize sets the maximum size in bytes of a message recombined from cri-o, containerd and docker log entries.
     # Set to 0 to remove any size limit.
     maxRecombineLogSize: 1048576
-
-# Configuration for collecting journald logs using otel collector
+    # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
     # Please update directory path for journald if it's different from below default value "/var/log/journal"
@@ -612,9 +554,7 @@ logsCollection:
         priority: info
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic. Not applicable to Splunk Observability.
     index: ""
-
   checkpointPath: "/var/addon/splunk/otel_pos"
-
   # Files on k8s nodes to tail.
   # Make sure to configure volume mounts properly at `agent.extraVolumes` and `agent.extraVolumeMounts`.
   extraFileLogs: {}
@@ -629,13 +569,11 @@ logsCollection:
   #       com.splunk.source: /var/log/kubernetes/apiserver/audit.log
   #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
   #       com.splunk.sourcetype: kube:apiserver-audit
-
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
 # As of now, this is the recommended way to collect k8s logs,
 # but it will be replaced by the native otel logs collection soon.
 ################################################################################
-
 fluentd:
   resources:
     limits:
@@ -644,13 +582,10 @@ fluentd:
     requests:
       cpu: 100m
       memory: 200Mi
-
   securityContext:
     runAsUser: 0
-
   # Extra enviroment variables to be set in the FluentD container
   extraEnvs: []
-
   config:
     # Configurations for container logs
     containers:
@@ -665,10 +600,8 @@ fluentd:
       # Specify the log format for "cri" logFormatType
       # It can be "%Y-%m-%dT%H:%M:%S.%N%:z" for openshift and "%Y-%m-%dT%H:%M:%S.%NZ" for IBM IKS
       criTimeFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"
-
     # Directory where to read journald logs. (docker daemon logs, kubelet logs, and anyother specified serivce logs)
     journalLogPath: /run/log/journal
-
     # Controls the output buffer for the fluentd daemonset
     # Note that, for memory buffer, if `resources.limits.memory` is set,
     # the total buffer size should not bigger than the memory limit, it should also
@@ -685,11 +618,9 @@ fluentd:
       flush_thread_count: 1
       overflow_action: block
       retry_max_times: 3
-
     # logLevel is to set log level of the Splunk log collector.
     # Available values are: trace, debug, info, warn, error
     logLevel: info
-
     # path of logfiles, default /var/log/containers/*.log
     path: /var/log/containers/*.log
     # paths of logfiles to exclude. object type is array as per fluentd specification:
@@ -702,7 +633,6 @@ fluentd:
     # Can be used if you want to run multiple instances of fluentd on the same host
     # https://docs.fluentd.org/input/tail#pos_file-highly-recommended
     posFilePrefix: /var/log/splunk-fluentd
-
     # `customFilters` defines the custom filters to be used.
     # This section can be used to define custom filters using plugins like https://github.com/splunk/fluent-plugin-jq
     # Its also possible to use other filters like https://www.fluentd.org/plugins#filter
@@ -739,7 +669,6 @@ fluentd:
     #     body: jq '.record.cluster_name = "my_awesome_cluster" | .record'
     # ```
     customFilters: {}
-
     # `logs` defines the source of logs, multiline support, and their sourcetypes.
     #
     # The scheme to define a log is:
@@ -852,48 +781,48 @@ fluentd:
           regexp: (?<time>\d{4}-[0-1]\d-[0-3]\d [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
           format: "%Y-%m-%d %H:%M:%S.%N"
       kube-apiserver:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-apiserver
         sourcetype: kube:kube-apiserver
       kube-scheduler:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-scheduler
         sourcetype: kube:kube-scheduler
       kube-controller-manager:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-controller-manager
         sourcetype: kube:kube-controller-manager
       kube-proxy:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-proxy
         sourcetype: kube:kube-proxy
       kubedns:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-dns
         sourcetype: kube:kubedns
       dnsmasq:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-dns
         sourcetype: kube:dnsmasq
       dns-sidecar:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-dns
           container: sidecar
         sourcetype: kube:kubedns-sidecar
       dns-controller:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: dns-controller
         sourcetype: kube:dns-controller
       kube-dns-autoscaler:
-        <<: *glog
+        !!merge <<: *glog
         from:
           pod: kube-dns-autoscaler
           container: autoscaler
@@ -905,15 +834,12 @@ fluentd:
         timestampExtraction:
           format: "%Y-%m-%dT%H:%M:%SZ"
         sourcetype: kube:apiserver-audit
-
 ################################################################################
 # Docker image configuration
 ################################################################################
-
 image:
   # Secrets to attach to the respective serviceaccount to pull docker images
   imagePullSecrets: []
-
   fluentd:
     # The registry and name of the fluentd image to pull
     repository: splunk/fluentd-hec
@@ -921,7 +847,6 @@ image:
     tag: 1.3.3
     # The policy that specifies when the user wants the fluentd images to be pulled
     pullPolicy: IfNotPresent
-
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
     repository: quay.io/signalfx/splunk-otel-collector
@@ -929,7 +854,6 @@ image:
     tag: ""
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
-
   # Image to be used by init container that patches log directories on the host, so the collector can read from them as a non-root user.
   # Effective only if `agent.securityContext.runAsUser` and `agent.securityContext.runAsGroup` are set to non-zero values.
   initPatchLogDirs:
@@ -939,8 +863,6 @@ image:
     tag: ""
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
-
-
 ################################################################################
 # Extra system configuration
 ################################################################################
@@ -948,10 +870,10 @@ image:
 ## Limits how many pods may be unavailable due to voluntary disruptions.
 ## https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 podDisruptionBudget: {}
-  # Minimum number of pods (as a number or percentage) that must remain available.
-  # minAvailable:
-  # Maximum number of pods (as a number or percentage) that can be unavailable.
-  # maxUnavailable:
+# Minimum number of pods (as a number or percentage) that must remain available.
+# minAvailable:
+# Maximum number of pods (as a number or percentage) that can be unavailable.
+# maxUnavailable:
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
@@ -959,23 +881,19 @@ serviceAccount:
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
   # Service account annotations
   annotations: {}
-
 rbac:
   # Create or use existing RBAC resources
   create: true
   # Specifies additional rules that will be added to the clusterRole.
   customRules: []
-
 # Create or use existing secret if name is empty default name is used
 secret:
   create: true
   name: ""
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
-
 # This default tolerations allow the daemonset to be deployed on control-plane
 # nodes, so that we can also collect logs and metrics from those nodes.
 tolerations:
@@ -983,17 +901,13 @@ tolerations:
     effect: NoSchedule
   - key: node-role.kubernetes.io/control-plane
     effect: NoSchedule
-
 # Defines which nodes should be selected to deploy the o11y collector daemonset.
 nodeSelector: {}
 terminationGracePeriodSeconds: 600
-
 # Defines node affinity to restrict deployment of the o11y collector daemonset.
 affinity: {}
-
 # Defines priorityClassName to assign a priority class to pods.
 priorityClassName: ""
-
 # This tells the kubelet that it should wait for x seconds before performing the first probe.
 # This is required in case you are using windows worker nodes.
 # It is recommended to keep it a 60-second window but it depends on cluster specification.
@@ -1001,21 +915,17 @@ readinessProbe:
   initialDelaySeconds: 0
 livenessProbe:
   initialDelaySeconds: 0
-
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
-
 # Whether to automatically create Openshift SCC or to create it manually.
 # NOTE: This config will only be used when distribution=openshift
 securityContextConstraints:
   create: true
-
 # Openshift SecurityContextConstraints can be overriden in this field.
 # This fields will be merged into the default config that can be found at
 # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/securityContextConstraints.yaml
 # NOTE: This config will only be used when distribution=openshift
 securityContextConstraintsOverwrite: {}
-
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
 # This is an additional deployment of Open-telemetry collector that can be used
@@ -1024,15 +934,12 @@ securityContextConstraintsOverwrite: {}
 # the collector endpoint instead of local agents. The collector running in the
 # passthrough mode is recommended for large k8s clusters, disabled by default.
 ################################################################################
-
 gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
-
   # Number of collector replicas
   replicaCount: 3
-
   # The ports exposed by the collector container.
   # Any port can be disabled by setting to null.
   # Any changes should be aligned with service.ports configuration below.
@@ -1072,46 +979,36 @@ gateway:
       protocol: TCP
       # Enabled for all because SignalFx exporter will always send metadata updates when enabled.
       enabled_for: [metrics, traces, logs]
-
   resources:
     limits:
       cpu: 4
       # Memory limit value is used as a source for default memory_limiter configuration
       memory: 8Gi
-
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
   # Pod configurations
   securityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
-
   # OTel collector annotations
   annotations: {}
   podAnnotations: {}
-
   # OTel collector extra pod labels
   podLabels: {}
-
   # Extra enviroment variables to be set in the standalone OTel collector container
   extraEnvs: []
-
   # Extra volumes to be mounted to the OTel Collector container.
   extraVolumes: []
   extraVolumeMounts: []
-
   # Enable or disable features of the gateway.
   featureGates: ""
-
   # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
   # Default configuration defined in config/otel-collector-config.yaml
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.
   config: {}
-
 ################################################################################
 # OpenTelemetry service config, used for otel collector deployment.
 # Disabled by default
@@ -1123,7 +1020,6 @@ service:
   type: ClusterIP
   # Service annotations
   annotations: {}
-
 # Default values for splunk-otel-network-explorer.
 networkExplorer:
   enabled: false
@@ -1131,19 +1027,15 @@ networkExplorer:
     tag: latest-v0.9
     repository: quay.io/signalfx
     pullPolicy: Always
-
   imagePullSecrets: []
-
   log:
     console: false
     # possible values: { error | warning | info | debug | trace }
     level: warning
-
   debug:
     enabled: false
     storeMinidump: false
     sendUnplannedExitMetric: true
-
   kernelCollector:
     enabled: true
     image:
@@ -1152,20 +1044,16 @@ networkExplorer:
       # repository: quay.io/signalfx
     nodeSelector: {}
     disableHttpMetrics: false
-
     serviceAccount:
       create: false
       name: ""
-
     tolerations:
-    - operator: "Exists"
-      effect: "NoExecute"
-    - operator: "Exists"
-      effect: "NoSchedule"
-
+      - operator: "Exists"
+        effect: "NoExecute"
+      - operator: "Exists"
+        effect: "NoSchedule"
     affinity: {}
     resources: {}
-
     # uncomment the line below to disable automatic kernel headers fetching
     # fetchKernelHeaders: false
 
@@ -1174,7 +1062,6 @@ networkExplorer:
 
     # uncomment to enable enrichment using Nomad metadata (https://www.nomadproject.io/)
     # collectNomadMetadata: true
-
   cloudCollector:
     enabled: false
     image:
@@ -1185,7 +1072,6 @@ networkExplorer:
       create: false
       name: ""
       iamRole: ""
-
   k8sCollector:
     enabled: true
     relay:
@@ -1201,154 +1087,153 @@ networkExplorer:
     serviceAccount:
       create: false
       name: ""
-
   reducer:
     ingestShards: 1
     matchingShards: 1
     aggregationShards: 1
     disableInternalMetrics: true
     disableMetrics: []
-      ### to disable an entire metric category: ###
-      # - tcp.all
-      # - udp.all
-      # - dns.all
-      # - http.all
-      ### to disable an individual metric: ###
-      ### tcp ###
-      # - tcp.bytes
-      # - tcp.rtt.num_measurements
-      # - tcp.active
-      # - tcp.rtt.average
-      # - tcp.packets
-      # - tcp.retrans
-      # - tcp.syn_timeouts
-      # - tcp.new_sockets
-      # - tcp.resets
-      ### udp ###
-      # - udp.bytes
-      # - udp.packets
-      # - udp.active
-      # - udp.drops
-      ### dns ###
-      # - dns.client.duration.average
-      # - dns.server.duration.average
-      # - dns.active_sockets
-      # - dns.responses
-      # - dns.timeouts
-      ### http ##
-      # - http.client.duration.average
-      # - http.server.duration.average
-      # - http.active_sockets
-      # - http.status_code
-      ### ebpf_net ##
-      # - ebpf_net.span_utilization_fraction
-      # - ebpf_net.pipeline_metric_bytes_discarded
-      # - ebpf_net.codetiming_min_ns
-      # - ebpf_net.entrypoint_info
-      # - ebpf_net.otlp_grpc.requests_sent
-      # - ebpf_net.connections
-      # - ebpf_net.rpc_queue_elem_utilization_fraction
-      # - ebpf_net.disconnects
-      # - ebpf_net.codetiming_avg_ns
-      # - ebpf_net.client_handle_pool
-      # - ebpf_net.otlp_grpc.successful_requests
-      # - ebpf_net.span_utilization
-      # - ebpf_net.up
-      # - ebpf_net.rpc_queue_buf_utilization_fraction
-      # - ebpf_net.collector_log_count
-      # - ebpf_net.time_since_last_message_ns
-      # - ebpf_net.bpf_log
-      # - ebpf_net.codetiming_count
-      # - ebpf_net.message
-      # - ebpf_net.otlp_grpc.bytes_sent
-      # - ebpf_net.pipeline_message_error
-      # - ebpf_net.pipeline_metric_bytes_written
-      # - ebpf_net.codetiming_max_ns
-      # - ebpf_net.span_utilization_max
-      # - ebpf_net.client_handle_pool_fraction
-      # - ebpf_net.span_utilization_fraction
-      # - ebpf_net.rpc_latency_ns
-      # - ebpf_net.agg_root_truncation
-      # - ebpf_net.clock_offset_ns
-      # - ebpf_net.otlp_grpc.metrics_sent
-      # - ebpf_net.otlp_grpc.unknown_response_tags
-      # - ebpf_net.collector_health
-      # - ebpf_net.codetiming_sum_ns
-      # - ebpf_net.otlp_grpc.failed_requests
-      # - ebpf_net.rpc_queue_buf_utilization
-      ### to enable all metrics (including metrics turned off by default): ###
-      # - none
+    ### to disable an entire metric category: ###
+    # - tcp.all
+    # - udp.all
+    # - dns.all
+    # - http.all
+    ### to disable an individual metric: ###
+    ### tcp ###
+    # - tcp.bytes
+    # - tcp.rtt.num_measurements
+    # - tcp.active
+    # - tcp.rtt.average
+    # - tcp.packets
+    # - tcp.retrans
+    # - tcp.syn_timeouts
+    # - tcp.new_sockets
+    # - tcp.resets
+    ### udp ###
+    # - udp.bytes
+    # - udp.packets
+    # - udp.active
+    # - udp.drops
+    ### dns ###
+    # - dns.client.duration.average
+    # - dns.server.duration.average
+    # - dns.active_sockets
+    # - dns.responses
+    # - dns.timeouts
+    ### http ##
+    # - http.client.duration.average
+    # - http.server.duration.average
+    # - http.active_sockets
+    # - http.status_code
+    ### ebpf_net ##
+    # - ebpf_net.span_utilization_fraction
+    # - ebpf_net.pipeline_metric_bytes_discarded
+    # - ebpf_net.codetiming_min_ns
+    # - ebpf_net.entrypoint_info
+    # - ebpf_net.otlp_grpc.requests_sent
+    # - ebpf_net.connections
+    # - ebpf_net.rpc_queue_elem_utilization_fraction
+    # - ebpf_net.disconnects
+    # - ebpf_net.codetiming_avg_ns
+    # - ebpf_net.client_handle_pool
+    # - ebpf_net.otlp_grpc.successful_requests
+    # - ebpf_net.span_utilization
+    # - ebpf_net.up
+    # - ebpf_net.rpc_queue_buf_utilization_fraction
+    # - ebpf_net.collector_log_count
+    # - ebpf_net.time_since_last_message_ns
+    # - ebpf_net.bpf_log
+    # - ebpf_net.codetiming_count
+    # - ebpf_net.message
+    # - ebpf_net.otlp_grpc.bytes_sent
+    # - ebpf_net.pipeline_message_error
+    # - ebpf_net.pipeline_metric_bytes_written
+    # - ebpf_net.codetiming_max_ns
+    # - ebpf_net.span_utilization_max
+    # - ebpf_net.client_handle_pool_fraction
+    # - ebpf_net.span_utilization_fraction
+    # - ebpf_net.rpc_latency_ns
+    # - ebpf_net.agg_root_truncation
+    # - ebpf_net.clock_offset_ns
+    # - ebpf_net.otlp_grpc.metrics_sent
+    # - ebpf_net.otlp_grpc.unknown_response_tags
+    # - ebpf_net.collector_health
+    # - ebpf_net.codetiming_sum_ns
+    # - ebpf_net.otlp_grpc.failed_requests
+    # - ebpf_net.rpc_queue_buf_utilization
+    ### to enable all metrics (including metrics turned off by default): ###
+    # - none
     enableMetrics: []
-      ### Disable metrics flag is evaluated first and only then enable metric flag is evaluated. ###
-      ### to enable an entire metric category: ###
-      # - tcp.all
-      # - udp.all
-      # - dns.all
-      # - http.all
-      # - ebpf_net.all
-      ### to enable an individual metric: ###
-      ### tcp ###
-      # - tcp.bytes
-      # - tcp.rtt.num_measurements
-      # - tcp.active
-      # - tcp.rtt.average
-      # - tcp.packets
-      # - tcp.retrans
-      # - tcp.syn_timeouts
-      # - tcp.new_sockets
-      # - tcp.resets
-      ### udp ###
-      # - udp.bytes
-      # - udp.packets
-      # - udp.active
-      # - udp.drops
-      ### dns ###
-      # - dns.client.duration.average
-      # - dns.server.duration.average
-      # - dns.active_sockets
-      # - dns.responses
-      # - dns.timeouts
-      ### http ###
-      # - http.client.duration.average
-      # - http.server.duration.average
-      # - http.active_sockets
-      # - http.status_code
-      ### ebpf_net ###
-      # - ebpf_net.span_utilization_fraction
-      # - ebpf_net.pipeline_metric_bytes_discarded
-      # - ebpf_net.codetiming_min_ns
-      # - ebpf_net.entrypoint_info
-      # - ebpf_net.otlp_grpc.requests_sent
-      # - ebpf_net.connections
-      # - ebpf_net.rpc_queue_elem_utilization_fraction
-      # - ebpf_net.disconnects
-      # - ebpf_net.codetiming_avg_ns
-      # - ebpf_net.client_handle_pool
-      # - ebpf_net.otlp_grpc.successful_requests
-      # - ebpf_net.span_utilization
-      # - ebpf_net.up
-      # - ebpf_net.rpc_queue_buf_utilization_fraction
-      # - ebpf_net.collector_log_count
-      # - ebpf_net.time_since_last_message_ns
-      # - ebpf_net.bpf_log
-      # - ebpf_net.codetiming_count
-      # - ebpf_net.message
-      # - ebpf_net.otlp_grpc.bytes_sent
-      # - ebpf_net.pipeline_message_error
-      # - ebpf_net.pipeline_metric_bytes_written
-      # - ebpf_net.codetiming_max_ns
-      # - ebpf_net.span_utilization_max
-      # - ebpf_net.client_handle_pool_fraction
-      # - ebpf_net.span_utilization_fraction
-      # - ebpf_net.rpc_latency_ns
-      # - ebpf_net.agg_root_truncation
-      # - ebpf_net.clock_offset_ns
-      # - ebpf_net.otlp_grpc.metrics_sent
-      # - ebpf_net.otlp_grpc.unknown_response_tags
-      # - ebpf_net.collector_health
-      # - ebpf_net.codetiming_sum_ns
-      # - ebpf_net.otlp_grpc.failed_requests
-      # - ebpf_net.rpc_queue_buf_utilization
+    ### Disable metrics flag is evaluated first and only then enable metric flag is evaluated. ###
+    ### to enable an entire metric category: ###
+    # - tcp.all
+    # - udp.all
+    # - dns.all
+    # - http.all
+    # - ebpf_net.all
+    ### to enable an individual metric: ###
+    ### tcp ###
+    # - tcp.bytes
+    # - tcp.rtt.num_measurements
+    # - tcp.active
+    # - tcp.rtt.average
+    # - tcp.packets
+    # - tcp.retrans
+    # - tcp.syn_timeouts
+    # - tcp.new_sockets
+    # - tcp.resets
+    ### udp ###
+    # - udp.bytes
+    # - udp.packets
+    # - udp.active
+    # - udp.drops
+    ### dns ###
+    # - dns.client.duration.average
+    # - dns.server.duration.average
+    # - dns.active_sockets
+    # - dns.responses
+    # - dns.timeouts
+    ### http ###
+    # - http.client.duration.average
+    # - http.server.duration.average
+    # - http.active_sockets
+    # - http.status_code
+    ### ebpf_net ###
+    # - ebpf_net.span_utilization_fraction
+    # - ebpf_net.pipeline_metric_bytes_discarded
+    # - ebpf_net.codetiming_min_ns
+    # - ebpf_net.entrypoint_info
+    # - ebpf_net.otlp_grpc.requests_sent
+    # - ebpf_net.connections
+    # - ebpf_net.rpc_queue_elem_utilization_fraction
+    # - ebpf_net.disconnects
+    # - ebpf_net.codetiming_avg_ns
+    # - ebpf_net.client_handle_pool
+    # - ebpf_net.otlp_grpc.successful_requests
+    # - ebpf_net.span_utilization
+    # - ebpf_net.up
+    # - ebpf_net.rpc_queue_buf_utilization_fraction
+    # - ebpf_net.collector_log_count
+    # - ebpf_net.time_since_last_message_ns
+    # - ebpf_net.bpf_log
+    # - ebpf_net.codetiming_count
+    # - ebpf_net.message
+    # - ebpf_net.otlp_grpc.bytes_sent
+    # - ebpf_net.pipeline_message_error
+    # - ebpf_net.pipeline_metric_bytes_written
+    # - ebpf_net.codetiming_max_ns
+    # - ebpf_net.span_utilization_max
+    # - ebpf_net.client_handle_pool_fraction
+    # - ebpf_net.span_utilization_fraction
+    # - ebpf_net.rpc_latency_ns
+    # - ebpf_net.agg_root_truncation
+    # - ebpf_net.clock_offset_ns
+    # - ebpf_net.otlp_grpc.metrics_sent
+    # - ebpf_net.otlp_grpc.unknown_response_tags
+    # - ebpf_net.collector_health
+    # - ebpf_net.codetiming_sum_ns
+    # - ebpf_net.otlp_grpc.failed_requests
+    # - ebpf_net.rpc_queue_buf_utilization
     telemetryPort: 7000
     statsPromPort: 7001
     image:
@@ -1359,23 +1244,19 @@ networkExplorer:
     nodeSelector: {}
     affinity: {}
     tolerations: []
-
   rbac:
     create: true
-
   podSecurityPolicy:
     enabled: true
     annotations: {}
-      ## Specify pod annotations
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-      ##
-      # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
-
-
+    ## Specify pod annotations
+    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
+    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
+    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
+    ##
+    # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+    # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+    # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
 ################################################################################
 # Notice: Operator related features should be considered to have an alpha
 # maturity level and be experimental. There may be breaking changes or Operator
@@ -1386,7 +1267,6 @@ networkExplorer:
 # Related documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
-
 operator:
   enabled: false
   # For more details, refer to: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
@@ -1400,11 +1280,11 @@ operator:
       # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
       # must be overridden here.
       # exporter:
-        # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+      # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
       # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
       # sampler:
-        # type: traceidratio
-        # argument: "0.95"
+      # type: traceidratio
+      # argument: "0.95"
       # Optional "environment variable" parameters that can configure all instrumentation libraries.
       # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
       # env:
@@ -1420,7 +1300,7 @@ operator:
       #   - env: (Optional) Allows you to add any additional environment variables.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-        tag: v1.27.0
+        tag: v1.28.0
       nodejs:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
         tag: 0.41.1
@@ -1436,7 +1316,7 @@ operator:
       dotnet:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
         tag: 1.0.0-rc.2
-      # Auto-instrumentation Libraries (End)
+        # Auto-instrumentation Libraries (End)
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
@@ -1446,21 +1326,17 @@ operator:
       issuerAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
-
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
 certmanager:
   enabled: false
   installCRDs: true
-
-
 ################################################################################
 # Helm Chart Feature Gates.
 # The following feature gates are used to enable/disable features in the Helm chart
 # that are not yet ready for general availability.
 # Options in this section are not guaranteed to be stable and may change at any time.
 ################################################################################
-
 featureGates:
   # Use Light Prometheus Receiver for metrics collection from discovered Prometheus endpoints.
   # https://github.com/signalfx/splunk-otel-collector/tree/main/internal/receiver/lightprometheusreceiver
