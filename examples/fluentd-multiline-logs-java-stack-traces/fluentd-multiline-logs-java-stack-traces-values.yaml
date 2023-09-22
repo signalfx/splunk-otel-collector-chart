@@ -2,8 +2,9 @@ clusterName: CHANGEME
 splunkObservability:
   realm: CHANGEME
   accessToken: CHANGEME
+  logsEnabled: true
 
-logsEnabled: true
+logsEngine: fluentd
 
 fluentd:
   config:

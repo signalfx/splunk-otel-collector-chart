@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Changed
+
+- Change the default logs collection engine (`logsEngine`) to the native OpenTelemetry logs collection (`otel`) [#934](https://github.com/signalfx/splunk-otel-collector-chart/pull/934)
+  - If you want to keep using Fluentd sidecar for the logs collection, set `logsEngine: fluentd` in your values.yaml
+
 ## [0.85.0] - 2023-09-19
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.85.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.85.0).
