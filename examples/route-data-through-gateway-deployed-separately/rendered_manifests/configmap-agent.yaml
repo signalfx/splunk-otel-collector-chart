@@ -47,16 +47,6 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      groupbyattrs/logs:
-        keys:
-        - com.splunk.source
-        - com.splunk.sourcetype
-        - container.id
-        - fluent.tag
-        - k8s.container.name
-        - k8s.namespace.name
-        - k8s.pod.name
-        - k8s.pod.uid
       k8sattributes:
         extract:
           annotations:

@@ -164,12 +164,10 @@ splunkObservability:
 #   otel-collector agent for further processing.
 # - `otel`: utilize native OpenTelemetry log collection.
 #
-# Change it to `otel` to get higher throughput performance and avoid installing
-# an extra container for fluentd.
+# `fluentd` will be deprecated soon, so it's recommended to use `otel` instead.
 ################################################################################
 
-# The default value is "fluentd" which will be changed to "otel" in 0.86.0.
-logsEngine: ""
+logsEngine: otel
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.

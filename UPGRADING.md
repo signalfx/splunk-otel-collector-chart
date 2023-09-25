@@ -1,5 +1,10 @@
 # Upgrade guidelines
 
+## 0.85.0 to 0.86.0
+
+The default logs collection engine (`logsEngine`) changed from `fluentd` to the native OpenTelemetry logs collection (`otel`).
+If you want to keep using Fluentd sidecar for the logs collection, set `logsEngine: fluentd` in your values.yaml.
+
 ## 0.84.0 to 0.85.0
 
 The format for defining auto-instrumentation images has been refactored. Previously, the image was

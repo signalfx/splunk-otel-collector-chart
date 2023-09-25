@@ -86,8 +86,6 @@ This distribution currently supports:
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
-The Helm chart currently uses Fluentd by default for Kubernetes logs collection, and supports an option to use native OpenTelemetry logs collection for higher throughput and performance. See the [logs collection section](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for more information, along with performance benchmarks run internally.
-
 ## Supported Kubernetes distributions
 
 This helm chart is tested and works with default configurations on the following
@@ -188,8 +186,6 @@ You can specify a namespace to deploy the chart to with the `-n` argument. Here 
 helm -n otel install my-splunk-otel-collector -f values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
-Consider enabling [native OpenTelemetry logs collection](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection) for better throughput instead of using the default fluentd engine. Add the following part --set=logsEngine=otel to your installation command if you want to use native OpenTelemetry logs collection.
-
 Instead of setting helm values as arguments a YAML file can be provided:
 
 ```bash
@@ -208,7 +204,6 @@ but use `upgrade` instead of `install`, for example:
 ```bash
 helm upgrade my-splunk-otel-collector --values my_values.yaml
 ```
-
 
 ### How to uninstall
 
