@@ -79,9 +79,9 @@ Splunk Network Explorer is installed and configured.
 [WARNING] "clusterReceiver.eventsEnabled" parameter is deprecated. Soon it will be replaced with "clusterReceiver.k8sObjects".
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680
 {{ end }}
-{{- if eq .Values.logsEngine "" }}
-[WARNING] The helm charts is going to move from Fluentd to the native OpenTelemetry logs collection by default.
-          Default value for "logsEngine" will be changed from "fluentd" to "otel" in version 0.86.0.
-          Please ensure that "logsEngine" parameter is explicitly set to "fluentd" or "otel" to avoid unexpected changes during upgrade.
-          More details: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#logs-collection
-{{ end }}
+{{- if .Values.operator.enabled }}
+[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true), currently considered ALPHA.
+  - Instrumentation library maturity varies (e.g., Java is more mature than Go). For library stability, visit: https://opentelemetry.io/docs/instrumentation/#status-and-releases
+  - Some libraries may be enabled by default. For current status, see: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
+  - Splunk provides best-effort support for native OpenTelemetry libraries, and full support for Splunk library distributions. For used libraries, refer to the values.yaml under "operator.instrumentation.spec".
+{{- end }}

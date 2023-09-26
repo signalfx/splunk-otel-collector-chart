@@ -1,10 +1,19 @@
 name: Check for new instrumentation versions
 
+# Description:
+# This workflow is responsible for checking for new versions of Splunk instrumentation libraries
+# used in operator based auto-instrumentation and updating the values.yaml if necessary.
+
 on:
   schedule:
     # Run every 12th hour at minute 45 past.
     - cron: "45 */12 * * *"
   workflow_dispatch:
+    inputs:
+      DEBUG_MODE:
+        description: 'Enable debug mode'
+        required: false
+        default: 'false'
 
 env:
   VALUES_YAML: helm-charts/splunk-otel-collector/values.yaml
@@ -15,43 +24,36 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Currently this workflow will update the listed operator instrumentation dependencies in values.yaml
-        language: ['java'] # Add other languages here
+        # Add languages that require version updates here
+        language: ['java']
     steps:
       - uses: actions/checkout@v4
-      - name: swizzle version
+
+      - name: Update Version
         id: swizzle_version
         run: |
-          REPO=ghcr.io/signalfx/splunk-otel-${{ matrix.language }}/splunk-otel-${{ matrix.language }}
-          LOCAL_VER=$(grep $REPO $VALUES_YAML | awk -F: '{print $2}' | tr -d ' "')
-          LATEST_VER=$(curl -qs -H "Accept: application/vnd.github+json" $(echo $LATEST_API | sed "s/{lang}/${{ matrix.language }}/g") | jq -r .tag_name)
-          echo "LATEST_VER=$LATEST_VER" >> $GITHUB_OUTPUT
-          echo "Current version of ${{ matrix.language }} is $LOCAL_VER, latest is $LATEST_VER"
+          echo "Update Splunk Operator Instrumentation for ${{ matrix.language }}"
 
-          if [ "$LATEST_VER" == "$LOCAL_VER" ]; then
-            echo We are already up to date. Nothing else to do.
-          else
-            echo 'Verifying that the image is pullable...'
-            echo '(If this fails, the image version is out of sync with ghcr version)'
-            docker pull $REPO:$LATEST_VER
-            echo 'Looks like we are good to update...'
-            echo Updating to new version in values.yaml
-            echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
-            VLINE=$(grep -n "${REPO}" $VALUES_YAML | cut -f1 -d:)
-            echo "Line number for ${REPO} in ${VALUES_YAML} is: ${VLINE}"
-            OLD_VER=$(sed -n "${VLINE}p" $VALUES_YAML | grep -oP 'v\K[0-9.]+')
-            echo "Old version number is: ${OLD_VER}"
-            NEW_VER=${LATEST_VER#v} # removes 'v' from the start of the string
-            echo "New version number is: ${NEW_VER}"
-            echo "sed: ${VLINE}s/${OLD_VER}/${NEW_VER}/"
-            sed -i "${VLINE}s/${OLD_VER}/${NEW_VER}/" $VALUES_YAML
-
-            echo Render chart template
-            make render
-
-            echo "Current git diff:"
-            git --no-pager diff
+          # Set debug argument if DEBUG_MODE is true
+          DEBUG_ARG=""
+          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
+            DEBUG_ARG="--debug"
           fi
+
+          # Run the update script and handle errors
+          ./ci_scripts/update-images-operator-splunk.sh ${{ matrix.language }} $DEBUG_ARG || exit 1
+
+          # Check if an update is needed
+          if [ "$NEED_UPDATE" -eq 0 ]; then
+            echo "No updates detected. Exiting."
+            exit 0
+          fi
+
+          echo "Rendering chart template..."
+          make render
+
+          echo "Displaying current git diff..."
+          git --no-pager diff
       - name: PR the new version
         if: ${{ steps.swizzle_version.outputs.NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v5

@@ -457,12 +457,3 @@ Build the securityContext for Linux and Windows
 {{- end }}
 {{- toYaml .securityContext }}
 {{- end -}}
-
-
-{{- define "splunk-otel-collector.logsEngine" -}}
-{{- if or (eq .Values.logsEngine "") (eq .Values.logsEngine "fluentd") -}}
-fluentd
-{{- else -}}
-otel
-{{- end -}}
-{{- end -}}

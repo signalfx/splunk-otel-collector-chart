@@ -4,6 +4,25 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.85.0] - 2023-09-19
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.85.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.85.0).
+
+### 🚀 New components 🚀
+
+- Add `component` label to daemonset pods and optional k8s service for agent daemonset which can be enabled with `agent.service.enabled` config. [#740](https://github.com/signalfx/splunk-otel-collector-chart/pull/740)
+
+### 💡 Enhancements 💡
+
+- Update Splunk Fluend HEC docker image to v1.3.3 [#924](https://github.com/signalfx/splunk-otel-collector-chart/pull/924)
+- Add ability to update and track operator auto-instrumentation images [#917](https://github.com/signalfx/splunk-otel-collector-chart/pull/917)
+  - [BREAKING CHANGE] Refactored auto-instrumentation image definition from operator.instrumentation.spec.{library}.image
+    to operator.instrumentation.spec.{library}.repository and operator.instrumentation.spec.{library}.tag.
+    See [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0840-0850)
+- Upgrade the Splunk OpenTelemetry Collector for Kubernetes dependencies [#32](https://github.com/signalfx/splunk-otel-collector-chart/pull/932),[#929](https://github.com/signalfx/splunk-otel-collector-chart/pull/929)
+  - opentelemetry-operator upgraded to [v0.37.1](https://github.com/open-telemetry/opentelemetry-helm-charts/releases/tag/opentelemetry-operator-0.37.1)
+  - Java auto-instrumentation upgraded from 1.28.0 to [1.28.0](https://github.com/signalfx/splunk-otel-java/releases/tag/v1.28.0)
+
 ## [0.84.0] - 2023-09-11
 
 ### 💡 Enhancements 💡

@@ -393,16 +393,10 @@ For this particular issue, the solution may vary depending on the Kubernetes clu
 
 ## Logs collection
 
-The helm chart currently utilizes [fluentd](https://docs.fluentd.org/) for Kubernetes logs
-collection. Logs collected with fluentd are sent through Splunk OTel Collector agent which
-does all the necessary metadata enrichment.
-
-OpenTelemetry Collector also has
-[native functionality for logs collection](https://github.com/open-telemetry/opentelemetry-log-collection).
-
-**IMPORTANT:** This chart will be migrated from Fluentd to the OpenTelemetry logs collection, which will be the default
-starting from version 0.86.0. Please ensure that the `logsEngine` parameter is explicitly set to avoid unexpected
-changes during upgrade.
+The helm chart utilizes OpenTelemetry Collector for Kubernetes logs collection, but it also provides an option to use
+[fluentd](https://docs.fluentd.org/) which will be deployed as a sidecar. Logs collected with fluentd are sent through
+Splunk OTel Collector agent which does all the necessary metadata enrichment. The fluentd was initially introduced
+before the native OpenTelemetry logs collection was available. It will be deprecated and removed at some point in future.
 
 Use the following configuration to switch between Fluentd and OpenTelemetry logs collection:
 

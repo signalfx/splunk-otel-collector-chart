@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.84.0
+    helm.sh/chart: splunk-otel-collector-0.85.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.84.0"
+    app.kubernetes.io/version: "0.85.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.84.0
+    chart: splunk-otel-collector-0.85.0
     release: default
     heritage: Helm
 data:
@@ -47,16 +47,6 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      groupbyattrs/logs:
-        keys:
-        - com.splunk.source
-        - com.splunk.sourcetype
-        - container.id
-        - fluent.tag
-        - k8s.container.name
-        - k8s.namespace.name
-        - k8s.pod.name
-        - k8s.pod.uid
       k8sattributes:
         extract:
           annotations:
