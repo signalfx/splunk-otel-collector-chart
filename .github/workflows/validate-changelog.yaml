@@ -1,9 +1,16 @@
 name: Ensure valid and up-to-date Changelog
 
+# Description:
+# Automates the validation of .chloggen (CHANGELOG.md) entries ensuring:
+#   1. All entries are valid.
+#   2. A new entry is added for updates to chart templates or rendered example content.
+#   3. Bypass validation with a 'Skip Changelog' label or a PR title containing '[chore]'.
+
 on: pull_request
 
 jobs:
   validate-changelog:
+    if: ${{ !contains(toLower(github.event.pull_request.labels.*.name), 'skip changelog') && !contains(toLower(github.event.pull_request.title), '[chore]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -11,16 +18,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Helm
-        uses: azure/setup-helm@v3.5
+      - name: Set up Go
+        uses: actions/setup-go@v4
 
-      - name: Setup ct (chart testing)
-        uses: helm/chart-testing-action@v2.4.0
+      - name: Install chloggen
+        run: go install go.opentelemetry.io/build-tools/chloggen@latest
 
-      - name: Run Helm chart-testing (lint)
-        run: make lint
-
-      - name: Validate changelog files
+      - name: Run make chlog-validate
         run: make chlog-validate
 
       - name: Read current version of the Chart

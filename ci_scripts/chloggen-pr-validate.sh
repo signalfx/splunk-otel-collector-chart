@@ -1,64 +1,69 @@
 #!/bin/bash
 # Purpose: Validates the presence of a changelog entry based on file changes.
 # Notes:
+#   - Should be executed via the `make chlog-validate` command.
 #   - Checks if certain types of files have been modified to require a changelog entry.
-#   - Designed to be a pre-commit check or to be used within a CI/CD pipeline.
-#
-# Behavior:
+#   - Designed to be a local check or to be used within a CI/CD pipeline.
 #   - Finds the last common commit with the main branch.
 #   - Checks for changes in specific directories and files:
 #       1. Helm chart templates in 'helm-charts/splunk-otel-collector/templates/*'
 #       2. Rendered manifests in 'examples/*/rendered_manifests/*'
 #   - Requires a '.chloggen' file if any of the above conditions is met.
-#
-# Example Usage:
-#   make chlog-pr-validate
 
+# Include the base utility functions for setting and debugging variables
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/base_util.sh"
+
+# ---- Initialize Variables ----
 # Get the current branch name
-current_branch=$(git rev-parse --abbrev-ref HEAD)
-
+setd "CURRENT_BRANCH" $(git rev-parse --abbrev-ref HEAD)
 # Get the last common commit with the main branch
-last_common_commit=$(git merge-base $current_branch main)
-
+setd "LAST_COMMON_COMMIT" $(git merge-base $CURRENT_BRANCH main)
 # Initialize variables to keep track of changes
-helm_chart_updated=0
-rendered_manifests_updated=0
-chloggen_file_present=0
-
+setd "HELM_CHART_UPDATED" 0
+setd "RENDERED_MANIFESTS_UPDATED" 0
+setd "CHLOGGEN_FILE_PRESENT" 0
 # Get a list of all changed files since the last common commit with main
-changed_files=$(git diff --name-only $last_common_commit HEAD)
-
+setd "COMMITTED_CHANGED_FILES" $(git diff --name-only $LAST_COMMON_COMMIT HEAD)
 # Include uncommitted changes
-uncommitted_files=$(git diff --name-only)
-
+setd "UNCOMMITTED_CHANGED_FILES" $(git diff --name-only)
 # Combine both lists
-all_changed_files="$changed_files $uncommitted_files"
+setd "CHANGED_FILES" "$COMMITTED_CHANGED_FILES $UNCOMMITTED_CHANGED_FILES"
 
-# Loop through each changed file
-for file in $all_changed_files; do
-    # Check if any Helm chart templates are updated (recursive)
+# ---- File Change Analysis ----
+# Assess each modified file to determine if a changelog entry is required
+for file in $CHANGED_FILES; do
+    # Monitor changes within the Helm chart templates
     if [[ "$file" == helm-chart/splunk-otel-collector/templates* ]]; then
-        helm_chart_updated=1
+        setd "HELM_CHART_UPDATED" 1
     fi
 
-    # Check if files under ./examples/*/rendered_manifests are updated (recursive)
+    # Monitor changes within the rendered manifests
     if [[ "$file" == examples/*/rendered_manifests* ]]; then
-        rendered_manifests_updated=1
+        setd "RENDERED_MANIFESTS_UPDATED" 1
     fi
 
-    # Check if a .chloggen file is present
+    # Track the presence of a .chloggen file indicating a changelog entry
     if [[ "$file" == *.chloggen ]]; then
-        chloggen_file_present=1
+        setd "CHLOGGEN_FILE_PRESENT" 1
     fi
 done
 
-# If Helm chart or rendered manifests are updated, ensure a .chloggen file is present
-if [[ $helm_chart_updated -eq 1 ]] || [[ $rendered_manifests_updated -eq 1 ]]; then
-    if [[ $chloggen_file_present -eq 0 ]]; then
-        echo "A changelog entry (.chloggen) is required for this commit."
+# ---- Changelog Entry Validation ----
+# Ensure that if critical files are modified, a corresponding changelog entry exists
+if [[ $HELM_CHART_UPDATED -eq 1 ]] || [[ $RENDERED_MANIFESTS_UPDATED -eq 1 ]]; then
+    if [[ $CHLOGGEN_FILE_PRESENT -eq 0 ]]; then
+        echo "A changelog entry (.chloggen) is required for this commit. Reason:"
+        if [[ $HELM_CHART_UPDATED -eq 1 ]]; then
+          echo "- Updates to files under helm-chart/splunk-otel-collector/templates "
+        fi
+        if [[ $RENDERED_MANIFESTS_UPDATED -eq 1 ]]; then
+            echo "- Updates to files under examples/*/rendered_manifests"
+        fi
         exit 1
     fi
 fi
 
-echo "Successfully validated any required changelog entries exist for a PR."
+# This format matches the chloggen tool format
+echo "PASS: all changelog entries required for PR are valid"
 exit 0

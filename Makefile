@@ -2,6 +2,10 @@
 # The general settings and variables for the project
 SHELL := /bin/bash
 
+# TODO: Move CHART_FILE_PATH and VALUES_FILE_PATH here, currently set in multiple places
+# The version of the splunk-otel-collector chart
+VERSION := $(shell grep "^version:" helm-charts/splunk-otel-collector/Chart.yaml | awk '{print $$2}')
+
 ## Location for GO resources
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -58,7 +62,7 @@ dep-build: ## Build the Helm chart with latest dependencies from the current Hel
 
 .PHONY: render
 render: repo-update dep-build ## Render the Helm chart with the examples as input
-	bash ./examples/render-examples.sh || exit 1
+	examples/render-examples.sh || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management
@@ -70,24 +74,24 @@ chlog-available: ## Validate the chloggen tool is available
 		exit 1; \
 	fi
 
+# Example Usage:
+# 	make chlog-new CHANGE_TYPE=enhancement COMPONENT=agent NOTE="Add X" ISSUES='[42]'
+# 	make chlog-new [CHANGE_TYPE=enhancement] [COMPONENT=agent] [NOTE="Add X"] [ISSUES='[42]'] [FILENAME=add-x] [SUBTEXT="Add Y"]
 .PHONY: chlog-new
 chlog-new: chlog-available ## Creates or updates a YAML file under .chloggen
-	# Example Usage:
-	#   make chlog-new
-	#   make chlog-new CHANGE_TYPE=enhancement COMPONENT=agent NOTE="Add feature X" ISSUES='[4242]' FILENAME=add-feature-x SUBTEXT="Supports Y"
-	./ci_scripts/chloggen-new.sh || exit 1
+	ci_scripts/chloggen-new.sh || exit 1
 
 .PHONY: chlog-validate
 chlog-validate: chlog-available ## Validates changelog requirements for pull requests
-	./ci_scripts/chloggen-pr-validate.sh || exit 1
 	$(CHLOGGEN) validate || exit 1
+	ci_scripts/chloggen-pr-validate.sh || exit 1
 
-.PHONY: chlog-release-preview
-chlog-release-preview: chlog-validate ## Provide a preview of the generated CHANGELOG.md file for a release
+.PHONY: chlog-preview
+chlog-preview: chlog-validate ## Provide a preview of the generated CHANGELOG.md file for a release
 	$(CHLOGGEN) update --dry || exit 1
 
-.PHONY: chlog-release
-chlog-release: chlog-validate ## Creates a release CHANGELOG.md entry from content in .chloggen
-	# Example Usage: make chlog-update VERSION=0.85.0
+# Example Usage: make chlog-update
+.PHONY: chlog-update
+chlog-update: chlog-validate ## Creates an update to CHANGELOG.md for a release entry from content in .chloggen
 	$(CHLOGGEN) update --version "[$(VERSION)] - $$(date +'%Y-%m-%d')" || exit 1; \
-	./ci_scripts/chloggen-release.sh || exit 1
+	ci_scripts/chloggen-update.sh || exit 1
