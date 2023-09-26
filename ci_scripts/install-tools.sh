@@ -1,26 +1,25 @@
 #!/bin/bash
 # Purpose: Installs or upgrades essential development tools.
 # Notes:
-#   - Supports macOS and Linux (best effort) for installations via `brew install` and `go install`.
+#   - Should be executed via the `make install-tools` command.
+#   - Supports macOS and Linux for installations via `brew install` and `go install`.
 #   - Installs tools like kubectl, helm, pre-commit, go, and chloggen.
-#   - Use OVERRIDE_OS_CHECK=true to bypass OS compatibility checks.
-#   - This script is intended to be run via `make install-tools`.
-#   - Prompts the user for approval to install or update each tool if the tool is out of date.
-#
-# Example Usage:
-#    make install-tools [OVERRIDE_OS_CHECK=true]
 
-# Function to install or upgrade a tool
-install_or_upgrade() {
+# Include the base utility functions for setting and debugging variables
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/base_util.sh"
+
+# Function to install a tool
+install() {
   local tool=$1
   local type=$2
 
   case $type in
     brew)
-      install_or_upgrade_brew "$tool"
+      install_brew "$tool"
       ;;
     go)
-      install_or_upgrade_go "$tool"
+      install_go "$tool"
       ;;
     *)
       echo "Unsupported tool type: $type"
@@ -29,8 +28,14 @@ install_or_upgrade() {
   esac
 }
 
-# Function to install or upgrade a Homebrew-based tool
-install_or_upgrade_brew() {
+# Function to install a Homebrew-based tool
+install_brew() {
+  if ! command -v brew &> /dev/null
+  then
+      echo "Homebrew could not be found. Please install Homebrew and try again."
+      exit 1
+  fi
+
   local tool=$1
   local installed_version=$(brew list $tool --versions | awk '{print $2}')
   local latest_version=$(brew info --json=v1 "$tool" | jq -r '.[0].versions.stable')
@@ -38,57 +43,45 @@ install_or_upgrade_brew() {
   if [ "$installed_version" == "$latest_version" ]; then
     echo "$tool is already up to date (version $installed_version)."
     return
+  elif [ ! -z "$installed_version" ] && [ "$installed_version" != "$latest_version" ]; then
+    echo "$tool $installed_version is installed. A new version $latest_version is available. Continuing for now..."
+    return
   fi
-
-  read -p "$tool version $installed_version is installed. Would you like to upgrade to $latest_version? (y/n): " yn
-  case $yn in
-    [Yy]* )
-      brew upgrade $tool || echo "Failed to upgrade $tool. Continuing..."
-      ;;
-    [Nn]* )
-      echo "Skipping upgrade for $tool."
-      ;;
-  esac
+  echo "$tool (version $latest_version) is not installed, installing now..."
+  brew install $tool || echo "Failed to install $tool. Continuing..."
 }
 
-# Function to install or upgrade a Go-based tool
-install_or_upgrade_go() {
+# Function to install a Go-based tool
+install_go() {
+  if ! command -v go &> /dev/null
+  then
+      echo "Go could not be found. Please install Go and try again."
+      exit 1
+  fi
+
   local tool=$1
   local tool_path="$LOCALBIN/$(basename $tool)"
-  local installed_version
 
   if [ -f "$tool_path" ]; then
-    installed_version=$($tool --version 2>/dev/null)  # Try to get the version
+    local installed_version=$($tool --version 2>/dev/null)  # Try to get the version
     if [ -z "$installed_version" ]; then  # If version is empty
       # Fallback to file modification time
       installed_version="UNKNOWN (Last updated: $(stat -c %y "$tool_path" 2>/dev/null || stat -f "%Sm" "$tool_path"))"
     fi
+    echo "$tool is already installed (version: $installed_version). Continuing for now..."
   else
-    installed_version="Not Installed"
+    echo "$tool is not installed, installing now..."
+    GOBIN=$LOCALBIN go install ${tool}@latest || echo "Failed to install $tool. Continuing..."
   fi
-
-  read -p "$tool version $installed_version is installed. Would you like to upgrade? (y/n): " yn
-  case $yn in
-    [Yy]* )
-      GOBIN=$LOCALBIN go install ${tool}@latest || echo "Failed to upgrade $tool. Continuing..."
-      ;;
-    [Nn]* )
-      echo "Skipping upgrade for $tool."
-      ;;
-    * )
-      echo "Please answer yes or no."
-      exit 1
-      ;;
-  esac
 }
 
-# Install or upgrade brew-based tools
+# install brew-based tools
 for tool in kubectl helm pre-commit go; do
-  install_or_upgrade "$tool" brew
+  install "$tool" brew
 done
 
-# Install or upgrade Go-based tools
-install_or_upgrade "go.opentelemetry.io/build-tools/chloggen" go
+# install Go-based tools
+install "go.opentelemetry.io/build-tools/chloggen" go
 
-echo "Tool installation and upgrade process completed successfully!"
+echo "Tool installation process completed!"
 exit 0

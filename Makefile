@@ -27,15 +27,9 @@ help: ## Display Makefile help information for all actions
 ##@ Initialization
 # Tasks for setting up the project environment
 
-.PHONY: init
-init: install-tools ## Initialize the environment
-	# TODO: Add more execution steps here
-	@echo "Initialization complete."
-
-OVERRIDE_OS_CHECK ?= false
 .PHONY: install-tools
-install-tools: $(LOCALBIN) ## Install tools (macOS/Linux)
-	@OVERRIDE_OS_CHECK=$(OVERRIDE_OS_CHECK) LOCALBIN=$(LOCALBIN) ./ci_scripts/install-tools.sh || exit 1
+install-tools: ## Install tools (macOS/Linux)
+	LOCALBIN=$(LOCALBIN) GOBIN=$(LOCALBIN) ci_scripts/install-tools.sh || exit 1
 
 ##@ Build
 # Tasks related to building the Helm chart
