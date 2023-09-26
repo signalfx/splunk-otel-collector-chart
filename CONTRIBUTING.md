@@ -61,7 +61,7 @@ To send us a pull request, please:
    reformat all the code, it will be hard for us to focus on your change.
 3. Please follow the versioning instructions found in the [RELEASE.md](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/RELEASE.md).
 4. Ensure local tests pass and add new tests related to the contribution.
-5. Add a CHANGLOG.md entry (make chlog-new) if the behavior of this chart is altered, see [Changelog Guidelines](https://signalfx/splunk-otel-collector-chart/blob/main/CONTRIBUTING.md#changelog-guidelines).
+5. Add a CHANGELOG.md entry (make chlog-new) if the behavior of this chart is altered, see [Changelog Guidelines](https://signalfx/splunk-otel-collector-chart/blob/main/CONTRIBUTING.md#changelog-guidelines).
 6. Render example documentation (make render) if chart templates are updated.
 7. Commit to your fork using clear commit messages.
 8. Send us a pull request, answering any default questions in the pull request
