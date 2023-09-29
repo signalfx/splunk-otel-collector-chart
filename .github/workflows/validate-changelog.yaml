@@ -1,9 +1,15 @@
 name: Ensure valid and up-to-date Changelog
 
+# Description: Automates the validation of .chloggen (CHANGELOG.md) entries ensuring:
+#   1. All entries are valid.
+#   2. A new entry is added for updates to chart templates or rendered example content.
+#   3. Bypass validation with a 'Skip Changelog' label or a PR title containing '[chore]'.
+
 on: pull_request
 
 jobs:
   validate-changelog:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'Skip Changelog') && !contains(github.event.pull_request.title, '[chore]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -11,12 +17,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Lint changelog file
-        uses: avto-dev/markdown-lint@v1
-        with:
-          rules: /lint/rules/changelog.js
-          config: /lint/config/changelog.yml
-          args: ./CHANGELOG.md
+      - name: Set up Go
+        uses: actions/setup-go@v4
+
+      - name: Install chloggen
+        run: make install-tools
+
+      - name: Run make chlog-validate
+        run: |
+          if ! make chlog-validate; then
+            echo "Options:"
+            echo "- Add a Changelog Entry: Please add a '.yaml' file to the './.chloggen/' directory detailing the changes in your commit. See 'CONTRIBUTING.md' for guidance on creating this entry."
+            echo "- Skip the Changelog Check: If your changes don't necessitate a changelog entry or it's a minor chore, you can skip this check by:"
+            echo "  1. Adding '[chore]' to the title of the pull request"
+            echo "  2. Applying the 'Skip Changelog' label to the pull request."
+            exit 1
+          fi
 
       - name: Read current version of the Chart
         id: read-chart
