@@ -33,7 +33,7 @@ install_brew() {
   if ! command -v brew &> /dev/null
   then
       echo "Homebrew could not be found. Please install Homebrew and try again."
-      exit 1
+      return
   fi
 
   local tool=$1
@@ -56,7 +56,7 @@ install_go() {
   if ! command -v go &> /dev/null
   then
       echo "Go could not be found. Please install Go and try again."
-      exit 1
+      return
   fi
 
   local tool=$1
