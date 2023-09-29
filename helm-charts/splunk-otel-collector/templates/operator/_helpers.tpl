@@ -80,10 +80,9 @@ Helper to define entries for instrumentation libraries.
   {{- /* Iterate over each specified instrumentation library */ -}}
   {{- if .Values.operator.instrumentation.spec -}}
     {{- range $key, $value := .Values.operator.instrumentation.spec -}}
-      {{- $instLibName := get $instLibAliases $key | default $key -}}
-
       {{- /* Check for required fields to determine if it is an instrumentation library */ -}}
-      {{- if and $value.repository $value.tag -}}
+      {{- if and (eq (kindOf $value) "map") $value.repository $value.tag -}}
+        {{- $instLibName := get $instLibAliases $key | default $key -}}
 
         {{- /* Generate YAML keys for each instrumentation library */ -}}
         {{- printf "%s:" $instLibName | indent 2 -}}
@@ -103,22 +102,28 @@ Helper to define entries for instrumentation libraries.
 {{- end -}}
 
 {{/*
-Helper to convert a list of dictionaries into a list of keys.
-- Iterates through a list of dictionaries and collects the 'name' field from each.
-- Returns a list of these 'name' keys.
+Helper to check if envs (list of dictionaries) has an env (dictionary) with a specific name.
+- Takes a list of dictionaries (envs) and a string (envName).
+- Returns "true" if a dictionary in the list has a 'name' key that matches envName, otherwise "false".
 */}}
-{{- define "splunk-otel-collector.operator.extract-name-keys-from-dict-list" -}}
-  {{- /* Initialize variables */ -}}
-  {{- $listOfDicts := . -}}
-  {{- $keyList := list -}}
+{{- define "splunk-otel-collector.operator.env-has" -}}
+  {{- /* Extract parameters */ -}}
+  {{- $envs := default list .env -}}
+  {{- $envName := .envName -}}
+  {{- $found := false -}}
 
-  {{- /* Collect 'name' field from each dictionary */ -}}
-  {{- range $listOfDicts -}}
-    {{- $keyList = append $keyList .name -}}
+  {{- /* Check if envName exists in the list of dictionaries */ -}}
+  {{- range $envs -}}
+    {{- if eq .name $envName -}}
+      {{- $found = true -}}
+    {{- end -}}
   {{- end -}}
 
-  {{- /* Return the list of 'name' keys */ -}}
-  {{- $keyList -}}
+  {{- if $found -}}
+    {{- "true" -}}
+  {{- else -}}
+    {{- "false" -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -138,7 +143,7 @@ Helper for generating environment variables for each instrumentation library.
       {{- $otelResourceAttributes = printf "%s,%s" $env.value $otelResourceAttributes }}
     {{- else }}
       {{- printf "- name: %s" $env.name | nindent 6 -}}
-      {{- printf "  value: %s" $env.value | nindent 6 -}}
+      {{- printf "  value: \"%s\"" $env.value | nindent 6 -}}
     {{- end }}
   {{- end }}
 
