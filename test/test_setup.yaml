@@ -176,3 +176,45 @@ spec:
           value: "256"
         - name: FREQ
           value: "1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      name: tomcat
+      labels:
+        app: tomcat
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+    spec:
+      containers:
+        - image: saravak/tomcat8
+          name: tomcatapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expressjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expressjs
+  template:
+    metadata:
+      name: expressjs
+      labels:
+        app: expressjs
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+    spec:
+      containers:
+        - image: bitnami/express
+          name: expressjs
