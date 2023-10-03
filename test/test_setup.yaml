@@ -198,6 +198,20 @@ spec:
         - image: saravak/tomcat8
           name: tomcatapp
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat
+  labels:
+    run: tomcat
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    run: tomcat
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -218,3 +232,17 @@ spec:
       containers:
         - image: osereme7/nodejs-helloworld-app:v1.0
           name: helloworld
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld
+  labels:
+    run: helloworld
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    run: helloworld

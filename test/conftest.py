@@ -29,7 +29,7 @@ def pytest_addoption(parser):
                      default="admin")
     parser.addoption("--splunk-password",
                      help="splunk user password",
-                     default="password")
+                     default="helloworld")
 
 #
 # def pytest_configure():

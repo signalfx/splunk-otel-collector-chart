@@ -1,4 +1,47 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: splunk-config
+  namespace: default
+data:
+  default.yml: |
+    splunk:
+    conf:
+      indexes:
+        directory: /opt/splunk/etc/apps/search/local
+        content:
+          ci_events:
+            coldPath: $SPLUNK_DB/ci_events/colddb
+            datatype: event
+            homePath: $SPLUNK_DB/ci_events/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/ci_events/thaweddb
+          ci_metrics:
+            coldPath: $SPLUNK_DB/ci_metrics/colddb
+            datatype: metric
+            homePath: $SPLUNK_DB/ci_metrics/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/ci_metrics/thaweddb
+          ci_traces:
+            coldPath: $SPLUNK_DB/ci_traces/colddb
+            datatype: event
+            homePath: $SPLUNK_DB/ci_traces/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/ci_traces/thaweddb
+          ns-anno:
+            coldPath: $SPLUNK_DB/ns-anno/colddb
+            datatype: event
+            homePath: $SPLUNK_DB/ns-anno/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/ns-anno/thaweddb
+          pod-anno:
+            coldPath: $SPLUNK_DB/pod-anno/colddb
+            datatype: event
+            homePath: $SPLUNK_DB/pod-anno/db
+            maxTotalDataSizeMB: 512000
+            thawedPath: $SPLUNK_DB/pod-anno/thaweddb
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: splunk
@@ -25,9 +68,32 @@ spec:
       env:
         - name: SPLUNK_START_ARGS
           value: --accept-license
-        - name: SPLUNK_USER
-          value: root
         - name: SPLUNK_PASSWORD
           value: helloworld
         - name: SPLUNK_LAUNCH_CONF
           value: OPTIMISTIC_ABOUT_FILE_LOCKING=1
+        - name: SPLUNK_HEC_TOKEN
+          value: 00000000-0000-0000-0000-0000000000000
+      volumeMounts:
+        - name: config-volume
+          mountPath: /tmp/defaults/
+  volumes:
+    - name: config-volume
+      configMap:
+        name: splunk-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: splunk
+  labels:
+    run: splunk
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      targetPort: 8000
+    - port: 8089
+      targetPort: 8089
+  selector:
+    run: splunk

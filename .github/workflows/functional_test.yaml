@@ -28,6 +28,7 @@ jobs:
       CI_SPLUNK_PASSWORD: helloworld
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
+      CI_INDEX_TRACES: ci_traces
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
       KUBERNETES_VERSION: ${{ matrix.kubernetes_version }}
       MINIKUBE_VERSION: latest
@@ -73,18 +74,6 @@ jobs:
           until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
             sleep 1;
           done
-          export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
-          # Setup Indexes
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=$CI_INDEX_EVENTS -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=ns-anno -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=pod-anno -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=$CI_INDEX_METRICS -d datatype=metric
-          # Enable HEC services
-          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http/http/enable
-          # Create new HEC token
-          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,ci_events,ci_metrics,ns-anno,pod-anno" https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http
-          # Restart Splunk
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
       - name: Deploy splunk-otel-collector chart
         run: |
@@ -97,10 +86,21 @@ jobs:
           fi
           ci_scripts/deploy_collector.sh
 
-      - name: Deploy log generator
+      - name: Deploy test applications
         run: |
           kubectl apply -f test/test_setup.yaml
-          sleep 60
+          until kubectl get pods | grep -q 'Pending'; do
+            sleep 1;
+          done
+
+      - name: Send curl requests to the applications
+        run: |
+          for i in {1..10}
+          do
+            curl -kv http://localhost:3000
+            curl -kv http://localhost:8080
+          done
+
 
       - uses: actions/setup-python@v4
         with:
@@ -116,7 +116,7 @@ jobs:
           pip install -r requirements.txt
           echo "Running functional tests....."
           python -m pytest \
-          	--splunkd-url https://$CI_SPLUNK_HOST:8089 \
+          	--splunkd-url https://localhost:8089 \
           	--splunk-user admin \
           	--splunk-password $CI_SPLUNK_PASSWORD \
           	-p no:warnings -s
@@ -130,7 +130,7 @@ jobs:
       - name: Print splunk-otel-collector logs
         if: always()
         run: |
-          # Echo logs for the collector (agent,cluster-receiver,gateway) for visability
+          # Echo logs for the collector (agent,cluster-receiver,gateway) for visibility
           pods=$(kubectl get pods -l app=splunk-otel-collector -o jsonpath='{.items[*].metadata.name}')
           for pod in $pods; do
             echo "Logs for $pod:"
