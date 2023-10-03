@@ -201,16 +201,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tomcat
+  name: tomcat-pod
   labels:
-    run: tomcat
+    run: tomcat-pod
 spec:
   type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
   selector:
-    run: tomcat
+    run: tomcat-pod
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -236,13 +236,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: helloworld
+  name: helloworld-pod
   labels:
-    run: helloworld
+    run: helloworld-pod
 spec:
   type: NodePort
   ports:
     - port: 3000
       targetPort: 3000
   selector:
-    run: helloworld
+    run: helloworld-pod
