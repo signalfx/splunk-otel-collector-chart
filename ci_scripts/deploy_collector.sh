@@ -21,6 +21,7 @@ helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 --set splunkPlatform.tracesIndex=$CI_INDEX_TRACES \
 --set splunkPlatform.tracesEnabled=true \
 --set splunkPlatform.token=00000000-0000-0000-0000-0000000000000 \
+--set environment=dev \
 -f ci_scripts/sck_otel_values.yaml helm-charts/splunk-otel-collector/
 #--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
 #wait for deployment to finish
