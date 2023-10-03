@@ -201,20 +201,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: expressjs
+  name: helloworld
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: expressjs
+      app: helloworld
   template:
     metadata:
-      name: expressjs
+      name: helloworld
       labels:
-        app: expressjs
+        app: helloworld
       annotations:
         instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
-        - image: bitnami/express
-          name: expressjs
+        - image: osereme7/nodejs-helloworld-app:1.0
+          name: helloworld
