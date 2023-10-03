@@ -73,7 +73,6 @@ jobs:
           # Wait until splunk is ready
           until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
             sleep 10;
-            kubectl logs splunk || true
           done
 
       - name: Deploy splunk-otel-collector chart

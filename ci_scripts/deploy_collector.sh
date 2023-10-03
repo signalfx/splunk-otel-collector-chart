@@ -26,5 +26,6 @@ helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 #--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
 #wait for deployment to finish
 until kubectl get pod | grep Running | [[ $(wc -l) == 1 ]]; do
-   sleep 1;
+   sleep 10;
+   kubectl get pods
 done
