@@ -12,7 +12,6 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
 
   {{- /* Check if the endpoint is overridden in the Helm values */ -}}
   {{- $endpointOverridden := and
-      .Values.operator.instrumentation
       .Values.operator.instrumentation.spec
       .Values.operator.instrumentation.spec.exporter
       .Values.operator.instrumentation.spec.exporter.endpoint
