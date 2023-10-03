@@ -81,19 +81,4 @@ spec:
     - name: config-volume
       configMap:
         name: splunk-config
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: splunk
-  labels:
-    run: splunk
-spec:
-  type: NodePort
-  ports:
-    - port: 8000
-      targetPort: 8000
-    - port: 8089
-      targetPort: 8089
-  selector:
-    run: splunk
+
