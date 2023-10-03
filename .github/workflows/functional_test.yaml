@@ -89,7 +89,9 @@ jobs:
       - name: Deploy test applications
         run: |
           kubectl apply -f test/test_setup.yaml
-          kubectl wait pod --all --for=condition=Ready --namespace=default
+          until kubectl wait pod --all --for=condition=Ready --namespace=default; do
+            sleep 10;
+          done
 
       - name: Send curl requests to the applications
         run: |
