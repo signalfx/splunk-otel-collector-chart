@@ -102,18 +102,18 @@ Helper to define entries for instrumentation libraries.
 {{- end -}}
 
 {{/*
-Helper to check if envs (list of dictionaries) has an env (dictionary) with a specific name.
-- Takes a list of dictionaries (envs) and a string (envName).
+Helper to check if env (list of dictionaries) has an environment variable (dictionary) with a specific name.
+- Takes a list of dictionaries (env) and a string (envName).
 - Returns "true" if a dictionary in the list has a 'name' key that matches envName, otherwise "false".
 */}}
 {{- define "splunk-otel-collector.operator.env-has" -}}
   {{- /* Extract parameters */ -}}
-  {{- $envs := default list .env -}}
+  {{- $env := default list .env -}}
   {{- $envName := .envName -}}
   {{- $found := false -}}
 
   {{- /* Check if envName exists in the list of dictionaries */ -}}
-  {{- range $envs -}}
+  {{- range $env -}}
     {{- if eq .name $envName -}}
       {{- $found = true -}}
     {{- end -}}
