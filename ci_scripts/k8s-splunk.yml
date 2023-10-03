@@ -68,6 +68,8 @@ spec:
       env:
         - name: SPLUNK_START_ARGS
           value: --accept-license
+        - name: SPLUNK_USER
+          value: root
         - name: SPLUNK_PASSWORD
           value: helloworld
         - name: SPLUNK_LAUNCH_CONF
