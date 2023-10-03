@@ -24,25 +24,25 @@ spec:
   {{- toYaml . | nindent 4 }}
   {{- end }}
   env:
-  {{- with .Values.operator.instrumentation.spec.env }}
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- if .Values.splunkObservability.profilingEnabled }}
-  {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
+    {{- with .Values.operator.instrumentation.spec.env }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if .Values.splunkObservability.profilingEnabled }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
     - name: SPLUNK_PROFILER_ENABLED
       value: "true"
-  {{- end }}
-  {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
+    {{- end }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
     - name: SPLUNK_PROFILER_MEMORY_ENABLED
       value: "true"
-  {{- end }}
-  {{- end }}
-  {{- if .Values.agent.enabled }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.agent.enabled }}
     - name: SPLUNK_OTEL_AGENT
       valueFrom:
         fieldRef:
           apiVersion: v1
           fieldPath: status.hostIP
-  {{- end }}
+    {{- end }}
 {{ include "splunk-otel-collector.operator.instrumentation-libraries" . }}
 {{- end }}
