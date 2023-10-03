@@ -25,7 +25,4 @@ helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 -f ci_scripts/sck_otel_values.yaml helm-charts/splunk-otel-collector/
 #--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
 #wait for deployment to finish
-until kubectl get pod | grep Running | [[ $(wc -l) == 1 ]]; do
-   sleep 10;
-   kubectl get pods
-done
+kubectl wait pod --all --for=condition=Ready --namespace=default
