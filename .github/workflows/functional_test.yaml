@@ -95,10 +95,12 @@ jobs:
 
       - name: Send curl requests to the applications
         run: |
+          TOMCAT_URL=$(minikube service tomcat-pod --url)
+          HELLOWORLD_URL=$(minikube service helloworld-pod --url)
           for i in {1..10}
           do
-            curl -kv http://localhost:3000
-            curl -kv http://localhost:8080
+            curl -kv $HELLOWORLD_URL
+            curl -kv $TOMCAT_URL
           done
 
 
