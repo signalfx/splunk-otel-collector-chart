@@ -6,40 +6,40 @@ metadata:
 data:
   default.yml: |
     splunk:
-    conf:
-      indexes:
-        directory: /opt/splunk/etc/apps/search/local
-        content:
-          ci_events:
-            coldPath: $SPLUNK_DB/ci_events/colddb
-            datatype: event
-            homePath: $SPLUNK_DB/ci_events/db
-            maxTotalDataSizeMB: 512000
-            thawedPath: $SPLUNK_DB/ci_events/thaweddb
-          ci_metrics:
-            coldPath: $SPLUNK_DB/ci_metrics/colddb
-            datatype: metric
-            homePath: $SPLUNK_DB/ci_metrics/db
-            maxTotalDataSizeMB: 512000
-            thawedPath: $SPLUNK_DB/ci_metrics/thaweddb
-          ci_traces:
-            coldPath: $SPLUNK_DB/ci_traces/colddb
-            datatype: event
-            homePath: $SPLUNK_DB/ci_traces/db
-            maxTotalDataSizeMB: 512000
-            thawedPath: $SPLUNK_DB/ci_traces/thaweddb
-          ns-anno:
-            coldPath: $SPLUNK_DB/ns-anno/colddb
-            datatype: event
-            homePath: $SPLUNK_DB/ns-anno/db
-            maxTotalDataSizeMB: 512000
-            thawedPath: $SPLUNK_DB/ns-anno/thaweddb
-          pod-anno:
-            coldPath: $SPLUNK_DB/pod-anno/colddb
-            datatype: event
-            homePath: $SPLUNK_DB/pod-anno/db
-            maxTotalDataSizeMB: 512000
-            thawedPath: $SPLUNK_DB/pod-anno/thaweddb
+      conf:
+        indexes:
+          directory: /opt/splunk/etc/apps/search/local
+          content:
+            ci_events:
+              coldPath: $SPLUNK_DB/ci_events/colddb
+              datatype: event
+              homePath: $SPLUNK_DB/ci_events/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/ci_events/thaweddb
+            ci_metrics:
+              coldPath: $SPLUNK_DB/ci_metrics/colddb
+              datatype: metric
+              homePath: $SPLUNK_DB/ci_metrics/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/ci_metrics/thaweddb
+            ci_traces:
+              coldPath: $SPLUNK_DB/ci_traces/colddb
+              datatype: event
+              homePath: $SPLUNK_DB/ci_traces/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/ci_traces/thaweddb
+            ns-anno:
+              coldPath: $SPLUNK_DB/ns-anno/colddb
+              datatype: event
+              homePath: $SPLUNK_DB/ns-anno/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/ns-anno/thaweddb
+            pod-anno:
+              coldPath: $SPLUNK_DB/pod-anno/colddb
+              datatype: event
+              homePath: $SPLUNK_DB/pod-anno/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/pod-anno/thaweddb
 ---
 apiVersion: v1
 kind: Pod
