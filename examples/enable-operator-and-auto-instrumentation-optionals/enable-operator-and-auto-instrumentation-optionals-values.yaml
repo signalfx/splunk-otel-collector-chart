@@ -1,0 +1,44 @@
+splunkObservability:
+  metricsEnabled: true
+  tracesEnabled: true
+  logsEnabled: true
+  accessToken: CHANGEME
+  realm: us0
+  # Optional: Enables profiling for all instrumentation libraries.
+  # When set, SPLUNK_PROFILER_ENABLED and SPLUNK_PROFILER_MEMORY_ENABLED are set to true in the instrumentation spec.
+  profilingEnabled: true
+
+clusterName: CHANGEME
+environment: CHANGEME
+
+# Optional: Configuration for agent and gateway components.
+# If only the gateway is enabled, exported traces are sent to the gateway service endpoint.
+agent:
+  enabled: false
+gateway:
+  enabled: true
+
+operator:
+  enabled: true
+  # Optional: Defines configurations for how applications should be instrumented.
+  instrumentation:
+    spec:
+      env:
+        # Sets custom resource attributes applicable to all instrumentation libraries.
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "deployment.environment=dev"
+      # Optional: Specifies a trace sampler.
+      sampler:
+        type: traceidratio
+        argument: "0.95"
+      java:
+        env:
+          # Optional: Disables SPLUNK_PROFILER_MEMORY_ENABLED specifically for Java instrumentation.
+          - name: SPLUNK_PROFILER_MEMORY_ENABLED
+            value: "false"
+          # Sets custom resource attributes, applicable to Java instrumentation only.
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "deployment.environment=java-poc"
+
+certmanager:
+  enabled: true
