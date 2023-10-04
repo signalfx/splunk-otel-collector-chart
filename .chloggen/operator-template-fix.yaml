@@ -3,10 +3,10 @@ change_type: bug_fix
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, networkExplorer, operator, chart, other)
 component: operator
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Fix helm template bug where some non-default Operator auto-instrumentation values can cause deployment failures
+note: Fix Operator helm template issues
 # One or more tracking issues related to the change
-issues: [938,943]
+issues: [938]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext:  Resolves smaller issues in the Helm template related to the of non-default Operator auto-instrumentation values, which could trigger deployment failures
