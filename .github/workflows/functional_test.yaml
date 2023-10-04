@@ -5,7 +5,7 @@ on: pull_request
 jobs:
   e2e-test:
     name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
