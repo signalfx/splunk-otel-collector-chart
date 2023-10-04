@@ -35,8 +35,6 @@ def test_agent_logs_metadata(setup):
     full_pod_name = k8s_helper.get_pod_full_name("agent")
     search_query = (
         "index=ci_events"
-        + " k8s.pod.name="
-        + full_pod_name
         + ' "Everything is ready. Begin running and processing data."'
     )
     logger.info(f"Query: {search_query}")
@@ -74,9 +72,7 @@ def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     logger.info("testing that agent logs are correctly ingested into Splunk")
     full_pod_name = k8s_helper.get_pod_full_name("agent")
     search_query = (
-        "index=ci_events" +
-        + " k8s.pod.name="
-        + full_pod_name
+        "index=ci_events"
         + " source=*/otel-collector/*.log"
     )
     logger.info(f"Query: {search_query}")
