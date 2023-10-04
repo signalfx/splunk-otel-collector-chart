@@ -17,6 +17,7 @@ AGENT_POD_LOGS = DEFAULT_LOGS_DIR + "agent_pod_logs.out"
 
 
 def get_pod_full_name(pod):
+    create_dir_if_not_exists(DEFAULT_LOGS_DIR)
     os.system("kubectl get pods > " + GET_PODS_FILE_NAME)
     lines = get_log_file_content(GET_PODS_FILE_NAME)
     for line in lines:
@@ -36,6 +37,7 @@ def get_log_file_content(log_file_name):
 
 
 def get_pod_logs(pod_full_name):
+    create_dir_if_not_exists(DEFAULT_LOGS_DIR)
     os.system(f"kubectl logs {pod_full_name} > {AGENT_POD_LOGS}")
     return get_log_file_content(AGENT_POD_LOGS)
 
@@ -83,6 +85,7 @@ def upgrade_helm(yaml_file, fields_dict=None):
 
 
 def wait_for_pods_initialization():
+    create_dir_if_not_exists(DEFAULT_LOGS_DIR)
     break_infinite_looping_counter = 60
     for x in range(break_infinite_looping_counter):
         time.sleep(1)
