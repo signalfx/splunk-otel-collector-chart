@@ -43,17 +43,18 @@ jobs:
 
       - name: Setup Minikube
         run: |
+          mkdir bin
           # Install Kubectl
           curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/arm64/kubectl
           chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+          mv kubectl bin/
           mkdir -p ${HOME}/.kube
           touch ${HOME}/.kube/config
           # Install Minikube
           curl -Lo minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64
           chmod +x minikube
-          sudo mv minikube /usr/local/bin/
-          sudo sysctl fs.protected_regular=0
+          mv minikube bin/
+          export PATH=$PATH:bin/
           # Start Minikube and Wait
           minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
           export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
