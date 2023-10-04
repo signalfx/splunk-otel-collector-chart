@@ -143,7 +143,7 @@ Helper for generating environment variables for each instrumentation library.
       {{- $otelResourceAttributes = printf "%s,%s" $env.value $otelResourceAttributes }}
     {{- else }}
       {{- printf "- name: %s" $env.name | nindent 6 -}}
-      {{- printf "  value: \"%s\"" $env.value | nindent 6 -}}
+      {{- printf "  value: %s" ($env.value | quote) | nindent 6 -}}
     {{- end }}
   {{- end }}
 
