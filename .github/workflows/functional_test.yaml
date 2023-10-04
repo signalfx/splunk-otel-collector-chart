@@ -51,12 +51,12 @@ jobs:
           mkdir -p ${HOME}/.kube
           touch ${HOME}/.kube/config
           # Install Minikube
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-arm64
           chmod +x minikube
           mv minikube bin/
           export PATH=$PATH:bin/
           # Start Minikube and Wait
-          minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 4096 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
+          minikube start --container-runtime=${CONTAINER_RUNTIME} --cpus 2 --memory 8192 --kubernetes-version=${KUBERNETES_VERSION} --no-vtx-check
           export JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
           until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
             sleep 1;
