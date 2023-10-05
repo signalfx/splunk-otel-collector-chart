@@ -24,7 +24,7 @@ jobs:
     env:
       CI_SPLUNK_PORT: 8089
       CI_SPLUNK_USERNAME: admin
-      CI_SPLUNK_HEC_TOKEN: a6b5e77f-d5f6-415a-bd43-930cecb12959
+      CI_SPLUNK_HEC_TOKEN: "00000000-0000-0000-0000-0000000000000"
       CI_SPLUNK_PASSWORD: helloworld
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
@@ -73,18 +73,6 @@ jobs:
           until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
             sleep 1;
           done
-          export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
-          # Setup Indexes
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=$CI_INDEX_EVENTS -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=ns-anno -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=pod-anno -d datatype=event
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/data/indexes -d name=$CI_INDEX_METRICS -d datatype=metric
-          # Enable HEC services
-          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http/http/enable
-          # Create new HEC token
-          curl -X POST -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD -k -d "name=splunk_hec_token&token=a6b5e77f-d5f6-415a-bd43-930cecb12959&disabled=0&index=main&indexes=main,ci_events,ci_metrics,ns-anno,pod-anno" https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/servicesNS/nobody/splunk_httpinput/data/inputs/http
-          # Restart Splunk
-          curl -k -u $CI_SPLUNK_USERNAME:$CI_SPLUNK_PASSWORD https://$CI_SPLUNK_HOST:$CI_SPLUNK_PORT/services/server/control/restart -X POST
 
       - name: Deploy splunk-otel-collector chart
         run: |
