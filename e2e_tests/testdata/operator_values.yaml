@@ -12,11 +12,21 @@ agent:
            insecure: true
     service:
       pipelines:
+        traces:
+          exporters:
+            - otlp
+clusterReceiver:
+  config:
+    exporters:
+      otlp:
+        endpoint: $ENDPOINT
+        tls:
+          insecure: true
+    service:
+      pipelines:
         metrics:
           exporters:
             - otlp
 environment: dev
 operator:
-  enabled: true
-certmanager:
   enabled: true

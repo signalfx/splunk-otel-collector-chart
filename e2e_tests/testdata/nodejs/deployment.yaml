@@ -1,24 +1,21 @@
-objectmeta:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: nodejs-test
-  namespace: default
-  labels:
-    app: nodejs-test
-  annotations:
-    instrumentation.opentelemetry.io/inject-nodejs: "true"
 spec:
+  replicas: 1
   selector:
-    matchlabels:
+    matchLabels:
       app: nodejs-test
   template:
-    objectmeta:
+    metadata:
       name: nodejs-test
-      namespace: default
       labels:
         app: nodejs-test
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
-        - name: nodejs-test
-          image: nodejs_test:latest
-          imagepullpolicy: Never
-      restartpolicy: Always
-  paused: false
+        - image: nodejs_test:latest
+          name: nodejs-test
+          imagePullPolicy: Never

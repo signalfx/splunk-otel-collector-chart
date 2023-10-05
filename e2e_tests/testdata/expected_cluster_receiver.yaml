@@ -3,13 +3,44 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.namespace.uid
+          value:
+            stringValue: 24d28cd3-f8b4-4bc2-8a0f-6a44fbe517fc
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: The current phase of namespaces (1 for active and 0 for terminating)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.namespace.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: default
         - key: k8s.namespace.uid
           value:
-            stringValue: 1beec5f0-b9e8-4a49-a1d2-791cd5cea590
+            stringValue: 38a398cc-a21c-421f-b54a-a96ffed5e935
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -34,13 +65,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-node-lease
         - key: k8s.namespace.uid
           value:
-            stringValue: 5c9026f1-a41c-4fe4-b8e6-f14b8fb931dd
+            stringValue: c520e69d-c96a-4495-be17-921da50c42f7
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -65,13 +96,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-public
         - key: k8s.namespace.uid
           value:
-            stringValue: f2f6a385-9657-4b1a-a6ab-7c98ea38d473
+            stringValue: 7194cd08-debe-45c7-bfed-570751c8c588
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -96,13 +127,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
         - key: k8s.namespace.uid
           value:
-            stringValue: 09a037fe-2fb9-4d42-b2ce-ce95a598188b
+            stringValue: fee93690-401f-483a-a4dd-e67a0c5f8fd0
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -127,13 +158,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: local-path-storage
         - key: k8s.namespace.uid
           value:
-            stringValue: 131b1093-eca2-48e2-8d43-ba16f4bcd737
+            stringValue: 3c177e55-2201-4119-9733-7604bbbf8fda
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -158,13 +189,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.node.name
           value:
             stringValue: kind-control-plane
         - key: k8s.node.uid
           value:
-            stringValue: c12747fd-e78b-4878-aa9e-09b404ba752b
+            stringValue: 018bff23-5f17-4094-86e1-d994b6362a16
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -188,13 +219,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.daemonset.name
           value:
             stringValue: kindnet
         - key: k8s.daemonset.uid
           value:
-            stringValue: eafae448-710d-4776-aa13-cb1d579d6f44
+            stringValue: 37dc933d-ee20-447e-8973-1bbe532bdf75
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -246,13 +277,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.daemonset.name
           value:
             stringValue: kube-proxy
         - key: k8s.daemonset.uid
           value:
-            stringValue: 0ebc1f58-7642-48c5-ab9b-481f9eadbec2
+            stringValue: ee864647-f429-429c-9578-7fc8c09c795e
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -304,13 +335,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.daemonset.name
           value:
             stringValue: sock-splunk-otel-collector-agent
         - key: k8s.daemonset.uid
           value:
-            stringValue: f922fd6b-f551-41ce-93e9-bc01451f7b2e
+            stringValue: ea89d344-50de-48f5-98b0-a555fe36e34e
         - key: k8s.namespace.name
           value:
             stringValue: default
@@ -362,13 +393,139 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.deployment.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.deployment.uid
+          value:
+            stringValue: a57ef6ee-1b2b-4558-bcf5-a042653c52b4
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.available
+            unit: "1"
+          - description: Number of desired pods in this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.deployment.name
+          value:
+            stringValue: cert-manager-cainjector
+        - key: k8s.deployment.uid
+          value:
+            stringValue: 7923ba15-5fe7-49fe-acce-ab6ea1c400af
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.available
+            unit: "1"
+          - description: Number of desired pods in this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.deployment.name
+          value:
+            stringValue: cert-manager-webhook
+        - key: k8s.deployment.uid
+          value:
+            stringValue: a007a65e-a345-4f59-91f5-a1a372e9fd53
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.available
+            unit: "1"
+          - description: Number of desired pods in this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
         - key: k8s.deployment.name
           value:
             stringValue: coredns
         - key: k8s.deployment.uid
           value:
-            stringValue: f6cbff32-15f5-4092-9652-bf14b28d4afd
+            stringValue: 5390f5dd-9d46-4b59-ae1f-90b1572db0a5
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -404,13 +561,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.deployment.name
           value:
             stringValue: local-path-provisioner
         - key: k8s.deployment.uid
           value:
-            stringValue: 300352ec-4f4a-4bdb-8192-28647105aafc
+            stringValue: 24060f59-fab6-4403-bd1b-d6aa50d9f516
         - key: k8s.namespace.name
           value:
             stringValue: local-path-storage
@@ -446,13 +603,13 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.deployment.name
           value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+            stringValue: nodejs-test
         - key: k8s.deployment.uid
           value:
-            stringValue: 85bacac2-ec69-466c-8507-88f31a40ad0d
+            stringValue: c55a99d3-e7cf-42e8-aa10-c0aa5c749b76
         - key: k8s.namespace.name
           value:
             stringValue: default
@@ -488,16 +645,100 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.deployment.name
+          value:
+            stringValue: sock-operator
+        - key: k8s.deployment.uid
+          value:
+            stringValue: fa6e0d2e-8fd2-4978-9385-24578c661447
         - key: k8s.namespace.name
           value:
             stringValue: default
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.available
+            unit: "1"
+          - description: Number of desired pods in this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.deployment.name
+          value:
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+        - key: k8s.deployment.uid
+          value:
+            stringValue: b37d8bd6-ac5b-426e-8103-07876b1949d1
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.available
+            unit: "1"
+          - description: Number of desired pods in this deployment
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.deployment.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
         - key: k8s.replicaset.name
           value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5fc8488d8f
+            stringValue: cert-manager-7f6665fd8c
         - key: k8s.replicaset.uid
           value:
-            stringValue: 05330df9-9047-41dc-a333-00b691b1becd
+            stringValue: 6f3a88d5-08fa-47d7-b5d5-22349eec9852
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -530,7 +771,217 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.replicaset.name
+          value:
+            stringValue: cert-manager-cainjector-666564dc88
+        - key: k8s.replicaset.uid
+          value:
+            stringValue: 47b7d220-b5ea-4a97-9188-413f82d61c83
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.available
+            unit: "1"
+          - description: Number of desired pods in this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.replicaset.name
+          value:
+            stringValue: cert-manager-webhook-fd94896cd
+        - key: k8s.replicaset.uid
+          value:
+            stringValue: 45d66cb0-32bc-4b10-8de2-354f5a88b6d1
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.available
+            unit: "1"
+          - description: Number of desired pods in this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.replicaset.name
+          value:
+            stringValue: nodejs-test-56cdcf7c
+        - key: k8s.replicaset.uid
+          value:
+            stringValue: 0b01c9f3-6f57-4bf9-8461-86cfdbcec358
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.available
+            unit: "1"
+          - description: Number of desired pods in this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.replicaset.name
+          value:
+            stringValue: sock-operator-56566595b
+        - key: k8s.replicaset.uid
+          value:
+            stringValue: 603f1329-325f-4a81-803b-654147bee88c
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.available
+            unit: "1"
+          - description: Number of desired pods in this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.replicaset.name
+          value:
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-79b6f8bbcf
+        - key: k8s.replicaset.uid
+          value:
+            stringValue: aeba1ae6-6ae0-4784-bfc4-04b81e98998c
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Total number of available pods (ready for at least minReadySeconds) targeted by this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.available
+            unit: "1"
+          - description: Number of desired pods in this replicaset
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.replicaset.desired
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -539,7 +990,7 @@ resourceMetrics:
             stringValue: coredns-5d78c9869d
         - key: k8s.replicaset.uid
           value:
-            stringValue: c3ca0438-0a92-4759-b32a-de5adbb23ec7
+            stringValue: 55a09986-f646-49d7-9aef-ec70d3272c49
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -572,7 +1023,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: local-path-storage
@@ -581,7 +1032,7 @@ resourceMetrics:
             stringValue: local-path-provisioner-6bc4bddd6b
         - key: k8s.replicaset.uid
           value:
-            stringValue: eb43da2e-6cbf-4a06-8681-9120984580c6
+            stringValue: 5736cb78-db19-4e63-b231-f6ffe183e0d7
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -614,7 +1065,118 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-7f6665fd8c-wkcm6
+        - key: k8s.pod.uid
+          value:
+            stringValue: 5286b581-2c17-4110-b074-18e477e407ec
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.pod.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-cainjector-666564dc88-d78nh
+        - key: k8s.pod.uid
+          value:
+            stringValue: 59324e58-5da3-4499-a70c-b94c3f0036fa
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.pod.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-webhook-fd94896cd-hcv6s
+        - key: k8s.pod.uid
+          value:
+            stringValue: b5cfd5d0-59d3-4ac5-8b4c-b8d5e07abec4
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.pod.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: default
@@ -623,10 +1185,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: sock-splunk-otel-collector-agent-5mb8s
+            stringValue: nodejs-test-56cdcf7c-bqrx6
         - key: k8s.pod.uid
           value:
-            stringValue: f7e7af10-ab59-4aac-9a5f-fe1385e6937b
+            stringValue: 7c6cf270-98d0-4a6a-b215-2461d252a610
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -651,7 +1213,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: default
@@ -660,10 +1222,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5fc8488d8f6krb6
+            stringValue: sock-operator-56566595b-9s2hn
         - key: k8s.pod.uid
           value:
-            stringValue: 70c097f4-e072-450e-bdd4-f99a1298a15b
+            stringValue: 1aa50cee-ff7b-4c49-b0b4-6c3e7a166410
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -688,7 +1250,81 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: sock-splunk-otel-collector-agent-wnhhz
+        - key: k8s.pod.uid
+          value:
+            stringValue: f2607c0e-1ccc-440f-b9ba-db9b220ba76e
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.pod.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-79b6f8bbcfkzqs8
+        - key: k8s.pod.uid
+          value:
+            stringValue: 28548a19-31ac-4113-aeef-6a84a9006e09
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Current phase of the pod (1 - Pending, 2 - Running, 3 - Succeeded, 4 - Failed, 5 - Unknown)
+            gauge:
+              dataPoints:
+                - asInt: "2"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.pod.phase
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -697,10 +1333,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: coredns-5d78c9869d-rv7vb
+            stringValue: coredns-5d78c9869d-d6jcd
         - key: k8s.pod.uid
           value:
-            stringValue: ce0723a9-66a8-4553-b922-04af9a55a112
+            stringValue: 4aaa15dc-642e-4f23-9bba-36d575bd493c
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -725,7 +1361,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -734,10 +1370,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: coredns-5d78c9869d-xrlwj
+            stringValue: coredns-5d78c9869d-d74kc
         - key: k8s.pod.uid
           value:
-            stringValue: 5e455da6-6280-4bff-9138-11f908d1e146
+            stringValue: d7997008-4987-4cd2-9b42-97189c1f19b2
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -762,7 +1398,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -774,7 +1410,7 @@ resourceMetrics:
             stringValue: etcd-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: bdd13d12-3500-43fe-bba7-89b627f4c473
+            stringValue: 2e3eea91-b1bc-4339-bd65-55bc996d1acb
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -799,7 +1435,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -808,10 +1444,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kindnet-rk8pb
+            stringValue: kindnet-nc2q6
         - key: k8s.pod.uid
           value:
-            stringValue: ce8da3d1-c601-4389-b203-2fc515874d3f
+            stringValue: 2e4716c8-b5fc-414e-8e2c-f209d6e98b3a
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -836,7 +1472,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -848,7 +1484,7 @@ resourceMetrics:
             stringValue: kube-apiserver-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: f10ca2ae-b67e-403f-bf77-bddb9ff98b9d
+            stringValue: d3bef5c4-8194-46fa-a02f-dc5db95a5255
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -873,7 +1509,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -885,7 +1521,7 @@ resourceMetrics:
             stringValue: kube-controller-manager-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: 9b7202fc-95df-4997-a959-8782b18c6c8d
+            stringValue: 58218320-9d68-4a05-a014-c2a3fb27ac17
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -910,7 +1546,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -919,10 +1555,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-proxy-rkvpf
+            stringValue: kube-proxy-wf4ls
         - key: k8s.pod.uid
           value:
-            stringValue: 45c645a7-2926-42ce-b193-f908e303d7b7
+            stringValue: 8202e24b-78a2-4a6a-a39e-28ba6964ac5a
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -947,7 +1583,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -959,7 +1595,7 @@ resourceMetrics:
             stringValue: kube-scheduler-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: e4d549e1-82b4-4b01-b29d-7786a96537cd
+            stringValue: c497b243-2c28-435e-805e-7389f314b93f
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -984,7 +1620,7 @@ resourceMetrics:
       attributes:
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.namespace.name
           value:
             stringValue: local-path-storage
@@ -993,10 +1629,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: local-path-provisioner-6bc4bddd6b-p7dmv
+            stringValue: local-path-provisioner-6bc4bddd6b-rpwhk
         - key: k8s.pod.uid
           value:
-            stringValue: 5546762d-a8f1-4054-8008-78b963d5dd1d
+            stringValue: aba05221-ad2b-4cbe-8d53-72852f2e3899
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1021,7 +1657,7 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 2eed557a16983132401c47dc4395a5b4a49afe1b3671ce8fe7fa45a06aa6aae4
+            stringValue: 0aab92f5f0a0d9849b04b2bfa6f0f08b3047cd2bc0dbc85da37d0204bd5a2e8e
         - key: container.image.name
           value:
             stringValue: docker.io/kindest/local-path-provisioner
@@ -1030,7 +1666,7 @@ resourceMetrics:
             stringValue: v20230511-dc714da8
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
             stringValue: local-path-provisioner
@@ -1042,10 +1678,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: local-path-provisioner-6bc4bddd6b-p7dmv
+            stringValue: local-path-provisioner-6bc4bddd6b-rpwhk
         - key: k8s.pod.uid
           value:
-            stringValue: 5546762d-a8f1-4054-8008-78b963d5dd1d
+            stringValue: aba05221-ad2b-4cbe-8d53-72852f2e3899
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1078,7 +1714,307 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 38e1c3b68f0c6cedfb4566020699ea7c6c3aff8bb5e6cc010c3ab8c6506fbb1a
+            stringValue: 0da68dc7786ddfbfb31887400f38137fea782ca35a66c932adc65c289c25d112
+        - key: container.image.name
+          value:
+            stringValue: registry.k8s.io/kube-scheduler
+        - key: container.image.tag
+          value:
+            stringValue: v1.27.3
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: kube-scheduler
+        - key: k8s.namespace.name
+          value:
+            stringValue: kube-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: kube-scheduler-kind-control-plane
+        - key: k8s.pod.uid
+          value:
+            stringValue: c497b243-2c28-435e-805e-7389f314b93f
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 1067eaecf09b0efc87c94bbfb2f25ee7043fd9befb764ce81837fccf9e0c6cf4
+        - key: container.image.name
+          value:
+            stringValue: quay.io/brancz/kube-rbac-proxy
+        - key: container.image.tag
+          value:
+            stringValue: v0.14.2
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: kube-rbac-proxy
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: sock-operator-56566595b-9s2hn
+        - key: k8s.pod.uid
+          value:
+            stringValue: 1aa50cee-ff7b-4c49-b0b4-6c3e7a166410
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.5
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_limit
+            unit: '{cpu}'
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.005
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "134217728"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_limit
+            unit: By
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "67108864"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_request
+            unit: By
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 1fcb382f630e41d40e87147e5e54d3ecd545a4a4517e844ce89ac6810429ec6d
+        - key: container.image.name
+          value:
+            stringValue: docker.io/kindest/kindnetd
+        - key: container.image.tag
+          value:
+            stringValue: v20230511-dc714da8
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: kindnet-cni
+        - key: k8s.namespace.name
+          value:
+            stringValue: kube-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: kindnet-nc2q6
+        - key: k8s.pod.uid
+          value:
+            stringValue: 2e4716c8-b5fc-414e-8e2c-f209d6e98b3a
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_limit
+            unit: '{cpu}'
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "52428800"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_limit
+            unit: By
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "52428800"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_request
+            unit: By
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 229a8e204f9e45dc08502a0606038b70d399446f08f26c8292127f24b32381ef
+        - key: container.image.name
+          value:
+            stringValue: quay.io/jetstack/cert-manager-webhook
+        - key: container.image.tag
+          value:
+            stringValue: v1.10.0
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: cert-manager-webhook
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-webhook-fd94896cd-hcv6s
+        - key: k8s.pod.uid
+          value:
+            stringValue: b5cfd5d0-59d3-4ac5-8b4c-b8d5e07abec4
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 24143363221e9d734ded5daa2c378c50274ded835cc43c3f192f1f48d36e7549
         - key: container.image.name
           value:
             stringValue: registry.k8s.io/kube-controller-manager
@@ -1087,7 +2023,7 @@ resourceMetrics:
             stringValue: v1.27.3
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
             stringValue: kube-controller-manager
@@ -1102,7 +2038,7 @@ resourceMetrics:
             stringValue: kube-controller-manager-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: 9b7202fc-95df-4997-a959-8782b18c6c8d
+            stringValue: 58218320-9d68-4a05-a014-c2a3fb27ac17
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1143,19 +2079,19 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 5822c8c8d3eb30e2b0152a4382c9257a8d68a8b0008902d1c96953b5c2ea9191
+            stringValue: 301113c8a12ed13ca8d184cb885388f7e6f5539c215ec2eb7d8a3b2fde2e6533
         - key: container.image.name
           value:
-            stringValue: registry.k8s.io/kube-proxy
+            stringValue: registry.k8s.io/coredns/coredns
         - key: container.image.tag
           value:
-            stringValue: v1.27.3
+            stringValue: v1.10.1
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
-            stringValue: kube-proxy
+            stringValue: coredns
         - key: k8s.namespace.name
           value:
             stringValue: kube-system
@@ -1164,10 +2100,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-proxy-rkvpf
+            stringValue: coredns-5d78c9869d-d6jcd
         - key: k8s.pod.uid
           value:
-            stringValue: 45c645a7-2926-42ce-b193-f908e303d7b7
+            stringValue: 4aaa15dc-642e-4f23-9bba-36d575bd493c
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1177,6 +2113,30 @@ resourceMetrics:
     schemaUrl: https://opentelemetry.io/schemas/1.18.0
     scopeMetrics:
       - metrics:
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "178257920"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_limit
+            unit: By
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "73400320"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_request
+            unit: By
           - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
             gauge:
               dataPoints:
@@ -1200,31 +2160,31 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 6914cc24bd140818a251f9bc4efee99a79c7c2cb3b9fccd64b36fa6cf97cfa53
+            stringValue: 34469c340168ed86014f2e81d5a88d60e90751995f0d584adda50a09efa60bbb
         - key: container.image.name
           value:
-            stringValue: docker.io/kindest/kindnetd
+            stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
         - key: container.image.tag
           value:
-            stringValue: v20230511-dc714da8
+            stringValue: v0.83.0
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
-            stringValue: kindnet-cni
+            stringValue: manager
         - key: k8s.namespace.name
           value:
-            stringValue: kube-system
+            stringValue: default
         - key: k8s.node.name
           value:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kindnet-rk8pb
+            stringValue: sock-operator-56566595b-9s2hn
         - key: k8s.pod.uid
           value:
-            stringValue: ce8da3d1-c601-4389-b203-2fc515874d3f
+            stringValue: 1aa50cee-ff7b-4c49-b0b4-6c3e7a166410
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1253,7 +2213,7 @@ resourceMetrics:
           - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
             gauge:
               dataPoints:
-                - asInt: "52428800"
+                - asInt: "134217728"
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.memory_limit
@@ -1261,7 +2221,7 @@ resourceMetrics:
           - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
             gauge:
               dataPoints:
-                - asInt: "52428800"
+                - asInt: "67108864"
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.memory_request
@@ -1289,7 +2249,7 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 882d619f953a1118be1d507cb81609d01b459c8d69592e1663ff4064e4089a2c
+            stringValue: 3cb1ef9a1d7f3525fb5c8012de8a2c693262a47645c58cc01f1bbfca1d22332f
         - key: container.image.name
           value:
             stringValue: quay.io/signalfx/splunk-otel-collector
@@ -1298,7 +2258,7 @@ resourceMetrics:
             stringValue: 0.85.0
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
             stringValue: otel-collector
@@ -1310,10 +2270,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: sock-splunk-otel-collector-agent-5mb8s
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-79b6f8bbcfkzqs8
         - key: k8s.pod.uid
           value:
-            stringValue: f7e7af10-ab59-4aac-9a5f-fe1385e6937b
+            stringValue: 28548a19-31ac-4113-aeef-6a84a9006e09
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1378,7 +2338,405 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 91af13d44d89f17bdf2441f98d735f942b5641b3e34f31af9c7fc79b4d4f5d87
+            stringValue: 5546876bb7f228ac90c4b2633a9b943339e7f12183bc508b639683342be8a1ea
+        - key: container.image.name
+          value:
+            stringValue: quay.io/jetstack/cert-manager-controller
+        - key: container.image.tag
+          value:
+            stringValue: v1.10.0
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: cert-manager-controller
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-7f6665fd8c-wkcm6
+        - key: k8s.pod.uid
+          value:
+            stringValue: 5286b581-2c17-4110-b074-18e477e407ec
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 6dd49fc25156797d364203d727ca3542331db8267216690c190273927d05746d
+        - key: container.image.name
+          value:
+            stringValue: registry.k8s.io/coredns/coredns
+        - key: container.image.tag
+          value:
+            stringValue: v1.10.1
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: coredns
+        - key: k8s.namespace.name
+          value:
+            stringValue: kube-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: coredns-5d78c9869d-d74kc
+        - key: k8s.pod.uid
+          value:
+            stringValue: d7997008-4987-4cd2-9b42-97189c1f19b2
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.1
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "178257920"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_limit
+            unit: By
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "73400320"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_request
+            unit: By
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 7b2b6c1d8a95ca46baa108a2e3e495cd29584a68f8656b72c7c8728698da3d33
+        - key: container.image.name
+          value:
+            stringValue: quay.io/signalfx/splunk-otel-collector
+        - key: container.image.tag
+          value:
+            stringValue: 0.85.0
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: otel-collector
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: sock-splunk-otel-collector-agent-wnhhz
+        - key: k8s.pod.uid
+          value:
+            stringValue: f2607c0e-1ccc-440f-b9ba-db9b220ba76e
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_limit
+            unit: '{cpu}'
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asDouble: 0.2
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.cpu_request
+            unit: '{cpu}'
+          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "524288000"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_limit
+            unit: By
+          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
+            gauge:
+              dataPoints:
+                - asInt: "524288000"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.memory_request
+            unit: By
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: 83b3dc6a49f6841dfa4c961e02ce3e8d348012d7826161064f207bd2e439bedf
+        - key: container.image.name
+          value:
+            stringValue: quay.io/jetstack/cert-manager-cainjector
+        - key: container.image.tag
+          value:
+            stringValue: v1.10.0
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: cert-manager-cainjector
+        - key: k8s.namespace.name
+          value:
+            stringValue: cert-manager
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: cert-manager-cainjector-666564dc88-d78nh
+        - key: k8s.pod.uid
+          value:
+            stringValue: 59324e58-5da3-4499-a70c-b94c3f0036fa
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: caabbd1d52a4eef537a6eb280682fe086c40f1acfb94870adde35ed5aba1e906
+        - key: container.image.name
+          value:
+            stringValue: docker.io/library/nodejs_test
+        - key: container.image.tag
+          value:
+            stringValue: latest
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: nodejs-test
+        - key: k8s.namespace.name
+          value:
+            stringValue: default
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: nodejs-test-56cdcf7c-bqrx6
+        - key: k8s.pod.uid
+          value:
+            stringValue: 7c6cf270-98d0-4a6a-b215-2461d252a610
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: cb010798e4cc40ee62e5516a49db8284004429dfffdd0a4475872c798e69efa8
+        - key: container.image.name
+          value:
+            stringValue: registry.k8s.io/kube-proxy
+        - key: container.image.tag
+          value:
+            stringValue: v1.27.3
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.container.name
+          value:
+            stringValue: kube-proxy
+        - key: k8s.namespace.name
+          value:
+            stringValue: kube-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: kube-proxy-wf4ls
+        - key: k8s.pod.uid
+          value:
+            stringValue: 8202e24b-78a2-4a6a-a39e-28ba6964ac5a
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: receiver
+          value:
+            stringValue: k8scluster
+    schemaUrl: https://opentelemetry.io/schemas/1.18.0
+    scopeMetrics:
+      - metrics:
+          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
+            gauge:
+              dataPoints:
+                - asInt: "1"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.ready
+            unit: "1"
+          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
+            gauge:
+              dataPoints:
+                - asInt: "0"
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: k8s.container.restarts
+            unit: "1"
+        scope:
+          name: otelcol/k8sclusterreceiver
+          version: v0.85.0
+  - resource:
+      attributes:
+        - key: container.id
+          value:
+            stringValue: e30f701398b7e05fde5e47c86efcdbbcd6ce68feb87ffa8f7654edc3e63a01bd
         - key: container.image.name
           value:
             stringValue: registry.k8s.io/kube-apiserver
@@ -1387,7 +2745,7 @@ resourceMetrics:
             stringValue: v1.27.3
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
             stringValue: kube-apiserver
@@ -1402,7 +2760,7 @@ resourceMetrics:
             stringValue: kube-apiserver-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: f10ca2ae-b67e-403f-bf77-bddb9ff98b9d
+            stringValue: d3bef5c4-8194-46fa-a02f-dc5db95a5255
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1443,242 +2801,7 @@ resourceMetrics:
       attributes:
         - key: container.id
           value:
-            stringValue: 9fa06d3d8b3f87583164a2868364125aaff9f5b56717c562d36a4a79412de217
-        - key: container.image.name
-          value:
-            stringValue: registry.k8s.io/kube-scheduler
-        - key: container.image.tag
-          value:
-            stringValue: v1.27.3
-        - key: k8s.cluster.name
-          value:
-            stringValue: dev-cluster-receiver
-        - key: k8s.container.name
-          value:
-            stringValue: kube-scheduler
-        - key: k8s.namespace.name
-          value:
-            stringValue: kube-system
-        - key: k8s.node.name
-          value:
-            stringValue: kind-control-plane
-        - key: k8s.pod.name
-          value:
-            stringValue: kube-scheduler-kind-control-plane
-        - key: k8s.pod.uid
-          value:
-            stringValue: e4d549e1-82b4-4b01-b29d-7786a96537cd
-        - key: metric_source
-          value:
-            stringValue: kubernetes
-        - key: receiver
-          value:
-            stringValue: k8scluster
-    schemaUrl: https://opentelemetry.io/schemas/1.18.0
-    scopeMetrics:
-      - metrics:
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asDouble: 0.1
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.cpu_request
-            unit: '{cpu}'
-          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
-            gauge:
-              dataPoints:
-                - asInt: "1"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.ready
-            unit: "1"
-          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
-            gauge:
-              dataPoints:
-                - asInt: "0"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.restarts
-            unit: "1"
-        scope:
-          name: otelcol/k8sclusterreceiver
-          version: v0.85.0
-  - resource:
-      attributes:
-        - key: container.id
-          value:
-            stringValue: 9ff4cb9eed73ea39e7f1f4a85f57427e08227f243b13c883ee17fdd01429f909
-        - key: container.image.name
-          value:
-            stringValue: quay.io/signalfx/splunk-otel-collector
-        - key: container.image.tag
-          value:
-            stringValue: 0.85.0
-        - key: k8s.cluster.name
-          value:
-            stringValue: dev-cluster-receiver
-        - key: k8s.container.name
-          value:
-            stringValue: otel-collector
-        - key: k8s.namespace.name
-          value:
-            stringValue: default
-        - key: k8s.node.name
-          value:
-            stringValue: kind-control-plane
-        - key: k8s.pod.name
-          value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5fc8488d8f6krb6
-        - key: k8s.pod.uid
-          value:
-            stringValue: 70c097f4-e072-450e-bdd4-f99a1298a15b
-        - key: metric_source
-          value:
-            stringValue: kubernetes
-        - key: receiver
-          value:
-            stringValue: k8scluster
-    schemaUrl: https://opentelemetry.io/schemas/1.18.0
-    scopeMetrics:
-      - metrics:
-          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asDouble: 0.2
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.cpu_limit
-            unit: '{cpu}'
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asDouble: 0.2
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.cpu_request
-            unit: '{cpu}'
-          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "524288000"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_limit
-            unit: By
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "524288000"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_request
-            unit: By
-          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
-            gauge:
-              dataPoints:
-                - asInt: "1"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.ready
-            unit: "1"
-          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
-            gauge:
-              dataPoints:
-                - asInt: "0"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.restarts
-            unit: "1"
-        scope:
-          name: otelcol/k8sclusterreceiver
-          version: v0.85.0
-  - resource:
-      attributes:
-        - key: container.id
-          value:
-            stringValue: b19c52cd2aef0e9d19225949300dda3713bf165501aac0c390ce5fbc9c815b72
-        - key: container.image.name
-          value:
-            stringValue: registry.k8s.io/coredns/coredns
-        - key: container.image.tag
-          value:
-            stringValue: v1.10.1
-        - key: k8s.cluster.name
-          value:
-            stringValue: dev-cluster-receiver
-        - key: k8s.container.name
-          value:
-            stringValue: coredns
-        - key: k8s.namespace.name
-          value:
-            stringValue: kube-system
-        - key: k8s.node.name
-          value:
-            stringValue: kind-control-plane
-        - key: k8s.pod.name
-          value:
-            stringValue: coredns-5d78c9869d-rv7vb
-        - key: k8s.pod.uid
-          value:
-            stringValue: ce0723a9-66a8-4553-b922-04af9a55a112
-        - key: metric_source
-          value:
-            stringValue: kubernetes
-        - key: receiver
-          value:
-            stringValue: k8scluster
-    schemaUrl: https://opentelemetry.io/schemas/1.18.0
-    scopeMetrics:
-      - metrics:
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asDouble: 0.1
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.cpu_request
-            unit: '{cpu}'
-          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "178257920"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_limit
-            unit: By
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "73400320"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_request
-            unit: By
-          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
-            gauge:
-              dataPoints:
-                - asInt: "1"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.ready
-            unit: "1"
-          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
-            gauge:
-              dataPoints:
-                - asInt: "0"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.restarts
-            unit: "1"
-        scope:
-          name: otelcol/k8sclusterreceiver
-          version: v0.85.0
-  - resource:
-      attributes:
-        - key: container.id
-          value:
-            stringValue: d90dc90c8069b7b48ae43e09104b275b05d1686f5c760c5dbcb8f84a1df98d4a
+            stringValue: f7981669609b22994bdf59b3bbfac55cdd66ae633473ea865e21a94431d3e940
         - key: container.image.name
           value:
             stringValue: registry.k8s.io/etcd
@@ -1687,7 +2810,7 @@ resourceMetrics:
             stringValue: 3.5.7-0
         - key: k8s.cluster.name
           value:
-            stringValue: dev-cluster-receiver
+            stringValue: dev-operator
         - key: k8s.container.name
           value:
             stringValue: etcd
@@ -1702,7 +2825,7 @@ resourceMetrics:
             stringValue: etcd-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: bdd13d12-3500-43fe-bba7-89b627f4c473
+            stringValue: 2e3eea91-b1bc-4339-bd65-55bc996d1acb
         - key: metric_source
           value:
             stringValue: kubernetes
@@ -1724,87 +2847,6 @@ resourceMetrics:
             gauge:
               dataPoints:
                 - asInt: "104857600"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_request
-            unit: By
-          - description: Whether a container has passed its readiness probe (0 for no, 1 for yes)
-            gauge:
-              dataPoints:
-                - asInt: "1"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.ready
-            unit: "1"
-          - description: How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that.
-            gauge:
-              dataPoints:
-                - asInt: "0"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.restarts
-            unit: "1"
-        scope:
-          name: otelcol/k8sclusterreceiver
-          version: v0.85.0
-  - resource:
-      attributes:
-        - key: container.id
-          value:
-            stringValue: e5c91d1ee88b12b3e8a061703bba40e57941cc5f323a111c7caeb17bed499051
-        - key: container.image.name
-          value:
-            stringValue: registry.k8s.io/coredns/coredns
-        - key: container.image.tag
-          value:
-            stringValue: v1.10.1
-        - key: k8s.cluster.name
-          value:
-            stringValue: dev-cluster-receiver
-        - key: k8s.container.name
-          value:
-            stringValue: coredns
-        - key: k8s.namespace.name
-          value:
-            stringValue: kube-system
-        - key: k8s.node.name
-          value:
-            stringValue: kind-control-plane
-        - key: k8s.pod.name
-          value:
-            stringValue: coredns-5d78c9869d-xrlwj
-        - key: k8s.pod.uid
-          value:
-            stringValue: 5e455da6-6280-4bff-9138-11f908d1e146
-        - key: metric_source
-          value:
-            stringValue: kubernetes
-        - key: receiver
-          value:
-            stringValue: k8scluster
-    schemaUrl: https://opentelemetry.io/schemas/1.18.0
-    scopeMetrics:
-      - metrics:
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asDouble: 0.1
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.cpu_request
-            unit: '{cpu}'
-          - description: Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "178257920"
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: k8s.container.memory_limit
-            unit: By
-          - description: Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details
-            gauge:
-              dataPoints:
-                - asInt: "73400320"
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.memory_request

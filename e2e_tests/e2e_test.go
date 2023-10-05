@@ -1,7 +1,6 @@
 package e2e_tests
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,11 +14,11 @@ import (
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
@@ -31,26 +30,31 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 const testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-e2e-testing"
 
-// TestTracesReception tests the chart with a real k8s cluster.
+// Test_E2E tests the chart with a real k8s cluster.
 // Run the following command prior to running the test locally:
 //
-// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing
+// export K8S_VERSION=v1.28.0
+// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing --config=.github/workflows/configs/e2e-kind-config-$K8S_VERSION.yaml
 // cd e2e_tests/testdata/nodejs
 // docker build -t nodejs_test:latest .
 // kind load docker-image nodejs_test:latest --name kind
-func TestTracesReception(t *testing.T) {
-	// cannot patch "sock-splunk-otel-collector" with kind Instrumentation: Internal error occurred: failed calling webhook "minstrumentation.kb.io": failed to call webhook: Post "https://sock-operator-webhook.default.svc:443/mutate-opentelemetry-io-v1alpha1-instrumentation?timeout=10s": dial tcp 10.96.245.118:443: connect: connection refused
-	t.Skip("Issue with deploying the operator on kind, skipping")
-	var expected ptrace.Traces
-	expectedFile := filepath.Join("testdata", "expected.yaml")
-	expected, err := readTraces(expectedFile)
+func Test_E2E(t *testing.T) {
+	var expectedTraces ptrace.Traces
+	expectedTracesFile := filepath.Join("testdata", "expected_traces.yaml")
+	expectedTraces, err := readTraces(expectedTracesFile)
 	require.NoError(t, err)
+
+	expectedMetricsFile := filepath.Join("testdata", "expected_cluster_receiver.yaml")
+	expectedMetrics, err := readMetrics(expectedMetricsFile)
+	require.NoError(t, err)
+
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(kubeConfig)
@@ -61,7 +65,7 @@ func TestTracesReception(t *testing.T) {
 	require.NoError(t, err)
 	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "operator_values.yaml"))
 	require.NoError(t, err)
-	valuesStr := strings.Replace(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)), 1)
+	valuesStr := strings.ReplaceAll(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)))
 	var values map[string]interface{}
 	err = yaml.Unmarshal([]byte(valuesStr), &values)
 	require.NoError(t, err)
@@ -103,77 +107,20 @@ func TestTracesReception(t *testing.T) {
 
 	deployments := clientset.AppsV1().Deployments("default")
 
-	var deployment *appsv1.Deployment
-	b, err := os.ReadFile(filepath.Join("testdata", "nodejs", "deployment.yaml"))
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	stream, err := os.ReadFile(filepath.Join("testdata", "nodejs", "deployment.yaml"))
 	require.NoError(t, err)
-	err = yaml.Unmarshal(b, &deployment)
+	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment, metav1.CreateOptions{})
+	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	require.NoError(t, err)
 
 	tracesConsumer := new(consumertest.TracesSink)
-	wantEntries := 3 // Minimal number of traces to wait for.
-	waitForTraces(t, wantEntries, tracesConsumer)
-
-	err = writeTraces(t, filepath.Join("testdata", "expected.yaml"), tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1])
-	require.NoError(t, err)
-	require.NoError(t, ptracetest.CompareTraces(expected, tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1],
-		ptracetest.IgnoreSpansOrder(),
-		ptracetest.IgnoreResourceSpansOrder(),
-	),
-	)
-}
-
-// TestClusterReceiverReception tests the chart with a real k8s cluster.
-// Run the following command prior to running the test locally:
-//
-//	kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing
-func TestClusterReceiverReception(t *testing.T) {
-	expectedFile := filepath.Join("testdata", "expected_cluster_receiver.yaml")
-	expected, err := readMetrics(expectedFile)
-	require.NoError(t, err)
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	clientset, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-
-	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
-	chart, err := loader.Load(chartPath)
-	require.NoError(t, err)
-
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "cluster_receiver_values.yaml"))
-	require.NoError(t, err)
-	valuesStr := strings.Replace(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)), 1)
-	var values map[string]interface{}
-	err = yaml.Unmarshal([]byte(valuesStr), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		fmt.Sprintf(format, v)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	require.NoError(t, err)
-
-	require.Eventually(t, func() bool {
-		di, err := clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
-		require.NoError(t, err)
-		for _, d := range di.Items {
-			if d.Status.ReadyReplicas != d.Status.Replicas {
-				return false
-			}
-		}
-		return true
-	}, 5*time.Minute, 10*time.Second)
-
 	metricsConsumer := new(consumertest.MetricsSink)
-	wantEntries := 3 // Minimal number of metrics to wait for.
-	waitForMetrics(t, wantEntries, metricsConsumer)
+	logsConsumer := new(consumertest.LogsSink)
+	wantEntries := 3 // Minimal number of traces, metrics, and logs to wait for.
+	waitForData(t, wantEntries, tracesConsumer, metricsConsumer, logsConsumer)
+
 	replaceWithStar := func(string) string { return "*" }
 	shortenNames := func(value string) string {
 		if strings.HasPrefix(value, "kube-proxy") {
@@ -203,88 +150,74 @@ func TestClusterReceiverReception(t *testing.T) {
 	containerImageShorten := func(value string) string {
 		return value[(strings.LastIndex(value, "/") + 1):]
 	}
-	require.NoError(t, pmetrictest.CompareMetrics(expected, metricsConsumer.AllMetrics()[len(metricsConsumer.AllMetrics())-1],
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues("k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	),
+
+	latestTrace := tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1]
+	actualSpan := latestTrace.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
+	host, _ := actualSpan.Attributes().Get("http.host")
+	assert.Equal(t, "localhost:3000", host.AsString())
+
+	statusCode, _ := actualSpan.Attributes().Get("http.status_code")
+	assert.Equal(t, "200", statusCode.AsString())
+
+	expectedSpan := expectedTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
+	expectedSpan.Attributes().Range(func(k string, _ pcommon.Value) bool {
+		_, ok := actualSpan.Attributes().Get(k)
+		assert.True(t, ok)
+		return true
+	})
+
+	require.NoError(t,
+		pmetrictest.CompareMetrics(expectedMetrics, metricsConsumer.AllMetrics()[len(metricsConsumer.AllMetrics())-1],
+			pmetrictest.IgnoreTimestamp(),
+			pmetrictest.IgnoreStartTimestamp(),
+			pmetrictest.IgnoreMetricValues("k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"),
+			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
+			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+			pmetrictest.IgnoreScopeVersion(),
+			pmetrictest.IgnoreResourceMetricsOrder(),
+			pmetrictest.IgnoreMetricsOrder(),
+			pmetrictest.IgnoreScopeMetricsOrder(),
+			pmetrictest.IgnoreMetricDataPointsOrder(),
+		),
 	)
 }
 
-func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
+func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *consumertest.MetricsSink, lc *consumertest.LogsSink) {
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 
-	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating traces receiver")
-	defer func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	}()
+	_, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
+	require.NoError(t, err)
+	_, err = f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
+	require.NoError(t, err)
+	logsReceiver, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
+	require.NoError(t, err)
 
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces in %d minutes", entriesNum,
-		len(tc.AllTraces()), timeoutMinutes)
-}
-
-func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) {
-	f := otlpreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating traces receiver")
-	defer func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	}()
-
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(mc.AllMetrics()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d metrics in %d minutes", entriesNum,
-		len(mc.AllMetrics()), timeoutMinutes)
-}
-
-func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
-	f := otlpreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, logsReceiver.Start(context.Background(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating logs receiver")
 	defer func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
+		assert.NoError(t, logsReceiver.Shutdown(context.Background()))
 	}()
 
 	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
-		return len(lc.AllLogs()) > entriesNum
+		return len(tc.AllTraces()) > entriesNum && len(mc.AllMetrics()) > entriesNum //&& len(lc.AllLogs()) > entriesNum
 	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
-		len(lc.AllLogs()), timeoutMinutes)
+		"failed to receive %d entries,  received %d traces, %d metrics, %d logs in %d minutes", entriesNum,
+		len(tc.AllTraces()), len(mc.AllMetrics()), len(lc.AllLogs()), timeoutMinutes)
 }
+
 func hostEndpoint(t *testing.T) string {
 	if runtime.GOOS == "darwin" {
 		return "host.docker.internal"
@@ -322,32 +255,6 @@ func readMetrics(filePath string) (pmetric.Metrics, error) {
 	}
 	unmarshaller := &pmetric.JSONUnmarshaler{}
 	return unmarshaller.UnmarshalMetrics(b)
-}
-
-// writeTraces writes a ptrace.Traces to the specified file in YAML format.
-func writeTraces(t *testing.T, filePath string, traces ptrace.Traces) error {
-	unmarshaler := &ptrace.JSONMarshaler{}
-	fileBytes, err := unmarshaler.MarshalTraces(traces)
-	if err != nil {
-		return err
-	}
-	var jsonVal map[string]interface{}
-	if err = json.Unmarshal(fileBytes, &jsonVal); err != nil {
-		return err
-	}
-	b := &bytes.Buffer{}
-	enc := yaml.NewEncoder(b)
-	enc.SetIndent(2)
-	if err := enc.Encode(jsonVal); err != nil {
-		return err
-	}
-	if err := os.WriteFile(filePath, b.Bytes(), 0600); err != nil {
-		return err
-	}
-	t.Logf("Golden file successfully written to %s.", filePath)
-	t.Log("NOTE: The wwriteTraces call must be removed in order to pass the test.")
-	t.Fail()
-	return nil
 }
 
 // readTraces reads a ptrace.Traces from the specified YAML or JSON file.

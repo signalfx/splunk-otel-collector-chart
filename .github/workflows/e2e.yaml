@@ -12,6 +12,7 @@ jobs:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-e2e-testing
     strategy:
+      fail-fast: false
       matrix:
         k8s-version:
           - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
@@ -41,10 +42,13 @@ jobs:
           node_image: kindest/node:${{ matrix.k8s-version }}
           kubectl_version: ${{ matrix.k8s-version }}
           cluster_name: kind
-          config: ./.github/workflows/configs/e2e-kind-config.yaml
+          config: ./.github/workflows/configs/e2e-kind-config-${{ matrix.k8s-version }}.yaml
       - name: Fix kubelet TLS server certificates
         run: |
           kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+      - name: Deploy cert-manager
+        run: |
+          make cert-manager
       - name: Build Node.js docker image
         run: |
           cd e2e_tests/testdata/nodejs
