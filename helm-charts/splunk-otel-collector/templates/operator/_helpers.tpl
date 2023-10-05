@@ -119,11 +119,7 @@ Helper to check if env (list of dictionaries) has an environment variable (dicti
     {{- end -}}
   {{- end -}}
 
-  {{- if $found -}}
-    {{- "true" -}}
-  {{- else -}}
-    {{- "false" -}}
-  {{- end -}}
+  {{- $found -}}
 {{- end -}}
 
 {{/*
