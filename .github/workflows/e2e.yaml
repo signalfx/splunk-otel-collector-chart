@@ -43,9 +43,6 @@ jobs:
           kubectl_version: ${{ matrix.k8s-version }}
           cluster_name: kind
           config: ./.github/workflows/configs/e2e-kind-config-${{ matrix.k8s-version }}.yaml
-      - name: Fix kubelet TLS server certificates
-        run: |
-          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
       - name: Deploy cert-manager
         run: |
           make cert-manager
@@ -54,6 +51,9 @@ jobs:
           cd e2e_tests/testdata/nodejs
           docker build -t nodejs_test:latest .
           kind load docker-image nodejs_test:latest --name kind
+      - name: Fix kubelet TLS server certificates
+        run: |
+          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
       - name: run e2e tests
         run: |
           cd e2e_tests

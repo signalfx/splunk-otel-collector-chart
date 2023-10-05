@@ -1,9 +1,5 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-kubeadmConfigPatches:
-  - |
-    kind: KubeletConfiguration
-    serverTLSBootstrap: true
 nodes:
   - role: control-plane
     image: kindest/node:v1.24.15
@@ -13,6 +9,9 @@ nodes:
         nodeRegistration:
           kubeletExtraArgs:
             node-labels: "ingress-ready=true"
+      - |
+        kind: KubeletConfiguration
+        serverTLSBootstrap: true
     extraPortMappings:
       - containerPort: 80
         hostPort: 80
