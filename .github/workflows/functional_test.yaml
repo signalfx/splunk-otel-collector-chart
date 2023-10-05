@@ -118,7 +118,7 @@ jobs:
       - name: Print splunk-otel-collector logs
         if: always()
         run: |
-          # Echo logs for the collector (agent,cluster-receiver,gateway) for visability
+          # Echo logs for the collector (agent,cluster-receiver,gateway) for visibility
           pods=$(kubectl get pods -l app=splunk-otel-collector -o jsonpath='{.items[*].metadata.name}')
           for pod in $pods; do
             echo "Logs for $pod:"
