@@ -40,7 +40,10 @@ const testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-e2e-testing
 // TestTracesReception tests the chart with a real k8s cluster.
 // Run the following command prior to running the test locally:
 //
-//	kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing
+// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing
+// cd e2e_tests/testdata/nodejs
+// docker build -t nodejs_test:latest .
+// kind load docker-image nodejs_test:latest --name kind
 func TestTracesReception(t *testing.T) {
 	// cannot patch "sock-splunk-otel-collector" with kind Instrumentation: Internal error occurred: failed calling webhook "minstrumentation.kb.io": failed to call webhook: Post "https://sock-operator-webhook.default.svc:443/mutate-opentelemetry-io-v1alpha1-instrumentation?timeout=10s": dial tcp 10.96.245.118:443: connect: connection refused
 	t.Skip("Issue with deploying the operator on kind, skipping")
@@ -262,6 +265,25 @@ func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) 
 	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
 		"failed to receive %d entries,  received %d metrics in %d minutes", entriesNum,
 		len(mc.AllMetrics()), timeoutMinutes)
+}
+
+func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
+	f := otlpreceiver.NewFactory()
+	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
+
+	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, err, "failed creating logs receiver")
+	defer func() {
+		assert.NoError(t, rcvr.Shutdown(context.Background()))
+	}()
+
+	timeoutMinutes := 3
+	require.Eventuallyf(t, func() bool {
+		return len(lc.AllLogs()) > entriesNum
+	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
+		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
+		len(lc.AllLogs()), timeoutMinutes)
 }
 func hostEndpoint(t *testing.T) string {
 	if runtime.GOOS == "darwin" {

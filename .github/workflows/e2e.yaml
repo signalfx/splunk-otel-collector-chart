@@ -45,11 +45,6 @@ jobs:
       - name: Fix kubelet TLS server certificates
         run: |
           kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: nodejs_test
-          path: /tmp
       - name: Build Node.js docker image
         run: |
           cd e2e_tests/testdata/nodejs
