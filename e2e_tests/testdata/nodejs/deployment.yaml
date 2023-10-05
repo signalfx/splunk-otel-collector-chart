@@ -1,0 +1,24 @@
+objectmeta:
+  name: nodejs-test
+  namespace: default
+  labels:
+    app: nodejs-test
+  annotations:
+    instrumentation.opentelemetry.io/inject-nodejs: "true"
+spec:
+  selector:
+    matchlabels:
+      app: nodejs-test
+  template:
+    objectmeta:
+      name: nodejs-test
+      namespace: default
+      labels:
+        app: nodejs-test
+    spec:
+      containers:
+        - name: nodejs-test
+          image: nodejs_test:latest
+          imagepullpolicy: Never
+      restartpolicy: Always
+  paused: false

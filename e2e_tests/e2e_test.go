@@ -29,7 +29,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -57,32 +56,12 @@ func TestTracesReception(t *testing.T) {
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
-	values := map[string]interface{}{
-		"environment": "dev",
-		"operator": map[string]interface{}{
-			"enabled": true,
-		},
-		"certmanager": map[string]interface{}{
-			"enabled": true,
-		},
-		"clusterName": "dev",
-		"splunkObservability": map[string]interface{}{
-			"realm":       "CHANGEME",
-			"accessToken": "CHANGEME",
-		},
-		"agent": map[string]interface{}{
-			"config": map[string]interface{}{
-				"exporters": map[string]interface{}{
-					"otlp": map[string]interface{}{
-						"endpoint": fmt.Sprintf("%s:4317", hostEndpoint(t)),
-						"tls": map[string]interface{}{
-							"insecure": true,
-						},
-					},
-				},
-			},
-		},
-	}
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "operator_values.yaml"))
+	require.NoError(t, err)
+	valuesStr := strings.Replace(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)), 1)
+	var values map[string]interface{}
+	err = yaml.Unmarshal([]byte(valuesStr), &values)
+	require.NoError(t, err)
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
@@ -121,44 +100,11 @@ func TestTracesReception(t *testing.T) {
 
 	deployments := clientset.AppsV1().Deployments("default")
 
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nodejs-test",
-			Namespace: "default",
-			Labels: map[string]string{
-				"app": "nodejs-test",
-			},
-			Annotations: map[string]string{
-				"instrumentation.opentelemetry.io/inject-nodejs": "true",
-			},
-		},
-		Spec: appsv1.DeploymentSpec{
-
-			Template: v1.PodTemplateSpec{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name:            "nodejs-test",
-							Image:           "nodejs_test:latest",
-							ImagePullPolicy: v1.PullNever,
-						},
-					},
-					RestartPolicy: v1.RestartPolicyAlways,
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "nodejs-test",
-					Namespace: "default",
-					Labels: map[string]string{
-						"app": "nodejs-test",
-					},
-				},
-			},
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app": "nodejs-test",
-				}},
-		},
-	}
+	var deployment *appsv1.Deployment
+	b, err := os.ReadFile(filepath.Join("testdata", "nodejs", "deployment.yaml"))
+	require.NoError(t, err)
+	err = yaml.Unmarshal(b, &deployment)
+	require.NoError(t, err)
 	_, err = deployments.Create(context.Background(), deployment, metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -191,34 +137,13 @@ func TestClusterReceiverReception(t *testing.T) {
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
-	values := map[string]interface{}{
-		"clusterName": "dev-cluster-receiver",
-		"splunkObservability": map[string]interface{}{ // those values are ignored as we override the exporters.
-			"realm":       "CHANGEME",
-			"accessToken": "CHANGEME",
-		},
-		"clusterReceiver": map[string]interface{}{
-			"config": map[string]interface{}{
-				"exporters": map[string]interface{}{
-					"otlp": map[string]interface{}{
-						"endpoint": fmt.Sprintf("%s:4317", hostEndpoint(t)),
-						"tls": map[string]interface{}{
-							"insecure": true,
-						},
-					},
-				},
-				"service": map[string]interface{}{
-					"pipelines": map[string]interface{}{
-						"metrics": map[string]interface{}{
-							"exporters": []string{
-								"otlp",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "cluster_receiver_values.yaml"))
+	require.NoError(t, err)
+	valuesStr := strings.Replace(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)), 1)
+	var values map[string]interface{}
+	err = yaml.Unmarshal([]byte(valuesStr), &values)
+	require.NoError(t, err)
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {

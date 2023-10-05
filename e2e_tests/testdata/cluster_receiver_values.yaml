@@ -1,0 +1,16 @@
+clusterName: dev-cluster-receiver
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+clusterReceiver:
+  config:
+    exporters:
+      otlp:
+        endpoint: $ENDPOINT
+        tls:
+           insecure: true
+    service:
+      pipelines:
+        metrics:
+          exporters:
+            - otlp
