@@ -1,0 +1,61 @@
+name: e2e-tests
+
+
+on: pull_request
+
+env:
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+jobs:
+  kubernetes-test:
+    env:
+      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-e2e-testing
+    strategy:
+      matrix:
+        k8s-version:
+          - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
+          - v1.27.4  # Support: 28 Apr 2024 - 28 Jun 2024
+          - v1.26.7 # Support: 28 Dec 2023 - 28 Feb 2024
+          - v1.25.12 # Support: 27 Aug 2023 - 27 Oct 2023
+          - v1.24.16  # Support: 28 May 2023 - 28 Jul 2023
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          node_image: kindest/node:${{ matrix.k8s-version }}
+          kubectl_version: ${{ matrix.k8s-version }}
+          cluster_name: kind
+          config: ./.github/workflows/configs/e2e-kind-config.yaml
+      - name: Fix kubelet TLS server certificates
+        run: |
+          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nodejs_test
+          path: /tmp
+      - name: Build Node.js docker image
+        run: |
+          cd e2e_tests/testdata/nodejs
+          docker build -t nodejs_test:latest .
+          kind load docker-image nodejs_test:latest --name kind
+      - name: run e2e tests
+        run: |
+          cd e2e_tests
+          go test -v
