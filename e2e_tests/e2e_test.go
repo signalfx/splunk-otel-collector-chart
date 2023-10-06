@@ -94,16 +94,7 @@ func Test_E2E(t *testing.T) {
 		}, 3*time.Minute, 30*time.Second)
 	}
 
-	require.Eventually(t, func() bool {
-		di, err := clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
-		require.NoError(t, err)
-		for _, d := range di.Items {
-			if d.Status.ReadyReplicas != d.Status.Replicas {
-				return false
-			}
-		}
-		return true
-	}, 5*time.Minute, 10*time.Second)
+	waitForAllDeploymentsToStart(t, clientset)
 
 	deployments := clientset.AppsV1().Deployments("default")
 
@@ -114,6 +105,8 @@ func Test_E2E(t *testing.T) {
 	require.NoError(t, err)
 	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	require.NoError(t, err)
+
+	waitForAllDeploymentsToStart(t, clientset)
 
 	tracesConsumer := new(consumertest.TracesSink)
 	metricsConsumer := new(consumertest.MetricsSink)
@@ -206,6 +199,19 @@ func Test_E2E(t *testing.T) {
 			pmetrictest.IgnoreMetricDataPointsOrder(),
 		),
 	)
+}
+
+func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset) {
+	require.Eventually(t, func() bool {
+		di, err := clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
+		require.NoError(t, err)
+		for _, d := range di.Items {
+			if d.Status.ReadyReplicas != d.Status.Replicas {
+				return false
+			}
+		}
+		return true
+	}, 5*time.Minute, 10*time.Second)
 }
 
 func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *consumertest.MetricsSink, lc *consumertest.LogsSink) {
