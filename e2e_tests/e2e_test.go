@@ -72,7 +72,7 @@ func Test_E2E(t *testing.T) {
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		fmt.Printf(format, v)
+		fmt.Printf(format+"\n", v)
 	}); err != nil {
 		require.NoError(t, err)
 	}
@@ -143,6 +143,21 @@ func Test_E2E(t *testing.T) {
 		}
 		if strings.HasPrefix(value, "sock-splunk-otel-collector-k8s-cluster-receiver") {
 			return "sock-splunk-otel-collector-k8s-cluster-receiver"
+		}
+		if strings.HasPrefix(value, "cert-manager-cainjector") {
+			return "cert-manager-cainjector"
+		}
+		if strings.HasPrefix(value, "sock-operator") {
+			return "sock-operator"
+		}
+		if strings.HasPrefix(value, "nodejs-test") {
+			return "nodejs-test"
+		}
+		if strings.HasPrefix(value, "cert-manager-webhook") {
+			return "cert-manager-webhook"
+		}
+		if strings.HasPrefix(value, "cert-manager") {
+			return "cert-manager"
 		}
 
 		return value

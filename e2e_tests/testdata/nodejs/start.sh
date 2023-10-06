@@ -14,6 +14,6 @@ function stop()
 trap stop SIGINT
 
 while [ $loop -eq 0 ]; do
-  curl -q http://localhost:3000
+  curl -s http://localhost:3000
   sleep 1
 done

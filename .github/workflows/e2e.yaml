@@ -43,6 +43,9 @@ jobs:
           kubectl_version: ${{ matrix.k8s-version }}
           cluster_name: kind
           config: ./.github/workflows/configs/e2e-kind-config-${{ matrix.k8s-version }}.yaml
+      - name: Update dependencies
+        run: |
+          make repo-update dep-build
       - name: Deploy cert-manager
         run: |
           make cert-manager
