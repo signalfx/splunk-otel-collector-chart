@@ -63,7 +63,7 @@ func Test_E2E(t *testing.T) {
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "operator_values.yaml"))
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "test_values.yaml"))
 	require.NoError(t, err)
 	valuesStr := strings.ReplaceAll(string(valuesBytes), "$ENDPOINT", fmt.Sprintf("%s:4317", hostEndpoint(t)))
 	var values map[string]interface{}
