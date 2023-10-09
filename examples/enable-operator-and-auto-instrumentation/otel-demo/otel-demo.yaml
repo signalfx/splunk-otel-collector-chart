@@ -6725,6 +6725,11 @@ spec:
               value: 'opentelemetry-demo-featureflagservice:50053'
             - name: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
               value: python
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['app.kubernetes.io/component']
           resources:
             limits:
               memory: 500Mi

@@ -59,6 +59,11 @@ function update_otel_demo {
     yq eval -i '
         (select(.kind == "Deployment") | .spec.template.spec.containers[].env) |= map(select(.name | test("^OTEL_") | not))
     ' "$OTEL_DEMO_PATH"
+    # Add back OTEL_SERVICE_NAME env var ONLY to opentelemetry-demo-recommendationservice deployment with the specified value.
+    # This python deployment requires this env var to start the application, see: https://github.com/open-telemetry/opentelemetry-demo/blob/fc01d8f46f9d2a1cac6a4e674662fbfe8b66f3c4/src/recommendationservice/recommendation_server.py#L127
+    yq eval -i '
+        (select(.kind == "Deployment" and .metadata.name == "opentelemetry-demo-recommendationservice") | .spec.template.spec.containers[]) |= .env += [{"name": "OTEL_SERVICE_NAME", "valueFrom": {"fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.labels['\''app.kubernetes.io/component'\'']"}}}]
+    ' "$OTEL_DEMO_PATH"
 
     # Remove objects by name for components we want to exclude
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-otelcol")' "$OTEL_DEMO_PATH"
