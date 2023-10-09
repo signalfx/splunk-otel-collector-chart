@@ -78,11 +78,6 @@ jobs:
         run: |
           make repo-update dep-build
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
-          # TODO: Remove NETWORK_EXPLORER_ENABLED after https://github.com/signalfx/splunk-otel-collector-chart/issues/896
-          if [[ "$KUBERNETES_VERSION" == *1.24* ]]; then
-            echo "Detected Kubernetes version 1.24. Setting NETWORK_EXPLORER_ENABLED to true."
-            export NETWORK_EXPLORER_ENABLED=true
-          fi
           ci_scripts/deploy_collector.sh
 
       - name: Deploy log generator
