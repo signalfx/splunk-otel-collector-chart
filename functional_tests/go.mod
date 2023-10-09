@@ -1,4 +1,7 @@
-module github.com/signalfx/splunk-otel-collector-chart/e2e_tests
+// Copyright Splunk Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 
 go 1.20
 

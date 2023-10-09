@@ -1,4 +1,7 @@
-package e2e_tests
+// Copyright Splunk Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package functional_tests
 
 import (
 	"context"
@@ -35,17 +38,17 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-e2e-testing"
+const testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-functional-testing"
 
-// Test_E2E tests the chart with a real k8s cluster.
+// Test_Functions tests the chart with a real k8s cluster.
 // Run the following command prior to running the test locally:
 //
 // export K8S_VERSION=v1.28.0
-// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-e2e-testing --config=.github/workflows/configs/e2e-kind-config-$K8S_VERSION.yaml
-// cd e2e_tests/testdata/nodejs
+// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
+// cd functional_tests/testdata/nodejs
 // docker build -t nodejs_test:latest .
 // kind load docker-image nodejs_test:latest --name kind
-func Test_E2E(t *testing.T) {
+func Test_Functions(t *testing.T) {
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join("testdata", "expected_traces.yaml")
 	expectedTraces, err := readTraces(expectedTracesFile)
