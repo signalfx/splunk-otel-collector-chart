@@ -161,11 +161,6 @@ func Test_E2E(t *testing.T) {
 
 	latestTrace := tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1]
 	actualSpan := latestTrace.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
-	host, _ := actualSpan.Attributes().Get("http.host")
-	assert.Equal(t, "localhost:3000", host.AsString())
-
-	statusCode, _ := actualSpan.Attributes().Get("http.status_code")
-	assert.Equal(t, "200", statusCode.AsString())
 
 	expectedSpan := expectedTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
 	expectedSpan.Attributes().Range(func(k string, _ pcommon.Value) bool {

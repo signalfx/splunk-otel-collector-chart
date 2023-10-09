@@ -1,7 +1,10 @@
 name: e2e-tests
 
 
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches: [ main ]
 
 env:
   # Make sure to exit early if cache segment download times out after 2 minutes.
