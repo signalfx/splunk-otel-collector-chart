@@ -22,7 +22,7 @@ dependencies:
   # - Avoid uppercase letters in names/aliases, they cause install failure due to subchart resource naming
   # - Avoid hyphen characters in names/aliases, they introduce template rendering complications (https://github.com/helm/helm/issues/2192)
   - name: cert-manager
-    version: v1.13.0
+    version: v1.13.1
     alias: certmanager
     repository: https://charts.jetstack.io
     condition: certmanager.enabled
