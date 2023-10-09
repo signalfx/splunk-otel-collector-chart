@@ -60,14 +60,16 @@ function update_otel_demo {
         (select(.kind == "Deployment") | .spec.template.spec.containers[].env) |= map(select(.name | test("^OTEL_") | not))
     ' "$OTEL_DEMO_PATH"
 
-    # Remove objects named opentelemetry-demo-otelcol
+    # Remove objects by name for components we want to exclude
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-otelcol")' "$OTEL_DEMO_PATH"
-
-    # Remove objects named opentelemetry-demo-frontendproxy
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-frontendproxy")' "$OTEL_DEMO_PATH"
-
-    # Remove objects named opentelemetry-demo-grafana-test
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-grafana")' "$OTEL_DEMO_PATH"
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-grafana-test")' "$OTEL_DEMO_PATH"
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-prometheus-server")' "$OTEL_DEMO_PATH"
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-jaeger")' "$OTEL_DEMO_PATH"
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-jaeger-collector")' "$OTEL_DEMO_PATH"
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-jaeger-query")' "$OTEL_DEMO_PATH"
+    yq eval -i 'select(.metadata.name != "opentelemetry-demo-jaeger-agent")' "$OTEL_DEMO_PATH"
 
     echo "OpenTelemetry Demo update completed!"
 }
