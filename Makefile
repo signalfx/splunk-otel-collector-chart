@@ -74,6 +74,11 @@ lint: ## Lint the Helm chart with ct
 	@echo "Linting Helm chart..."
 	ct lint --config=ct.yaml || exit 1
 
+.PHONY: pre-commit
+pre-commit: render ## Test the Helm chart with pre-commit
+	@echo "Checking the Helm chart with pre-commit..."
+	pre-commit run --all-files || exit 1
+
 ##@ Changelog
 # Tasks related to changelog management
 
