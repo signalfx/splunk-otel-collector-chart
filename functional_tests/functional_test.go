@@ -75,7 +75,7 @@ func Test_Functions(t *testing.T) {
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		fmt.Printf(format+"\n", v)
+		t.Logf(format, v)
 	}); err != nil {
 		require.NoError(t, err)
 	}
@@ -84,14 +84,14 @@ func Test_Functions(t *testing.T) {
 	install.ReleaseName = "sock"
 	_, err = install.Run(chart, values)
 	if err != nil {
-		fmt.Printf("error reported during helm install: %v\n", err)
+		t.Logf("error reported during helm install: %v", err)
 		retryUpgrade := action.NewUpgrade(actionConfig)
 		retryUpgrade.Namespace = "default"
 		retryUpgrade.Install = true
 		require.Eventually(t, func() bool {
 			_, err = retryUpgrade.Run("sock", chart, values)
 			if err != nil {
-				fmt.Printf("error reported during helm upgrade: %v\n", err)
+				t.Logf("error reported during helm upgrade: %v\n", err)
 			}
 			return err == nil
 		}, 3*time.Minute, 30*time.Second)
