@@ -174,9 +174,16 @@ func Test_Functions(t *testing.T) {
 		assert.True(t, ok)
 		return true
 	})
+	var selected pmetric.Metrics
+	for _, m := range metricsConsumer.AllMetrics() {
+		if m.ResourceMetrics().Len() == expectedMetrics.ResourceMetrics().Len() {
+			selected = m
+			break
+		}
+	}
 
 	require.NoError(t,
-		pmetrictest.CompareMetrics(expectedMetrics, metricsConsumer.AllMetrics()[len(metricsConsumer.AllMetrics())-1],
+		pmetrictest.CompareMetrics(expectedMetrics, selected,
 			pmetrictest.IgnoreTimestamp(),
 			pmetrictest.IgnoreStartTimestamp(),
 			pmetrictest.IgnoreMetricValues("k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"),

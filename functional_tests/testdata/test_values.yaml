@@ -25,6 +25,8 @@ clusterReceiver:
     service:
       pipelines:
         metrics:
+          # Remove batch processor.
+          processors: [ memory_limiter, resource, resource/k8s_cluster ]
           exporters:
             - otlp
 environment: dev
