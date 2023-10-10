@@ -19,6 +19,8 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 CHLOGGEN ?= $(LOCALBIN)/chloggen
 
+CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
+
 # The help target as provided
 .PHONY: help
 help: ## Display Makefile help information for all actions
@@ -95,8 +97,6 @@ chlog-preview: chlog-validate ## Provide a preview of the generated CHANGELOG.md
 chlog-update: chlog-validate ## Creates an update to CHANGELOG.md for a release entry from content in .chloggen
 	$(CHLOGGEN) update --version "[$(VERSION)] - $$(date +'%Y-%m-%d')" || exit 1; \
 	ci_scripts/chloggen-update.sh || exit 1
-
-CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
 
 .PHONY: cert-manager
 cert-manager: cmctl

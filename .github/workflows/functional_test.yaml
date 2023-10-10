@@ -3,7 +3,7 @@ name: Splunk Platform Functional Test
 on: pull_request
 
 jobs:
-  e2e-test:
+  functional-test:
     name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
     runs-on: ubuntu-20.04
     strategy:
