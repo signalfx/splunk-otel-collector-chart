@@ -231,6 +231,8 @@ data:
           id: clean-up-log-record
           to: body
           type: move
+        - field: attributes.time
+          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true

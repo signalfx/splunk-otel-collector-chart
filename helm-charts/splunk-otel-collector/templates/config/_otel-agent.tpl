@@ -416,6 +416,8 @@ receivers:
         id: clean-up-log-record
         from: attributes.log
         to: body
+      - type: remove
+        field: attributes.time
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
