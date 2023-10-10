@@ -414,8 +414,12 @@ receivers:
       # Clean up log record
       - type: move
         id: clean-up-log-record
+        output: clean-up-time-attribute
         from: attributes.log
         to: body
+      - type: remove
+        id: clean-up-time-attribute
+        field: attributes.time
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}

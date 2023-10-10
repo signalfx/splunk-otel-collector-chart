@@ -237,8 +237,12 @@ data:
           type: move
         - from: attributes.log
           id: clean-up-log-record
+          output: clean-up-time-attribute
           to: body
           type: move
+        - field: attributes.time
+          id: clean-up-time-attribute
+          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true
