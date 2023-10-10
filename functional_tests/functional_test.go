@@ -41,10 +41,13 @@ import (
 const testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-functional-testing"
 
 // Test_Functions tests the chart with a real k8s cluster.
-// Run the following command prior to running the test locally:
+// Run the following commands prior to running the test locally:
 //
+// export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
 // export K8S_VERSION=v1.28.0
 // kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
+// kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+// make cert-manager
 // cd functional_tests/testdata/nodejs
 // docker build -t nodejs_test:latest .
 // kind load docker-image nodejs_test:latest --name kind
