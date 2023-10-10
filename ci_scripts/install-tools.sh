@@ -76,7 +76,7 @@ install_go() {
 }
 
 # install brew-based tools
-for tool in kubectl helm pre-commit go; do
+for tool in kubectl helm chart-testing pre-commit go; do
   install "$tool" brew
 done
 
