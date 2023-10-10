@@ -1,0 +1,34 @@
+---
+clusterName: dev-operator
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: $ENDPOINT
+        tls:
+           insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+clusterReceiver:
+  config:
+    exporters:
+      otlp:
+        endpoint: $ENDPOINT
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        metrics:
+          # Remove batch processor.
+          processors: [ memory_limiter, resource, resource/k8s_cluster ]
+          exporters:
+            - otlp
+environment: dev
+operator:
+  enabled: true

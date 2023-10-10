@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-test
+  template:
+    metadata:
+      name: nodejs-test
+      labels:
+        app: nodejs-test
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+    spec:
+      containers:
+        - image: nodejs_test:latest
+          name: nodejs-test
+          imagePullPolicy: Never

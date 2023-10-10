@@ -95,3 +95,28 @@ chlog-preview: chlog-validate ## Provide a preview of the generated CHANGELOG.md
 chlog-update: chlog-validate ## Creates an update to CHANGELOG.md for a release entry from content in .chloggen
 	$(CHLOGGEN) update --version "[$(VERSION)] - $$(date +'%Y-%m-%d')" || exit 1; \
 	ci_scripts/chloggen-update.sh || exit 1
+
+CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
+
+.PHONY: cert-manager
+cert-manager: cmctl
+	# Consider using cmctl to install the cert-manager once install command is not experimental
+	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml
+	$(CMCTL) check api --wait=5m
+
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+CMCTL = $(shell pwd)/bin/cmctl
+.PHONY: cmctl
+cmctl:
+	@{ \
+	set -e ;\
+	if (`pwd`/bin/cmctl version | grep ${CERTMANAGER_VERSION}) > /dev/null 2>&1 ; then \
+		exit 0; \
+	fi ;\
+	TMP_DIR=$$(mktemp -d) ;\
+	curl -L -o $$TMP_DIR/cmctl.tar.gz https://github.com/jetstack/cert-manager/releases/download/$(CERTMANAGER_VERSION)/cmctl-`go env GOOS`-`go env GOARCH`.tar.gz ;\
+	tar xzf $$TMP_DIR/cmctl.tar.gz -C $$TMP_DIR ;\
+	[ -d bin ] || mkdir bin ;\
+	mv $$TMP_DIR/cmctl $(CMCTL) ;\
+	rm -rf $$TMP_DIR ;\
+	}
