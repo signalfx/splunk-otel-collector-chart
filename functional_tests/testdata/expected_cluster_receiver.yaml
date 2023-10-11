@@ -29,7 +29,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -60,7 +60,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -91,7 +91,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -122,7 +122,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -153,7 +153,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -184,7 +184,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -214,7 +214,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -245,7 +245,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.current_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)
             gauge:
               dataPoints:
@@ -253,7 +253,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.desired_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod
             gauge:
               dataPoints:
@@ -261,7 +261,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.misscheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready
             gauge:
               dataPoints:
@@ -269,10 +269,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.ready_nodes
-            unit: "1"
+            unit: "{node}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -303,7 +303,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.current_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)
             gauge:
               dataPoints:
@@ -311,7 +311,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.desired_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod
             gauge:
               dataPoints:
@@ -319,7 +319,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.misscheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready
             gauge:
               dataPoints:
@@ -327,10 +327,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.ready_nodes
-            unit: "1"
+            unit: "{node}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -361,7 +361,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.current_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)
             gauge:
               dataPoints:
@@ -369,7 +369,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.desired_scheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod
             gauge:
               dataPoints:
@@ -377,7 +377,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.misscheduled_nodes
-            unit: "1"
+            unit: "{node}"
           - description: Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready
             gauge:
               dataPoints:
@@ -385,10 +385,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.daemonset.ready_nodes
-            unit: "1"
+            unit: "{node}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -419,7 +419,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -427,10 +427,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -461,7 +461,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -469,10 +469,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -503,7 +503,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -511,10 +511,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -545,7 +545,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -553,10 +553,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -587,7 +587,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -595,10 +595,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -629,7 +629,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -637,10 +637,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -671,7 +671,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -679,10 +679,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -713,7 +713,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this deployment
             gauge:
               dataPoints:
@@ -721,10 +721,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.deployment.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -755,7 +755,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -763,10 +763,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -797,7 +797,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -805,10 +805,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -839,7 +839,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -847,10 +847,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -881,7 +881,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -889,10 +889,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -923,7 +923,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -931,10 +931,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -965,7 +965,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -973,10 +973,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1007,7 +1007,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -1015,10 +1015,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1049,7 +1049,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.available
-            unit: "1"
+            unit: "{pod}"
           - description: Number of desired pods in this replicaset
             gauge:
               dataPoints:
@@ -1057,10 +1057,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.replicaset.desired
-            unit: "1"
+            unit: "{pod}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1097,7 +1097,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1134,7 +1134,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1171,7 +1171,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1208,7 +1208,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1245,7 +1245,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1282,7 +1282,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1319,7 +1319,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1356,7 +1356,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1393,7 +1393,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1430,7 +1430,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1467,7 +1467,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1504,7 +1504,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1541,7 +1541,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1578,7 +1578,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1615,7 +1615,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: k8s.cluster.name
@@ -1652,7 +1652,7 @@ resourceMetrics:
             unit: "1"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -1738,10 +1738,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -1795,10 +1795,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -1876,10 +1876,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -1965,10 +1965,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2022,10 +2022,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2079,10 +2079,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2168,10 +2168,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2241,10 +2241,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2298,10 +2298,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2363,10 +2363,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2420,10 +2420,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2501,10 +2501,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2566,10 +2566,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2655,10 +2655,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2712,10 +2712,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2777,10 +2777,10 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
   - resource:
       attributes:
         - key: container.id
@@ -2866,7 +2866,7 @@ resourceMetrics:
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             name: k8s.container.restarts
-            unit: "1"
+            unit: "{restart}"
         scope:
           name: otelcol/k8sclusterreceiver
-          version: v0.85.0
+          version: ignored
