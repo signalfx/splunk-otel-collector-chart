@@ -4,6 +4,25 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.86.0] - 2023-10-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.86.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.86.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Drop time attribute used during parsing the time from log record, so it is not reported as an extra field. ([#912](https://github.com/signalfx/splunk-otel-collector-chart/pull/912))
+- `agent`: Change the default logs collection engine (`logsEngine`) to the native OpenTelemetry logs collection (`otel`) ([#934](https://github.com/signalfx/splunk-otel-collector-chart/pull/934))
+  If you want to keep using Fluentd sidecar for the logs collection, set `logsEngine' to 'fluentd` in your values.yaml
+- `operator`: cert-manager upgraded to v1.13.1 ([#941](https://github.com/signalfx/splunk-otel-collector-chart/pull/941))
+- `operator`: opentelemetry-operator upgraded to v0.39.1 ([#940](https://github.com/signalfx/splunk-otel-collector-chart/pull/940))
+- `chart`: Add support for OpenTelemetry CHANGELOG.md generator tool, see [chloggen](https://github.com/open-telemetry/opentelemetry-operator/tree/main/.chloggen) ([#923](https://github.com/signalfx/splunk-otel-collector-chart/pull/923))
+
+### 🧰 Bug fixes 🧰
+
+- `networkExplorer`: delete deprecated Pod Security Policy from networkExplorer templates ([#896](https://github.com/signalfx/splunk-otel-collector-chart/pull/896))
+- `operator`: Fix Operator helm template issues ([#938](https://github.com/signalfx/splunk-otel-collector-chart/pull/938))
+  Resolves smaller issues in the Helm template related to the of non-default Operator auto-instrumentation values, which could trigger deployment failures
+
 ## [0.85.0] - 2023-09-19
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.85.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.85.0).
