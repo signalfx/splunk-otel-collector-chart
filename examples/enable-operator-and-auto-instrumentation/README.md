@@ -2,12 +2,12 @@
 
 ## How to deploy the OpenTelemetry Operator and Java auto-instrumentation
 
-In the following example we will show how to instrument a project based on
-[spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices).
+In the following example we will show how to instrument a project using
+[spring-petclinic](https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/examples/enable-operator-and-auto-instrumentation/spring-petclinic/spring-petclinic.yaml).
 
-### 1. Setup the spring-petclinic demo application to instrument
+### 1. Setup the Spring PetClinic demo to instrument
 
-The Java spring-petclinic demo will create a spring-petclinic namespace and deploy the related Java applications to it.
+The Java spring-petclinic demo deploys the related Java applications to the current namespace.
 If you have your own Java application you want to instrument, you can still use the steps below as an example for how
 to instrument your application.
 
@@ -84,7 +84,6 @@ kubectl get deployments -l app.kubernetes.io/part-of=spring-petclinic -o name | 
 ```bash
 # To disable instrumentation, remove the annotation or set its value to 'false'
 kubectl get deployments -l app.kubernetes.io/part-of=spring-petclinic -o name | xargs -I % kubectl patch % -p "{\"spec\": {\"template\":{\"metadata\":{\"annotations\":{\"instrumentation.opentelemetry.io/inject-java\":\"false\"}}}}}"
-
 ```
 
 **Other Methods**
@@ -147,13 +146,12 @@ true for the instrumented pod using the command below.
 <details>
 <summary>Expand for commands to run to verify instrumentation</summary>
 
-```
+```bash
 kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr
 # Name:             spring-petclinic-9d5bc5fff-5r5gr
 # Namespace:        spring-petclinic
 # Annotations:      instrumentation.opentelemetry.io/inject-java: true
 # Status:           Running
-# Controlled By:  ReplicaSet/spring-petclinic-9d5bc5fff
 # Init Containers:
 #   opentelemetry-auto-instrumentation:
 #     Image:         ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.23.0
@@ -166,7 +164,6 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr
 #       Exit Code:    0
 # Containers:
 #   app:
-#     Image:          *
 #     State:          Running
 #     Ready:          True
 #     Environment:
@@ -178,7 +175,7 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr
 #       OTEL_RESOURCE_ATTRIBUTES_POD_NAME:   spring-petclinic-9d5bc5fff-5r5gr (v1:metadata.name)
 #       OTEL_RESOURCE_ATTRIBUTES_NODE_NAME:   (v1:spec.nodeName)
 #       OTEL_PROPAGATORS:                    tracecontext,baggage,b3
-#       OTEL_RESOURCE_ATTRIBUTES:            k8s.container.name=app,k8s.deployment.name=spring-petclinic,k8s.namespace.name=spring-petclinic,k8s.node.name=$(OTEL_RESOURCE_ATTRIBUTES_NODE_NAME),k8s.pod.name=$(OTEL_RESOURCE_ATTRIBUTES_POD_NAME),k8s.replicaset.name=spring-petclinic-9d5bc5fff
+#       OTEL_RESOURCE_ATTRIBUTES:            splunk.zc.method=autoinstrumentation-java:v1.28.1,k8s.container.name=app,k8s.deployment.name=spring-petclinic,k8s.namespace.name=spring-petclinic,k8s.node.name=$(OTEL_RESOURCE_ATTRIBUTES_NODE_NAME),k8s.pod.name=$(OTEL_RESOURCE_ATTRIBUTES_POD_NAME),k8s.replicaset.name=spring-petclinic-9d5bc5fff
 #     Mounts:
 #       /otel-auto-instrumentation from opentelemetry-auto-instrumentation (rw)
 ```
@@ -187,10 +184,5 @@ kubectl describe pod spring-petclinic-9d5bc5fff-5r5gr
 
 #### 2.4 Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
-<details>
-<summary> Expand for visual results </summary>
-
 ![APM](auto-instrumentation-java-apm-result.png)
 ![Splunk_Chart_OtelOperator_Auto-instrumentation](auto-instrumentation-java-diagram.png)
-
-</details>
