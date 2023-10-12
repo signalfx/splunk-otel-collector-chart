@@ -491,7 +491,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	)
 }
 
-func testAgentLogs(t *testing.T, ) {
+func testAgentLogs(t *testing.T) {
 	logsConsumer := setupOnce(t).logsConsumer
 	waitForLogs(t, 5, logsConsumer)
 
@@ -533,7 +533,7 @@ func testAgentLogs(t *testing.T, ) {
 			}
 		}
 	}
-	{
+	t.Run("test node.js log records", func(t *testing.T) {
 		assert.NotNil(t, helloWorldLogRecord)
 		sourceType, ok := helloWorldResource.Attributes().Get("com.splunk.sourcetype")
 		assert.True(t, ok)
@@ -547,19 +547,19 @@ func testAgentLogs(t *testing.T, ) {
 		podName, ok := helloWorldLogRecord.Attributes().Get("k8s.pod.name")
 		assert.True(t, ok)
 		assert.Regexp(t, regexp.MustCompile("nodejs-test-.*"), podName.AsString())
-	}
-	{
+	})
+	t.Run("test pod annotation log records", func(t *testing.T) {
 		assert.NotNil(t, podAnnoLogRecord)
 		sourceType, ok := podAnnoResource.Attributes().Get("com.splunk.sourcetype")
 		assert.True(t, ok)
 		assert.Equal(t, "kube:container:pod-w-index-wo-ns-index", sourceType.AsString())
-	}
-	{
+	})
+	t.Run("test namespace annotation log records", func(t *testing.T) {
 		assert.NotNil(t, nsAnnoLogRecord)
 		sourceType, ok := nsAnnoResource.Attributes().Get("com.splunk.sourcetype")
 		assert.True(t, ok)
 		assert.Equal(t, "kube:container:pod-wo-index-w-ns-index", sourceType.AsString())
-	}
+	})
 }
 
 func testK8sObjects(t *testing.T) {
