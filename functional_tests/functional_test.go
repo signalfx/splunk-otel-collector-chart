@@ -282,6 +282,8 @@ func testNodeJSTraces(t *testing.T) {
 	ignoreSpanAttribute("net.peer.port", latestTrace)
 	ignoreSpanAttribute("http.user_agent", expectedTraces)
 	ignoreSpanAttribute("http.user_agent", latestTrace)
+	ignoreSpanAttribute("os.version", latestTrace)
+	ignoreSpanAttribute("os.version", expectedTraces)
 	ignoreTraceID(expectedTraces)
 	ignoreSpanID(expectedTraces)
 	ignoreTraceID(latestTrace)
