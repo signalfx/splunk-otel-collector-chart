@@ -1,0 +1,53 @@
+---
+clusterName: dev-operator
+metricsEnabled: true
+tracesEnabled: true
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   ingestUrl: {{ .AgentEndpoint }}
+   apiUrl: {{ .ApiURLEndpoint }}
+   metricsEnabled: true
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+  metricsEnabled: true
+  metricsIndex: myMetricsIndex
+logsCollection:
+  journald:
+    enabled: true
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: {{ .OtlpEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+clusterReceiver:
+  eventsEnabled: true
+  config:
+    exporters:
+      signalfx:
+        ingest_url: {{ .K8sClusterEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_logs:
+        endpoint: {{ .LogObjectsHecEndpoint }}
+
+  k8sObjects:
+    - name: pods
+    - name: namespaces
+    - name: nodes
+    - name: events
+      mode: watch
+
+environment: dev
+operator:
+  enabled: true

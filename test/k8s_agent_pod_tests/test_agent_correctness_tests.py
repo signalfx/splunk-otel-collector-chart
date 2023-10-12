@@ -47,61 +47,6 @@ def setup_for_agent_tests():
     k8s_helper.upgrade_helm(default_yaml_file, yaml_fields_recall)
 
 
-def test_agent_logs_metadata(setup):
-    """
-    Test that agent logs have correct metadata:
-    - source
-    - sourcetype
-    - index
-
-    """
-    # prepare connector for test
-    yaml_file = AGENT_VALUES_YAML
-    yaml_fields = {
-        "splunkPlatform.index": INDEX_MAIN,
-        "splunkPlatform.token": os.environ.get("CI_SPLUNK_HEC_TOKEN"),
-        "splunkPlatform.endpoint": "https://"
-        + os.environ.get("CI_SPLUNK_HOST")
-        + ":8088/services/collector",
-    }
-    k8s_helper.upgrade_helm(yaml_file, yaml_fields)
-
-    full_pod_name = k8s_helper.get_pod_full_name("agent")
-    search_query = (
-        "index="
-        + INDEX_MAIN
-        + " k8s.pod.name="
-        + full_pod_name
-        + ' "Everything is ready. Begin running and processing data."'
-    )
-    logger.info(f"Query: {search_query}")
-    events = check_events_from_splunk(
-        start_time="-5m@m",
-        url=setup["splunkd_url"],
-        user=setup["splunk_user"],
-        query=["search {0}".format(search_query)],
-        password=setup["splunk_password"],
-    )
-    logger.info("Splunk received %s events in the last minute", len(events))
-    assert len(events) == 1
-    event = events[0]
-    sourcetype = "kube:container:otel-collector"
-    sorce_regex_part = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-    source_pattern = (
-        r"^/var/log/pods/default_"
-        + full_pod_name
-        + "_"
-        + sorce_regex_part
-        + "/otel-collector/0.log$"
-    )
-    assert INDEX_MAIN == event["index"]
-    assert full_pod_name == event["k8s.pod.name"]
-    assert sourcetype == event["_sourcetype"]
-    assert re.match(
-        source_pattern, event["source"]
-    ), f"Source does not match the pattern {source_pattern}"
-
-
 def test_all_agent_logs_correctly_ingested_into_splunk(setup):
     """
     Test that agent logs are correctly ingested into Splunk
