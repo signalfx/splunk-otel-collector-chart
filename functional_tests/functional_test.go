@@ -501,8 +501,6 @@ func testAgentLogs(t *testing.T, ) {
 	var podAnnoLogRecord *plog.LogRecord
 	var nsAnnoResource pcommon.Resource
 	var nsAnnoLogRecord *plog.LogRecord
-	//var journaldResource pcommon.Resource
-	//var journaldLogRecord *plog.LogRecord
 	var sourcetypes []string
 
 	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
@@ -531,12 +529,6 @@ func testAgentLogs(t *testing.T, ) {
 							nsAnnoResource = rl.Resource()
 						}
 					}
-					//if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
-					//	if strings.Contains(value.AsString(), "journald") {
-					//		journaldLogRecord = &logRecord
-					//		journaldResource = rl.Resource()
-					//	}
-					//}
 				}
 			}
 		}
@@ -567,30 +559,6 @@ func testAgentLogs(t *testing.T, ) {
 		sourceType, ok := nsAnnoResource.Attributes().Get("com.splunk.sourcetype")
 		assert.True(t, ok)
 		assert.Equal(t, "kube:container:pod-wo-index-w-ns-index", sourceType.AsString())
-	}
-	{
-		// journald testing fails with kind.
-		//assert.NotNil(t, journaldLogRecord)
-		//_, ok := journaldResource.Attributes().Get("com.splunk.host")
-		//assert.True(t, ok)
-
-		//foundContainerdService := false
-		//foundDockerService := false
-		//foundKubeletService := false
-		//
-		//for _, sourcetype := range sourcetypes {
-		//	switch sourcetype {
-		//	case "kube:journald:containerd.service":
-		//		foundContainerdService = true
-		//	case "kube:journald:docker.service":
-		//		foundDockerService = true
-		//	case "kube:journald:kubelet.service":
-		//		foundKubeletService = true
-		//	}
-		//}
-		//assert.True(t, foundContainerdService)
-		//assert.True(t, foundDockerService)
-		//assert.True(t, foundKubeletService)
 	}
 }
 
