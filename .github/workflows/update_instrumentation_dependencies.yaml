@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         # Add languages that require version updates here
-        language: ['java']
+        language: ['java', 'nodejs']
     steps:
       - uses: actions/checkout@v4
 
