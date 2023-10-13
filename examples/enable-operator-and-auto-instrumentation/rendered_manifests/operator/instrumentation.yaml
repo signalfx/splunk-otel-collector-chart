@@ -54,10 +54,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-java:v1.28.0
   nodejs:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.41.1
+    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-nodejs:0.41.1
+        value: splunk.zc.method=splunk-otel-js:v2.4.4
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
     env:
