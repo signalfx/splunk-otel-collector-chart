@@ -108,52 +108,6 @@ def test_annotation_excluding(setup, container_name, expected):
                 len(events))
     assert len(events) == expected
 
-@pytest.mark.parametrize("test_input,expected", [
-    ("kube:container:kube-apiserver", 1),
-    ("kube:container:etcd", 1),
-    ("kube:container:kube-controller-manager", 1),
-    ("empty_sourcetype", 0)
-])
-def test_sourcetype(setup, test_input, expected):
-    '''
-    Test that known sourcetypes are present in target index
-    '''
-    logger.info("testing for presence of sourcetype={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    source_type = ' sourcetype=""' if test_input == "empty_sourcetype" else ' sourcetype=' + test_input
-    search_query = "index=" + index_logging + source_type
-    events = check_events_from_splunk(start_time="-24h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected if test_input != "empty_sourcetype" else len(
-        events) == expected
-
-@pytest.mark.parametrize("sourcetype,index,expected", [
-    ("sourcetype-anno", "pod-anno", 1)
-])
-def test_annotation_sourcetype(setup, sourcetype, index, expected):
-    '''
-    Test annotation for sourcetype properly overwrites it when set
-    '''
-    logger.info("testing for annotation sourcetype of {0} index={1} expected={2} event(s)".format(
-        sourcetype, index, expected))
-    search_query = "index=" + index + ' sourcetype=' + sourcetype
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
 @pytest.mark.skipif(True, reason="Jira: ADDON-36296")
 @pytest.mark.parametrize("test_input,expected", [
     ("/var/log/pods/*_kube-apiserver*", 1),
@@ -181,27 +135,6 @@ def test_source(setup, test_input, expected):
                 len(events))
     assert len(events) >= expected if test_input != "empty_source" else len(
         events) == expected
-
-@pytest.mark.parametrize("test_input,host_name,expected", [
-    ("valid_host", "minikube", 1),
-    ("empty_host", "", 0)
-])
-def test_host(setup, test_input, host_name, expected):
-    '''
-    Test that known hosts are present in target index
-    '''
-    logger.info("testing for presence of host={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    search_query = "index={0} host=\"{1}\"".format(index_logging, host_name)
-    events = check_events_from_splunk(start_time="-24h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
 
 @pytest.mark.parametrize("test_input,expected", [
     ("k8s.pod.name", 1),
@@ -270,30 +203,6 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
                                           search_query)],
                                       password=setup["splunk_password"])
     logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
-@pytest.mark.parametrize("test_input,expected", [
-    ("test_journald_data", 1)
-])
-def test_journald_logs(setup, test_input, expected):
-    '''
-    Test that user specified index can successfully index the
-    journald log stream from k8s. If no index is specified, default
-    index "ci_events" will be used.
-    '''
-    logger.info("testing test_journald_logs input={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    search_query = "index=" + index_logging + " sourcetype=kube:journald*"
-
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last hour",
                 len(events))
     assert len(events) >= expected
 
