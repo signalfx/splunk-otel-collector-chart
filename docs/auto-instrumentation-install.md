@@ -119,7 +119,7 @@ how everything is set up.
 
 ## Learn by example
 
-- [Java Spring Clinic Example](../examples/enable-operator-and-auto-instrumentation/README.md)
+- [OpenTelemetry Operator and Auto-Instrumentation Example Guide](../examples/enable-operator-and-auto-instrumentation/README.md)
 
 ## How does auto-instrumentation work?
 
