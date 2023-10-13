@@ -65,6 +65,13 @@ function update_otel_demo {
         (select(.kind == "Deployment" and .metadata.name == "opentelemetry-demo-recommendationservice") | .spec.template.spec.containers[]) |= .env += [{"name": "OTEL_SERVICE_NAME", "valueFrom": {"fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.labels['\''app.kubernetes.io/component'\'']"}}}]
     ' "$OTEL_DEMO_PATH"
 
+    # Remove all env vars with PUBLIC_OTEL_* prefixes from Deployment objects.
+    # This is a special case that was likely for legacy support, only the NodeJS opentelemetry-demo-frontend deployment was using it.
+    # These env vars can cause compatibility issues with Splunk instrumentation and they don't seem to follow the OpenTelemetry spec.
+    yq eval -i '
+        (select(.kind == "Deployment") | .spec.template.spec.containers[].env) |= map(select(.name | test("^PUBLIC_OTEL_") | not))
+    ' "$OTEL_DEMO_PATH"
+
     # Remove objects by name for components we want to exclude
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-otelcol")' "$OTEL_DEMO_PATH"
     yq eval -i 'select(.metadata.name != "opentelemetry-demo-frontendproxy")' "$OTEL_DEMO_PATH"
