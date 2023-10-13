@@ -283,7 +283,6 @@ func testNodeJSTraces(t *testing.T) {
 	ignoreSpanAttribute("http.user_agent", expectedTraces)
 	ignoreSpanAttribute("http.user_agent", latestTrace)
 	ignoreSpanAttribute("os.version", latestTrace)
-	ignoreSpanAttribute("os.version", expectedTraces)
 	ignoreTraceID(expectedTraces)
 	ignoreSpanID(expectedTraces)
 	ignoreTraceID(latestTrace)
@@ -294,12 +293,15 @@ func testNodeJSTraces(t *testing.T) {
 	ignoreEndTimestamp(expectedTraces)
 
 	require.NoError(t, ptracetest.CompareTraces(expectedTraces, latestTrace,
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	))
