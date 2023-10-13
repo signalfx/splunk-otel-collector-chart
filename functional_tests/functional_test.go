@@ -278,6 +278,10 @@ func testNodeJSTraces(t *testing.T) {
 
 	latestTrace := tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1]
 
+	internal.WriteTraces(t, filepath.Join("testdata", "new_traces.yaml"), latestTrace)
+	b, _ := os.ReadFile(filepath.Join("testdata", "new_traces.yaml"))
+	fmt.Println(string(b))
+
 	ignoreSpanAttribute("net.peer.port", expectedTraces)
 	ignoreSpanAttribute("net.peer.port", latestTrace)
 	ignoreSpanAttribute("http.user_agent", expectedTraces)
