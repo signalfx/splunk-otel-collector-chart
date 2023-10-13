@@ -13,9 +13,9 @@ resourceSpans:
         - key: telemetry.sdk.version
           value:
             stringValue: 1.15.2
-        - key: container.id
+        - key: splunk.distro.version
           value:
-            stringValue: 9e051f271ffca61f7ac0d674262064d19bf1390ed3eb12f5ee8aac4e3f76b479
+            stringValue: 2.4.4
         - key: splunk.zc.method
           value:
             stringValue: splunk-otel-js:v2.4.4
@@ -33,10 +33,10 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: nodejs-test-56cdcf7c-d2g4p
+            stringValue: nodejs-test-57564b7dc9-9lh4b
         - key: k8s.replicaset.name
           value:
-            stringValue: nodejs-test-56cdcf7c
+            stringValue: nodejs-test-57564b7dc9
         - key: service.version
           value:
             stringValue: latest
@@ -45,16 +45,16 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: host.arch
           value:
-            stringValue: arm64
+            stringValue: amd64
         - key: os.type
           value:
             stringValue: linux
         - key: os.version
           value:
-            stringValue: 6.4.16-linuxkit
+            stringValue: 6.2.0-1012-azure
         - key: process.pid
           value:
-            intValue: "10"
+            intValue: "13"
         - key: process.executable.name
           value:
             stringValue: node
@@ -66,10 +66,10 @@ resourceSpans:
             stringValue: nodejs
         - key: k8s.pod.ip
           value:
-            stringValue: 10.244.0.20
+            stringValue: 10.244.0.10
         - key: k8s.pod.uid
           value:
-            stringValue: a7f043b6-1203-403e-b31a-da07e5e70a3f
+            stringValue: c7a2dcd8-7768-4f98-9f61-d4478cc51ed7
         - key: k8s.pod.labels.app
           value:
             stringValue: nodejs-test
@@ -79,15 +79,15 @@ resourceSpans:
         - key: container.image.tag
           value:
             stringValue: latest
+        - key: container.id
+          value:
+            stringValue: e2ad2bf9957aca48fd5605e83e7b778bcbeee645adab44ca4162a275226e51ca
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
         - key: deployment.environment
           value:
             stringValue: dev
-        - key: splunk.distro.version
-          value:
-            stringValue: 2.4.4
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeSpans:
       - scope:
@@ -115,7 +115,7 @@ resourceSpans:
                   stringValue: /
               - key: http.user_agent
                 value:
-                  stringValue: curl/7.64.0
+                  stringValue: curl/8.4.0
               - key: http.flavor
                 value:
                   stringValue: "1.1"
@@ -133,234 +133,18 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "36684"
+                  intValue: "39964"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1696541822398335488"
+            endTimeUnixNano: "1697226524248646656"
             kind: 2
             name: GET
             parentSpanId: ""
-            spanId: c9ab939384f70971
-            startTimeUnixNano: "1696541822398000128"
+            spanId: cec9cdcca3d9564a
+            startTimeUnixNano: "1697226524248000000"
             status: {}
-            traceId: 6cf86a997ce0197a1870fa10f1c1e52a
-          - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
-                value:
-                  stringValue: GET
-              - key: http.scheme
-                value:
-                  stringValue: http
-              - key: http.target
-                value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.64.0
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
-                value:
-                  intValue: "36686"
-              - key: http.status_code
-                value:
-                  intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
-            endTimeUnixNano: "1696541823407264768"
-            kind: 2
-            name: GET
-            parentSpanId: ""
-            spanId: 75891538cb66d09e
-            startTimeUnixNano: "1696541823407000064"
-            status: {}
-            traceId: 8830246df5f7536d2c086ca3751b7359
-          - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
-                value:
-                  stringValue: GET
-              - key: http.scheme
-                value:
-                  stringValue: http
-              - key: http.target
-                value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.64.0
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
-                value:
-                  intValue: "36692"
-              - key: http.status_code
-                value:
-                  intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
-            endTimeUnixNano: "1696541824422413056"
-            kind: 2
-            name: GET
-            parentSpanId: ""
-            spanId: 85e5c3b909008ff3
-            startTimeUnixNano: "1696541824422000128"
-            status: {}
-            traceId: f96aa2ebeb6a2a364834aab44d021fdc
-          - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
-                value:
-                  stringValue: GET
-              - key: http.scheme
-                value:
-                  stringValue: http
-              - key: http.target
-                value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.64.0
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
-                value:
-                  intValue: "36708"
-              - key: http.status_code
-                value:
-                  intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
-            endTimeUnixNano: "1696541825471467264"
-            kind: 2
-            name: GET
-            parentSpanId: ""
-            spanId: c9e36999adf60852
-            startTimeUnixNano: "1696541825471000064"
-            status: {}
-            traceId: 4876ca58ca6c3a5f3aceeb71aaa778b4
-          - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
-                value:
-                  stringValue: GET
-              - key: http.scheme
-                value:
-                  stringValue: http
-              - key: http.target
-                value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.64.0
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
-                value:
-                  intValue: "36710"
-              - key: http.status_code
-                value:
-                  intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
-            endTimeUnixNano: "1696541826494764544"
-            kind: 2
-            name: GET
-            parentSpanId: ""
-            spanId: 4c4a49b8a56c1287
-            startTimeUnixNano: "1696541826494000128"
-            status: {}
-            traceId: e4540e1a19d742b1f151de19f7f6743e
+            traceId: 6c2f9e02bb2a68e930b7b5cfc631789b
