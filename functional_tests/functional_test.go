@@ -497,12 +497,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 
-	if err != nil {
-		internal.WriteMetrics(t, filepath.Join("testdata", "actual_cluster_receiver.yaml"), *selected)
-		b, _ := os.ReadFile(filepath.Join("testdata", "actual_cluster_receiver.yaml"))
-		fmt.Println(string(b))
-	}
-
 	require.NoError(t, err)
 }
 
