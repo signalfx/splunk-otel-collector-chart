@@ -1127,7 +1127,13 @@ service:
   # Service annotations
   annotations: {}
 
-# Default values for splunk-otel-network-explorer.
+################################################################################
+# Configuration section for Network Explorer (disabled by default).
+# Network Explorer allows you to collect network metrics from linux kernel.
+# Note that Network Explorer is not supported for Linux kernel version 6 at the moment.
+# Setting networkExplorer.enabled=true for Linux kernel 6 will lead to errors.
+################################################################################
+
 networkExplorer:
   enabled: false
   images:
