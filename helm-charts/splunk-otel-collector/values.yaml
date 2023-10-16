@@ -1111,11 +1111,6 @@ gateway:
   config: {}
 
 ################################################################################
-# Notice: Network Explorer related features should be considered to have an
-# ALPHA maturity level and be experimental. There may be breaking changes or
-# Network Explorer features may be replaced entirely with a better alternative
-# in the future.
-#
 # OpenTelemetry service config, used for otel collector deployment.
 # Disabled by default
 ################################################################################
@@ -1128,10 +1123,14 @@ service:
   annotations: {}
 
 ################################################################################
+# Notice: Network Explorer related features should be considered to have an
+# ALPHA maturity level and be experimental. There may be breaking changes or
+# Network Explorer features may be replaced entirely with a better alternative
+# in the future.
+#
 # Configuration section for Network Explorer (disabled by default).
 # Network Explorer allows you to collect network metrics from linux kernel.
-# Note that Network Explorer is not supported for Linux kernel version 6 at the moment.
-# Setting networkExplorer.enabled=true for Linux kernel 6 will lead to errors.
+# Related documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#network-explorer
 ################################################################################
 
 networkExplorer:

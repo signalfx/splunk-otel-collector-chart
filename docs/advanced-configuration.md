@@ -553,7 +553,8 @@ networkExplorer:
 Note: Enabling network explorer will automatically enable the Open Telemetry Collector Gateway.
 
 ### Prerequisites
-Network Explorer is only supported in Kubernetes-based environments on Linux hosts: RedHat Linux 7.6+, Ubuntu 16.04+, Debian Stretch+, Amazon Linux 2, Google COS.
+- Network Explorer supports Kubernetes nodes on the following Linux distributions: RedHat 7.6+, Ubuntu 16.04+, Debian Stretch+, Amazon Linux 2, and Google COS.
+- Linux kernel version 6 is not supported at this time.
 
 ### Modifying the reducer footprint
 The reducer is a single pod per Kubernetes cluster. If your cluster contains a large number of pods, nodes, and services, you can increase the resources allocated to it.
