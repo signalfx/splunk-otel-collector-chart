@@ -540,7 +540,7 @@ Note: Running the collector agent for log collection in non-root mode is not cur
 
 ## Network explorer
 
-**NOTE:** Network Explorer related features should be considered to have an ALPHA maturity level and be experimental.
+**NOTE:** Network Explorer related features should be considered to have an [ALPHA](https://github.com/open-telemetry/opentelemetry-collector#alpha) maturity level and be experimental.
 There may be breaking changes or Network Explorer features may be replaced entirely with a better alternative in the future.
 
 [Network explorer](network-explorer-architecture.md) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
