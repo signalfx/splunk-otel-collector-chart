@@ -539,6 +539,10 @@ Note: Running the collector agent for log collection in non-root mode is not cur
 [related GitHub feature request issue](https://github.com/signalfx/splunk-otel-collector-chart/issues/891).
 
 ## Network explorer
+
+**NOTE:** Network Explorer related features should be considered to have an ALPHA maturity level and be experimental.
+There may be breaking changes or Network Explorer features may be replaced entirely with a better alternative in the future.
+
 [Network explorer](network-explorer-architecture.md) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
 To enable the network explorer, set the `enabled` flag to `true`
 ```yaml
