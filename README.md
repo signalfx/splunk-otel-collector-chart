@@ -88,16 +88,15 @@ This distribution currently supports:
 
 ## Supported Kubernetes distributions
 
-This helm chart is tested and works with default configurations on the following
-Kubernetes distributions:
+The Helm chart works with default configurations of the main Kubernetes distributions. Use actively supported versions:
 
-- [Vanilla (unmodified version) Kubernetes](https://kubernetes.io)
-- [Amazon Elastic Kubernetes Service](https://aws.amazon.com/eks)
+- [Vanilla (unmodified version) Kubernetes](https://endoflife.date/kubernetes)
+- [Amazon Elastic Kubernetes Service](https://endoflife.date/amazon-eks)
   including [with Fargate profiles](docs/advanced-configuration.md#eks-fargate-support)
-- [Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/aks)
-- [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
+- [Azure Kubernetes Service](https://endoflife.date/azure-kubernetes-service)
+- [Google Kubernetes Engine](https://endoflife.date/google-kubernetes-engine)
   including [GKE Autopilot](docs/advanced-configuration.md#gke-autopilot-support)
-- [Red Hat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift)
+- [Red Hat OpenShift](https://endoflife.date/red-hat-openshift)
 
 While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to
@@ -109,7 +108,9 @@ require additional configurations applied to
 
 The following prerequisites are required to use the helm chart:
 
-- [Helm 3](https://helm.sh/docs/intro/install/) (Helm 2 is not supported)
+- [Helm 3](https://helm.sh/docs/intro/install/)
+  - Helm 3 version support may vary depending on the [supported Kubernetes version](#supported-kubernetes-distributions) you are using and the [Helm supported Kubernetes versions skew](https://helm.sh/docs/topics/version_skew/#supported-version-skew).
+  - Please note that Helm 2 is not supported.
 - Administrator access to your [Kubernetes cluster](https://kubernetes.io/) and familiarity with your Kubernetes configuration. You must know where your log information is being collected in your Kubernetes deployment.
 
 #### To send data to Splunk Enterprise or Splunk Cloud
