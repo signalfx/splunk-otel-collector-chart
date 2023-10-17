@@ -109,7 +109,7 @@ require additional configurations applied to
 
 The following prerequisites are required to use the helm chart:
 
-- [Helm 3](https://helm.sh/docs/intro/install/) (Helm versions lower than 3.6.0 is not supported)
+- [Helm 3](https://helm.sh/docs/intro/install/) (Helm versions lower than 3.6.0 are not supported)
 - Administrator access to your [Kubernetes cluster](https://kubernetes.io/) and familiarity with your Kubernetes configuration. You must know where your log information is being collected in your Kubernetes deployment.
 
 #### To send data to Splunk Enterprise or Splunk Cloud
