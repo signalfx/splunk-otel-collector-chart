@@ -35,19 +35,19 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.3
   dotnet:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.0.2
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-dotnet:1.0.0
+        value: splunk.zc.method=autoinstrumentation-dotnet:1.0.2
       # dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: http://$(SPLUNK_OTEL_AGENT):4318
   go:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.3.0-alpha
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.7.0-alpha
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-go:v0.3.0-alpha
+        value: splunk.zc.method=autoinstrumentation-go:v0.7.0-alpha
   java:
     image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.28.0
     env:
@@ -59,10 +59,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-js:v2.4.4
   python:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.40b0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.41b0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-python:0.40b0
+        value: splunk.zc.method=autoinstrumentation-python:0.41b0
       # python auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
