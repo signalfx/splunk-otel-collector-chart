@@ -3,6 +3,8 @@ name: functional-tests
 
 on:
   pull_request:
+    paths:
+      - '!**.md'
   push:
     branches: [ main ]
 
