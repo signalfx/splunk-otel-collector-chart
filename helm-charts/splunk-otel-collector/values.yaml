@@ -256,7 +256,7 @@ extraAttributes:
   # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
   fromAnnotations: 
     - key: splunk.com/metricsIndex
-      tag_name: com.splunk.metricsIndex
+      tag_name: com.splunkPlatform.metricsIndex
       from: namespace
       
   # List of hardcoded key/value pairs that will be added as attributes to
