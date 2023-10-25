@@ -255,10 +255,13 @@ extraAttributes:
   # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
   # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
   fromAnnotations: 
-    - key: splunk.com/metricsIndex
-      tag_name: metricsIndex
-      from: namespace
+    # - key: splunk.com/metricsIndex
+    #   tag_name: metricsIndex
+    #   from: namespace
       
+    - from: namespace
+      key: splunk.com/metricsIndex
+      tag_name: com.splunk.metricsIndex
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
   custom: []
