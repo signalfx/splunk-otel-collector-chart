@@ -1,33 +1,33 @@
 apiVersion: v2
 name: splunk-otel-collector
-version: 0.86.1
-appVersion: 0.86.0
-description: Splunk OpenTelemetry Collector for Kubernetes
-icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
-type: application
-keywords:
-- splunk
-- opentelemetry
-- observability
-- logs
-- traces
-- metrics
-- apm
-maintainers:
-- name: dmitryax
-- name: jvoravong
-- name: emaderer
-dependencies:
-  # Subchart Notes:
-  # - Avoid uppercase letters in names/aliases, they cause install failure due to subchart resource naming
-  # - Avoid hyphen characters in names/aliases, they introduce template rendering complications (https://github.com/helm/helm/issues/2192)
-  - name: cert-manager
-    version: v1.13.1
-    alias: certmanager
-    repository: https://charts.jetstack.io
-    condition: certmanager.enabled
-  - name: opentelemetry-operator
-    version: 0.39.1
-    alias: operator
-    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-    condition: operator.enabled
+# version: 0.86.1
+# appVersion: 0.86.0
+# description: Splunk OpenTelemetry Collector for Kubernetes
+# icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
+# type: application
+# keywords:
+# - splunk
+# - opentelemetry
+# - observability
+# - logs
+# - traces
+# - metrics
+# - apm
+# maintainers:
+# - name: dmitryax
+# - name: jvoravong
+# - name: emaderer
+# dependencies:
+#   # Subchart Notes:
+#   # - Avoid uppercase letters in names/aliases, they cause install failure due to subchart resource naming
+#   # - Avoid hyphen characters in names/aliases, they introduce template rendering complications (https://github.com/helm/helm/issues/2192)
+#   - name: cert-manager
+#     version: v1.13.1
+#     alias: certmanager
+#     repository: https://charts.jetstack.io
+#     condition: certmanager.enabled
+#   - name: opentelemetry-operator
+#     version: 0.39.1
+#     alias: operator
+#     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+#     condition: operator.enabled
