@@ -257,7 +257,7 @@ extraAttributes:
   fromAnnotations:
     - key: splunk.com/metricsIndex
       tag_name: metricsIndex
-      from: kube-system
+      from: namespace
       
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
