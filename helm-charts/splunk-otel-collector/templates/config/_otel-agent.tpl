@@ -448,7 +448,10 @@ receivers:
       value: 'EXPR("kube:journald:"+body._SYSTEMD_UNIT)'
     - type: add
       field: resource["com.splunk.index"]
-      value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index }}
+      value: "kube2"
+    - type: add
+      field: resource["com.splunk.metricsIndex"]
+      value: {{ $.Values.logsCollection.journald.metricsIndex | default $.Values.splunkPlatform.metricsIndex }}
     - type: add
       field: resource["host.name"]
       value: 'EXPR(env("K8S_NODE_NAME"))'

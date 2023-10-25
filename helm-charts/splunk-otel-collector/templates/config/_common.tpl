@@ -128,6 +128,12 @@ k8sattributes:
       - key: splunk.com/index
         tag_name: com.splunk.index
         from: pod
+      - key: splunk.com/metricsIndex
+        tag_name: com.splunk.metricsIndex
+        from: namespace
+      - key: splunk.com/metricsIndex
+        tag_name: com.splunk.metricsIndex
+        from: pod
       {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
     {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
     labels:
