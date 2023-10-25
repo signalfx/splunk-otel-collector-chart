@@ -37,7 +37,7 @@ splunkPlatform:
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: "kube"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
-  metricsIndex: "kube2_metrics"
+  metricsIndex: "kube_mterics"
   # Name of the Splunk event type index targeted. Required when ingesting traces to Splunk Platform.
   tracesIndex: ""
   # Optional. Default value for `source` field.
@@ -257,6 +257,7 @@ extraAttributes:
   fromAnnotations:
     - key: splunk.com/metricsIndex
       tag_name: metricsIndex
+      from: kube-system
       
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
