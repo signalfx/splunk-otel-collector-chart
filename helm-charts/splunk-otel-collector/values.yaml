@@ -14,7 +14,7 @@ fullnameOverride: ""
 # log as "k8s.cluster.name" attribute.
 ################################################################################
 
-clusterName: ""
+clusterName: "test_cluster"
 
 ################################################################################
 # Splunk Cloud / Splunk Enterprise configuration.
@@ -27,17 +27,17 @@ splunkPlatform:
   # to. e.g. "http://X.X.X.X:8088/services/collector/event". Setting this parameter
   # enables Splunk Platform as a destination. Use the /services/collector/event
   # endpoint for proper extraction of fields.
-  endpoint: ""
+  endpoint: "http://http://10.202.12.84:8088/services/collector/event"
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
   # Alternatively the token can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   # HTTP Event Collector token.
-  token: ""
+  token: "00000000-0000-0000-0000-000000000000"
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
-  index: "main"
+  index: "kube"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
-  metricsIndex: ""
+  metricsIndex: "kube_mterics"
   # Name of the Splunk event type index targeted. Required when ingesting traces to Splunk Platform.
   tracesIndex: ""
   # Optional. Default value for `source` field.
@@ -55,7 +55,7 @@ splunkPlatform:
   idleConnTimeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
-  insecureSkipVerify: false
+  insecureSkipVerify: true
   # The PEM-format CA certificate for this client.
   # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
@@ -75,7 +75,7 @@ splunkPlatform:
   # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
   # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
-  metricsEnabled: false
+  metricsEnabled: true
   # If you enable traces collection, make sure that `tracesIndex` is provided as well.
   tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
