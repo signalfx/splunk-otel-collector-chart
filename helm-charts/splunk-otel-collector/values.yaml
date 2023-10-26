@@ -37,7 +37,7 @@ splunkPlatform:
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
   index: "kube"
   # Name of the Splunk metric type index targeted. Required when ingesting metrics to Splunk Platform.
-  metricsIndex: "kube_mterics"
+  metricsIndex: "kube_metrics"
   # Name of the Splunk event type index targeted. Required when ingesting traces to Splunk Platform.
   tracesIndex: ""
   # Optional. Default value for `source` field.
