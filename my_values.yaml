@@ -6,6 +6,7 @@ splunkPlatform:
 
   index: "kube"
   metricsIndex: "kube_metrics"
+  insecureSkipVerify: true
 
 agent:
   enabled: true

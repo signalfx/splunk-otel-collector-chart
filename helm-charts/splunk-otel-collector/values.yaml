@@ -55,7 +55,7 @@ splunkPlatform:
   idleConnTimeout: 10s
   # Whether to skip checking the certificate of the HEC endpoint when sending
   # data over HTTPS.
-  insecureSkipVerify: true
+  insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
   # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
@@ -75,7 +75,7 @@ splunkPlatform:
   # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
   # If you enable metrics collection, make sure that `metricsIndex` is provided as well.
-  metricsEnabled: true
+  metricsEnabled: false
   # If you enable traces collection, make sure that `tracesIndex` is provided as well.
   tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
@@ -255,7 +255,7 @@ extraAttributes:
   # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
   # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
   fromAnnotations: []
-  
+
   # List of hardcoded key/value pairs that will be added as attributes to
   # all the telemetry.
   custom: []
@@ -313,7 +313,7 @@ agent:
         caFile: ""
       # Specifies whether the etcd's TLS cert will be verified. If set to false, a CA certificate must be made
       # available as part of the etcd secret to verify the TLS cert with.
-      skipVerify: false
+      skipVerify: true
     proxy:
       # Specifies whether to collect proxy metrics.
       enabled: true
