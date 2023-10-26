@@ -90,13 +90,13 @@ This distribution currently supports:
 
 The Helm chart works with default configurations of the main Kubernetes distributions. Use actively supported versions:
 
-- [Vanilla (unmodified version) Kubernetes](https://endoflife.date/kubernetes)
-- [Amazon Elastic Kubernetes Service](https://endoflife.date/amazon-eks)
+- [Vanilla (unmodified version) Kubernetes](https://kubernetes.io/releases/)
+- [Amazon Elastic Kubernetes Service](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
   including [with Fargate profiles](docs/advanced-configuration.md#eks-fargate-support)
-- [Azure Kubernetes Service](https://endoflife.date/azure-kubernetes-service)
-- [Google Kubernetes Engine](https://endoflife.date/google-kubernetes-engine)
+- [Azure Kubernetes Service](https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions)
+- [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs/release-schedule)
   including [GKE Autopilot](docs/advanced-configuration.md#gke-autopilot-support)
-- [Red Hat OpenShift](https://endoflife.date/red-hat-openshift)
+- [Red Hat OpenShift](https://access.redhat.com/support/policy/updates/openshift)
 
 While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to
