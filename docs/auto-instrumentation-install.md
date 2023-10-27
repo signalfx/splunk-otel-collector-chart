@@ -394,3 +394,43 @@ provides best effort support with issues related to native OpenTelemetry instrum
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#opentelemetry-auto-instrumentation-injection
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#use-customized-or-vendor-instrumentation
+
+### Troubleshooting the Operator and Cert Manager
+
+#### 1. Check the logs for failures
+
+**Operator Logs:**
+
+```bash
+kubectl logs -l app.kubernetes.io/name=operator
+```
+
+**Cert-Manager Logs:**
+
+```bash
+kubectl logs -l app=certmanager
+kubectl logs -l app=cainjector
+kubectl logs -l app=webhook
+```
+
+#### 2. Cert-Manager Issues
+
+If the operator seems to be hanging, it could be due to the cert-manager not auto-creating the required certificate. To troubleshoot:
+
+- Check the health and logs of the cert-manager pods for potential issues.
+- Consider restarting the cert-manager pods.
+- Ensure that your cluster has only one instance of cert-manager, which should include `certmanager`, `certmanager-cainjector`, and `certmanager-webhook`.
+
+For additional guidance, refer to the official cert-manager documentation:
+- [Troubleshooting Guide](https://cert-manager.io/docs/troubleshooting/)
+- [Uninstallation Guide](https://cert-manager.io/v1.2-docs/installation/uninstall/kubernetes/)
+
+#### 3. Validate Certificates
+
+Ensure that the certificate, which the cert-manager creates and the operator utilizes, is available.
+
+```bash
+kubectl get certificates
+# NAME                                          READY   SECRET                                                           AGE
+# splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
+```
