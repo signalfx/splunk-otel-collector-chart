@@ -29,10 +29,6 @@ Set `operator.enabled=true` when deploying the chart to enable deploying the ope
 If a cert-manager is not available in the cluster (or other TLS certificate source), then you'll need to deploy it
 using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
 commands below to run these steps.
-
-<details>
-<summary>Expand for extended Instrumentation configuration details</summary>
-
 - An [opentelemetry.io/v1alpha1 Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
 object is used to configure the auto-instrumentation of your applications. To successfully enable instrumentation, the
 target pod must have an Instrumentation object available.
@@ -55,8 +51,6 @@ opentelemetry.io/v1alpha1 Instrumentation object.
   - Use the optional `environment` configuration in `values.yaml`.
   - Use the Instrumentation spec (`operator.instrumentation.spec.env`) with the environment variable `OTEL_RESOURCE_ATTRIBUTES`.
 
-</details>
-
 ```bash
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
 kubectl get pods -l app=cert-manager --all-namespaces
@@ -66,9 +60,6 @@ helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=tr
 ```
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
-
-<details>
-<summary>Expand for sample output to verify against</summary>
 
 ```bash
 kubectl get pods
@@ -89,8 +80,6 @@ kubectl get otelinst
 # NAME                    AGE   ENDPOINT
 # splunk-otel-collector   3s    http://$(SPLUNK_OTEL_AGENT):4317
 ```
-
-</details>
 
 ### 3. Instrument application by setting an annotation
 
