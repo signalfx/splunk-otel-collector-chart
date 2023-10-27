@@ -160,7 +160,7 @@ For a nodejs application, with helm chart installed as:
 helm install splunk-otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace monitoring
 ```
 
-The default instrumentation name is `splunk-otel-collector`.
+_Note: The default `Instrumentation` object name matches the helm release name. The default instrumentation name for this example is `splunk-otel-collector`._
 
 If the current namespace is `monitoring`:
 - Use any of the following annotations:
@@ -172,8 +172,6 @@ If the current namespace is not `monitoring`, like `default` or `my-other-namesp
 - Use the annotation:
   - `"instrumentation.opentelemetry.io/inject-nodejs": "monitoring/splunk-otel-collector"`
 
-_Note: The `Instrumentation` object name matches the helm release name._
-
 **Example 2:**
 
 For a nodejs application, with helm chart installed as:
@@ -181,6 +179,9 @@ For a nodejs application, with helm chart installed as:
 ```bash
 helm install otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace o11y
 ```
+
+_Note: The default `Instrumentation` object name matches the helm release name. The default instrumentation name for this example is `otel-collector`._
+
 If the current namespace is `o11y`:
 - Use any of the following annotations:
   - `"instrumentation.opentelemetry.io/inject-nodejs": "true"`
@@ -189,7 +190,7 @@ If the current namespace is `o11y`:
 
 If the current namespace is not `o11y`, like `default` or `my-other-namespace`:
 - Use the annotation:
-- `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
 
 #### Multi-container pods with single instrumentation:
 
@@ -383,7 +384,7 @@ provides best effort support with issues related to native OpenTelemetry instrum
 | python                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-python)                                       |                                                                                |
 | java                    | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | dotnet                  | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet       |
-| nodejs                  | OpenTelemetry | Available   | Needs Validation | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-nodejs-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodes        |
+| nodejs                  | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-nodejs-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodes        |
 | python                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | apache-httpd            | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
 
