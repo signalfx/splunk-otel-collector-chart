@@ -83,21 +83,172 @@ kubectl get otelinst
 
 ### 3. Instrument application by setting an annotation
 
-An _instrumentation.opentelemetry.io/inject-{instrumentation_library}_ annotation can be added to the following:
-- Namespace: All pods within that namespace will be instrumented.
-- Pod Spec Objects: PodSpec objects that are available as part of Deployment,
-  Statefulset, or other resources can be annotated.
-- Example annotations
-  - `instrumentation.opentelemetry.io/inject-java: "true"`
-  - `instrumentation.opentelemetry.io/inject-dotnet: "true"`
-  - `instrumentation.opentelemetry.io/inject-nodejs: "true"`
-  - `instrumentation.opentelemetry.io/inject-python: "true"`
+Enable instrumentation by adding the `instrumentation.opentelemetry.io/inject-{instrumentation_library}` annotation.
+This can be applied to a namespace for all its pods or to individual PodSpec objects, available as part of
+Deployment, Statefulset, and other resources.
 
-The instrumentation annotations can have the following values:
-- "true" - inject and Instrumentation resource from the namespace to use.
-- "my-instrumentation" - name of Instrumentation CR instance in the current namespace to use.
-- "my-other-namespace/my-instrumentation" - name and namespace of Instrumentation CR instance in another namespace to use.
-- "false" - do not inject.
+**Annotation Values:**
+- `"true"`: Inject the `Instrumentation` resource from the namespace.
+- `"my-instrumentation"`: Use the `Instrumentation` CR instance in the current namespace.
+- `"my-other-namespace/my-instrumentation"`: Use the `Instrumentation` CR instance from another namespace.
+- `"false"`: Do not inject.
+
+**Annotations for Different Libraries:**
+
+**Java:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-java: "true"
+```
+
+**NodeJS:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-nodejs: "true"
+```
+
+**Python:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-python: "true"
+```
+
+**.NET:**
+.NET auto-instrumentation uses annotations to set the .NET [Runtime Identifiers](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog).
+Current RIDs: `linux-x64` (default) and `linux-musl-x64`.
+
+```yaml
+instrumentation.opentelemetry.io/inject-dotnet: "true"
+instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64"
+instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
+```
+
+**Go:**
+Go auto-instrumentation requires `OTEL_GO_AUTO_TARGET_EXE`. Set via annotation or the Instrumentation resource.
+
+```yaml
+instrumentation.opentelemetry.io/inject-go: "true"
+instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/path/to/container/executable"
+```
+_Note: Elevated permissions are automatically set for Go auto-instrumentation._
+
+**Apache HTTPD:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-apache-httpd: "true"
+```
+
+**Nginx:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-nginx: "true"
+```
+
+**OpenTelemetry SDK:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-sdk: "true"
+```
+
+#### Annotation Examples:
+
+**Example 1:**
+
+For a nodejs application, with helm chart installed as:
+
+```bash
+helm install splunk-otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace monitoring
+```
+
+The default instrumentation name is `splunk-otel-collector`.
+
+If the current namespace is `monitoring`:
+- Use any of the following annotations:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "true"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "splunk-otel-collector"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "monitoring/splunk-otel-collector"`
+
+If the current namespace is not `monitoring`, like `default` or `my-other-namespace`:
+- Use the annotation:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "monitoring/splunk-otel-collector"`
+
+_Note: The `Instrumentation` object name matches the helm release name._
+
+**Example 2:**
+
+For a nodejs application, with helm chart installed as:
+
+```bash
+helm install otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace o11y
+```
+If the current namespace is `o11y`:
+- Use any of the following annotations:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "true"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "otel-collector"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
+
+If the current namespace is not `o11y`, like `default` or `my-other-namespace`:
+- Use the annotation:
+- `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
+
+#### Multi-container pods with single instrumentation:
+
+By default, the first container in the pod spec is instrumented. Specify containers with the
+`instrumentation.opentelemetry.io/container-names` annotation.
+
+**Example:**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment-with-multiple-containers
+spec:
+  selector:
+    matchLabels:
+      app: my-pod-with-multiple-containers
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-pod-with-multiple-containers
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/container-names: "myapp,myapp2"
+```
+
+#### Multi-container pods with multiple instrumentations:
+
+This is for when `operator.autoinstrumentation.multi-instrumentation` is enabled. Specify containers
+for each language using specific annotations like `instrumentation.opentelemetry.io/java-container-names`.
+
+**Example:**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment-with-multi-containers-multi-instrumentations
+spec:
+  selector:
+    matchLabels:
+      app: my-pod-with-multi-containers-multi-instrumentations
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-pod-with-multi-containers-multi-instrumentations
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/java-container-names: "myapp,myapp2"
+        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/python-container-names: "myapp3"
+```
+
+**NOTES:**
+- Go auto-instrumentation **does not** support multi-container pods.
+- A container cannot be instrumented with multiple languages.
+- The `instrumentation.opentelemetry.io/container-names` annotation is not used for this feature.
 
 ### 4. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
