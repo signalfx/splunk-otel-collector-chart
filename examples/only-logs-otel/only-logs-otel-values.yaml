@@ -7,3 +7,15 @@ splunkObservability:
   tracesEnabled: false
 
 logsEngine: otel
+logsCollection:
+  containers:
+   multilineConfigs:
+     - namespaceName:
+         value: default
+       podName:
+         value: buttercup-app-.*
+         useRegexp: true
+       containerName:
+         value: server
+       firstEntryRegex: ^[^\s].*
+       combineWith: "\t"
