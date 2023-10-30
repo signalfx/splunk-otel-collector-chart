@@ -19,3 +19,20 @@ logsCollection:
          value: server
        firstEntryRegex: ^[^\s].*
        combineWith: "\t"
+     - namespaceName:
+         value: k8s-nm2
+       podName:
+         value: foo-app-.*
+         useRegexp: true
+       containerName:
+         value: client
+       firstEntryRegex: ^[^\s].*
+       combineWith: ""
+     - namespaceName:
+         value: k8s-nm3
+       podName:
+         value: foo-app-.*
+         useRegexp: true
+       containerName:
+         value: server
+       firstEntryRegex: ^[^\s].*
