@@ -6,7 +6,6 @@ package functional_tests
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,6 +19,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
@@ -271,7 +271,7 @@ func testNodeJSTraces(t *testing.T) {
 
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join("testdata", "expected_traces.yaml")
-	expectedTraces, err := readTraces(expectedTracesFile)
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
 	waitForTraces(t, 3, tracesConsumer)
@@ -305,11 +305,6 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
-	if err != nil {
-		internal.WriteTraces(t, filepath.Join("testdata", "actual_traces.yaml"), latestTrace)
-		b, _ := os.ReadFile(filepath.Join("testdata", "actual_traces.yaml"))
-		fmt.Println(string(b))
-	}
 
 	require.NoError(t, err)
 }
@@ -425,7 +420,7 @@ func shortenNames(value string) string {
 func testK8sClusterReceiverMetrics(t *testing.T) {
 	metricsConsumer := setupOnce(t).k8sclusterReceiverMetricsConsumer
 	expectedMetricsFile := filepath.Join("testdata", "expected_cluster_receiver.yaml")
-	expectedMetrics, err := readMetrics(expectedMetricsFile)
+	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
@@ -794,46 +789,6 @@ func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *
 	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
 		"failed to receive %d entries,  received %d traces, %d metrics, %d logs in %d minutes", entriesNum,
 		len(tc.AllTraces()), len(mc.AllMetrics()), len(lc.AllLogs()), timeoutMinutes)
-}
-
-// readMetrics reads a pmetric.Metrics from the specified YAML or JSON file.
-func readMetrics(filePath string) (pmetric.Metrics, error) {
-	b, err := os.ReadFile(filePath)
-	if err != nil {
-		return pmetric.Metrics{}, err
-	}
-	if strings.HasSuffix(filePath, ".yaml") || strings.HasSuffix(filePath, ".yml") {
-		var m map[string]interface{}
-		if err = yaml.Unmarshal(b, &m); err != nil {
-			return pmetric.Metrics{}, err
-		}
-		b, err = json.Marshal(m)
-		if err != nil {
-			return pmetric.Metrics{}, err
-		}
-	}
-	unmarshaller := &pmetric.JSONUnmarshaler{}
-	return unmarshaller.UnmarshalMetrics(b)
-}
-
-// readTraces reads a ptrace.Traces from the specified YAML or JSON file.
-func readTraces(filePath string) (ptrace.Traces, error) {
-	b, err := os.ReadFile(filePath)
-	if err != nil {
-		return ptrace.Traces{}, err
-	}
-	if strings.HasSuffix(filePath, ".yaml") || strings.HasSuffix(filePath, ".yml") {
-		var m map[string]interface{}
-		if err = yaml.Unmarshal(b, &m); err != nil {
-			return ptrace.Traces{}, err
-		}
-		b, err = json.Marshal(m)
-		if err != nil {
-			return ptrace.Traces{}, err
-		}
-	}
-	unmarshaler := ptrace.JSONUnmarshaler{}
-	return unmarshaler.UnmarshalTraces(b)
 }
 
 func setupTraces(t *testing.T) *consumertest.TracesSink {
