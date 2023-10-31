@@ -227,6 +227,41 @@ data:
         - from: attributes["log.file.path"]
           to: resource["com.splunk.source"]
           type: move
+        - default: clean-up-log-record
+          routes:
+          - expr: (resource["k8s.namespace.name"]) == "default" && (resource["k8s.pod.name"])
+              matches "buttercup-app-.*" && (resource["k8s.container.name"]) == "server"
+            output: default_buttercup-app-.*_server
+          - expr: (resource["k8s.namespace.name"]) == "k8s-nm2" && (resource["k8s.pod.name"])
+              matches "foo-app-.*" && (resource["k8s.container.name"]) == "client"
+            output: k8s-nm2_foo-app-.*_client
+          - expr: (resource["k8s.namespace.name"]) == "k8s-nm3" && (resource["k8s.pod.name"])
+              matches "foo-app-.*" && (resource["k8s.container.name"]) == "server"
+            output: k8s-nm3_foo-app-.*_server
+          type: router
+        - combine_field: attributes.log
+          combine_with: "\t"
+          id: default_buttercup-app-.*_server
+          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          max_log_size: 1048576
+          output: clean-up-log-record
+          source_identifier: resource["com.splunk.source"]
+          type: recombine
+        - combine_field: attributes.log
+          combine_with: ""
+          id: k8s-nm2_foo-app-.*_client
+          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          max_log_size: 1048576
+          output: clean-up-log-record
+          source_identifier: resource["com.splunk.source"]
+          type: recombine
+        - combine_field: attributes.log
+          id: k8s-nm3_foo-app-.*_server
+          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          max_log_size: 1048576
+          output: clean-up-log-record
+          source_identifier: resource["com.splunk.source"]
+          type: recombine
         - from: attributes.log
           id: clean-up-log-record
           to: body

@@ -587,6 +587,7 @@ logsCollection:
     #     containerName:
     #       value: server
     #     firstEntryRegex: ^[^\s].*
+    #     combineWith: ""
     multilineConfigs: []
     # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
     # All other logs will be ignored.
