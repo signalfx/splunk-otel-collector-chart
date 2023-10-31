@@ -2,8 +2,6 @@ name: Splunk Platform Functional Test
 
 on:
   pull_request:
-    paths:
-      - '!**.md'
 
 jobs:
   functional-test:
