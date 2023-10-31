@@ -474,6 +474,7 @@ logsCollection:
         containerName:
           value: server
         firstEntryRegex: ^[^\s].*
+        combineWith: ""
 ```
 
 Use https://regex101.com/ to find a golang regex that works for your format and specify it in the config file for the config option `firstEntryRegex`.

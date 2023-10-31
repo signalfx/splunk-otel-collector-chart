@@ -409,6 +409,9 @@ receivers:
         combine_field: attributes.log
         is_first_entry: '(attributes.log) matches {{ .firstEntryRegex | quote }}'
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
+        {{- if hasKey . "combineWith" }}
+        combine_with: {{ .combineWith | quote }}
+        {{- end }}
       {{- end }}
       {{- end }}
       # Clean up log record

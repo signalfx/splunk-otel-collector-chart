@@ -7,3 +7,33 @@ splunkObservability:
   tracesEnabled: false
 
 logsEngine: otel
+logsCollection:
+  containers:
+   multilineConfigs:
+     - namespaceName:
+         value: default
+       podName:
+         value: buttercup-app-.*
+         useRegexp: true
+       containerName:
+         value: server
+       firstEntryRegex: ^[^\s].*
+       combineWith: "\t" # Recombine entries together with a tab character.
+     - namespaceName:
+         value: k8s-nm2
+       podName:
+         value: foo-app-.*
+         useRegexp: true
+       containerName:
+         value: client
+       firstEntryRegex: ^[^\s].*
+       combineWith: "" # Recombine entries without a separator.
+     - namespaceName:
+         value: k8s-nm3
+       podName:
+         value: foo-app-.*
+         useRegexp: true
+       containerName:
+         value: server
+       firstEntryRegex: ^[^\s].*
+       # Recombine entries with the default separator, "\n".
