@@ -18,7 +18,7 @@ logsCollection:
        containerName:
          value: server
        firstEntryRegex: ^[^\s].*
-       combineWith: "\t"
+       combineWith: "\t" # Recombine entries together with a tab character.
      - namespaceName:
          value: k8s-nm2
        podName:
@@ -27,7 +27,7 @@ logsCollection:
        containerName:
          value: client
        firstEntryRegex: ^[^\s].*
-       combineWith: ""
+       combineWith: "" # Recombine entries without a separator.
      - namespaceName:
          value: k8s-nm3
        podName:
@@ -36,3 +36,4 @@ logsCollection:
        containerName:
          value: server
        firstEntryRegex: ^[^\s].*
+       # Recombine entries with the default separator, "\n".

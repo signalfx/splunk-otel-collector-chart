@@ -256,7 +256,6 @@ data:
           source_identifier: resource["com.splunk.source"]
           type: recombine
         - combine_field: attributes.log
-          combine_with: \n
           id: k8s-nm3_foo-app-.*_server
           is_first_entry: (attributes.log) matches "^[^\\s].*"
           max_log_size: 1048576

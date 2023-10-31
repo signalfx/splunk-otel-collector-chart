@@ -411,8 +411,6 @@ receivers:
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
         {{- if hasKey . "combineWith" }}
         combine_with: {{ .combineWith | quote }}
-        {{- else }}
-        combine_with: "\\n"
         {{- end }}
       {{- end }}
       {{- end }}
