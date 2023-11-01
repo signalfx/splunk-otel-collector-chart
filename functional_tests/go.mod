@@ -7,14 +7,14 @@ go 1.20
 
 require (
 	github.com/docker/docker v23.0.3+incompatible
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.0.0-20231031211240-1c63ac99a6e0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.86.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.86.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.86.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.86.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector/component v0.86.0
 	go.opentelemetry.io/collector/consumer v0.86.0
-	go.opentelemetry.io/collector/pdata v1.0.0-rcv0015
+	go.opentelemetry.io/collector/pdata v1.0.0-rcv0017.0.20231026220224-6405e152a2d9
 	go.opentelemetry.io/collector/receiver v0.86.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.86.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -111,6 +111,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.86.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.86.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.88.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/signalfx v0.86.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc4 // indirect
@@ -172,8 +173,8 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
-	google.golang.org/grpc v1.58.3 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/grpc v1.59.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
