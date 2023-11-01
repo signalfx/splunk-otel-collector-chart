@@ -73,9 +73,6 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
-        resource_attributes:
-          opencensus.resourcetype:
-            enabled: false
       prometheus/k8s-api-server:
         config:
           scrape_configs:
