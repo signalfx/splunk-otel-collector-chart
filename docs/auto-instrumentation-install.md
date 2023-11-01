@@ -29,10 +29,6 @@ Set `operator.enabled=true` when deploying the chart to enable deploying the ope
 If a cert-manager is not available in the cluster (or other TLS certificate source), then you'll need to deploy it
 using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
 commands below to run these steps.
-
-<details>
-<summary>Expand for extended Instrumentation configuration details</summary>
-
 - An [opentelemetry.io/v1alpha1 Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
 object is used to configure the auto-instrumentation of your applications. To successfully enable instrumentation, the
 target pod must have an Instrumentation object available.
@@ -55,8 +51,6 @@ opentelemetry.io/v1alpha1 Instrumentation object.
   - Use the optional `environment` configuration in `values.yaml`.
   - Use the Instrumentation spec (`operator.instrumentation.spec.env`) with the environment variable `OTEL_RESOURCE_ATTRIBUTES`.
 
-</details>
-
 ```bash
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
 kubectl get pods -l app=cert-manager --all-namespaces
@@ -66,9 +60,6 @@ helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=tr
 ```
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
-
-<details>
-<summary>Expand for sample output to verify against</summary>
 
 ```bash
 kubectl get pods
@@ -90,25 +81,175 @@ kubectl get otelinst
 # splunk-otel-collector   3s    http://$(SPLUNK_OTEL_AGENT):4317
 ```
 
-</details>
-
 ### 3. Instrument application by setting an annotation
 
-An _instrumentation.opentelemetry.io/inject-{instrumentation_library}_ annotation can be added to the following:
-- Namespace: All pods within that namespace will be instrumented.
-- Pod Spec Objects: PodSpec objects that are available as part of Deployment,
-  Statefulset, or other resources can be annotated.
-- Example annotations
-  - `instrumentation.opentelemetry.io/inject-java: "true"`
-  - `instrumentation.opentelemetry.io/inject-dotnet: "true"`
-  - `instrumentation.opentelemetry.io/inject-nodejs: "true"`
-  - `instrumentation.opentelemetry.io/inject-python: "true"`
+Enable instrumentation by adding the `instrumentation.opentelemetry.io/inject-{instrumentation_library}` annotation.
+This can be applied to a namespace for all its pods or to individual PodSpec objects, available as part of
+Deployment, Statefulset, and other resources.
 
-The instrumentation annotations can have the following values:
-- "true" - inject and Instrumentation resource from the namespace to use.
-- "my-instrumentation" - name of Instrumentation CR instance in the current namespace to use.
-- "my-other-namespace/my-instrumentation" - name and namespace of Instrumentation CR instance in another namespace to use.
-- "false" - do not inject.
+**Annotation Values:**
+- `"true"`: Inject the `Instrumentation` resource from the namespace.
+- `"my-instrumentation"`: Use the `Instrumentation` custom resource (CR) instance in the current namespace.
+- `"my-other-namespace/my-instrumentation"`: Use the `Instrumentation` CR instance from another namespace.
+- `"false"`: Do not inject.
+
+**Annotations for Different Libraries:**
+
+**Java:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-java: "true"
+```
+
+**NodeJS:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-nodejs: "true"
+```
+
+**Python:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-python: "true"
+```
+
+**.NET:**
+.NET auto-instrumentation uses annotations to set the .NET [Runtime Identifiers](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog).
+Current RIDs: `linux-x64` (default) and `linux-musl-x64`.
+
+```yaml
+instrumentation.opentelemetry.io/inject-dotnet: "true"
+instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64"
+instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
+```
+
+**Go:**
+Go auto-instrumentation requires `OTEL_GO_AUTO_TARGET_EXE`. Set via annotation or the Instrumentation resource.
+
+```yaml
+instrumentation.opentelemetry.io/inject-go: "true"
+instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/path/to/container/executable"
+```
+_Note: Elevated permissions are automatically set for Go auto-instrumentation._
+
+**Apache HTTPD:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-apache-httpd: "true"
+```
+
+**Nginx:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-nginx: "true"
+```
+
+**OpenTelemetry SDK:**
+
+```yaml
+instrumentation.opentelemetry.io/inject-sdk: "true"
+```
+
+#### Annotation Examples:
+
+**Example 1:**
+
+For a nodejs application, with helm chart installed as:
+
+```bash
+helm install splunk-otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace monitoring
+```
+
+_Note: The default `Instrumentation` object name matches the helm release name. The default instrumentation name for this example is `splunk-otel-collector`._
+
+If the current namespace is `monitoring`:
+- Use any of the following annotations:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "true"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "splunk-otel-collector"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "monitoring/splunk-otel-collector"`
+
+If the current namespace is not `monitoring`, like `default` or `my-other-namespace`:
+- Use the annotation:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "monitoring/splunk-otel-collector"`
+
+**Example 2:**
+
+For a nodejs application, with helm chart installed as:
+
+```bash
+helm install otel-collector --values ~/src/values/my_values.yaml ./helm-charts/splunk-otel-collector --namespace o11y
+```
+
+_Note: The default `Instrumentation` object name matches the helm release name. The default instrumentation name for this example is `otel-collector`._
+
+If the current namespace is `o11y`:
+- Use any of the following annotations:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "true"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "otel-collector"`
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
+
+If the current namespace is not `o11y`, like `default` or `my-other-namespace`:
+- Use the annotation:
+  - `"instrumentation.opentelemetry.io/inject-nodejs": "o11y/otel-collector"`
+
+#### Multi-container pods with single instrumentation:
+
+By default, the first container in the pod spec is instrumented. Specify containers with the
+`instrumentation.opentelemetry.io/container-names` annotation.
+
+**Example:**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment-with-multiple-containers
+spec:
+  selector:
+    matchLabels:
+      app: my-pod-with-multiple-containers
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-pod-with-multiple-containers
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/container-names: "myapp,myapp2"
+```
+
+#### Multi-container pods with multiple instrumentations:
+
+This is for when `operator.autoinstrumentation.multi-instrumentation` is enabled. Specify containers
+for each language using specific annotations like `instrumentation.opentelemetry.io/java-container-names`.
+
+**Example:**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment-with-multi-containers-multi-instrumentations
+spec:
+  selector:
+    matchLabels:
+      app: my-pod-with-multi-containers-multi-instrumentations
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-pod-with-multi-containers-multi-instrumentations
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/java-container-names: "myapp,myapp2"
+        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/python-container-names: "myapp3"
+```
+
+**NOTES:**
+- Go auto-instrumentation **does not** support multi-container pods.
+- A container cannot be instrumented with multiple languages.
+- The `instrumentation.opentelemetry.io/container-names` annotation will be disregarded if a language container name annotation is set.
 
 ### 4. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
@@ -226,6 +367,10 @@ Below is a breakdown of the main and related components involved in auto-instrum
 - Documentation
   - https://opentelemetry.io/docs/instrumentation/
 
+</details>
+
+### Instrumentation Libraries
+
 In the table below current instrumentation libraries are listed, if they are supported, and how compatible they are
 with Splunk customer content.
 _The native OpenTelemetry instrumentation libraries are owned and maintained by the OpenTelemetry Community, Splunk
@@ -235,15 +380,13 @@ provides best effort support with issues related to native OpenTelemetry instrum
 |-------------------------|---------------|-------------|------------------|------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | java                    | Splunk        | Available   | Yes              | Completely                   | [Link](github.com/signalfx/splunk-otel-java)                                         | ghcr.io/signalfx/splunk-otel-java/splunk-otel-java                             |
 | dotnet                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-dotnet)                                       |                                                                                |
-| nodejs                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-nodejs)                                       |                                                                                |
+| nodejs                  | Splunk        | Available   | Yes              | Completely                   | [Link](github.com/signalfx/splunk-otel-nodejs)                                       | ghcr.io/signalfx/splunk-otel-java/splunk-otel-js                               |
 | python                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-python)                                       |                                                                                |
 | java                    | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | dotnet                  | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet       |
-| nodejs                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-nodejs-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodes        |
+| nodejs                  | OpenTelemetry | Available   | Yes              | Mostly                       | [Link](https://github.com/open-telemetry/opentelemetry-nodejs-instrumentation)       | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodes        |
 | python                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | apache-httpd            | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
-
-</details>
 
 ### Documentation Resources
 
@@ -252,3 +395,65 @@ provides best effort support with issues related to native OpenTelemetry instrum
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#opentelemetry-auto-instrumentation-injection
 - https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#use-customized-or-vendor-instrumentation
+
+### Troubleshooting the Operator and Cert Manager
+
+#### 1. Check the logs for failures
+
+**Operator Logs:**
+
+```bash
+kubectl logs -l app.kubernetes.io/name=operator
+```
+
+**Cert-Manager Logs:**
+
+```bash
+kubectl logs -l app=certmanager
+kubectl logs -l app=cainjector
+kubectl logs -l app=webhook
+```
+
+#### 2. Cert-Manager Issues
+
+If the operator seems to be hanging, it could be due to the cert-manager not auto-creating the required certificate. To troubleshoot:
+
+- Check the health and logs of the cert-manager pods for potential issues.
+- Consider restarting the cert-manager pods.
+- Ensure that your cluster has only one instance of cert-manager, which should include `certmanager`, `certmanager-cainjector`, and `certmanager-webhook`.
+
+For additional guidance, refer to the official cert-manager documentation:
+- [Troubleshooting Guide](https://cert-manager.io/docs/troubleshooting/)
+- [Uninstallation Guide](https://cert-manager.io/v1.2-docs/installation/uninstall/kubernetes/)
+
+#### 3. Validate Certificates
+
+Ensure that the certificate, which the cert-manager creates and the operator utilizes, is available.
+
+```bash
+kubectl get certificates
+# NAME                                          READY   SECRET                                                           AGE
+# splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
+```
+
+#### 4. Using a Self-Signed Certificate for the Webhook
+
+The operator supports various methods for managing TLS certificates for the webhook. Below are the options available through the operator, with a brief description for each. For detailed configurations and specific use cases, please refer to the operator’s
+[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml).
+
+1. **(Default Functionality) Use certManager to Generate a Self-Signed Certificate:**
+  - Ensure that `operator.admissionWebhooks.certManager` is enabled.
+  - By default, the OpenTelemetry Operator will use a self-signer issuer.
+  - This option takes precedence over other options when enabled.
+  - Specific issuer references and annotations can be provided as needed.
+
+2. **Use Helm to Automatically Generate a Self-Signed Certificate:**
+  - Ensure that `operator.admissionWebhooks.certManager` is disabled and `operator.admissionWebhooks.autoGenerateCert` is enabled.
+  - When these conditions are met, Helm will automatically create a self-signed certificate and secret for you.
+
+3. **Use Your Own Self-Signed Certificate:**
+  - Ensure that both `operator.admissionWebhooks.certManager` and `operator.admissionWebhooks.autoGenerateCert` are disabled.
+  - Provide paths to your own PEM-encoded certificate, private key, and CA cert.
+
+**Note**: While using a self-signed certificate offers a quicker and simpler setup, it has limitations, such as not being trusted by default by clients.
+This may be acceptable for testing purposes or internal environments. For complete configurations and additional guidance, please refer to the provided link to the Helm chart documentation.
