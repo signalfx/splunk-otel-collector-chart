@@ -249,7 +249,7 @@ spec:
 **NOTES:**
 - Go auto-instrumentation **does not** support multi-container pods.
 - A container cannot be instrumented with multiple languages.
-- The `instrumentation.opentelemetry.io/container-names` annotation is not used for this feature.
+- The `instrumentation.opentelemetry.io/container-names` annotation will be disregarded if a language container name annotation is set.
 
 ### 4. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
