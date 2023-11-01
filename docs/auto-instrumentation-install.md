@@ -89,7 +89,7 @@ Deployment, Statefulset, and other resources.
 
 **Annotation Values:**
 - `"true"`: Inject the `Instrumentation` resource from the namespace.
-- `"my-instrumentation"`: Use the `Instrumentation` CR instance in the current namespace.
+- `"my-instrumentation"`: Use the `Instrumentation` custom resource (CR) instance in the current namespace.
 - `"my-other-namespace/my-instrumentation"`: Use the `Instrumentation` CR instance from another namespace.
 - `"false"`: Do not inject.
 
