@@ -435,3 +435,25 @@ kubectl get certificates
 # NAME                                          READY   SECRET                                                           AGE
 # splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
 ```
+
+#### 4. Using a Self-Signed Certificate for the Webhook
+
+The operator supports various methods for managing TLS certificates for the webhook. Below are the options available through the operator, with a brief description for each. For detailed configurations and specific use cases, please refer to the operator’s
+[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml).
+
+1. **(Default Functionality) Use certManager to Generate a Self-Signed Certificate:**
+  - Ensure that `operator.admissionWebhooks.certManager` is enabled.
+  - By default, the OpenTelemetry Operator will use a self-signer issuer.
+  - This option takes precedence over other options when enabled.
+  - Specific issuer references and annotations can be provided as needed.
+
+2. **Use Helm to Automatically Generate a Self-Signed Certificate:**
+  - Ensure that `operator.admissionWebhooks.certManager` is disabled and `operator.admissionWebhooks.autoGenerateCert` is enabled.
+  - When these conditions are met, Helm will automatically create a self-signed certificate and secret for you.
+
+3. **Use Your Own Self-Signed Certificate:**
+  - Ensure that both `operator.admissionWebhooks.certManager` and `operator.admissionWebhooks.autoGenerateCert` are disabled.
+  - Provide paths to your own PEM-encoded certificate, private key, and CA cert.
+
+**Note**: While using a self-signed certificate offers a quicker and simpler setup, it has limitations, such as not being trusted by default by clients.
+This may be acceptable for testing purposes or internal environments. For complete configurations and additional guidance, please refer to the provided link to the Helm chart documentation.
