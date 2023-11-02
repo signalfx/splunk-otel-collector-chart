@@ -46,7 +46,7 @@ jobs:
         if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: helm-charts
         env:
