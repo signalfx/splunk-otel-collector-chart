@@ -9,9 +9,9 @@ metadata:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.13.1"
+    app.kubernetes.io/version: "v1.13.2"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.13.1
+    helm.sh/chart: certmanager-v1.13.2
 rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates"]
@@ -42,9 +42,9 @@ metadata:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.13.1"
+    app.kubernetes.io/version: "v1.13.2"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.13.1
+    helm.sh/chart: certmanager-v1.13.2
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -66,9 +66,9 @@ metadata:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.13.1"
+    app.kubernetes.io/version: "v1.13.2"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.13.1
+    helm.sh/chart: certmanager-v1.13.2
 rules:
   # Used for leader election by the controller
   # cert-manager-cainjector-leader-election is used by the CertificateBased injector controller
@@ -96,9 +96,9 @@ metadata:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.13.1"
+    app.kubernetes.io/version: "v1.13.2"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.13.1
+    helm.sh/chart: certmanager-v1.13.2
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
