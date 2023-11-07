@@ -40,8 +40,8 @@ install-tools: ## Install tools (macOS/Linux)
 ##@ Build
 # Tasks related to building the Helm chart
 
-.PHONY: repo-update
-repo-update: ## Update Helm repositories to latest
+.PHONY: dep-update
+dep-update: ## Update Helm chart dependencies to latest, build the Helm chart with latest dependencies
 	@{ \
 	if ! (helm repo list | grep -q open-telemetry) ; then \
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
@@ -50,20 +50,15 @@ repo-update: ## Update Helm repositories to latest
 		helm repo add jetstack https://charts.jetstack.io || exit 1; \
 	fi ;\
 	helm repo update open-telemetry jetstack || exit 1; \
-	}
-
-.PHONY: dep-build
-dep-build: ## Build the Helm chart with latest dependencies from the current Helm repositories
-	@{ \
 	DEP_OK=true ;\
 	DIR=helm-charts/splunk-otel-collector ;\
 	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then DEP_OK=false ; fi ;\
 	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then DEP_OK=false ; fi ;\
-	if [ "$$DEP_OK" = "false" ] ; then helm dependencies build $$DIR || exit 1; fi ;\
+	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
 	}
 
 .PHONY: render
-render: repo-update dep-build ## Render the Helm chart with the examples as input
+render: dep-update ## Render the Helm chart with the examples as input
 	examples/render-examples.sh || exit 1
 
 ##@ Test
