@@ -73,6 +73,8 @@ data:
       pos_file /var/log/splunk-fluentd-containers.log.pos
       path_key source
       read_from_head true
+      enable_stat_watcher true
+      refresh_interval 60
       <parse>
         @include source.containers.parse.conf
         time_key time

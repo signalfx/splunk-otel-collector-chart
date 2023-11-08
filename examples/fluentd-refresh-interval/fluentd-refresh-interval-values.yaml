@@ -1,0 +1,12 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  logsEnabled: true
+
+logsEngine: fluentd
+
+fluentd:
+  config:
+    refreshInterval: 30
+    enableStatWatcher: false

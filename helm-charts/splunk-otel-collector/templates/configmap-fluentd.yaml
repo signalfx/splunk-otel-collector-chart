@@ -72,6 +72,8 @@ data:
       pos_file {{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos
       path_key source
       read_from_head true
+      enable_stat_watcher {{ .Values.fluentd.config.enableStatWatcher | default true }}
+      refresh_interval {{ .Values.fluentd.config.refreshInterval | default 60 }}
       <parse>
         @include source.containers.parse.conf
         time_key time
