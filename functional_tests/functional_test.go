@@ -114,6 +114,7 @@ func setupOnce(t *testing.T) *sinks {
 
 	return globalSinks
 }
+
 func deployChartsAndApps(t *testing.T) {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
@@ -235,6 +236,88 @@ func deployChartsAndApps(t *testing.T) {
 		}
 		waitTime := int64(0)
 		_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
+			GracePeriodSeconds: &waitTime,
+		})
+		for _, job := range jobs {
+			jobClient := clientset.BatchV1().Jobs(job.Namespace)
+			_ = jobClient.Delete(context.Background(), job.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: &waitTime,
+			})
+		}
+		for _, nm := range namespaces {
+			nmClient := clientset.CoreV1().Namespaces()
+			_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: &waitTime,
+			})
+		}
+		uninstall := action.NewUninstall(actionConfig)
+		uninstall.IgnoreNotFound = true
+		uninstall.Wait = true
+		_, _ = uninstall.Run("sock")
+	})
+}
+
+func deployChartsAndAppsSCK(t *testing.T) {
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	chartPath := "/tmp/splunk-connect-for-kubernetes/helm-chart/splunk-connect-for-kubernetes/"
+	chart, err := loader.Load(chartPath)
+	require.NoError(t, err)
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "test_values_sck.yaml.tmpl"))
+	require.NoError(t, err)
+	replacements := struct {
+		LogHecHost string
+		LogHecPort string
+	}{
+		hostEndpoint(t),
+		fmt.Sprintf("%d", hecReceiverPort)
+	}
+	tmpl, err := template.New("").Parse(string(valuesBytes))
+	require.NoError(t, err)
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, replacements)
+	require.NoError(t, err)
+	var values map[string]interface{}
+	err = yaml.Unmarshal(buf.Bytes(), &values)
+	require.NoError(t, err)
+
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
+		t.Logf(format+"\n", v)
+	}); err != nil {
+		require.NoError(t, err)
+	}
+	install := action.NewInstall(actionConfig)
+	install.Namespace = "default"
+	install.ReleaseName = "sck"
+	_, err = install.Run(chart, values)
+	if err != nil {
+		t.Logf("error reported during helm install: %v\n", err)
+		retryUpgrade := action.NewUpgrade(actionConfig)
+		retryUpgrade.Namespace = "default"
+		retryUpgrade.Install = true
+		_, err = retryUpgrade.Run("sock", chart, values)
+		require.NoError(t, err)
+	}
+
+	waitForAllDeploymentsToStart(t, clientset)
+
+	sckJob, err := os.ReadFile(filepath.Join("testdata", "sck_log_job.yaml"))
+	require.NoError(t, err)
+	var jobs []*batchv1.Job
+
+	waitForAllDeploymentsToStart(t, clientset)
+
+	t.Cleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
+			return
+		}
+		waitTime := int64(0)
+		_ = deployments.Delete(context.Background(), "sck-test", metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 		for _, job := range jobs {

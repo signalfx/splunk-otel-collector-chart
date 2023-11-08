@@ -1,0 +1,21 @@
+---
+global:
+  logLevel: info
+  splunk:
+      hec:
+        protocol: http
+        host: {{ .LogHecHost }}
+        token: foobar
+        port: {{ .LogHecPort }}
+
+  kubernetes:
+    clusterName: "dev_sck"
+
+splunk-kubernetes-logging:
+  enabled: true
+ 
+splunk-kubernetes-metrics:
+  enabled: false
+
+splunk-kubernetes-objects:
+  enabled: false
