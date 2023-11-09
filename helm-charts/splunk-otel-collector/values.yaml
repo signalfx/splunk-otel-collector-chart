@@ -703,11 +703,13 @@ fluentd:
     posFilePrefix: /var/log/splunk-fluentd
 
     # Specify the interval of refreshing the list of watch file. Defaults to 60 (seconds)
-    refreshInterval: 60
+    # uncomment the line below to override default behaviour
+    # refreshInterval: 60
 
-    # Boolean to whether enables the additional inotify-based watcher.
-    # Setting this parameter to false will disable the inotify events and use only timer watcher for file tailing.
-    enableStatWatcher: true
+    # Enables the stat_watcher. Defaults to true. 
+    # See: https://docs.fluentd.org/v1.0/articles/in_tail#enable_stat_watcher"
+    # uncomment the line below to disable it
+    # enableStatWatcher: false
 
     # `customFilters` defines the custom filters to be used.
     # This section can be used to define custom filters using plugins like https://github.com/splunk/fluent-plugin-jq
