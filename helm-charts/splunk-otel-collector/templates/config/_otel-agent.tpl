@@ -484,6 +484,10 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
 
+  {{- include "splunk-otel-collector.k8sAttributesProcessorMetrics" . | nindent 2 }}
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+
   {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
   groupbyattrs/logs:
@@ -577,6 +581,14 @@ processors:
         action: insert
         new_name: container.memory.usage
   {{- end }}
+
+  transform/metricsindexchange:
+    metric_statements:
+      - context: metric
+        statements:
+          - set(resource.attributes["k8s.pod.about"], "nothing")
+          - set(resource.attributes["k8s.pod.about"], resource.attributes["com.splunk.metricsIndex"])
+          - set(resource.attributes["com.splunk.index"], resource.attributes["com.splunk.metricsIndex"])
 
   {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
   # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
@@ -797,6 +809,7 @@ service:
       receivers: [hostmetrics, kubeletstats, otlp, receiver_creator, signalfx]
       processors:
         - memory_limiter
+        - k8sattributes/metrics
         - batch
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
@@ -824,6 +837,7 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
+        - logging
     {{- end }}
 
     {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -832,6 +846,7 @@ service:
       receivers: [prometheus/agent]
       processors:
         - memory_limiter
+        - k8sattributes/metrics
         - batch
         - resource/add_agent_k8s
         - resourcedetection

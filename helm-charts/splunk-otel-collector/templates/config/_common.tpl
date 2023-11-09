@@ -128,12 +128,6 @@ k8sattributes:
       - key: splunk.com/index
         tag_name: com.splunk.index
         from: pod
-      - key: splunk.com/metricsIndex
-        tag_name: com.splunk.metricsIndex
-        from: namespace
-      - key: splunk.com/metricsIndex
-        tag_name: com.splunk.metricsIndex
-        from: pod
       {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
     {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
     labels:
@@ -142,6 +136,43 @@ k8sattributes:
       {{- end }}
       {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
     {{- end }}
+{{- end }}
+
+{{/*
+Common config for K8s attributes processor adding k8s metadata to resource attributes.
+*/}}
+{{- define "splunk-otel-collector.k8sAttributesProcessorMetrics" -}}
+k8sattributes/metrics:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.ip
+    - sources:
+      - from: resource_attribute
+        name: ip
+    - sources:
+      - from: connection
+    - sources:
+      - from: resource_attribute
+        name: host.name
+  extract:
+    metadata:
+      - k8s.pod.name
+      - k8s.pod.uid
+      - k8s.deployment.name
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.start_time
+    annotations:
+      - key: splunk.com/metricsIndex
+        tag_name: com.splunk.metricsIndex
+        from: namespace
+      - key: splunk.com/metricsIndex
+        tag_name: com.splunk.metricsIndex
+        from: pod
 {{- end }}
 
 {{/*
