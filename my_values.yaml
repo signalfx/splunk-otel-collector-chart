@@ -1,7 +1,7 @@
 clusterName: "test_cluster"
 
 splunkPlatform:
-  endpoint: "https://10.202.12.84:8088/services/collector/event"
+  endpoint: "https://10.202.19.233:8088/services/collector/event"
   token: "00000000-0000-0000-0000-000000000000"
 
   index: "kube"
@@ -29,9 +29,3 @@ agent:
       enabled: true
     etcd:
       skipVerify: false
-
-extraAttributes:
-  fromAnnotations: 
-    - from: namespace
-      key: splunk.com/metricsIndex
-      tag_name: com.splunk.metricsIndex

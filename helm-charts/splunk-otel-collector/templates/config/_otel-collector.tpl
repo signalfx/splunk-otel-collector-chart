@@ -34,6 +34,7 @@ receivers:
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
+  {{- include "splunk-otel-collector.k8sAttributesProcessorMetrics" . | nindent 2 }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- if .Values.autodetect.istio }}
   {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
@@ -172,6 +173,8 @@ service:
       receivers: [otlp, signalfx]
       processors:
         - memory_limiter
+        - k8sattributes/metrics
+        - transform/metrics_index_update
         - batch
         - resource/add_cluster_name
         {{- if .Values.extraAttributes.custom }}
@@ -229,6 +232,8 @@ service:
       receivers: [prometheus/collector]
       processors:
         - memory_limiter
+        - k8sattributes/metrics
+        - transform/metrics_index_update
         - batch
         - resource/add_collector_k8s
         - resourcedetection

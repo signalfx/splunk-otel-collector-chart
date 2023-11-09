@@ -450,9 +450,6 @@ receivers:
       field: resource["com.splunk.index"]
       value: {{ $.Values.logsCollection.journald.index | default $.Values.splunkPlatform.index }}
     - type: add
-      field: resource["com.splunk.metricsIndex"]
-      value: {{ $.Values.logsCollection.journald.metricsIndex | default $.Values.splunkPlatform.metricsIndex }}
-    - type: add
       field: resource["host.name"]
       value: 'EXPR(env("K8S_NODE_NAME"))'
     - type: add
@@ -485,8 +482,6 @@ processors:
       node_from_env_var: K8S_NODE_NAME
 
   {{- include "splunk-otel-collector.k8sAttributesProcessorMetrics" . | nindent 2 }}
-    filter:
-      node_from_env_var: K8S_NODE_NAME
 
   {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
@@ -582,13 +577,13 @@ processors:
         new_name: container.memory.usage
   {{- end }}
 
-  transform/metricsindexchange:
+  transform/metrics_index_update:
     metric_statements:
       - context: metric
         statements:
-          - set(resource.attributes["k8s.pod.about"], "nothing")
-          - set(resource.attributes["k8s.pod.about"], resource.attributes["com.splunk.metricsIndex"])
           - set(resource.attributes["com.splunk.index"], resource.attributes["com.splunk.metricsIndex"])
+          # If I do that it works fine (name of the index as a string):
+          # - set(resource.attributes["com.splunk.index"], "kube_metrics2")
 
   {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
   # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
@@ -810,6 +805,7 @@ service:
       processors:
         - memory_limiter
         - k8sattributes/metrics
+        - transform/metrics_index_update
         - batch
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
@@ -847,6 +843,7 @@ service:
       processors:
         - memory_limiter
         - k8sattributes/metrics
+        - transform/metrics_index_update
         - batch
         - resource/add_agent_k8s
         - resourcedetection
