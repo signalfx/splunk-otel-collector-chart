@@ -1,6 +1,5 @@
 # Example of chart configuration
 
-## Multiline Fluentd logging for Java stacktraces
+## Fluentd refresh interval and stat watcher
 
-This example shows how to configure FluentD to capture logs that span multiple lines,
-specifically Java application stacktraces.
+This example shows how to configure refresh_interval and enable_stat_watcher for tail plugin in FluentD
