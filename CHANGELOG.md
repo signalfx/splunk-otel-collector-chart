@@ -4,6 +4,20 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.87.0] - 2023-11-15
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.87.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.87.0).
+
+### 💡 Enhancements 💡
+
+- `agent, fluentd`: Allow users to override `enable_stat_watcher` and `refresh_interval` for tail plugin from values.yaml ([#982](https://github.com/signalfx/splunk-otel-collector-chart/pull/982))
+- `agent`: Add combineWith field to multiline configuration ([#756](https://github.com/signalfx/splunk-otel-collector-chart/pull/756))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Remove by default empty allowedFlexVolumes ([#981](https://github.com/signalfx/splunk-otel-collector-chart/pull/981))
+  Removed the allowedFlexVolumes empty field since it does not provide any default additional benefits for the users.
+
 ## [0.86.1] - 2023-10-13
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.86.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.86.0).
