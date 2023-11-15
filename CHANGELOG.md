@@ -12,6 +12,8 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 - `agent, fluentd`: Allow users to override `enable_stat_watcher` and `refresh_interval` for tail plugin from values.yaml ([#982](https://github.com/signalfx/splunk-otel-collector-chart/pull/982))
 - `agent`: Add combineWith field to multiline configuration ([#756](https://github.com/signalfx/splunk-otel-collector-chart/pull/756))
+- `operator`: cert-manager upgraded to v1.13.2 ([#1007](https://github.com/signalfx/splunk-otel-collector-chart/pull/1007))
+- `operator`: opentelemetry-operator upgraded to v0.41.0 ([#985](https://github.com/signalfx/splunk-otel-collector-chart/pull/985))
 
 ### 🧰 Bug fixes 🧰
 
