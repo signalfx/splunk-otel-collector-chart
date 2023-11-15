@@ -51,7 +51,7 @@ jobs:
           kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
       - name: Update dependencies
         run: |
-          make repo-update dep-build
+          make dep-update
       - name: Deploy cert-manager
         run: |
           make cert-manager

@@ -77,7 +77,7 @@ jobs:
 
       - name: Deploy splunk-otel-collector chart
         run: |
-          make repo-update dep-build
+          make dep-update
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           ci_scripts/deploy_collector.sh
 

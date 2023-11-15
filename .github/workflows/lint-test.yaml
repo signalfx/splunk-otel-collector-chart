@@ -25,7 +25,7 @@ jobs:
           version: v3.7.1
 
       - name: Set up chart dependencies
-        run: make repo-update dep-build
+        run: make dep-update
 
       - name: Run chart-testing (list-changed)
         id: list-changed

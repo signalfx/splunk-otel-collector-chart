@@ -42,8 +42,8 @@ jobs:
             DEBUG_ARG="--debug"
           fi
 
-          # Ensure repositories are up-to-date
-          make repo-update
+          # Ensure chart dependencies are up-to-date
+          make dep-update
 
           # Fetch the latest version using helm search repo
           LATEST_VER=$(helm search repo ${{ matrix.repo }} --versions | awk 'NR==2{print $2}')
