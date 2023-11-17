@@ -71,11 +71,14 @@ const (
 // cd functional_tests/testdata/nodejs
 // docker build -t nodejs_test:latest .
 // kind load docker-image nodejs_test:latest --name kind
+// On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
+// kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
 
 // When running tests you can use the following env vars to help with local development:
 // SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
 // SKIP_TEARDOWN: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
 // SKIP_TESTS: skip running tests, just set up and tear down the cluster.
+// TEARDOWN_BEFORE_SETUP: delete all the deployments made by these tests before setting up.
 
 var globalSinks *sinks
 
@@ -104,6 +107,9 @@ func setupOnce(t *testing.T) *sinks {
 			k8sclusterReceiverMetricsConsumer: setupSignalfxReceiver(t, signalFxReceiverK8sClusterReceiverPort),
 			tracesConsumer:                    setupTraces(t),
 		}
+		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+			teardown(t)
+		}
 		// deploy the chart and applications.
 		if os.Getenv("SKIP_SETUP") == "true" {
 			t.Log("Skipping setup as SKIP_SETUP is set to true")
@@ -115,10 +121,8 @@ func setupOnce(t *testing.T) *sinks {
 	return globalSinks
 }
 func deployChartsAndApps(t *testing.T) {
-	testKubeConfig := os.Getenv("KUBECONFIG")
-	if testKubeConfig == "" {
-		testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-functional-testing"
-	}
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(kubeConfig)
@@ -237,27 +241,75 @@ func deployChartsAndApps(t *testing.T) {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		waitTime := int64(0)
-		_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
+		teardown(t)
+
+	})
+}
+
+func teardown(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	waitTime := int64(0)
+	deployments := clientset.AppsV1().Deployments("default")
+	require.NoError(t, err)
+	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
+	jobstream, err := os.ReadFile(filepath.Join("testdata", "test_jobs.yaml"))
+	require.NoError(t, err)
+	var namespaces []*corev1.Namespace
+	var jobs []*batchv1.Job
+	for _, resourceYAML := range strings.Split(string(jobstream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err := decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "Namespace" {
+			nm := obj.(*corev1.Namespace)
+			namespaces = append(namespaces, nm)
+		}
+
+		if groupVersionKind.Group == "batch" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "Job" {
+			job := obj.(*batchv1.Job)
+			jobs = append(jobs, job)
+		}
+	}
+	for _, job := range jobs {
+		jobClient := clientset.BatchV1().Jobs(job.Namespace)
+		_ = jobClient.Delete(context.Background(), job.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
-		for _, job := range jobs {
-			jobClient := clientset.BatchV1().Jobs(job.Namespace)
-			_ = jobClient.Delete(context.Background(), job.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-		}
-		for _, nm := range namespaces {
-			nmClient := clientset.CoreV1().Namespaces()
-			_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-		}
-		uninstall := action.NewUninstall(actionConfig)
-		uninstall.IgnoreNotFound = true
-		uninstall.Wait = true
-		_, _ = uninstall.Run("sock")
-	})
+	}
+	for _, nm := range namespaces {
+		nmClient := clientset.CoreV1().Namespaces()
+		_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
+			GracePeriodSeconds: &waitTime,
+		})
+	}
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
+		t.Logf(format+"\n", v)
+	}); err != nil {
+		require.NoError(t, err)
+	}
+	uninstall := action.NewUninstall(actionConfig)
+	uninstall.IgnoreNotFound = true
+	uninstall.Wait = true
+	_, _ = uninstall.Run("sock")
 }
 
 func Test_Functions(t *testing.T) {
@@ -510,18 +562,30 @@ func testAgentLogs(t *testing.T) {
 
 	var helloWorldResource pcommon.Resource
 	var helloWorldLogRecord *plog.LogRecord
-	var podAnnoResource pcommon.Resource
-	var podAnnoLogRecord *plog.LogRecord
-	var nsAnnoResource pcommon.Resource
-	var nsAnnoLogRecord *plog.LogRecord
+	excludePods := true
+	excludeNs := true
 	var sourcetypes []string
+	var indices []string
 
 	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
 		l := logsConsumer.AllLogs()[i]
 		for j := 0; j < l.ResourceLogs().Len(); j++ {
 			rl := l.ResourceLogs().At(j)
 			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
-				sourcetypes = append(sourcetypes, value.AsString())
+				sourcetype := value.AsString()
+				sourcetypes = append(sourcetypes, sourcetype)
+			}
+			if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
+				index := value.AsString()
+				indices = append(indices, index)
+			}
+			if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
+				if "pod-w-index-w-ns-exclude" == value.AsString() {
+					excludePods = false
+				}
+				if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
+					excludeNs = false
+				}
 			}
 
 			for k := 0; k < rl.ScopeLogs().Len(); k++ {
@@ -532,16 +596,7 @@ func testAgentLogs(t *testing.T) {
 						helloWorldLogRecord = &logRecord
 						helloWorldResource = rl.Resource()
 					}
-					if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
-						if "pod-anno" == value.AsString() {
-							podAnnoLogRecord = &logRecord
-							podAnnoResource = rl.Resource()
-						}
-						if "ns-anno" == value.AsString() {
-							nsAnnoLogRecord = &logRecord
-							nsAnnoResource = rl.Resource()
-						}
-					}
+
 				}
 			}
 		}
@@ -561,17 +616,19 @@ func testAgentLogs(t *testing.T) {
 		assert.True(t, ok)
 		assert.Regexp(t, regexp.MustCompile("nodejs-test-.*"), podName.AsString())
 	})
-	t.Run("test pod annotation log records", func(t *testing.T) {
-		assert.NotNil(t, podAnnoLogRecord)
-		sourceType, ok := podAnnoResource.Attributes().Get("com.splunk.sourcetype")
-		assert.True(t, ok)
-		assert.Equal(t, "kube:container:pod-w-index-wo-ns-index", sourceType.AsString())
+	t.Run("test index is set", func(t *testing.T) {
+		assert.Contains(t, indices, "ns-anno")
+		assert.Contains(t, indices, "pod-anno")
 	})
-	t.Run("test namespace annotation log records", func(t *testing.T) {
-		assert.NotNil(t, nsAnnoLogRecord)
-		sourceType, ok := nsAnnoResource.Attributes().Get("com.splunk.sourcetype")
-		assert.True(t, ok)
-		assert.Equal(t, "kube:container:pod-wo-index-w-ns-index", sourceType.AsString())
+	t.Run("test sourcetype is set", func(t *testing.T) {
+		assert.Contains(t, sourcetypes, "kube:container:pod-w-index-wo-ns-index")
+		assert.Contains(t, sourcetypes, "kube:container:pod-wo-index-w-ns-index")
+		assert.Contains(t, sourcetypes, "kube:container:pod-wo-index-wo-ns-index")
+		assert.Contains(t, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
+	})
+	t.Run("excluded pods and namespaces", func(t *testing.T) {
+		assert.True(t, excludePods, "excluded pods should be ignored")
+		assert.True(t, excludeNs, "excluded namespaces should be ignored")
 	})
 }
 
@@ -773,31 +830,6 @@ func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clients
 		}
 		return true
 	}, 5*time.Minute, 10*time.Second)
-}
-
-func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *consumertest.MetricsSink, lc *consumertest.LogsSink) {
-	f := otlpreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-
-	_, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
-	require.NoError(t, err)
-	_, err = f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
-	require.NoError(t, err)
-	logsReceiver, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
-	require.NoError(t, err)
-
-	require.NoError(t, logsReceiver.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating logs receiver")
-	defer func() {
-		assert.NoError(t, logsReceiver.Shutdown(context.Background()))
-	}()
-
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum && len(mc.AllMetrics()) > entriesNum //&& len(lc.AllLogs()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces, %d metrics, %d logs in %d minutes", entriesNum,
-		len(tc.AllTraces()), len(mc.AllMetrics()), len(lc.AllLogs()), timeoutMinutes)
 }
 
 func setupTraces(t *testing.T) *consumertest.TracesSink {
