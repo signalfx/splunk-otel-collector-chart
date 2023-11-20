@@ -40,7 +40,8 @@ Collector gateway service name captured in the step 2. Additionally, if you had 
 ```yaml
 endpoint:
   address: <my-splunk-otel-collector-gateway>
-# addttional custom configuration moved from the networkExplorer section in Splunk OpenTelemetry Collector helm chart.
+
+# additional custom configuration moved from the networkExplorer section in Splunk OpenTelemetry Collector helm chart.
 ```
 
 ## 0.85.0 to 0.86.0
