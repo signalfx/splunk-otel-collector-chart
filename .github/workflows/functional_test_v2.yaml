@@ -63,12 +63,4 @@ jobs:
       - name: run functional tests
         run: |
           cd functional_tests
-          export RUN_SCK_ONLY="0"
-          go test -v
-      - name: run sck migration tests
-        run: |
-          sck_path=/tmp/splunk-connect-for-kubernetes
-          git clone https://github.com/splunk/splunk-connect-for-kubernetes.git $sck_path
-          cd functional_tests
-          export RUN_SCK_ONLY="1"
           go test -v

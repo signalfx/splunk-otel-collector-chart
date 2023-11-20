@@ -1,12 +1,23 @@
-apiVersion: v1
-kind: Pod
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: my-test-log
+  name: pod-sck-index-sck-migration
+  namespace: default
 spec:
-  containers:
-    - name: my-test
-      image: registry.access.redhat.com/ubi9/ubi
-      imagePullPolicy: IfNotPresent
-      securityContext:
-        runAsUser: 0
-      command: ['sh','-c', 'for i in {1..1000}; do echo "Hello ${i}"; sleep 2; done']
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: pod-sck-index-sck-migration
+      annotations:
+        splunk.com/index: "pod-sck-migration"
+        splunk.com/sourcetype: "sourcetype-sck-m-anno"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pod-sck-index-sck-migration
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          command: ['sh','-c', 'for i in {1..1000}; do echo "${i}"; sleep 5; done']
