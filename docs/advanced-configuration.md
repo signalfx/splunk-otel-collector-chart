@@ -780,3 +780,35 @@ agent:
   * Cluster receiver is a 1-replica deployment of Open-temlemetry collector.
   * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such envrionments.
   * Data Persistence is currently not applicable to the k8s cluster metrics and k8s events.
+
+### Using OpenTelemetry eBPF helm chart with Splunk OpenTelemetry Collector for Kubernetes
+
+[OpenTelemetry eBPF Helm Chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-ebpf)
+can be used to collect network metrics from linux kernel. The metrics collected by eBPF can be
+sent to Splunk OpenTelemetry Collector for Kubernetes gateway. The gateway will then forward the metrics to Splunk
+Observability Cloud or Splunk Enterprise.
+
+To use the OpenTelemetry eBPF helm chart with Splunk OpenTelemetry Collector for Kubernetes, follow the steps below:
+
+1. Make sure the Splunk OpenTelemetry Collector helm chart is installed with the gateway enabled:
+
+```yaml
+gateway:
+  enabled: true
+```
+
+2. Grab name of the Splunk OpenTelemetry Collector gateway service:
+
+```bash
+kubectl get svc | grep splunk-otel-collector-gateway
+```
+
+3. Install the upstream OpenTelemetry eBPF helm chart pointing to the Splunk OpenTelemetry Collector gateway service:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update open-telemetry
+helm install my-opentelemetry-ebpf --set=endpoint.address=<my-splunk-otel-collector-gateway> open-telemetry/opentelemetry-ebpf
+```
+
+where <my-splunk-otel-collector-gateway> is the gateway service name captured in the step 2.

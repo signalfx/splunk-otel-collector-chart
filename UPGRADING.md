@@ -1,5 +1,48 @@
 # Upgrade guidelines
 
+## 0.87.0 to 0.88.0
+
+The `networkExplorer` option is deprecated now. Please use the upstream OpenTelemetry eBPF Helm chart to collect
+the network metrics by following the next steps:
+
+1. Make sure the Splunk OpenTelemetry Collector helm chart is installed with the gateway enabled:
+
+```yaml
+gateway:
+  enabled: true
+```
+
+2. Disable the network explorer:
+
+```yaml
+networkExplorer:
+  enabled: false
+```
+
+3. Grab name of the Splunk OpenTelemetry Collector gateway service:
+
+```bash
+kubectl get svc | grep splunk-otel-collector-gateway
+```
+
+4. Install the upstream OpenTelemetry eBPF helm chart pointing to the Splunk OpenTelemetry Collector gateway service:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update open-telemetry
+helm install my-opentelemetry-ebpf -f ./otel-ebpf-values.yaml open-telemetry/opentelemetry-ebpf
+```
+
+`otel-ebpf-values.yaml` must at least have `endpoint.address` option set to the Splunk OpenTelemetry
+Collector gateway service name captured in the step 2. Additionally, if you had any custom confgurations in the
+`networkExplorer` section, you need to move them to the `otel-ebpf-values.yaml` file.
+
+```yaml
+endpoint:
+  address: <my-splunk-otel-collector-gateway>
+# addttional custom configuration moved from the networkExplorer section in Splunk OpenTelemetry Collector helm chart.
+```
+
 ## 0.85.0 to 0.86.0
 
 The default logs collection engine (`logsEngine`) changed from `fluentd` to the native OpenTelemetry logs collection (`otel`).

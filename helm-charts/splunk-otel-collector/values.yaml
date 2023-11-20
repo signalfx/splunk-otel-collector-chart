@@ -1133,10 +1133,9 @@ service:
   annotations: {}
 
 ################################################################################
-# Configuration section for Network Explorer (disabled by default).
-# Network Explorer allows you to collect network metrics from linux kernel.
-# Note that Network Explorer is not supported for Linux kernel version 6 at the moment.
-# Setting networkExplorer.enabled=true for Linux kernel 6 will lead to errors.
+# [DEPRECATED] Configuration section for Network Explorer (disabled by default).
+# Follow https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0870-to-0880
+# to replace it with the upstream OpenTelemetry eBPF helm chart.
 ################################################################################
 
 networkExplorer:
