@@ -754,7 +754,7 @@ func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset)
 			}
 		}
 		return true
-	}, 5*time.Minute, 5*time.Second)
+	}, 5*time.Minute, 10*time.Second)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clientset) {
@@ -767,7 +767,7 @@ func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clients
 			}
 		}
 		return true
-	}, 5*time.Minute, 5*time.Second)
+	}, 5*time.Minute, 10*time.Second)
 }
 
 func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *consumertest.MetricsSink, lc *consumertest.LogsSink) {
