@@ -55,11 +55,6 @@ jobs:
       - name: Deploy cert-manager
         run: |
           make cert-manager
-      - name: Build Node.js docker image
-        run: |
-          cd functional_tests/testdata/nodejs
-          docker build -t nodejs_test:latest .
-          kind load docker-image nodejs_test:latest --name kind
       - name: run functional tests
         run: |
           cd functional_tests
