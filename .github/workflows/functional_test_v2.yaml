@@ -96,20 +96,8 @@ jobs:
       - name: Deploy cert-manager
         run: |
           make cert-manager
-      - name: Build Node.js docker image
-        env:
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
-        run: |
-          aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT.dkr.ecr.us-west-1.amazonaws.com
-          cd functional_tests/testdata/nodejs
-          docker build -t nodejs_test:latest .
-          docker tag nodejs_test:latest $AWS_ACCOUNT.dkr.ecr.us-west-1.amazonaws.com/rotel-testing-nodejs-testing:latest
-          docker push $AWS_ACCOUNT.dkr.ecr.us-west-1.amazonaws.com/rotel-testing-nodejs-testing:latest
       - name: run functional tests
         env:
-          NODEJS_DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-west-1.amazonaws.com/rotel-testing-nodejs-testing:latest
           HOST_ENDPOINT: 0.0.0.0
         run: |
 

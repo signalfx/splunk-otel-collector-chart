@@ -183,10 +183,6 @@ func deployChartsAndApps(t *testing.T) {
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	if img, ok := os.LookupEnv("NODEJS_DOCKER_IMAGE"); ok {
-		deployment.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].Image = img
-		deployment.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullIfNotPresent
-	}
 	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
 		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
