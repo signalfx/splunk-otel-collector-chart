@@ -212,18 +212,22 @@ func deployChartsAndApps(t *testing.T) {
 			t.Logf("Deployed namespace %s", nm.Name)
 		}
 
-		waitForAllNamespacesToBeCreated(t, clientset)
-
 		if groupVersionKind.Group == "batch" &&
 			groupVersionKind.Version == "v1" &&
 			groupVersionKind.Kind == "Job" {
 			job := obj.(*batchv1.Job)
 			jobs = append(jobs, job)
-			jobClient := clientset.BatchV1().Jobs(job.Namespace)
-			_, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed job %s", job.Name)
+
 		}
+	}
+
+	waitForAllNamespacesToBeCreated(t, clientset)
+
+	for _, job := range jobs {
+		jobClient := clientset.BatchV1().Jobs(job.Namespace)
+		_, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
+		require.NoError(t, err)
+		t.Logf("Deployed job %s", job.Name)
 	}
 
 	waitForAllDeploymentsToStart(t, clientset)
@@ -750,7 +754,7 @@ func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset)
 			}
 		}
 		return true
-	}, 5*time.Minute, 10*time.Second)
+	}, 5*time.Minute, 5*time.Second)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clientset) {
@@ -763,7 +767,7 @@ func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clients
 			}
 		}
 		return true
-	}, 5*time.Minute, 10*time.Second)
+	}, 5*time.Minute, 5*time.Second)
 }
 
 func waitForData(t *testing.T, entriesNum int, tc *consumertest.TracesSink, mc *consumertest.MetricsSink, lc *consumertest.LogsSink) {
