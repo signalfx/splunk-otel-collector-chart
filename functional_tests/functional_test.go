@@ -51,7 +51,6 @@ import (
 )
 
 const (
-	testKubeConfig                         = "/tmp/kube-config-splunk-otel-collector-chart-functional-testing"
 	hecReceiverPort                        = 8090
 	hecMetricsReceiverPort                 = 8091
 	hecLogsObjectsReceiverPort             = 8092
@@ -76,6 +75,7 @@ const (
 // When running tests you can use the following env vars to help with local development:
 // SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
 // SKIP_TEARDOWN: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
+// SKIP_TESTS: skip running tests, just set up and tear down the cluster.
 
 var globalSinks *sinks
 
@@ -115,6 +115,10 @@ func setupOnce(t *testing.T) *sinks {
 	return globalSinks
 }
 func deployChartsAndApps(t *testing.T) {
+	testKubeConfig := os.Getenv("KUBECONFIG")
+	if testKubeConfig == "" {
+		testKubeConfig = "/tmp/kube-config-splunk-otel-collector-chart-functional-testing"
+	}
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(kubeConfig)
@@ -179,6 +183,10 @@ func deployChartsAndApps(t *testing.T) {
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
+	if img, ok := os.LookupEnv("NODEJS_DOCKER_IMAGE"); ok {
+		deployment.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].Image = img
+		deployment.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullIfNotPresent
+	}
 	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
 		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
@@ -258,6 +266,10 @@ func deployChartsAndApps(t *testing.T) {
 
 func Test_Functions(t *testing.T) {
 	_ = setupOnce(t)
+	if os.Getenv("SKIP_TESTS") == "true" {
+		t.Log("Skipping tests as SKIP_TESTS is set to true")
+		return
+	}
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
@@ -915,6 +927,9 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 }
 
 func hostEndpoint(t *testing.T) string {
+	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
+		return host
+	}
 	if runtime.GOOS == "darwin" {
 		return "host.docker.internal"
 	}
