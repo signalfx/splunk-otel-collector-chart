@@ -16,6 +16,6 @@ spec:
         instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
-        - image: nodejs_test:latest
+        - image: quay.io/splunko11ytest/nodejs_test:latest
           name: nodejs-test
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
