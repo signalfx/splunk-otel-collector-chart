@@ -108,34 +108,6 @@ def test_annotation_excluding(setup, container_name, expected):
                 len(events))
     assert len(events) == expected
 
-@pytest.mark.skipif(True, reason="Jira: ADDON-36296")
-@pytest.mark.parametrize("test_input,expected", [
-    ("/var/log/pods/*_kube-apiserver*", 1),
-    ("/var/log/pods/*_ci*", 1),
-    ("/var/log/pods/*_coredns*", 1),
-    ("/var/log/pods/*_etcd-*", 1),
-    ("empty_source", 0)
-])
-def test_source(setup, test_input, expected):
-    '''
-    Test that known sources are present in target index
-    '''
-    logger.info("testing for presence of source={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    source = ' source=""' if test_input == "empty_source" else ' source=' + test_input
-    search_query = "index=" + index_logging + ' OR index="kube-system"' + source
-    events = check_events_from_splunk(start_time="-24h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected if test_input != "empty_source" else len(
-        events) == expected
-
 @pytest.mark.parametrize("test_input,expected", [
     ("k8s.pod.name", 1),
     ("k8s.namespace.name", 1),
