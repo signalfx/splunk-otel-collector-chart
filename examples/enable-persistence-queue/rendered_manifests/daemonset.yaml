@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: c10a544bcac5d3afccbecd5e84a3cd8a9fec02d7d00763113c8d5a23efce3244
+        checksum/config: 512f2bf1e2ee4ad712905204fd4b91fb3b01aaf52f8f8f47e6c4399a0af4c956
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -40,7 +40,7 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
-
+        
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
         - effect: NoSchedule
