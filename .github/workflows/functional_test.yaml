@@ -5,6 +5,7 @@ on:
 
 jobs:
   functional-test:
+    if: "!contains(github.event.pull_request.labels.*.name, 'Skip Functional Test')"
     name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
     runs-on: ubuntu-20.04
     strategy:

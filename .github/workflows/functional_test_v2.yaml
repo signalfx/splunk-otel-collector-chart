@@ -12,6 +12,7 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 jobs:
   kubernetes-test:
+    if: "!contains(github.event.pull_request.labels.*.name, 'Skip Functional Test')"
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
     strategy:
@@ -60,6 +61,7 @@ jobs:
           cd functional_tests
           go test -v
   eks-test:
+    if: "!contains(github.event.pull_request.labels.*.name, 'Skip Functional Test') || !contains(github.event.pull_request.labels.*.name, 'Skip Functional Test - EKS')"
     concurrency:
       group: eks-access
     env:
