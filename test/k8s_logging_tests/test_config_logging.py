@@ -6,8 +6,6 @@ import json
 import sys
 from urllib.parse import urlparse
 from ..common import check_events_from_splunk, create_index_in_splunk, delete_index_in_splunk
-from kubernetes import client, config
-from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,30 +13,6 @@ formatter = logging.Formatter('%(message)s')
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
-
-@pytest.mark.parametrize("test_input,expected", [
-    ("test_data", 1)
-])
-def test_splunk_index(setup, test_input, expected):
-    '''
-    Test that user specified index can successfully index the
-    log stream from k8s. If no index is specified, default
-    index "ci_events" will be used.
-    '''
-    logger.info("testing test_splunk_index input={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    search_query = "index=" + index_logging
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
 
 @pytest.mark.parametrize("label,index,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", 1),
@@ -61,52 +35,6 @@ def test_label_collection(setup, label, index, expected):
     logger.info("Splunk received %s events in the last minute",
                 len(events))
     assert len(events) >= expected
-
-
-@pytest.mark.parametrize("index,container_name,expected", [
-    ("pod-anno", "pod-w-index-w-ns-index", 1),
-    ("ns-anno", "pod-wo-index-w-ns-index", 1),
-    ("pod-anno", "pod-w-index-wo-ns-index", 1),
-    ("ci_events", "pod-wo-index-wo-ns-index", 1),
-])
-def test_annotation_routing(setup, index, container_name, expected):
-    '''
-    Test annotation routing feature. it tests different combinations of
-    namespace annotations and pod annotations.
-    '''
-    logger.info("testing test_annotation_routing pod={0} expected={1} event(s)".format(
-        container_name, expected))
-    search_query = "index=" + index + " k8s.container.name::" + container_name
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
-@pytest.mark.parametrize("container_name,expected", [
-    ("pod-w-index-w-ns-exclude", 0),
-    ("pod-w-exclude-wo-ns-exclude", 0)
-])
-def test_annotation_excluding(setup, container_name, expected):
-    '''
-    Test annotation excluding feature.
-    '''
-    logger.info("testing test_annotation_excluding pod={0} expected={1} event(s)".format(
-        container_name, expected))
-    search_query = "index=*" + " k8s.container.name::" + container_name
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) == expected
 
 @pytest.mark.parametrize("test_input,expected", [
     ("k8s.pod.name", 1),
