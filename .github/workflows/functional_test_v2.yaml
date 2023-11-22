@@ -61,7 +61,9 @@ jobs:
           cd functional_tests
           go test -v
   eks-test:
-    if: "!contains(github.event.pull_request.labels.*.name, 'Skip Functional Test') || !contains(github.event.pull_request.labels.*.name, 'Skip Functional Test - EKS')"
+    if: |
+      github.event.pull_request.base.repo.html_url == 'https://github.com/signalfx/splunk-otel-collector-chart' &&
+      (!contains(github.event.pull_request.labels.*.name, 'Skip Functional Test') || !contains(github.event.pull_request.labels.*.name, 'Skip Functional Test - EKS'))
     concurrency:
       group: eks-access
     env:
