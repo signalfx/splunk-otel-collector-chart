@@ -37,6 +37,6 @@ jobs:
           commit-message: Update collector version
           title: Update collector version to ${{ steps.update.outputs.LATEST_VER }}
           body: Use the new version of the collector
-          branch: "update-${{ steps.update.outputs.LATEST_VER }}"
+          branch: "update-collector"
           base: main
           delete-branch: true
