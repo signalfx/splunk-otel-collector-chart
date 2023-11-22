@@ -38,5 +38,8 @@ jobs:
           title: Update collector version to ${{ steps.update.outputs.LATEST_VER }}
           body: Use the new version of the collector
           branch: "update-collector"
+          # The "Skip Changelog" label is applied because the ci_scripts/chloggen-update.sh script
+          # will automatically add information about the collector when a release is created.
+          labels: ["Skip Changelog"]
           base: main
           delete-branch: true
