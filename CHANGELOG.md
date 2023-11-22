@@ -17,6 +17,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - `agent`: Remove the use of the `max_connections` configuration key, use `max_idle_conns_per_host` instead. ([#1034](https://github.com/signalfx/splunk-otel-collector-chart/pull/1034))
 - `operator`: Bump java to v1.29.1 in helm-charts/splunk-otel-collector/values.yaml ([#1042](https://github.com/signalfx/splunk-otel-collector-chart/pull/1042))
 - `operator`: Bump nodejs to v2.5.1 in helm-charts/splunk-otel-collector/values.yaml ([#1040](https://github.com/signalfx/splunk-otel-collector-chart/pull/1040))
+- `operator`: Update opentelemetry-operator to version 0.42.3 ([#1025](https://github.com/signalfx/splunk-otel-collector-chart/pull/1025))
 
 ## [0.87.0] - 2023-11-15
 
