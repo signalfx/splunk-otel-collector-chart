@@ -126,9 +126,6 @@ data:
           - from: resource_attribute
             name: ip
         - sources:
-          - from: resource_attribute
-            name: k8s.deployment.name
-        - sources:
           - from: connection
         - sources:
           - from: resource_attribute
