@@ -4,6 +4,20 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.88.0] - 2023-11-22
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.88.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.88.0).
+
+### 🚩 Deprecations 🚩
+
+- `networkExplorer`: Deprecate networkExplorer in favor of the upstream OpenTelemetry eBPF helm chart. ([#1026](https://github.com/signalfx/splunk-otel-collector-chart/pull/1026))
+
+### 💡 Enhancements 💡
+
+- `agent`: Remove the use of the `max_connections` configuration key, use `max_idle_conns_per_host` instead. ([#1034](https://github.com/signalfx/splunk-otel-collector-chart/pull/1034))
+- `operator`: Bump java to v1.29.1 in helm-charts/splunk-otel-collector/values.yaml ([#1042](https://github.com/signalfx/splunk-otel-collector-chart/pull/1042))
+- `operator`: Bump nodejs to v2.5.1 in helm-charts/splunk-otel-collector/values.yaml ([#1040](https://github.com/signalfx/splunk-otel-collector-chart/pull/1040))
+
 ## [0.87.0] - 2023-11-15
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.87.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.87.0).
