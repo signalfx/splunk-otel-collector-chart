@@ -22,7 +22,8 @@ data:
         endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
         index: main
-        max_connections: 200
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
         profiling_data_enabled: false
         retry_on_failure:
           enabled: true

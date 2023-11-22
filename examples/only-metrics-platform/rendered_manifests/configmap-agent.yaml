@@ -22,7 +22,8 @@ data:
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: CHANGEME
-        max_connections: 200
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
         retry_on_failure:
           enabled: true
           initial_interval: 5s
