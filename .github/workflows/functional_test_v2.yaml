@@ -102,3 +102,71 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+  eks-upgrade-test:
+    concurrency:
+      group: eks-access
+    env:
+      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout main if in a PR
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: main
+      - name: Checkout previous main commit if in main
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: HEAD
+          fetch-depth: 2
+      - name: Checkout previous main commit if in main
+        if: github.event_name != 'pull_request'
+        run: cd base && git checkout HEAD^
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-west-1
+      - name: Install kubeconfig
+        run: |
+          aws eks update-kubeconfig --name rotel-eks --region us-west-1
+      - name: Update dependencies
+        run: |
+          cd base && make dep-update
+      - name: Deploy cert-manager
+        run: |
+          cd base && make cert-manager
+      - name: Deploy previous version of the chart
+        run: |
+          cd base && helm install sock helm-charts/splunk-otel-collector --set clusterName=dev-operator --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: Deploy cert-manager
+        run: |
+          make cert-manager
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+        run: |
+          cd functional_tests
+          go test -v
