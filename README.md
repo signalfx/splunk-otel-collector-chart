@@ -152,9 +152,11 @@ For Splunk Observability Cloud the following parameters are required:
 - `splunkObservability.accessToken`: Your Splunk Observability org access
   token.
 
-The following parameter is required for any of the destinations:
+The following parameter is required or optional for any of the destinations, depending on the Kubernetes service:
 
 - `clusterName`: arbitrary value that identifies your Kubernetes cluster. The value will be associated with every trace, metric and log as "k8s.cluster.name" attribute.
+  * Optional: EKS and GKE. Detected value will be overwritten by this parameter if specified.
+  * Required: All other services
 
 Run the following commands, replacing the parameters above with their appropriate values.
 

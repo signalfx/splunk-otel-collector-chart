@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/schema#",
   "type": "object",
   "required": [
-    "clusterName",
     "cloudProvider",
     "distribution"
   ],
@@ -22,8 +21,7 @@
     },
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "splunkPlatform": {
       "description": "Splunk Cloud / Splunk Enterprise configuration",
@@ -1547,6 +1545,27 @@
           }
         }
       ]
+    },
+    {
+      "if": {
+        "properties": {
+          "distribution": { "pattern": "^[^g].[^k]*[^e].*" }
+        }
+      },
+      "then": {
+        "if": {
+          "properties": {
+            "distribution": { "pattern": "^[^e].[^k]*[^s].*" }
+          }
+        },
+        "then": {
+          "properties": {
+            "clusterName": {
+              "minLength": 1
+            }
+          }
+        }
+      }
     },
     {
       "if": {
