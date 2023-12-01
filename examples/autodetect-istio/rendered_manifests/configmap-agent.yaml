@@ -150,6 +150,11 @@ data:
         - system
         override: true
         timeout: 10s
+      resourcedetection/k8s_cluster_name:
+        detectors:
+        - env
+        override: true
+        timeout: 10s
       transform/istio_service_name:
         error_mode: ignore
         log_statements:

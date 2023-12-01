@@ -123,6 +123,20 @@ data:
         - env
         - gcp
         - system
+        gcp:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
+        override: true
+        timeout: 10s
+      resourcedetection/k8s_cluster_name:
+        detectors:
+        - env
+        - gcp
+        gcp:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
         override: true
         timeout: 10s
     receivers:

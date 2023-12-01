@@ -80,8 +80,56 @@ resourcedetection:
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
     - system
+  {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+  gcp:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+  {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  eks:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+  {{- end }}
   override: true
+  {{/* Testing determined that the EKS cluster name detection required a slightly longer default timeout. */}}
+  {{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  timeout: 15s
+  {{- else -}}
   timeout: 10s
+  {{- end }}
+{{- end }}
+
+{{/*
+Common config for adding k8s.cluster.name using the resourcedetection processor
+*/}}
+{{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
+resourcedetection/k8s_cluster_name:
+  detectors:
+    - env
+    {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+    - gcp
+    {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+    - eks
+    {{- end }}
+  {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+  gcp:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+  {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  eks:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+  {{- end }}
+  override: true
+  {{/* Testing determined that the EKS cluster name detection required a slightly longer default timeout. */}}
+  {{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  timeout: 15s
+  {{- else -}}
+  timeout: 10s
+  {{- end }}
 {{- end }}
 
 {{/*

@@ -137,6 +137,11 @@ data:
         - system
         override: true
         timeout: 10s
+      resourcedetection/k8s_cluster_name:
+        detectors:
+        - env
+        override: true
+        timeout: 10s
     receivers:
       filelog:
         encoding: utf-8

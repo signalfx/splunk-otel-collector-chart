@@ -124,8 +124,22 @@ data:
         - eks
         - ec2
         - system
+        eks:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
         override: true
-        timeout: 10s
+        timeout: 15s
+      resourcedetection/k8s_cluster_name:
+        detectors:
+        - env
+        - eks
+        eks:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
+        override: true
+        timeout: 15s
     receivers:
       hostmetrics:
         collection_interval: 10s

@@ -45,6 +45,7 @@ processors:
   batch:
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+  {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
 
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
@@ -63,7 +64,8 @@ processors:
         value: "${K8S_NAMESPACE}"
 
   # It's important to put this processor after resourcedetection to make sure that
-  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}".
+  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
+  # it's declared.
   resource/add_cluster_name:
     attributes:
       - action: upsert
@@ -150,7 +152,12 @@ service:
         - memory_limiter
         - k8sattributes
         - batch
+        {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
         - resource/add_cluster_name
+        {{- end }}
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
@@ -173,7 +180,12 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
         - resource/add_cluster_name
+        {{- end }}
         {{- if .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
@@ -232,7 +244,9 @@ service:
         - batch
         - resource/add_collector_k8s
         - resourcedetection
+        {{- if .Values.clusterName }}
         - resource/add_cluster_name
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         - signalfx
