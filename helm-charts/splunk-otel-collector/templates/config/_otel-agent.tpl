@@ -523,8 +523,7 @@ processors:
   # attributes from container environments.
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
-  # Resource detection processor that only detects and adds the k8s.cluster.name
-  # attribute.
+  # Resource detection processor that only detects the k8s.cluster.name attribute.
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
 
   # General resource attributes that apply to all telemetry passing through the agent.

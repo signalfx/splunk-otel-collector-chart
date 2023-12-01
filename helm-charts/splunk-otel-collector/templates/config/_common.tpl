@@ -106,10 +106,8 @@ Common config for adding k8s.cluster.name using the resourcedetection processor
 {{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
 resourcedetection/k8s_cluster_name:
   detectors:
-    # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
-    # before it gets set later by the cloud provider detector.
     - env
-    {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.cloudProvider" .) "gcp") }}
+    {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
     - gcp
     {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
     - eks

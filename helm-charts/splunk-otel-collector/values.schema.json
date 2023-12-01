@@ -264,6 +264,7 @@
     "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
+      "$comment": "Please ensure clusterName is set to the proper required/optional value when modifying this list",
       "enum": [
         "eks",
         "eks/fargate",
@@ -1550,19 +1551,37 @@
       "if": {
         "properties": {
           "distribution": { "pattern": "^[^g].[^k]*[^e].*" }
-        }
+        },
+        "required": ["distribution"]
       },
       "then": {
         "if": {
           "properties": {
             "distribution": { "pattern": "^[^e].[^k]*[^s].*" }
-          }
+          },
+          "required": ["distribution"]
         },
         "then": {
+          "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
           "properties": {
             "clusterName": {
               "minLength": 1
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "distribution": { "pattern": "^[ ]?$" }
+        }
+      },
+      "then": {
+        "$comment": "We get here if the distribution is blank or just spaces. The clusterName is required for this case",
+        "properties": {
+          "clusterName": {
+            "minLength": 1
           }
         }
       }
