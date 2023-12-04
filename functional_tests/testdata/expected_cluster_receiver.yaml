@@ -4455,6 +4455,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: k8scluster
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-wo-index
                   timeUnixNano: "1000000"
             name: k8s.node.condition_ready
         scope: {}

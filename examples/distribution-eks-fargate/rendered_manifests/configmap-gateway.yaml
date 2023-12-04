@@ -87,6 +87,41 @@ data:
         - sources:
           - from: resource_attribute
             name: host.name
+      k8sattributes/metrics:
+        extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.node.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.name
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
+        - sources:
+          - from: resource_attribute
+            name: host.name
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
@@ -174,6 +209,7 @@ data:
           - memory_limiter
           - batch
           - resource/add_cluster_name
+          - k8sattributes/metrics
           receivers:
           - otlp
           - signalfx
@@ -186,6 +222,7 @@ data:
           - resource/add_collector_k8s
           - resourcedetection
           - resource/add_cluster_name
+          - k8sattributes/metrics
           receivers:
           - prometheus/collector
         traces:
