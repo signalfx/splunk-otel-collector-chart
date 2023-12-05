@@ -544,6 +544,17 @@ agent:
 Note: Running the collector agent for log collection in non-root mode is not currently supported in CRI-O and OpenShift environments at this time, for more details see the
 [related GitHub feature request issue](https://github.com/signalfx/splunk-otel-collector-chart/issues/891).
 
+## Searching for event metadata in Splunk
+Splunk OpenTelemetry Collector for Kubernetes sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "pod", "namespace", "container_name","container_id", "cluster_name" will appear as fields when viewing the event data inside Splunk.
+
+Since Splunk version 9.0 searching for indexed fields is turned on by default so there shouldn't be a problem with searching for them. 
+If searching for indexed fields is turned off or you are running an older version of splunk, there are two solutions for running searches in Splunk on metadata:
+
+* Modify search to use`fieldname::value` instead of `fieldname=value`.
+* Configure `fields.conf` on your downstream Splunk system to have your meta-data fields available to be searched using `fieldname=value`. Examples: [Fieldsconf](https://docs.splunk.com/Documentation/Splunk/latest/admin/Fieldsconf)
+
+For more information on index time field extraction please view this [guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/Configureindex-timefieldextraction#Where_to_put_the_configuration_changes_in_a_distributed_environment).
+
 ## Network explorer
 [Network explorer](network-explorer-architecture.md) allows you to collect network telemetry for ingest and analysis.  This telemetry is sent to the Open Telemetry Collector Gateway.
 To enable the network explorer, set the `enabled` flag to `true`
