@@ -1,8 +1,7 @@
-name: Check for new instrumentation versions
+name: Update Docker Images
 
-# Description:
-# This workflow is responsible for checking for new versions of Splunk instrumentation libraries
-# used in operator based auto-instrumentation and updating the values.yaml if necessary.
+# Description: This workflow automatically checks for new versions of specified Docker images and
+# updates them if necessary.
 
 on:
   schedule:
@@ -16,52 +15,67 @@ on:
         default: 'false'
 
 env:
-  VALUES_YAML: helm-charts/splunk-otel-collector/values.yaml
-  LATEST_API: https://api.github.com/repos/signalfx/splunk-otel-{lang}/releases/latest
+  DEBUG_MODE: ${{ (github.event.inputs.DEBUG_MODE == 'true' && '0') || '1' }}
 
 jobs:
-  maybe_update:
+  check_and_update:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Continue all jobs even if one fails
       matrix:
-        # Add languages that require version updates here
-        language: ['java', 'nodejs']
+        # Docker images to check for version updates
+        include:
+          - name: 'java'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.operator.instrumentation.spec.java'
+          - name: 'nodejs'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.operator.instrumentation.spec.nodejs'
+          - name: 'fluentd-hec'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.image.fluentd'
+          # TODO: Add support for Splunk image
+          # - name: 'splunk'
+          #  yaml_file_path: 'ci_scripts/k8s-splunk.yml'
+          #  yaml_value_path: 'select(.kind == \\\"Pod\\\").spec.containers[] | select(.name == \\\"splunk\\\")'
     steps:
       - uses: actions/checkout@v4
 
-      - name: Update Version
-        id: swizzle_version
+      - name: Check for Version Updates
+        id: check_for_update
         run: |
-          echo "Update Splunk Operator Instrumentation for ${{ matrix.language }}"
+          echo "Checking docker image version for ${{ matrix.name }}"
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
 
-          # Set debug argument if DEBUG_MODE is true
-          DEBUG_ARG=""
-          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
-            DEBUG_ARG="--debug"
-          fi
-
-          # Run the update script and handle errors
-          ./ci_scripts/update-images-operator-splunk.sh ${{ matrix.language }} $DEBUG_ARG || exit 1
-
-          # Check if an update is needed
-          if [ "$NEED_UPDATE" -eq 0 ]; then
-            echo "No updates detected. Exiting."
-            exit 0
-          fi
-
-          echo "Rendering chart template..."
-          make render
-
-          echo "Displaying current git diff..."
-          git --no-pager diff
-      - name: PR the new version
-        if: ${{ steps.swizzle_version.outputs.NEED_UPDATE == 1 }}
+      - name: Open PR for Version Update
+        id: open_pr
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: Update ${{ matrix.language }} instrumentation version
-          title: Update ${{ matrix.language }} instrumentation version to ${{ steps.swizzle_version.outputs.LATEST_VER }}
-          body: Use the new version of the ${{ matrix.language }} instrumentation
-          branch: "update-${{ matrix.language }}-${{ steps.swizzle_version.outputs.LATEST_VER }}"
+          commit-message: Update ${{ matrix.name }} instrumentation version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          base: main
+          delete-branch: true
+          modify-outputs: false
+
+      - name: Apply Version Update and Generate Changelog
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        run: |
+          # Apply the version update, update the rendered examples with the version update, and create a changelog entry
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
+          make render || exit 1
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=operator NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}] || exit 1
+
+      - name: Finalize PR with updates
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update ${{ matrix.name }} instrumentation version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
           modify-outputs: false
