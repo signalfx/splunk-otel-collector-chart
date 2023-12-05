@@ -20,7 +20,7 @@ on:
         default: 'false'
 
 env:
-  CHART_YAML: helm-charts/splunk-otel-collector/Chart.yaml
+  DEBUG_MODE: ${{ (github.event.inputs.DEBUG_MODE == 'true' && '0') || '1' }}
 
 jobs:
   maybe_update:
@@ -35,12 +35,6 @@ jobs:
         id: update_chart
         run: |
           echo "Update dependencies for Helm chart"
-
-          # Set debug argument if DEBUG_MODE is true
-          DEBUG_ARG=""
-          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
-            DEBUG_ARG="--debug"
-          fi
 
           # Ensure chart dependencies are up-to-date
           make dep-update
@@ -67,7 +61,7 @@ jobs:
 
             if [ ${{ matrix.repo }} == "opentelemetry-operator" ]; then
               echo "Update Splunk Operator Instrumentation Images if Needed"
-              ./ci_scripts/update-images-operator-otel.sh ${{ matrix.language }} $DEBUG_ARG || exit 1
+              ./ci_scripts/update-images-operator-otel.sh ${{ matrix.language }} || exit 1
             fi
 
             echo Updating rendered examples
