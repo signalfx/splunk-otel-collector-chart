@@ -26,12 +26,15 @@ jobs:
         # Docker images to check for version updates
         include:
           - name: 'java'
+            component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
             yaml_value_path: '.operator.instrumentation.spec.java'
           - name: 'nodejs'
+            component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
             yaml_value_path: '.operator.instrumentation.spec.nodejs'
           - name: 'fluentd-hec'
+            component: 'agent'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
             yaml_value_path: '.image.fluentd'
           # TODO: Add support for Splunk image
@@ -66,7 +69,7 @@ jobs:
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
           make render || exit 1
-          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=operator NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}] || exit 1
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}] || exit 1
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
