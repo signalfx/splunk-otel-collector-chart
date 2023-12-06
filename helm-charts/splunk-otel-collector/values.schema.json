@@ -1384,114 +1384,8 @@
       "deprecated": true
     },
     "networkExplorer": {
-      "description": "Splunk Network Explorer Configuration",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "description": "Enable network explorer",
-          "type": "boolean"
-        },
-        "images": {
-          "description": "images",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "tag": {
-              "type": "string"
-            },
-            "repository": {
-              "type": "string"
-            },
-            "pullPolicy": {
-              "type": "string",
-              "enum": [
-                "IfNotPresent",
-                "Always",
-                "Never"
-              ]
-            }
-          }
-        },
-        "imagePullSecrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "log": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "console": {
-              "type": "boolean"
-            },
-            "level": {
-              "type": "string",
-              "enum": [
-                "error",
-                "warning",
-                "info",
-                "debug",
-                "trace"
-              ]
-            }
-          }
-        },
-        "debug": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "storeMinidump": {
-              "type": "boolean"
-            },
-            "sendUnplannedExitMetric": {
-              "type": "boolean"
-            }
-          }
-        },
-        "kernelCollector": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "cloudCollector": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "k8sCollector": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "reducer": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "rbac": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "create": {
-              "type": "boolean"
-            }
-          }
-        },
-        "podSecurityPolicy": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "annotations": {
-              "type": "object",
-              "additionalProperties": true
-            }
-          }
-        }
-      }
+      "deprecated": true,
+      "additionalProperties": true
     },
     "operator": {
       "description": "OpenTelemetry Operator configuration. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
@@ -1500,6 +1394,16 @@
     },
     "certmanager": {
       "description": "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "opentelemetry-operator": {
+      "description": "OpenTelemetry Operator configuration (legacy). Prefer using 'operator' for new installations. This field is provided for backward compatibility with older Helm versions or custom distributions. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "cert-manager": {
+      "description": "Configuration for cert-manager (legacy). Prefer using 'certmanager' for new installations. This field is included to support backward compatibility with older Helm versions or custom distributions. cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
       "type": "object",
       "additionalProperties": true
     },

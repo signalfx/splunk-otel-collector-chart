@@ -6,12 +6,12 @@ metadata:
   name: default-splunk-otel-collector-otel-agent
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.88.0
+    helm.sh/chart: splunk-otel-collector-0.91.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.89.0"
+    app.kubernetes.io/version: "0.91.1"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.88.0
+    chart: splunk-otel-collector-0.91.0
     release: default
     heritage: Helm
 data:
@@ -92,41 +92,6 @@ data:
         - sources:
           - from: resource_attribute
             name: k8s.pod.ip
-        - sources:
-          - from: resource_attribute
-            name: ip
-        - sources:
-          - from: connection
-        - sources:
-          - from: resource_attribute
-            name: host.name
-      k8sattributes/metrics:
-        extract:
-          annotations:
-          - from: pod
-            key: splunk.com/sourcetype
-          - from: namespace
-            key: splunk.com/metricsIndex
-            tag_name: com.splunk.index
-          - from: pod
-            key: splunk.com/metricsIndex
-            tag_name: com.splunk.index
-          metadata:
-          - k8s.node.name
-          - k8s.namespace.name
-        pod_association:
-        - sources:
-          - from: resource_attribute
-            name: k8s.node.name
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.ip
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.name
         - sources:
           - from: resource_attribute
             name: ip
@@ -220,7 +185,6 @@ data:
           - resource/add_agent_k8s
           - resourcedetection
           - resource
-          - k8sattributes/metrics
           receivers:
           - prometheus/agent
       telemetry:

@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-logsink-config
+  namespace: default
+data:
+  config.yaml: |
+    receivers:
+      splunk_hec:
+        endpoint: 0.0.0.0:8088
+    exporters:
+      file:
+        path: /tmp/output.log
+    service:
+      pipelines:
+        logs:
+          receivers: [splunk_hec]
+          exporters: [file]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector-logsink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collector-logsink
+  template:
+    metadata:
+      name: collector-logsink
+      labels:
+        app: collector-logsink
+    spec:
+      containers:
+        - image: quay.io/signalfx/splunk-otel-collector:latest
+          name: collector-logsink
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+          env:
+            - name: SPLUNK_CONFIG
+              value: /etc/config/config.yaml
+          ports:
+            - containerPort: 8088
+      volumes:
+        - name: config-volume
+          configMap:
+            name: collector-logsink-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: collector-logsink-service
+  labels:
+    run: collector-logsink-service
+spec:
+  ports:
+    - port: 8088
+      protocol: TCP
+      targetPort: 8088
+  selector:
+    app: collector-logsink
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pod-sck-index-sck-migration
+  namespace: default
+spec:
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: pod-sck-index-sck-migration
+      annotations:
+        splunk.com/index: "pod-sck-migration"
+        splunk.com/sourcetype: "sourcetype-sck-m-anno"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pod-sck-index-sck-migration
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          command: ['sh','-c', 'for i in {1..1000}; do echo "APP LOG LINE ${i}"; sleep 1; done']

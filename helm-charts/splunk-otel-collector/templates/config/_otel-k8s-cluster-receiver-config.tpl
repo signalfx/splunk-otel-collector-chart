@@ -81,7 +81,12 @@ receivers:
 
 processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
-  {{- include "splunk-otel-collector.k8sAttributesProcessorMetrics" . | nindent 2 }}
+
+  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+  {{- include "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" . | nindent 2 }}
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+  {{- end }}
 
   batch:
     send_batch_max_size: 32768
@@ -210,7 +215,14 @@ service:
     # k8s metrics pipeline
     metrics:
       receivers: [k8s_cluster]
-      processors: [memory_limiter, batch, resource, k8sattributes/metrics, resource/k8s_cluster]
+      processors:
+        - memory_limiter
+        - batch
+        - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
+        - resource/k8s_cluster
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -222,7 +234,13 @@ service:
     {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
     metrics/eks:
       receivers: [receiver_creator]
-      processors: [memory_limiter, batch, resource, k8sattributes/metrics]
+      processors:
+        - memory_limiter
+        - batch
+        - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -241,7 +259,9 @@ service:
         - resource/add_collector_k8s
         - resourcedetection
         - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

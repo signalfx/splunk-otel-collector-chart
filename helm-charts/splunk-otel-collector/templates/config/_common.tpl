@@ -141,7 +141,7 @@ k8sattributes:
 {{/*
 Common config for K8s attributes processor adding k8s metadata to metrics resource attributes.
 */}}
-{{- define "splunk-otel-collector.k8sAttributesProcessorMetrics" -}}
+{{- define "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" -}}
 k8sattributes/metrics:
   pod_association:
     - sources:
@@ -155,19 +155,11 @@ k8sattributes/metrics:
         name: k8s.pod.ip
     - sources:
       - from: resource_attribute
-        name: k8s.pod.name
-    - sources:
-      - from: resource_attribute
         name: ip
     - sources:
       - from: connection
-    - sources:
-      - from: resource_attribute
-        name: host.name
   extract:
-    metadata:
-      - k8s.node.name
-      - k8s.namespace.name
+    metadata: []
     annotations:
       - key: splunk.com/sourcetype
         from: pod

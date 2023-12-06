@@ -1,0 +1,10 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: false
+  logsEnabled: true
+  tracesEnabled: false
+splunkPlatform:
+  endpoint: http://collector-logsink-service:8088/services/collector
+  token: foobar

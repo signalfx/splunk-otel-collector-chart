@@ -17,16 +17,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
+        # To check latest versions, see: https://hub.docker.com/r/kindest/node/tags
         k8s-version:
+          - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
           - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
           - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
           - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
           - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
-          - v1.24.15  # Support: 28 May 2023 - 28 Jul 2023
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ~1.20.8
           cache: false
@@ -59,7 +61,11 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+
   eks-test:
+    name: Test helm install in EKS - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
       group: eks-access
     env:
@@ -68,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ~1.20.8
           cache: false
@@ -82,7 +88,7 @@ jobs:
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -103,6 +109,9 @@ jobs:
           cd functional_tests
           go test -v
   eks-upgrade-test:
+    name: Test helm upgrade in EKS - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
       group: eks-access
     env:
@@ -127,7 +136,7 @@ jobs:
       - name: Checkout previous main commit if in main
         if: github.event_name != 'pull_request'
         run: cd base && git checkout HEAD^
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ~1.20.8
           cache: false
@@ -141,7 +150,7 @@ jobs:
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
