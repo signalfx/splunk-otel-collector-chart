@@ -1,0 +1,85 @@
+name: Update Docker Images
+
+# Description: This workflow automatically checks for new versions of specified Docker images and
+# updates them if necessary.
+
+on:
+  schedule:
+    # Run every 12th hour at minute 45 past.
+    - cron: "45 */12 * * *"
+  workflow_dispatch:
+    inputs:
+      DEBUG_MODE:
+        description: 'Enable debug mode'
+        required: false
+        default: 'false'
+
+jobs:
+  check_and_update:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # Continue all jobs even if one fails
+      matrix:
+        # Docker images to check for version updates
+        include:
+          - name: 'java'
+            component: 'operator'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.operator.instrumentation.spec.java'
+          - name: 'nodejs'
+            component: 'operator'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.operator.instrumentation.spec.nodejs'
+          - name: 'fluentd-hec'
+            component: 'agent'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
+            yaml_value_path: '.image.fluentd'
+          # TODO: Add support for Splunk image
+          # - name: 'splunk'
+          #  yaml_file_path: 'ci_scripts/k8s-splunk.yml'
+          #  yaml_value_path: 'select(.kind == \\\"Pod\\\").spec.containers[] | select(.name == \\\"splunk\\\")'
+    env:
+      DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for Version Updates
+        id: check_for_update
+        run: |
+          echo "Checking docker image version for ${{ matrix.name }}"
+
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
+
+      - name: Open PR for Version Update
+        id: open_pr
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update ${{ matrix.name }} instrumentation version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          base: main
+          delete-branch: true
+          modify-outputs: false
+
+      - name: Apply Version Update and Generate Changelog
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        run: |
+          # Apply the version update, update the rendered examples with the version update, and create a changelog entry
+          # We run `make update-docker-image` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
+          make render || exit 1
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}] || exit 1
+
+      - name: Finalize PR with updates
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update ${{ matrix.name }} instrumentation version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          base: main
+          delete-branch: true
+          modify-outputs: false
