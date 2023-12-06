@@ -547,7 +547,7 @@ Note: Running the collector agent for log collection in non-root mode is not cur
 ## Searching for event metadata in Splunk Enterprise/Cloud
 Splunk OpenTelemetry Collector for Kubernetes sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "pod", "namespace", "container_name","container_id", "cluster_name" will appear as fields when viewing the event data inside Splunk.
 
-Since Splunk version 9.0 searching for indexed fields is turned on by default so there shouldn't be a problem with searching for them. 
+Since Splunk version 9.0 searching for indexed fields is turned on by default so there shouldn't be a problem with searching for them.
 If searching for indexed fields is turned off or you are running an older version of splunk, there are two solutions for running searches in Splunk on metadata:
 
 * Modify search to use`fieldname::value` instead of `fieldname=value`.
