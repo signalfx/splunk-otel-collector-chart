@@ -17,8 +17,24 @@ VALUES_FILE_PATH="${ROOT_DIR}helm-charts/splunk-otel-collector/values.yaml"
 # Set default OWNER to "signalfx" if not already set
 : "${OWNER:=signalfx}"  # Sets OWNER to "signalfx" if it is not already set
 
-# Debug mode is off by default but can be enabled with --debug
-: "${DEBUG_MODE:=0}"  # Sets DEBUG_MODE to 0 if it is not already set
+# Helper function to interpret DEBUG_MODE boolean values as 1 or 0
+interpret_debug_boolean() {
+    case $1 in
+        true|1) echo 1 ;;
+        false|0) echo 0 ;;
+        *) echo 0 ;;  # Default to false/0 for any other input
+    esac
+}
+
+# DEBUG_MODE Configuration:
+# By default, DEBUG_MODE is set to 0 (disabled). It can be enabled in two ways:
+# 1. By passing the argument "--debug" when executing the script.
+#    This will set DEBUG_MODE to 1 (enabled).
+# 2. By setting the DEBUG_MODE environment variable before sourcing this script.
+#    DEBUG_MODE can be set to either 'true' or 1 to enable debug mode,
+#    or 'false' or 0 to disable it. If set to any other value, it defaults to 0 (disabled).
+# When DEBUG_MODE is enabled (set to 'true' or 1), debug information will be displayed.
+DEBUG_MODE=$(interpret_debug_boolean "$DEBUG_MODE")
 
 # Iterate over all arguments of the calling script
 for arg in "$@"; do

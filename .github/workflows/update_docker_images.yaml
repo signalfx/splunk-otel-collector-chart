@@ -38,6 +38,8 @@ jobs:
           # - name: 'splunk'
           #  yaml_file_path: 'ci_scripts/k8s-splunk.yml'
           #  yaml_value_path: 'select(.kind == \\\"Pod\\\").spec.containers[] | select(.name == \\\"splunk\\\")'
+    env:
+      DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,12 +47,6 @@ jobs:
         id: check_for_update
         run: |
           echo "Checking docker image version for ${{ matrix.name }}"
-
-          # Set debug argument if DEBUG_MODE is true
-          DEBUG_ARG=""
-          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
-            DEBUG_ARG="--debug"
-          fi
 
           make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
 
