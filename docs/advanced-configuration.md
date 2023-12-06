@@ -544,7 +544,7 @@ agent:
 Note: Running the collector agent for log collection in non-root mode is not currently supported in CRI-O and OpenShift environments at this time, for more details see the
 [related GitHub feature request issue](https://github.com/signalfx/splunk-otel-collector-chart/issues/891).
 
-## Searching for event metadata in Splunk
+## Searching for event metadata in Splunk Enterprise/Cloud
 Splunk OpenTelemetry Collector for Kubernetes sends events to Splunk which can contain extra meta-data attached to each event. Metadata values such as "pod", "namespace", "container_name","container_id", "cluster_name" will appear as fields when viewing the event data inside Splunk.
 
 Since Splunk version 9.0 searching for indexed fields is turned on by default so there shouldn't be a problem with searching for them. 
