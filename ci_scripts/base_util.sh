@@ -18,12 +18,12 @@ VALUES_FILE_PATH="${ROOT_DIR}helm-charts/splunk-otel-collector/values.yaml"
 : "${OWNER:=signalfx}"  # Sets OWNER to "signalfx" if it is not already set
 
 # Debug mode is off by default but can be enabled with --debug
-: "${DEBUG_MODE:=1}"  # Sets DEBUG_MODE to 0 if it is not already set
+: "${DEBUG_MODE:=0}"  # Sets DEBUG_MODE to 0 if it is not already set
 
 # Iterate over all arguments of the calling script
 for arg in "$@"; do
     if [[ "$arg" == "--debug" ]]; then
-        DEBUG_MODE=0  # Enable debug mode
+        DEBUG_MODE=1  # Enable debug mode
         # Remove --debug from arguments
         for index in "${!@}"; do
             if [[ "${!index}" == "--debug" ]]; then
@@ -66,7 +66,7 @@ setd() {
 # Supports variables, strings, and file paths for file content.
 # Usage: debug "variable_name"
 debug() {
-    if [[ $DEBUG_MODE -eq 0 ]]; then
+    if [[ $DEBUG_MODE -eq 1 ]]; then
         local var_name="$1"
         local var_value="${!var_name}"  # Indirect reference to get the value
         if [[ -f "$var_value" ]]; then

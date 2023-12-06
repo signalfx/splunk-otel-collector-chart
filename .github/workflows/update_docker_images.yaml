@@ -14,9 +14,6 @@ on:
         required: false
         default: 'false'
 
-env:
-  DEBUG_MODE: ${{ (github.event.inputs.DEBUG_MODE == 'true' && '0') || '1' }}
-
 jobs:
   check_and_update:
     runs-on: ubuntu-latest
@@ -48,6 +45,13 @@ jobs:
         id: check_for_update
         run: |
           echo "Checking docker image version for ${{ matrix.name }}"
+
+          # Set debug argument if DEBUG_MODE is true
+          DEBUG_ARG=""
+          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
+            DEBUG_ARG="--debug"
+          fi
+
           make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE || exit 1
 
       - name: Open PR for Version Update
