@@ -106,7 +106,6 @@ Common config for adding k8s.cluster.name using the resourcedetection processor
 {{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
 resourcedetection/k8s_cluster_name:
   detectors:
-    - env
     {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
     - gcp
     {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
@@ -117,11 +116,47 @@ resourcedetection/k8s_cluster_name:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
+      host.name:
+        enabled: false
+      host.id:
+        enabled: false
+      host.type:
+        enabled: false
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
+      cloud.account.id:
+        enabled: false
+      cloud.region:
+        enabled: false
+      cloud.availability_zone:
+        enabled: false
+      faas.name:
+        enabled: false
+      faas.version:
+        enabled: false
+      faas.id:
+        enabled: false
+      faas.instance:
+        enabled: false
+      gcp.cloud_run.job.execution:
+        enabled: false
+      gcp.cloud_run.job.task_index:
+        enabled: false
+      gcp.gce.instance.name:
+        enabled: false
+      gcp.gce.instance.hostname:
+        enabled: false
   {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
   eks:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
   {{- end }}
   override: true
   {{/* Testing determined that the EKS cluster name detection required a slightly longer default timeout. */}}

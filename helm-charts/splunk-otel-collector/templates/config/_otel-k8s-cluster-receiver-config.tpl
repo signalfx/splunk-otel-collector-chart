@@ -215,7 +215,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
+        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
@@ -234,7 +234,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
+        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource

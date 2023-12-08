@@ -1454,23 +1454,22 @@
     {
       "if": {
         "properties": {
-          "distribution": { "pattern": "^[^g].[^k]*[^e].*" }
+          "distribution": { "pattern": "^(gke|eks).*" }
         },
         "required": ["distribution"]
       },
       "then": {
-        "if": {
-          "properties": {
-            "distribution": { "pattern": "^[^e].[^k]*[^s].*" }
-          },
-          "required": ["distribution"]
-        },
-        "then": {
-          "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
-          "properties": {
-            "clusterName": {
-              "minLength": 1
-            }
+        "properties": {
+          "clusterName": {
+            "minLength": 0
+          }
+        }
+      },
+      "else": {
+        "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
+        "properties": {
+          "clusterName": {
+            "minLength": 1
           }
         }
       }
