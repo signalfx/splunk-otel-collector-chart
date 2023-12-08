@@ -142,8 +142,7 @@ data:
         override: true
         timeout: 10s
       resourcedetection/k8s_cluster_name:
-        detectors:
-        - env
+        detectors: null
         override: true
         timeout: 10s
     receivers:

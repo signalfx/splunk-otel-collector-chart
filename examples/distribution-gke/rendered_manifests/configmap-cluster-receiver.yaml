@@ -73,10 +73,41 @@ data:
         timeout: 10s
       resourcedetection/k8s_cluster_name:
         detectors:
-        - env
         - gcp
         gcp:
           resource_attributes:
+            cloud.account.id:
+              enabled: false
+            cloud.availability_zone:
+              enabled: false
+            cloud.platform:
+              enabled: false
+            cloud.provider:
+              enabled: false
+            cloud.region:
+              enabled: false
+            faas.id:
+              enabled: false
+            faas.instance:
+              enabled: false
+            faas.name:
+              enabled: false
+            faas.version:
+              enabled: false
+            gcp.cloud_run.job.execution:
+              enabled: false
+            gcp.cloud_run.job.task_index:
+              enabled: false
+            gcp.gce.instance.hostname:
+              enabled: false
+            gcp.gce.instance.name:
+              enabled: false
+            host.id:
+              enabled: false
+            host.name:
+              enabled: false
+            host.type:
+              enabled: false
             k8s.cluster.name:
               enabled: true
         override: true
@@ -105,7 +136,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:

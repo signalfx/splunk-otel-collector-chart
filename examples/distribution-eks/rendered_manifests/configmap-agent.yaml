@@ -132,10 +132,13 @@ data:
         timeout: 15s
       resourcedetection/k8s_cluster_name:
         detectors:
-        - env
         - eks
         eks:
           resource_attributes:
+            cloud.platform:
+              enabled: false
+            cloud.provider:
+              enabled: false
             k8s.cluster.name:
               enabled: true
         override: true
