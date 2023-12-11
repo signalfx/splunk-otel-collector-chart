@@ -677,10 +677,17 @@ func testAgentMetrics(t *testing.T) {
 		"container.filesystem.capacity",
 		"container.filesystem.usage",
 		"container.memory.usage",
+		"container_cpu_utilization",
 		"k8s.pod.network.errors",
 		"k8s.pod.network.io",
 		"otelcol_exporter_sent_log_records",
+		"otelcol_exporter_queue_capacity",
+		"otelcol_exporter_send_failed_log_records",
+		"otelcol_exporter_sent_spans",
 		"otelcol_otelsvc_k8s_ip_lookup_miss",
+		"otelcol_processor_accepted_spans",
+		"otelcol_processor_dropped_spans",
+		"otelcol_processor_refused_spans",
 		"otelcol_processor_refused_log_records",
 		"otelcol_processor_dropped_log_records",
 		"otelcol_processor_accepted_log_records",
@@ -699,14 +706,22 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_process_runtime_total_alloc_bytes",
 		"otelcol_process_runtime_total_sys_memory_bytes",
 		"otelcol_process_uptime",
+		"otelcol_receiver_accepted_spans",
 		"otelcol_processor_accepted_metric_points",
 		"otelcol_processor_batch_timeout_trigger_send",
+		"otelcol_receiver_accepted_metric_points",
 		"otelcol_processor_dropped_metric_points",
 		"otelcol_processor_refused_metric_points",
-		"otelcol_receiver_accepted_metric_points",
+		"otelcol_receiver_accepted_log_records",
+		"otelcol_receiver_refused_log_records",
 		"otelcol_receiver_refused_metric_points",
+		"otelcol_receiver_refused_spans",
 		"otelcol_scraper_errored_metric_points",
 		"otelcol_scraper_scraped_metric_points",
+		"scrape_duration_seconds",
+		"scrape_samples_post_metric_relabeling",
+		"scrape_samples_scraped",
+		"scrape_series_added",
 		"system.cpu.load_average.15m",
 		"system.cpu.load_average.1m",
 		"system.cpu.load_average.5m",
@@ -716,8 +731,130 @@ func testAgentMetrics(t *testing.T) {
 		"system.network.errors",
 		"system.network.io",
 		"system.paging.operations",
+		"up",
 	}
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames)
+	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected_internal_metrics.yaml"))
+	require.NoError(t, err)
+
+	replaceWithStar := func(string) string { return "*" }
+	containerImageShorten := func(value string) string {
+		return value[(strings.LastIndex(value, "/") + 1):]
+	}
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer)
+	require.NotNil(t, selectedInternalMetrics)
+
+	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
+		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
+		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
+		pmetrictest.IgnoreScopeVersion(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+	)
+	assert.NoError(t, err)
+
+	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected_kubeletstats_metrics.yaml"))
+	require.NoError(t, err)
+	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer)
+	require.NotNil(t, selectedKubeletstatsMetrics)
+	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
+		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
+		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
+		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
+		pmetrictest.IgnoreScopeVersion(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+	)
+	assert.NoError(t, err)
+}
+
+func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink) *pmetric.Metrics {
+	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
+		m := metricSink.AllMetrics()[h]
+		foundCorrectSet := false
+	OUTER:
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+					metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+					if metricToConsider.Name() == metricName {
+						foundCorrectSet = true
+						break OUTER
+					}
+				}
+			}
+		}
+		if !foundCorrectSet {
+			continue
+		}
+		if m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+			return &m
+		}
+	}
+	return nil
 }
 
 func testHECMetrics(t *testing.T) {
