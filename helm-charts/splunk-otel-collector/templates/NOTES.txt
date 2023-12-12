@@ -9,9 +9,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
 {{ end }}
-{{- if .Values.networkExplorer.enabled }}
-Splunk Network Explorer is installed and configured.
-{{ end }}
 
 {{- if .Values.splunkRealm }}
 [WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.
@@ -85,7 +82,9 @@ Splunk Network Explorer is installed and configured.
   - Some libraries may be enabled by default. For current status, see: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
   - Splunk provides best-effort support for native OpenTelemetry libraries, and full support for Splunk library distributions. For used libraries, refer to the values.yaml under "operator.instrumentation.spec".
 {{- end }}
-{{- if .Values.networkExplorer.enabled }}
-[WARNING] `networkExplorer` option is deprecated and will be removed soon.
-          Follow https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0870-to-0880 to replace it with the upstream OpenTelemetry eBPF helm chart.
+{{- if and (not (eq (toString .Values.networkExplorer) "<nil>")) .Values.networkExplorer.enabled }}
+{{ fail "Network explorer is not part of this helm chart anymore. Please follow https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0870-to-0880 to replace it with the upstream OpenTelemetry eBPF helm chart." }}
+{{- end }}
+{{- if not (eq (toString .Values.networkExplorer) "<nil>")}}
+[WARNING] `networkExplorer` option is no longer supported. Please remove it from your custom values.yaml.
 {{- end }}
