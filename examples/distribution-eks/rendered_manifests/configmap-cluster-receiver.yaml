@@ -127,6 +127,7 @@ data:
           processors:
           - memory_limiter
           - batch
+          - resourcedetection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:

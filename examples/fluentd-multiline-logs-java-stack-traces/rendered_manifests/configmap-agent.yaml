@@ -139,11 +139,7 @@ data:
         - env
         - system
         override: true
-        timeout: 10s
-      resourcedetection/k8s_cluster_name:
-        detectors: null
-        override: true
-        timeout: 10s
+        timeout: 15s
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:8006

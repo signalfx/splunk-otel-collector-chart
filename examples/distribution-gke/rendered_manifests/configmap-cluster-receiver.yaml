@@ -70,7 +70,7 @@ data:
             k8s.cluster.name:
               enabled: true
         override: true
-        timeout: 10s
+        timeout: 15s
       resourcedetection/k8s_cluster_name:
         detectors:
         - gcp
@@ -111,7 +111,7 @@ data:
             k8s.cluster.name:
               enabled: true
         override: true
-        timeout: 10s
+        timeout: 15s
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
@@ -136,6 +136,7 @@ data:
           processors:
           - memory_limiter
           - batch
+          - resourcedetection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:

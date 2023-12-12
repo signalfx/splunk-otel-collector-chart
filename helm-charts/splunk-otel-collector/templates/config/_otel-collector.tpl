@@ -45,7 +45,9 @@ processors:
   batch:
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+  {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
+  {{- end }}
 
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:

@@ -86,7 +86,9 @@ processors:
     send_batch_max_size: 32768
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+  {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
+  {{- end }}
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
