@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.90.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.90.0"
+    app.kubernetes.io/version: "0.91.0"
     app: splunk-otel-collector
     component: otel-collector-agent
     chart: splunk-otel-collector-0.90.1
@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 8c0e6f74115f23b8e5e0d6b6fe3de4e667373af3535d939eed21b5de3be34ebb
+        checksum/config: a432d484e49ff05aef622747c901ed6c18598b9a615ae6d1ba8fe80ece380be5
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -47,7 +47,7 @@ spec:
           key: node-role.kubernetes.io/control-plane
       initContainers:
         - name: migrate-checkpoint
-          image: quay.io/signalfx/splunk-otel-collector:0.90.0
+          image: quay.io/signalfx/splunk-otel-collector:0.91.0
           imagePullPolicy: IfNotPresent
           command: ["/migratecheckpoint"]
           securityContext:
@@ -120,7 +120,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.90.0
+        image: quay.io/signalfx/splunk-otel-collector:0.91.0
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 0

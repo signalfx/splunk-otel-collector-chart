@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.90.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.90.0"
+    app.kubernetes.io/version: "0.91.0"
     app: splunk-otel-collector
     component: otel-collector-agent
     chart: splunk-otel-collector-0.90.1
@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: a8517af525e453ece95ace01fe8ed81bfcce47bd2b127883abf0598c0eca9357
+        checksum/config: bda1e00a079ef6aa0731e12081c4bf7d4c106b003522040e138028e26ca7c916
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -65,7 +65,7 @@ spec:
           containerPort: 9943
           hostPort: 9943
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.90.0
+        image: quay.io/signalfx/splunk-otel-collector:0.91.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
