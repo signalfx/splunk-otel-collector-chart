@@ -92,12 +92,7 @@ resourcedetection:
         enabled: true
   {{- end }}
   override: true
-  {{/* Testing determined that the EKS cluster name detection required a slightly longer default timeout. */}}
-  {{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
   timeout: 15s
-  {{- else -}}
-  timeout: 10s
-  {{- end }}
 {{- end }}
 
 {{/*
@@ -159,12 +154,7 @@ resourcedetection/k8s_cluster_name:
         enabled: false
   {{- end }}
   override: true
-  {{/* Testing determined that the EKS cluster name detection required a slightly longer default timeout. */}}
-  {{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
   timeout: 15s
-  {{- else -}}
-  timeout: 10s
-  {{- end }}
 {{- end }}
 
 {{/*

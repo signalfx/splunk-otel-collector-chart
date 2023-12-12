@@ -1476,21 +1476,6 @@
     },
     {
       "if": {
-        "properties": {
-          "distribution": { "pattern": "^[ ]?$" }
-        }
-      },
-      "then": {
-        "$comment": "We get here if the distribution is blank or just spaces. The clusterName is required for this case",
-        "properties": {
-          "clusterName": {
-            "minLength": 1
-          }
-        }
-      }
-    },
-    {
-      "if": {
         "$comment": "if k8s secret resource created by the chart (default behavior)",
         "properties": {
           "secret": {
