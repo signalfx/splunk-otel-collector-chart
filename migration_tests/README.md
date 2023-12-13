@@ -51,7 +51,7 @@ You can recreate the execution of the step on your machine with the following se
 1. Check the collector deployment logs:
    ```
    pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
-   kubectl exec -it $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE \d+' | awk '{print $4}' > sock_logs.log
+   kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE [[:digit:]]+' | awk '{print $4}' > sock_logs.log
    ```
 1. Check we have no duplicates:
    ```
