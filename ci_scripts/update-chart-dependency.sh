@@ -75,5 +75,5 @@ maybe_update_chart_dependency_version() {
 }
 
 # ---- Update Version Information ----
-# Call the maybe_update_version function to update the version if necessary
+# Call the maybe_update_chart_dependency_version function to update the version if necessary
 maybe_update_chart_dependency_version
