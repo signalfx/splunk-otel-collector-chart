@@ -15,10 +15,10 @@ resourceSpans:
             stringValue: 1.15.2
         - key: splunk.distro.version
           value:
-            stringValue: 2.5.1
+            stringValue: 2.6.0
         - key: splunk.zc.method
           value:
-            stringValue: splunk-otel-js:v2.5.1
+            stringValue: splunk-otel-js:v2.6.0
         - key: k8s.container.name
           value:
             stringValue: nodejs-test
@@ -92,7 +92,7 @@ resourceSpans:
     scopeSpans:
       - scope:
           name: '@opentelemetry/instrumentation-http'
-          version: 0.44.0
+          version: 0.45.1
         spans:
           - attributes:
               - key: http.url
