@@ -68,6 +68,7 @@ jobs:
           kubectl get pods -A
           pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
           echo $pod
+          kubectl logs $pod
           kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE \d+' | awk '{print $4}' > sck_logs.log
           cat sck_logs.log
           if [[ ! -s sck_logs.log  ]]; then
