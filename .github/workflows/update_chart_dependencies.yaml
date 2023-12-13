@@ -19,71 +19,64 @@ on:
         required: false
         default: 'false'
 
-env:
-  CHART_YAML: helm-charts/splunk-otel-collector/Chart.yaml
-
 jobs:
-  maybe_update:
+  check_and_update:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Continue all jobs even if one fails
       matrix:
-        # Currently this worfklow will update the listed dependencies in the Chart.yaml
-        repo: ['cert-manager', 'opentelemetry-operator'] # Add other repos here
+        # Docker images to check for version updates
+        include:
+          - name: 'certmanager'
+            component: 'operator'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'cert-manager'
+          - name: 'operator'
+            component: 'operator'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'opentelemetry-operator'
+    env:
+      DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
       - uses: actions/checkout@v4
-      - name: Update Chart
-        id: update_chart
+
+      - name: Check for Version Updates
+        id: check_for_update
         run: |
-          echo "Update dependencies for Helm chart"
+          echo "Checking docker image version for ${{ matrix.name }}"
 
-          # Set debug argument if DEBUG_MODE is true
-          DEBUG_ARG=""
-          if [ "${{ github.event.inputs.DEBUG_MODE }}" == "true" ]; then
-            DEBUG_ARG="--debug"
-          fi
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE || exit 1
 
-          # Ensure chart dependencies are up-to-date
-          make dep-update
-
-          # Fetch the latest version using helm search repo
-          LATEST_VER=$(helm search repo ${{ matrix.repo }} --versions | awk 'NR==2{print $2}')
-          echo "LATEST_VER=$LATEST_VER" >> $GITHUB_OUTPUT
-
-          # Retrieve the current version from chart.yaml
-          DEP_PATH=$(yq eval ".dependencies[] | select(.name == \"${{ matrix.repo }}\") | .version" $CHART_YAML)
-
-          echo "Current version of ${{ matrix.repo }} is $DEP_PATH, latest is $LATEST_VER"
-
-          if [ "$LATEST_VER" == "$DEP_PATH" ]; then
-            echo We are already up to date. Nothing else to do.
-          else
-            echo 'Looks like we need to update...'
-            echo Updating to new version in chart.yaml
-            echo "NEED_UPDATE=1" >> $GITHUB_OUTPUT
-
-            # Update the version in chart.yaml using yq and jq
-            DEP_LINE=$(yq eval ".dependencies | keys | map(tonumber) | map(select(. != null)) | map(select(. < 10000)) | map(. + 1)" $CHART_YAML | jq ".[] | select(.[\"name\"] == \"${{ matrix.repo }}\")")
-            sed -i "${DEP_LINE}s/$DEP_PATH/$LATEST_VER/" $CHART_YAML
-
-            if [ ${{ matrix.repo }} == "opentelemetry-operator" ]; then
-              echo "Update Splunk Operator Instrumentation Images if Needed"
-              ./ci_scripts/update-images-operator-otel.sh ${{ matrix.language }} $DEBUG_ARG || exit 1
-            fi
-
-            echo Updating rendered examples
-            make render
-
-            echo "Current git diff:"
-            git --no-pager diff
-          fi
-      - name: PR the new version
-        if: ${{ steps.update_chart.outputs.NEED_UPDATE == 1 }}
+      - name: Open PR for Version Update
+        id: open_pr
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: Update ${{ matrix.repo }} chart version
-          title: Update ${{ matrix.repo }} chart version to ${{ steps.update_chart.outputs.LATEST_VER }}
-          body: Use the new version of the ${{ matrix.repo }} chart
-          branch: "update-${{ matrix.repo }}-${{ steps.update_chart.outputs.LATEST_VER }}"
+          commit-message: Update ${{ matrix.name }} chart dependency version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          base: main
+          delete-branch: true
+          modify-outputs: false
+
+      - name: Apply Version Update and Generate Changelog
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        run: |
+          # Apply the version update, update the rendered examples with the version update, and create a changelog entry
+          # We run `make update-docker-image` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE || exit 1
+          make render || exit 1
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}] || exit 1
+
+      - name: Finalize PR with updates
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update ${{ matrix.name }} chart dependency version
+          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
+          body: Use the latest version of ${{ matrix.name }}
+          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
           modify-outputs: false
