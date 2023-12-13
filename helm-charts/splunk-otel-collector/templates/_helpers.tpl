@@ -351,7 +351,7 @@ Whether the gateway is enabled, either through network explorer, or through its 
 */}}
 {{- define "splunk-otel-collector.gatewayEnabled" -}}
 {{- $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{- or $gateway.enabled .Values.networkExplorer.enabled }}
+{{- $gateway.enabled }}
 {{- end -}}
 
 {{/*
