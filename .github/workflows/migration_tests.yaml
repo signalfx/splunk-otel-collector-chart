@@ -59,22 +59,12 @@ jobs:
           helm install --wait sck -f migration_tests/sck_values.yaml sck/splunk-connect-for-kubernetes
       - name: sleep 60
         run: sleep 60
-      - run: |
-          pod=$(kubectl get pods -A | grep sck-splunk-kubernetes-logging | awk '{print $2}')
-          kubectl logs $pod
-          pod=$(kubectl get pods -A | grep pod-sck-index-sck-migration | awk '{print $2}')
-          kubectl logs $pod
       - name: Uninstall SCK
         run: helm uninstall --wait sck
       - name: Collect logs collected so far
         run: |
-          kubectl get pods -A
           pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
-          echo $pod
-          kubectl logs $pod
           kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE [[:digit:]]+' | awk '{print $4}' > sck_logs.log
-          cat sck_logs.log
-          echo "done"
           if [[ ! -s sck_logs.log  ]]; then
             echo "SCK logs are empty"
             exit 1
