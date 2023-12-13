@@ -105,6 +105,7 @@ jobs:
           cd functional_tests
           go test -v
   eks-upgrade-test:
+    needs: kubernetes-test
     concurrency:
       group: eks-access
     env:
