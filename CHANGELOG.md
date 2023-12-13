@@ -4,6 +4,21 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.91.0] - 2023-12-12
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.91.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.91.0).
+
+### 🛑 Breaking changes 🛑
+
+- `networkExplorer`: Remove networkExplorer from helm chart ([#1076](https://github.com/signalfx/splunk-otel-collector-chart/pull/1076))
+  Network explorer is no longer part of this helm chart and should be installed separately.
+  See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#using-opentelemetry-ebpf-helm-chart-with-splunk-opentelemetry-collector-for-kubernetes
+  for more details.
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump nodejs to v2.6.0 in helm-charts/splunk-otel-collector/values.yaml ([#1080](https://github.com/signalfx/splunk-otel-collector-chart/pull/1080))
+
 ## [0.90.1] - 2023-12-08
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.90.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.90.0).
