@@ -106,6 +106,7 @@ jobs:
           go test -v
   eks-upgrade-test:
     needs: kubernetes-test
+    if: github.repository == 'signalfx/splunk-otel-collector-chart'
     concurrency:
       group: eks-access
     env:
