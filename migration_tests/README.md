@@ -37,7 +37,7 @@ You can recreate the execution of the step on your machine with the following se
    ```
 1. Collect logs collected so far:
    ```
-   pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
+   pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
    kubectl exec -it $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE \d+' | awk '{print $4}' > sck_logs.log
    ```
 1. Install SOCK:
