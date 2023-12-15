@@ -1,0 +1,83 @@
+name: sck-migration-tests
+
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+env:
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+jobs:
+  kubernetes-test:
+    env:
+      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-migration-testing
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version:
+          - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          node_image: kindest/node:${{ matrix.k8s-version }}
+          kubectl_version: ${{ matrix.k8s-version }}
+          cluster_name: kind
+          config: ./.github/workflows/configs/kind-config.yaml
+      - name: Fix kubelet TLS server certificates
+        run: |
+          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: Deploy cert-manager
+        run: |
+          make cert-manager
+      - name: Deploy collector as deployment
+        run: kubectl apply -f migration_tests/collector_deployment.yaml
+      - name: Deploy SCK
+        run: |
+          helm repo add sck https://splunk.github.io/splunk-connect-for-kubernetes/
+          helm install --wait sck -f migration_tests/sck_values.yaml sck/splunk-connect-for-kubernetes
+      - name: sleep 60
+        run: sleep 60
+      - name: Uninstall SCK
+        run: helm uninstall --wait sck
+      - name: Collect logs collected so far
+        run: |
+          pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
+          kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE [[:digit:]]+' | awk '{print $4}' > sck_logs.log
+          if [[ ! -s sck_logs.log  ]]; then
+            echo "SCK logs are empty"
+            exit 1
+          fi
+      - name: Install SOCK
+        run: helm install --wait sock -f migration_tests/sock_values.yaml helm-charts/splunk-otel-collector
+      - name: Wait additional 10s to produce more logs
+        run: sleep 10
+      - name: Check the collector deployment logs
+        run: |
+          pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
+          kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE \d+' | awk '{print $4}' > sock_logs.log
+          dupes=$(cat sock_logs.log | sort | uniq -d)
+          if [[ -n $dupes ]]; then
+            echo "Duplicates detected: $dupes"
+          fi

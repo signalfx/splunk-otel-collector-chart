@@ -1,0 +1,22 @@
+global:
+  logLevel: info
+  splunk:
+    hec:
+      protocol: http
+      host: collector-logsink-service
+      token: foobar
+      port: 8088
+
+  kubernetes:
+    clusterName: "dev_sck"
+
+splunk-kubernetes-logging:
+  enabled: true
+  containers:
+    logFormatType: cri
+
+splunk-kubernetes-metrics:
+  enabled: false
+
+splunk-kubernetes-objects:
+  enabled: false
