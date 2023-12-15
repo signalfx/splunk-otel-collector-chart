@@ -75,7 +75,7 @@ jobs:
         run: sleep 10
       - name: Check the collector deployment logs
         run: |
-          pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
+          pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
           kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE \d+' | awk '{print $4}' > sock_logs.log
           dupes=$(cat sock_logs.log | sort | uniq -d)
           if [[ -n $dupes ]]; then
