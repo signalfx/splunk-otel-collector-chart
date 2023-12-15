@@ -50,7 +50,7 @@ You can recreate the execution of the step on your machine with the following se
    ```
 1. Check the collector deployment logs:
    ```
-   pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
+   pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
    kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE [[:digit:]]+' | awk '{print $4}' > sock_logs.log
    ```
 1. Check we have no duplicates:
