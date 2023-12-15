@@ -41,7 +41,7 @@ install-tools: ## Install tools (macOS/Linux)
 # Tasks related to building the Helm chart
 
 .PHONY: dep-update
-dep-update: ## Update Helm chart dependencies to latest, build the Helm chart with latest dependencies
+dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart with the dependencies specified in the Chart.yaml
 	@{ \
 	if ! (helm repo list | grep -q open-telemetry) ; then \
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
@@ -145,3 +145,14 @@ update-docker-image: ## Updates the Docker image tag in a YAML file to the lates
 		exit 1; \
 	fi
 	ci_scripts/update-docker-image.sh "$(FILE_PATH)" "$(QUERY_STRING)" $(DEBUG)
+
+# Example Usage:
+#   make update-chart-dep CHART_PATH=./helm-charts/splunk-otel-collector/Chart.yaml SUBCHART_NAME='opentelemetry-operator'
+.PHONY: update-chart-dep
+update-chart-dep: dep-update ## Updates the dependency version in the Chart.yaml file to the latest version
+	@if [ -z "$(CHART_PATH)" ] || [ -z "$(SUBCHART_NAME)" ]; then \
+		echo "Error: CHART_PATH and SUBCHART_NAME are mandatory."; \
+		echo "Usage: make update-docker-image FILE_PATH=path/to/file.yaml QUERY_STRING='yq.query' [DEBUG=--debug]"; \
+		exit 1; \
+	fi
+	ci_scripts/update-chart-dependency.sh $(CHART_PATH) $(SUBCHART_NAME) $(DEBUG_MODE)

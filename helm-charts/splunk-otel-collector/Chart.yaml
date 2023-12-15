@@ -6,17 +6,17 @@ description: Splunk OpenTelemetry Collector for Kubernetes
 icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
 type: application
 keywords:
-- splunk
-- opentelemetry
-- observability
-- logs
-- traces
-- metrics
-- apm
+  - splunk
+  - opentelemetry
+  - observability
+  - logs
+  - traces
+  - metrics
+  - apm
 maintainers:
-- name: dmitryax
-- name: jvoravong
-- name: emaderer
+  - name: dmitryax
+  - name: jvoravong
+  - name: emaderer
 dependencies:
   # Subchart Notes:
   # - Avoid uppercase letters in names/aliases, they cause install failure due to subchart resource naming
