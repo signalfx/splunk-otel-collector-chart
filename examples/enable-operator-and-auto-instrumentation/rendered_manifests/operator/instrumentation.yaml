@@ -35,10 +35,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.3
   dotnet:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.1.0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.2.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-dotnet:1.1.0
+        value: splunk.zc.method=autoinstrumentation-dotnet:1.2.0
       # dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
