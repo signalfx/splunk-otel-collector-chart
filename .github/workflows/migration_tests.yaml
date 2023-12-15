@@ -63,7 +63,7 @@ jobs:
         run: helm uninstall --wait sck
       - name: Collect logs collected so far
         run: |
-          pod=$(kubectl get pods -A | grep logsink | awk '{print $2}')
+          pod=$(kubectl get pods --no-headers -o custom-columns=":metadata.name" -lapp=collector-logsink)
           kubectl exec $pod -- cat /tmp/output.log | grep -Eo '"body":{"stringValue":"APP LOG LINE [[:digit:]]+' | awk '{print $4}' > sck_logs.log
           if [[ ! -s sck_logs.log  ]]; then
             echo "SCK logs are empty"
