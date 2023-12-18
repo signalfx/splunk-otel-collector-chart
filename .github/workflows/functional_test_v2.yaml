@@ -61,7 +61,7 @@ jobs:
           go test -v
 
   eks-test:
-    name: Test in EKS cluster - Credentials required
+    name: Test helm install in EKS - credentials needed
     needs: kubernetes-test
     if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
@@ -107,6 +107,7 @@ jobs:
           cd functional_tests
           go test -v
   eks-upgrade-test:
+    name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
     if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
