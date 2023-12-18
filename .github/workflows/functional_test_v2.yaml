@@ -61,7 +61,7 @@ jobs:
           go test -v
   eks-test:
     needs: kubernetes-test
-    if: github.repository == 'signalfx/splunk-otel-collector-chart'
+    if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
       group: eks-access
     env:
@@ -106,7 +106,7 @@ jobs:
           go test -v
   eks-upgrade-test:
     needs: kubernetes-test
-    if: github.repository == 'signalfx/splunk-otel-collector-chart'
+    if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
       group: eks-access
     env:
