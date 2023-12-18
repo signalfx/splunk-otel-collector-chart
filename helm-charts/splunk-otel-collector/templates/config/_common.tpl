@@ -80,12 +80,12 @@ resourcedetection:
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
     - system
-  {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+  {{- if and (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (not .Values.clusterName) }}
   gcp:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  {{- else if and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (not .Values.clusterName) }}
   eks:
     resource_attributes:
       k8s.cluster.name:

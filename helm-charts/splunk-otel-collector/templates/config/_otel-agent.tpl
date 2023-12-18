@@ -524,7 +524,7 @@ processors:
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
   # Resource detection processor that only detects the k8s.cluster.name attribute.
-  {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+  {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
@@ -745,7 +745,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource

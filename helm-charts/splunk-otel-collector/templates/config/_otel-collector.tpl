@@ -45,7 +45,7 @@ processors:
   batch:
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
-  {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+  {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
@@ -154,7 +154,7 @@ service:
         - memory_limiter
         - k8sattributes
         - batch
-        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
@@ -182,7 +182,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}

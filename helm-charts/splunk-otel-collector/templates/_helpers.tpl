@@ -464,3 +464,10 @@ Whether the clusterName configuration option is optional
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
 {{- or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
 {{- end -}}
+
+{{/*
+Whether the helm chart should detect the cluster name automatically
+*/}}
+{{- define "splunk-otel-collector.autoDetectClusterName" -}}
+{{- and (include "splunk-otel-collector.clusterNameOptional" .) (not .Values.clusterName) }}
+{{- end -}}

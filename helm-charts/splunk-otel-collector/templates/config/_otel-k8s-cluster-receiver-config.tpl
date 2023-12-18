@@ -86,7 +86,7 @@ processors:
     send_batch_max_size: 32768
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
-  {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+  {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
@@ -217,7 +217,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
@@ -236,7 +236,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if eq (include "splunk-otel-collector.clusterNameOptional" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
