@@ -59,7 +59,9 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+
   eks-test:
+    name: Test in EKS cluster - Credentials required
     needs: kubernetes-test
     if: github.event.pull_request.head.repo.name == github.repository
     concurrency:
