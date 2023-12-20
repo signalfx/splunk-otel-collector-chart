@@ -33,6 +33,8 @@ jobs:
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
       KUBERNETES_VERSION: ${{ matrix.kubernetes_version }}
       MINIKUBE_VERSION: latest
+      CLOUD_PROVIDER: aws
+      DISTRIBUTION: eks
 
     steps:
       - name: Checkout
