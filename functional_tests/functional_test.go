@@ -58,12 +58,18 @@ const (
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	otlpReceiverPort                       = 4317
 	apiPort                                = 8881
+	kindTestKubeEnv                        = "kind"
+	eksTestKubeEnv                         = "eks"
+	testDir                                = "testdata"
+	eksValuesDir                           = "expected_eks_values"
+	kindValuesDir                          = "expected_kind_values"
 )
 
 // Test_Functions tests the chart with a real k8s cluster.
 // Run the following commands prior to running the test locally:
 //
 // export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
+// export KUBE_TEST_ENV=kind
 // export K8S_VERSION=v1.28.0
 // kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
 // kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
@@ -83,6 +89,8 @@ const (
 var globalSinks *sinks
 
 var setupRun = sync.Once{}
+
+var expectedValuesDir string
 
 type sinks struct {
 	logsConsumer                      *consumertest.LogsSink
@@ -123,6 +131,8 @@ func setupOnce(t *testing.T) *sinks {
 func deployChartsAndApps(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
+	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(kubeConfig)
@@ -131,7 +141,7 @@ func deployChartsAndApps(t *testing.T) {
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "test_values.yaml.tmpl"))
+	valuesBytes, err := os.ReadFile(filepath.Join(testDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
 	replacements := struct {
 		K8sClusterEndpoint    string
@@ -141,6 +151,7 @@ func deployChartsAndApps(t *testing.T) {
 		OtlpEndpoint          string
 		ApiURLEndpoint        string
 		LogObjectsHecEndpoint string
+		KubeTestEnv           string
 	}{
 		fmt.Sprintf("http://%s:%d", hostEndpoint(t), signalFxReceiverK8sClusterReceiverPort),
 		fmt.Sprintf("http://%s:%d", hostEndpoint(t), signalFxReceiverPort),
@@ -149,6 +160,7 @@ func deployChartsAndApps(t *testing.T) {
 		fmt.Sprintf("%s:%d", hostEndpoint(t), otlpReceiverPort),
 		fmt.Sprintf("http://%s:%d", hostEndpoint(t), apiPort),
 		fmt.Sprintf("http://%s:%d/services/collector", hostEndpoint(t), hecLogsObjectsReceiverPort),
+		kubeTestEnv,
 	}
 	tmpl, err := template.New("").Parse(string(valuesBytes))
 	require.NoError(t, err)
@@ -183,7 +195,7 @@ func deployChartsAndApps(t *testing.T) {
 	deployments := clientset.AppsV1().Deployments("default")
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
-	stream, err := os.ReadFile(filepath.Join("testdata", "nodejs", "deployment.yaml"))
+	stream, err := os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
@@ -195,7 +207,7 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
-	jobstream, err := os.ReadFile(filepath.Join("testdata", "test_jobs.yaml"))
+	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
 	var jobs []*batchv1.Job
@@ -260,7 +272,7 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	jobstream, err := os.ReadFile(filepath.Join("testdata", "test_jobs.yaml"))
+	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
 	var jobs []*batchv1.Job
@@ -318,6 +330,19 @@ func Test_Functions(t *testing.T) {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
+
+	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
+	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
+
+	switch kubeTestEnv {
+	case kindTestKubeEnv:
+		expectedValuesDir = kindValuesDir
+	case eksTestKubeEnv:
+		expectedValuesDir = eksValuesDir
+	default:
+		assert.Fail(t, "KUBE_TEST_ENV is set to invalid value. Must be one of [kind, eks].")
+	}
+
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
@@ -330,7 +355,7 @@ func testNodeJSTraces(t *testing.T) {
 	tracesConsumer := setupOnce(t).tracesConsumer
 
 	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join("testdata", "expected_traces.yaml")
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
@@ -480,7 +505,7 @@ func shortenNames(value string) string {
 
 func testK8sClusterReceiverMetrics(t *testing.T) {
 	metricsConsumer := setupOnce(t).k8sclusterReceiverMetricsConsumer
-	expectedMetricsFile := filepath.Join("testdata", "expected_cluster_receiver.yaml")
+	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver.yaml")
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
@@ -734,7 +759,7 @@ func testAgentMetrics(t *testing.T) {
 		"up",
 	}
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames)
-	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected_internal_metrics.yaml"))
+	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml"))
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
@@ -785,7 +810,7 @@ func testAgentMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected_kubeletstats_metrics.yaml"))
+	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml"))
 	require.NoError(t, err)
 	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer)
 	if selectedKubeletstatsMetrics == nil {

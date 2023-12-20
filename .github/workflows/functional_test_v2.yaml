@@ -14,6 +14,7 @@ jobs:
   kubernetes-test:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
+      KUBE_TEST_ENV: kind
     strategy:
       fail-fast: false
       matrix:
@@ -70,6 +71,7 @@ jobs:
       group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+      KUBE_TEST_ENV: eks
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
     steps:
@@ -116,6 +118,7 @@ jobs:
       group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+      KUBE_TEST_ENV: eks
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
     steps:
