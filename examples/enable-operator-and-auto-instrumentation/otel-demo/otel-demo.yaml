@@ -7,7 +7,7 @@ metadata:
     opentelemetry.io/name: opentelemetry-demo
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/name: opentelemetry-demo
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 ---
 # Source: opentelemetry-demo/templates/component.yaml
@@ -20,7 +20,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: adservice
     app.kubernetes.io/name: opentelemetry-demo-adservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -41,7 +41,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: cartservice
     app.kubernetes.io/name: opentelemetry-demo-cartservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -62,7 +62,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: checkoutservice
     app.kubernetes.io/name: opentelemetry-demo-checkoutservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -83,7 +83,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: currencyservice
     app.kubernetes.io/name: opentelemetry-demo-currencyservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -104,7 +104,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: emailservice
     app.kubernetes.io/name: opentelemetry-demo-emailservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -125,7 +125,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: featureflagservice
     app.kubernetes.io/name: opentelemetry-demo-featureflagservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -149,7 +149,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: ffspostgres
     app.kubernetes.io/name: opentelemetry-demo-ffspostgres
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -170,7 +170,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: frontend
     app.kubernetes.io/name: opentelemetry-demo-frontend
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -191,7 +191,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: kafka
     app.kubernetes.io/name: opentelemetry-demo-kafka
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -215,7 +215,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: loadgenerator
     app.kubernetes.io/name: opentelemetry-demo-loadgenerator
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -236,7 +236,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: paymentservice
     app.kubernetes.io/name: opentelemetry-demo-paymentservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -257,7 +257,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: productcatalogservice
     app.kubernetes.io/name: opentelemetry-demo-productcatalogservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -278,7 +278,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: quoteservice
     app.kubernetes.io/name: opentelemetry-demo-quoteservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -299,7 +299,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: recommendationservice
     app.kubernetes.io/name: opentelemetry-demo-recommendationservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -320,7 +320,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: redis
     app.kubernetes.io/name: opentelemetry-demo-redis
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -341,7 +341,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: shippingservice
     app.kubernetes.io/name: opentelemetry-demo-shippingservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
   type: ClusterIP
@@ -362,9 +362,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: accountingservice
     app.kubernetes.io/name: opentelemetry-demo-accountingservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-accountingservice
@@ -379,7 +380,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: accountingservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-accountingservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-accountingservice'
           imagePullPolicy: IfNotPresent
           env:
             - name: KAFKA_SERVICE_ADDR
@@ -405,9 +406,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: adservice
     app.kubernetes.io/name: opentelemetry-demo-adservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-adservice
@@ -422,7 +424,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: adservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-adservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-adservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -432,8 +434,6 @@ spec:
               value: "8080"
             - name: FEATURE_FLAG_GRPC_SERVICE_ADDR
               value: 'opentelemetry-demo-featureflagservice:50053'
-            - name: OTLP_LOGS_EXPORTER
-              value: otlp
           resources:
             limits:
               memory: 300Mi
@@ -448,9 +448,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: cartservice
     app.kubernetes.io/name: opentelemetry-demo-cartservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-cartservice
@@ -465,7 +466,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: cartservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-cartservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-cartservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -500,9 +501,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: checkoutservice
     app.kubernetes.io/name: opentelemetry-demo-checkoutservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-checkoutservice
@@ -517,7 +519,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: checkoutservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-checkoutservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-checkoutservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -560,9 +562,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: currencyservice
     app.kubernetes.io/name: opentelemetry-demo-currencyservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-currencyservice
@@ -577,7 +580,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: currencyservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-currencyservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-currencyservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -599,9 +602,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: emailservice
     app.kubernetes.io/name: opentelemetry-demo-emailservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-emailservice
@@ -616,7 +620,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: emailservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-emailservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-emailservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -640,9 +644,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: featureflagservice
     app.kubernetes.io/name: opentelemetry-demo-featureflagservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-featureflagservice
@@ -657,7 +662,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: featureflagservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-featureflagservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-featureflagservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50053
@@ -698,9 +703,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: ffspostgres
     app.kubernetes.io/name: opentelemetry-demo-ffspostgres
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-ffspostgres
@@ -745,9 +751,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: frauddetectionservice
     app.kubernetes.io/name: opentelemetry-demo-frauddetectionservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-frauddetectionservice
@@ -762,7 +769,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frauddetectionservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-frauddetectionservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-frauddetectionservice'
           imagePullPolicy: IfNotPresent
           env:
             - name: KAFKA_SERVICE_ADDR
@@ -788,9 +795,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: frontend
     app.kubernetes.io/name: opentelemetry-demo-frontend
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-frontend
@@ -805,7 +813,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frontend
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-frontend'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-frontend'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -849,9 +857,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: kafka
     app.kubernetes.io/name: opentelemetry-demo-kafka
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-kafka
@@ -866,7 +875,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: kafka
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-kafka'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-kafka'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9092
@@ -896,9 +905,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: loadgenerator
     app.kubernetes.io/name: opentelemetry-demo-loadgenerator
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-loadgenerator
@@ -913,7 +923,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: loadgenerator
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-loadgenerator'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-loadgenerator'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8089
@@ -947,9 +957,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: paymentservice
     app.kubernetes.io/name: opentelemetry-demo-paymentservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-paymentservice
@@ -964,7 +975,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: paymentservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-paymentservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-paymentservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -990,9 +1001,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: productcatalogservice
     app.kubernetes.io/name: opentelemetry-demo-productcatalogservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-productcatalogservice
@@ -1007,7 +1019,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: productcatalogservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-productcatalogservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-productcatalogservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -1031,9 +1043,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: quoteservice
     app.kubernetes.io/name: opentelemetry-demo-quoteservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-quoteservice
@@ -1048,7 +1061,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: quoteservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-quoteservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-quoteservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -1074,9 +1087,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: recommendationservice
     app.kubernetes.io/name: opentelemetry-demo-recommendationservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-recommendationservice
@@ -1091,7 +1105,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: recommendationservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-recommendationservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-recommendationservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -1124,9 +1138,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: redis
     app.kubernetes.io/name: opentelemetry-demo-redis
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-redis
@@ -1165,9 +1180,10 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/component: shippingservice
     app.kubernetes.io/name: opentelemetry-demo-shippingservice
-    app.kubernetes.io/version: "1.5.0"
+    app.kubernetes.io/version: "1.6.0"
     app.kubernetes.io/part-of: opentelemetry-demo
 spec:
+  replicas: 1
   selector:
     matchLabels:
       opentelemetry.io/name: opentelemetry-demo-shippingservice
@@ -1182,7 +1198,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: shippingservice
-          image: 'ghcr.io/open-telemetry/demo:1.5.0-shippingservice'
+          image: 'ghcr.io/open-telemetry/demo:1.6.0-shippingservice'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
