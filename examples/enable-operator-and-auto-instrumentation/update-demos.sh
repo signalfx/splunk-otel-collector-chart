@@ -64,6 +64,15 @@ function update_otel_demo {
     yq eval -i '
         (select(.kind == "Deployment" and .metadata.name == "opentelemetry-demo-recommendationservice") | .spec.template.spec.containers[]) |= .env += [{"name": "OTEL_SERVICE_NAME", "valueFrom": {"fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.labels['\''app.kubernetes.io/component'\'']"}}}]
     ' "$OTEL_DEMO_PATH"
+    # Increase the memory limit for the NodeJS frontend deployment to avoid OOMing after auto-instrumentation
+    yq eval -i '
+        (select(.kind == "Deployment" and .metadata.name == "opentelemetry-demo-frontend") | .spec.template.spec.containers[0].resources.limits.memory) = "300Mi"
+    ' "$OTEL_DEMO_PATH"
+    # Update the frontendproxy to be frontend since we exclude the frontendproxy deployment
+    awk '
+    /name: LOCUST_HOST/ { print; getline; sub("frontendproxy", "frontend"); print; next }
+    { print }
+    ' "$OTEL_DEMO_PATH" > temp_file && mv temp_file "$OTEL_DEMO_PATH"
 
     # Remove all env vars with PUBLIC_OTEL_* prefixes from Deployment objects.
     # This is a special case that was likely for legacy support, only the NodeJS opentelemetry-demo-frontend deployment was using it.
