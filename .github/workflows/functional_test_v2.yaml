@@ -65,7 +65,7 @@ jobs:
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     concurrency:
       group: eks-access
     env:
@@ -111,7 +111,7 @@ jobs:
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     concurrency:
       group: eks-access
     env:
