@@ -54,7 +54,7 @@ jobs:
         id: check_if_pr_open
         run: |
           DIFF=0
-          git diff --no-ext-diff --quiet main..update-${{ matrix.name }} -- helm-charts || DIFF=1
+          (git show-ref --verify --quiet refs/heads/update-${{ matrix.name }} && git diff --no-ext-diff --quiet main..update-${{ matrix.name }} -- helm-charts) || DIFF=1
           echo "PR_NEEDED=$DIFF" >> "$GITHUB_OUTPUT"
 
       - name: Open PR for Version Update
