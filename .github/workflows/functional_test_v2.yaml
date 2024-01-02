@@ -169,7 +169,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+          cd base && helm install sock helm-charts/splunk-otel-collector --set clusterName=dev-operator --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
       - name: Update dependencies
         run: |
           make dep-update
