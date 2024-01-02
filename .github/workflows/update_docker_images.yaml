@@ -55,7 +55,7 @@ jobs:
       - name: Check if PR is already open
         id: check_if_pr_open
         run: |
-          git diff --exit-code master..update-${{ matrix.name }} -- helm-charts
+          git diff --exit-code main..update-${{ matrix.name }} -- helm-charts
           echo "PR_NEEDED=$?" >> "$GITHUB_OUTPUT"
 
       - name: Open PR for Version Update
