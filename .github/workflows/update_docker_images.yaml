@@ -69,10 +69,9 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
-          modify-outputs: false
 
       - name: Apply Version Update and Generate Changelog
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # We run `make update-docker-image` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
@@ -81,7 +80,7 @@ jobs:
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Finalize PR with updates
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update ${{ matrix.name }} instrumentation version
@@ -90,4 +89,3 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
-          modify-outputs: false
