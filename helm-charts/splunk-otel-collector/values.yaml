@@ -1180,6 +1180,9 @@ operator:
       nodejs:
         repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
         tag: v2.6.1
+      dotnet:
+        repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
+        tag: 1.2.1
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.8.0-alpha
@@ -1189,9 +1192,6 @@ operator:
       python:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.41b0
-      dotnet:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
-        tag: 1.2.0
       nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx
         tag: 1.0.3
