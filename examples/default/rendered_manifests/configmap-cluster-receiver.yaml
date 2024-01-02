@@ -65,7 +65,7 @@ data:
         - env
         - system
         override: true
-        timeout: 10s
+        timeout: 15s
     receivers:
       k8s_cluster:
         auth_type: serviceAccount

@@ -1,5 +1,4 @@
 ---
-clusterName: dev-operator
 metricsEnabled: true
 tracesEnabled: true
 splunkObservability:
@@ -51,3 +50,10 @@ clusterReceiver:
 environment: dev
 operator:
   enabled: true
+
+{{ if (eq .KubeTestEnv "kind") }}
+clusterName: dev-operator
+{{ else if (eq .KubeTestEnv "eks") }}
+cloudProvider: aws
+distribution: eks
+{{ end }}

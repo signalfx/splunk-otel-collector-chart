@@ -9,9 +9,10 @@ nameOverride: ""
 fullnameOverride: ""
 
 ################################################################################
-# clusterName is a REQUIRED. It can be set to an arbitrary value that identifies
+# clusterName is an optional parameter. It can be set to an arbitrary value that identifies
 # your K8s cluster. The value will be associated with every trace, metric and
-# log as "k8s.cluster.name" attribute.
+# log as "k8s.cluster.name" attribute. It's optional on EKS and GKE, but required
+# on all other Kubernetes services.
 ################################################################################
 
 clusterName: ""

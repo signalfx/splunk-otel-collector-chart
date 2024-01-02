@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/schema#",
   "type": "object",
   "required": [
-    "clusterName",
     "cloudProvider",
     "distribution"
   ],
@@ -22,8 +21,7 @@
     },
     "clusterName": {
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "splunkPlatform": {
       "description": "Splunk Cloud / Splunk Enterprise configuration",
@@ -266,6 +264,7 @@
     "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
+      "$comment": "Please ensure clusterName is set to the proper required/optional value when modifying this list",
       "enum": [
         "eks",
         "eks/fargate",
@@ -1451,6 +1450,29 @@
           }
         }
       ]
+    },
+    {
+      "if": {
+        "properties": {
+          "distribution": { "pattern": "^(gke|eks).*" }
+        },
+        "required": ["distribution"]
+      },
+      "then": {
+        "properties": {
+          "clusterName": {
+            "minLength": 0
+          }
+        }
+      },
+      "else": {
+        "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
+        "properties": {
+          "clusterName": {
+            "minLength": 1
+          }
+        }
+      }
     },
     {
       "if": {

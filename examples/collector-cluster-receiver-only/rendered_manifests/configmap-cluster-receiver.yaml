@@ -71,7 +71,7 @@ data:
         - env
         - system
         override: true
-        timeout: 10s
+        timeout: 15s
       transform/add_sourcetype:
         log_statements:
         - context: log
