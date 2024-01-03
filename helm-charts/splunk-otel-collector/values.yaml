@@ -18,6 +18,14 @@ fullnameOverride: ""
 clusterName: ""
 
 ################################################################################
+# hostNetwork is an option that allows to use the networking stack of the host
+# machine. Disabling this value will have affect on monitoring some control
+# plane components. For Windows operating system the hostNetwork is disabled.
+################################################################################
+
+hostNetwork: true
+
+################################################################################
 # Splunk Cloud / Splunk Enterprise configuration.
 ################################################################################
 
