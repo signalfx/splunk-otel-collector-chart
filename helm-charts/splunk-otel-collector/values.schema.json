@@ -25,6 +25,10 @@
       "type": "string",
       "minLength": 1
     },
+    "enableHostNetwork": {
+      "description": "Flag to enable host network",
+      "type": "boolean"
+    },
     "splunkPlatform": {
       "description": "Splunk Cloud / Splunk Enterprise configuration",
       "type": "object",

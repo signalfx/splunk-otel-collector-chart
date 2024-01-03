@@ -53,7 +53,7 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
-      {{- if not .Values.isWindows }}
+      {{- if and (.Values.enableHostNetwork) (not .Values.isWindows)}}
       hostNetwork: true
       {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
