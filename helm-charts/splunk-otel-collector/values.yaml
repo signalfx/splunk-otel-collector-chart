@@ -17,6 +17,13 @@ fullnameOverride: ""
 clusterName: ""
 
 ################################################################################
+# enableHostNetwork is a flag to enable hostNetwork, by default it is enabled
+# except for Windows operating system
+################################################################################
+
+enableHostNetwork: true
+
+################################################################################
 # Splunk Cloud / Splunk Enterprise configuration.
 ################################################################################
 
