@@ -17,4 +17,10 @@ data:
   relay: |
     {{- $config := include "splunk-otel-collector.agentConfig" . | fromYaml }}
     {{- $agent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+{{- if .Values.agent.discovery.enabled }}
+  discovery.properties: |
+    splunk.discovery:
+    {{- $properties := include "splunk-otel-collector.agentDiscoveryProperties" . | fromYaml }}
+    {{- $agent.discovery.properties | mustMergeOverwrite $properties | toYaml | nindent 6 }}
+{{- end }}
 {{- end }}

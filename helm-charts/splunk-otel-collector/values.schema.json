@@ -595,6 +595,29 @@
         "annotations": {
           "type": "object"
         },
+        "discovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "extensions": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "receivers": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
         "podAnnotations": {
           "type": "object"
         },

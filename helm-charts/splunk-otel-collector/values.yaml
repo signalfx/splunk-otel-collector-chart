@@ -424,6 +424,13 @@ agent:
   # existing fields can be disabled by setting them to null value.
   config: {}
 
+  # Discovery mode attempts to automatically configure the agent with bundled metric receiver configuration
+  discovery:
+    enabled: false
+    properties:
+      extensions: {}
+      receivers: {}
+
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
 # This is an extra 1-replica deployment of Open-temlemetry collector used

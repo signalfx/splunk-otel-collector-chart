@@ -133,6 +133,57 @@ clusterReceiver:
   enabled: false
 ```
 
+## Discovery Mode
+
+*At this time only Linux installations are supported*
+
+The agent daemonset can be configured to run in [`--discovery` mode](https://docs.splunk.com/observability/en/gdi/opentelemetry/discovery-mode.html), initiating a "preflight" discovery phase to test bundled metric receiver configurations against `k8s_observer` discovered endpoints. Successfully discovered instances are then incorporated in the existing service config.
+
+You can additionally configure any necessary discovery properties for providing required auth or service-specific information:
+
+```yaml
+agent:
+  discovery:
+    enabled: true # disabled by default
+    properties:
+      extensions:
+        k8s_observer:
+          config:
+            auth_type: serviceAccount  # default auth_type value
+      receivers:
+        postgres:
+          config:
+            # auth fields reference environment variables populated by secret data below
+            username: '${env:POSTGRES_USER}'
+            password: '${env:POSTGRES_PASSWORD}'
+            tls:
+              insecure: true
+
+  extraEnvs:
+    # environment variables using a manually created "postgres-monitoring" secret
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: postgres-monitoring
+          key: username
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-monitoring
+          key: password
+```
+
+For discovery progress and statement evaluations, see the agent startup logs in product or via kubectl.
+
+```bash
+$ kubectl -n monitoring logs splunk-otel-collector-agent | grep -i disco
+Discovering for next 10s...
+Successfully discovered "postgresql" using "k8s_observer" endpoint "k8s_observer/e8a10f52-4f2a-468c-be7b-7f3c673b1c8e/(5432)".
+Discovery complete.
+```
+
+By default, the `docker_observer` and `host_observer` extensions are disabled for discovery in the helm chart.
+
 ## GKE Autopilot support
 
 If you want to run Splunk OTel Collector in [Google Kubernetes Engine
