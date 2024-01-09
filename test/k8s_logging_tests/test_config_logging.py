@@ -130,3 +130,24 @@ def test_journald_unit(setup, test_input, expected):
                     len(events))
     assert len(events) >= expected if test_input != "empty_unit" else len(
         events) == expected
+
+@pytest.mark.parametrize("index,expected", [
+    ("test_metrics", 1)
+])
+def test_metric_index_from_annotations(setup, index, expected):
+
+    '''
+    Test that metrics are being sent to "test_metrics" index, as defined by splunk.com/metricsIndex annotation during setup
+    '''
+    logger.info("testing for metrics index={0} expected={1} event(s)".format(index, expected))
+    search_query = "index=" + index
+
+    events = check_events_from_splunk(start_time="-1h@h",
+                                      url=setup["splunkd_url"],
+                                      user=setup["splunk_user"],
+                                      query=["mpreview {0}".format(
+                                          search_query)],
+                                      password=setup["splunk_password"])
+    logger.info("Splunk received %s events in the last minute",
+                len(events))
+    assert len(events) >= expected
