@@ -23,10 +23,6 @@
       "description": "Cluster name that will be used as metadata attributes for all telemetry data",
       "type": "string"
     },
-    "hostNetwork": {
-      "description": "Host network allows container to use networking stack of the host machine",
-      "type": "boolean"
-    },
     "splunkPlatform": {
       "description": "Splunk Cloud / Splunk Enterprise configuration",
       "type": "object",
@@ -595,6 +591,10 @@
               "type": "boolean"
             }
           }
+        },
+        "hostNetwork": {
+          "description": "Host network allows container to use networking stack of the host machine",
+          "type": "boolean"
         },
         "annotations": {
           "type": "object"
