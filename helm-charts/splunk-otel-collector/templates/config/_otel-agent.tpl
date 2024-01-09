@@ -530,17 +530,25 @@ processors:
   # attributes from container environments.
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
 
+  # Resource detection processor that only detects the k8s.cluster.name attribute.
+  {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+  {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
+  {{- end }}
+
   # General resource attributes that apply to all telemetry passing through the agent.
   # It's important to put this processor after resourcedetection to make sure that
-  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}".
+  # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
+  # it's declared.
   resource:
     attributes:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
+      {{- if .Values.clusterName }}
       - action: upsert
         key: k8s.cluster.name
         value: {{ .Values.clusterName }}
+      {{- end }}
       {{- range .Values.extraAttributes.custom }}
       - action: insert
         key: "{{ .name }}"
@@ -744,6 +752,9 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         {{- if .Values.environment }}
         - resource/add_environment

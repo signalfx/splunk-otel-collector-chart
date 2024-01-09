@@ -92,6 +92,9 @@ processors:
     send_batch_max_size: 32768
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
+  {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+  {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
+  {{- end }}
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
@@ -143,9 +146,11 @@ processors:
       - action: insert
         key: metric_source
         value: kubernetes
+      {{- if .Values.clusterName }}
       - action: upsert
         key: k8s.cluster.name
         value: {{ .Values.clusterName }}
+      {{- end }}
       {{- range .Values.extraAttributes.custom }}
       - action: upsert
         key: {{ .name }}
@@ -218,6 +223,9 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8sattributes/metrics
@@ -237,6 +245,9 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8sattributes/metrics
@@ -322,8 +333,11 @@ service:
       processors:
         - memory_limiter
         - batch
+        - resourcedetection
         - resource
+        {{- if .Values.clusterName }}
         - resource/add_event_k8s
+        {{- end }}
       exporters:
         - signalfx
     {{- end }}
