@@ -137,7 +137,7 @@ def test_journald_unit(setup, test_input, expected):
 def test_metric_index_from_annotations(setup, index, expected):
 
     '''
-    Test that metrics are being sent to "test_metrics" index, as defined by splunk.com/metricsIndex annotation during setup
+    Test that metrics are being sent to "test_metrics" index, as defined by splunk.com/metricsIndex annotation added during setup
     '''
     logger.info("testing for metrics index={0} expected={1} event(s)".format(index, expected))
     search_query = "index=" + index
