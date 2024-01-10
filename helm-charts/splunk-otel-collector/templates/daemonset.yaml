@@ -53,10 +53,12 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
-      {{- if and (.Values.agent.hostNetwork) (not .Values.isWindows)}}
+      {{- if and (.Values.agent.hostNetwork) (not .Values.isWindows) }}
       hostNetwork: true
       {{- end }}
+      {{- if .Values.agent.hostNetwork }}
       dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       nodeSelector:
         {{- if .Values.nodeSelector }}
