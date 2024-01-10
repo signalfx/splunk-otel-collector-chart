@@ -599,8 +599,8 @@ logsCollection:
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
-    # Please update directory path for journald if it's different from below default value "/var/log/journal"
-    directory: /var/log/journal
+    # Please update directory path for journald if it's different from below default value "/run/log/journal"
+    directory: /run/log/journal
     # List of service units to collect journald logs for and configuration for each.
     units:
       - name: kubelet
