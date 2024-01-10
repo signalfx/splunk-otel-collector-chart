@@ -50,9 +50,17 @@ jobs:
 
           make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE
 
+      - name: Check if PR is already open
+        id: check_if_pr_open
+        run: |
+          DIFF=1
+          git fetch origin
+          ((git show-ref --verify --quiet refs/heads/update-${{ matrix.name }}) || (git diff --no-ext-diff --quiet main..update-${{ matrix.name }} -- helm-charts)) && DIFF=0
+          echo "PR_NEEDED=$DIFF" >> "$GITHUB_OUTPUT"
+
       - name: Open PR for Version Update
         id: open_pr
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update ${{ matrix.name }} instrumentation version
@@ -61,10 +69,9 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
-          modify-outputs: false
 
       - name: Apply Version Update and Generate Changelog
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # We run `make update-docker-image` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
@@ -73,7 +80,7 @@ jobs:
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Finalize PR with updates
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update ${{ matrix.name }} instrumentation version
@@ -82,4 +89,3 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
-          modify-outputs: false
