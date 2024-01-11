@@ -254,6 +254,9 @@ spec:
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
         {{- end }}
+        {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+        - --discovery
+        {{- end }}
         ports:
         {{- range $key, $port := $agent.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) (and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for)) }}
@@ -355,6 +358,10 @@ spec:
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
+      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+        - mountPath: /etc/otel/collector/config.d
+          name: otel-discovery-properties-configmap
+        {{- end }}
         {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
         {{- if .Values.isWindows }}
         - mountPath: "C:\\hostfs"
@@ -537,6 +544,14 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+      - name: otel-discovery-properties-configmap
+        configMap:
+          name: {{ template "splunk-otel-collector.fullname" . }}-otel-agent
+          items:
+            - key: discovery.properties
+              path: properties.discovery.yaml
+      {{- end }}
       {{- if $agent.extraVolumes }}
       {{- toYaml $agent.extraVolumes | nindent 6 }}
       {{- end }}

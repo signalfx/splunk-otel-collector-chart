@@ -1,0 +1,29 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+agent:
+  discovery:
+    enabled: true
+    properties:
+      receivers:
+        redis:
+          config:
+            password: '${env:REDIS_PASSWORD}'
+            username: '${env:REDIS_USERNAME}'
+  # these env vars reference a secret that must be created manually
+  extraEnvs:
+    - name: REDIS_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: redis-secret
+          key: username
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secret
+          key: password
+
+clusterReceiver:
+  # disabled for example only. unrelated to discovery mode
+  enabled: false

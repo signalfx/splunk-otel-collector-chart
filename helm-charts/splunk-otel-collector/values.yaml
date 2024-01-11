@@ -424,6 +424,15 @@ agent:
   # existing fields can be disabled by setting them to null value.
   config: {}
 
+  # Discovery mode attempts to automatically configure the agent with bundled metric receiver configuration.
+  # For more details, refer to: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#discovery-mode
+
+  discovery:
+    enabled: false
+    properties:
+      extensions: {}
+      receivers: {}
+
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
 # This is an extra 1-replica deployment of Open-temlemetry collector used
