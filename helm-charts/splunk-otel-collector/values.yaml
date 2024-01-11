@@ -1182,7 +1182,7 @@ operator:
         tag: v2.6.1
       dotnet:
         repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-        tag: 1.2.1
+        tag: v1.2.1
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
