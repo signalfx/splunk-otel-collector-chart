@@ -172,6 +172,5 @@ If you're running Docker Desktop, you can adjust the allocated resources in the 
 ### TODOS and Possible Upcoming Features
 - Steps for how to use Github Codepspaces with the devcontainer
 - Steps for how to use Jetbrains (Goland) with the devcontainer
-- Create a Githbut workflow to publish a devcontainer to the repository for devs and CI/CD to use
 - Steps for how to pair program remotely using a single devcontainer instance
 - Steps on how to spin up a chart demo in the Web UI using Github codespaces
