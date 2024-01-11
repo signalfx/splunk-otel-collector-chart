@@ -4,6 +4,22 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.91.1] - 2024-01-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.91.3](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.91.3).
+
+### 💡 Enhancements 💡
+
+- `agent`: linux: Adopt discovery mode in agent and provide agent.discovery.properties value mapping ([#1108](https://github.com/signalfx/splunk-otel-collector-chart/pull/1108))
+- `chart`: Make clusterName optional in EKS and GKE ([#1056](https://github.com/signalfx/splunk-otel-collector-chart/pull/1056),[#1067](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1067))
+- `operator`: Bump certmanager to v1.13.3 in helm-charts/splunk-otel-collector/Chart.yaml ([#1085](https://github.com/signalfx/splunk-otel-collector-chart/pull/1085))
+- `operator`: Bump nodejs to v2.6.1 in helm-charts/splunk-otel-collector/values.yaml ([#1094](https://github.com/signalfx/splunk-otel-collector-chart/pull/1094))
+- `operator`: Bump operator to 0.44.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#1084](https://github.com/signalfx/splunk-otel-collector-chart/pull/1084))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Change the default directory of the journald receiver ([#1110](https://github.com/signalfx/splunk-otel-collector-chart/pull/1110))
+
 ## [0.91.0] - 2023-12-12
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.91.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.91.0).
