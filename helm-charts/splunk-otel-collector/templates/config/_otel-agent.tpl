@@ -875,3 +875,15 @@ service:
         {{- end }}
     {{- end }}
 {{- end }}
+{{/*
+Discovery properties for the otel-collector agent
+The values can be overridden in .Values.agent.discovery.properties.
+*/}}
+{{- define "splunk-otel-collector.agentDiscoveryProperties" -}}
+extensions:
+  docker_observer:
+    enabled: false
+  host_observer:
+    enabled: false
+receivers: {}
+{{- end }}

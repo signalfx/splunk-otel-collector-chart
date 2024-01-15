@@ -424,6 +424,15 @@ agent:
   # existing fields can be disabled by setting them to null value.
   config: {}
 
+  # Discovery mode attempts to automatically configure the agent with bundled metric receiver configuration.
+  # For more details, refer to: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#discovery-mode
+
+  discovery:
+    enabled: false
+    properties:
+      extensions: {}
+      receivers: {}
+
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
 # This is an extra 1-replica deployment of Open-temlemetry collector used
@@ -599,8 +608,8 @@ logsCollection:
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
-    # Please update directory path for journald if it's different from below default value "/var/log/journal"
-    directory: /var/log/journal
+    # Please update directory path for journald if it's different from below default value "/run/log/journal"
+    directory: /run/log/journal
     # List of service units to collect journald logs for and configuration for each.
     units:
       - name: kubelet
