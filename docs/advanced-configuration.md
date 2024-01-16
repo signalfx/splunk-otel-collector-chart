@@ -559,6 +559,7 @@ Manage Splunk OTel Collector Logging with these supported annotations.
 
 * Use `splunk.com/index` annotation on pod and/or namespace to tell which Splunk platform indexes to ingest to. Pod annotation will take precedence over namespace annotation when both are annotated.
   For example, the following command will make logs from `kube-system` namespace to be sent to `k8s_events` index: `kubectl annotate namespace kube-system splunk.com/index=k8s_events`
+* Use `splunk.com/metricsIndex` annotation on pod and/or namespace to tell which Splunk platform metric indexes to ingest to. Pod annotation will take precedence over namespace annotation when both are annotated.
 * Filter logs using pod and/or namespace annotation
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `false` (default: false), set `splunk.com/exclude` annotation to `true` on pod and/or namespace to exclude its logs from ingested.
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `true` (default: false), set `splunk.com/include` annotation to `true` on pod and/or namespace to only include its logs from ingested. All other logs will be ignored.

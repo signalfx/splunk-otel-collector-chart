@@ -82,6 +82,12 @@ receivers:
 processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
+  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+  {{- include "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" . | nindent 2 }}
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+  {{- end }}
+
   batch:
     send_batch_max_size: 32768
 
@@ -221,6 +227,9 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
         - resource/k8s_cluster
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
@@ -240,6 +249,9 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -258,6 +270,9 @@ service:
         - resource/add_collector_k8s
         - resourcedetection
         - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

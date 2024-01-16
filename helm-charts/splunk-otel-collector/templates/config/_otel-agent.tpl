@@ -484,6 +484,13 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
 
+
+  {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+  {{- include "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" . | nindent 2 }}
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+  {{- end }}
+
   {{- if eq .Values.logsEngine "fluentd" }}
   # Move flat fluentd logs attributes to resource attributes
   groupbyattrs/logs:
@@ -824,6 +831,9 @@ service:
         {{- if .Values.isWindows }}
         - metricstransform
         {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if $gatewayEnabled }}
         - otlp
@@ -847,6 +857,9 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        - k8sattributes/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         # Use signalfx instead of otlp even if collector is enabled

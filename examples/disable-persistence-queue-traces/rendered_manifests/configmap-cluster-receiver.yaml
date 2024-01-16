@@ -47,6 +47,35 @@ data:
     processors:
       batch:
         send_batch_max_size: 32768
+      k8sattributes/metrics:
+        extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          metadata: []
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.node.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
@@ -106,6 +135,7 @@ data:
           - memory_limiter
           - batch
           - resource
+          - k8sattributes/metrics
           - resource/k8s_cluster
           receivers:
           - k8s_cluster
@@ -118,6 +148,7 @@ data:
           - resource/add_collector_k8s
           - resourcedetection
           - resource
+          - k8sattributes/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:
