@@ -400,6 +400,12 @@ agent:
     # so that agent pods can be discovered via dns etc
     enabled: false
 
+  # hostNetwork schedules the pod with the host's network namespace.
+  # Disabling this value will affect monitoring of some control plane
+  # components. Enabling the agent service is recommended (see above).
+  # Disregarded for Windows (unsupported by k8s).
+  hostNetwork: true
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
