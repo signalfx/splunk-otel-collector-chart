@@ -46,20 +46,20 @@ spec:
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: http://$(SPLUNK_OTEL_AGENT):4318
   go:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.8.0-alpha
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:v0.10.1-alpha
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-go:v0.8.0-alpha
+        value: splunk.zc.method=autoinstrumentation-go:v0.10.1-alpha
   java:
     image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-java:v1.30.0
   nginx:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:1.0.3
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:1.0.4
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-nginx:1.0.3
+        value: splunk.zc.method=autoinstrumentation-nginx:1.0.4
   nodejs:
     image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.6.1
     env:
