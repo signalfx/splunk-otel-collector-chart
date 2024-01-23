@@ -591,11 +591,18 @@ func testAgentLogs(t *testing.T) {
 	excludeNs := true
 	var sourcetypes []string
 	var indices []string
+	var journalDsourceTypes []string
 
 	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
 		l := logsConsumer.AllLogs()[i]
 		for j := 0; j < l.ResourceLogs().Len(); j++ {
 			rl := l.ResourceLogs().At(j)
+			if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
+				if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
+					sourcetype := value.AsString()
+					journalDsourceTypes = append(journalDsourceTypes, sourcetype)
+				}
+			}
 			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 				sourcetype := value.AsString()
 				sourcetypes = append(sourcetypes, sourcetype)
@@ -626,6 +633,10 @@ func testAgentLogs(t *testing.T) {
 			}
 		}
 	}
+	t.Run("test journald sourcetypes are set", func(t *testing.T) {
+		assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
+		assert.Contains(t, journalDsourceTypes, "kube:journald:kubelet.service")
+	})
 	t.Run("test node.js log records", func(t *testing.T) {
 		assert.NotNil(t, helloWorldLogRecord)
 		sourceType, ok := helloWorldResource.Attributes().Get("com.splunk.sourcetype")

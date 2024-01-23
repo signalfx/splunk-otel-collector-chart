@@ -106,31 +106,6 @@ def test_custom_metadata_fields_annotations(setup, label, index, value, expected
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.parametrize("test_input,expected", [
-    ("containerd.service", 1),
-    ("docker.service", 1),
-    ("kubelet.service", 1),
-    ("empty_unit", 0)
-])
-def test_journald_unit(setup, test_input, expected):
-    '''
-    Test that all configured journald units are present in target index.
-    '''
-    logger.info("testing for presence of journald_unit={0} expected={1} event(s)".format(
-        test_input, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    search_query = "index=" + index_logging + " sourcetype=kube:journald:" + test_input
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last hour",
-                    len(events))
-    assert len(events) >= expected if test_input != "empty_unit" else len(
-        events) == expected
-
 @pytest.mark.parametrize("index,expected", [
     ("test_metrics", 1)
 ])
