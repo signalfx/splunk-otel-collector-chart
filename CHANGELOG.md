@@ -165,6 +165,10 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - Fix for secret name which now respects the same overrides as other resources in the chart [#873](https://github.com/signalfx/splunk-otel-collector-chart/pull/873)
 - Update the secret validation hook pod to use imagePullSecrets instead of possible non-existing serviceAccountName [#888](https://github.com/signalfx/splunk-otel-collector-chart/pull/888)
 
+### Changed
+
+- Set HEC exporter gzip compression enabled by default [#601](https://github.com/signalfx/splunk-otel-collector-chart/pull/601)
+
 ## [0.82.0] - 2023-08-02
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.82.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.82.0).
