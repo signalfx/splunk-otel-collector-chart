@@ -221,38 +221,38 @@ Create the patch-log-dirs image name.
 {{- end -}}
 
 {{/*
-Convert memory value from resources.limit to numeric value in MiB to be used by otel memory_limiter processor.
-*/}}
-{{- define "splunk-otel-collector.convertMemToMib" -}}
+  This helper converts the input value of memory to MiB.
+  Input needs to be a valid value as supported by k8s memory resource field.
+ */}}
+{{- define "splunk-otel-collector.convertMemToMib" }}
 {{- $mem := lower . -}}
 {{- if hasSuffix "e" $mem -}}
-{{- trimSuffix "e" $mem | atoi | mul 1000 | mul 1000 | mul 1000 | mul 1000 -}}
+{{- $mem = mulf (trimSuffix "e" $mem | float64) 1e18 -}}
 {{- else if hasSuffix "ei" $mem -}}
-{{- trimSuffix "ei" $mem | atoi | mul 1024 | mul 1024 | mul 1024 | mul 1024 -}}
+{{- $mem = mulf (trimSuffix "e" $mem | float64) 0x1p60 -}}
 {{- else if hasSuffix "p" $mem -}}
-{{- trimSuffix "p" $mem | atoi | mul 1000 | mul 1000 | mul 1000 -}}
+{{- $mem = mulf (trimSuffix "p" $mem | float64) 1e15 -}}
 {{- else if hasSuffix "pi" $mem -}}
-{{- trimSuffix "pi" $mem | atoi | mul 1024 | mul 1024 | mul 1024 -}}
+{{- $mem = mulf (trimSuffix "pi" $mem | float64) 0x1p50 -}}
 {{- else if hasSuffix "t" $mem -}}
-{{- trimSuffix "t" $mem | atoi | mul 1000 | mul 1000 -}}
+{{- $mem = mulf (trimSuffix "t" $mem | float64) 1e12 -}}
 {{- else if hasSuffix "ti" $mem -}}
-{{- trimSuffix "ti" $mem | atoi | mul 1024 | mul 1024 -}}
+{{- $mem = mulf (trimSuffix "ti" $mem | float64) 0x1p40 -}}
 {{- else if hasSuffix "g" $mem -}}
-{{- trimSuffix "g" $mem | atoi | mul 1000 -}}
+{{- $mem = mulf (trimSuffix "g" $mem | float64) 1e9 -}}
 {{- else if hasSuffix "gi" $mem -}}
-{{- trimSuffix "gi" $mem | atoi | mul 1024 -}}
+{{- $mem = mulf (trimSuffix "gi" $mem | float64) 0x1p30 -}}
 {{- else if hasSuffix "m" $mem -}}
-{{- div (trimSuffix "m" $mem | atoi | mul 1000) 1024 -}}
+{{- $mem = mulf (trimSuffix "m" $mem | float64) 1e6 -}}
 {{- else if hasSuffix "mi" $mem -}}
-{{- trimSuffix "mi" $mem | atoi -}}
+{{- $mem = mulf (trimSuffix "mi" $mem | float64) 0x1p20 -}}
 {{- else if hasSuffix "k" $mem -}}
-{{- div (trimSuffix "k" $mem | atoi) 1000 -}}
+{{- $mem = mulf (trimSuffix "k" $mem | float64) 1e3 -}}
 {{- else if hasSuffix "ki" $mem -}}
-{{- div (trimSuffix "ki" $mem | atoi) 1024 -}}
-{{- else -}}
-{{- div (div ($mem | atoi) 1024) 1024 -}}
-{{- end -}}
-{{- end -}}
+{{- $mem = mulf (trimSuffix "ki" $mem | float64) 0x1p10 -}}
+{{- end }}
+{{- divf $mem 0x1p20 | floor -}}
+{{- end }}
 
 {{/*
 Create a filter expression for multiline logs configuration.

@@ -38,6 +38,11 @@ jobs:
       - name: Run chart-testing (lint)
         run: make lint
 
+      - name: Run helm unit tests
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest
+          make unittest
+
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
         # Only build a kind cluster if there are chart changes to test.

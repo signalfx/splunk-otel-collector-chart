@@ -80,7 +80,7 @@ spec:
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" $gateway.resources.limits.memory }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" $gateway.resources.limits.memory | int64 }}"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:

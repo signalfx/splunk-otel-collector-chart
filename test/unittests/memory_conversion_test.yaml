@@ -1,0 +1,51 @@
+suite: splunk-otel-collector.convertMemToMib
+templates:
+  - "deployment-cluster-receiver.yaml"
+  - "configmap-cluster-receiver.yaml" # referenced in deployment
+values:
+  - ./values/basic.yaml
+tests:
+- it: convert floating-point memory limit (G to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 1.5G
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: SPLUNK_MEMORY_TOTAL_MIB
+          value: "1430"
+- it: convert integer memory limit (M to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 1000M
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: SPLUNK_MEMORY_TOTAL_MIB
+          value: "953"
+- it: convert integer memory limit (Ki to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 1680Ki
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: SPLUNK_MEMORY_TOTAL_MIB
+          value: "1"
+- it: convert floating-point memory limit (Gi to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 0.5Gi
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: SPLUNK_MEMORY_TOTAL_MIB
+          value: "512"
