@@ -4,6 +4,18 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.92.0] - 2024-01-23
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.92.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.92.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Use the Splunk Distribution of OpenTelemetry .NET docker image by default when auto-instrumenting with the operator ([#1098](https://github.com/signalfx/splunk-otel-collector-chart/pull/1098))
+- `other`: Added support for rerouting metrics index with pod/namespace annotations ([#1053](https://github.com/signalfx/splunk-otel-collector-chart/pull/1053))
+- `chart`: Allows to set the hostNetwork parameter in chart ([#1014](https://github.com/signalfx/splunk-otel-collector-chart/pull/1014))
+- `operator`: Bump dotnet to v1.3.0 in helm-charts/splunk-otel-collector/values.yaml ([#1121](https://github.com/signalfx/splunk-otel-collector-chart/pull/1121))
+- `operator`: Bump operator to 0.46.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#1116](https://github.com/signalfx/splunk-otel-collector-chart/pull/1116),[#1124](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1124))
+
 ## [0.91.1] - 2024-01-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.91.3](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.91.3).
