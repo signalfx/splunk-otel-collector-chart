@@ -231,8 +231,20 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 			t.Logf("Deployed namespace %s", nm.Name)
 		}
+	}
 
-		waitForAllNamespacesToBeCreated(t, clientset)
+	waitForAllNamespacesToBeCreated(t, clientset)
+
+	for _, resourceYAML := range strings.Split(string(jobstream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err := decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
 
 		if groupVersionKind.Group == "batch" &&
 			groupVersionKind.Version == "v1" &&
@@ -777,7 +789,7 @@ func testAgentMetrics(t *testing.T) {
 	containerImageShorten := func(value string) string {
 		return value[(strings.LastIndex(value, "/") + 1):]
 	}
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer)
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	require.NotNil(t, selectedInternalMetrics)
 
 	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
@@ -823,8 +835,9 @@ func testAgentMetrics(t *testing.T) {
 
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml"))
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer)
+	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
+		golden.WriteMetrics(t, filepath.Join("testdata", "expected_kind_values", "expected_kubeletestats_metrics.yaml"), *selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, true))
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
 	}
@@ -875,7 +888,7 @@ func testAgentMetrics(t *testing.T) {
 	}
 }
 
-func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink) *pmetric.Metrics {
+func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricSink.AllMetrics()[h]
 		foundCorrectSet := false
@@ -894,7 +907,7 @@ func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *co
 		if !foundCorrectSet {
 			continue
 		}
-		if m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
 			return &m
 		}
 	}
