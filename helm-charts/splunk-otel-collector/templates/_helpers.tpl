@@ -226,35 +226,32 @@ Create the patch-log-dirs image name.
  */}}
 {{- define "splunk-otel-collector.convertMemToMib" }}
 {{- $mem := lower . -}}
-{{- $memBytes := 0 -}}
 {{- if hasSuffix "e" $mem -}}
-{{- $memBytes = mulf (trimSuffix "e" $mem | float64) (mul 1000 1000 1000 1000 1000 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "e" $mem | float64) 1e18 -}}
 {{- else if hasSuffix "ei" $mem -}}
-{{- $memBytes = mulf (trimSuffix "e" $mem | float64) (mul 1024 1024 1024 1024 1024 1024) | floor -}}
+{{- $mem = mulf (trimSuffix "e" $mem | float64) 0x1p60 -}}
 {{- else if hasSuffix "p" $mem -}}
-{{- $memBytes = mulf (trimSuffix "p" $mem | float64) (mul 1000 1000 1000 1000 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "p" $mem | float64) 1e15 -}}
 {{- else if hasSuffix "pi" $mem -}}
-{{- $memBytes = mulf (trimSuffix "pi" $mem | float64) (mul 1024 1024 1024 1024 1024) | floor -}}
+{{- $mem = mulf (trimSuffix "pi" $mem | float64) 0x1p50 -}}
 {{- else if hasSuffix "t" $mem -}}
-{{- $memBytes = mulf (trimSuffix "t" $mem | float64) (mul 1000 1000 1000 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "t" $mem | float64) 1e12 -}}
 {{- else if hasSuffix "ti" $mem -}}
-{{- $memBytes = mulf (trimSuffix "ti" $mem | float64) (mul 1024 1024 1024 1024 ) | floor -}}
+{{- $mem = mulf (trimSuffix "ti" $mem | float64) 0x1p40 -}}
 {{- else if hasSuffix "g" $mem -}}
-{{- $memBytes = mulf (trimSuffix "g" $mem | float64) (mul 1000 1000 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "g" $mem | float64) 1e9 -}}
 {{- else if hasSuffix "gi" $mem -}}
-{{- $memBytes = mulf (trimSuffix "gi" $mem | float64) (mul 1024 1024 1024) | floor -}}
+{{- $mem = mulf (trimSuffix "gi" $mem | float64) 0x1p30 -}}
 {{- else if hasSuffix "m" $mem -}}
-{{- $memBytes = mulf (trimSuffix "m" $mem | float64) (mul 1000 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "m" $mem | float64) 1e6 -}}
 {{- else if hasSuffix "mi" $mem -}}
-{{- $memBytes = mulf (trimSuffix "mi" $mem | float64) (mul 1024 1024) | floor -}}
+{{- $mem = mulf (trimSuffix "mi" $mem | float64) 0x1p20 -}}
 {{- else if hasSuffix "k" $mem -}}
-{{- $memBytes = mulf (trimSuffix "k" $mem | float64) (mul 1000) | floor -}}
+{{- $mem = mulf (trimSuffix "k" $mem | float64) 1e3 -}}
 {{- else if hasSuffix "ki" $mem -}}
-{{- $memBytes = mulf (trimSuffix "ki" $mem | float64) (mul 1024) | floor -}}
-{{- else }}
-{{- $memBytes = $mem -}}
+{{- $mem = mulf (trimSuffix "ki" $mem | float64) 0x1p10 -}}
 {{- end }}
-{{- div ($memBytes | int64) (mul 1024 1024) -}}
+{{- divf $mem 0x1p20 | floor -}}
 {{- end }}
 
 {{/*
