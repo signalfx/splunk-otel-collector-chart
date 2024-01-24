@@ -2,11 +2,8 @@ suite: splunk-otel-collector.convertMemToMib
 templates:
   - "deployment-cluster-receiver.yaml"
   - "configmap-cluster-receiver.yaml" # referenced in deployment
-set:
-  clusterReceiver.enabled: true
-  clusterName: test
-  splunkObservability.realm: test
-  splunkObservability.accessToken: test
+values:
+  - ./values/basic.yaml
 tests:
 - it: convert floating-point memory limit (G to Mi)
   templates:
