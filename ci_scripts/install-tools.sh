@@ -90,10 +90,10 @@ install_helm_plugin() {
   local installed_version=$(helm plugin list | grep ${plugin} | awk '{print $2}')
 
   if [ -z "$installed_version" ]; then
-    echo "Helm plugin $tool is not installed, installing now..."
+    echo "Helm plugin ${plugin} is not installed, installing now..."
     helm plugin install ${repo} || echo "Failed to install plugin ${plugin}. Continuing..."
   else
-    echo "Helm plugin ${plugin} (version: $installed_version) already installed."
+    echo "Helm plugin ${plugin} (version: ${installed_version}) already installed."
   fi
 }
 
