@@ -21,6 +21,9 @@ install() {
     go)
       install_go "$tool"
       ;;
+    helm_plugin)
+      install_helm_plugin "$tool"
+      ;;
     *)
       echo "Unsupported tool type: $type"
       exit 1
@@ -75,10 +78,32 @@ install_go() {
   fi
 }
 
+# Function to install a helm plugin
+install_helm_plugin() {
+  if ! command -v helm &> /dev/null
+  then
+      echo "Helm could not be found. Please install Helm and try again."
+      return
+  fi
+  local plugin="${1%%=*}"
+  local repo="${1#*=}"
+  local installed_version=$(helm plugin list | grep ${plugin} | awk '{print $2}')
+
+  if [ -z "$installed_version" ]; then
+    echo "Helm plugin $tool is not installed, installing now..."
+    helm plugin install ${repo} || echo "Failed to install plugin ${plugin}. Continuing..."
+  else
+    echo "Helm plugin ${plugin} (version: $installed_version) already installed."
+  fi
+}
+
 # install brew-based tools
 for tool in kubectl helm chart-testing pre-commit go; do
   install "$tool" brew
 done
+
+# install helm plugin
+install "unittest=https://github.com/helm-unittest/helm-unittest.git" helm_plugin
 
 # install Go-based tools
 install "go.opentelemetry.io/build-tools/chloggen" go
