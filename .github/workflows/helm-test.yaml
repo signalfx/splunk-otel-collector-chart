@@ -38,7 +38,7 @@ jobs:
       - name: Run chart-testing (lint)
         run: make lint
 
-      - name: Run helm unittest
+      - name: Run helm unit tests
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest
           make unittest
