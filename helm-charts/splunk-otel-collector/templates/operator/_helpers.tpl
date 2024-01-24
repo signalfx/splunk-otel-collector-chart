@@ -163,6 +163,11 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Output final OTEL_EXPORTER_OTLP_ENDPOINT, if applicable based on input conditions */ -}}
   {{- if $customOtelExporterEndpoint }}
+    {{- /* {{- /* Ensure the SPLUNK_OTEL_AGENT env var is set with per language env vars to successfully use it in env var substitution */ -}}
+    {{- if contains "SPLUNK_OTEL_AGENT" $customOtelExporterEndpoint -}}
+      {{- printf "- name: SPLUNK_OTEL_AGENT\n  valueFrom:\n    fieldRef:\n      apiVersion: v1\n      fieldPath: status.hostIP" | indent 6 }}
+      {{- printf "\n" -}}
+    {{- end -}}
     {{- if contains "4318" $customOtelExporterEndpoint }}
       {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .instLibName | indent 6 -}}
       {{- printf "\n" -}}
