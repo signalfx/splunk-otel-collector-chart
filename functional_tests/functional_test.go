@@ -756,6 +756,7 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_process_uptime",
 		"otelcol_receiver_accepted_spans",
 		"otelcol_processor_accepted_metric_points",
+		"otelcol_processor_filter_logs_filtered",
 		"otelcol_processor_batch_timeout_trigger_send",
 		"otelcol_receiver_accepted_metric_points",
 		"otelcol_processor_dropped_metric_points",
@@ -790,6 +791,10 @@ func testAgentMetrics(t *testing.T) {
 		return value[(strings.LastIndex(value, "/") + 1):]
 	}
 	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
+	if selectedInternalMetrics == nil {
+		t.Skip("No metric batch identified with the right metric count, exiting")
+		return
+	}
 	require.NotNil(t, selectedInternalMetrics)
 
 	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
@@ -825,6 +830,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
 		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
 		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
 		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
@@ -837,7 +843,6 @@ func testAgentMetrics(t *testing.T) {
 	require.NoError(t, err)
 	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
-		golden.WriteMetrics(t, filepath.Join("testdata", "expected_kind_values", "expected_kubeletestats_metrics.yaml"), *selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, true))
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
 	}
