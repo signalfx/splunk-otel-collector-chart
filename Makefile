@@ -111,6 +111,21 @@ chlog-update: chlog-validate ## Creates an update to CHANGELOG.md for a release 
 	$(CHLOGGEN) update --version "[$(VERSION)] - $$(date +'%Y-%m-%d')" || exit 1; \
 	ci_scripts/chloggen-update.sh || exit 1
 
+# Example Usage:
+#		make chlog-release-notes
+#		make chlog-release-notes OUTPUT=file
+.PHONY: chlog-release-notes
+chlog-release-notes: ## Prints out the current release notes to stdout or RELEASE.md
+	@ESCAPED_VER=$$(echo $(VERSION) | sed 's/\./\\./g'); \
+	VER_PATTERN="\[$${ESCAPED_VER}\]"; \
+	echo "Extracting release notes for version $(VERSION)"; \
+	if [ "$(OUTPUT)" = "file" ]; then \
+		awk "\$$0 ~ /$$VER_PATTERN/{flag=1; next} /^## \[/{flag=0} flag && NF" CHANGELOG.md > helm-charts/splunk-otel-collector/RELEASE.md; \
+		echo "Release notes written to RELEASE.md"; \
+	else \
+		awk "\$$0 ~ /$$VER_PATTERN/{flag=1; next} /^## \[/{flag=0} flag && NF" CHANGELOG.md; \
+	fi
+
 ##@ Cert Manager
 # Tasks related to deploying and managing Cert Manager
 

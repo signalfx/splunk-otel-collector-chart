@@ -45,10 +45,15 @@ jobs:
         run: make render
         if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}
 
+      - name: Generate Release Notes
+        run: make chlog-release-notes OUTPUT=file
+        if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: helm-charts
+          config: .github/workflows/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}
