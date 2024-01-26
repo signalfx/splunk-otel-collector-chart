@@ -1092,6 +1092,13 @@ func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset)
 		require.NoError(t, err)
 		for _, d := range di.Items {
 			if d.Status.ReadyReplicas != d.Status.Replicas {
+				var messages string
+				for _, c := range d.Status.Conditions {
+					messages += c.Message
+					messages += "\n"
+				}
+
+				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
 				return false
 			}
 		}
