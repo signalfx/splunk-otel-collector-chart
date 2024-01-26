@@ -1,4 +1,4 @@
-# Node.js test image
+# Java test image
 
 This image is used for testing the auto-instrumentation of Java application through the OpenTelemetry Operator.
 
