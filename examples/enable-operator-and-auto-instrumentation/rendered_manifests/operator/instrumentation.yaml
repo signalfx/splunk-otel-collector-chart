@@ -41,6 +41,11 @@ spec:
         value: "Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation"
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-dotnet:v1.3.0
+      - name: SPLUNK_OTEL_AGENT
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.hostIP
       # dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -70,6 +75,11 @@ spec:
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-python:0.43b0
+      - name: SPLUNK_OTEL_AGENT
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.hostIP
       # python auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT

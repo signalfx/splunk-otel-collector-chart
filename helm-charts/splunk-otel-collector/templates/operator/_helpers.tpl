@@ -32,7 +32,7 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
 {{/*
 Helper to define an endpoint for exporting telemetry data related to auto-instrumentation.
 - Determines the endpoint based on user-defined values or default agent/gateway settings.
-- Order of precedence: User-defined > Agent endpoint > Gateway endpoint
+- Order of precedence: User-defined > Agent service endpoint > Agent host port endpoint > Gateway endpoint
 */}}
 {{- define "splunk-otel-collector.operator.instrumentation-exporter-endpoint" -}}
   {{- /* Initialize endpoint variable */ -}}
@@ -46,7 +46,10 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
     (ne .Values.operator.instrumentation.spec.exporter.endpoint "")
   }}
   {{- $endpoint = .Values.operator.instrumentation.spec.exporter.endpoint -}}
-  {{- /* Use the agent endpoint if the agent is enabled */ -}}
+  {{- /* Use the agent service endpoint if the agent is enabled */ -}}
+  {{- else if .Values.agent.service.enabled -}}
+    {{- $endpoint = printf "http://%s-agent:4317" (include "splunk-otel-collector.fullname" .) -}}
+  {{- /* Use the agent host port endpoint if the agent is enabled */ -}}
   {{- else if .Values.agent.enabled -}}
     {{- $endpoint = "http://$(SPLUNK_OTEL_AGENT):4317" -}}
   {{- /* Use the gateway endpoint if the gateway is enabled */ -}}
@@ -163,6 +166,11 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Output final OTEL_EXPORTER_OTLP_ENDPOINT, if applicable based on input conditions */ -}}
   {{- if $customOtelExporterEndpoint }}
+    {{- /* Ensure the SPLUNK_OTEL_AGENT env var is set with per language env vars to successfully use it in env var substitution */ -}}
+    {{- if contains "SPLUNK_OTEL_AGENT" $customOtelExporterEndpoint -}}
+      {{- printf "- name: SPLUNK_OTEL_AGENT\n  valueFrom:\n    fieldRef:\n      apiVersion: v1\n      fieldPath: status.hostIP" | indent 6 }}
+      {{- printf "\n" -}}
+    {{- end -}}
     {{- if contains "4318" $customOtelExporterEndpoint }}
       {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .instLibName | indent 6 -}}
       {{- printf "\n" -}}
