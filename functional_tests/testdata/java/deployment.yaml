@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-test
+  template:
+    metadata:
+      name: java-test
+      labels:
+        app: java-test
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+    spec:
+      containers:
+        - image: quay.io/splunko11ytest/java_test:latest
+          name: java-test
+          imagePullPolicy: IfNotPresent
