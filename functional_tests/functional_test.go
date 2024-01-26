@@ -471,6 +471,7 @@ func testJavaTraces(t *testing.T) {
 	ignoreEndTimestamp(expectedTraces)
 
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("os.description"),
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
