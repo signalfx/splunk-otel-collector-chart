@@ -392,13 +392,18 @@ func testNodeJSTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-		trace := tracesConsumer.AllTraces()[i]
-		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-			selectedTrace = &trace
-			break
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
 		}
-	}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
 	ignoreSpanAttribute("net.peer.port", expectedTraces)
@@ -445,13 +450,19 @@ func testJavaTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-		trace := tracesConsumer.AllTraces()[i]
-		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-			selectedTrace = &trace
-			break
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
 		}
-	}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
+
 	require.NotNil(t, selectedTrace)
 
 	ignoreSpanAttribute("net.sock.peer.port", expectedTraces)
