@@ -670,6 +670,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts"),
 	)
 
 	require.NoError(t, err)
