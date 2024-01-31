@@ -50,7 +50,7 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           commit-message: Update ${{ matrix.name }} chart dependency version
           title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           commit-message: Update ${{ matrix.name }} chart dependency version
           title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
