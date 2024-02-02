@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/lint-test.yaml?query=branch%3Amain">
-    <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/signalfx/splunk-otel-collector-chart/lint-test.yaml?branch=main&style=for-the-badge">
+  <a href="https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/helm-test.yaml?query=branch%3Amain">
+    <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/signalfx/splunk-otel-collector-chart/helm-test.yaml?branch=main&style=for-the-badge">
   </a>
   <a href="https://github.com/signalfx/splunk-otel-collector/releases">
     <img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/signalfx/splunk-otel-collector-chart?include_prereleases&style=for-the-badge">
