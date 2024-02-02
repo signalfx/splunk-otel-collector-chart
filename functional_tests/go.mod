@@ -6,7 +6,7 @@ module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 go 1.20
 
 require (
-	github.com/docker/docker v23.0.3+incompatible
+	github.com/docker/docker v23.0.8+incompatible
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.0.0-20231031211240-1c63ac99a6e0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.86.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.86.0
