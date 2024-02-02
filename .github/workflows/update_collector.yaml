@@ -32,7 +32,7 @@ jobs:
           fi
       - name: PR the new version
         if: ${{ steps.update.outputs.NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           commit-message: Update collector version
           title: Update collector version to ${{ steps.update.outputs.LATEST_VER }}
