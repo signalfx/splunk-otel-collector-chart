@@ -47,7 +47,7 @@ opentelemetry.io/v1alpha1 Instrumentation object.
       - [Add trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
       - [Enable always-on profiling partially](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
 - To view a deployed Instrumentation, you can use the command: `kubectl get otelinst {instrumentation_name} -o yaml`.
-- For proper ingestion of trace telemetry data, the `deployment.environment` attribute must be present in the exported traces. There are two ways to set this attribute:
+- The `deployment.environment` attribute may be set in the exported traces to identify the [APM deployment environment](https://docs.splunk.com/observability/en/apm/set-up-apm/environments.html). There are two ways to set this attribute:
   - Use the optional `environment` configuration in `values.yaml`.
   - Use the Instrumentation spec (`operator.instrumentation.spec.env`) with the environment variable `OTEL_RESOURCE_ATTRIBUTES`.
 
