@@ -32,7 +32,7 @@ if [ "${ACTUAL}" != "e84ff8c607b2a10f635c312403f9ede40a045404957e55adcf3d663f9e3
 fi
 chmod a+x kubectl
 # label node
-./kubectl label nodes $K8S_NODE_NAME splunk-otel-eks-fargate-kubeletstats-receiver-node=true
+./kubectl label nodes "$K8S_NODE_NAME" splunk-otel-eks-fargate-kubeletstats-receiver-node=true
 
 echo "Disabling k8s_cluster receiver for this instance"
 # strip k8s_cluster and its pipeline
@@ -41,4 +41,5 @@ echo "Disabling k8s_cluster receiver for this instance"
 
 # set kubelet stats to not monitor ourselves (all other kubelets)
 echo "Ensuring k8s_observer-based kubeletstats receivers won't monitor own node to avoid Fargate network limitation."
+# shellcheck disable=SC2016
 ./yq e -i '.receivers.receiver_creator.receivers.kubeletstats.rule = .receivers.receiver_creator.receivers.kubeletstats.rule + " && not ( name contains \"${K8S_NODE_NAME}\" )"' /splunk-messages/config.yaml
