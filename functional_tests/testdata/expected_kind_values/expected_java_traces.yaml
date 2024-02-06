@@ -3,7 +3,7 @@ resourceSpans:
       attributes:
         - key: container.id
           value:
-            stringValue: eb1bdc8ebe6e95ecffcf83d34ad861265aa2c0bd81382ea6ab75ca9446ea93e6
+            stringValue: f07768147eb263408a3ced1cf8216bce3580b87d13ff71660ebd03d78579a457
         - key: host.arch
           value:
             stringValue: aarch64
@@ -24,7 +24,7 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: java-test-566495f78-vfhvx
+            stringValue: java-test-566495f78-ffk2c
         - key: k8s.replicaset.name
           value:
             stringValue: java-test-566495f78
@@ -96,10 +96,10 @@ resourceSpans:
             stringValue: 1.32.0
         - key: k8s.pod.ip
           value:
-            stringValue: 10.244.0.51
+            stringValue: 10.244.0.20
         - key: k8s.pod.uid
           value:
-            stringValue: 82cc84ec-f3c5-42f1-b9b3-5729b7ecb1a8
+            stringValue: bc60a255-ee5f-4a0e-82d0-f466cfe1e6ec
         - key: k8s.pod.labels.app
           value:
             stringValue: java-test
@@ -112,6 +112,15 @@ resourceSpans:
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
+        - key: cluster_name
+          value:
+            stringValue: ci-k8s-cluster
+        - key: customfield1
+          value:
+            stringValue: customvalue1
+        - key: customfield2
+          value:
+            stringValue: customvalue2
         - key: deployment.environment
           value:
             stringValue: dev
@@ -139,10 +148,10 @@ resourceSpans:
                   stringValue: 11.0.0.0
               - key: thread.name
                 value:
-                  stringValue: http-nio-8080-exec-9
+                  stringValue: '*'
               - key: thread.id
                 value:
-                  intValue: "47"
+                  stringValue: '*'
               - key: http.route
                 value:
                   stringValue: /index.jsp
@@ -151,7 +160,7 @@ resourceSpans:
                   intValue: "8080"
               - key: net.sock.peer.port
                 value:
-                  intValue: "52940"
+                  stringValue: '*'
               - key: net.sock.host.addr
                 value:
                   stringValue: 127.0.0.1
@@ -176,14 +185,12 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1706258468729528092"
             kind: 2
             name: GET /index.jsp
             parentSpanId: ""
-            spanId: b6cf8d3ecc547401
-            startTimeUnixNano: "1706258468726048467"
+            spanId: ""
             status: {}
-            traceId: a930046caccd1fe173b3ad57c2f6e6e9
+            traceId: ""
           - attributes:
               - key: http.target
                 value:
@@ -202,10 +209,10 @@ resourceSpans:
                   stringValue: 11.0.0.0
               - key: thread.name
                 value:
-                  stringValue: http-nio-8080-exec-10
+                  stringValue: '*'
               - key: thread.id
                 value:
-                  intValue: "48"
+                  stringValue: '*'
               - key: http.route
                 value:
                   stringValue: /index.jsp
@@ -214,7 +221,7 @@ resourceSpans:
                   intValue: "8080"
               - key: net.sock.peer.port
                 value:
-                  intValue: "52954"
+                  stringValue: '*'
               - key: net.sock.host.addr
                 value:
                   stringValue: 127.0.0.1
@@ -239,14 +246,12 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1706258469774745802"
             kind: 2
             name: GET /index.jsp
             parentSpanId: ""
-            spanId: 20cdb1687e59fdf5
-            startTimeUnixNano: "1706258469769739218"
+            spanId: ""
             status: {}
-            traceId: 8b63635f10bdcfcc1fcdeaeda31a96ab
+            traceId: ""
           - attributes:
               - key: http.target
                 value:
@@ -265,10 +270,10 @@ resourceSpans:
                   stringValue: 11.0.0.0
               - key: thread.name
                 value:
-                  stringValue: http-nio-8080-exec-1
+                  stringValue: '*'
               - key: thread.id
                 value:
-                  intValue: "39"
+                  stringValue: '*'
               - key: http.route
                 value:
                   stringValue: /index.jsp
@@ -277,7 +282,7 @@ resourceSpans:
                   intValue: "8080"
               - key: net.sock.peer.port
                 value:
-                  intValue: "37418"
+                  stringValue: '*'
               - key: net.sock.host.addr
                 value:
                   stringValue: 127.0.0.1
@@ -302,14 +307,12 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1706258470807762009"
             kind: 2
             name: GET /index.jsp
             parentSpanId: ""
-            spanId: bb3832953e513d91
-            startTimeUnixNano: "1706258470801912801"
+            spanId: ""
             status: {}
-            traceId: 1c10b0af33b904936db0410652f2c468
+            traceId: ""
           - attributes:
               - key: http.target
                 value:
@@ -328,10 +331,10 @@ resourceSpans:
                   stringValue: 11.0.0.0
               - key: thread.name
                 value:
-                  stringValue: http-nio-8080-exec-2
+                  stringValue: '*'
               - key: thread.id
                 value:
-                  intValue: "40"
+                  stringValue: '*'
               - key: http.route
                 value:
                   stringValue: /index.jsp
@@ -340,7 +343,7 @@ resourceSpans:
                   intValue: "8080"
               - key: net.sock.peer.port
                 value:
-                  intValue: "37454"
+                  stringValue: '*'
               - key: net.sock.host.addr
                 value:
                   stringValue: 127.0.0.1
@@ -365,14 +368,12 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1706258471824299677"
             kind: 2
             name: GET /index.jsp
             parentSpanId: ""
-            spanId: 14a31077992837a7
-            startTimeUnixNano: "1706258471821418302"
+            spanId: ""
             status: {}
-            traceId: f848d67c4af84930e7e761cbd2d5d97d
+            traceId: ""
           - attributes:
               - key: http.target
                 value:
@@ -391,10 +392,10 @@ resourceSpans:
                   stringValue: 11.0.0.0
               - key: thread.name
                 value:
-                  stringValue: http-nio-8080-exec-3
+                  stringValue: '*'
               - key: thread.id
                 value:
-                  intValue: "41"
+                  stringValue: '*'
               - key: http.route
                 value:
                   stringValue: /index.jsp
@@ -403,7 +404,7 @@ resourceSpans:
                   intValue: "8080"
               - key: net.sock.peer.port
                 value:
-                  intValue: "37478"
+                  stringValue: '*'
               - key: net.sock.host.addr
                 value:
                   stringValue: 127.0.0.1
@@ -428,11 +429,9 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1706258472849618136"
             kind: 2
             name: GET /index.jsp
             parentSpanId: ""
-            spanId: 678e09882f9c42e0
-            startTimeUnixNano: "1706258472845127386"
+            spanId: ""
             status: {}
-            traceId: ddfff35eae0f791b428fdc56ef5b49a0
+            traceId: ""
