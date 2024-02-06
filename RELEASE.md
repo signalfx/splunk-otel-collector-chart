@@ -20,4 +20,3 @@ To make a new release of the helm chart:
 1. Run `make chlog-update` to update CHANGELOG.md for the release.
 1. Create PR and request review from the team.
 1. When the PR gets merged, the release will automatically be made and the helm repo updated.
-1. Release notes are not populated automatically. So make sure to update them manually using the notes from [CHANGELOG](./CHANGELOG.md).

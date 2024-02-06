@@ -4,6 +4,20 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.92.1] - 2024-02-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.92.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.92.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump certmanager to v1.14.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#1140](https://github.com/signalfx/splunk-otel-collector-chart/pull/1140))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Fix Helm chart incorrectly handling Kubernetes versions containing a "+" character, causing deployment errors for PodDisruptionBudget in certain environments ([#1144](https://github.com/signalfx/splunk-otel-collector-chart/pull/1144))
+- `collector`: Fix template function to be able to convert non-integer memory limit values ([#1128](https://github.com/signalfx/splunk-otel-collector-chart/pull/1128))
+- `operator`: Fix issue where the collector agent exporter endpoint used in operator .NET and Python auto-instrumentation was missing the proper IP address ([#1129](https://github.com/signalfx/splunk-otel-collector-chart/pull/1129))
+
 ## [0.92.0] - 2024-01-23
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.92.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.92.0).
