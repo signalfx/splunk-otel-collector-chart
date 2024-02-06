@@ -36,51 +36,6 @@ def test_label_collection(setup, label, index, expected):
                 len(events))
     assert len(events) >= expected
 
-@pytest.mark.parametrize("test_input,expected", [
-    ("k8s.pod.name", 1),
-    ("k8s.namespace.name", 1),
-    ("k8s.container.name", 1),
-    ("k8s.pod.uid", 1)
-])
-def test_default_fields(setup, test_input, expected):
-    '''
-    Test that default fields are attached as a metadata to all the logs
-    '''
-    logger.info("testing test_clusterName input={0} expected={1} event(s)".format(
-        test_input, expected))
-    search_query = "index=* " + test_input + "=*"
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
-@pytest.mark.parametrize("field,value,expected", [
-    ("customfield1", "customvalue1", 1),
-    ("customfield2", "customvalue2", 1)
-])
-def test_custom_metadata_fields(setup, field,value, expected):
-    '''
-    Test user provided custom metadata fields are ingested with log
-    '''
-    logger.info("testing custom metadata field={0} value={1} expected={2} event(s)".format(
-        field,value, expected))
-    index_logging = os.environ["CI_INDEX_EVENTS"] if os.environ["CI_INDEX_EVENTS"] else "ci_events"
-    search_query = "index=" + index_logging + " " + field + "::" + value
-    events = check_events_from_splunk(start_time="-1h@h",
-                                      url=setup["splunkd_url"],
-                                      user=setup["splunk_user"],
-                                      query=["search {0}".format(
-                                          search_query)],
-                                      password=setup["splunk_password"])
-    logger.info("Splunk received %s events in the last minute",
-                len(events))
-    assert len(events) >= expected
-
 @pytest.mark.parametrize("label,index,value,expected", [
     ("pod-w-index-wo-ns-index", "pod-anno", "pod-value-2", 1),
     # ("pod-wo-index-w-ns-index", "ns-anno", "ns-value", 1),

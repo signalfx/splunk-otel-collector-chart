@@ -772,6 +772,16 @@ func testAgentLogs(t *testing.T) {
 		assert.True(t, excludePods, "excluded pods should be ignored")
 		assert.True(t, excludeNs, "excluded namespaces should be ignored")
 	})
+	t.Run("check default metadata is attached to all the logs", func(t *testing.T) {
+		_, ok := helloWorldLogRecord.Attributes().Get("k8s.pod.name")
+		assert.True(t, ok)
+		_, ok = helloWorldLogRecord.Attributes().Get("k8s.namespace.name")
+		assert.True(t, ok)
+		_, ok = helloWorldLogRecord.Attributes().Get("k8s.container.name")
+		assert.True(t, ok)
+		_, ok = helloWorldLogRecord.Attributes().Get("k8s.pod.uid")
+		assert.True(t, ok)
+	})
 }
 
 func testK8sObjects(t *testing.T) {
@@ -780,6 +790,8 @@ func testK8sObjects(t *testing.T) {
 
 	var kinds []string
 	var sourceTypes []string
+	foundCustomField1 := false
+	foundCustomField2 := false
 
 	for i := 0; i < len(logsObjectsConsumer.AllLogs()); i++ {
 		l := logsObjectsConsumer.AllLogs()[i]
@@ -794,11 +806,18 @@ func testK8sObjects(t *testing.T) {
 							kinds = append(kinds, kind.AsString())
 						}
 					}
+					if value, ok := logRecord.Attributes().Get("customfield1"); ok && value.AsString() == "customvalue1" {
+						foundCustomField1 = true
+					}
+					if value, ok := logRecord.Attributes().Get("customfield2"); ok && value.AsString() == "customvalue2" {
+						foundCustomField2 = true
+					}
 				}
 			}
 			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 				sourceTypes = append(sourceTypes, value.AsString())
 			}
+
 		}
 	}
 
@@ -809,6 +828,9 @@ func testK8sObjects(t *testing.T) {
 	assert.Contains(t, sourceTypes, "kube:object:pods")
 	assert.Contains(t, sourceTypes, "kube:object:namespaces")
 	assert.Contains(t, sourceTypes, "kube:object:nodes")
+
+	assert.True(t, foundCustomField1)
+	assert.True(t, foundCustomField2)
 }
 
 func testAgentMetrics(t *testing.T) {
