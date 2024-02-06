@@ -74,11 +74,11 @@ const (
 // kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
 // kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
 // make cert-manager
-// cd functional_tests/testdata/nodejs
-// docker build -t nodejs_test:latest .
-// kind load docker-image nodejs_test:latest --name kind
+// kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
+// kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
 // On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
 // kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
+// kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
 
 // When running tests you can use the following env vars to help with local development:
 // SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
@@ -207,6 +207,19 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
+	// Java test app
+	stream, err = os.ReadFile(filepath.Join(testDir, "java", "deployment.yaml"))
+	require.NoError(t, err)
+	deployment, _, err = decode(stream, nil, nil)
+	require.NoError(t, err)
+	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
 	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -284,6 +297,9 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = deployments.Delete(context.Background(), "java-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
 	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -356,6 +372,7 @@ func Test_Functions(t *testing.T) {
 	}
 
 	t.Run("node.js traces captured", testNodeJSTraces)
+	t.Run("java traces captured", testJavaTraces)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
 	t.Run("test HEC metrics", testHECMetrics)
@@ -367,29 +384,105 @@ func testNodeJSTraces(t *testing.T) {
 	tracesConsumer := setupOnce(t).tracesConsumer
 
 	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_traces.yaml")
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_nodejs_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
-	waitForTraces(t, 3, tracesConsumer)
+	waitForTraces(t, 10, tracesConsumer)
 
-	latestTrace := tracesConsumer.AllTraces()[len(tracesConsumer.AllTraces())-1]
+	var selectedTrace *ptrace.Traces
+
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
+	require.NotNil(t, selectedTrace)
 
 	ignoreSpanAttribute("net.peer.port", expectedTraces)
-	ignoreSpanAttribute("net.peer.port", latestTrace)
+	ignoreSpanAttribute("net.peer.port", *selectedTrace)
 	ignoreSpanAttribute("http.user_agent", expectedTraces)
-	ignoreSpanAttribute("http.user_agent", latestTrace)
-	ignoreSpanAttribute("os.version", latestTrace)
+	ignoreSpanAttribute("http.user_agent", *selectedTrace)
+	ignoreSpanAttribute("os.version", *selectedTrace)
 	ignoreTraceID(expectedTraces)
 	ignoreSpanID(expectedTraces)
-	ignoreTraceID(latestTrace)
-	ignoreSpanID(latestTrace)
-	ignoreStartTimestamp(latestTrace)
-	ignoreEndTimestamp(latestTrace)
+	ignoreTraceID(*selectedTrace)
+	ignoreSpanID(*selectedTrace)
+	ignoreStartTimestamp(*selectedTrace)
+	ignoreEndTimestamp(*selectedTrace)
 	ignoreStartTimestamp(expectedTraces)
 	ignoreEndTimestamp(expectedTraces)
 
-	err = ptracetest.CompareTraces(expectedTraces, latestTrace,
+	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
+		ptracetest.IgnoreResourceAttributeValue("container.id"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceSpansOrder(),
+		ptracetest.IgnoreScopeSpansOrder(),
+	)
+
+	require.NoError(t, err)
+}
+
+func testJavaTraces(t *testing.T) {
+	tracesConsumer := setupOnce(t).tracesConsumer
+
+	var expectedTraces ptrace.Traces
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+
+	waitForTraces(t, 10, tracesConsumer)
+
+	var selectedTrace *ptrace.Traces
+
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
+
+	require.NotNil(t, selectedTrace)
+
+	ignoreSpanAttribute("net.sock.peer.port", expectedTraces)
+	ignoreSpanAttribute("net.sock.peer.port", *selectedTrace)
+	ignoreSpanAttribute("thread.id", expectedTraces)
+	ignoreSpanAttribute("thread.id", *selectedTrace)
+	ignoreSpanAttribute("thread.name", expectedTraces)
+	ignoreSpanAttribute("thread.name", *selectedTrace)
+	ignoreSpanAttribute("os.version", *selectedTrace)
+	ignoreTraceID(expectedTraces)
+	ignoreSpanID(expectedTraces)
+	ignoreTraceID(*selectedTrace)
+	ignoreSpanID(*selectedTrace)
+	ignoreStartTimestamp(*selectedTrace)
+	ignoreEndTimestamp(*selectedTrace)
+	ignoreStartTimestamp(expectedTraces)
+	ignoreEndTimestamp(expectedTraces)
+
+	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("os.description"),
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
@@ -588,6 +681,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts"),
 	)
 
 	require.NoError(t, err)
@@ -1011,6 +1105,13 @@ func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset)
 		require.NoError(t, err)
 		for _, d := range di.Items {
 			if d.Status.ReadyReplicas != d.Status.Replicas {
+				var messages string
+				for _, c := range d.Status.Conditions {
+					messages += c.Message
+					messages += "\n"
+				}
+
+				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
 				return false
 			}
 		}
