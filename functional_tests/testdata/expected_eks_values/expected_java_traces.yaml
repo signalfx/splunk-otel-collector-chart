@@ -78,13 +78,13 @@ resourceSpans:
             stringValue: latest
         - key: splunk.distro.version
           value:
-            stringValue: 1.30.0
+            stringValue: latest
         - key: splunk.zc.method
           value:
-            stringValue: splunk-otel-java:v1.30.0
+            stringValue: splunk-otel-java:latest
         - key: telemetry.auto.version
           value:
-            stringValue: splunk-1.30.0-otel-1.32.0
+            stringValue: splunk-latest-otel-1.32.0
         - key: telemetry.sdk.language
           value:
             stringValue: java
@@ -119,7 +119,7 @@ resourceSpans:
     scopeSpans:
       - scope:
           name: io.opentelemetry.tomcat-10.0
-          version: 1.32.0-alpha
+          version: 1.32.1-alpha
         spans:
           - attributes:
               - key: http.target
