@@ -19,14 +19,9 @@ extensions:
   {{- end }}
 
 receivers:
-  # Prometheus receiver scraping metrics from the pod itself, both otel and fluentd
-  prometheus/k8s_cluster_receiver:
-    config:
-      scrape_configs:
-      - job_name: 'otel-k8s-cluster-receiver'
-        scrape_interval: 10s
-        static_configs:
-        - targets: ["${K8S_POD_IP}:8889"]
+  # Prometheus receiver scraping metrics from the pod itself
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" "k8s-cluster-receiver" | nindent 2}}
+
   k8s_cluster:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}

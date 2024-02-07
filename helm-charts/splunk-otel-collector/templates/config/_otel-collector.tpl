@@ -19,14 +19,10 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
+
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus/collector:
-    config:
-      scrape_configs:
-      - job_name: 'otel-collector'
-        scrape_interval: 10s
-        static_configs:
-        - targets: ["${K8S_POD_IP}:8889"]
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" "collector" | nindent 2}}
+
   signalfx:
     endpoint: 0.0.0.0:9943
     access_token_passthrough: true

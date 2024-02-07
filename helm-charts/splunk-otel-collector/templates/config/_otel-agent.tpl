@@ -36,16 +36,7 @@ receivers:
   {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  prometheus/agent:
-    config:
-      scrape_configs:
-      - job_name: 'otel-agent'
-        scrape_interval: 10s
-        static_configs:
-        - targets:
-          - "${K8S_POD_IP}:8889"
-          # Fluend metrics collection disabled by default
-          # - "${K8S_POD_IP}:24231"
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:

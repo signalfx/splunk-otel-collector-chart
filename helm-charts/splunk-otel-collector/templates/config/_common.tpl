@@ -482,3 +482,29 @@ Add Extra Annotations
 {{ . | toYaml}}
 {{- end }}
 {{- end }}
+
+{{/*
+Generates prometheus receiver config for internal metrics.
+Provide the component name as the input.
+*/}}
+{{- define "splunk-otel-collector.prometheusInternalMetrics" -}}
+{{- $receiver := . | lower | replace "-" "_" }}
+{{- $job := . | lower }}
+prometheus/{{ $receiver }}:
+  config:
+    scrape_configs:
+    - job_name: "otel-{{ $job }}"
+      metric_relabel_configs:
+      - action: drop
+        regex: "otelcol_rpc_.*"
+        source_labels:
+        - __name__
+      - action: drop
+        regex: "otelcol_http_.*"
+        source_labels:
+        - __name__
+      scrape_interval: 10s
+      static_configs:
+      - targets:
+        - "${K8S_POD_IP}:8889"
+{{- end }}
