@@ -109,10 +109,6 @@ These are the metrics available in Splunk OpenTelemetry Collector for Kubernetes
 * otelcol_process_uptime
 * otelcol_processor_accepted_log_records
 * otelcol_processor_accepted_metric_points
-* otelcol_processor_batch_batch_send_size_bucket
-* otelcol_processor_batch_batch_send_size_count
-* otelcol_processor_batch_batch_send_size_sum
-* otelcol_processor_batch_timeout_trigger_send
 * otelcol_processor_dropped_log_records
 * otelcol_processor_dropped_metric_points
 * otelcol_processor_refused_log_records

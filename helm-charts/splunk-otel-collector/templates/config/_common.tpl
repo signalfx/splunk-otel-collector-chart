@@ -503,6 +503,10 @@ prometheus/{{ $receiver }}:
         regex: "otelcol_http_.*"
         source_labels:
         - __name__
+      - action: drop
+        regex: "otelcol_processor_batch_.*"
+        source_labels:
+        - __name__
       scrape_interval: 10s
       static_configs:
       - targets:
