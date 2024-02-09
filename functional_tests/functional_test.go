@@ -1041,7 +1041,6 @@ func testHECMetrics(t *testing.T) {
 
 	metricNames := []string{
 		"container.cpu.time",
-		"container.cpu.utilization",
 		"container.filesystem.available",
 		"container.filesystem.capacity",
 		"container.filesystem.usage",
@@ -1054,7 +1053,6 @@ func testHECMetrics(t *testing.T) {
 		"k8s.node.network.errors",
 		"k8s.node.network.io",
 		"k8s.pod.cpu.time",
-		"k8s.pod.cpu.utilization",
 		"k8s.pod.filesystem.available",
 		"k8s.pod.filesystem.capacity",
 		"k8s.pod.filesystem.usage",

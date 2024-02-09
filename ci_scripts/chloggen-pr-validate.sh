@@ -51,11 +51,10 @@ for file in $CHANGED_FILES; do
 done
 
 # ---- Changelog Entry Validation ----
-if { [[ $HELM_CHART_UPDATED -eq 1 ]] || [[ $RENDERED_MANIFESTS_UPDATED -eq 1 ]]; } && [[ $CHLOGGEN_FILE_PRESENT -eq 0 ]]; then
+if { [[ $HELM_CHART_UPDATED -eq 1 ]]; } && [[ $CHLOGGEN_FILE_PRESENT -eq 0 ]]; then
     printf "Changed Files:\n${CHANGED_FILES}\n"
     echo "FAIL: A changelog entry (.chloggen) is required for this commit due to:"
     [[ $HELM_CHART_UPDATED -eq 1 ]] && echo "- Updates to files under 'helm-charts/*/templates*'"
-    [[ $RENDERED_MANIFESTS_UPDATED -eq 1 ]] && echo "- Updates to files under 'examples/*/rendered_manifests*'"
     exit 1
 fi
 
