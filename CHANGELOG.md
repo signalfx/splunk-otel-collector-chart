@@ -8,6 +8,19 @@
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
 
+### 🛑 Breaking changes 🛑
+
+- `internal metrics`: Stop reporting metrics sent by the batch processor ([#1147](https://github.com/signalfx/splunk-otel-collector-chart/pull/1147))
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump java to v1.30.1 in helm-charts/splunk-otel-collector/values.yaml ([#1139](https://github.com/signalfx/splunk-otel-collector-chart/pull/1139))
+- `operator`: Bump nodejs to v2.7.0 in helm-charts/splunk-otel-collector/values.yaml ([#1143](https://github.com/signalfx/splunk-otel-collector-chart/pull/1143))
+
+## [0.93.0] - 2024-02-08
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
+
 ## [0.92.1] - 2024-02-06
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.92.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.92.0).
