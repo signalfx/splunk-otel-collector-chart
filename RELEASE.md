@@ -13,10 +13,24 @@ of `version` field.
 
 ### Release Procedure
 
-To make a new release of the helm chart:
-1. Bump the chart `version` in [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml)
-1. Run `make render` to update Helm dependencies and render all the examples with the latest changes.
-1. Run `git add .` to stage the rendered differences without requiring a chloggen entry
-1. Run `make chlog-update` to update CHANGELOG.md for the release.
-1. Create PR and request review from the team.
-1. When the PR gets merged, the release will automatically be made and the helm repo updated.
+#### Using GitHub Workflows
+
+- **Manual Github Worfklow:**
+  - Navigate to the **[Draft Release](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml** workflow under GitHub Actions.
+  - Manually trigger the workflow. It automatically drafts a PR for the release.
+  - Review code changes, validate chart functionality, approve the PR, and merge the PR.
+- **Scheduled PRs:** Automatically generated PRs are scheduled for new versions of the collector that introduce major or minor version changes.
+  - Review code changes, validate chart functionality, approve the PR, and merge the PR.
+
+#### Manually Making a Release
+
+1. **Version Update:** Manually edit [Chart.yaml](helm-charts/splunk-otel-collector/Chart.yaml) to update the `version` field.
+1. **Dependencies & Rendering:** Execute `make render` to update Helm dependencies and apply changes.
+1. **CHANGELOG Update:** Run `make chlog-update` to incorporate changes into the CHANGELOG.
+1. **Stage & Commit Changes:**
+   1. Stage all changes: `git add .`
+   1. Commit with a message: `git commit -m "Prepare release {version}"`
+1. **Create a pull request:**
+   1. Push your commits to the signalfx owned remote repository.
+   1. Create a PR for your changes against the main branch.
+1. Review code changes, validate chart functionality, approve the PR, and merge the PR.

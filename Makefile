@@ -181,3 +181,15 @@ update-chart-dep: dep-update ## Updates the dependency version in the Chart.yaml
 		exit 1; \
 	fi
 	ci_scripts/update-chart-dependency.sh $(CHART_PATH) $(SUBCHART_NAME) $(DEBUG_MODE)
+
+# Usage Examples:
+#   make prepare-release
+#       - Prepares for a new release using the current chart and app version in Chart.yaml.
+#         Automatically increments the chart version.
+#         Commits and pushes changes to a new branch unless CREATE_BRANCH is set to "false".
+#   make prepare-release CHART_VERSION=1.2.3 APP_VERSION=1.2.0 CREATE_BRANCH=false
+#       - Prepares for a new release with the chart version explicitly set to 1.2.3 and the app version to 1.2.0.
+#         Changes remain local if CREATE_BRANCH is set to "false", suitable for workflows that do not immediately push to remote.
+.PHONY: prepare-release
+prepare-release: ## Prepares for a new release of the helm chart. Optionally specify CHART_VERSION and APP_VERSION.
+	ci_scripts/prepare-release.sh @CREATE_BRANCH=${CREATE_BRANCH} CHART_VERSION=${CHART_VERSION} APP_VERSION=${APP_VERSION}

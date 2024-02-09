@@ -108,6 +108,7 @@ emit_output() {
     fi
 }
 
+# ---- CI/CD Methods ----
 # Function: setup_git
 # Description: Configures git so commits are published under the bot user.
 # Usage: setup_git
@@ -115,6 +116,80 @@ setup_git() {
   git config --global user.name release-bot
   git config --global user.email ssg-srv-gh-o11y-gdi@splunk.com
   echo "set git config for release-bot (ssg-srv-gh-o11y-gdi@splunk.com)"
+}
+
+# Function: get_release_version
+# Description: Removes the leading 'v' from a version string.
+# Usage: get_release_version "v1.2.3"
+get_release_version() {
+  local release_tag="$1"
+  echo "$release_tag" | cut -c2-
+}
+
+# Function: get_major_version
+# Description: Extracts the major version number from a version string.
+# Usage: get_major_version "v1.2.3"
+get_major_version() {
+  local release_tag="$1"
+  get_release_version "$release_tag" | awk -F'.' '{print $1}'
+}
+
+# Function: get_minor_version
+# Description: Extracts the minor version number from a version string.
+# Usage: get_minor_version "v1.2.3"
+get_minor_version() {
+  local release_tag="$1"
+  get_release_version "$release_tag" | awk -F'.' '{print $2}'
+}
+
+# Function: get_patch_version
+# Description: Extracts the patch version number from a version string.
+# Usage: get_patch_version "v1.2.3"
+get_patch_version() {
+  local release_tag="$1"
+  get_release_version "$release_tag" | awk -F'.' '{print $3}'
+}
+
+# Function: validate_version
+# Description: Validates that the provided version string follows the major.minor.patch format.
+# Usage: validate_version "1.2.3"
+validate_version() {
+  local version="$1"
+  if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+  then
+    echo "Invalid release version: $version"
+    echo "Release version must follow the pattern major.minor.patch, e.g. 1.2.3"
+    exit 1
+  fi
+}
+
+# Function: setup_branch
+# Description: Checks if the specified branch exists and has open PRs. If it does and has no open PRs, it resets the branch to main. If it doesn't exist, it creates a new branch.
+# Usage: setup_branch "release-1.2.3" "github.com/example/repo"
+setup_branch() {
+  local branch="$1"
+  local repo_url="$2"
+
+  # check if the branch exists
+  if git ls-remote --exit-code --heads origin "$branch"; then
+    # get number of open PRs for the branch
+    pr_count="$( gh pr list --repo "$repo_url" --head "$branch" --state open --json id --jq length )"
+    if [[ ! "$pr_count" =~ ^[0-9]+$ ]]; then
+      echo "ERROR: Failed to get PRs for the $branch branch!" >&2
+      echo "$pr_count" >&2
+      exit 1
+    fi
+    if [[ "$pr_count" != "0" ]]; then
+      echo ">>> The $branch branch exists and has $pr_count open PR(s)."
+      echo ">>> Nothing to do."
+      exit 0
+    fi
+    echo ">>> Resetting the $branch branch to main ..."
+    git checkout "$branch"
+    git reset --hard origin/main
+  else
+    git checkout -b "$branch"
+  fi
 }
 
 # ---- Docker Methods ----
