@@ -338,20 +338,24 @@ maybe_update_version() {
     local latest_tag=$(get_latest_tag "$image_repository")
     echo "Latest tag available: $latest_tag"
 
-    # Check if the latest tag is different from the current tag and update if necessary
-    if [[ "$latest_tag" != "$current_tag" ]]; then
-      # Emit the NEED_UPDATE variable to either GitHub output or stdout
+    # Check if we need to update the current tag value with the latest tag value
+    if [[ -z "$latest_tag" ]]; then
+        echo "Unable to retrieve the latest tag at this time."
+        echo "On rare occasions, the latest tag lookup request times out."
+    elif [[ "$latest_tag" == "$current_tag" ]]; then
+        echo "No update required. Current tag ($current_tag) is the latest version."
+    else
+        # The current tag is different and needs to be updated
         setd "NEED_UPDATE" 1
-        setd "CURRENT_TAG" $current_tag
-        setd "LATEST_TAG" $latest_tag
-        # Notify possible downstream CI/CD tasks about needed info
+        setd "CURRENT_TAG" "$current_tag"
+        setd "LATEST_TAG" "$latest_tag"
+        # Emit the NEED_UPDATE variable to either GitHub output (or stdout) to notify possible
+        # downstream CI/CD tasks about needed info
         emit_output "NEED_UPDATE"
         emit_output "CURRENT_TAG"
         emit_output "LATEST_TAG"
         update_version "$yq_query_string" "$yaml_file_path" "$latest_tag"
         echo "Update complete. Tag changed to $latest_tag."
-    else
-        echo "No update required. Current tag ($current_tag) is the latest version."
     fi
     echo "Image update process completed successfully for '$yaml_file_path'."
 }
