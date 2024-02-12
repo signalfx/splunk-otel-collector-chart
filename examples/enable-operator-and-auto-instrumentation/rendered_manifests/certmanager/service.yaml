@@ -10,9 +10,9 @@ metadata:
     app.kubernetes.io/name: certmanager
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "controller"
-    app.kubernetes.io/version: "v1.14.1"
+    app.kubernetes.io/version: "v1.14.2"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.14.1
+    helm.sh/chart: certmanager-v1.14.2
 spec:
   type: ClusterIP
   ports:
