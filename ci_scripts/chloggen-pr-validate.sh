@@ -3,9 +3,9 @@
 # Notes:
 #   - Should be executed via the `make chlog-validate` command.
 #   - Designed to be a local or CI/CD pipeline check.
-#   - Checks for changes in specific directories and files:
-#       1. Helm chart templates in 'helm-charts/splunk-otel-collector/templates/*'
-#       2. Rendered manifests in 'examples/*/rendered_manifests/*'
+#   - Checks for changes in specific files:
+#       1. Helm chart templates in 'helm-charts/*/templates/*'
+#       2. Helm chart configurations in 'helm-charts/*/Chart.yaml'
 #   - Requires a '.chloggen' file if any of the above conditions is met.
 
 # Include the base utility functions for setting and debugging variables
@@ -22,8 +22,7 @@ fi
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 LAST_COMMON_COMMIT=$(git merge-base $CURRENT_BRANCH main)
 HELM_CHART_UPDATED=0
-RENDERED_MANIFESTS_UPDATED=0
-CHLOGGEN_FILE_PRESENT=0
+CHLOGGEN_CONTENT_UPDATED=0
 
 # Get a list of all changed files since the last common commit with main
 CHANGED_FILES=$(git diff --name-only $LAST_COMMON_COMMIT HEAD)
@@ -38,23 +37,32 @@ fi
 # ---- File Change Analysis ----
 for file in $CHANGED_FILES; do
   case "$file" in
+    # Helm chart template was updated
     helm-charts/*/templates*)
         HELM_CHART_UPDATED=1
         ;;
-    examples/*/rendered_manifests*)
-        RENDERED_MANIFESTS_UPDATED=1
+    # Helm chart version, appVersion, or dependency (subchart) version was updated in Chart.yaml
+    helm-charts/*/Chart.yaml)
+        HELM_CHART_UPDATED=1
         ;;
+    # A new .chloggen file was added or existing content updated
     .chloggen*)
-        CHLOGGEN_FILE_PRESENT=1
+        CHLOGGEN_CONTENT_UPDATED=1
+        ;;
+    # A new CHANGELOG.md entry was generated from .chloggen content
+    CHANGELOG.md)
+        CHLOGGEN_CONTENT_UPDATED=1
         ;;
   esac
 done
 
 # ---- Changelog Entry Validation ----
-if { [[ $HELM_CHART_UPDATED -eq 1 ]]; } && [[ $CHLOGGEN_FILE_PRESENT -eq 0 ]]; then
+if { [[ $HELM_CHART_UPDATED -eq 1 ]]; } && [[ $CHLOGGEN_CONTENT_UPDATED -eq 0 ]]; then
     printf "Changed Files:\n${CHANGED_FILES}\n"
-    echo "FAIL: A changelog entry (.chloggen) is required for this commit due to:"
-    [[ $HELM_CHART_UPDATED -eq 1 ]] && echo "- Updates to files under 'helm-charts/*/templates*'"
+    echo "FAIL: A new changelog file in .chloggen/ or entry in CHANGELOG.md is required for this commit due to:"
+    echo "- Updates to files under 'helm-charts/*/templates*'"
+    echo "- Updates to Chart.yaml files"
+    echo "Please run \"make chlog-new\" for normal PRs or \"make chlog-update\" for PRs creating releases."
     exit 1
 fi
 
