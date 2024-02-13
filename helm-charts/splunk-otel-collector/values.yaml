@@ -97,15 +97,15 @@ splunkPlatform:
     # The maximum amount of time spent trying to send a batch; ignored if enabled is false
     maxElapsedTime: 300s
 
+  # Refer to https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md
   sendingQueue:
     enabled: true
     # Number of consumers that dequeue batches; ignored if enabled is false
     numConsumers: 10
-    # Maximum number of batches kept in memory before dropping; ignored if enabled is false
-    # User should calculate this as num_seconds * requests_per_second where:
-    #   num_seconds is the number of seconds to buffer in case of a backend outage
-    #   requests_per_second is the average number of requests per seconds.
-    queueSize: 5000
+    # Maximum number of batches kept in memory before applying backpressure; ignored if enabled is false
+    # The sending queue keeps by default all elements in memory, so it is best to keep it small
+    # and allow the collector to slow down ingestion.
+    queueSize: 1000
 
     # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
     # It allows setting higher queue limits and preserving the data across restarts of the collector container.
