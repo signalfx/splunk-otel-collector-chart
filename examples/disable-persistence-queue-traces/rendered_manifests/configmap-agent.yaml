@@ -33,7 +33,7 @@ data:
         sending_queue:
           enabled: true
           num_consumers: 10
-          queue_size: 5000
+          queue_size: 1000
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector
@@ -57,7 +57,7 @@ data:
         sending_queue:
           enabled: true
           num_consumers: 10
-          queue_size: 5000
+          queue_size: 1000
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector
@@ -81,7 +81,7 @@ data:
         sending_queue:
           enabled: true
           num_consumers: 10
-          queue_size: 5000
+          queue_size: 1000
           storage: null
         source: kubernetes
         splunk_app_name: splunk-otel-collector
