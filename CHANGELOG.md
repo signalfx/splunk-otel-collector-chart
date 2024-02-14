@@ -4,6 +4,23 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.93.1] - 2024-02-14
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Change the default sending queue size from 5000 to 1000. ([#1157](https://github.com/signalfx/splunk-otel-collector-chart/pull/1157))
+- `operator`: Bump dotnet to v1.4.0 in helm-charts/splunk-otel-collector/values.yaml ([#1158](https://github.com/signalfx/splunk-otel-collector-chart/pull/1158))
+- `operator`: Bump certmanager to v1.14.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#1152](https://github.com/signalfx/splunk-otel-collector-chart/pull/1152))
+  - ⚠️ Known Issue fixed in certmanager v1.14.2
+    - In cert-manager [v1.14.1](https://github.com/cert-manager/cert-manager/releases/tag/v1.14.1), the CA and SelfSigned issuers issue certificates with SANs set to non-critical even when the subject is empty. It incorrectly copies the critical field from the CSR.
+    - To avoid this issue, please upgrade directly to version 0.93.1 of this chart when utilizing `certmanager.enabled=true`, thereby bypassing affected versions v0.92.1 and v0.93.0.
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Remove networkExplorer deprecation note that can cause the chart installation to fail ([#1162](https://github.com/signalfx/splunk-otel-collector-chart/pull/1162))
+
 ## [0.93.0] - 2024-02-08
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
