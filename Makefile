@@ -107,9 +107,10 @@ chlog-preview: chlog-validate ## Provide a preview of the generated CHANGELOG.md
 
 # Example Usage: make chlog-update
 .PHONY: chlog-update
-chlog-update: chlog-validate ## Creates an update to CHANGELOG.md for a release entry from content in .chloggen
+chlog-update: ## Creates an update to CHANGELOG.md for a release entry from content in .chloggen
 	$(CHLOGGEN) update --version "[$(VERSION)] - $$(date +'%Y-%m-%d')" || exit 1; \
 	ci_scripts/chloggen-update.sh || exit 1
+	make chlog-validate || exit 1
 
 # Example Usage:
 #		make chlog-release-notes
