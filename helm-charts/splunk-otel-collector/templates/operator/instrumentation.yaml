@@ -37,7 +37,7 @@ spec:
       value: "true"
     {{- end }}
     {{- end }}
-    {{- if .Values.agent.enabled }}
+    {{- if contains "SPLUNK_OTEL_AGENT" (include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" .) }}
     - name: SPLUNK_OTEL_AGENT
       valueFrom:
         fieldRef:
