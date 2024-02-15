@@ -67,6 +67,40 @@ entries:
   splunk-otel-collector:
   - apiVersion: v2
     appVersion: 0.93.0
+    created: "2024-02-15T22:56:53.910305914Z"
+    dependencies:
+    - alias: certmanager
+      condition: certmanager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.14.2
+    - alias: operator
+      condition: operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.46.0
+    description: Splunk OpenTelemetry Collector for Kubernetes
+    digest: 9db67c55ec317bd9768ed1a6d7d83be49cee25381e282354385bed3e893dbb91
+    icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
+    keywords:
+    - splunk
+    - opentelemetry
+    - observability
+    - logs
+    - traces
+    - metrics
+    - apm
+    maintainers:
+    - name: dmitryax
+    - name: jvoravong
+    - name: emaderer
+    name: splunk-otel-collector
+    type: application
+    urls:
+    - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.93.2/splunk-otel-collector-0.93.2.tgz
+    version: 0.93.2
+  - apiVersion: v2
+    appVersion: 0.93.0
     created: "2024-02-14T20:54:46.650365374Z"
     dependencies:
     - alias: certmanager
@@ -3183,4 +3217,4 @@ entries:
     urls:
     - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.20.0/splunk-otel-collector-0.20.0.tgz
     version: 0.20.0
-generated: "2024-02-14T20:54:46.650651412Z"
+generated: "2024-02-15T22:56:53.91067403Z"
