@@ -32,7 +32,7 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
 {{/*
 Helper to define an endpoint for exporting telemetry data related to auto-instrumentation.
 - Determines the endpoint based on user-defined values or default agent/gateway settings.
-- Order of precedence: User-defined > Agent service endpoint > Agent host port endpoint > Gateway endpoint
+- Order of precedence: User-defined endpoint > Agent service endpoint > Agent host port endpoint > Gateway endpoint
 */}}
 {{- define "splunk-otel-collector.operator.instrumentation-exporter-endpoint" -}}
   {{- /* Initialize endpoint variable */ -}}
@@ -48,7 +48,7 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
   {{- $endpoint = .Values.operator.instrumentation.spec.exporter.endpoint -}}
   {{- /* Use the agent service endpoint if the agent is enabled */ -}}
   {{- else if .Values.agent.service.enabled -}}
-    {{- $endpoint = printf "http://%s-agent:4317" (include "splunk-otel-collector.fullname" .) -}}
+    {{- $endpoint = printf "http://%s-agent.%s.svc.cluster.local:4317" (include "splunk-otel-collector.fullname" .) .Release.Namespace -}}
   {{- /* Use the agent host port endpoint if the agent is enabled */ -}}
   {{- else if .Values.agent.enabled -}}
     {{- $endpoint = "http://$(SPLUNK_OTEL_AGENT):4317" -}}
