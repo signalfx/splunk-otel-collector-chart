@@ -184,12 +184,12 @@ jobs:
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
-    # needs: kubernetes-test
-    # if: github.event.pull_request.head.repo.full_name == github.repository
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.full_name == github.repository
     concurrency:
       group: gke-autopilot-access
     env:
-      KUBE_TEST_ENV: kind
+      KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
     runs-on: ubuntu-latest
     steps:
@@ -207,15 +207,18 @@ jobs:
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: google-github-actions/setup-gcloud
+      - uses: 'google-github-actions/auth@v2.1.0'
         with:
-          service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2.1.0
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+      - uses: google-github-actions/get-gke-credentials@v2.1.0
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
-          credentials: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
       - name: Update dependencies
         run: |
           make dep-update

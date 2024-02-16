@@ -60,7 +60,10 @@ const (
 	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
+	autopilotTestKubeEnv                   = "gke/auopilot"
 	testDir                                = "testdata"
+	valuesDir                              = "values"
+	manifestsDir                           = "manifests"
 	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
 )
@@ -141,7 +144,15 @@ func deployChartsAndApps(t *testing.T) {
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
-	valuesBytes, err := os.ReadFile(filepath.Join(testDir, "test_values.yaml.tmpl"))
+
+	var valuesBytes []byte
+	switch kubeTestEnv {
+	case autopilotTestKubeEnv:
+		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
+	default:
+		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
+	}
+
 	require.NoError(t, err)
 	replacements := struct {
 		K8sClusterEndpoint    string
@@ -220,7 +231,7 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
-	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
+	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
 	var jobs []*batchv1.Job
@@ -278,6 +289,7 @@ func deployChartsAndApps(t *testing.T) {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
+		t.Log("Cleaning up cluster")
 		teardown(t)
 
 	})
@@ -300,7 +312,7 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "java-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	jobstream, err := os.ReadFile(filepath.Join(testDir, "test_jobs.yaml"))
+	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
 	var jobs []*batchv1.Job
@@ -363,7 +375,7 @@ func Test_Functions(t *testing.T) {
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
 	switch kubeTestEnv {
-	case kindTestKubeEnv:
+	case kindTestKubeEnv, autopilotTestKubeEnv:
 		expectedValuesDir = kindValuesDir
 	case eksTestKubeEnv:
 		expectedValuesDir = eksValuesDir
