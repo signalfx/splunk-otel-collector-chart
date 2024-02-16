@@ -182,3 +182,48 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+
+  gke-autopilot-test:
+    name: Test helm install in GKE/Autopilot - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    concurrency:
+      group: gke-autopilot-access
+    env:
+      KUBE_TEST_ENV: kind
+      SKIP_TESTS: "true"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+      - uses: google-github-actions/get-gke-credentials
+        with:
+          cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          location: ${{ secrets.GKE_REGION }}
+          credentials: ${{ secrets.GKE_SA_KEY }}
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+        run: |
+          cd functional_tests
+          go test -v
