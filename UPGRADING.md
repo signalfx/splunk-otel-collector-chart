@@ -1,5 +1,9 @@
 # Upgrade guidelines
 
+# 0.93.0 to 0.94.0
+
+The `networkExplorer` option is removed.
+
 ## 0.87.0 to 0.88.0
 
 The `networkExplorer` option is deprecated now. Please use the upstream OpenTelemetry eBPF Helm chart to collect
