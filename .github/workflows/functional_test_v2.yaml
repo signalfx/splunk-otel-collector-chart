@@ -1,6 +1,5 @@
 name: functional-tests
 
-
 on:
   pull_request:
   push:
@@ -185,8 +184,8 @@ jobs:
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
-    needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # needs: kubernetes-test
+    # if: github.event.pull_request.head.repo.full_name == github.repository
     concurrency:
       group: gke-autopilot-access
     env:
@@ -208,7 +207,6 @@ jobs:
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
