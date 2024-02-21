@@ -58,8 +58,10 @@ extraAttributes:
    - name: "customfield2"
      value: "customvalue2"
 
-clusterName: dev
-environment: dev
+clusterName: test
+environment: test
+cloudProvider: gcp
+distribution: gke/autopilot
 
 operator:
   enabled: true
@@ -68,6 +70,3 @@ operator:
       enabled: false
     autoGenerateCert:
       enabled: true
-
-cloudProvider: gcp
-distribution: gke/autopilot
