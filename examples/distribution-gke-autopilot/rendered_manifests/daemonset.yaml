@@ -50,7 +50,6 @@ spec:
         command:
         - /otelcol
         - --config=/conf/relay.yaml
-        - --metrics-addr=0.0.0.0:8889
         ports:
         - name: jaeger-grpc
           containerPort: 14250

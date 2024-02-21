@@ -248,10 +248,6 @@ spec:
         {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
-        {{- if eq .Values.distribution "gke/autopilot" }}
-        {{- /* Temporary no-op argument required to run collector on GKE Autopilot */}}
-        - --metrics-addr=0.0.0.0:8889
-        {{- end }}
         {{- end }}
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
