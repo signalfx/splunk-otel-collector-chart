@@ -381,6 +381,8 @@ agent:
   # To run it as non root user, uncomment below `securityContext` options.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
   # permissions of container logs directories on the host filesystem to make logs readable by this non root user.
+  # Please note that on uninstallation of the chart, the permissions added to the
+  # host log directories for given uid/gid are not reverted.
 
   securityContext: {}
   #   runAsUser: 20000
