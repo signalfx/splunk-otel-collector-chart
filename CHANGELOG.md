@@ -4,6 +4,18 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.93.3] - 2024-02-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
+
+### 🛑 Breaking changes 🛑
+
+- `networkExplorer`: The `networkExplorer` option was deprecated in 0.88.0. It is now entirely removed. ([#1156](https://github.com/signalfx/splunk-otel-collector-chart/pull/1156))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix GKE Autopilot deployment ([#1171](https://github.com/signalfx/splunk-otel-collector-chart/pull/1171))
+
 ## [0.93.2] - 2024-02-15
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
