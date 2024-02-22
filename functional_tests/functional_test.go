@@ -60,7 +60,7 @@ const (
 	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
-	autopilotTestKubeEnv                   = "gke/auopilot"
+	autopilotTestKubeEnv                   = "gke/autopilot"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
