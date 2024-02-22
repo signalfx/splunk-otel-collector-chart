@@ -287,7 +287,9 @@ jobs:
           make dep-update
       - name: Deploy previous version of the chart
         run: |
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=gcp --set distribution=gke/autopilot --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+          cd base
+          helm dependency update helm-charts/splunk-otel-collector
+          helm install sock helm-charts/splunk-otel-collector --set cloudProvider=gcp --set distribution=gke/autopilot --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
