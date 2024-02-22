@@ -228,3 +228,69 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+
+  gke-autopilot-upgrade-test:
+    name: Test helm upgrade in GKE/Autopilot - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    concurrency:
+      group: gke-autopilot-access
+    env:
+      KUBE_TEST_ENV: gke/autopilot
+      SKIP_TESTS: "true"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout main if in a PR
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: main
+      - name: Checkout previous main commit if in main
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: HEAD
+          fetch-depth: 2
+      - name: Checkout previous main commit if in main
+        if: github.event_name != 'pull_request'
+        run: cd base && git checkout HEAD^
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - uses: 'google-github-actions/auth@v2.1.0'
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2.1.0
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+      - uses: google-github-actions/get-gke-credentials@v2.1.0
+        with:
+          cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          location: ${{ secrets.GKE_REGION }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: Deploy previous version of the chart
+        run: |
+          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=gcp --set distribution=gke/autopilot --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+        run: |
+          cd functional_tests
+          go test -v
