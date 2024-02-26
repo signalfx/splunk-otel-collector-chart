@@ -11,9 +11,9 @@ metadata:
     app.kubernetes.io/name: startupapicheck
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "startupapicheck"
-    app.kubernetes.io/version: "v1.14.2"
+    app.kubernetes.io/version: "v1.14.3"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.14.2
+    helm.sh/chart: certmanager-v1.14.3
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -34,9 +34,9 @@ metadata:
     app.kubernetes.io/name: startupapicheck
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "startupapicheck"
-    app.kubernetes.io/version: "v1.14.2"
+    app.kubernetes.io/version: "v1.14.3"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.14.2
+    helm.sh/chart: certmanager-v1.14.3
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
