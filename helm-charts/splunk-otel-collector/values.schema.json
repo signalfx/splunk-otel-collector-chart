@@ -8,6 +8,10 @@
   "title": "Values",
   "additionalProperties": false,
   "properties": {
+    "enabled": {
+      "description": "Flag to enable splunk-otel-collector used as a subchart in other charts.",
+      "type": "boolean"
+    },
     "global": {
       "type": "object"
     },
