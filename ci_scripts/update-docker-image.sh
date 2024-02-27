@@ -9,6 +9,7 @@
 #   $1: The file path to the YAML file containing the Docker image reference (mandatory).
 #   $2: The yq query string to locate the image tag within the YAML file (mandatory).
 #       Can be a direct path for simple structures or a complex yq query for nested structures.
+#   $3: The filter to select the image tag to update (optional). The filter is applied as the prefix of the image.
 #   --debug: (Optional) Activates debug mode for verbose output, aiding in troubleshooting.
 #
 # Usage Examples:
@@ -28,17 +29,18 @@ source "$SCRIPT_DIR/base_util.sh"
 # ---- Validate Input Arguments ----
 if [ "$#" -lt 2 ]; then
     echo "Error: Incorrect number of arguments provided."
-    echo "Usage: $0 <path-to-yaml-file> <yq-query-string> [--debug]"
+    echo "Usage: $0 <path-to-yaml-file> <yq-query-string> [filter] [--debug]"
     exit 1
 fi
 
 # ---- Initialize Variables ----
-# Set the YAML file path and the yq query string
+# Set the YAML file path and the yq query string and the filter
 setd "YAML_FILE_PATH" "$1"
 setd "YQ_QUERY_STRING" "$2"
+setd "FILTER" "$3"
 
 # ---- Update Version Information ----
 # Call the maybe_update_version function to update the tag if necessary
-maybe_update_version "$YAML_FILE_PATH" "$YQ_QUERY_STRING"
+maybe_update_version "$YAML_FILE_PATH" "$YQ_QUERY_STRING" "$FILTER"
 
 exit 0

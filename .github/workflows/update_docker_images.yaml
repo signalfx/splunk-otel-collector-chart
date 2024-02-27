@@ -26,6 +26,7 @@ jobs:
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
             yaml_value_path: '.operator.instrumentation.spec.java'
+            filter: 'v1.'
           - name: 'nodejs'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
@@ -52,7 +53,7 @@ jobs:
         run: |
           echo "Checking docker image version for ${{ matrix.name }}"
 
-          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' FILTER='${{ matrix.filter }}' DEBUG_MODE=$DEBUG_MODE
 
       - name: Check if PR is already open
         id: check_if_pr_open

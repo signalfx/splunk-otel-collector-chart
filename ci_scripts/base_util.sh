@@ -202,12 +202,16 @@ get_current_tag() {
 # Usage: get_latest_tag "quay.io/owner/repo"
 get_latest_tag() {
     local repo_value="$1"
+    local filter="$2"
     # Handle different container registries
     # For quay.io repositories
     if [[ $repo_value =~ ^quay\.io/(.+)/(.+) ]]; then
         local owner="${BASH_REMATCH[1]}"
         local repo_name="${BASH_REMATCH[2]}"
         local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=1&onlyActiveTags=true"
+        if [! -z "$filter" ]; then
+            latest_api+="&filter_tag_name=$filter"
+        fi
         local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name')
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from quay.io" >&2
@@ -219,6 +223,9 @@ get_latest_tag() {
         local full_repo_name="${BASH_REMATCH[1]}"
         local latest_api="https://api.github.com/repos/${full_repo_name}/tags"
         local tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r '.[0].name')
+        if [! -z "$filter" ]; then
+            tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r "first(.[] | select(.name | startswith("$filter"))).name")
+        fi
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from ghcr.io" >&2
             return 1
@@ -226,6 +233,11 @@ get_latest_tag() {
         echo "$tag_name"
     # Default for Docker Hub repositories
     else
+        if [ -z "$filter" ]; then
+            # TODO support getting a specific tag from docker hub
+            echo "Error: filters are not supported for docker hub yet"
+            exit 1
+        fi
        # Remove the 'docker.io/' prefix if present
        repo_value="${repo_value#docker.io/}"
        local tags_api="https://registry.hub.docker.com/v2/repositories/$repo_value/tags/?page_size=100"
@@ -320,11 +332,12 @@ update_version() {
 
 # Function: maybe_update_version
 # Description: Checks if the current image tag in the YAML file needs to be updated to the latest version.
-#              If so, updates the file with the latest tag.
-# Usage: maybe_update_version "path/to/yaml/file.yaml" ".path.to.image.tag"
+#              If so, updates the file with the latest tag or the first image that matches the prefix filter.
+# Usage: maybe_update_version "path/to/yaml/file.yaml" ".path.to.image.tag" "v1."
 maybe_update_version() {
     local yaml_file_path="$1"
     local yq_query_string="$2"
+    local filter="$3"
 
     echo "Checking for image tag updates in '$yaml_file_path' based on query '$yq_query_string'"
 
@@ -335,7 +348,7 @@ maybe_update_version() {
     local image_repository=$(get_current_repo "$yaml_file_path" "$yq_query_string")
     echo "Image repository identified: $image_repository"
 
-    local latest_tag=$(get_latest_tag "$image_repository")
+    local latest_tag=$(get_latest_tag "$image_repository" "$filter")
     echo "Latest tag available: $latest_tag"
 
     # Check if we need to update the current tag value with the latest tag value
