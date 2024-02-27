@@ -157,15 +157,15 @@ cmctl: ## Downloads and installs cmctl, the CLI for cert-manager, to your local 
 # Tasks related to continous integration
 
 # Example Usage:
-#   make update-docker-image FILE_PATH=./path/to/values.yaml QUERY_STRING='.images.splunk'
+#   make update-docker-image FILE_PATH=./path/to/values.yaml QUERY_STRING='.images.splunk' FILTER='v1.0'
 .PHONY: update-docker-image
 update-docker-image: ## Updates the Docker image tag in a YAML file to the latest version
 	@if [ -z "$(FILE_PATH)" ] || [ -z "$(QUERY_STRING)" ]; then \
 		echo "Error: FILE_PATH and QUERY_STRING are mandatory."; \
-		echo "Usage: make update-docker-image FILE_PATH=path/to/file.yaml QUERY_STRING='yq.query' [DEBUG=--debug]"; \
+		echo "Usage: make update-docker-image FILE_PATH=path/to/file.yaml QUERY_STRING='yq.query' FILTER='v1.0' [DEBUG=--debug]"; \
 		exit 1; \
 	fi
-	ci_scripts/update-docker-image.sh "$(FILE_PATH)" "$(QUERY_STRING)" $(DEBUG)
+	ci_scripts/update-docker-image.sh "$(FILE_PATH)" "$(QUERY_STRING)" "$(FILTER)" $(DEBUG)
 
 # Example Usage:
 #   make update-chart-dep CHART_PATH=./helm-charts/splunk-otel-collector/Chart.yaml SUBCHART_NAME='opentelemetry-operator'
