@@ -7,9 +7,6 @@ The values can be overridden in .Values.clusterReceiver.config
 extensions:
   health_check:
 
-  memory_ballast:
-    size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
-
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
@@ -208,9 +205,9 @@ service:
     metrics:
       address: 0.0.0.0:8889
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-  extensions: [health_check, memory_ballast, k8s_observer]
+  extensions: [health_check, k8s_observer]
   {{- else }}
-  extensions: [health_check, memory_ballast]
+  extensions: [health_check]
   {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}

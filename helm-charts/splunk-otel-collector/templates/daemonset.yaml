@@ -269,6 +269,8 @@ spec:
           {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
         env:
+          - name: GOMEMLIMIT
+            value: {{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory | int64 }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory | int64 }}"
           - name: K8S_NODE_NAME

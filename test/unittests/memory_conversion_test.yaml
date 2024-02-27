@@ -27,6 +27,17 @@ tests:
         content:
           name: SPLUNK_MEMORY_TOTAL_MIB
           value: "953"
+- it: convert integer memory limit (M to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 10000M
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: GOMEMLIMIT
+          value: "9536"
 - it: convert integer memory limit (Ki to Mi)
   templates:
   - "deployment-cluster-receiver.yaml"
@@ -38,6 +49,17 @@ tests:
         content:
           name: SPLUNK_MEMORY_TOTAL_MIB
           value: "1"
+- it: convert integer memory limit (Ki to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 8000Ki
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: GOMEMLIMIT
+          value: "7"
 - it: convert floating-point memory limit (Gi to Mi)
   templates:
   - "deployment-cluster-receiver.yaml"
@@ -49,3 +71,14 @@ tests:
         content:
           name: SPLUNK_MEMORY_TOTAL_MIB
           value: "512"
+- it: convert floating-point memory limit (Gi to Mi)
+  templates:
+  - "deployment-cluster-receiver.yaml"
+  set:
+    clusterReceiver.resources.limits.memory: 0.8Gi
+  asserts:
+    - contains:
+        path: spec.template.spec.containers[0].env
+        content:
+          name: GOMEMLIMIT
+          value: "819"
