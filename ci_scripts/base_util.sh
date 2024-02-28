@@ -209,7 +209,7 @@ get_latest_tag() {
         local owner="${BASH_REMATCH[1]}"
         local repo_name="${BASH_REMATCH[2]}"
         local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=1&onlyActiveTags=true"
-        if [! -z "$filter" ]; then
+        if [ -n "$filter" ]; then
             latest_api+="&filter_tag_name=$filter"
         fi
         local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name')
@@ -223,8 +223,8 @@ get_latest_tag() {
         local full_repo_name="${BASH_REMATCH[1]}"
         local latest_api="https://api.github.com/repos/${full_repo_name}/tags"
         local tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r '.[0].name')
-        if [! -z "$filter" ]; then
-            tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r "first(.[] | select(.name | startswith("$filter"))).name")
+        if [ -n "$filter" ]; then
+            tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r --arg filter "$filter" 'first(.[] | select(.name | startswith($filter))).name')
         fi
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from ghcr.io" >&2
@@ -233,7 +233,7 @@ get_latest_tag() {
         echo "$tag_name"
     # Default for Docker Hub repositories
     else
-        if [ -z "$filter" ]; then
+        if [ -n "$filter" ]; then
             # TODO support getting a specific tag from docker hub
             echo "Error: filters are not supported for docker hub yet"
             exit 1
