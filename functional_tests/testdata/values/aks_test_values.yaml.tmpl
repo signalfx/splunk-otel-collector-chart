@@ -62,13 +62,15 @@ clusterName: test
 environment: test
 cloudProvider: azure
 distribution: aks
-
 isWindows: true
-
 image:
   otelcol:
     repository: quay.io/signalfx/splunk-otel-collector-windows-dev
     tag: latest
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
 
 operator:
   enabled: true
