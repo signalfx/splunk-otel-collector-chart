@@ -329,12 +329,19 @@ jobs:
       - uses: azure/login@v1.6.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
       - uses: azure/aks-set-context@v3.2
         with:
           resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
           admin: false
           use-kubelogin: true
+
       - name: Update dependencies
         run: |
           make dep-update
