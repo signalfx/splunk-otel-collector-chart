@@ -1,0 +1,80 @@
+---
+metricsEnabled: true
+tracesEnabled: true
+splunkObservability:
+  realm:       CHANGEME
+  accessToken: CHANGEME
+  ingestUrl: {{ .AgentEndpoint }}
+  apiUrl: {{ .ApiURLEndpoint }}
+  metricsEnabled: true
+
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: {{ .OtlpEndpoint }}
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+clusterReceiver:
+  eventsEnabled: true
+  config:
+    exporters:
+      signalfx:
+        ingest_url: {{ .K8sClusterEndpoint }}
+        tls:
+          insecure: true
+
+  k8sObjects:
+    - name: pods
+    - name: namespaces
+    - name: nodes
+    - name: events
+      mode: watch
+
+extraAttributes:
+  fromAnnotations:
+    - key: splunk.com/customField
+      tag_name: customField
+  fromLabels:
+    - key: app
+      from: pod
+    - key: app
+      from: namespace
+
+  custom:
+   - name: "cluster_name"
+     value: "ci-k8s-cluster"
+   - name: "customfield1"
+     value: "customvalue1"
+   - name: "customfield2"
+     value: "customvalue2"
+
+clusterName: test
+environment: test
+cloudProvider: azure
+distribution: aks
+isWindows: true
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-windows
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
+
+operator:
+  enabled: true
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true
