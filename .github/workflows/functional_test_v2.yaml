@@ -299,7 +299,7 @@ jobs:
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
-    # needs: kubernetes-test
+    needs: kubernetes-test
     if: github.event.pull_request.head.repo.full_name == github.repository
     concurrency:
       group: aks-windows-group
