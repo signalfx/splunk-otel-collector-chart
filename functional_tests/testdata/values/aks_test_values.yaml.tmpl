@@ -1,19 +1,14 @@
 ---
 splunkObservability:
-   realm:       CHANGEME
-   accessToken: CHANGEME
-   ingestUrl: {{ .AgentEndpoint }}
-   apiUrl: {{ .ApiURLEndpoint }}
+  realm:       CHANGEME
+  accessToken: CHANGEME
+  ingestUrl: {{ .AgentEndpoint }}
+  apiUrl: {{ .ApiURLEndpoint }}
 
 splunkPlatform:
   token: foobar
   endpoint: {{ .LogHecEndpoint }}
-  metricsEnabled: true
-  metricsIndex: myMetricsIndex
-logsCollection:
-  journald:
-    enabled: true
-    directory: /run/log/journal
+
 agent:
   config:
     exporters:
@@ -21,8 +16,6 @@ agent:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
-      splunk_hec/platform_metrics:
-        endpoint: {{ .MetricHecEndpoint }}
     service:
       pipelines:
         traces:
@@ -36,8 +29,6 @@ clusterReceiver:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
           insecure: true
-      splunk_hec/platform_logs:
-        endpoint: {{ .LogObjectsHecEndpoint }}
 
   k8sObjects:
     - name: pods
@@ -64,13 +55,26 @@ extraAttributes:
    - name: "customfield2"
      value: "customvalue2"
 
-environment: dev
+clusterName: test
+environment: test
+cloudProvider: azure
+distribution: aks
+isWindows: true
+# use dev image until multi-platform version of splunk-otel-collector-windows is available
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-windows-dev
+    tag: latest
+    pullPolicy: Always
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
+
 operator:
   enabled: true
-
-{{ if (eq .KubeTestEnv "kind") }}
-clusterName: dev-operator
-{{ else if (eq .KubeTestEnv "eks") }}
-cloudProvider: aws
-distribution: eks
-{{ end }}
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true

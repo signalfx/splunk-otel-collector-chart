@@ -296,3 +296,51 @@ jobs:
         run: |
           cd functional_tests
           go test -v
+
+  aks-windows-test:
+    name: Test helm install in AKS - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    concurrency:
+      group: aks-windows-group
+    env:
+      KUBE_TEST_ENV: aks
+      SKIP_TESTS: "true"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.20.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Set up kubelogin for non-interactive login
+        uses: azure/use-kubelogin@v1.2
+        with:
+          kubelogin-version: "v0.0.24"
+      - uses: azure/login@v1.6.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: azure/aks-set-context@v3.2
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          admin: false
+          use-kubelogin: true
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+        run: |
+          cd functional_tests
+          go test -v
