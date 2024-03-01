@@ -1,12 +1,10 @@
 ---
-metricsEnabled: true
-tracesEnabled: true
 splunkObservability:
    realm:       CHANGEME
    accessToken: CHANGEME
    ingestUrl: {{ .AgentEndpoint }}
    apiUrl: {{ .ApiURLEndpoint }}
-   metricsEnabled: true
+
 splunkPlatform:
   token: foobar
   endpoint: {{ .LogHecEndpoint }}

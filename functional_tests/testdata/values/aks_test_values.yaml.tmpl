@@ -1,12 +1,9 @@
 ---
-metricsEnabled: true
-tracesEnabled: true
 splunkObservability:
   realm:       CHANGEME
   accessToken: CHANGEME
   ingestUrl: {{ .AgentEndpoint }}
   apiUrl: {{ .ApiURLEndpoint }}
-  metricsEnabled: true
 
 splunkPlatform:
   token: foobar
@@ -63,6 +60,7 @@ environment: test
 cloudProvider: azure
 distribution: aks
 isWindows: true
+# use dev image until multi-platform version of splunk-otel-collector-windows is available
 image:
   otelcol:
     repository: quay.io/signalfx/splunk-otel-collector-windows-dev
