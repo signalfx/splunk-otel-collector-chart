@@ -77,14 +77,12 @@ This distribution currently supports:
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter).
   More information available
   [here](https://docs.signalfx.com/en/latest/otel/imm-otel-collector.html).
-- [Splunk Log Observer](https://www.splunk.com/en_us/products/log-observer.html) via
-  the [`splunk_hec`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 - [Splunk Cloud](https://www.splunk.com/en_us/products/splunk-cloud-platform.html) or
   [Splunk
   Enterprise](https://www.splunk.com/en_us/products/splunk-enterprise.html) via
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
+  - Interested in sending logs to Splunk Cloud via OTLP for improved backpressure handling and performance? [Sign up for the preview](https://voc.splunk.com/preview/otlp) today!
 
 ## Supported Kubernetes distributions
 
