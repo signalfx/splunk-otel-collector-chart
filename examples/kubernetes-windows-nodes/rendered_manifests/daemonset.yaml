@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.93.3
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.93.0"
+    app.kubernetes.io/version: "0.94.0"
     app: splunk-otel-collector
     component: otel-collector-agent
     chart: splunk-otel-collector-0.93.3
@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 7ad2ff5930e0d17d5a9909c10f423340c803fae5a5e6d85520f4bfa3caeafa66
+        checksum/config: 181cbaae2df34945d7ae393cb8529fe501a10032f799dccaf29b2f082f7f8b12
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       dnsPolicy: ClusterFirstWithHostNet
@@ -86,7 +86,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector-windows:0.93.0
+        image: quay.io/signalfx/splunk-otel-collector-windows:0.94.0
         imagePullPolicy: IfNotPresent
         securityContext:
           windowsOptions:
