@@ -4,6 +4,27 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.94.0] - 2024-03-01
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.94.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.94.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump certmanager to v1.14.3 in helm-charts/splunk-otel-collector/Chart.yaml ([#1182](https://github.com/signalfx/splunk-otel-collector-chart/pull/1182))
+- `operator`: Bump java to v1.30.3 in helm-charts/splunk-otel-collector/values.yaml ([#1188](https://github.com/signalfx/splunk-otel-collector-chart/pull/1188))
+- `operator`: Bump nodejs to v2.7.1 in helm-charts/splunk-otel-collector/values.yaml ([#1180](https://github.com/signalfx/splunk-otel-collector-chart/pull/1180))
+
+### 🧰 Bug fixes 🧰
+
+- `clusterReceiver`: Bring back the default translations for kubelet metrics in EKS Fargate ([#1174](https://github.com/signalfx/splunk-otel-collector-chart/pull/1174))
+- `agent`: Remove a post-delete hook which targeted one a single node for reverting file ACLs. ([#1175](https://github.com/signalfx/splunk-otel-collector-chart/pull/1175))
+  The removed hook was intended to undo the ACLs set on log directores when
+  runAsUser and runAsGroup are provided. An initContainer run as root-user updates
+  the permissions of log directories to allow read access to the provided uid/gid.
+  But there is no graceful way to revert these ACLs on each node as part of the
+  chart uninstallation process.
+
+
 ## [0.93.3] - 2024-02-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.93.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.93.0).
