@@ -60,12 +60,9 @@ environment: test
 cloudProvider: azure
 distribution: aks
 isWindows: true
-# use dev image until multi-platform version of splunk-otel-collector-windows is available
 image:
   otelcol:
-    repository: quay.io/signalfx/splunk-otel-collector-windows-dev
-    tag: latest
-    pullPolicy: Always
+    repository: quay.io/signalfx/splunk-otel-collector-windows
 readinessProbe:
   initialDelaySeconds: 60
 livenessProbe:
