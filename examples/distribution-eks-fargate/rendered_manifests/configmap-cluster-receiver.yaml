@@ -4,6 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: default-splunk-otel-collector-otel-k8s-cluster-receiver
+  namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
     helm.sh/chart: splunk-otel-collector-0.93.3

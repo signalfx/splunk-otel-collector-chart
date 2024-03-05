@@ -16,5 +16,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ template "splunk-otel-collector.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
 {{- end }}

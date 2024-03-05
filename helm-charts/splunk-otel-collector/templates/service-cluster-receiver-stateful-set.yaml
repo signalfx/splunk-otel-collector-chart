@@ -4,6 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "splunk-otel-collector.clusterReceiverServiceName" . }}
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     app: {{ template "splunk-otel-collector.name" . }}
 spec:

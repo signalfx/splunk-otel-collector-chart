@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: default-splunk-otel-collector-agent
+  namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
     helm.sh/chart: splunk-otel-collector-0.93.3
@@ -31,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: e127063d6ffe1a7f1a0f243fd6ddbb4308fe1c2469e38a656b05a7eb693f5dc7
+        checksum/config: 22d74fec09c97a1c69cfa143a2a13a28e0959b6873acd2a9b40b3cc707142f9e
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
