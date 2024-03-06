@@ -1,8 +1,0 @@
-# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: enhancement
-# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: chart
-# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: The request is to add the namespace to the generated templates, for commands like "helm template --namespace mynamespace (...)"
-# One or more tracking issues related to the change
-issues: [1011]
