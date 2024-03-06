@@ -4,6 +4,14 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.95.0] - 2024-03-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.95.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.95.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: The request is to add the namespace to the generated templates, for commands like "helm template --namespace mynamespace (...)" ([#1011](https://github.com/signalfx/splunk-otel-collector-chart/pull/1011))
+
 ## [0.94.0] - 2024-03-01
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.94.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.94.0).
