@@ -57,9 +57,13 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
 	}
 
+# Example Usage:
+#		make render
+#		make render VALUES="extra-values.yaml"
+#		make render VALUES="values1.yaml values2.yaml"
 .PHONY: render
-render: dep-update ## Render the Helm chart with the examples as input
-	examples/render-examples.sh || exit 1
+render: dep-update ## Render the Helm chart with the examples as input. Users can also provide value overrides.
+	@examples/render-examples.sh $(VALUES) || exit 1
 
 ##@ Test
 # Tasks related to testing the Helm chart

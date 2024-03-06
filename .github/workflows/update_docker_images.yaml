@@ -80,7 +80,7 @@ jobs:
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # We run `make update-docker-image` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
-          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' DEBUG_MODE=$DEBUG_MODE
+          make update-docker-image FILE_PATH=${{ matrix.yaml_file_path }} QUERY_STRING='${{ matrix.yaml_value_path }}' FILTER='${{ matrix.filter }}' DEBUG_MODE=$DEBUG_MODE
           make render
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 

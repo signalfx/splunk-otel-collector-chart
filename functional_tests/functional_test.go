@@ -61,6 +61,7 @@ const (
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
 	autopilotTestKubeEnv                   = "gke/autopilot"
+	aksTestKubeEnv                         = "aks"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
@@ -149,6 +150,8 @@ func deployChartsAndApps(t *testing.T) {
 	switch kubeTestEnv {
 	case autopilotTestKubeEnv:
 		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
+	case aksTestKubeEnv:
+		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
 	default:
 		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
 	}
@@ -375,7 +378,7 @@ func Test_Functions(t *testing.T) {
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
 	switch kubeTestEnv {
-	case kindTestKubeEnv, autopilotTestKubeEnv:
+	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv:
 		expectedValuesDir = kindValuesDir
 	case eksTestKubeEnv:
 		expectedValuesDir = eksValuesDir
