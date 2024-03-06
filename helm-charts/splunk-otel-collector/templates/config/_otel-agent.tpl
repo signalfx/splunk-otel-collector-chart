@@ -257,9 +257,9 @@ receivers:
     exclude:
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       {{- if .Values.isWindows }}
-      - "C:\\var\\log\\pods\\{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
+      - "C:\\var\\log\\pods\\{{ template "splunk-otel-collector.namespace" . }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
       {{- else }}
-      - /var/log/pods/{{ .Release.Namespace }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
+      - /var/log/pods/{{ template "splunk-otel-collector.namespace" . }}_{{ include "splunk-otel-collector.fullname" . }}*_*/otel-collector/*.log
       {{- end }}
       {{- end }}
       {{- range $_, $excludePath := .Values.logsCollection.containers.excludePaths }}

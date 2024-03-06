@@ -471,3 +471,12 @@ Whether the helm chart should detect the cluster name automatically
 {{- define "splunk-otel-collector.autoDetectClusterName" -}}
 {{- and (include "splunk-otel-collector.clusterNameOptional" .) (not .Values.clusterName) }}
 {{- end -}}
+
+{{/*
+Helper used to define a namspace.
+- Returns namespace from a release
+- If namespaceOverride value is filled in it will replace the namespace
+*/}}
+{{- define "splunk-otel-collector.namespace" -}}
+  {{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

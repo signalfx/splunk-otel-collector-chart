@@ -48,7 +48,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 users:
-- system:serviceaccount:{{ .Release.Namespace }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
+- system:serviceaccount:{{ template "splunk-otel-collector.namespace" . }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
 
 {{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
 {{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
