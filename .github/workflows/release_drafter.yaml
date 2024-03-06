@@ -40,6 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install tools
+        run: make install-tools
+
       - name: Prepare Release
         id: prepare_release
         run: |
