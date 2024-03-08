@@ -71,7 +71,7 @@ LATEST_CHART_VERSION=$CURRENT_CHART_VERSION
 if [[ "$CHART_VERSION_OVERRIDDEN" == "true" ]]; then
     LATEST_CHART_VERSION=$CHART_VERSION
     debug "Using override chart version value $LATEST_CHART_VERSION"
-# If the trigger is a manual dispatch or a scheduled event with differing differing current and latest collector app version
+# If the trigger is a manual dispatch or a scheduled event with differing current and latest collector app version
 elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] || ( [[ "$GITHUB_EVENT_NAME" == "schedule" ]] && [[ "$CURRENT_APP_VERSION" != "$LATEST_APP_VERSION" ]] ); then
     # If the major and minor versions of the chart and app match...
     if [[ "$chart_major" -eq "$app_major" && "$chart_minor" -eq "$app_minor" ]]; then
