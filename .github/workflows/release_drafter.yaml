@@ -1,10 +1,10 @@
-name: Prepare New Helm Chart Release
+name: Check for new chart release
 
 # Description:
 # This workflow prepares a new release of the helm chart by updating chart and app versions as well as creating a PR.
 # A release PR will be created in these cases.
 #  - When a user kicks offs this workflow manually. A user can specify the CHART_VERSION and APP_VERSION used for the new release.
-#  - When the cron schedule kicks off the job and there is a major or minor version different for the APP_VERSION. The CHART_VERSION will be automatically incremented appropriately.
+#  - When the cron schedule kicks off the job and there is a version difference for the collector application, then a chart release draft PR will be created with the version automatically incremented appropriately.
 
 on:
   schedule:
@@ -12,10 +12,6 @@ on:
     - cron: "55 */12 * * *"
   workflow_dispatch:
     inputs:
-      CREATE_BRANCH:
-        description: 'Whether to create a remote branch for the release. Defaults to false since peter-evans/create-pull-request steps will handle branch creation.'
-        required: false
-        default: 'false'
       CHART_VERSION:
         description: 'Optionally overrides the chart version in Chart.yaml.'
         required: false
@@ -33,7 +29,6 @@ jobs:
   prepare_release:
     runs-on: ubuntu-latest
     env:
-      CREATE_BRANCH: ${{ github.event.inputs.CREATE_BRANCH }}
       CHART_VERSION: ${{ github.event.inputs.CHART_VERSION }}
       APP_VERSION: ${{ github.event.inputs.APP_VERSION }}
       DEBUG: ${{ github.event.inputs.DEBUG }}
@@ -46,15 +41,19 @@ jobs:
       - name: Prepare Release
         id: prepare_release
         run: |
-          make prepare-release CHART_VERSION=$CHART_VERSION APP_VERSION=$APP_VERSION CREATE_BRANCH=$CREATE_BRANCH DEBUG=$DEBUG
+          make prepare-release CHART_VERSION=$CHART_VERSION APP_VERSION=$APP_VERSION CREATE_BRANCH=false DEBUG=$DEBUG
 
       - name: Check if PR is already open
         id: check_if_pr_open
         run: |
-          DIFF=1
+          echo "PR_NEEDED=1" >> "$GITHUB_OUTPUT"
           git fetch origin
-          ((git show-ref --verify --quiet refs/heads/update-release) || (git diff --no-ext-diff --quiet main..update-release -- helm-charts)) && DIFF=0
-          echo "PR_NEEDED=$DIFF" >> "$GITHUB_OUTPUT"
+          # Directly check if the feature branch exists and has the same changes in the remote repository
+          if git ls-remote --heads origin update-release > /dev/null; then
+            if git diff --no-ext-diff --quiet origin/update-release -- helm-charts; then
+              echo "PR_NEEDED=0" >> "$GITHUB_OUTPUT"
+            fi
+          fi
 
       - name: Open PR for Version Update
         id: open_pr
@@ -63,7 +62,10 @@ jobs:
         with:
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
-          body: Updating Helm chart from version ${{ steps.prepare_release.outputs.CURRENT_CHART_VERSION }} to ${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }} and App version from ${{ steps.prepare_release.outputs.CURRENT_APP_VERSION }} to ${{ steps.prepare_release.outputs.LATEST_APP_VERSION }}
-          branch: "update-release" # Same branch name for all PRs
+          body: |
+            Description
+            - Release Helm chart version ${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
+            - Includes collector version ${{ steps.prepare_release.outputs.LATEST_APP_VERSION }}
+          branch: update-release
           base: main
           delete-branch: true

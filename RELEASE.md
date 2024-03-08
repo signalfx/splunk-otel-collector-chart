@@ -15,11 +15,12 @@ of `version` field.
 
 #### Using GitHub Workflows
 
-- **Manual Github Worfklow:**
-  - Navigate to the **[Draft Release](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml** workflow under GitHub Actions.
+- **Manual Dispatch Github Worfklow:**
+  - Navigate to the **[Release Drafter](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml** workflow under GitHub Actions.
   - Manually trigger the workflow. It automatically drafts a PR for the release.
   - Review code changes, validate chart functionality, approve the PR, and merge the PR.
-- **Scheduled PRs:** Automatically generated PRs are scheduled for new versions of the collector that introduce major or minor version changes.
+- **Automatic Schedule Github Worfklow:**
+  - Automatically generated PRs are scheduled to follow collector releases.
   - Review code changes, validate chart functionality, approve the PR, and merge the PR.
 
 #### Manually Making a Release
