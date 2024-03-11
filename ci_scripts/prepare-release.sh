@@ -84,6 +84,9 @@ elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] || ( [[ "$GITHUB_EVENT_NA
         LATEST_CHART_VERSION="$app_major.$app_minor.0"
         debug "Aligning chart version to $LATEST_CHART_VERSION due to major.minor mismatch with app version"
     fi
+else
+  echo "No update required. Current release is up to date."
+  exit 0
 fi
 
 # Check if the computed LATEST_CHART_VERSION already exists in the Helm repo to avoid duplicates
