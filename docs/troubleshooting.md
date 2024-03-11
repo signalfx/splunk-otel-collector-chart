@@ -16,4 +16,3 @@ Before you contact Splunk Support, see [Collector for Kubernetes: Gather support
 ## Contribute to docs
 
 For instructions on how to contribute to the docs, see [Contribute to Splunk Observability Cloud documentation]([https://docs.splunk.com/observability/en/get-started/contribute.html).
-
