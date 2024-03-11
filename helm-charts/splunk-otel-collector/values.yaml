@@ -1207,7 +1207,7 @@ operator:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
       go:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
+        repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
         tag: v0.10.1-alpha
       apache-httpd:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
