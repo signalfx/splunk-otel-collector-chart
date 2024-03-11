@@ -87,7 +87,7 @@ elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] || ( [[ "$GITHUB_EVENT_NA
 fi
 
 # Check if the computed LATEST_CHART_VERSION already exists in the Helm repo to avoid duplicates
-if helm search repo your-repo/splunk-otel-collector --versions | grep -q "splunk-otel-collector-$LATEST_CHART_VERSION"; then
+if make dep-update && helm search repo splunk-otel-collector-chart/splunk-otel-collector --versions | grep -q "splunk-otel-collector-$LATEST_CHART_VERSION"; then
     echo "Version $LATEST_CHART_VERSION already exists. Exiting."
     exit 1
 fi
