@@ -53,10 +53,8 @@ GITHUB_EVENT_NAME=${GITHUB_EVENT_NAME:-workflow_dispatch}
 CURRENT_CHART_VERSION=$(yq e ".version" "${CHART_FILE_PATH}")
 CURRENT_APP_VERSION=$(yq e ".appVersion" "${CHART_FILE_PATH}")
 CREATE_BRANCH=${CREATE_BRANCH:-true}
-chart_major=$(get_major_version "v$CURRENT_CHART_VERSION")
-chart_minor=$(get_minor_version "v$CURRENT_CHART_VERSION")
-app_major=$(get_major_version "v$CURRENT_APP_VERSION")
-app_minor=$(get_minor_version "v$CURRENT_APP_VERSION")
+CURRENT_CHART_VERSION_MAJOR=$(get_major_version "v$CURRENT_CHART_VERSION")
+CURRENT_CHART_VERSION_MINOR=$(get_minor_version "v$CURRENT_CHART_VERSION")
 
 # This is the version to use with the new release.
 LATEST_APP_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' https://api.github.com/repos/"$OWNER"/splunk-otel-collector/releases/latest | jq -r .tag_name | sed 's/^v//')
@@ -64,6 +62,8 @@ if [[ "$APP_VERSION_OVERRIDDEN" = true ]]; then
     LATEST_APP_VERSION=$APP_VERSION
     debug "Using override collector app version value $LATEST_APP_VERSION"
 fi
+LATEST_CHART_VERSION_PATCH=$(get_major_version "v$LATEST_APP_VERSION")
+LATEST_CHART_VERSION_MINOR=$(get_minor_version "v$LATEST_APP_VERSION")
 
 # This will be the new version of the chart for the new release
 LATEST_CHART_VERSION=$CURRENT_CHART_VERSION
@@ -74,14 +74,14 @@ if [[ "$CHART_VERSION_OVERRIDDEN" == "true" ]]; then
 # If the trigger is a manual dispatch or a scheduled event with differing current and latest collector app version
 elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] || ( [[ "$GITHUB_EVENT_NAME" == "schedule" ]] && [[ "$CURRENT_APP_VERSION" != "$LATEST_APP_VERSION" ]] ); then
     # If the major and minor versions of the chart and app match...
-    if [[ "$chart_major" -eq "$app_major" && "$chart_minor" -eq "$app_minor" ]]; then
+    if [[ "$CURRENT_CHART_VERSION_MAJOR" -eq "$LATEST_CHART_VERSION_PATCH" && "$CURRENT_CHART_VERSION_MINOR" -eq "$LATEST_CHART_VERSION_MINOR" ]]; then
         # Increment the chart's patch version
-        chart_patch=$(get_patch_version "v$CURRENT_CHART_VERSION")
-        LATEST_CHART_VERSION="$chart_major.$chart_minor.$((chart_patch + 1))"
+        CURRENT_CHART_VERSION_PATCH=$(get_patch_version "v$CURRENT_CHART_VERSION")
+        LATEST_CHART_VERSION="$CURRENT_CHART_VERSION_MAJOR.$CURRENT_CHART_VERSION_MINOR.$((CURRENT_CHART_VERSION_PATCH + 1))"
         debug "Incrementing chart version to $LATEST_CHART_VERSION"
     else
         # If major or minor versions don't match, align chart version with app version (set patch to 0)
-        LATEST_CHART_VERSION="$app_major.$app_minor.0"
+        LATEST_CHART_VERSION="$LATEST_CHART_VERSION_PATCH.$LATEST_CHART_VERSION_MINOR.0"
         debug "Aligning chart version to $LATEST_CHART_VERSION due to major.minor mismatch with app version"
     fi
 fi
