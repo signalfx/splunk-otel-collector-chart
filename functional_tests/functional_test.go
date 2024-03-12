@@ -421,20 +421,6 @@ func testNodeJSTraces(t *testing.T) {
 	}, 3*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
-	ignoreSpanAttribute("net.peer.port", expectedTraces)
-	ignoreSpanAttribute("net.peer.port", *selectedTrace)
-	ignoreSpanAttribute("http.user_agent", expectedTraces)
-	ignoreSpanAttribute("http.user_agent", *selectedTrace)
-	ignoreSpanAttribute("os.version", *selectedTrace)
-	ignoreTraceID(expectedTraces)
-	ignoreSpanID(expectedTraces)
-	ignoreTraceID(*selectedTrace)
-	ignoreSpanID(*selectedTrace)
-	ignoreStartTimestamp(*selectedTrace)
-	ignoreEndTimestamp(*selectedTrace)
-	ignoreStartTimestamp(expectedTraces)
-	ignoreEndTimestamp(expectedTraces)
-
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
@@ -448,6 +434,13 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreSpanAttribute("net.peer.port"),
+		ptracetest.IgnoreSpanAttribute("http.user_agent"),
+		ptracetest.IgnoreSpanAttribute("os.version"),
+		ptracetest.IgnoreTraceID(),
+		ptracetest.IgnoreSpanID(),
+		ptracetest.IgnoreStartTimestamp(),
+		ptracetest.IgnoreEndTimestamp(),
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
@@ -482,22 +475,6 @@ func testJavaTraces(t *testing.T) {
 
 	require.NotNil(t, selectedTrace)
 
-	ignoreSpanAttribute("net.sock.peer.port", expectedTraces)
-	ignoreSpanAttribute("net.sock.peer.port", *selectedTrace)
-	ignoreSpanAttribute("thread.id", expectedTraces)
-	ignoreSpanAttribute("thread.id", *selectedTrace)
-	ignoreSpanAttribute("thread.name", expectedTraces)
-	ignoreSpanAttribute("thread.name", *selectedTrace)
-	ignoreSpanAttribute("os.version", *selectedTrace)
-	ignoreTraceID(expectedTraces)
-	ignoreSpanID(expectedTraces)
-	ignoreTraceID(*selectedTrace)
-	ignoreSpanID(*selectedTrace)
-	ignoreStartTimestamp(*selectedTrace)
-	ignoreEndTimestamp(*selectedTrace)
-	ignoreStartTimestamp(expectedTraces)
-	ignoreEndTimestamp(expectedTraces)
-
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
 		ptracetest.IgnoreResourceAttributeValue("os.description"),
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
@@ -513,78 +490,19 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("thread.id"),
+		ptracetest.IgnoreSpanAttributeValue("thread.name"),
+		ptracetest.IgnoreSpanAttributeValue("os.version"),
+		ptracetest.IgnoreTraceID(),
+		ptracetest.ignoreSpanID(),
+		ptracetest.IgnoreStartTimestamp(),
+		ptracetest.IgnoreEndTimestamp(),
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 
 	require.NoError(t, err)
-}
-
-func ignoreStartTimestamp(traces ptrace.Traces) {
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		rs := traces.ResourceSpans().At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetStartTimestamp(0)
-			}
-		}
-	}
-}
-
-func ignoreEndTimestamp(traces ptrace.Traces) {
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		rs := traces.ResourceSpans().At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetEndTimestamp(0)
-			}
-		}
-	}
-}
-
-func ignoreSpanAttribute(attributeName string, traces ptrace.Traces) {
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		rs := traces.ResourceSpans().At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				if _, ok := span.Attributes().Get(attributeName); ok {
-					span.Attributes().PutStr(attributeName, "*")
-				}
-			}
-		}
-	}
-}
-
-func ignoreTraceID(traces ptrace.Traces) {
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		rs := traces.ResourceSpans().At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetTraceID(pcommon.NewTraceIDEmpty())
-			}
-		}
-	}
-}
-
-func ignoreSpanID(traces ptrace.Traces) {
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		rs := traces.ResourceSpans().At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetSpanID(pcommon.NewSpanIDEmpty())
-			}
-		}
-	}
 }
 
 func shortenNames(value string) string {
