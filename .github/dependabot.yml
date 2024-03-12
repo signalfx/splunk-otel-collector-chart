@@ -6,8 +6,5 @@ updates:
       interval: "daily"
   - package-ecosystem: "gomod"
     directory: "/functional_tests"
-    ignore:
-      - dependency-name: "go.opentelemetry.io/*"
-      - dependency-name: "github.com/open-telemetry/*"
     schedule:
       interval: "weekly"
