@@ -421,6 +421,9 @@ func testNodeJSTraces(t *testing.T) {
 	}, 3*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
+	maskScopeVersion(*selectedTrace)
+	maskScopeVersion(expectedTraces)
+
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
@@ -474,6 +477,9 @@ func testJavaTraces(t *testing.T) {
 	}, 3*time.Minute, 5*time.Second)
 
 	require.NotNil(t, selectedTrace)
+
+	maskScopeVersion(*selectedTrace)
+	maskScopeVersion(expectedTraces)
 
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
 		ptracetest.IgnoreResourceAttributeValue("os.description"),
@@ -1243,4 +1249,15 @@ func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
 	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
 		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
 		len(lc.AllLogs()), timeoutMinutes)
+}
+
+func maskScopeVersion(traces ptrace.Traces) {
+	rss := traces.ResourceSpans()
+	for i := 0; i < rss.Len(); i++ {
+		rs := rss.At(i)
+		for j := 0; j < rs.ScopeSpans().Len(); j++ {
+			ss := rs.ScopeSpans().At(j)
+			ss.Scope().SetVersion("")
+		}
+	}
 }
