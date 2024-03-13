@@ -47,6 +47,11 @@ jobs:
 
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
 
+      - name: Install Skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
