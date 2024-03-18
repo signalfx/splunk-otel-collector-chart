@@ -1,0 +1,13 @@
+clusterName: CHANGEME
+
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  metricsIndex: CHANGEME
+  metricsEnabled: true
+
+agent:
+  config:
+    exporters:
+      splunk_hec/platform_metrics:
+        use_multi_metric_format: true
