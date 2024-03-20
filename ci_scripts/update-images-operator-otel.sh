@@ -14,9 +14,11 @@ source "$SCRIPT_DIR/base_util.sh"
 
 # ---- Initialize Temporary Files ----
 # Create a temporary file to hold a subsection of the values.yaml file
-setd "TEMP_VALUES_FILE" "$SCRIPT_DIR/temp_values_subsection.yaml"
-# Create a temporary file to store version information
-setd "TEMP_VERSIONS" "$SCRIPT_DIR/versions.txt"
+setd "TEMP_VALUES_FILE" "$SCRIPT_DIR/temp_values_subsection.out"
+# Create a temporary file to store operator main.go code containing docker image repository information
+setd "TEMP_MAIN_FILE" "$SCRIPT_DIR/temp_main.out"
+# Create a temporary file to store docker image version information
+setd "TEMP_VERSIONS" "$SCRIPT_DIR/temp_versions.out"
 
 # ---- Operator Subchart Version Extraction ----
 # Extract the version of the opentelemetry-operator subchart from the main Chart.yaml
@@ -31,6 +33,14 @@ SUBCHART_URL="https://raw.githubusercontent.com/open-telemetry/opentelemetry-hel
 debug "Fetching: $SUBCHART_URL"
 APP_VERSION=$(curl -s "$SUBCHART_URL" | grep 'appVersion:' | awk '{print $2}')
 debug "Operator App Version: $APP_VERSION"
+
+# ---- Fetch Docker Repository Information ----
+# Fetch the code containing information about what instrumentation language uses what docker repository.
+MAIN_URL="https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v$APP_VERSION/main.go"
+debug "Fetching: $MAIN_URL"
+curl -s "$MAIN_URL" > "$TEMP_MAIN_FILE"
+debug "Extracted main.go of the operator:"
+debug "$TEMP_MAIN_FILE"
 
 # ---- Fetch Version Mapping ----
 # Fetch the version mappings from versions.txt for the fetched appVersion.
@@ -51,8 +61,18 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
     if [[ "$IMAGE_KEY" =~ ^autoinstrumentation-.* ]]; then
         # Upstream Operator Values
         setd "INST_LIB_NAME" "${IMAGE_KEY#autoinstrumentation-}"
-        setd "REPOSITORY_UPSTREAM" "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-${INST_LIB_NAME}"
         setd "TAG_UPSTREAM" "${VERSION}"
+
+        # Find the proper docker repository for the instrumentation library by scraping the main.go file of the operator
+        INST_LIB_REPO=$(grep "auto-instrumentation-${INST_LIB_NAME}-image" "$TEMP_MAIN_FILE" | grep -o 'ghcr.io/[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*/autoinstrumentation-[a-zA-Z0-9_-]*' | sort | uniq )
+        if [ -n "$INST_LIB_REPO" ]; then
+            # Set the REPOSITORY_UPSTREAM variable
+            setd "REPOSITORY_UPSTREAM" "$INST_LIB_REPO"
+            debug "Set REPOSITORY_UPSTREAM to ${INST_LIB_REPO}"
+        else
+            echo "Failed to find repository for ${INST_LIB_NAME}"
+            exit 1
+        fi
 
         setd "REPOSITORY_LOCAL_PATH" "${INST_LIB_NAME}.repository"
         setd "REPOSITORY_LOCAL" "$(yq eval ".${REPOSITORY_LOCAL_PATH}" "${TEMP_VALUES_FILE}")"
@@ -63,9 +83,17 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
           setd "TAG_LOCAL_PATH" "${INST_LIB_NAME}.tag"
           setd "TAG_LOCAL" "$(yq eval ".${TAG_LOCAL_PATH}" "${TEMP_VALUES_FILE}")"
           if [[ -z "${TAG_LOCAL}" || "${TAG_LOCAL}" == "null" || "${TAG_LOCAL}" != "$TAG_UPSTREAM" ]]; then
-            debug "Upserting value for ${REPOSITORY_LOCAL}:${TAG_LOCAL}"
-            yq eval -i ".${TAG_LOCAL_PATH} = \"${TAG_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
-            setd "NEED_UPDATE" 1
+            IMAGE="${REPOSITORY_UPSTREAM}:${TAG_UPSTREAM}"
+            # Skopeo validates the existence of the Docker images no matter the current host architecture used
+            if skopeo inspect --retry-times 3 --raw "docker://$IMAGE" &>/dev/null; then
+                echo "Image $IMAGE exists."
+                echo "Upserting value for ${REPOSITORY_LOCAL}:${TAG_UPSTREAM}"
+                yq eval -i ".${TAG_LOCAL_PATH} = \"${TAG_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
+                setd "NEED_UPDATE" 1
+            else
+                echo "Failed to find Docker image $IMAGE. Check image repository and tag."
+                exit 1
+            fi
           else
             debug "Retaining existing value for ${REPOSITORY_LOCAL}:${TAG_LOCAL}"
           fi
@@ -91,8 +119,7 @@ awk '
 # Replace the original values.yaml with the updated version
 mv "${VALUES_FILE_PATH}.updated" "$VALUES_FILE_PATH"
 # Cleanup temporary files
-rm "$TEMP_VALUES_FILE"
-rm "$TEMP_VERSIONS"
+rm "$TEMP_MAIN_FILE" "$TEMP_VERSIONS" "$TEMP_VALUES_FILE"
 
 echo "Image update process completed successfully!"
 exit 0
