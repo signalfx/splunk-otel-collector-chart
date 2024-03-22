@@ -128,24 +128,12 @@ spec:
           name: admin-server
           ports:
             - containerPort: 9090
+              hostPort: 9090
+              protocol: TCP
           resources:
             limits:
               memory: "536870912"
       restartPolicy: Always
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: spring-petclinic-default
-spec:
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              io.kompose.network/spring-petclinic-default: "true"
-  podSelector:
-    matchLabels:
-      io.kompose.network/spring-petclinic-default: "true"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -171,9 +159,12 @@ spec:
           name: api-gateway
           ports:
             - containerPort: 8080
+              hostPort: 8080
+              protocol: TCP
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
+      restartPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -196,9 +187,20 @@ spec:
     spec:
       containers:
         - image: springcommunity/spring-petclinic-config-server
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -I
+                - http://config-server:8888
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
           name: config-server
           ports:
             - containerPort: 8888
+              hostPort: 8888
+              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -228,9 +230,11 @@ spec:
           name: customers-service
           ports:
             - containerPort: 8081
+              hostPort: 8081
+              protocol: TCP
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -254,12 +258,23 @@ spec:
     spec:
       containers:
         - image: springcommunity/spring-petclinic-discovery-server
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -f
+                - http://discovery-server:8761
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
           name: discovery-server
           ports:
             - containerPort: 8761
+              hostPort: 8761
+              protocol: TCP
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -286,9 +301,11 @@ spec:
           name: vets-service
           ports:
             - containerPort: 8083
+              hostPort: 8083
+              protocol: TCP
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -315,7 +332,9 @@ spec:
           name: visits-service
           ports:
             - containerPort: 8082
+              hostPort: 8082
+              protocol: TCP
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
