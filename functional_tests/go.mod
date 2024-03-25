@@ -14,9 +14,9 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.96.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.96.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.96.0
+	go.opentelemetry.io/collector/component v0.97.0
 	go.opentelemetry.io/collector/consumer v0.96.0
-	go.opentelemetry.io/collector/pdata v1.3.0
+	go.opentelemetry.io/collector/pdata v1.4.0
 	go.opentelemetry.io/collector/receiver v0.96.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.96.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -148,10 +148,10 @@ require (
 	go.opentelemetry.io/collector/config/confignet v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v1.3.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v0.96.0 // indirect
-	go.opentelemetry.io/collector/config/configtelemetry v0.96.0 // indirect
+	go.opentelemetry.io/collector/config/configtelemetry v0.97.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.96.0 // indirect
-	go.opentelemetry.io/collector/confmap v0.96.0 // indirect
+	go.opentelemetry.io/collector/confmap v0.97.0 // indirect
 	go.opentelemetry.io/collector/exporter v0.96.0 // indirect
 	go.opentelemetry.io/collector/extension v0.96.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.96.0 // indirect
@@ -180,7 +180,7 @@ require (
 	golang.org/x/tools v0.16.1 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
-	google.golang.org/grpc v1.62.0 // indirect
+	google.golang.org/grpc v1.62.1 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
