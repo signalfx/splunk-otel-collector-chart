@@ -104,6 +104,15 @@ rules:
   resourceNames:
   - aws-auth
 {{- end }}
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
 {{- with .Values.rbac.customRules }}
 {{ toYaml . }}
 {{- end }}

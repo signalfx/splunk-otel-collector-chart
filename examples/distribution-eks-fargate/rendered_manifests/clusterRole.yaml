@@ -95,3 +95,12 @@ rules:
   - get
   resourceNames:
   - aws-auth
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
