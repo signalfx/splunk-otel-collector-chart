@@ -128,8 +128,6 @@ spec:
           name: admin-server
           ports:
             - containerPort: 9090
-              hostPort: 9090
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -159,8 +157,6 @@ spec:
           name: api-gateway
           ports:
             - containerPort: 8080
-              hostPort: 8080
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -199,8 +195,6 @@ spec:
           name: config-server
           ports:
             - containerPort: 8888
-              hostPort: 8888
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -230,8 +224,6 @@ spec:
           name: customers-service
           ports:
             - containerPort: 8081
-              hostPort: 8081
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -270,8 +262,6 @@ spec:
           name: discovery-server
           ports:
             - containerPort: 8761
-              hostPort: 8761
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -301,8 +291,6 @@ spec:
           name: vets-service
           ports:
             - containerPort: 8083
-              hostPort: 8083
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
@@ -332,8 +320,6 @@ spec:
           name: visits-service
           ports:
             - containerPort: 8082
-              hostPort: 8082
-              protocol: TCP
           resources:
             limits:
               memory: "536870912"
