@@ -12,10 +12,6 @@ If you have your own NodeJS application you want to instrument, you can still us
 to instrument your application.
 
 ```bash
-kubectl create namespace otel-demo
-```
-
-```bash
 curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/examples/enable-operator-and-auto-instrumentation/otel-demo/otel-demo.yaml | kubectl apply -n otel-demo -f -
 ```
 
