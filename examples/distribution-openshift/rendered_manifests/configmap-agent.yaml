@@ -32,8 +32,6 @@ data:
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
       zpages: null
     processors:
       batch: null
@@ -247,7 +245,6 @@ data:
       extensions:
       - health_check
       - k8s_observer
-      - memory_ballast
       - zpages
       pipelines:
         metrics:

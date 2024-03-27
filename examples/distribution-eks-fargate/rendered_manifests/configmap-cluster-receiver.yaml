@@ -29,8 +29,6 @@ data:
         auth_type: serviceAccount
         observe_nodes: true
         observe_pods: true
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
       batch:
         send_batch_max_size: 32768
@@ -117,7 +115,6 @@ data:
     service:
       extensions:
       - health_check
-      - memory_ballast
       - k8s_observer
       pipelines:
         metrics:

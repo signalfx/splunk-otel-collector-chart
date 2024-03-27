@@ -34,8 +34,6 @@ data:
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.signalfx.com
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
       zpages: null
     processors:
       batch: null
@@ -169,7 +167,6 @@ data:
     service:
       extensions:
       - health_check
-      - memory_ballast
       - zpages
       - http_forwarder
       pipelines:
