@@ -133,20 +133,6 @@ spec:
               memory: "536870912"
       restartPolicy: Always
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: spring-petclinic-default
-spec:
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              io.kompose.network/spring-petclinic-default: "true"
-  podSelector:
-    matchLabels:
-      io.kompose.network/spring-petclinic-default: "true"
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -173,7 +159,8 @@ spec:
             - containerPort: 8080
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
+      restartPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -196,6 +183,15 @@ spec:
     spec:
       containers:
         - image: springcommunity/spring-petclinic-config-server
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -I
+                - http://config-server:8888
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
           name: config-server
           ports:
             - containerPort: 8888
@@ -230,7 +226,7 @@ spec:
             - containerPort: 8081
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -254,12 +250,21 @@ spec:
     spec:
       containers:
         - image: springcommunity/spring-petclinic-discovery-server
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -f
+                - http://discovery-server:8761
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
           name: discovery-server
           ports:
             - containerPort: 8761
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -288,7 +293,7 @@ spec:
             - containerPort: 8083
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -317,5 +322,5 @@ spec:
             - containerPort: 8082
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536870912"
       restartPolicy: Always

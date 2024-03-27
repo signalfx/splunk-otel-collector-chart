@@ -42,6 +42,9 @@ function update_spring_petclinic_demo {
     yq eval -i 'select(.kind == "Deployment") .metadata.labels += {"app.kubernetes.io/part-of": "spring-petclinic"}' "$SPRING_PETCLINIC_PATH"
     yq eval -i 'select(.kind == "Deployment") .spec.template.metadata.labels += {"app.kubernetes.io/part-of": "spring-petclinic"}' "$SPRING_PETCLINIC_PATH"
 
+    # Remove unwanted port settings
+    yq eval -i 'del(.spec.template.spec.containers[].ports[].hostPort) | del(.spec.template.spec.containers[].ports[].protocol)' "$SPRING_PETCLINIC_PATH"
+
     # Remove the downloaded docker-compose file
     rm -rf "$SPRING_PETCLINIC_DOCKER_COMPOSE_PATH"
 
