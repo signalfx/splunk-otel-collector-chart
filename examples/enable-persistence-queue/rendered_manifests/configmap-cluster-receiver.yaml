@@ -43,8 +43,6 @@ data:
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
       health_check: null
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
       batch:
         send_batch_max_size: 32768
@@ -140,7 +138,6 @@ data:
     service:
       extensions:
       - health_check
-      - memory_ballast
       pipelines:
         metrics:
           exporters:
