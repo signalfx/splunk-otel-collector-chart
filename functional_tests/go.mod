@@ -14,10 +14,10 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.96.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.96.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.96.0
-	go.opentelemetry.io/collector/consumer v0.96.0
+	go.opentelemetry.io/collector/component v0.97.0
+	go.opentelemetry.io/collector/consumer v0.97.0
 	go.opentelemetry.io/collector/pdata v1.4.0
-	go.opentelemetry.io/collector/receiver v0.96.0
+	go.opentelemetry.io/collector/receiver v0.97.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.96.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.14.3
@@ -140,7 +140,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
-	go.opentelemetry.io/collector v0.96.0 // indirect
+	go.opentelemetry.io/collector v0.97.0 // indirect
 	go.opentelemetry.io/collector/config/configauth v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/configcompression v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/configgrpc v0.96.0 // indirect
@@ -148,14 +148,14 @@ require (
 	go.opentelemetry.io/collector/config/confignet v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v1.3.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v0.96.0 // indirect
-	go.opentelemetry.io/collector/config/configtelemetry v0.96.0 // indirect
+	go.opentelemetry.io/collector/config/configtelemetry v0.97.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.96.0 // indirect
-	go.opentelemetry.io/collector/confmap v0.96.0 // indirect
+	go.opentelemetry.io/collector/confmap v0.97.0 // indirect
 	go.opentelemetry.io/collector/exporter v0.96.0 // indirect
 	go.opentelemetry.io/collector/extension v0.96.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.96.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.3.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.4.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.96.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.47.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
