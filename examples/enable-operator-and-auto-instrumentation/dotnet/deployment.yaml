@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnet-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dotnet-test
+  template:
+    metadata:
+      name: dotnet-test
+      labels:
+        app: dotnet-test
+    spec:
+      containers:
+        - image: quay.io/splunko11ytest/dotnet_test:latest
+          name: dotnet-test
+          imagePullPolicy: IfNotPresent
+          # imagePullPolicy: Always

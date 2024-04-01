@@ -209,6 +209,7 @@ func deployChartsAndApps(t *testing.T) {
 	deployments := clientset.AppsV1().Deployments("default")
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
+	// NodeJS test app
 	stream, err := os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
@@ -223,6 +224,19 @@ func deployChartsAndApps(t *testing.T) {
 	}
 	// Java test app
 	stream, err = os.ReadFile(filepath.Join(testDir, "java", "deployment.yaml"))
+	require.NoError(t, err)
+	deployment, _, err = decode(stream, nil, nil)
+	require.NoError(t, err)
+	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
+	// .NET test app
+	stream, err = os.ReadFile(filepath.Join(testDir, "dotnet", "deployment.yaml"))
 	require.NoError(t, err)
 	deployment, _, err = decode(stream, nil, nil)
 	require.NoError(t, err)
@@ -315,6 +329,9 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "java-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = deployments.Delete(context.Background(), "dotnet-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -388,6 +405,7 @@ func Test_Functions(t *testing.T) {
 
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
+	t.Run(".NET traces captured", testDotNetTraces)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
 	t.Run("test HEC metrics", testHECMetrics)
@@ -509,6 +527,69 @@ func testJavaTraces(t *testing.T) {
 	)
 
 	require.NoError(t, err)
+}
+
+func testDotNetTraces(t *testing.T) {
+	tracesConsumer := setupOnce(t).tracesConsumer
+
+	//var expectedTraces ptrace.Traces
+	//expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
+	//expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	//require.NoError(t, err)
+
+	waitForTraces(t, 30, tracesConsumer)
+	var selectedTrace *ptrace.Traces
+
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", trace)
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
+				//if expectedTraces.SpanCount() == trace.SpanCount() {
+				//	selectedTrace = &trace
+				//	break
+				//}
+				selectedTrace = &trace
+				break
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
+	golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", *selectedTrace)
+
+	//require.NotNil(t, selectedTrace)
+	//
+	//maskScopeVersion(*selectedTrace)
+	//maskScopeVersion(expectedTraces)
+	//
+	//err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+	//	ptracetest.IgnoreResourceAttributeValue("os.description"),
+	//	ptracetest.IgnoreResourceAttributeValue("process.pid"),
+	//	ptracetest.IgnoreResourceAttributeValue("container.id"),
+	//	ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+	//	ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+	//	ptracetest.IgnoreResourceAttributeValue("os.version"),
+	//	ptracetest.IgnoreResourceAttributeValue("host.arch"),
+	//	ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+	//	ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
+	//	ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
+	//	ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+	//	ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
+	//	ptracetest.IgnoreSpanAttributeValue("thread.id"),
+	//	ptracetest.IgnoreSpanAttributeValue("thread.name"),
+	//	ptracetest.IgnoreSpanAttributeValue("os.version"),
+	//	ptracetest.IgnoreTraceID(),
+	//	ptracetest.IgnoreSpanID(),
+	//	ptracetest.IgnoreStartTimestamp(),
+	//	ptracetest.IgnoreEndTimestamp(),
+	//	ptracetest.IgnoreResourceSpansOrder(),
+	//	ptracetest.IgnoreScopeSpansOrder(),
+	//)
+	//
+	//require.NoError(t, err)
 }
 
 func shortenNames(value string) string {
