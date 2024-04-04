@@ -398,7 +398,7 @@ provides best effort support with issues related to native OpenTelemetry instrum
 
 ### Troubleshooting the Operator and Cert Manager
 
-#### 1. Check the logs for failures
+#### Check the logs for failures
 
 **Operator Logs:**
 
@@ -414,7 +414,30 @@ kubectl logs -l app=cainjector
 kubectl logs -l app=webhook
 ```
 
-#### 2. Cert-Manager Issues
+#### Operator Issues
+
+##### Networking and Firewall Requirements
+
+Ensure the Mutating Webhook used by the operator for pod auto-instrumentation is not hindered by network policies or firewall rules. Key points to ensure:
+
+- **Webhook Accessibility**: The webhook must freely communicate with the cluster IP and the Kubernetes API server. Ensure network policies or firewall rules permit operator-related services to interact with these endpoints.
+- **Required Ports**: Policies should explicitly allow traffic to the necessary ports for seamless operation.
+
+Use the following command to identify the IP addresses and ports that need to be accessible:
+
+```bash
+kubectl get svc -n {operator_namespace}
+# Example output indicating necessary IP and port configurations:
+# NAME                                          TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)                                       AGE
+# kubernetes                                    ClusterIP  10.0.0.1      <none>       443/TCP                                       10d
+# splunk-splunk-otel-collector-agent            ClusterIP  10.0.176.113  <none>       8006/TCP,14250/TCP,14268/TCP,...              3d17h
+# splunk-splunk-otel-collector-operator         ClusterIP  10.0.254.125  <none>       8443/TCP,8080/TCP                             3d17h
+# splunk-splunk-otel-collector-operator-webhook ClusterIP  10.0.222.223  <none>       443/TCP                                       3d17h
+```
+
+- **Configuration Action**: Adjust your network policies and firewall settings based on the service endpoints and ports listed by the command. This ensures the webhook and operator services can properly communicate within the cluster.
+
+#### Cert-Manager Issues
 
 If the operator seems to be hanging, it could be due to the cert-manager not auto-creating the required certificate. To troubleshoot:
 
@@ -426,7 +449,7 @@ For additional guidance, refer to the official cert-manager documentation:
 - [Troubleshooting Guide](https://cert-manager.io/docs/troubleshooting/)
 - [Uninstallation Guide](https://cert-manager.io/v1.2-docs/installation/uninstall/kubernetes/)
 
-#### 3. Validate Certificates
+##### Validate Certificates
 
 Ensure that the certificate, which the cert-manager creates and the operator utilizes, is available.
 
@@ -436,24 +459,10 @@ kubectl get certificates
 # splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
 ```
 
-#### 4. Using a Self-Signed Certificate for the Webhook
+##### Using a Self-Signed Certificate for the Webhook
 
 The operator supports various methods for managing TLS certificates for the webhook. Below are the options available through the operator, with a brief description for each. For detailed configurations and specific use cases, please refer to the operator’s
-[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml).
-
-1. **(Default Functionality) Use certManager to Generate a Self-Signed Certificate:**
-  - Ensure that `operator.admissionWebhooks.certManager` is enabled.
-  - By default, the OpenTelemetry Operator will use a self-signer issuer.
-  - This option takes precedence over other options when enabled.
-  - Specific issuer references and annotations can be provided as needed.
-
-2. **Use Helm to Automatically Generate a Self-Signed Certificate:**
-  - Ensure that `operator.admissionWebhooks.certManager` is disabled and `operator.admissionWebhooks.autoGenerateCert` is enabled.
-  - When these conditions are met, Helm will automatically create a self-signed certificate and secret for you.
-
-3. **Use Your Own Self-Signed Certificate:**
-  - Ensure that both `operator.admissionWebhooks.certManager` and `operator.admissionWebhooks.autoGenerateCert` are disabled.
-  - Provide paths to your own PEM-encoded certificate, private key, and CA cert.
+[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml)
 
 **Note**: While using a self-signed certificate offers a quicker and simpler setup, it has limitations, such as not being trusted by default by clients.
 This may be acceptable for testing purposes or internal environments. For complete configurations and additional guidance, please refer to the provided link to the Helm chart documentation.
