@@ -430,6 +430,8 @@ receivers:
     directory: {{ $.Values.logsCollection.journald.directory }}
     units: [{{ $unit.name }}]
     priority: {{ $unit.priority }}
+    retry_on_failure:
+      enabled: true
     storage: file_storage
     operators:
     - type: add
