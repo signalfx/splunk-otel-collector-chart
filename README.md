@@ -63,12 +63,8 @@ however, only the Splunk distributions are in scope for official Splunk support 
 This distribution currently supports:
 
 - [Splunk APM](https://www.splunk.com/en_us/products/apm-application-performance-monitoring.html) via the
-  [`sapm`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter).
-  The [`otlphttp`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter)
-  can be used with a [custom
-  configuration](https://github.com/signalfx/splunk-otel-collector/blob/main/cmd/otelcol/config/collector/otlp_config_linux.yaml).
+  [`otlp`
+  exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter).
   More information available
   [here](https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-opentelemetry-collector.html).
 - [Splunk Infrastructure
