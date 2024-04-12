@@ -608,8 +608,8 @@ processors:
         key: destination_canonical_revision
   {{- end }}
 
-# By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
-# Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
+# By default only OTLP exporter enabled. It will be pointed to collector deployment if enabled,
+# Otherwise it's pointed directly to o11y cloud backend based on the values provided in signalfx setting.
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
@@ -622,7 +622,7 @@ exporters:
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otelOtlpExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
@@ -783,12 +783,9 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if $gatewayEnabled }}
+        {{- if or $gatewayEnabled (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
         - otlp
         {{- else }}
-        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - sapm
-        {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
         {{- end }}
