@@ -83,6 +83,10 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
   - Splunk provides best-effort support for native OpenTelemetry libraries, and full support for Splunk library distributions. For used libraries, refer to the values.yaml under "operator.instrumentation.spec".
 {{- end }}
 {{- if not (eq (toString ((.Values.agent.config).exporters).sapm) "<nil>") }}
-[WARNING] You are using the SAPM exporter. SAPM has been deprecated in favor of OTLP, which is now used by default for trace ingest.
+[WARNING] You are using the SAPM exporter as part of your agent configuration. SAPM has been deprecated in favor of OTLP, which is now used by default for trace ingest.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0970-to-0980
+{{- end }}
+{{- if not (eq (toString ((.Values.gateway.config).exporters).sapm) "<nil>") }}
+[WARNING] You are using the SAPM exporter as part of your gateway configuration. SAPM has been deprecated in favor of OTLP, which is now used by default for trace ingest.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0970-to-0980
 {{- end }}
