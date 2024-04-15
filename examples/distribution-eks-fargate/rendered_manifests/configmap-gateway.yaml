@@ -18,10 +18,9 @@ metadata:
 data:
   relay: |
     exporters:
-      otlp:
-        endpoint: https://ingest.CHANGEME.signalfx.com:443
-        headers:
-          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+      sapm:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace
         sending_queue:
           num_consumers: 32
       signalfx:
@@ -202,7 +201,7 @@ data:
           - prometheus/collector
         traces:
           exporters:
-          - otlp
+          - sapm
           processors:
           - memory_limiter
           - k8sattributes
