@@ -1206,6 +1206,7 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
+      # Instrumentation for go is disabled by default, enable it with `operator.manager.featureGates=+operator.autoinstrumentation.go”`
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
@@ -1215,6 +1216,7 @@ operator:
       python:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.44b0
+      # Instrumentation for nginx is disabled by default, enable it with `operator.manager.featureGates=+operator.autoinstrumentation.nginx”`
       nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4

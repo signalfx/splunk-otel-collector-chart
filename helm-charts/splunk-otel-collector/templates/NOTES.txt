@@ -77,8 +77,17 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680
 {{ end }}
 {{- if .Values.operator.enabled }}
-[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true), currently considered ALPHA.
-  - Instrumentation library maturity varies (e.g., Java is more mature than Go). For library stability, visit: https://opentelemetry.io/docs/instrumentation/#status-and-releases
-  - Some libraries may be enabled by default. For current status, see: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
-  - Splunk provides best-effort support for native OpenTelemetry libraries, and full support for Splunk library distributions. For used libraries, refer to the values.yaml under "operator.instrumentation.spec".
+[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true)! The operator can automatically instrument Kubernetes hosted applications, the integration maturity can vary per application language.
+  - Status: Instrumentation language maturity varies. Below is a table detailing each integration language's status and relevant information.
+  - Usage: Certain instrumentation languages are enabled by default while other must be enabled manually using feature gates (operator.manager.featureGates=+operator.autoinstrumentation.{language}).
+  - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry instrumentation distributions of instrumentation language libraries. See `values.yaml` under `operator.instrumentation.spec` for more information on what libraries are utilized.
+  | Instrumentation Language | Feature Gate Name                                     | Feature Gate Default Value | Status       | Source URL                                                      |
+  |--------------------------|-------------------------------------------------------|----------------------------|--------------|-----------------------------------------------------------------|
+  | Java                     | `operator.autoinstrumentation.java`                   | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-java                    |
+  | NodeJS                   | `operator.autoinstrumentation.nodejs`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-js                      |
+  | DotNet                   | `operator.autoinstrumentation.dotnet`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-dotnet                  |
+  | Python                   | `operator.autoinstrumentation.python`                 | Enabled                    | Experimental | https://github.com/open-telemetry/opentelemetry-python          |
+  | ApacheHttpD              | `operator.autoinstrumentation.apache-httpd`           | Enabled                    | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
+  | Go                       | `operator.autoinstrumentation.go`                     | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-go              |
+  | Nginx                    | `operator.autoinstrumentation.nginx`                  | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
 {{- end }}
