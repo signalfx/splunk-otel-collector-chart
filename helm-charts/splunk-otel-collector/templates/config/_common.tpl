@@ -10,14 +10,13 @@ memory_limiter:
 {{- end }}
 
 {{/*
-Common config for the otel-collector OTLP exporter
+Common config for the otel-collector sapm exporter
 */}}
-{{- define "splunk-otel-collector.otelOtlpExporter" -}}
+{{- define "splunk-otel-collector.otelSapmExporter" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
-otlp:
-  endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}:443
-  headers:
-    X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+sapm:
+  endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace
+  access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
 {{- end }}
 {{- end }}
 

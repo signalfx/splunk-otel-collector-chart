@@ -1,16 +1,5 @@
 # Upgrade guidelines
 
-# 0.97.0 to 0.98.0
-
-The `sapm` exporter is removed in favor of the `otlp` exporter.
-
-By default, only the `otlp` exporter is present in the list of exporters of the trace pipeline.
-
-If you had customized the `sapm` exporter configuration, you will need to change your Helm values to configure
-the OTLP exporter instead.
-
-If you were using the `sapm` exporter in a custom pipeline, please remove it and replace it with the `otlp` exporter.
-
 # 0.93.0 to 0.94.0
 
 The `networkExplorer` option is removed.
