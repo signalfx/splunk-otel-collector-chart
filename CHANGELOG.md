@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.98.0] - 2024-04-16
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.98.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.98.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Enable `retry_on_failure` for journald receiver ([#764](https://github.com/signalfx/splunk-otel-collector-chart/pull/764))
+  In case of temporary errors the journald receiver should slow down and retry the log delivery instead of dropping it.
+
+### 🧰 Bug fixes 🧰
+
+- `clusterReceiver`: Added clusterRole for events.k8s.io, without it k8sobjectsreceiver throws an error on startup ([#1238](https://github.com/signalfx/splunk-otel-collector-chart/pull/1238))
+
 ## [0.97.0] - 2024-03-28
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.97.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.97.0).
