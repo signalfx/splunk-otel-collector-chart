@@ -326,7 +326,7 @@ jobs:
         uses: azure/use-kubelogin@v1.2
         with:
           kubelogin-version: "v0.0.24"
-      - uses: azure/login@v2.0.0
+      - uses: azure/login@v2.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: azure/aks-set-context@v3.2
