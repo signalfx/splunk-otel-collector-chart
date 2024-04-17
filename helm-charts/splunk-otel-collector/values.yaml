@@ -1194,6 +1194,7 @@ operator:
       #   - repository: Specifies the Docker image repository.
       #   - tag: Indicates the Docker image tag.
       #   - env: (Optional) Allows you to add any additional environment variables.
+      # Auto-instrumentation for the various languages that are distributed by Splunk are enabled by default.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
         tag: v1.31.0
@@ -1206,21 +1207,25 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
-      # Instrumentation for go is disabled by default, enable it with `operator.manager.featureGates=+operator.autoinstrumentation.go”`
+      # Auto-instrumentation for the various languages distributed by OpenTelemetry natively (below) are disabled by default.
+      # Enable any language by changing its corresponding feature gate from "-" to "+" under "operator.manager.featureGates".
+      apache-httpd:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+        tag: 1.0.4
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
-      apache-httpd:
+      nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
       python:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.44b0
-      # Instrumentation for nginx is disabled by default, enable it with `operator.manager.featureGates=+operator.autoinstrumentation.nginx”`
-      nginx:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
-        tag: 1.0.4
       # Auto-instrumentation Libraries (End)
+  manager:
+    # Configure feature gates here. Prefix with "+" to enable or "-" to disable a feature.
+    # TODO: See if there is a better way to set feature gates per language
+    featureGates: "-operator.autoinstrumentation.apache-httpd,-operator.autoinstrumentation.go,-operator.autoinstrumentation.nginx,-operator.autoinstrumentation.python"
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
