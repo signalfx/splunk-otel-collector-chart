@@ -86,8 +86,8 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
   | Java                     | `operator.autoinstrumentation.java`                   | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-java                    |
   | NodeJS                   | `operator.autoinstrumentation.nodejs`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-js                      |
   | DotNet                   | `operator.autoinstrumentation.dotnet`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-dotnet                  |
-  | Python                   | `operator.autoinstrumentation.python`                 | Enabled                    | Experimental | https://github.com/open-telemetry/opentelemetry-python          |
-  | ApacheHttpD              | `operator.autoinstrumentation.apache-httpd`           | Enabled                    | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
+  | ApacheHttpD              | `operator.autoinstrumentation.apache-httpd`           | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
   | Go                       | `operator.autoinstrumentation.go`                     | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-go              |
   | Nginx                    | `operator.autoinstrumentation.nginx`                  | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
+  | Python                   | `operator.autoinstrumentation.python`                 | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-python          |
 {{- end }}
