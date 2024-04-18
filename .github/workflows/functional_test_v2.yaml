@@ -64,6 +64,7 @@ jobs:
           kubectl get pods
           kubectl logs -l app=dotnet-test
           kubectl describe pod -l app=dotnet-test
+          kubectl get pod -l app=dotnet-test -o yaml
           pwd
           cd ..
           tree

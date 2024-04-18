@@ -57,6 +57,7 @@ const (
 	signalFxReceiverPort                   = 9443
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	otlpReceiverPort                       = 4317
+	otlpHTTPReceiverPort                   = 4318
 	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
@@ -425,18 +426,18 @@ func testNodeJSTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
+	//require.Eventually(t, func() bool {
+	//	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+	//		trace := tracesConsumer.AllTraces()[i]
+	//		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
+	//			if expectedTraces.SpanCount() == trace.SpanCount() {
+	//				selectedTrace = &trace
+	//				break
+	//			}
+	//		}
+	//	}
+	//	return selectedTrace != nil
+	//}, 3*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
 	maskScopeVersion(*selectedTrace)
@@ -481,18 +482,18 @@ func testJavaTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
+	//require.Eventually(t, func() bool {
+	//	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+	//		trace := tracesConsumer.AllTraces()[i]
+	//		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
+	//			if expectedTraces.SpanCount() == trace.SpanCount() {
+	//				selectedTrace = &trace
+	//				break
+	//			}
+	//		}
+	//	}
+	//	return selectedTrace != nil
+	//}, 3*time.Minute, 5*time.Second)
 
 	require.NotNil(t, selectedTrace)
 
@@ -1174,6 +1175,7 @@ func setupTraces(t *testing.T) *consumertest.TracesSink {
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpReceiverPort)
+	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpHTTPReceiverPort)
 
 	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
 	require.NoError(t, err)
