@@ -329,7 +329,7 @@ jobs:
       - uses: azure/login@v2.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: azure/aks-set-context@v3.2
+      - uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
