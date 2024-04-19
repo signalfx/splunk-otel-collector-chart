@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/collector/consumer v0.98.0
 	go.opentelemetry.io/collector/pdata v1.5.0
 	go.opentelemetry.io/collector/receiver v0.98.0
-	go.opentelemetry.io/collector/receiver/otlpreceiver v0.97.0
+	go.opentelemetry.io/collector/receiver/otlpreceiver v0.98.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.14.3
 	k8s.io/api v0.29.3
@@ -143,9 +143,9 @@ require (
 	go.opentelemetry.io/collector v0.98.0 // indirect
 	go.opentelemetry.io/collector/config/configauth v0.98.0 // indirect
 	go.opentelemetry.io/collector/config/configcompression v1.5.0 // indirect
-	go.opentelemetry.io/collector/config/configgrpc v0.97.0 // indirect
+	go.opentelemetry.io/collector/config/configgrpc v0.98.0 // indirect
 	go.opentelemetry.io/collector/config/confighttp v0.98.0 // indirect
-	go.opentelemetry.io/collector/config/confignet v0.97.0 // indirect
+	go.opentelemetry.io/collector/config/confignet v0.98.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v1.5.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v0.98.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.98.0 // indirect
