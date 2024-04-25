@@ -162,6 +162,9 @@ splunkObservability:
   # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
   profilingEnabled: false
 
+  # Whether to skip checking the certificate of the K8s endpoint.
+  insecureSkipVerify: false
+
 ################################################################################
 # Logs collection engine:
 # - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to

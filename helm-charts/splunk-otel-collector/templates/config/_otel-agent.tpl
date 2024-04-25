@@ -231,6 +231,7 @@ receivers:
     extra_metadata_labels:
       - container.id
       # - k8s.volume.type
+    insecure_skip_verify:  {{ .Values.splunkObservability.insecureSkipVerify }}
 
   signalfx:
     endpoint: 0.0.0.0:9943
