@@ -141,7 +141,7 @@ to be configured.
 For Splunk Enterprise/Cloud the following parameters are required:
 
 - `splunkPlatform.endpoint`: URL to a Splunk instance, e.g.
-  "http://localhost:8088/services/collector"
+  "http://localhost:8088/services/collector/event"
 - `splunkPlatform.token`: Splunk HTTP Event Collector token
 
 For Splunk Observability Cloud the following parameters are required:
@@ -173,13 +173,13 @@ helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splun
 Sending data to Splunk Enterprise or Splunk Cloud
 
 ```bash
-helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector/event,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 Sending data to both Splunk Observability Cloud and Splunk Enterprise or Splunk Cloud
 
 ```bash
-helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
+helm install my-splunk-otel-collector --set="splunkPlatform.endpoint=https://127.0.0.1:8088/services/collector/event,splunkPlatform.token=xxxxxx,splunkPlatform.metricsIndex=k8s-metrics,splunkPlatform.index=main,splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 You can specify a namespace to deploy the chart to with the `-n` argument. Here is an example showing how to deploy in the `otel` namespace:
