@@ -384,6 +384,14 @@ _Note: Native OpenTelemetry instrumentation libraries are owned and maintained b
 | Nginx                    | OpenTelemetry  | `operator.autoinstrumentation.nginx`                  | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-cpp-contrib | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
 | Python                   | Splunk         | `operator.autoinstrumentation.python`                 | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-python      | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python       |
 
+#### Steps to Enable Feature Gates
+
+1. **Identify the Feature Gate**: Each instrumentation library has a corresponding feature gate that controls its activation, as listed in the table of instrumentation languages.
+
+2. **Modify Helm Values File**: Open your Helm values file where the OpenTelemetry Operator configuration is defined. Locate the `operator.manager.featureGates` section.
+
+3. **Update Feature Gates**: To enable an experimental library, update the corresponding feature gate with a `+` prefix.
+
 ### Documentation Resources
 
 - https://developers.redhat.com/devnation/tech-talks/using-opentelemetry-on-kubernetes

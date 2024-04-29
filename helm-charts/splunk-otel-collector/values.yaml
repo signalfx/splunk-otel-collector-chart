@@ -1194,7 +1194,7 @@ operator:
       #   - repository: Specifies the Docker image repository.
       #   - tag: Indicates the Docker image tag.
       #   - env: (Optional) Allows you to add any additional environment variables.
-      # Auto-instrumentation for the various languages that are distributed by Splunk are enabled by default.
+      # Auto-instrumentation for the various languages that are distributed by Splunk or OpenTelemetry.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
         tag: v1.31.0
@@ -1207,24 +1207,25 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
-      # Auto-instrumentation for the various languages distributed by OpenTelemetry natively (below) are disabled by default.
-      # Enable any language by changing its corresponding feature gate from "-" to "+" under "operator.manager.featureGates".
+      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.apache-httpd".
       apache-httpd:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
+      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.go".
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
+      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.nginx".
       nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
+      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.python".
       python:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.44b0
       # Auto-instrumentation Libraries (End)
   manager:
     # Configure feature gates here. Prefix with "+" to enable or "-" to disable a feature.
-    # TODO: See if there is a better way to set feature gates per language
     featureGates: "-operator.autoinstrumentation.apache-httpd,-operator.autoinstrumentation.go,-operator.autoinstrumentation.nginx,-operator.autoinstrumentation.python"
   admissionWebhooks:
     certManager:

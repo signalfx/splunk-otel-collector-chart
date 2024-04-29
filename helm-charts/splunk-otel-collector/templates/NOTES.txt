@@ -80,14 +80,5 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true)! The operator can automatically instrument Kubernetes hosted applications, the integration maturity can vary per application language.
   - Status: Instrumentation language maturity varies. Below is a table detailing each integration language's status and relevant information.
   - Usage: Certain instrumentation languages are enabled by default while other must be enabled manually using feature gates (operator.manager.featureGates=+operator.autoinstrumentation.{language}).
-  - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry instrumentation distributions of instrumentation language libraries. See `values.yaml` under `operator.instrumentation.spec` for more information on what libraries are utilized.
-  | Instrumentation Language | Feature Gate Name                                     | Feature Gate Default Value | Status       | Source URL                                                      |
-  |--------------------------|-------------------------------------------------------|----------------------------|--------------|-----------------------------------------------------------------|
-  | Java                     | `operator.autoinstrumentation.java`                   | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-java                    |
-  | NodeJS                   | `operator.autoinstrumentation.nodejs`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-js                      |
-  | DotNet                   | `operator.autoinstrumentation.dotnet`                 | Enabled                    | Stable       | https://github.com/signalfx/splunk-otel-dotnet                  |
-  | ApacheHttpD              | `operator.autoinstrumentation.apache-httpd`           | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
-  | Go                       | `operator.autoinstrumentation.go`                     | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-go              |
-  | Nginx                    | `operator.autoinstrumentation.nginx`                  | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-cpp-contrib     |
-  | Python                   | `operator.autoinstrumentation.python`                 | Disabled                   | Experimental | https://github.com/open-telemetry/opentelemetry-python          |
+  - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry instrumentation distributions of instrumentation language libraries. See `values.yaml` under `operator.instrumentation.spec` and  `operator.manager.featureGates` for more information on what libraries are utilized.
 {{- end }}
