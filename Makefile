@@ -166,7 +166,7 @@ cmctl: ## Downloads and installs cmctl, the CLI for cert-manager, to your local 
 	}
 
 .PHONY: cert-manager
-cert-manager: ## Ensures cert-manager is deployed in the current Kubernetes cluster and verifies API access with kubectl wait
+cert-manager: cmctl ## Ensures cert-manager is deployed in the current Kubernetes cluster and verifies API access with kubectl wait
 	@if ! kubectl get pods -l app=cert-manager --all-namespaces | grep -q 'Running'; then \
 		echo "Deploying cert-manager now..."; \
 		kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml || exit 1; \
