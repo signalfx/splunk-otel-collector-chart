@@ -34,7 +34,13 @@ spec:
             - --health-probe-addr=:8081
             - --webhook-port=9443
             - --collector-image=otel/opentelemetry-collector-contrib:0.95.0
-            - --feature-gates=-operator.autoinstrumentation.apache-httpd,-operator.autoinstrumentation.go,-operator.autoinstrumentation.nginx,-operator.autoinstrumentation.python
+            - --enable-java-instrumentation=true
+            - --enable-nodejs-instrumentation=true
+            - --enable-dotnet-instrumentation=true
+            - --enable-apache-httpd-instrumentation=false
+            - --enable-go-instrumentation=false
+            - --enable-nginx-instrumentation=false
+            - --enable-python-instrumentation=false
           command:
             - /manager
           env:

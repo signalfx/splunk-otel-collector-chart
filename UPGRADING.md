@@ -1,5 +1,35 @@
 # Upgrade guidelines
 
+# 0.99.0 to 0.99.1
+
+Feature gates for controlling instrumentation in the operator have been replaced with command-line arguments.
+This update primarily affects users of non-Splunk distributions like apache-httpd, go, nginx, and python, which are now disabled by default.
+
+If you were using `operator.manager.featureGates`, convert previous feature gates to command-line arguments in `operator.manager.extraArgs`. See below for summary of release changes:
+- `+operator.autoinstrumentation.java` becomes `--enable-java-instrumentation=true`
+- `+operator.autoinstrumentation.nodejs` becomes `--enable-nodejs-instrumentation=true`
+- `+operator.autoinstrumentation.dotnet` becomes `--enable-dotnet-instrumentation=true`
+- `+operator.autoinstrumentation.apache-httpd` becomes `--enable-apache-httpd-instrumentation=false`
+- `-operator.autoinstrumentation.go` becomes `--enable-go-instrumentation=false`
+- `-operator.autoinstrumentation.nginx` becomes `--enable-nginx-instrumentation=false`
+- `+operator.autoinstrumentation.python` becomes `--enable-python-instrumentation=false`
+
+If you want to maintain the same level of instrumentation availability as before, configure your `operator` settings as follows:
+```yaml
+operator:
+  manager:
+    extraArgs:
+      - --enable-java-instrumentation=true
+      - --enable-nodejs-instrumentation=true
+      - --enable-dotnet-instrumentation=true
+      - --enable-apache-httpd-instrumentation=true
+      - --enable-go-instrumentation=false
+      - --enable-nginx-instrumentation=false
+      - --enable-python-instrumentation=true
+```
+
+If you need to enable a specific instrumentation, such as Go, update the value of `operator.manager.extraArgs` as needed.
+
 # 0.93.0 to 0.94.0
 
 The `networkExplorer` option is removed.

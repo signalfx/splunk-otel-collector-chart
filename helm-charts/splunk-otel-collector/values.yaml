@@ -1207,26 +1207,33 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
-      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.apache-httpd".
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-apache-httpd-instrumentation=true".
       apache-httpd:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
-      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.go".
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-go-instrumentation=true".
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
-      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.nginx".
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-nginx-instrumentation=true".
       nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
-      # Disabled by default. To enable, update "operator.manager.featureGates" for the related feature gate to "+operator.autoinstrumentation.python".
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-python-instrumentation=true".
       python:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.44b0
       # Auto-instrumentation Libraries (End)
   manager:
-    # Configure feature gates here. Prefix with "+" to enable or "-" to disable a feature.
-    featureGates: "-operator.autoinstrumentation.apache-httpd,-operator.autoinstrumentation.go,-operator.autoinstrumentation.nginx,-operator.autoinstrumentation.python"
+    # Configure operator manager command-line args.
+    extraArgs:
+      - --enable-java-instrumentation=true
+      - --enable-nodejs-instrumentation=true
+      - --enable-dotnet-instrumentation=true
+      - --enable-apache-httpd-instrumentation=false
+      - --enable-go-instrumentation=false
+      - --enable-nginx-instrumentation=false
+      - --enable-python-instrumentation=false
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
