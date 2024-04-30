@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.96.0
+    helm.sh/chart: splunk-otel-collector-0.99.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.96.1"
+    app.kubernetes.io/version: "0.99.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.96.0
+    chart: splunk-otel-collector-0.99.0
     release: default
     heritage: Helm
 data:
@@ -32,8 +32,6 @@ data:
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
       zpages: null
     processors:
       batch: null
@@ -196,7 +194,6 @@ data:
       extensions:
       - health_check
       - k8s_observer
-      - memory_ballast
       - zpages
       pipelines:
         metrics:

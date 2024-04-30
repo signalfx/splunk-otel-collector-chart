@@ -25,31 +25,45 @@ these frameworks often have pre-built instrumentation capabilities already avail
 
 ### 1. Deploy the Helm Chart with the Operator enabled
 
-Set `operator.enabled=true` when deploying the chart to enable deploying the operator as well.
-If a cert-manager is not available in the cluster (or other TLS certificate source), then you'll need to deploy it
-using `certmanager.enabled=true`. The cert-manager issues TLS certificates the operator requires. You can use the
-commands below to run these steps.
-- An [opentelemetry.io/v1alpha1 Instrumentation](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation)
-object is used to configure the auto-instrumentation of your applications. To successfully enable instrumentation, the
-target pod must have an Instrumentation object available.
-- When `operator.enabled=true`, the helm chart deploys a
-[default](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml)
-opentelemetry.io/v1alpha1 Instrumentation object.
-  - The default Instrumentation supports [AlwaysOn Profiling](https://docs.splunk.com/Observability/apm/profiling/intro-profiling.html) when `splunkObservability.profilingEnabled=true`.
-    - These environment variables will be set when auto-instrumenting applications.
-      - SPLUNK_PROFILER_ENABLED="true"
-      - SPLUNK_PROFILER_MEMORY_ENABLED="true"
-    - Example
-      - [Enable always-on profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling.yaml)
-  - Users can override the specifications of the default deployed instrumentation by setting override values under `operator.instrumentation.spec`.
-    - Examples
-      - [Add custom environment span tag](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
-      - [Add trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
-      - [Enable always-on profiling partially](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
-- To view a deployed Instrumentation, you can use the command: `kubectl get otelinst {instrumentation_name} -o yaml`.
-- The `deployment.environment` attribute may be set in the exported traces to identify the [APM deployment environment](https://docs.splunk.com/observability/en/apm/set-up-apm/environments.html). There are two ways to set this attribute:
-  - Use the optional `environment` configuration in `values.yaml`.
-  - Use the Instrumentation spec (`operator.instrumentation.spec.env`) with the environment variable `OTEL_RESOURCE_ATTRIBUTES`.
+- **Operator Deployment (Required)**
+  - `operator.enabled`: Set to `true` to enable deploying the operator.
+    - **Required**: This configuration is necessary for the operator's deployment within your cluster.
+
+- **TLS Certificate Management (Required)**
+  - **Using cert-manager (Recommended)**
+    - `certmanager.enabled`: Enable cert-manager by setting to `true`.
+      - **Check Before Enabling**: Ensure cert-manager is not already installed to avoid multiple instances.
+      - **Recommended**: Cert-manager simplifies the management of TLS certificates, automating issuance and renewal.
+
+  - **Alternative Methods**
+    - **Automatically Generate a Self-Signed Certificate with Helm**
+      - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
+        - **Use Case**: Suitable when cert-manager is not installed or preferred.
+    - **Provide Your Own Certificate**
+      - Ensure both `operator.admissionWebhooks.certManager.enabled` and `operator.admissionWebhooks.autoGenerateCert.enabled` are set to `false`.
+      - `operator.admissionWebhooks.cert_file`: Path to your PEM-encoded certificate.
+      - `operator.admissionWebhooks.key_file`: Path to your PEM-encoded private key.
+      - `operator.admissionWebhooks.ca_file`: Path to your PEM-encoded CA certificate.
+        - **Use Case**: Ideal for integrating existing certificates or custom certificate management processes.
+
+- **Deployment Environment (Required)**
+  - **Via `values.yaml` (Recommended)**
+    - `environment`: Required configuration to set the deployment environment attribute in exported traces.
+
+  - **Alternative Methods**
+    - **Instrumentation Spec**
+      - `operator.instrumentation.spec.env`: Use with the `OTEL_RESOURCE_ATTRIBUTES` environment variable to specify the deployment environment.
+
+- **Auto-instrumentation Configuration Overrides (Optional)**
+  - **[Default Instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml) Object Deployment**
+    - Automatically deploys with `operator.enabled=true`.
+    - Supports AlwaysOn Profiling when `splunkObservability.profilingEnabled=true`.
+  - **Customizing Instrumentation**
+    - `operator.instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
+      - **Examples**
+        - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
+        - [trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
+        - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml).
 
 ```bash
 # Check if cert-manager is already installed, don't deploy a second cert-manager.
@@ -398,7 +412,7 @@ provides best effort support with issues related to native OpenTelemetry instrum
 
 ### Troubleshooting the Operator and Cert Manager
 
-#### 1. Check the logs for failures
+#### Check the logs for failures
 
 **Operator Logs:**
 
@@ -414,7 +428,30 @@ kubectl logs -l app=cainjector
 kubectl logs -l app=webhook
 ```
 
-#### 2. Cert-Manager Issues
+#### Operator Issues
+
+##### Networking and Firewall Requirements
+
+Ensure the Mutating Webhook used by the operator for pod auto-instrumentation is not hindered by network policies or firewall rules. Key points to ensure:
+
+- **Webhook Accessibility**: The webhook must freely communicate with the cluster IP and the Kubernetes API server. Ensure network policies or firewall rules permit operator-related services to interact with these endpoints.
+- **Required Ports**: Policies should explicitly allow traffic to the necessary ports for seamless operation.
+
+Use the following command to identify the IP addresses and ports that need to be accessible:
+
+```bash
+kubectl get svc -n {operator_namespace}
+# Example output indicating necessary IP and port configurations:
+# NAME                                          TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)                                       AGE
+# kubernetes                                    ClusterIP  10.0.0.1      <none>       443/TCP                                       10d
+# splunk-splunk-otel-collector-agent            ClusterIP  10.0.176.113  <none>       8006/TCP,14250/TCP,14268/TCP,...              3d17h
+# splunk-splunk-otel-collector-operator         ClusterIP  10.0.254.125  <none>       8443/TCP,8080/TCP                             3d17h
+# splunk-splunk-otel-collector-operator-webhook ClusterIP  10.0.222.223  <none>       443/TCP                                       3d17h
+```
+
+- **Configuration Action**: Adjust your network policies and firewall settings based on the service endpoints and ports listed by the command. This ensures the webhook and operator services can properly communicate within the cluster.
+
+#### Cert-Manager Issues
 
 If the operator seems to be hanging, it could be due to the cert-manager not auto-creating the required certificate. To troubleshoot:
 
@@ -426,7 +463,7 @@ For additional guidance, refer to the official cert-manager documentation:
 - [Troubleshooting Guide](https://cert-manager.io/docs/troubleshooting/)
 - [Uninstallation Guide](https://cert-manager.io/v1.2-docs/installation/uninstall/kubernetes/)
 
-#### 3. Validate Certificates
+##### Validate Certificates
 
 Ensure that the certificate, which the cert-manager creates and the operator utilizes, is available.
 
@@ -436,24 +473,10 @@ kubectl get certificates
 # splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
 ```
 
-#### 4. Using a Self-Signed Certificate for the Webhook
+##### Using a Self-Signed Certificate for the Webhook
 
 The operator supports various methods for managing TLS certificates for the webhook. Below are the options available through the operator, with a brief description for each. For detailed configurations and specific use cases, please refer to the operator’s
-[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml).
-
-1. **(Default Functionality) Use certManager to Generate a Self-Signed Certificate:**
-  - Ensure that `operator.admissionWebhooks.certManager` is enabled.
-  - By default, the OpenTelemetry Operator will use a self-signer issuer.
-  - This option takes precedence over other options when enabled.
-  - Specific issuer references and annotations can be provided as needed.
-
-2. **Use Helm to Automatically Generate a Self-Signed Certificate:**
-  - Ensure that `operator.admissionWebhooks.certManager` is disabled and `operator.admissionWebhooks.autoGenerateCert` is enabled.
-  - When these conditions are met, Helm will automatically create a self-signed certificate and secret for you.
-
-3. **Use Your Own Self-Signed Certificate:**
-  - Ensure that both `operator.admissionWebhooks.certManager` and `operator.admissionWebhooks.autoGenerateCert` are disabled.
-  - Provide paths to your own PEM-encoded certificate, private key, and CA cert.
+[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml)
 
 **Note**: While using a self-signed certificate offers a quicker and simpler setup, it has limitations, such as not being trusted by default by clients.
 This may be acceptable for testing purposes or internal environments. For complete configurations and additional guidance, please refer to the provided link to the Helm chart documentation.

@@ -43,7 +43,7 @@ jobs:
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
       - name: Create kind cluster
-        uses: helm/kind-action@v1.9.0
+        uses: helm/kind-action@v1.10.0
         with:
           node_image: kindest/node:${{ matrix.k8s-version }}
           kubectl_version: ${{ matrix.k8s-version }}
@@ -75,7 +75,6 @@ jobs:
         with:
           name: write_expected_dotnet_traces
           path: functional_tests/write_expected_dotnet_traces.yaml
-
 #  eks-test:
 #    name: Test helm install in EKS - credentials needed
 #    needs: kubernetes-test

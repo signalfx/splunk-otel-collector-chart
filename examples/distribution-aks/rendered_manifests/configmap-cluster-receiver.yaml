@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.96.0
+    helm.sh/chart: splunk-otel-collector-0.99.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.96.1"
+    app.kubernetes.io/version: "0.99.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.96.0
+    chart: splunk-otel-collector-0.99.0
     release: default
     heritage: Helm
 data:
@@ -26,8 +26,6 @@ data:
         timeout: 10s
     extensions:
       health_check: null
-      memory_ballast:
-        size_mib: ${SPLUNK_BALLAST_SIZE_MIB}
     processors:
       batch:
         send_batch_max_size: 32768
@@ -98,7 +96,6 @@ data:
     service:
       extensions:
       - health_check
-      - memory_ballast
       pipelines:
         metrics:
           exporters:

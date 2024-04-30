@@ -36,7 +36,7 @@ jobs:
         if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}
 
       - name: Install Helm
-        uses: azure/setup-helm@v3.5
+        uses: azure/setup-helm@v4
         with:
           version: v3.11.3
         if: ${{ steps.check_update_chart.outputs.VALID_UPDATE == 1 }}

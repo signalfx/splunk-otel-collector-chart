@@ -70,6 +70,9 @@ resourceSpans:
         - key: process.runtime.version
           value:
             stringValue: 21.0.2+13-LTS
+        - key: service.instance.id
+          value:
+            stringValue: 9d6b356a-c9d2-49d4-b553-bf0e6bb7e323
         - key: service.name
           value:
             stringValue: java-test
@@ -124,7 +127,7 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.21.0
+    schemaUrl: https://opentelemetry.io/schemas/1.23.1
     scopeSpans:
       - scope:
           name: io.opentelemetry.tomcat-10.0

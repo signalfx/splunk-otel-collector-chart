@@ -581,7 +581,7 @@ logsCollection:
     # are usually broken down into several one-line logs and can be reconstructed with a regex
     # expression that matches the first line of each logs batch. The following operator is being
     # utilized for this purpose:
-    # https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/recombine.md
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md
     # By the time of reconstructing a multiline log the following information is available to
     # identify source of the logs: namespace, pod and container names. At least one source
     # identifier has to be specified in for each multiline config.
@@ -1196,10 +1196,10 @@ operator:
       #   - env: (Optional) Allows you to add any additional environment variables.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-        tag: v1.31.0
+        tag: v1.32.0
       nodejs:
         repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
-        tag: v2.7.1
+        tag: v2.8.0
       dotnet:
         repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
         tag: v1.4.0
