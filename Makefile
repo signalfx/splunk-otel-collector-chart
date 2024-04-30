@@ -21,6 +21,9 @@ CHLOGGEN ?= $(LOCALBIN)/chloggen
 
 CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
 
+KUBE_CONFIG ?= $(HOME)/.kube/config
+KUBE_TEST_ENV ?= kind
+
 # The help target as provided
 .PHONY: help
 help: ## Display Makefile help information for all actions
@@ -83,6 +86,17 @@ unittest: ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
 	cd helm-charts/splunk-otel-collector && helm unittest --strict -f ../../test/unittests/*.yaml . || exit 1
 
+.PHONY: functionaltest
+functionaltest: dep-update start-k8s cert-manager ## Run functional v2 tests with prerequisite checks and setup
+	@echo "Running functional tests..."
+	cd functional_tests && KUBE_CONFIG=$(KUBECONFIG) KUBE_TEST_ENV=$(KUBE_TEST_ENV) go test -v || exit 1
+
+.PHONY: functionaltest-cleanup
+functionaltest-cleanup: dep-update start-k8s cert-manager ## Run functional v2 tests with prerequisite checks and setup
+	helm delete sock || true
+	make cert-manager-cleanup || true
+	kubectl delete ns ns-w-exclude ns-w-index ns-wo-index || true
+
 ##@ Changelog
 # Tasks related to changelog management
 
@@ -134,12 +148,6 @@ chlog-release-notes: ## Prints out the current release notes to stdout or RELEAS
 ##@ Cert Manager
 # Tasks related to deploying and managing Cert Manager
 
-.PHONY: cert-manager
-cert-manager: cmctl ## Installs cert-manager in the current Kubernetes cluster and verifies API access with cmctl
-	# Consider using cmctl to install the cert-manager once install command is not experimental
-	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml
-	$(CMCTL) check api --wait=5m
-
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 CMCTL = $(shell pwd)/bin/cmctl
 .PHONY: cmctl
@@ -157,8 +165,46 @@ cmctl: ## Downloads and installs cmctl, the CLI for cert-manager, to your local 
 	rm -rf $$TMP_DIR ;\
 	}
 
+.PHONY: cert-manager
+cert-manager: ## Ensures cert-manager is deployed in the current Kubernetes cluster and verifies API access with kubectl wait
+	@if ! kubectl get pods -l app=cert-manager --all-namespaces | grep -q 'Running'; then \
+		echo "Deploying cert-manager now..."; \
+		kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml || exit 1; \
+		echo "Waiting until cert-manager is running."; \
+	  sleep 5; \
+	else \
+		echo "cert-manager is already deployed."; \
+	fi; \
+	$(CMCTL) check api --wait=5m; \
+
+.PHONY: cert-manager-cleanup
+cert-manager-cleanup: ## Ensures cert-manager is deleted in the current Kubernetes cluster and ensures all related resources are removed
+	kubectl delete issuers.cert-manager.io --all --all-namespaces || true
+	kubectl delete clusterissuers.cert-manager.io --all --all-namespaces || true
+	kubectl delete certificates.cert-manager.io --all --all-namespaces || true
+	kubectl delete certificaterequests.cert-manager.io --all --all-namespaces || true
+	kubectl delete orders.acme.cert-manager.io --all --all-namespaces || true
+	kubectl delete challenges.acme.cert-manager.io --all --all-namespaces || true
+	kubectl delete -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml || true
+	kubectl delete apiservice v1.cert-manager.io  || true
+	kubectl get validatingwebhookconfigurations --no-headers=true | grep 'cert-manager' | awk '{print $0}' | xargs -r kubectl delete validatingwebhookconfigurations --all-namespaces
+	kubectl get mutatingwebhookconfigurations --no-headers=true | grep 'cert-manager' | awk '{print $0}' | xargs -r kubectl delete mutatingwebhookconfigurations --all-namespaces
+	kubectl delete deployments,services,clusterroles,clusterrolebindings,serviceaccounts -l app=cert-manager --all-namespaces || true
+	kubectl delete namespace cert-manager || true
+
 ##@ CI Scripts
 # Tasks related to continous integration
+
+start-k8s: ## Check if connected to a Kubernetes cluster, if not, start a local kind Kubernetes cluster
+	@if kubectl cluster-info; then \
+		echo "Connected to a Kubernetes cluster successfully."; \
+	else \
+		echo "Not connected to a Kubernetes cluster. Starting a local kind cluster..."; \
+		kind create cluster --image kindest/node:latest; \
+	fi
+	kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+	@echo "Kubernetes version:"; \
+	kubectl version
 
 # Example Usage:
 #   make update-docker-image FILE_PATH=./path/to/values.yaml QUERY_STRING='.images.splunk' FILTER='v1.0'
