@@ -12,6 +12,8 @@ spec:
       name: nodejs-test
       labels:
         app: nodejs-test
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
         - image: quay.io/splunko11ytest/nodejs_test:latest

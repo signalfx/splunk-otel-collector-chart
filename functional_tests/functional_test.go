@@ -57,7 +57,7 @@ const (
 	signalFxReceiverPort                   = 9443
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	otlpReceiverPort                       = 4317
-	otlpHTTPReceiverPort                   = 4318
+	otlpHTTPReceiverPort                   = 4318 // TODO: Verify this port is setup properly to receive data from .NET and Python instrumentation
 	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
@@ -426,18 +426,18 @@ func testNodeJSTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	//require.Eventually(t, func() bool {
-	//	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-	//		trace := tracesConsumer.AllTraces()[i]
-	//		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-	//			if expectedTraces.SpanCount() == trace.SpanCount() {
-	//				selectedTrace = &trace
-	//				break
-	//			}
-	//		}
-	//	}
-	//	return selectedTrace != nil
-	//}, 3*time.Minute, 5*time.Second)
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
 	maskScopeVersion(*selectedTrace)
@@ -482,18 +482,18 @@ func testJavaTraces(t *testing.T) {
 
 	var selectedTrace *ptrace.Traces
 
-	//require.Eventually(t, func() bool {
-	//	for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-	//		trace := tracesConsumer.AllTraces()[i]
-	//		if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-	//			if expectedTraces.SpanCount() == trace.SpanCount() {
-	//				selectedTrace = &trace
-	//				break
-	//			}
-	//		}
-	//	}
-	//	return selectedTrace != nil
-	//}, 3*time.Minute, 5*time.Second)
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
 
 	require.NotNil(t, selectedTrace)
 
@@ -533,6 +533,7 @@ func testJavaTraces(t *testing.T) {
 func testDotNetTraces(t *testing.T) {
 	tracesConsumer := setupOnce(t).tracesConsumer
 
+	// TODO: Add this back once we have .NET golden file
 	//var expectedTraces ptrace.Traces
 	//expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
 	//expectedTraces, err := golden.ReadTraces(expectedTracesFile)
@@ -546,6 +547,7 @@ func testDotNetTraces(t *testing.T) {
 			trace := tracesConsumer.AllTraces()[i]
 			golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", trace)
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
+				// TODO: Add this back or refactor once we have .NET golden file
 				//if expectedTraces.SpanCount() == trace.SpanCount() {
 				//	selectedTrace = &trace
 				//	break
@@ -558,6 +560,7 @@ func testDotNetTraces(t *testing.T) {
 	}, 3*time.Minute, 5*time.Second)
 	golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", *selectedTrace)
 
+	// TODO: Add this back once we have .NET golden file
 	//require.NotNil(t, selectedTrace)
 	//
 	//maskScopeVersion(*selectedTrace)

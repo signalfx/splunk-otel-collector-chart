@@ -1,3 +1,4 @@
+# TODO: Review all changes to this file, remove bloat
 # .Net test image
 
 This image is used for testing the auto-instrumentation of .Net application through the OpenTelemetry Operator.
@@ -11,11 +12,12 @@ The container performs two separate functions:
 Running this container inside a Kubernetes cluster under observation of the operator therefore creates traces.
 
 ## Develop
-Make sure docker
+
 Login to quay.io and push with `make push`
 Make sure for new image repositories you make the repository public
 - Arm based machines can have issues running dockerx build commands with this test image due to QEMU and .NET support, see: https://github.com/dotnet/dotnet-docker/issues/3832
 - On an M2 Mac running Docker Desktop 25.0.0, was able to get the dockerx build to run after setting `docker buildx create --use --name multi-arch-builder`
+
 ## Creating a test and golden file
 
 In functional_test_v2.yaml add the following lines
