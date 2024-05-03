@@ -20,8 +20,7 @@ jobs:
         # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
         # To check latest Kind versions, see: https://hub.docker.com/r/kindest/node/tags
         k8s-version:
-          # TODO: Until Kind publishes more images, use 1.30 alpha image (that they recommend), see: https://github.com/kubernetes-sigs/kind/issues/3589
-          - v1.30.0-alpha.0.102_41890534532931 # Support: 28 Apr 2025 - 28 Jun 2025
+          - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
           - v1.29.2 # Support: 28 Dec 2024 - 28 Feb 2025
           - v1.28.7 # Support: 28 Aug 2024 - 28 Oct 2024
           - v1.27.11  # Support: 28 Apr 2024 - 28 Jun 2024
