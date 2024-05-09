@@ -604,6 +604,10 @@
           "description": "Host network allows container to use networking stack of the host machine",
           "type": "boolean"
         },
+        "skipInitContainers": {
+          "description": "Skip init containers",
+          "type": "boolean"
+        },
         "annotations": {
           "type": "object"
         },
