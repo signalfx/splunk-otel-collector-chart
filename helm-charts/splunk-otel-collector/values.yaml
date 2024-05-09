@@ -411,6 +411,10 @@ agent:
   # Disregarded for Windows (unsupported by k8s).
   hostNetwork: true
 
+  # Set this to true to skip all the init containers. If you are running the agent as a non-root user,
+  # you must ensure to handle patching of log directories on the host filesystem manually.
+  skipInitContainers: false
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
