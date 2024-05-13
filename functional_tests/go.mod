@@ -16,7 +16,7 @@ require (
 	go.opentelemetry.io/collector/consumer v0.100.0
 	go.opentelemetry.io/collector/pdata v1.7.0
 	go.opentelemetry.io/collector/receiver v0.100.0
-	go.opentelemetry.io/collector/receiver/otlpreceiver v0.99.0
+	go.opentelemetry.io/collector/receiver/otlpreceiver v0.100.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.14.4
 	k8s.io/api v0.29.3
@@ -143,9 +143,9 @@ require (
 	go.opentelemetry.io/collector v0.100.0 // indirect
 	go.opentelemetry.io/collector/config/configauth v0.100.0 // indirect
 	go.opentelemetry.io/collector/config/configcompression v1.7.0 // indirect
-	go.opentelemetry.io/collector/config/configgrpc v0.99.0 // indirect
+	go.opentelemetry.io/collector/config/configgrpc v0.100.0 // indirect
 	go.opentelemetry.io/collector/config/confighttp v0.100.0 // indirect
-	go.opentelemetry.io/collector/config/confignet v0.99.0 // indirect
+	go.opentelemetry.io/collector/config/confignet v0.100.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v1.7.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v0.100.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.100.0 // indirect
@@ -157,7 +157,7 @@ require (
 	go.opentelemetry.io/collector/extension/auth v0.100.0 // indirect
 	go.opentelemetry.io/collector/featuregate v1.7.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.100.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.50.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.51.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0 // indirect
 	go.opentelemetry.io/otel v1.26.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.48.0 // indirect
