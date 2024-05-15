@@ -25,9 +25,6 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   env:
-    {{- with .Values.operator.instrumentation.spec.env }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
     {{- if .Values.splunkObservability.profilingEnabled }}
     {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
     - name: SPLUNK_PROFILER_ENABLED
@@ -44,6 +41,9 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: status.hostIP
+    {{- end }}
+    {{- with .Values.operator.instrumentation.spec.env }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
 {{ include "splunk-otel-collector.operator.instrumentation-libraries" . }}
 {{- end }}
