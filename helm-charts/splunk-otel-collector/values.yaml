@@ -1202,10 +1202,10 @@ operator:
         tag: v2.8.0
       dotnet:
         repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-        tag: v1.4.0
+        tag: v1.5.0
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
-            value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
+            value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
