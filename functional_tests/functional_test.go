@@ -547,7 +547,9 @@ func testDotNetTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", trace)
-			fmt.Println(string(os.ReadFile("write_expected_dotnet_traces.yaml")))
+			b, err := os.ReadFile("write_expected_dotnet_traces.yaml")
+			require.NoError(t, err)
+			fmt.Println(string(b))
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
 				// TODO: Add this back or refactor once we have .NET golden file
 				//if expectedTraces.SpanCount() == trace.SpanCount() {
@@ -561,6 +563,10 @@ func testDotNetTraces(t *testing.T) {
 		return selectedTrace != nil
 	}, 3*time.Minute, 5*time.Second)
 	golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", *selectedTrace)
+	fmt.Println("=====SELECTED====")
+	b, err := os.ReadFile("write_expected_dotnet_traces.yaml")
+	require.NoError(t, err)
+	fmt.Println(string(b))
 
 	// TODO: Add this back once we have .NET golden file
 	//require.NotNil(t, selectedTrace)
