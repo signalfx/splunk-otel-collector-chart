@@ -1,0 +1,13 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: operator
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Bump operator app to v0.99.0 while keeping operator chart at v0.49.1 due to values.schema.json validation blocker
+# One or more tracking issues related to the change
+issues: [1292]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext:
+  Holding off on updating the operator chart until changes are adopted for https://github.com/open-telemetry/opentelemetry-helm-charts/pull/1065

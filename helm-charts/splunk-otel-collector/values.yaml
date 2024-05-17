@@ -1225,6 +1225,11 @@ operator:
         tag: 0.44b0
       # Auto-instrumentation Libraries (End)
   manager:
+    # TODO: Remove overriding the operator version once this chart has been updated to adhere to
+    # the operator chart schema validation rules. See: https://github.com/open-telemetry/opentelemetry-helm-charts/pull/1065
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+      tag: "0.99.0"
     # Configure operator manager command-line args.
     extraArgs:
       - --enable-java-instrumentation=true
