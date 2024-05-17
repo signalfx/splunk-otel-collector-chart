@@ -20,3 +20,15 @@ spec:
         - image: quay.io/splunko11ytest/dotnet_test:latest
           name: dotnet-test
           imagePullPolicy: IfNotPresent
+          env:
+            - name: OTEL_LOG_LEVEL
+              value: DEBUG
+            - name: OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED
+              value: "true"
+            # This is needed to bypass an error thrown by auto-instrumentation:
+            # [Error] Error in StartupHook initialization: LoaderFolderLocation: /otel-auto-instrumentation-dotnet/net
+            # Exception: Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.
+            # System.Exception: Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.
+            #    at StartupHook.Initialize() in /_/src/OpenTelemetry.AutoInstrumentation.StartupHook/StartupHook.cs:line 34
+            - name: OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED
+              value: "false"
