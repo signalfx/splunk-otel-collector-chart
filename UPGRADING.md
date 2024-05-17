@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-# 0.99.0 to 0.99.1
+# 0.100.0 to 0.100.1
 
 Feature gates for controlling instrumentation in the operator have been replaced with command-line arguments.
 This update primarily affects users of non-Splunk distributions like apache-httpd, go, nginx, and python, which are now disabled by default.
