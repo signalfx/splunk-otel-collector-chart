@@ -374,23 +374,23 @@ Below is a breakdown of the main and related components involved in auto-instrum
 The table below lists the current instrumentation libraries, their availability, and their compatibility with Splunk customer content.
 _Note: Native OpenTelemetry instrumentation libraries are owned and maintained by the OpenTelemetry Community. Splunk provides best effort support for issues related to these libraries._
 
-| Instrumentation Language | Distribution   | Feature Gate Name                                     | Feature Gate Default Value | Status         | Splunk Content Compatibility | Source URL                                                  | Image Repository                                                               |
-|--------------------------|----------------|-------------------------------------------------------|----------------------------|----------------|------------------------------|-------------------------------------------------------------|--------------------------------------------------------------------------------|
-| Java                     | Splunk         | `operator.autoinstrumentation.java`                   | Enabled                    | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-java                | ghcr.io/signalfx/splunk-otel-java/splunk-otel-java                             |
-| NodeJS                   | Splunk         | `operator.autoinstrumentation.nodejs`                 | Enabled                    | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-js                  | ghcr.io/signalfx/splunk-otel-java/splunk-otel-js                               |
-| DotNet                   | Splunk         | `operator.autoinstrumentation.dotnet`                 | Enabled                    | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-dotnet              | ghcr.io/signalfx/splunk-otel-java/splunk-otel-dotnet                           |
-| ApacheHttpD              | OpenTelemetry  | `operator.autoinstrumentation.apache-httpd`           | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-cpp-contrib | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
-| Go                       | OpenTelemetry  | `operator.autoinstrumentation.go`                     | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-go          | ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go |
-| Nginx                    | OpenTelemetry  | `operator.autoinstrumentation.nginx`                  | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-cpp-contrib | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
-| Python                   | Splunk         | `operator.autoinstrumentation.python`                 | Disabled                   | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-python      | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python       |
+| Instrumentation Language | Distribution   | Command Line Arg Name                       | Command Line Arg Default Value | Status         | Splunk Content Compatibility | Source URL                                                  | Image Repository                                                               |
+|--------------------------|----------------|---------------------------------------------|--------------------------------|----------------|------------------------------|-------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Java                     | Splunk         | `operator.autoinstrumentation.java`         | true                           | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-java                | ghcr.io/signalfx/splunk-otel-java/splunk-otel-java                             |
+| NodeJS                   | Splunk         | `operator.autoinstrumentation.nodejs`       | true                           | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-js                  | ghcr.io/signalfx/splunk-otel-java/splunk-otel-js                               |
+| DotNet                   | Splunk         | `operator.autoinstrumentation.dotnet`       | true                           | Stable         | Fully Compatible             | https://github.com/signalfx/splunk-otel-dotnet              | ghcr.io/signalfx/splunk-otel-java/splunk-otel-dotnet                           |
+| ApacheHttpD              | OpenTelemetry  | `operator.autoinstrumentation.apache-httpd` | false                          | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-cpp-contrib | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
+| Go                       | OpenTelemetry  | `operator.autoinstrumentation.go`           | false                          | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-go          | ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go |
+| Nginx                    | OpenTelemetry  | `operator.autoinstrumentation.nginx`        | false                          | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-cpp-contrib | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
+| Python                   | Splunk         | `operator.autoinstrumentation.python`       | false                          | Experimental   | Partially Compatible         | https://github.com/open-telemetry/opentelemetry-python      | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python       |
 
-#### Steps to Enable Feature Gates
+#### Steps to Enable Instrumentation with Command Line Arg
 
-1. **Identify the Feature Gate**: Each instrumentation library has a corresponding feature gate that controls its activation, as listed in the table of instrumentation languages.
+1. **Identify the Argument**: Each instrumentation library has a corresponding command line arg that controls its activation, as listed in the table of instrumentation languages.
 
-2. **Modify Helm Values File**: Open your Helm values file where the OpenTelemetry Operator configuration is defined. Locate the `operator.manager.featureGates` section.
+2. **Modify Helm Values File**: Open your Helm values file where the OpenTelemetry Operator configuration is defined. Locate the `operator.manager.extraArgs` section.
 
-3. **Update Feature Gates**: To enable an experimental library, update the corresponding feature gate with a `+` prefix.
+3. **Update the Argument**: To enable an experimental library, update the corresponding command line arg. It should be in the format of `operator.autoinstrumentation.{language}={true|false}`.
 
 ### Documentation Resources
 
