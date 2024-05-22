@@ -534,11 +534,10 @@ func testJavaTraces(t *testing.T) {
 func testDotNetTraces(t *testing.T) {
 	tracesConsumer := setupOnce(t).tracesConsumer
 
-	// TODO: Add this back once we have .NET golden file
-	//var expectedTraces ptrace.Traces
-	//expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
-	//expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	//require.NoError(t, err)
+	var expectedTraces ptrace.Traces
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_dotnet_traces.yaml")
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
 
 	waitForTraces(t, 30, tracesConsumer)
 	var selectedTrace *ptrace.Traces
@@ -546,55 +545,53 @@ func testDotNetTraces(t *testing.T) {
 	require.Eventually(t, func() bool {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
-			golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", trace)
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
-				// TODO: Add this back or refactor once we have .NET golden file
-				//if expectedTraces.SpanCount() == trace.SpanCount() {
-				//	selectedTrace = &trace
-				//	break
-				//}
+				if expectedTraces.SpanCount() == trace.SpanCount() {
+					selectedTrace = &trace
+					break
+				}
 				selectedTrace = &trace
 				break
 			}
 		}
 		return selectedTrace != nil
 	}, 3*time.Minute, 5*time.Second)
-	golden.WriteTraces(t, "write_expected_dotnet_traces.yaml", *selectedTrace)
 
-	// TODO: Add this back once we have .NET golden file
-	//require.NotNil(t, selectedTrace)
-	//
-	//maskScopeVersion(*selectedTrace)
-	//maskScopeVersion(expectedTraces)
-	//
-	//err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-	//	ptracetest.IgnoreResourceAttributeValue("os.description"),
-	//	ptracetest.IgnoreResourceAttributeValue("process.pid"),
-	//	ptracetest.IgnoreResourceAttributeValue("container.id"),
-	//	ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-	//	ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-	//	ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-	//	ptracetest.IgnoreResourceAttributeValue("os.version"),
-	//	ptracetest.IgnoreResourceAttributeValue("host.arch"),
-	//	ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-	//	ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-	//	ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-	//	ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-	//	ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
-	//	ptracetest.IgnoreSpanAttributeValue("thread.id"),
-	//	ptracetest.IgnoreSpanAttributeValue("thread.name"),
-	//	ptracetest.IgnoreSpanAttributeValue("os.version"),
-	//	ptracetest.IgnoreTraceID(),
-	//	ptracetest.IgnoreSpanID(),
-	//	ptracetest.IgnoreStartTimestamp(),
-	//	ptracetest.IgnoreEndTimestamp(),
-	//	ptracetest.IgnoreResourceSpansOrder(),
-	//	ptracetest.IgnoreScopeSpansOrder(),
-	//)
-	//
-	//require.NoError(t, err)
+	require.NotNil(t, selectedTrace)
+
+	maskScopeVersion(*selectedTrace)
+	maskScopeVersion(expectedTraces)
+	maskSpanParentID(*selectedTrace)
+	maskSpanParentID(expectedTraces)
+
+	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("os.description"),
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
+		ptracetest.IgnoreResourceAttributeValue("container.id"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("thread.id"),
+		ptracetest.IgnoreSpanAttributeValue("thread.name"),
+		ptracetest.IgnoreSpanAttributeValue("os.version"),
+		ptracetest.IgnoreTraceID(),
+		ptracetest.IgnoreSpanID(),
+		ptracetest.IgnoreStartTimestamp(),
+		ptracetest.IgnoreEndTimestamp(),
+		ptracetest.IgnoreResourceSpansOrder(),
+		ptracetest.IgnoreScopeSpansOrder(),
+	)
+
+	require.NoError(t, err)
 }
 
 func shortenNames(value string) string {
@@ -1345,6 +1342,20 @@ func maskScopeVersion(traces ptrace.Traces) {
 		for j := 0; j < rs.ScopeSpans().Len(); j++ {
 			ss := rs.ScopeSpans().At(j)
 			ss.Scope().SetVersion("")
+		}
+	}
+}
+
+func maskSpanParentID(traces ptrace.Traces) {
+	rss := traces.ResourceSpans()
+	for i := 0; i < rss.Len(); i++ {
+		rs := rss.At(i)
+		for j := 0; j < rs.ScopeSpans().Len(); j++ {
+			ss := rs.ScopeSpans().At(j)
+			for k := 0; k < ss.Spans().Len(); k++ {
+				span := ss.Spans().At(k)
+				span.SetParentSpanID(pcommon.NewSpanIDEmpty())
+			}
 		}
 	}
 }
