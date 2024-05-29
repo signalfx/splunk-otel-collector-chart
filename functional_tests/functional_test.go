@@ -628,6 +628,11 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts"),
 	)
+	if err != nil {
+		golden.WriteMetrics(t, "/tmp/out.yaml", *selected)
+		b, _ := os.ReadFile("/tmp/out.yaml")
+		fmt.Println(string(b))
+	}
 
 	require.NoError(t, err)
 }
@@ -1064,15 +1069,16 @@ func testHECMetrics(t *testing.T) {
 }
 
 func checkMetricsIndex(t *testing.T, consumer *consumertest.MetricsSink, index string) {
-	require.Eventually(t, func() bool {
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 		m := consumer.AllMetrics()[len(consumer.AllMetrics())-1]
+		var indices []string
 		for i := 0; i < m.ResourceMetrics().Len(); i++ {
 			rm := m.ResourceMetrics().At(i)
 			if metricIndex, ok := rm.Resource().Attributes().Get("com.splunk.index"); ok {
-				return index == metricIndex.AsString()
+				indices = append(indices, metricIndex.AsString())
 			}
 		}
-		return false
+		assert.Contains(tt, indices, index)
 	}, 5*time.Minute, 10*time.Second)
 }
 
