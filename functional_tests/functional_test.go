@@ -643,6 +643,7 @@ func testAgentLogs(t *testing.T) {
 	var sourcetypes []string
 	var indices []string
 	var journalDsourceTypes []string
+	customLog := false
 
 	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
 		l := logsConsumer.AllLogs()[i]
@@ -679,7 +680,9 @@ func testAgentLogs(t *testing.T) {
 						helloWorldLogRecord = &logRecord
 						helloWorldResource = rl.Resource()
 					}
-
+					_, custom := logRecord.Attributes().Get("customField")
+					_, podLabel := logRecord.Attributes().Get("k8s.pod.labels.app")
+					customLog = customLog || (custom && podLabel)
 				}
 			}
 		}
@@ -706,6 +709,9 @@ func testAgentLogs(t *testing.T) {
 	t.Run("test index is set", func(t *testing.T) {
 		assert.Contains(t, indices, "ns-anno")
 		assert.Contains(t, indices, "pod-anno")
+	})
+	t.Run("customField is set", func(t *testing.T) {
+		assert.True(t, customLog)
 	})
 	t.Run("test sourcetype is set", func(t *testing.T) {
 		assert.Contains(t, sourcetypes, "kube:container:pod-w-index-wo-ns-index")
@@ -1054,6 +1060,20 @@ func testHECMetrics(t *testing.T) {
 		"system.processes.created",
 	}
 	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
+	checkMetricsIndex(t, hecMetricsConsumer, "test_metrics")
+}
+
+func checkMetricsIndex(t *testing.T, consumer *consumertest.MetricsSink, index string) {
+	require.Eventually(t, func() bool {
+		m := consumer.AllMetrics()[len(consumer.AllMetrics())-1]
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			rm := m.ResourceMetrics().At(i)
+			if metricIndex, ok := rm.Resource().Attributes().Get("com.splunk.index"); ok {
+				return index == metricIndex.AsString()
+			}
+		}
+		return false
+	}, 5*time.Minute, 10*time.Second)
 }
 
 func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset) {
