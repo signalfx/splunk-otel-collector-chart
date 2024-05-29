@@ -75,7 +75,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not $agent.skipInitContainers) }}
       initContainers:
         {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
         - name: prepare-fluentd-config

@@ -7,13 +7,13 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.99.0
+    helm.sh/chart: splunk-otel-collector-0.100.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.99.0"
+    app.kubernetes.io/version: "0.100.0"
     app: splunk-otel-collector
     component: otel-operator
-    chart: splunk-otel-collector-0.99.0
+    chart: splunk-otel-collector-0.100.0
     release: default
     heritage: Helm
     app.kubernetes.io/component: otel-operator
@@ -59,10 +59,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-go:v0.10.1-alpha
   java:
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.32.0
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.32.1
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-java:v1.32.0
+        value: splunk.zc.method=splunk-otel-java:v1.32.1
   nginx:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
     env:

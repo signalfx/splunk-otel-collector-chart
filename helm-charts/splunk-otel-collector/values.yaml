@@ -271,7 +271,7 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# OpenTelemetry collector running as an deamonset agent on every node.
+# OpenTelemetry collector running as an daemonset agent on every node.
 # It collects metrics and traces and send them to Signalfx backend.
 ################################################################################
 
@@ -411,6 +411,10 @@ agent:
   # Disregarded for Windows (unsupported by k8s).
   hostNetwork: true
 
+  # Set this to true to skip all the init containers. If you are running the agent as a non-root user,
+  # you must ensure to handle patching of log directories on the host filesystem manually.
+  skipInitContainers: false
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
@@ -446,7 +450,7 @@ agent:
 
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
-# This is an extra 1-replica deployment of Open-temlemetry collector used
+# This is an extra 1-replica deployment of OpenTelemetry collector used
 # specifically for collecting metrics from kubernetes API.
 ################################################################################
 
@@ -1046,7 +1050,7 @@ securityContextConstraintsOverwrite: {}
 
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
-# This is an additional deployment of Open-telemetry collector that can be used
+# This is an additional deployment of OpenTelemetry collector that can be used
 # to pass traces trough it, make k8s metadata enrichment and batching.
 # Another use case is to point tracing instrumentation libraries directly to
 # the collector endpoint instead of local agents. The collector running in the
@@ -1196,7 +1200,7 @@ operator:
       #   - env: (Optional) Allows you to add any additional environment variables.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-        tag: v1.32.0
+        tag: v1.32.1
       nodejs:
         repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
         tag: v2.8.0

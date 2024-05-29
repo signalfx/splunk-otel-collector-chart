@@ -768,7 +768,7 @@ agent:
   * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
   * Even if support is somehow provided, only one of the pods will be able to acquire the lock and run, while the others will be blocked and unable to operate.
 * Cluster Receiver support
-  * Cluster receiver is a 1-replica deployment of Open-temlemetry collector.
+  * Cluster receiver is a 1-replica deployment of OpenTelemetry collector.
   * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such envrionments.
   * Data Persistence is currently not applicable to the k8s cluster metrics and k8s events.
 

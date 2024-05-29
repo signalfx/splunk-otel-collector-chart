@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.100.0] - 2024-05-09
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.100.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.100.0).
+
+## [0.99.1] - 2024-05-09
+
+### 💡 Enhancements 💡
+
+- `agent`: Add an option `skipInitContainers` to skip init container setting file ACLs when the `runAsUser` and
+  `runAsGroup` are provided. This is useful when the user wants to manage the file ACLs themselves.
+  ([#1286](https://github.com/signalfx/splunk-otel-collector-chart/pull/1286))
+- `operator`: Bump dotnet to v1.5.0 in helm-charts/splunk-otel-collector/values.yaml ([#1282](https://github.com/signalfx/splunk-otel-collector-chart/pull/1282))
+
 ## [0.99.0] - 2024-04-26
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.99.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.99.0).

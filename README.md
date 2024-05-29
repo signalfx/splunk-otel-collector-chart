@@ -47,7 +47,7 @@ export metric, trace, and log data for:
 
 - [Splunk Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html)
 - [Splunk Cloud Platform](https://www.splunk.com/en_us/software/splunk-cloud-platform.html)
-- [Splunk Observability Cloud](https://www.observability.splunk.com/)
+- [Splunk Observability Cloud](https://www.splunk.com/en_us/products/observability-cloud.html)
 
 ## Current Status
 
