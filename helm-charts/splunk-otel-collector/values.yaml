@@ -450,7 +450,7 @@ agent:
 
 ################################################################################
 # OpenTelemetry Kubernetes cluster receiver
-# This is an extra 1-replica deployment of Open-temlemetry collector used
+# This is an extra 1-replica deployment of OpenTelemetry collector used
 # specifically for collecting metrics from kubernetes API.
 ################################################################################
 
@@ -1050,7 +1050,7 @@ securityContextConstraintsOverwrite: {}
 
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
-# This is an additional deployment of Open-telemetry collector that can be used
+# This is an additional deployment of OpenTelemetry collector that can be used
 # to pass traces trough it, make k8s metadata enrichment and batching.
 # Another use case is to point tracing instrumentation libraries directly to
 # the collector endpoint instead of local agents. The collector running in the
