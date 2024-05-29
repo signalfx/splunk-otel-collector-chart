@@ -4,6 +4,18 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.101.0] - 2024-05-29
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.101.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.101.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump java to v1.32.1 in helm-charts/splunk-otel-collector/values.yaml ([#1300](https://github.com/signalfx/splunk-otel-collector-chart/pull/1300))
+
+### 🧰 Bug fixes 🧰
+
+- `operator`: Fix issue where SPLUNK_OTEL_AGENT env var was set before custom operator.instrumentation.spec.env env vars ([#1292](https://github.com/signalfx/splunk-otel-collector-chart/pull/1292))
+
 ## [0.100.0] - 2024-05-09
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.100.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.100.0).
