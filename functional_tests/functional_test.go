@@ -575,6 +575,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.version"),
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),

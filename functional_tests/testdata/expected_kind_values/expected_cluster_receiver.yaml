@@ -5192,6 +5192,36 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.deployment.name
                       value:
+                        stringValue: dotnet-test
+                    - key: k8s.deployment.uid
+                      value:
+                        stringValue: 24a752be-eed3-49a7-958c-06968e95c113
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.deployment.name
+                      value:
                         stringValue: sock-operator
                     - key: k8s.deployment.uid
                       value:
