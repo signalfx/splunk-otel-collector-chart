@@ -13,6 +13,9 @@ resourceSpans:
         - key: host.name
           value:
             stringValue: kind-control-plane
+        - key: process.owner
+          value:
+            stringValue: root
         - key: process.pid
           value:
             intValue: "1"
