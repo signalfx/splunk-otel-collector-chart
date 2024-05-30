@@ -1,0 +1,86 @@
+clusterName: "stork-fed1dp-iad0-nc1"
+
+splunkPlatform:
+  token: "OMITTED"
+  endpoint: "http://splunkpov01.fed1dp.nc1.iad0.nsscloud.net:8088/services/collector/event"
+
+logsCollection:
+
+  # Container logs collection
+  containers:
+    enabled: true
+    # Container runtime. One of `docker`, `cri-o`, or `containerd`
+    # Automatically discovered if not set.
+    containerRuntime: ""
+    # Paths of logfiles to exclude. object type is array:
+    # i.e. to exclude `kube-system` namespace,
+    # excludePaths: ["/var/log/pods/kube-system_*/*/*.log"]
+    excludePaths: []
+    # Boolean for ingesting the agent's own log
+    excludeAgentLogs: true
+    # Extra operators for container logs.
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md
+    extraOperators: []
+
+    # Multiline logs processing configuration. Multiline logs that written by containers to stdout
+    # are usually broken down into several one-line logs and can be reconstructed with a regex
+    # expression that matches the first line of each logs batch. The following operator is being
+    # utilized for this purpose:
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md
+    # By the time of reconstructing a multiline log the following information is available to
+    # identify source of the logs: namespace, pod and container names. At least one source
+    # identifier has to be specified in for each multiline config.
+    # The following example shows how to setup multiline log processing for logs having subsequent
+    # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
+    # scheduled to run in "default" namespace with a java container called "server", and the
+    # container produces the following log example:
+    #  .........
+    #  Exception in thread "main" java.lang.NumberFormatException: For input string: "3.1415"
+    #      at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+    #      at java.lang.Integer.parseInt(Integer.java:580)
+    #      at ExampleCli.parseNumericArgument(ExampleCli.java:47)
+    #      at ExampleCli.parseCliOptions(ExampleCli.java:27)
+    #      at ExampleCli.main(ExampleCli.java:11)
+    #  .........
+    # The following sample configuration will handle multiline logs from that specific container:
+    # multilineConfigs:
+    #   - namespaceName:
+    #       value: default
+    #     podName:
+    #       value: buttercup-app-.*
+    #       useRegexp: true
+    #     containerName:
+    #       value: server
+    #     firstEntryRegex: ^[^\s].*
+    #     combineWith: ""
+    multilineConfigs: []
+    # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
+    # All other logs will be ignored.
+    useSplunkIncludeAnnotation: true
+    # maxRecombineLogsSize sets the maximum size in bytes of a message recombined from cri-o, containerd and docker log entries.
+    # Set to 0 to remove any size limit.
+    maxRecombineLogSize: 1048576
+
+  extraFileLogs: {}
+  # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
+  # extraFileLogs:
+  #   filelog/deepscanreceiver-api-receiver:
+  #     include: [/var/log/pods/*deepscanreceiver_deepscanreceiver-api-receiver*/*/*.log]
+  #     start_at: beginning
+  #     include_file_path: true
+  #     include_file_name: true
+  #     resource:
+  #       com.splunk.index: deepscanreceiver
+  #       com.splunk.source: /var/log/pods/*deepscanreceiver_deepscanreceiver-api-receiver*/*/*.log
+  #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
+  #       com.splunk.sourcetype: kube:deepscanreceiver:api-receiver
+  #   filelog/deepscanreceiver-api-receiver:
+  #     include: [/var/log/pods/*deepscanreceiver_deepscanreceiver-api-receiver*/*/*.log]
+  #     start_at: beginning
+  #     include_file_path: true
+  #     include_file_name: true
+  #     resource:
+  #       com.splunk.index: deepscanreceiver
+  #       com.splunk.source: /var/log/pods/*deepscanreceiver_deepscanreceiver-api-receiver*/*/*.log
+  #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
+  #       com.splunk.sourcetype: kube:deepscanreceiver:api-receiver
