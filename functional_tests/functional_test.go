@@ -57,7 +57,7 @@ const (
 	signalFxReceiverPort                   = 9443
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	otlpReceiverPort                       = 4317
-	otlpHTTPReceiverPort                   = 4318 // TODO: Verify this port is setup properly to receive data from .NET and Python instrumentation
+	otlpHTTPReceiverPort                   = 4318
 	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"

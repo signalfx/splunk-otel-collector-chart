@@ -16,7 +16,7 @@ kubectl create namespace dotnet-demo
 ```
 
 ```bash
-curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/functional_tests/testdata/dotnet/deployment.yaml | kubectl apply -n dotnet-demo -f -
+curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/examples/enable-operator-and-auto-instrumentation/dotnet/deployment.yaml | kubectl apply -n dotnet-demo -f -
 ```
 
 ### 2. Complete the steps outlined in [Getting started with auto-instrumentation](../../docs/auto-instrumentation-install.md#steps-for-setting-up-auto-instrumentation)

@@ -1,4 +1,3 @@
-# TODO: Review all changes to this file, likely revert all changes to this file
 name: functional-tests
 
 on:
@@ -63,20 +62,8 @@ jobs:
       - name: run functional tests
         run: |
           cd functional_tests
-          go test -v || true
-          kubectl get pods
-          kubectl logs -l app=dotnet-test
-          kubectl describe pod -l app=dotnet-test
-          kubectl get pod -l app=dotnet-test -o yaml
-          pwd
-          cd ..
-          tree
+          go test -v
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: write_expected_dotnet_traces
-          path: functional_tests/write_expected_dotnet_traces.yaml
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: kubernetes-test
@@ -344,7 +331,7 @@ jobs:
       - uses: azure/login@v2.1.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: azure/aks-set-context@v3.2
+      - uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
