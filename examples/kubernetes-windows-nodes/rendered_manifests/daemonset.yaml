@@ -34,6 +34,7 @@ spec:
       annotations:
         checksum/config: d94e6957ef84581a74c66de01a71db6762a67752f01a73dc4ffe9b1a7b6d8395
         kubectl.kubernetes.io/default-container: otel-collector
+        container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
     spec:
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: default-splunk-otel-collector
