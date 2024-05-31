@@ -435,6 +435,7 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("os.version"),
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
 		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),

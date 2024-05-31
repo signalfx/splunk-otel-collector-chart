@@ -31,10 +31,12 @@ jobs:
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
             dependency_name: 'cert-manager'
-          - name: 'operator'
-            component: 'operator'
-            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
-            dependency_name: 'opentelemetry-operator'
+          # TODO: Add this back once this chart has been updated to adhere to
+          # the operator chart schema validation rules. See: https://github.com/open-telemetry/opentelemetry-helm-charts/pull/1065
+          # - name: 'operator'
+          #   component: 'operator'
+          #   yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+          #   dependency_name: 'opentelemetry-operator'
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:

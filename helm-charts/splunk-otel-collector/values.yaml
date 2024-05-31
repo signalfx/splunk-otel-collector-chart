@@ -1201,6 +1201,7 @@ operator:
       #   - repository: Specifies the Docker image repository.
       #   - tag: Indicates the Docker image tag.
       #   - env: (Optional) Allows you to add any additional environment variables.
+      # Auto-instrumentation for the various languages that are distributed by Splunk or OpenTelemetry.
       java:
         repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
         tag: v1.32.1
@@ -1213,19 +1214,38 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation
-      go:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
-        tag: v0.10.1-alpha
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-apache-httpd-instrumentation=true".
       apache-httpd:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
-      python:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
-        tag: 0.44b0
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-go-instrumentation=true".
+      go:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
+        tag: v0.10.1-alpha
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-nginx-instrumentation=true".
       nginx:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
+      # Disabled by default. To enable, update "operator.manager.extraArgs" to include "--enable-python-instrumentation=true".
+      python:
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+        tag: 0.44b0
       # Auto-instrumentation Libraries (End)
+  manager:
+    # TODO: Remove overriding the operator version once this chart has been updated to adhere to
+    # the operator chart schema validation rules. See: https://github.com/open-telemetry/opentelemetry-helm-charts/pull/1065
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+      tag: "0.99.0"
+    # Configure operator manager command-line args.
+    extraArgs:
+      - --enable-java-instrumentation=true
+      - --enable-nodejs-instrumentation=true
+      - --enable-dotnet-instrumentation=true
+      - --enable-apache-httpd-instrumentation=false
+      - --enable-go-instrumentation=false
+      - --enable-nginx-instrumentation=false
+      - --enable-python-instrumentation=false
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.

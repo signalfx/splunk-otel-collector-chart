@@ -57,7 +57,6 @@ awk '/# Auto-instrumentation Libraries \(Start\)/,/# Auto-instrumentation Librar
 
 # ---- Update Image Information ----
 while IFS='=' read -r IMAGE_KEY VERSION; do
-    NEED_UPDATE="${NEED_UPDATE:-0}"  # Sets NEED_UPDATE to its current value or 0 if not set
     if [[ "$IMAGE_KEY" =~ ^autoinstrumentation-.* ]]; then
         # Upstream Operator Values
         setd "INST_LIB_NAME" "${IMAGE_KEY#autoinstrumentation-}"
@@ -90,6 +89,8 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
                 echo "Upserting value for ${REPOSITORY_LOCAL}:${TAG_UPSTREAM}"
                 yq eval -i ".${TAG_LOCAL_PATH} = \"${TAG_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
                 setd "NEED_UPDATE" 1
+                # Emit the NEED_UPDATE variable to either GitHub output or stdout
+                emit_output "NEED_UPDATE"
             else
                 echo "Failed to find Docker image $IMAGE. Check image repository and tag."
                 exit 1
@@ -103,9 +104,6 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
         fi
     fi
 done < "${TEMP_VERSIONS}"
-
-# Emit the NEED_UPDATE variable to either GitHub output or stdout
-emit_output "NEED_UPDATE"
 
 # Merge the updated subsection back into values.yaml
 # This approach specifically updates only the subsection between the start and end tokens.
