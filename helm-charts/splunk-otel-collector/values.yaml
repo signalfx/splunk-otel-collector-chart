@@ -417,7 +417,10 @@ agent:
 
   # OTel agent annotations
   annotations: {}
-  podAnnotations: {}
+  podAnnotations:
+    # This annotation is a workaround to avoid filling the syslog with warnings from appArmor such as:
+    # Apr 16 13:05:49 localhost kernel: [7954196.731418] audit: type=1400 audit(1713272749.057:5567969): apparmor="DENIED" operation="ptrace" class="ptrace" profile="cri-containerd.apparmor.d" pid=4151892 comm="otelcol" requested_mask="read" denied_mask="read" peer="unconfined"
+    container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
 
   # OTel agent extra pod labels
   podLabels: {}
