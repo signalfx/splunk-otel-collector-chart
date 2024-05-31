@@ -1210,9 +1210,9 @@ operator:
         env:
           - name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
-          - name: OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED
-            # TODO: Decide to remove or keep this env var, might be a temporary work around
-            value: "false"
+#          - name: OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED
+#            # TODO: Decide to remove or keep this env var, might be a temporary work around
+#            value: "false"
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
         tag: v0.10.1-alpha
