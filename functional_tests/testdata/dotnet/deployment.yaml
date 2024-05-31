@@ -14,7 +14,7 @@ spec:
         app: dotnet-test
       annotations:
         instrumentation.opentelemetry.io/inject-dotnet: "true"
-        instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64"
+        instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
     spec:
       containers:
         - image: quay.io/splunko11ytest/dotnet_test:latest
