@@ -191,6 +191,39 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
+                        stringValue: dotnet-test-d454cf769-99txr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 0b67f08c-0af1-4a79-9b06-cea5db50709a
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
                         stringValue: sock-operator-6cf5597fb6-mrf64
                     - key: k8s.pod.uid
                       value:
@@ -1701,6 +1734,51 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: nodejs-test-d454cf769-99txr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 0b67f08c-0af1-4a79-9b06-cea5db50709a
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e15c137fa718e88afe498e1f4a18a75605ebc6e0eded5470d4c982acee8b0ae3
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/splunko11ytest/dotnet_test
+                    - key: container.image.tag
+                      value:
+                        stringValue: latest
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: dotnet-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: dotnet-test-d454cf769-99txr
                     - key: k8s.pod.uid
                       value:
                         stringValue: 0b67f08c-0af1-4a79-9b06-cea5db50709a
@@ -4751,6 +4829,36 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.deployment.name
                       value:
+                        stringValue: dotnet-test
+                    - key: k8s.deployment.uid
+                      value:
+                        stringValue: 5409d480-7c0a-4a0b-a49f-e43dea1be98e
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.deployment.name
+                      value:
                         stringValue: local-path-provisioner
                     - key: k8s.deployment.uid
                       value:
@@ -5084,6 +5192,36 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.deployment.name
                       value:
+                        stringValue: dotnet-test
+                    - key: k8s.deployment.uid
+                      value:
+                        stringValue: 24a752be-eed3-49a7-958c-06968e95c113
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.deployment.name
+                      value:
                         stringValue: sock-operator
                     - key: k8s.deployment.uid
                       value:
@@ -5271,6 +5409,36 @@ resourceMetrics:
                     - key: k8s.replicaset.name
                       value:
                         stringValue: nodejs-test-d454cf769
+                    - key: k8s.replicaset.uid
+                      value:
+                        stringValue: 41a00e05-ce4f-4243-ae0d-82d3ec975c86
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.replicaset.name
+                      value:
+                        stringValue: dotnet-test-d454cf769
                     - key: k8s.replicaset.uid
                       value:
                         stringValue: 41a00e05-ce4f-4243-ae0d-82d3ec975c86
@@ -5544,6 +5712,36 @@ resourceMetrics:
                     - key: k8s.replicaset.name
                       value:
                         stringValue: nodejs-test-d454cf769
+                    - key: k8s.replicaset.uid
+                      value:
+                        stringValue: 41a00e05-ce4f-4243-ae0d-82d3ec975c86
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.replicaset.name
+                      value:
+                        stringValue: dotnet-test-d454cf769
                     - key: k8s.replicaset.uid
                       value:
                         stringValue: 41a00e05-ce4f-4243-ae0d-82d3ec975c86

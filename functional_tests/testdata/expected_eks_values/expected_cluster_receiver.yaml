@@ -113,6 +113,30 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
+                        stringValue: dotnet-test-57564b7dc9-pf2bk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b660efd2-e961-488a-af7a-2161f27565bb
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: rotel-eks
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
                         stringValue: sock-operator-7867c9764-gdv94
                     - key: k8s.pod.uid
                       value:
@@ -1140,6 +1164,42 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: nodejs-test-57564b7dc9-pf2bk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b660efd2-e961-488a-af7a-2161f27565bb
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: container.id
+                      value:
+                        stringValue: 38809b5e5212eddddeec2d4d387e2f27ff754e0c3f67cc9a9ffb89db72601480
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/splunko11ytest/dotnet_test
+                    - key: container.image.tag
+                      value:
+                        stringValue: latest
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: rotel-eks
+                    - key: k8s.container.name
+                      value:
+                        stringValue: dotnet-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: dotnet-test-57564b7dc9-pf2bk
                     - key: k8s.pod.uid
                       value:
                         stringValue: b660efd2-e961-488a-af7a-2161f27565bb
@@ -3926,6 +3986,27 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.replicaset.name
                       value:
+                        stringValue: dotnet-test-57564b7dc9
+                    - key: k8s.replicaset.uid
+                      value:
+                        stringValue: fc4c748c-a646-4813-9abf-f0688a15d022
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: rotel-eks
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.replicaset.name
+                      value:
                         stringValue: sock-operator-7867c9764
                     - key: k8s.replicaset.uid
                       value:
@@ -4077,6 +4158,27 @@ resourceMetrics:
                     - key: k8s.replicaset.name
                       value:
                         stringValue: nodejs-test-57564b7dc9
+                    - key: k8s.replicaset.uid
+                      value:
+                        stringValue: fc4c748c-a646-4813-9abf-f0688a15d022
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: rotel-eks
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.replicaset.name
+                      value:
+                        stringValue: dotnet-test-57564b7dc9
                     - key: k8s.replicaset.uid
                       value:
                         stringValue: fc4c748c-a646-4813-9abf-f0688a15d022
