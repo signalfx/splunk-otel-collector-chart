@@ -15,7 +15,7 @@ metadata:
     release: default
     heritage: Helm
 users:
-- system:serviceaccount:default:default-splunk-otel-collector
+  - system:serviceaccount:default:default-splunk-otel-collector
 allowHostDirVolumePlugin: true
 allowHostIPC: false
 allowHostNetwork: true
@@ -25,7 +25,7 @@ allowPrivilegedContainer: false
 allowedCapabilities: []
 defaultAddCapabilities: []
 fsGroup:
-  type: MustRunAs
+  type: RunAsAny
 priority: 10
 readOnlyRootFilesystem: true
 requiredDropCapabilities:
