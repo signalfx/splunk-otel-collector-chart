@@ -98,7 +98,7 @@ spec:
             defaultMode: 420
             secretName: default-operator-controller-manager-service-cert
       securityContext:
-        fsGroup: 65532
-        runAsGroup: 65532
+        fsGroup: 1001035532
+        runAsGroup: 1001035532
         runAsNonRoot: true
-        runAsUser: 65532
+        runAsUser: 1001035532

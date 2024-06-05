@@ -1171,6 +1171,10 @@ service:
 ################################################################################
 
 operator:
+  securityContext:
+    fsGroup: 1001035532
+    runAsGroup: 1001035532
+    runAsUser: 1001035532
   enabled: false
   # For more details, refer to: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
   instrumentation:
