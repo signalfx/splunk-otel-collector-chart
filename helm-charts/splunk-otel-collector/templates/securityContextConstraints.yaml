@@ -10,11 +10,11 @@ allowHostDirVolumePlugin: true
 allowHostIPC: false
 allowPrivilegedContainer: false
 volumes:
-  - configMap
-  - downwardAPI
-  - emptyDir
-  - hostPath
-  - secret
+- configMap
+- downwardAPI
+- emptyDir
+- hostPath
+- secret
 # Allow podman/crio socket and /proc access
 seLinuxContext:
   type: MustRunAs
@@ -33,7 +33,7 @@ runAsUser:
 supplementalGroups:
   type: RunAsAny
 requiredDropCapabilities:
-  - ALL
+- ALL
 {{- end -}}
 
 {{- if and (eq (include "splunk-otel-collector.distribution" .) "openshift") .Values.securityContextConstraints.create  }}
@@ -48,9 +48,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 users:
-  - system:serviceaccount:{{ template "splunk-otel-collector.namespace" . }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
+- system:serviceaccount:{{ template "splunk-otel-collector.namespace" . }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
 {{- if .Values.operator.enabled }}
-  - system:serviceaccount:{{ include "splunk-otel-collector.namespace" . }}:operator
+- system:serviceaccount:{{ include "splunk-otel-collector.namespace" . }}:operator
 {{- end }}
 {{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
 {{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
