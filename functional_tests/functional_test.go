@@ -1318,7 +1318,9 @@ func hostEndpoint(t *testing.T) string {
 	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
 	require.NoError(t, err)
 	for _, ipam := range network.IPAM.Config {
-		return ipam.Gateway
+		if ipam.Gateway != "" {
+			return ipam.Gateway
+		}
 	}
 	require.Fail(t, "failed to find host endpoint")
 	return ""

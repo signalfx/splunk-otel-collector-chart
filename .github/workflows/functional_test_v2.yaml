@@ -22,11 +22,11 @@ jobs:
         k8s-version:
           # TODO: Add 1.30 support once Kind publishes an official 1.30 image
           - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
-          # - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
-          # - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
-          # - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
-          # # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
-          # - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+          - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
+          - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
+          - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
+          # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
+          - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,15 +61,6 @@ jobs:
           make cert-manager
       - name: run functional tests
         run: |
-          echo ========================docker networks ============
-          docker network ls
-          echo ========================================
-          echo ========================docker inspect kind ============
-          docker network inspect kind
-          echo ============================================================
-          echo ==================from container ip route==================
-          docker exec kind-control-plane ip route show default
-          echo ==============================================================
           cd functional_tests
           go test -v
 
