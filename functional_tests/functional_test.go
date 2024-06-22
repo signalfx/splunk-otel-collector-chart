@@ -158,6 +158,12 @@ func deployChartsAndApps(t *testing.T) {
 	}
 
 	require.NoError(t, err)
+
+	hostEp := hostEndpoint(t)
+	if len(hostEp) == 0 {
+		require.Fail(t, "Host endpoint not found")
+	}
+
 	replacements := struct {
 		K8sClusterEndpoint    string
 		AgentEndpoint         string
@@ -168,13 +174,13 @@ func deployChartsAndApps(t *testing.T) {
 		LogObjectsHecEndpoint string
 		KubeTestEnv           string
 	}{
-		fmt.Sprintf("http://%s:%d", hostEndpoint(t), signalFxReceiverK8sClusterReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEndpoint(t), signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEndpoint(t), hecReceiverPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEndpoint(t), hecMetricsReceiverPort),
-		fmt.Sprintf("%s:%d", hostEndpoint(t), otlpReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEndpoint(t), apiPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEndpoint(t), hecLogsObjectsReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, hecReceiverPort),
+		fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecMetricsReceiverPort),
+		fmt.Sprintf("%s:%d", hostEp, otlpReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, apiPort),
+		fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort),
 		kubeTestEnv,
 	}
 	tmpl, err := template.New("").Parse(string(valuesBytes))
@@ -1312,7 +1318,9 @@ func hostEndpoint(t *testing.T) string {
 	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
 	require.NoError(t, err)
 	for _, ipam := range network.IPAM.Config {
-		return ipam.Gateway
+		if ipam.Gateway != "" {
+			return ipam.Gateway
+		}
 	}
 	require.Fail(t, "failed to find host endpoint")
 	return ""
