@@ -36,12 +36,12 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
   dotnet:
-    image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.5.0
+    image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.6.0
     env:
       - name: OTEL_DOTNET_AUTO_PLUGINS
         value: "Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation"
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-dotnet:v1.5.0
+        value: splunk.zc.method=splunk-otel-dotnet:v1.6.0
       - name: SPLUNK_OTEL_AGENT
         valueFrom:
           fieldRef:
