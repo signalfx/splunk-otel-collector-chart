@@ -17,8 +17,8 @@
       minikube start --driver=docker --container-runtime=$CONTAINER_RUNTIME --cpus 3 --memory 8192 --kubernetes-version=v1.15.2 --no-vtx-check
 
 #### Install Splunk on minikube
-    # Use ci_scripts/k8s-splunk.yml file to deploy splunk on minikube
-    kubectl apply -f ci_scripts/k8s-splunk.yml
+    # Use functional_tests/testdata/splunk/deployment.yaml file to deploy splunk on minikube
+    kubectl apply -f functional_tests/testdata/splunk/deployment.yaml
 
     # Run following command to check if Splunk is ready. User should see "Ansible playbook complete, will begin streaming splunkd_stderr.log"
     kubectl logs splunk -f

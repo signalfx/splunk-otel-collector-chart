@@ -71,7 +71,7 @@ jobs:
             sleep 1;
           done
           # Install Splunk on minikube
-          kubectl apply -f ci_scripts/k8s-splunk.yml
+          kubectl apply -f functional_tests/testdata/splunk/deployment.yaml
           # Wait until splunk is ready
           until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
             sleep 1;
