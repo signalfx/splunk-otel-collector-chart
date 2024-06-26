@@ -73,7 +73,7 @@ jobs:
           # Install Splunk on minikube
           kubectl apply -f functional_tests/testdata/splunk/deployment.yaml
           # Wait until splunk is ready
-          until kubectl logs splunk --tail=2 | grep -q 'Ansible playbook complete'; do
+          until kubectl logs -l app=splunk --tail=2 | grep -q 'Ansible playbook complete'; do
             sleep 1;
           done
 
