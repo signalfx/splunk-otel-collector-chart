@@ -119,6 +119,11 @@ spec:
         - --config=/splunk-messages/config.yaml
         {{- else }}
         - --config=/conf/relay.yaml
+        {{- if $clusterReceiver.extraConfigs.enabled }}
+        {{- range $key := $clusterReceiver.extraConfigs.configMapKeys }}
+        {{ print "- --config=/conf-extra/" $key ".yaml" }}
+        {{- end }}
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- if .Values.clusterReceiver.featureGates }}
@@ -191,6 +196,8 @@ spec:
         {{- end }}
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: collector-configmap
+        - mountPath: {{ .Values.isWindows | ternary "C:\\conf-extra" "/conf-extra" }}
+          name: collector-configmap-extra
         {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
         - mountPath: /splunk-messages
           name: messages
@@ -209,6 +216,16 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if $clusterReceiver.extraConfigs.enabled }}
+      - name: collector-configmap-extra
+        configMap:
+          name: {{ $clusterReceiver.extraConfigs.configMapName }}
+          items:
+            {{- range $key := $clusterReceiver.extraConfigs.configMapKeys }}
+            {{ print "- key: " $key }}
+            {{ print "  path: " $key ".yaml" }}
+            {{- end }}
+      {{- end }}
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi

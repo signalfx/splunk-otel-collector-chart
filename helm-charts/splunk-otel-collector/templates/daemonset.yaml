@@ -249,6 +249,11 @@ spec:
         {{- else }}
         - /otelcol
         - --config=/conf/relay.yaml
+        {{- if $agent.extraConfigs.enabled }}
+        {{- range $key := $agent.extraConfigs.configMapKeys }}
+        {{ print "- --config=/conf-extra/" $key ".yaml" }}
+        {{- end }}
+        {{- end }}
         {{- end }}
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
@@ -357,6 +362,8 @@ spec:
         volumeMounts:
         - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
           name: otel-configmap
+        - mountPath: {{ .Values.isWindows | ternary "C:\\conf-extra" "/conf-extra" }}
+          name: otel-configmap-extra
       {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
         - mountPath: /etc/otel/collector/config.d
           name: otel-discovery-properties-configmap
@@ -543,6 +550,16 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      {{- if $agent.extraConfigs.enabled }}
+      - name: otel-configmap-extra
+        configMap:
+          name: {{ $agent.extraConfigs.configMapName }}
+          items:
+            {{- range $key := $agent.extraConfigs.configMapKeys }}
+            {{ print "- key: " $key }}
+            {{ print "  path: " $key ".yaml" }}
+            {{- end }}
+      {{- end }}
       {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
       - name: otel-discovery-properties-configmap
         configMap:
