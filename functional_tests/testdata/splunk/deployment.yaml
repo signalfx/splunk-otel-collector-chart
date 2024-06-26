@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: splunk-config
+  name: splunk
   namespace: default
 data:
   default.yml: |
@@ -47,45 +47,55 @@ data:
               maxTotalDataSizeMB: 512000
               thawedPath: $SPLUNK_DB/test_metrics/thaweddb
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: splunk
+  namespace: default
   labels:
     app: splunk
 spec:
-  hostNetwork: true
-  securityContext:
-    runAsUser: 0
-    runAsGroup: 0
-  containers:
-    - name: splunk
-      image: docker.io/splunk/splunk:8.2.0
-      ports:
-        - name: web-interface
-          containerPort: 8000
-          protocol: TCP
-        - name: hec
-          containerPort: 8088
-          protocol: TCP
-        - name: management-api
-          containerPort: 8089
-          protocol: TCP
-      env:
-        - name: SPLUNK_START_ARGS
-          value: --accept-license
-        - name: SPLUNK_USER
-          value: root
-        - name: SPLUNK_PASSWORD
-          value: helloworld
-        - name: SPLUNK_LAUNCH_CONF
-          value: OPTIMISTIC_ABOUT_FILE_LOCKING=1
-        - name: SPLUNK_HEC_TOKEN
-          value: 00000000-0000-0000-0000-0000000000000
-      volumeMounts:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splunk
+  template:
+    metadata:
+      labels:
+        app: splunk
+    spec:
+      hostNetwork: true
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+        - name: splunk
+          image: quay.io/splunko11ytest/splunk:8.2.0
+          ports:
+            - name: web-interface
+              containerPort: 8000
+              protocol: TCP
+            - name: hec
+              containerPort: 8088
+              protocol: TCP
+            - name: management-api
+              containerPort: 8089
+              protocol: TCP
+          env:
+            - name: SPLUNK_START_ARGS
+              value: --accept-license
+            - name: SPLUNK_USER
+              value: root
+            - name: SPLUNK_PASSWORD
+              value: helloworld
+            - name: SPLUNK_LAUNCH_CONF
+              value: OPTIMISTIC_ABOUT_FILE_LOCKING=1
+            - name: SPLUNK_HEC_TOKEN
+              value: 00000000-0000-0000-0000-0000000000000
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tmp/defaults/
+      volumes:
         - name: config-volume
-          mountPath: /tmp/defaults/
-  volumes:
-    - name: config-volume
-      configMap:
-        name: splunk-config
+          configMap:
+            name: splunk-config
