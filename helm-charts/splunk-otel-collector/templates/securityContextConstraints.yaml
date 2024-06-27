@@ -50,7 +50,7 @@ metadata:
 users:
 - system:serviceaccount:{{ template "splunk-otel-collector.namespace" . }}:{{ template "splunk-otel-collector.serviceAccountName" . }}
 {{- if .Values.operator.enabled }}
-- system:serviceaccount:{{ include "splunk-otel-collector.namespace" . }}:operator
+- system:serviceaccount:{{ include "splunk-otel-collector.namespace" . }}:{{ template "opentelemetry-operator.serviceAccountName" .Subcharts.operator }}
 {{- end }}
 {{- $config := include "splunk-otel-collector.defaultSecurityContextConstraints" . | fromYaml }}
 {{ .Values.securityContextConstraintsOverwrite | mustMergeOverwrite $config | toYaml }}
