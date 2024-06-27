@@ -86,13 +86,15 @@ unittest: ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
 	cd helm-charts/splunk-otel-collector && helm unittest --strict -f ../../test/unittests/*.yaml . || exit 1
 
+# Example Usage:
+# 	make functionaltest [SKIP_SETUP=true] [SKIP_TEARDOWN=true] [SKIP_TESTS=true]
 .PHONY: functionaltest
 functionaltest: dep-update start-k8s cert-manager ## Run functional v2 tests with prerequisite checks and setup
 	@echo "Running functional tests..."
 	cd functional_tests && KUBE_CONFIG=$(KUBECONFIG) KUBE_TEST_ENV=$(KUBE_TEST_ENV) go test -v || exit 1
 
 .PHONY: functionaltest-cleanup
-functionaltest-cleanup: dep-update start-k8s cert-manager ## Run functional v2 tests with prerequisite checks and setup
+functionaltest-cleanup: ## Cleanup resources deployed by functional tests
 	helm delete sock || true
 	make cert-manager-cleanup || true
 	kubectl delete -f functional_tests/testdata/manifests/test_jobs.yaml || true
