@@ -95,7 +95,7 @@ functionaltest: dep-update start-k8s cert-manager ## Run functional v2 tests wit
 functionaltest-cleanup: dep-update start-k8s cert-manager ## Run functional v2 tests with prerequisite checks and setup
 	helm delete sock || true
 	make cert-manager-cleanup || true
-	kubectl delete ns ns-w-exclude ns-w-index ns-wo-index || true
+	kubectl delete -f functional_tests/testdata/manifests/test_jobs.yaml || true
 
 ##@ Changelog
 # Tasks related to changelog management
