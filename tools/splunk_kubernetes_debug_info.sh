@@ -49,7 +49,7 @@ write_output() {
   if echo "$output" | yq eval '.' - > /dev/null 2>&1; then
     # Check if output contains empty list using yq
     if [[ $(echo "$output" | yq eval '.kind' -) == "List" ]] && [[ $(echo "$output" | yq eval '.items | length' -) -eq 0 ]]; then
-      echo "[$(date)] Skipping $file_name: Empty list" >> "$temp_dir/errors.log"
+      echo "[$(date)] Skipping $file_name: Empty list" >> "$temp_dir/errors.txt"
       return
     fi
   fi
@@ -235,7 +235,7 @@ collect_data_cluster() {
 
 # Parse input parameters
 namespaces=""
-k8s_object_name_filter="*|splunk|collector|otel|certmanager|test|sck|sock"
+k8s_object_name_filter="splunk|collector|otel|certmanager|test|sck|sock"
 
 for arg in "$@"; do
   case $arg in
