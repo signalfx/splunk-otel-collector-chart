@@ -276,6 +276,10 @@ extraAttributes:
 ################################################################################
 
 agent:
+  extraConfigs:
+    enabled: false
+    configMapName: ""
+    configMapKeys: []
   enabled: true
 
   # Metric collection from k8s control plane components.
@@ -461,6 +465,10 @@ agent:
 # It has to be running on one pod, so it uses its own dedicated deployment with 1 replica.
 
 clusterReceiver:
+  extraConfigs:
+    enabled: false
+    configMapName: ""
+    configMapKeys: []
   enabled: true
 
   # Need to be adjusted based on size of the monitored cluster
