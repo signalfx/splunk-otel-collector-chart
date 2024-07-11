@@ -5,7 +5,7 @@ The values can be overridden in .Values.gateway.config
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
   health_check:
-
+    endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   http_forwarder:
     egress:

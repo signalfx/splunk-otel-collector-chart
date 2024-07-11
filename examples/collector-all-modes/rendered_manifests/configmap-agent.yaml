@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.103.0
+    helm.sh/chart: splunk-otel-collector-0.104.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.103.0"
+    app.kubernetes.io/version: "0.104.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.103.0
+    chart: splunk-otel-collector-0.104.0
     release: default
     heritage: Helm
 data:
@@ -29,7 +29,8 @@ data:
         ingest_url: http://default-splunk-otel-collector:9943
         sync_host_metadata: true
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}

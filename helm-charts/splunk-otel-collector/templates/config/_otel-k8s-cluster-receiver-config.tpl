@@ -6,7 +6,7 @@ The values can be overridden in .Values.clusterReceiver.config
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
-
+    endpoint: 0.0.0.0:13133
 
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
