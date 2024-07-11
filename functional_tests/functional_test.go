@@ -650,6 +650,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 	containerImageShorten := func(value string) string {
+
 		return value[(strings.LastIndex(value, "/") + 1):]
 	}
 
@@ -933,8 +934,10 @@ func testAgentMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
+
+	archRe := regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 	containerImageShorten := func(value string) string {
-		return value[(strings.LastIndex(value, "/") + 1):]
+		return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
 	}
 	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
