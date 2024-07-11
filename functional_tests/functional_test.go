@@ -649,9 +649,9 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
+	archRe := regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 	containerImageShorten := func(value string) string {
-
-		return value[(strings.LastIndex(value, "/") + 1):]
+		return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
 	}
 
 	var selected *pmetric.Metrics
