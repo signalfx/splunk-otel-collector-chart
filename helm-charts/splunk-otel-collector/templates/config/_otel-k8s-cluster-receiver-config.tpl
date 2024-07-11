@@ -7,7 +7,6 @@ The values can be overridden in .Values.clusterReceiver.config
 extensions:
   health_check:
 
-
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
@@ -15,6 +14,13 @@ extensions:
     observe_pods: true
     observe_nodes: true
   {{- end }}
+
+  {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+  file_storage/persistent_queue_receiver:
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/receiver
+    timeout: 0
+  {{- end }}
+
 
 receivers:
   # Prometheus receiver scraping metrics from the pod itself
