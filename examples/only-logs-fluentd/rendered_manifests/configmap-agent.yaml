@@ -31,7 +31,8 @@ data:
         profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}

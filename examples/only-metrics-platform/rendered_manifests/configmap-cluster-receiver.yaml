@@ -42,7 +42,8 @@ data:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
     processors:
       batch:
         send_batch_max_size: 32768

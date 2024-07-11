@@ -24,7 +24,8 @@ data:
         ingest_url: https://ingest.CHANGEME.signalfx.com
         timeout: 10s
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       k8s_observer:
         auth_type: serviceAccount
         observe_nodes: true

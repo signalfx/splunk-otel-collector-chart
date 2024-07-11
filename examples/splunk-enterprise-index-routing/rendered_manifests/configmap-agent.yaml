@@ -45,7 +45,8 @@ data:
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}

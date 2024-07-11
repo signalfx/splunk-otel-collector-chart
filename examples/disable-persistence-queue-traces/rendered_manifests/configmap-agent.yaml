@@ -97,7 +97,8 @@ data:
       file_storage/persistent_queue:
         directory: /var/addon/splunk/exporter_queue/agent
         timeout: 0
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}

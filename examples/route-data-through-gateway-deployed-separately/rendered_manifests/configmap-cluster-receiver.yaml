@@ -25,7 +25,8 @@ data:
         ingest_url: http://<custom-gateway-url>:9943
         timeout: 10s
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
     processors:
       batch:
         send_batch_max_size: 32768

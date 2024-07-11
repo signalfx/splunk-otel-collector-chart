@@ -30,7 +30,8 @@ data:
         sending_queue:
           num_consumers: 32
     extensions:
-      health_check: null
+      health_check:
+        endpoint: 0.0.0.0:13133
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.signalfx.com
