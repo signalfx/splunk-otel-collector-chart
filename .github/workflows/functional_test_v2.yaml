@@ -20,7 +20,7 @@ jobs:
         # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
         # To check latest versions, see: https://hub.docker.com/r/kindest/node/tags
         k8s-version:
-          # TODO: Add 1.30 support once Kind publishes an official 1.30 image
+          - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
           - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
           - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
           - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
@@ -60,6 +60,8 @@ jobs:
         run: |
           make cert-manager
       - name: run functional tests
+        env:
+          K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
           cd functional_tests
           go test -v
