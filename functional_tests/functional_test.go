@@ -778,7 +778,7 @@ func testAgentLogs(t *testing.T) {
 			}
 		}
 	}
-	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "1.30") {
+	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
 		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
 	} else {
 		t.Run("test journald sourcetypes are set", func(t *testing.T) {
