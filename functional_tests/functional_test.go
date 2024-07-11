@@ -70,6 +70,8 @@ const (
 	kindValuesDir                          = "expected_kind_values"
 )
 
+var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
+
 // Test_Functions tests the chart with a real k8s cluster.
 // Run the following commands prior to running the test locally:
 //
@@ -601,6 +603,10 @@ func testDotNetTraces(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func containerImageShorten(value string) string {
+	return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
+}
+
 func shortenNames(value string) string {
 	if strings.HasPrefix(value, "kube-proxy") {
 		return "kube-proxy"
@@ -649,10 +655,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
-	archRe := regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
-	containerImageShorten := func(value string) string {
-		return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
-	}
 
 	var selected *pmetric.Metrics
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
@@ -694,6 +696,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricValues(metricNames...),
@@ -935,10 +938,6 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	archRe := regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
-	containerImageShorten := func(value string) string {
-		return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
-	}
 	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
@@ -957,6 +956,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
