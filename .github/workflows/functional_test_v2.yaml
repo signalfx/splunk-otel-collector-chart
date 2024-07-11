@@ -60,6 +60,8 @@ jobs:
         run: |
           make cert-manager
       - name: run functional tests
+        env:
+          K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
           cd functional_tests
           go test -v

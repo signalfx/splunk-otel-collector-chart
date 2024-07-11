@@ -726,6 +726,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 }
 
 func testAgentLogs(t *testing.T) {
+
 	logsConsumer := setupOnce(t).logsConsumer
 	waitForLogs(t, 5, logsConsumer)
 
@@ -777,10 +778,14 @@ func testAgentLogs(t *testing.T) {
 			}
 		}
 	}
-	t.Run("test journald sourcetypes are set", func(t *testing.T) {
-		assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
-		assert.Contains(t, journalDsourceTypes, "kube:journald:kubelet.service")
-	})
+	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "1.30") {
+		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
+	} else {
+		t.Run("test journald sourcetypes are set", func(t *testing.T) {
+			assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
+			assert.Contains(t, journalDsourceTypes, "kube:journald:kubelet.service")
+		})
+	}
 	t.Run("test node.js log records", func(t *testing.T) {
 		assert.NotNil(t, helloWorldLogRecord)
 		sourceType, ok := helloWorldResource.Attributes().Get("com.splunk.sourcetype")
