@@ -211,11 +211,14 @@ service:
   telemetry:
     metrics:
       address: 0.0.0.0:8889
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
-  extensions: [health_check, k8s_observer]
-  {{- else }}
-  extensions: [health_check]
-  {{- end }}
+  extensions:
+    - health_check
+    {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+    - k8s_observer
+    {{- end }}
+    {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+    - file_storage/persistent_queue_receiver
+    {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
     # k8s metrics pipeline
