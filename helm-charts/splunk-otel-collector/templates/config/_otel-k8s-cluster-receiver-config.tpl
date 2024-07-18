@@ -17,7 +17,7 @@ extensions:
 
   {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   file_storage/persistent_queue_receiver:
-    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/receiver
+    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/clusterReceiver
     timeout: 0
   {{- end }}
 
