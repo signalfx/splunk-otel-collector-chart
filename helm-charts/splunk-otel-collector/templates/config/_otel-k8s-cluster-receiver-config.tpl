@@ -21,7 +21,6 @@ extensions:
     timeout: 0
   {{- end }}
 
-
 receivers:
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" "k8s-cluster-receiver" | nindent 2}}
