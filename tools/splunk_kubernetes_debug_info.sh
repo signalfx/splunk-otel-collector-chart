@@ -17,9 +17,11 @@
 # 3. Make the script executable:
 #    chmod +x splunk_kubernetes_debug_info.sh
 # 4. Run the script:
-#    ./splunk_kubernetes_debug_info.sh [NAMESPACES=namespace1,namespace2,...] [K8S_OBJECT_NAME_FILTER=splunk|collector|otel|certmanager|test|sck|sock|customname]
-#    If no namespaces are specified, the script will collect information from all namespaces.
-#
+#    4.1. Via Terminal and Curl:
+#         curl -s https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/tools/splunk_kubernetes_debug_info.sh | bash
+#    4.2. Via Terminal and Local Code:
+#         ./splunk_kubernetes_debug_info.sh [NAMESPACES=namespace1,namespace2,...] [K8S_OBJECT_NAME_FILTER=splunk|collector|otel|certmanager|test|sck|sock|customname]
+#    Note: If no namespaces are specified, the script will collect information from all namespaces.
 # Sensitive Data Handling:
 # The script attempts to redact sensitive information where possible, including tokens, passwords, and certificates.
 # However, users should review the files for any sensitive data before sharing.
