@@ -70,6 +70,8 @@ const (
 	kindValuesDir                          = "expected_kind_values"
 )
 
+var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
+
 // Test_Functions tests the chart with a real k8s cluster.
 // Run the following commands prior to running the test locally:
 //
@@ -601,6 +603,10 @@ func testDotNetTraces(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func containerImageShorten(value string) string {
+	return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
+}
+
 func shortenNames(value string) string {
 	if strings.HasPrefix(value, "kube-proxy") {
 		return "kube-proxy"
@@ -649,9 +655,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
-	containerImageShorten := func(value string) string {
-		return value[(strings.LastIndex(value, "/") + 1):]
-	}
 
 	var selected *pmetric.Metrics
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
@@ -693,6 +696,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricValues(metricNames...),
@@ -722,6 +726,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 }
 
 func testAgentLogs(t *testing.T) {
+
 	logsConsumer := setupOnce(t).logsConsumer
 	waitForLogs(t, 5, logsConsumer)
 
@@ -773,10 +778,14 @@ func testAgentLogs(t *testing.T) {
 			}
 		}
 	}
-	t.Run("test journald sourcetypes are set", func(t *testing.T) {
-		assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
-		assert.Contains(t, journalDsourceTypes, "kube:journald:kubelet.service")
-	})
+	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
+		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
+	} else {
+		t.Run("test journald sourcetypes are set", func(t *testing.T) {
+			assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
+			assert.Contains(t, journalDsourceTypes, "kube:journald:kubelet.service")
+		})
+	}
 	t.Run("test node.js log records", func(t *testing.T) {
 		assert.NotNil(t, helloWorldLogRecord)
 		sourceType, ok := helloWorldResource.Attributes().Get("com.splunk.sourcetype")
@@ -933,9 +942,7 @@ func testAgentMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
-	containerImageShorten := func(value string) string {
-		return value[(strings.LastIndex(value, "/") + 1):]
-	}
+
 	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
@@ -954,6 +961,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),

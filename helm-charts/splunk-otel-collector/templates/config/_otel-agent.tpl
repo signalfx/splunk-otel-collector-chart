@@ -19,6 +19,7 @@ extensions:
 
 
   health_check:
+    endpoint: 0.0.0.0:13133
 
   k8s_observer:
     auth_type: serviceAccount
