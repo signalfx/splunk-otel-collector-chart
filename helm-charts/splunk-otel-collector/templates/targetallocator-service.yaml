@@ -1,0 +1,15 @@
+{{ if .Values.targetallocator.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
+  name: {{ template "splunk-otel-collector.fullname" . }}-ta
+spec:
+  selector:
+    app: targetallocator
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 80
+      targetPort: http-port
+{{- end }}

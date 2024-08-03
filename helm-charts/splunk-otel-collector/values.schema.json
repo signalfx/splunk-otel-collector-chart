@@ -1441,6 +1441,38 @@
       "type": "object",
       "additionalProperties": true
     },
+    "targetallocator": {
+      "description": "Target Allocator configuration.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "string"
+        },
+        "serviceAccount": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "create": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          }
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
     "featureGates": {
       "description": "Helm Chart Feature Gates.",
       "type": "object",

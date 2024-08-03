@@ -1,0 +1,33 @@
+{{ if .Values.targetallocator.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
+  name: {{ template "splunk-otel-collector.fullname" . }}-ta
+  labels:
+    app: targetallocator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: targetallocator
+  template:
+    metadata:
+      labels:
+        app: targetallocator
+    spec:
+      serviceAccountName: {{ template "splunk-otel-collector.targetallocatorServiceAccountName" . }}
+      containers:
+        - name: targetallocator
+          image: {{ .Values.targetallocator.image }}
+          ports:
+            - containerPort: 8080
+              name: http-port
+          volumeMounts:
+            - name: config-volume
+              mountPath: /conf/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "splunk-otel-collector.targetallocatorConfigMapName" . }}
+{{- end }}

@@ -1,0 +1,22 @@
+{{ if .Values.targetallocator.enabled -}}
+{{ if .Values.rbac.create -}}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "splunk-otel-collector.targetallocatorClusterRoleBindingName" . }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "splunk-otel-collector.targetallocatorClusterRoleName" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "splunk-otel-collector.targetallocatorServiceAccountName" . }}
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
+{{- end }}
+{{- end }}

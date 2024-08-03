@@ -243,6 +243,17 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
+  {{- if .Values.targetallocator.enabled  }}
+  prometheus/crd:
+    config:
+      global:
+        scrape_interval: 30s
+    target_allocator:
+      endpoint: http://targetallocator-service.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      interval: 30s
+      collector_id: ${env:K8S_POD_NAME}
+  {{- end }}
+
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
@@ -803,7 +814,15 @@ service:
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
-      receivers: [hostmetrics, kubeletstats, otlp, receiver_creator, signalfx]
+      receivers:
+        - hostmetrics
+        - kubeletstats
+        - otlp
+        - receiver_creator
+        - signalfx
+        {{- if .Values.targetallocator.enabled  }}
+        - prometheus/crd
+        {{- end }}
       processors:
         - memory_limiter
         - batch
