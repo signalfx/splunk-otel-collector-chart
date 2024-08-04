@@ -60,9 +60,6 @@ spec:
         - name: otlp-http
           containerPort: 4318
           protocol: TCP
-        - name: otlp-http-old
-          containerPort: 55681
-          protocol: TCP
         - name: signalfx
           containerPort: 9943
           hostPort: 9943

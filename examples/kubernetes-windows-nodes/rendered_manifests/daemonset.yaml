@@ -73,9 +73,6 @@ spec:
         - name: otlp-http
           containerPort: 4318
           protocol: TCP
-        - name: otlp-http-old
-          containerPort: 55681
-          protocol: TCP
         - name: sfx-forwarder
           containerPort: 9080
           hostPort: 9080

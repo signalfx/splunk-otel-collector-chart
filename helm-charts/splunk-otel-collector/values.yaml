@@ -339,10 +339,6 @@ agent:
       containerPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
-    otlp-http-old:
-      containerPort: 55681
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
@@ -1078,10 +1074,6 @@ gateway:
       enabled_for: [metrics, traces, logs]
     otlp-http:
       containerPort: 4318
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
-    otlp-http-old:
-      containerPort: 55681
       protocol: TCP
       enabled_for: [metrics, traces, logs]
     jaeger-thrift:
