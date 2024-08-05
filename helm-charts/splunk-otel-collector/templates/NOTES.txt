@@ -77,8 +77,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680
 {{ end }}
 {{- if .Values.operator.enabled }}
-[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true), currently considered ALPHA.
-  - Instrumentation library maturity varies (e.g., Java is more mature than Go). For library stability, visit: https://opentelemetry.io/docs/instrumentation/#status-and-releases
-  - Some libraries may be enabled by default. For current status, see: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
-  - Splunk provides best-effort support for native OpenTelemetry libraries, and full support for Splunk library distributions. For used libraries, refer to the values.yaml under "operator.instrumentation.spec".
+[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true)! The operator can automatically instrument Kubernetes hosted applications. Integration maturity depends on the instrumentation libraries used.
+  - Status: Instrumentation language maturity varies. See `operator.instrumentation.spec` and documentation for utilized instrumentation details.
+  - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry distributions of auto-instrumentation libraries.
 {{- end }}
