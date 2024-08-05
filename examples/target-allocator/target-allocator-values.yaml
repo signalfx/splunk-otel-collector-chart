@@ -1,0 +1,25 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+agent:
+  config:
+    receivers:
+      prometheus/crd:
+        config:
+          global:
+            scrape_interval: 5s
+        target_allocator:
+          endpoint: http://targetallocator-service.default.svc.cluster.local:80
+          interval: 10s
+          collector_id: ${env:K8S_POD_NAME}
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - hostmetrics
+            - kubeletstats
+            - otlp
+            - signalfx
+            - prometheus/crd # Adding this receiver to the list of metrics pipeline receivers.
