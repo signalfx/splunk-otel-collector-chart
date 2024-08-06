@@ -243,7 +243,7 @@ receivers:
     listenAddress: 0.0.0.0:9080
   {{- end }}
 
-  {{- if .Values.targetallocator.enabled  }}
+  {{- if .Values.targetAllocator.enabled  }}
   prometheus/ta:
     config:
       global:
@@ -820,7 +820,7 @@ service:
         - otlp
         - receiver_creator
         - signalfx
-        {{- if .Values.targetallocator.enabled  }}
+        {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
         {{- end }}
       processors:

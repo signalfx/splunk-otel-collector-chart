@@ -1,9 +1,9 @@
-{{ if .Values.targetallocator.enabled -}}
+{{ if .Values.targetAllocator.enabled -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   namespace: {{ template "splunk-otel-collector.namespace" . }}
-  name: {{ template "splunk-otel-collector.targetallocatorClusterRoleName" . }}
+  name: {{ template "splunk-otel-collector.targetAllocatorClusterRoleName" . }}
 rules:
   - apiGroups:
       - monitoring.coreos.com

@@ -1,21 +1,21 @@
 ---
-# Source: splunk-otel-collector/templates/targetallocator-deployment.yaml
+# Source: splunk-otel-collector/templates/targetAllocator-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: default
   name: default-splunk-otel-collector-ta
   labels:
-    app: targetallocator
+    app: targetAllocator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: targetallocator
+      app: targetAllocator
   template:
     metadata:
       labels:
-        app: targetallocator
+        app: targetAllocator
     spec:
       serviceAccountName: default-splunk-otel-collector-ta
       containers:

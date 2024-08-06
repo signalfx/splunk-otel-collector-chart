@@ -1,5 +1,5 @@
 ---
-# Source: splunk-otel-collector/templates/targetallocator-service.yaml
+# Source: splunk-otel-collector/templates/targetAllocator-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,7 +7,7 @@ metadata:
   name: default-splunk-otel-collector-ta
 spec:
   selector:
-    app: targetallocator
+    app: targetAllocator
   ports:
     - name: http-port
       protocol: TCP

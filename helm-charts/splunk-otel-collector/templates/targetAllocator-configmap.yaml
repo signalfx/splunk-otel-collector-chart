@@ -1,8 +1,8 @@
-{{ if .Values.targetallocator.enabled -}}
+{{ if .Values.targetAllocator.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "splunk-otel-collector.targetallocatorConfigMapName" . }}
+  name: {{ template "splunk-otel-collector.targetAllocatorConfigMapName" . }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
@@ -12,5 +12,5 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   targetallocator.yaml: |
-    {{- .Values.targetallocator.config | toYaml | nindent 4 }}
+    {{- .Values.targetAllocator.config | toYaml | nindent 4 }}
 {{- end }}

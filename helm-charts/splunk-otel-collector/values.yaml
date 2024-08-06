@@ -1246,7 +1246,7 @@ certmanager:
 # Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
 ################################################################################
 
-targetallocator:
+targetAllocator:
   enabled: false
   image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.105.0
   serviceAccount:

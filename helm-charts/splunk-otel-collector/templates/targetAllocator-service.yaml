@@ -1,4 +1,4 @@
-{{ if .Values.targetallocator.enabled -}}
+{{ if .Values.targetAllocator.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,7 +6,7 @@ metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}-ta
 spec:
   selector:
-    app: targetallocator
+    app: targetAllocator
   ports:
     - name: http-port
       protocol: TCP
