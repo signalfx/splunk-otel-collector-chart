@@ -244,12 +244,12 @@ receivers:
   {{- end }}
 
   {{- if .Values.targetallocator.enabled  }}
-  prometheus/crd:
+  prometheus/ta:
     config:
       global:
         scrape_interval: 30s
     target_allocator:
-      endpoint: http://targetallocator-service.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      endpoint: http://{{ template "splunk-otel-collector.fullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
       interval: 30s
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
@@ -821,7 +821,7 @@ service:
         - receiver_creator
         - signalfx
         {{- if .Values.targetallocator.enabled  }}
-        - prometheus/crd
+        - prometheus/ta
         {{- end }}
       processors:
         - memory_limiter

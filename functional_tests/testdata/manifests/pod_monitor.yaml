@@ -1,0 +1,11 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: pod-monitor
+spec:
+  selector:
+    matchLabels:
+      app: prometheus-annotation-test
+  podMetricsEndpoints:
+    - port: web

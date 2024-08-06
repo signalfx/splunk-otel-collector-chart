@@ -179,13 +179,13 @@ data:
             static_configs:
             - targets:
               - ${K8S_POD_IP}:8889
-      prometheus/crd:
+      prometheus/ta:
         config:
           global:
             scrape_interval: 30s
         target_allocator:
           collector_id: ${env:K8S_POD_NAME}
-          endpoint: http://targetallocator-service.default.svc.cluster.local:80
+          endpoint: http://default-splunk-otel-collector-ta.default.svc.cluster.local:80
           interval: 30s
       receiver_creator:
         receivers:
@@ -262,7 +262,7 @@ data:
           - otlp
           - receiver_creator
           - signalfx
-          - prometheus/crd
+          - prometheus/ta
         metrics/agent:
           exporters:
           - signalfx
