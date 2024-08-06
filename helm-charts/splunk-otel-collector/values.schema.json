@@ -359,6 +359,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "extraConfigs": {
+          "type": "object"
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -678,6 +681,9 @@
       "properties": {
         "enabled": {
           "type": "boolean"
+        },
+        "extraConfigs": {
+          "type": "object"
         },
         "resources": {
           "type": "object",
