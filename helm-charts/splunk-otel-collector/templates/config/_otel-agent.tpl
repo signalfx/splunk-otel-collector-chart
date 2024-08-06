@@ -88,7 +88,7 @@ receivers:
       # Receivers for collecting k8s control plane metrics.
       # Distributions besides Kubernetes and Openshift are not supported.
       # Verified with Kubernetes v1.22 and Openshift v4.10.59.
-      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
+      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
@@ -207,6 +207,128 @@ receivers:
           useServiceAccount: true
       {{- end }}
       {{- end }}
+
+      {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+      # Receivers for collecting k8s control plane metrics as native OpenTelemetry metrics, including histogram data.
+      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
+      # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
+      # will fail the verification.
+      {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
+      prometheus/coredns:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: k8s-coredns
+          {{- if eq .Values.distribution "openshift" }}
+          port: 9154
+          skipVerify: true
+          useHTTPS: true
+          useServiceAccount: true
+          {{- else }}
+          port: 9153
+          {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+      prometheus/etcd:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["k8s-app"] == "etcd"
+        {{- else }}
+        rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main")
+        {{- end }}
+        config:
+          clientCertPath: /otel/etc/etcd/tls.crt
+          clientKeyPath: /otel/etc/etcd/tls.key
+          useHTTPS: true
+          type: etcd
+          {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+          skipVerify: true
+          {{- else }}
+          caCertPath: /otel/etc/etcd/cacert.pem
+          skipVerify: false
+          {{- end }}
+          {{- if eq .Values.distribution "openshift" }}
+          port: 9979
+          {{- else }}
+          port: 4001
+          {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
+      prometheus/kube-controller-manager:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "kube-controller-manager" && labels["kube-controller-manager"] == "true"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-controller-manager
+          port: 10257
+          skipVerify: true
+          type: kube-controller-manager
+          useHTTPS: true
+          useServiceAccount: true
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
+      prometheus/kubernetes-apiserver:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else }}
+        rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-apiserver
+          skipVerify: true
+          type: kubernetes-apiserver
+          useHTTPS: true
+          useServiceAccount: true
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
+      prometheus/kubernetes-proxy:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port == 29101)
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-proxy
+          type: kubernetes-proxy
+          # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
+          # For now, set the scrape failure log level to debug when no specific distribution is selected
+          {{- if eq .Values.distribution "" }}
+          scrapeFailureLogLevel: debug
+          {{- end }}
+          {{- if eq .Values.distribution "openshift" }}
+          skipVerify: true
+          useHTTPS: true
+          useServiceAccount: true
+          {{- else }}
+          port: 10249
+          {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
+      prometheus/kubernetes-scheduler:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "openshift-kube-scheduler" && labels["scheduler"] == "true"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
+        {{- end }}
+        config:
+          extraDimensions:
+            metric_source: kubernetes-scheduler
+          skipVerify: true
+          port: 10259
+          type: kubernetes-scheduler
+          useHTTPS: true
+          useServiceAccount: true
+      {{- end }}
+      {{- end }}
+    {{- end }}
 
   kubeletstats:
     collection_interval: 10s
@@ -675,6 +797,14 @@ exporters:
     sync_host_metadata: true
   {{- end }}
 
+  {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+  signalfx/histograms:
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    send_otlp_histograms: true
+  {{- end }}
+
 service:
   telemetry:
     metrics:
@@ -825,7 +955,9 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
+        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
+        {{- end }}
         - signalfx
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
@@ -890,6 +1022,20 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
+    {{- end }}
+
+    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    metrics/histograms:
+      receivers:
+       - receiver_creator
+      processors:
+        - memory_limiter
+        - batch
+        - resource/add_agent_k8s
+        - resourcedetection
+        - resource
+      exporters:
+        - signalfx/histograms
     {{- end }}
 {{- end }}
 {{/*
