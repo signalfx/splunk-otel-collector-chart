@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-annotation-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-annotation-test
+  template:
+    metadata:
+      name: prometheus-annotation-test
+      labels:
+        app: prometheus-annotation-test
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - image: quay.io/splunko11ytest/httpd:latest
+          name: prometheus-annotation-test
+          imagePullPolicy: IfNotPresent

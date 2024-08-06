@@ -29,7 +29,6 @@ otlp:
     grpc:
       endpoint: 0.0.0.0:4317
     http:
-      # Deprecated 55681 port is also open by default:
       # https://github.com/open-telemetry/opentelemetry-collector/blob/9d3a8a4608a7dbd9f787867226a78356ace9b5e4/receiver/otlpreceiver/otlp.go#L140-L152
       endpoint: 0.0.0.0:4318
 

@@ -10,6 +10,10 @@ splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}
   metricsEnabled: true
   metricsIndex: myMetricsIndex
+
+autodetect:
+  prometheus: true
+
 logsCollection:
   journald:
     enabled: true

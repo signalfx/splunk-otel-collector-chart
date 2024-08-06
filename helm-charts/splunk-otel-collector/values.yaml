@@ -223,7 +223,7 @@ autodetect:
 # Optional: Configuration for additional metadata that will be added to all the
 # telemetry as extra attributes.
 # IMPORTANT: Additional attributes configured with `fromLabels` and
-# `fromAttributes` options are only applied to traces and logs. Pod labels are
+# `fromAnnotations` options are only applied to traces and logs. Pod labels are
 # always sent to Splunk Observability (if enabled) as metric properties.
 ################################################################################
 
@@ -339,10 +339,6 @@ agent:
       containerPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
-    otlp-http-old:
-      containerPort: 55681
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
@@ -1078,10 +1074,6 @@ gateway:
       enabled_for: [metrics, traces, logs]
     otlp-http:
       containerPort: 4318
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
-    otlp-http-old:
-      containerPort: 55681
       protocol: TCP
       enabled_for: [metrics, traces, logs]
     jaeger-thrift:

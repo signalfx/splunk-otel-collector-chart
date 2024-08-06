@@ -83,7 +83,9 @@ var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 // make cert-manager
 // kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
 // kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
+// kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
 // On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
+// kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.6.0 --name kind
 // kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
 // kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
 
@@ -257,6 +259,19 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
+	// Prometheus annotation
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"))
+	require.NoError(t, err)
+	deployment, _, err = decode(stream, nil, nil)
+	require.NoError(t, err)
+	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -341,6 +356,9 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = deployments.Delete(context.Background(), "prometheus-annotation-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -420,6 +438,7 @@ func Test_Functions(t *testing.T) {
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
+	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 }
 
 func testNodeJSTraces(t *testing.T) {
@@ -1045,6 +1064,24 @@ func testAgentMetrics(t *testing.T) {
 	} else {
 		assert.NoError(t, err)
 	}
+}
+
+func testPrometheusAnnotationMetrics(t *testing.T) {
+	agentMetricsConsumer := setupOnce(t).agentMetricsConsumer
+
+	metricNames := []string{
+		"istio_agent_cert_expiry_seconds",
+		"istio_agent_endpoint_no_pod",
+		"istio_agent_go_gc_cycles_automatic_gc_cycles_total",
+		"istio_agent_go_gc_cycles_forced_gc_cycles_total",
+		"istio_agent_go_gc_cycles_total_gc_cycles_total",
+		"istio_agent_go_gc_duration_seconds_sum",
+		"istio_agent_go_gc_duration_seconds_count",
+		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_bucket",
+		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
+		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
+	}
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames)
 }
 
 func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
