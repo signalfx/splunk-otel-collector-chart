@@ -144,7 +144,7 @@ func deployChartsAndApps(t *testing.T) {
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
-	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
@@ -215,9 +215,9 @@ func deployChartsAndApps(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	waitForAllDeploymentsToStart(t, clientset)
+	waitForAllDeploymentsToStart(t, client)
 
-	deployments := clientset.AppsV1().Deployments("default")
+	deployments := client.AppsV1().Deployments("default")
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	// NodeJS test app
@@ -291,14 +291,14 @@ func deployChartsAndApps(t *testing.T) {
 			groupVersionKind.Kind == "Namespace" {
 			nm := obj.(*corev1.Namespace)
 			namespaces = append(namespaces, nm)
-			nms := clientset.CoreV1().Namespaces()
+			nms := client.CoreV1().Namespaces()
 			_, err := nms.Create(context.Background(), nm, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed namespace %s", nm.Name)
 		}
 	}
 
-	waitForAllNamespacesToBeCreated(t, clientset)
+	waitForAllNamespacesToBeCreated(t, client)
 
 	for _, resourceYAML := range strings.Split(string(jobstream), "---") {
 		if len(resourceYAML) == 0 {
@@ -316,14 +316,14 @@ func deployChartsAndApps(t *testing.T) {
 			groupVersionKind.Kind == "Job" {
 			job := obj.(*batchv1.Job)
 			jobs = append(jobs, job)
-			jobClient := clientset.BatchV1().Jobs(job.Namespace)
+			jobClient := client.BatchV1().Jobs(job.Namespace)
 			_, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed job %s", job.Name)
 		}
 	}
 
-	waitForAllDeploymentsToStart(t, clientset)
+	waitForAllDeploymentsToStart(t, client)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -342,10 +342,10 @@ func teardown(t *testing.T) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
-	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	waitTime := int64(0)
-	deployments := clientset.AppsV1().Deployments("default")
+	deployments := client.AppsV1().Deployments("default")
 	require.NoError(t, err)
 	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
@@ -388,13 +388,13 @@ func teardown(t *testing.T) {
 		}
 	}
 	for _, job := range jobs {
-		jobClient := clientset.BatchV1().Jobs(job.Namespace)
+		jobClient := client.BatchV1().Jobs(job.Namespace)
 		_ = jobClient.Delete(context.Background(), job.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 	}
 	for _, nm := range namespaces {
-		nmClient := clientset.CoreV1().Namespaces()
+		nmClient := client.CoreV1().Namespaces()
 		_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
@@ -1190,9 +1190,9 @@ func testHECMetrics(t *testing.T) {
 	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
 }
 
-func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset) {
+func waitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
 	require.Eventually(t, func() bool {
-		di, err := clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
+		di, err := client.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
 		require.NoError(t, err)
 		for _, d := range di.Items {
 			if d.Status.ReadyReplicas != d.Status.Replicas {
@@ -1210,9 +1210,9 @@ func waitForAllDeploymentsToStart(t *testing.T, clientset *kubernetes.Clientset)
 	}, 5*time.Minute, 10*time.Second)
 }
 
-func waitForAllNamespacesToBeCreated(t *testing.T, clientset *kubernetes.Clientset) {
+func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {
 	require.Eventually(t, func() bool {
-		nms, err := clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+		nms, err := client.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 		require.NoError(t, err)
 		for _, d := range nms.Items {
 			if d.Status.Phase != corev1.NamespaceActive {
