@@ -198,7 +198,7 @@ func deployChartsAndApps(t *testing.T) {
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v)
+		t.Logf(format+"\n", v...)
 	}); err != nil {
 		require.NoError(t, err)
 	}
