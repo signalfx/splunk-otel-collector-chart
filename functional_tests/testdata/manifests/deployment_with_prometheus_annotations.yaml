@@ -21,3 +21,6 @@ spec:
         - image: quay.io/splunko11ytest/httpd:latest
           name: prometheus-annotation-test
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: web
+              containerPort: 80

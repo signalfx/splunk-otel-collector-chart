@@ -1,0 +1,17 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: new_component
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: targetAllocator
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Add support for Target Allocator as part of the Helm chart.
+# One or more tracking issues related to the change
+issues: [689]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  Target Allocator is a component of the OpenTelemetry Operator.
+  With this addition, the target allocator is deployed to work in coordination with the daemonset of collectors.
+  It applies a default configuration applying scrape targets per node.
+  By default, the Target Allocator looks for all ServiceMonitor and PodMonitor CRDs across all namespaces.
+  This can be tuned by overriding the service account associated with the Target Allocator.

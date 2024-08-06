@@ -71,6 +71,8 @@ extraAttributes:
 environment: dev
 operator:
   enabled: true
+targetAllocator:
+  enabled: true
 
 {{ if (eq .KubeTestEnv "kind") }}
 clusterName: dev-operator

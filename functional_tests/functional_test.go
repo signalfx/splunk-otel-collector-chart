@@ -7,6 +7,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/dynamic"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -41,7 +45,10 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -145,6 +152,10 @@ func deployChartsAndApps(t *testing.T) {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	extensionsClient, err := clientset.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
@@ -272,6 +283,93 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
+	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	sch := k8sruntime.NewScheme()
+	var crds []*appextensionsv1.CustomResourceDefinition
+
+	for _, resourceYAML := range strings.Split(string(stream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err := decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "apiextensions.k8s.io" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			crds = append(crds, crd)
+			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
+			require.NoError(t, err)
+			t.Logf("Deployed CRD %s", crd.Name)
+			for _, version := range crd.Spec.Versions {
+				sch.AddKnownTypeWithName(
+					schema.GroupVersionKind{
+						Group:   crd.Spec.Group,
+						Version: version.Name,
+						Kind:    crd.Spec.Names.Kind,
+					},
+					&unstructured.Unstructured{},
+				)
+			}
+		}
+	}
+
+	codecs := serializer.NewCodecFactory(sch)
+	crdDecode := codecs.UniversalDeserializer().Decode
+	// Prometheus pod monitor
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
+	require.NoError(t, err)
+
+	podMonitor, _, err := crdDecode(stream, nil, nil)
+	require.NoError(t, err)
+	g := schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "podmonitors",
+	}
+	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
+	// Service
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
+	require.NoError(t, err)
+	service, _, err := decode(stream, nil, nil)
+	require.NoError(t, err)
+	_, err = client.CoreV1().Services("default").Create(context.Background(), service.(*corev1.Service), metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	// Prometheus service monitor
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
+	require.NoError(t, err)
+
+	serviceMonitor, _, err := crdDecode(stream, nil, nil)
+	require.NoError(t, err)
+	g = schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "servicemonitors",
+	}
+	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), serviceMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
+	// Read jobs
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -344,6 +442,8 @@ func teardown(t *testing.T) {
 	require.NoError(t, err)
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
+	extensionsClient, err := clientset.NewForConfig(kubeConfig)
+	require.NoError(t, err)
 	waitTime := int64(0)
 	deployments := client.AppsV1().Deployments("default")
 	require.NoError(t, err)
@@ -359,6 +459,10 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = client.CoreV1().Services("default").Delete(context.Background(), "prometheus-annotation-service", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
+
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -393,6 +497,32 @@ func teardown(t *testing.T) {
 			GracePeriodSeconds: &waitTime,
 		})
 	}
+
+	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	var crds []*appextensionsv1.CustomResourceDefinition
+	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err := decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "apiextensions.k8s.io" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			crds = append(crds, crd)
+			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+			_ = apiExtensions.Delete(context.Background(), crd.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: &waitTime,
+			})
+		}
+	}
+
 	for _, nm := range namespaces {
 		nmClient := client.CoreV1().Namespaces()
 		_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
@@ -956,7 +1086,7 @@ func testAgentMetrics(t *testing.T) {
 		"system.paging.operations",
 		"up",
 	}
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames)
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, nil)
 	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml"))
 	require.NoError(t, err)
 
@@ -1081,7 +1211,25 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
 		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
 	}
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames)
+	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+		_, podLabelPresent := attrs.Get("pod")
+		_, serviceLabelPresent := attrs.Get("service")
+		return !podLabelPresent && !serviceLabelPresent
+	})
+	// when scraping via pod monitor, the pod attribute refers to the pod the metric is scraped from.
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+		_, podLabelPresent := attrs.Get("pod")
+		_, serviceLabelPresent := attrs.Get("service")
+		return podLabelPresent && !serviceLabelPresent
+	})
+	// when scraping via service monitor, the pod attribute refers to the pod the metric is scraped from,
+	// and the servicelabel attribute is added by the serviceMonitor definition.
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+		_, podLabelPresent := attrs.Get("pod")
+		_, serviceLabelPresent := attrs.Get("service")
+		return podLabelPresent && serviceLabelPresent
+	})
 }
 
 func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
@@ -1187,7 +1335,7 @@ func testHECMetrics(t *testing.T) {
 		"system.processes.count",
 		"system.processes.created",
 	}
-	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
+	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames, nil)
 }
 
 func waitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
@@ -1307,14 +1455,19 @@ func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
 
 	return lc
 }
-func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string) {
+
+type dimensionFilter struct {
+	key   string
+	value string
+}
+
+func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(string, pcommon.Map) bool) {
 	metricsToFind := map[string]bool{}
 	for _, name := range metricNames {
 		metricsToFind[name] = false
 	}
 	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
-
 		for _, m := range mc.AllMetrics() {
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
 				rm := m.ResourceMetrics().At(i)
@@ -1322,7 +1475,22 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 					sm := rm.ScopeMetrics().At(j)
 					for k := 0; k < sm.Metrics().Len(); k++ {
 						metric := sm.Metrics().At(k)
-						metricsToFind[metric.Name()] = true
+						var attrs pcommon.Map
+						switch metric.Type() {
+						case pmetric.MetricTypeGauge:
+							attrs = metric.Gauge().DataPoints().At(0).Attributes()
+						case pmetric.MetricTypeSum:
+							attrs = metric.Sum().DataPoints().At(0).Attributes()
+						case pmetric.MetricTypeHistogram:
+							attrs = metric.Histogram().DataPoints().At(0).Attributes()
+						case pmetric.MetricTypeExponentialHistogram:
+							attrs = metric.ExponentialHistogram().DataPoints().At(0).Attributes()
+						default:
+							panic("Unsupported type " + metric.Type().String())
+						}
+						if matchFn == nil || matchFn(metric.Name(), attrs) {
+							metricsToFind[metric.Name()] = true
+						}
 					}
 				}
 			}
