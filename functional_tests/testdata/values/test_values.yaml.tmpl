@@ -19,6 +19,9 @@ logsCollection:
     enabled: true
     directory: /run/log/journal
 agent:
+  service:
+    enabled: true
+  hostNetwork: false
   config:
     exporters:
       otlp:
