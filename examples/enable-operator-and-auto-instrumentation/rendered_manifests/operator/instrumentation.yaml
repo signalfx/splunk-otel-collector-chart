@@ -61,6 +61,15 @@ spec:
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=splunk-otel-java:v2.6.0
+      - name: SPLUNK_OTEL_AGENT
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.hostIP
+      # java auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
+      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
   nginx:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
     env:
