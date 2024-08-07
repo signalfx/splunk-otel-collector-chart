@@ -233,7 +233,11 @@ k8sattributes/metrics:
   extract:
     metadata: []
     annotations:
-      - key: splunk.com/sourcetype
+      - key: splunk.com/metricsSourceType
+        tag_name: com.splunk.sourcetype
+        from: namespace
+      - key: splunk.com/metricsSourceType
+        tag_name: com.splunk.sourcetype
         from: pod
       - key: splunk.com/metricsIndex
         tag_name: com.splunk.index
