@@ -877,7 +877,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 func testAgentLogs(t *testing.T) {
 
 	logsConsumer := setupOnce(t).logsConsumer
-	waitForLogs(t, 5, logsConsumer)
+	waitForLogs(t, 25, logsConsumer)
 
 	var helloWorldResource pcommon.Resource
 	var helloWorldLogRecord *plog.LogRecord
