@@ -34,7 +34,6 @@ spec:
       annotations:
         checksum/config: 54fcba274a8f78a61178e8807de9932667ef4b576682e1c860ea15431834657e
         kubectl.kubernetes.io/default-container: otel-collector
-        container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
