@@ -27,6 +27,9 @@ jobs:
           - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
           # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
           - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+        test-job:
+          - functional
+          - histogram
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +67,7 @@ jobs:
           K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags ${{ matrix.test-job }}
 
   eks-test:
     name: Test helm install in EKS - credentials needed

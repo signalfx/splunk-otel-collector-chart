@@ -1,6 +1,8 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build functional
+
 package functional_tests
 
 import (
@@ -14,15 +16,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
 	"text/template"
 	"time"
 
-	"github.com/docker/docker/api/types"
-	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
@@ -1511,48 +1510,6 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 		return missingCount == 0
 	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
 		"failed to receive all metrics %d minutes", timeoutMinutes)
-}
-
-func hostEndpoint(t *testing.T) string {
-	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
-		return host
-	}
-	if runtime.GOOS == "darwin" {
-		return "host.docker.internal"
-	}
-
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
-	require.NoError(t, err)
-	client.NegotiateAPIVersion(context.Background())
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
-	require.NoError(t, err)
-	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
-			return ipam.Gateway
-		}
-	}
-	require.Fail(t, "failed to find host endpoint")
-	return ""
-}
-
-func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces in %d minutes", entriesNum,
-		len(tc.AllTraces()), timeoutMinutes)
-}
-
-func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(lc.AllLogs()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
-		len(lc.AllLogs()), timeoutMinutes)
 }
 
 func maskScopeVersion(traces ptrace.Traces) {

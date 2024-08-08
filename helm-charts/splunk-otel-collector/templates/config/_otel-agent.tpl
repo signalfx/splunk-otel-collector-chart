@@ -221,16 +221,18 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-dns"
         {{- end }}
         config:
-          extraDimensions:
-            metric_source: k8s-coredns
-          {{- if eq .Values.distribution "openshift" }}
-          port: 9154
-          skipVerify: true
-          useHTTPS: true
-          useServiceAccount: true
-          {{- else }}
-          port: 9153
-          {{- end }}
+          config:
+            scrape_configs:
+            - job_name: "coredns"
+              {{- if eq .Values.distribution "openshift" }}
+              static_configs:
+                - targets: ["`endpoint`:9154"]
+              tls_config:
+                insecure_skip_verify: true
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:9153"]
+              {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
       prometheus/etcd:
@@ -240,21 +242,26 @@ receivers:
         rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main")
         {{- end }}
         config:
-          clientCertPath: /otel/etc/etcd/tls.crt
-          clientKeyPath: /otel/etc/etcd/tls.key
-          useHTTPS: true
-          type: etcd
-          {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
-          skipVerify: true
-          {{- else }}
-          caCertPath: /otel/etc/etcd/cacert.pem
-          skipVerify: false
-          {{- end }}
-          {{- if eq .Values.distribution "openshift" }}
-          port: 9979
-          {{- else }}
-          port: 4001
-          {{- end }}
+          config:
+            scrape_configs:
+            - job_name: "etcd"
+              scheme: https
+              tls_config:
+                cert_file: /otel/etc/etcd/tls.crt
+                key_file: /otel/etc/etcd/tls.key
+                {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                insecure_skip_verify: true
+                {{- else }}
+                ca_file: /otel/etc/etcd/cacert.pem
+                insecure_skip_verify: false
+                {{- end }}
+                {{- if eq .Values.distribution "openshift" }}
+                static_configs:
+                  - targets: ["`endpoint`:9979"]
+                {{- else }}
+                static_configs:
+                  - targets: ["`endpoint`:4001"]
+                {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
       prometheus/kube-controller-manager:
@@ -264,13 +271,14 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
         {{- end }}
         config:
-          extraDimensions:
-            metric_source: kubernetes-controller-manager
-          port: 10257
-          skipVerify: true
-          type: kube-controller-manager
-          useHTTPS: true
-          useServiceAccount: true
+          config:
+            scrape_configs:
+            - job_name: "kube-controller-manager"
+              tls_config:
+                insecure_skip_verify: true
+              static_configs:
+                - targets: ["`endpoint`:10257"]
+              scheme: https
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
       prometheus/kubernetes-apiserver:
@@ -280,12 +288,15 @@ receivers:
         rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
         {{- end }}
         config:
-          extraDimensions:
-            metric_source: kubernetes-apiserver
-          skipVerify: true
-          type: kubernetes-apiserver
-          useHTTPS: true
-          useServiceAccount: true
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-apiserver"
+              tls_config:
+                insecure_skip_verify: true
+              scheme: https
+              useServiceAccount: true
+              static_configs:
+                - targets: ["`endpoint`:`port`"]
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       prometheus/kubernetes-proxy:
@@ -295,21 +306,20 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
         {{- end }}
         config:
-          extraDimensions:
-            metric_source: kubernetes-proxy
-          type: kubernetes-proxy
-          # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
-          # For now, set the scrape failure log level to debug when no specific distribution is selected
-          {{- if eq .Values.distribution "" }}
-          scrapeFailureLogLevel: debug
-          {{- end }}
-          {{- if eq .Values.distribution "openshift" }}
-          skipVerify: true
-          useHTTPS: true
-          useServiceAccount: true
-          {{- else }}
-          port: 10249
-          {{- end }}
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-proxy"
+              {{- if eq .Values.distribution "openshift" }}
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+              useServiceAccount: true
+              static_configs:
+                - targets: ["`endpoint`:`port`"]
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:10249"]
+              {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       prometheus/kubernetes-scheduler:
@@ -319,13 +329,15 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
         {{- end }}
         config:
-          extraDimensions:
-            metric_source: kubernetes-scheduler
-          skipVerify: true
-          port: 10259
-          type: kubernetes-scheduler
-          useHTTPS: true
-          useServiceAccount: true
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-scheduler"
+              insecure_skip_verify: true
+              static_configs:
+                - targets: ["`endpoint`:10259"]
+              scheme: https
+              useHTTPS: true
+              useServiceAccount: true
       {{- end }}
       {{- end }}
     {{- end }}

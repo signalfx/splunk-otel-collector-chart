@@ -1,0 +1,43 @@
+clusterName: sock
+splunkObservability:
+  realm:       CHANGEME
+  accessToken: CHANGEME
+  ingestUrl: {{ .IngestURL }}
+
+clusterReceiver:
+  enabled: false
+
+agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
+      secret:
+        name: "foo"
+        create: true
+        clientCert: |
+          -----BEGIN PUBLIC KEY-----
+          MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxuRazFKDi+xckGuMHEGWh5fAT
+          L2E5vW9eEUnikSS95TUJMDTedLZ7dUoYjLz8a6XKTxKTR2X+YvyjQbKuyS9zducI
+          F/du5bQnDVP/zQ/VWARQrhtBA3OlEC8ZEo2O/xQbwaILC94doj7md1mxugTIdlN8
+          6Ys8xYR7hXo7Sv9rvQIDAQAB
+          -----END PUBLIC KEY-----
+        clientKey: |
+          -----BEGIN PRIVATE KEY-----
+          MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBALG5FrMUoOL7FyQa
+          4wcQZaHl8BMvYTm9b14RSeKRJL3lNQkwNN50tnt1ShiMvPxrpcpPEpNHZf5i/KNB
+          sq7JL3N25wgX927ltCcNU//ND9VYBFCuG0EDc6UQLxkSjY7/FBvBogsL3h2iPuZ3
+          WbG6BMh2U3zpizzFhHuFejtK/2u9AgMBAAECgYBUzaTvPuCmbnnUWKAMNt7IKhgs
+          j2ctTh9eG5HN8sQ9eKmeAMq5e6e3sXfxzvY+3H730lNiw6b/g+xZWngQvx9Mhdgb
+          qKpiz2ycqkD9/mNZa4cxyWe+9cFwefGgUpaGHvmhVt3OI6JmvHa3bG0Rx5MC4BL+
+          M3CRwncWjLj4HKHdAQJBANWr2dEAn5rxejnCx962aW994wJikG+O3bOj9Pz8ljkt
+          j7ywOstOOBAXDuE1JpNvd8pgDBUENrD+HUSSThdPbrUCQQDU7icAYcqxY0nQo69C
+          OxnslJigk1uG25/orLf9zYtLXvr0g3zOaKYe2Um1rA6NCSWN19Fwy+BmDYfwfQHq
+          laXpAkBtslKbOIS4WWz0polST7gFo02eddfNTj2H8o7eKxc8t6Vpq9gjdD7YE95x
+          xIXPf5Syc2kAiS9C4tNH1wz8bq1ZAkBGfzrGc5oqNNdBjo/9+5dPrrsBnwgUlC5T
+          WKvqCd1ubNnljosJw7gMSqCO15JRu4+FcMjU8Ysv/pbdVmYGBtnRAkAicSFkYDK6
+          kLUQLdw95nJ6z61ui751lCCPs1Bqu5iRUrRGAHoKiA7Zs/04w60VK9TY3hNvp6ZG
+          jzr0CCyu9yD+
+          -----END PRIVATE KEY-----
+
+featureGates:
+  useControlPlaneMetricsHistogramData: true
