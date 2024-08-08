@@ -294,7 +294,12 @@ receivers:
               tls_config:
                 insecure_skip_verify: true
               scheme: https
-              useServiceAccount: true
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
               static_configs:
                 - targets: ["`endpoint`:`port`"]
       {{- end }}
@@ -312,8 +317,11 @@ receivers:
               {{- if eq .Values.distribution "openshift" }}
               scheme: https
               tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                 insecure_skip_verify: true
-              useServiceAccount: true
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
               static_configs:
                 - targets: ["`endpoint`:`port`"]
               {{- else }}
@@ -332,12 +340,15 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-scheduler"
-              insecure_skip_verify: true
               static_configs:
                 - targets: ["`endpoint`:10259"]
               scheme: https
-              useHTTPS: true
-              useServiceAccount: true
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
       {{- end }}
       {{- end }}
     {{- end }}

@@ -211,14 +211,17 @@ data:
             config:
               config:
                 scrape_configs:
-                - job_name: kubernetes-apiserver
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
+                  job_name: kubernetes-apiserver
                   scheme: https
                   static_configs:
                   - targets:
                     - '`endpoint`:`port`'
                   tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
-                  useServiceAccount: true
             rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
           prometheus/kubernetes-proxy:
             config:
@@ -233,14 +236,17 @@ data:
             config:
               config:
                 scrape_configs:
-                - insecure_skip_verify: true
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
                   job_name: kubernetes-scheduler
                   scheme: https
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'
-                  useHTTPS: true
-                  useServiceAccount: true
+                  tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                    insecure_skip_verify: true
             rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
         watch_observers:
         - k8s_observer
