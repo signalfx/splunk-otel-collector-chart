@@ -881,7 +881,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 func testAgentLogs(t *testing.T) {
 
 	logsConsumer := setupOnce(t).logsConsumer
-	waitForLogs(t, 25, logsConsumer)
+	waitForLogs(t, 5, logsConsumer)
 
 	var helloWorldResource pcommon.Resource
 	var helloWorldLogRecord *plog.LogRecord
@@ -891,46 +891,54 @@ func testAgentLogs(t *testing.T) {
 	var indices []string
 	var journalDsourceTypes []string
 
-	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
-		l := logsConsumer.AllLogs()[i]
-		for j := 0; j < l.ResourceLogs().Len(); j++ {
-			rl := l.ResourceLogs().At(j)
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		for i := 0; i < len(logsConsumer.AllLogs()); i++ {
+			l := logsConsumer.AllLogs()[i]
+			for j := 0; j < l.ResourceLogs().Len(); j++ {
+				rl := l.ResourceLogs().At(j)
+				if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
+					if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
+						sourcetype := value.AsString()
+						journalDsourceTypes = append(journalDsourceTypes, sourcetype)
+					}
+				}
 				if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 					sourcetype := value.AsString()
-					journalDsourceTypes = append(journalDsourceTypes, sourcetype)
+					sourcetypes = append(sourcetypes, sourcetype)
 				}
-			}
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
-				sourcetype := value.AsString()
-				sourcetypes = append(sourcetypes, sourcetype)
-			}
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
-				index := value.AsString()
-				indices = append(indices, index)
-			}
-			if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
-				if "pod-w-index-w-ns-exclude" == value.AsString() {
-					excludePods = false
+				if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
+					index := value.AsString()
+					indices = append(indices, index)
 				}
-				if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
-					excludeNs = false
-				}
-			}
-
-			for k := 0; k < rl.ScopeLogs().Len(); k++ {
-				sl := rl.ScopeLogs().At(k)
-				for m := 0; m < sl.LogRecords().Len(); m++ {
-					logRecord := sl.LogRecords().At(m)
-					if logRecord.Body().AsString() == "Hello World" {
-						helloWorldLogRecord = &logRecord
-						helloWorldResource = rl.Resource()
+				if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
+					if "pod-w-index-w-ns-exclude" == value.AsString() {
+						excludePods = false
 					}
+					if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
+						excludeNs = false
+					}
+				}
 
+				for k := 0; k < rl.ScopeLogs().Len(); k++ {
+					sl := rl.ScopeLogs().At(k)
+					for m := 0; m < sl.LogRecords().Len(); m++ {
+						logRecord := sl.LogRecords().At(m)
+						if logRecord.Body().AsString() == "Hello World" {
+							helloWorldLogRecord = &logRecord
+							helloWorldResource = rl.Resource()
+						}
+
+					}
 				}
 			}
 		}
-	}
+		assert.NotNil(tt, helloWorldLogRecord)
+		assert.Contains(tt, sourcetypes, "kube:container:pod-w-index-wo-ns-index")
+		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-w-ns-index")
+		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-wo-ns-index")
+		assert.Contains(t, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
+	}, 3*time.Minute, 5*time.Second)
+
 	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
 		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
 	} else {
