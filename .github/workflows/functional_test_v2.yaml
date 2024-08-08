@@ -115,7 +115,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
@@ -187,7 +187,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          go test -v -tags functional
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
@@ -234,7 +234,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
@@ -302,7 +302,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          go test -v -tags functional
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
@@ -350,4 +350,4 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
