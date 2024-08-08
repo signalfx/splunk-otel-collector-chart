@@ -334,14 +334,18 @@ func deployChartsAndApps(t *testing.T) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
+	// CRDs sometimes take time to register. We retry deploying the pod monitor until such a time all CRDs are deployed.
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+		if err != nil {
+			_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+			assert.NoError(tt, err2)
+			if err2 != nil {
+				assert.NoError(tt, err)
+			}
 		}
-	}
+	}, 1*time.Minute, 5*time.Second)
+
 	// Service
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
 	require.NoError(t, err)
