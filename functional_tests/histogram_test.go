@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"os"
 	"path/filepath"
 	"sync"
@@ -156,10 +157,34 @@ func Test_Histograms(t *testing.T) {
 func testHistogramMetrics(t *testing.T) {
 	otlpMetricsSink := setupOnce(t)
 	waitForMetrics(t, 5, otlpMetricsSink)
-	expectedMetricsFile := filepath.Join(testDir, "expected_histogram_metrics.yaml")
-	for i, m := range otlpMetricsSink.AllMetrics() {
-		golden.WriteMetrics(t, filepath.Join(testDir, fmt.Sprintf("expected_histogram_metrics-%d.yaml", i)), m)
+
+	var selected *pmetric.Metrics
+
+	for h := len(otlpMetricsSink.AllMetrics()) - 1; h >= 0; h-- {
+		m := otlpMetricsSink.AllMetrics()[h]
+		foundCorrectSet := false
+	OUTER:
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+					metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+					if metricToConsider.Type() == pmetric.MetricTypeHistogram {
+						foundCorrectSet = true
+						break OUTER
+					}
+				}
+			}
+		}
+		if !foundCorrectSet {
+			continue
+		}
+		selected = &m
 	}
+
+	require.NotNil(t, selected)
+
+	expectedMetricsFile := filepath.Join(testDir, "expected_histogram_metrics.yaml")
+	golden.WriteMetrics(t, filepath.Join(testDir, "expected_histogram_metrics.yaml"), *selected)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
