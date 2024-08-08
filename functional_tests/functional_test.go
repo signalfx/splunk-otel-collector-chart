@@ -1378,7 +1378,7 @@ func setupTraces(t *testing.T) *consumertest.TracesSink {
 	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpReceiverPort)
 	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpHTTPReceiverPort)
 
-	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
+	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopSettings(), cfg, tc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1396,7 +1396,7 @@ func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
+	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1419,8 +1419,8 @@ func setupHEC(t *testing.T) (*consumertest.LogsSink, *consumertest.MetricsSink) 
 
 	lc := new(consumertest.LogsSink)
 	mc := new(consumertest.MetricsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
-	mrcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), mCfg, mc)
+	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
+	mrcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), mCfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1444,7 +1444,7 @@ func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecLogsObjectsReceiverPort)
 
 	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
+	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
