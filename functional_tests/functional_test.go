@@ -1,6 +1,8 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build functional
+
 package functional_tests
 
 import (
@@ -14,15 +16,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
 	"text/template"
 	"time"
 
-	"github.com/docker/docker/api/types"
-	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
@@ -80,28 +79,6 @@ const (
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 
 // Test_Functions tests the chart with a real k8s cluster.
-// Run the following commands prior to running the test locally:
-//
-// export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
-// export KUBE_TEST_ENV=kind
-// export K8S_VERSION=v1.28.0
-// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
-// kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-// make cert-manager
-// kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
-// kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
-// kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
-// On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
-// kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.6.0 --name kind
-// kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
-// kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
-
-// When running tests you can use the following env vars to help with local development:
-// SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
-// SKIP_TEARDOWN: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
-// SKIP_TESTS: skip running tests, just set up and tear down the cluster.
-// TEARDOWN_BEFORE_SETUP: delete all the deployments made by these tests before setting up.
-
 var globalSinks *sinks
 
 var setupRun = sync.Once{}
@@ -1513,48 +1490,6 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 		return missingCount == 0
 	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
 		"failed to receive all metrics %d minutes", timeoutMinutes)
-}
-
-func hostEndpoint(t *testing.T) string {
-	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
-		return host
-	}
-	if runtime.GOOS == "darwin" {
-		return "host.docker.internal"
-	}
-
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
-	require.NoError(t, err)
-	client.NegotiateAPIVersion(context.Background())
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
-	require.NoError(t, err)
-	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
-			return ipam.Gateway
-		}
-	}
-	require.Fail(t, "failed to find host endpoint")
-	return ""
-}
-
-func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces in %d minutes", entriesNum,
-		len(tc.AllTraces()), timeoutMinutes)
-}
-
-func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(lc.AllLogs()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
-		len(lc.AllLogs()), timeoutMinutes)
 }
 
 func maskScopeVersion(traces ptrace.Traces) {
