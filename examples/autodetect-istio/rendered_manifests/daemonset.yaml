@@ -34,7 +34,6 @@ spec:
       annotations:
         checksum/config: f2b5a239c1c7406b070bd9ceefced3cdd80cdb3897cf9d2d7f402282f5a99e7c
         kubectl.kubernetes.io/default-container: otel-collector
-        container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
         sidecar.istio.io/inject: "false"
     spec:
       hostNetwork: true
