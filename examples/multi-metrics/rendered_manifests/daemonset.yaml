@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: c742abedac5c9f8b7d6d4421a0707f64dda0b320dd3e4e30d0956f4b68bac284
+        checksum/config: 4cf071b9d4ccf12145f67e0249646f40aee7ffb9a8daa316191e40982792cc3d
         kubectl.kubernetes.io/default-container: otel-collector
         container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
     spec:
