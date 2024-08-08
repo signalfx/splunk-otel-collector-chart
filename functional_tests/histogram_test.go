@@ -17,6 +17,7 @@ import (
 	"sync"
 	"testing"
 	"text/template"
+	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"github.com/stretchr/testify/assert"
@@ -66,7 +67,7 @@ func setupOtlpReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
+	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -158,40 +159,44 @@ func testHistogramMetrics(t *testing.T) {
 	otlpMetricsSink := setupOnce(t)
 	waitForMetrics(t, 5, otlpMetricsSink)
 
-	var selected *pmetric.Metrics
+	var corednsMetrics *pmetric.Metrics
 
-	for h := len(otlpMetricsSink.AllMetrics()) - 1; h >= 0; h-- {
-		m := otlpMetricsSink.AllMetrics()[h]
-		foundCorrectSet := false
-	OUTER:
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-					metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-					if metricToConsider.Type() == pmetric.MetricTypeHistogram {
-						foundCorrectSet = true
-						break OUTER
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		for h := len(otlpMetricsSink.AllMetrics()) - 1; h >= 0; h-- {
+			m := otlpMetricsSink.AllMetrics()[h]
+			for i := 0; i < m.ResourceMetrics().Len(); i++ {
+				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" {
+							corednsMetrics = &m
+							break
+						}
 					}
 				}
 			}
 		}
-		if !foundCorrectSet {
-			continue
-		}
-		selected = &m
-	}
+		assert.NotNil(tt, corednsMetrics)
+	}, 3*time.Minute, 5*time.Second)
 
-	require.NotNil(t, selected)
+	require.NotNil(t, corednsMetrics)
 
-	expectedMetricsFile := filepath.Join(testDir, "expected_histogram_metrics.yaml")
-	golden.WriteMetrics(t, filepath.Join(testDir, "expected_histogram_metrics.yaml"), *selected)
-	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
+	expectedMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "coredns_metrics.yaml"))
 	require.NoError(t, err)
 
-	err = pmetrictest.CompareMetrics(expectedMetrics, otlpMetricsSink.AllMetrics()[len(otlpMetricsSink.AllMetrics())-1],
+	err = pmetrictest.CompareMetrics(expectedMetrics, *corednsMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricValues(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreResourceAttributeValue("server.address"),
+		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 	)
 	assert.NoError(t, err)
 }
