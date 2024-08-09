@@ -20,7 +20,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   It applies a default configuration applying scrape targets per node.
   By default, the Target Allocator looks for all ServiceMonitor and PodMonitor CRDs across all namespaces.
   This can be tuned by overriding the service account associated with the Target Allocator.
-  
 
 ### 🧰 Bug fixes 🧰
 
