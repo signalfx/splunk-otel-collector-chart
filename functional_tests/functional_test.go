@@ -591,7 +591,7 @@ func testNodeJSTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
 					selectedTrace = &trace
 					break
 				}
@@ -647,7 +647,7 @@ func testJavaTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
 					selectedTrace = &trace
 					break
 				}
