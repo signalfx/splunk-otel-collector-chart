@@ -129,7 +129,7 @@ Helper to check if env (list of dictionaries) has an environment variable (dicti
 Helper for generating environment variables for each instrumentation library.
 - Prioritizes user-supplied environment variables over defaults.
 - For OTEL_RESOURCE_ATTRIBUTES, combines default attributes with any user-supplied values.
-- For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python'), but user-supplied values will override these.
+- For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python', `java`), but user-supplied values will override these.
 */}}
 {{- define "splunk-otel-collector.operator.extract-instrumentation-env" }}
   {{- /* Initialize Splunk default Otel resource attribute; always included */ -}}
@@ -153,7 +153,7 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Handle custom or default exporter endpoint */ -}}
   {{- $customOtelExporterEndpoint := "" }}
-  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") }}
+  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") (eq .instLibName "java") }}
     {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
   {{- end }}
   {{- if .env }}

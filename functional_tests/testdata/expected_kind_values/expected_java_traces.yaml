@@ -42,19 +42,7 @@ resourceSpans:
                 - stringValue: -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
                 - stringValue: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
                 - stringValue: -Djdk.tls.ephemeralDHKeySize=2048
-                - stringValue: -Dorg.apache.catalina.security.SecurityListener.UMASK=0027
-                - stringValue: --add-opens=java.base/java.lang=ALL-UNNAMED
-                - stringValue: --add-opens=java.base/java.io=ALL-UNNAMED
-                - stringValue: --add-opens=java.base/java.util=ALL-UNNAMED
-                - stringValue: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
-                - stringValue: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
-                - stringValue: -classpath
-                - stringValue: /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
-                - stringValue: -Dcatalina.base=/usr/local/tomcat
-                - stringValue: -Dcatalina.home=/usr/local/tomcat
-                - stringValue: -Djava.io.tmpdir=/usr/local/tomcat/temp
-                - stringValue: org.apache.catalina.startup.Bootstrap
-                - stringValue: start
+                - stringValue: -Dorg.apache.catalina.security.Security...
         - key: process.executable.path
           value:
             stringValue: /opt/java/openjdk/bin/java
@@ -88,6 +76,12 @@ resourceSpans:
         - key: telemetry.auto.version
           value:
             stringValue: splunk-latest-otel-1.32.0
+        - key: telemetry.distro.name
+          value:
+            stringValue: opentelemetry-java-instrumentation
+        - key: telemetry.distro.version
+          value:
+            stringValue: splunk-2.6.0-otel-2.6.0
         - key: telemetry.sdk.language
           value:
             stringValue: java
@@ -127,7 +121,7 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.23.1
+    schemaUrl: https://opentelemetry.io/schemas/1.24.0
     scopeSpans:
       - scope:
           name: io.opentelemetry.tomcat-10.0
