@@ -49,6 +49,10 @@ splunkPlatform:
   # Optional. Default value for `sourcetype` field. For container logs, it will
   # be container name.
   sourcetype: ""
+  # Optional. Default value for the metrics' sourcetype field. If not set, it will default to "httpevent".
+  metricsSourceType: ""
+  # Optional. Default value for the traces' sourcetype field. If not set, it will default to "httpevent".
+  tracesSourceType: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   maxConnections: 200
   # Whether to disable gzip compression over HTTP. Defaults to true.

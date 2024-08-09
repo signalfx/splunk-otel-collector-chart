@@ -61,6 +61,12 @@
         "sourcetype": {
           "type": "string"
         },
+        "metricsSourceType": {
+          "type": "string"
+        },
+        "tracesSourceType": {
+          "type": "string"
+        },
         "maxConnections": {
           "type": "integer"
         },
@@ -167,6 +173,13 @@
         {
           "properties": {
             "metricsEnabled": {
+              "const": true
+            }
+          }
+        },
+        {
+          "properties": {
+            "tracesEnabled": {
               "const": true
             }
           }
