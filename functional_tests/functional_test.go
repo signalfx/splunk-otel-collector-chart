@@ -936,7 +936,7 @@ func testAgentLogs(t *testing.T) {
 		assert.Contains(tt, sourcetypes, "kube:container:pod-w-index-wo-ns-index")
 		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-w-ns-index")
 		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-wo-ns-index")
-		assert.Contains(t, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
+		assert.Contains(tt, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
 	}, 3*time.Minute, 5*time.Second)
 
 	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
