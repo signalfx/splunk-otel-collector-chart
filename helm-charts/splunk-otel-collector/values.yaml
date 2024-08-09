@@ -1283,3 +1283,5 @@ featureGates:
   # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
   # From the other hand, it does not support all Prometheus configuration options.
   useLightPrometheusReceiver: false
+  # Use a specific metrics pipeline to report control plane metrics as histograms.
+  useControlPlaneMetricsHistogramData: false
