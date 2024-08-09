@@ -81,3 +81,24 @@ def test_metric_index_from_annotations(setup, index, expected):
     logger.info("Splunk received %s events in the last minute",
                 len(events))
     assert len(events) >= expected
+
+@pytest.mark.parametrize("index,sourcetype,expected", [
+    ("test_metrics", "test:metrics", 1)
+])
+def test_metric_sourcetype_from_annotations(setup, index, sourcetype, expected):
+
+    '''
+    Test that metrics are being assigned the "test:metrics" sourcetype, as defined by splunk.com/metricsSourceType annotation added during setup
+    '''
+    logger.info("testing for metrics index={0} sourcetype={1} expected={2} event(s)".format(index, sourcetype, expected))
+    search_query = "index={0} filter=\"sourcetype={1}\"".format(index, sourcetype)
+
+    events = check_events_from_splunk(start_time="-1h@h",
+                                      url=setup["splunkd_url"],
+                                      user=setup["splunk_user"],
+                                      query=["mpreview {0}".format(
+                                          search_query)],
+                                      password=setup["splunk_password"])
+    logger.info("Splunk received %s events in the last minute",
+                len(events))
+    assert len(events) >= expected
