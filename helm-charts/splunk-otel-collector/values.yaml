@@ -1283,3 +1283,7 @@ featureGates:
   # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
   # From the other hand, it does not support all Prometheus configuration options.
   useLightPrometheusReceiver: false
+  # The feature gate enables experimental exporter batching instead of batch processor. This feature
+  # ensures the backpressure is propagated to the file readers and no data is dropped.
+  # Not recommended to use with enabled gateway.
+  noDropLogsPipeline: false
