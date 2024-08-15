@@ -19,3 +19,5 @@ spec:
         - image: quay.io/splunko11ytest/java_test:latest
           name: java-test
           imagePullPolicy: IfNotPresent
+      nodeSelector:
+        kubernetes.io/os: "linux"
