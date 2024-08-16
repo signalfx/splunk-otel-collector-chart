@@ -711,7 +711,9 @@ service:
         {{- if not $gatewayEnabled }}
         - filter/logs
         {{- end }}
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         - resourcedetection
         - resource
         {{- if not $gatewayEnabled }}
@@ -753,7 +755,9 @@ service:
         {{- end }}
       processors:
         - memory_limiter
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
