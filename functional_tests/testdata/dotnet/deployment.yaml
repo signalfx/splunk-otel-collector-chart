@@ -20,3 +20,5 @@ spec:
         - image: quay.io/splunko11ytest/dotnet_test:latest
           name: dotnet-test
           imagePullPolicy: IfNotPresent
+      nodeSelector:
+        kubernetes.io/os: "linux"

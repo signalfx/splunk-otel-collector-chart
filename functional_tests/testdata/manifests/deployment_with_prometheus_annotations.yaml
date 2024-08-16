@@ -24,3 +24,5 @@ spec:
           ports:
             - name: web
               containerPort: 80
+      nodeSelector:
+        kubernetes.io/os: "linux"
