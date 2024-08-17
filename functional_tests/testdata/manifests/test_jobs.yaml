@@ -36,6 +36,7 @@ spec:
         splunk.com/sourcetype: "sourcetype-anno"
         splunk.com/customField: pod-value-1
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-index
@@ -62,6 +63,7 @@ spec:
       annotations:
         splunk.com/exclude: "false"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-wo-index-w-ns-index
@@ -89,6 +91,7 @@ spec:
         splunk.com/index: "pod-anno"
         splunk.com/customField: pod-value-2
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-wo-ns-index
@@ -115,6 +118,7 @@ spec:
       annotations:
         splunk.com/index: "pod-anno"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
@@ -141,6 +145,7 @@ spec:
       annotations:
         splunk.com/exclude: "true"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
@@ -165,6 +170,7 @@ spec:
       labels:
         app: pod-wo-index-wo-ns-index
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-wo-index-wo-ns-index

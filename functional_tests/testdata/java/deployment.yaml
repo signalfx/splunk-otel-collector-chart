@@ -15,6 +15,7 @@ spec:
       annotations:
         instrumentation.opentelemetry.io/inject-java: "true"
     spec:
+      automountServiceAccountToken: false
       containers:
         - image: quay.io/splunko11ytest/java_test:latest
           name: java-test

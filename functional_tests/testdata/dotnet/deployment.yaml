@@ -16,6 +16,7 @@ spec:
         instrumentation.opentelemetry.io/inject-dotnet: "true"
         instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
     spec:
+      automountServiceAccountToken: false
       containers:
         - image: quay.io/splunko11ytest/dotnet_test:latest
           name: dotnet-test

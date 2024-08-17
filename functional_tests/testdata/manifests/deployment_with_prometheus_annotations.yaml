@@ -17,6 +17,7 @@ spec:
         prometheus.io/port: "80"
         prometheus.io/path: "/metrics"
     spec:
+      automountServiceAccountToken: false
       containers:
         - image: quay.io/splunko11ytest/httpd:latest
           name: prometheus-annotation-test
