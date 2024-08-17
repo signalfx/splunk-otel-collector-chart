@@ -4,6 +4,34 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.106.0] - 2024-08-17
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.106.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.106.1).
+
+### 🛑 Breaking changes 🛑
+
+- `agent`: Remove the deprecated OTLP HTTP port 55681 ([#1359](https://github.com/signalfx/splunk-otel-collector-chart/pull/1359))
+
+### 🚀 New components 🚀
+
+- `targetAllocator`: Add support for Target Allocator as part of the Helm chart. ([#689](https://github.com/signalfx/splunk-otel-collector-chart/pull/689))
+  Target Allocator is a component of the OpenTelemetry Operator.
+  With this addition, the target allocator is deployed to work in coordination with the daemonset of collectors.
+  It applies a default configuration applying scrape targets per node.
+  By default, the Target Allocator looks for all ServiceMonitor and PodMonitor CRDs across all namespaces.
+  This can be tuned by overriding the service account associated with the Target Allocator.
+  
+
+### 💡 Enhancements 💡
+
+- `agent`: Add an experimental feature gate to use exporter batching instead of the batch processor ([#1387](https://github.com/signalfx/splunk-otel-collector-chart/pull/1387))
+- `all`: Set automountServiceAccountToken to true explicitly for the chart's defined service accounts. ([#1390](https://github.com/signalfx/splunk-otel-collector-chart/pull/1390))
+- `operator`: Bump java to v1.32.3 in helm-charts/splunk-otel-collector/values.yaml ([#1355](https://github.com/signalfx/splunk-otel-collector-chart/pull/1355))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Remove apparmor pod annotation by enabled default ([#1378](https://github.com/signalfx/splunk-otel-collector-chart/pull/1378))
+
 ## [0.105.0] - 2024-07-30
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
