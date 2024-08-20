@@ -396,12 +396,12 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.port", metricNames...),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
@@ -414,12 +414,12 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.port", metricNames...),
 	)
 	assert.NoError(t, err)
 }
