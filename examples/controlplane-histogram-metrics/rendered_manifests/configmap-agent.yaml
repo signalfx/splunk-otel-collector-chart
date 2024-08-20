@@ -199,14 +199,19 @@ data:
             config:
               config:
                 scrape_configs:
-                - job_name: kube-controller-manager
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
+                  job_name: kube-controller-manager
                   scheme: https
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
                   tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
-            rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
+            rule: type == "pod" && (labels["k8s-app"] == "kube-controller-manager" ||
+              labels["component"] == "kube-controller-manager")
           prometheus/kubernetes-apiserver:
             config:
               config:
@@ -222,7 +227,8 @@ data:
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
-            rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+            rule: type == "port" && port == 443 && (pod.labels["k8s-app"] == "kube-apiserver"
+              || pod.labels["component"] == "kube-apiserver")
           prometheus/kubernetes-proxy:
             config:
               config:
@@ -247,7 +253,8 @@ data:
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
-            rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
+            rule: type == "pod" && (labels["k8s-app"] == "kube-scheduler" || labels["component"]
+              == "kube-scheduler")
         watch_observers:
         - k8s_observer
       signalfx:

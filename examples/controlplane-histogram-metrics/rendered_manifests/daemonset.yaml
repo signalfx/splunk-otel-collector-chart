@@ -32,9 +32,8 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 28b6f0588483dd033ac2479429077b8ef0109952c0f251371a4a5d64af9f7874
+        checksum/config: c2891096377ab34bef86708ca876c84c427dc0529f50124c0668b4090b6ab19f
         kubectl.kubernetes.io/default-container: otel-collector
-        container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
