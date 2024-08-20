@@ -239,7 +239,7 @@ receivers:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["k8s-app"] == "etcd"
         {{- else }}
-        rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main")
+        rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main" || labels["component"] == "etcd")
         {{- end }}
         config:
           config:
@@ -255,44 +255,46 @@ receivers:
                 ca_file: /otel/etc/etcd/cacert.pem
                 insecure_skip_verify: false
                 {{- end }}
-                {{- if eq .Values.distribution "openshift" }}
-                static_configs:
-                  - targets: ["`endpoint`:9979"]
-                {{- else }}
-                static_configs:
-                  - targets: ["`endpoint`:4001"]
-                {{- end }}
+              {{- if eq .Values.distribution "openshift" }}
+              static_configs:
+                - targets: ["`endpoint`:9979"]
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:2381"]
+              {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
       prometheus/kube-controller-manager:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["app"] == "kube-controller-manager" && labels["kube-controller-manager"] == "true"
         {{- else }}
-        rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
+        rule: type == "pod" && (labels["k8s-app"] == "kube-controller-manager" || labels["component"] == "kube-controller-manager")
         {{- end }}
         config:
           config:
             scrape_configs:
             - job_name: "kube-controller-manager"
-              tls_config:
-                insecure_skip_verify: true
               static_configs:
                 - targets: ["`endpoint`:10257"]
               scheme: https
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
       prometheus/kubernetes-apiserver:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
         {{- else }}
-        rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+        rule: type == "port" && port == 443 && (pod.labels["k8s-app"] == "kube-apiserver" || pod.labels["component"] == "kube-apiserver")
         {{- end }}
         config:
           config:
             scrape_configs:
             - job_name: "kubernetes-apiserver"
-              tls_config:
-                insecure_skip_verify: true
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -334,7 +336,7 @@ receivers:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && labels["app"] == "openshift-kube-scheduler" && labels["scheduler"] == "true"
         {{- else }}
-        rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
+        rule: type == "pod" && (labels["k8s-app"] == "kube-scheduler" || labels["component"] == "kube-scheduler")
         {{- end }}
         config:
           config:
