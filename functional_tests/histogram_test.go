@@ -174,11 +174,15 @@ func testHistogramMetrics(t *testing.T) {
 	expectedCoreDNSMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "coredns_metrics.yaml"))
 	require.NoError(t, err)
 
+	expectedEtcdMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "etcd_metrics.yaml"))
+	require.NoError(t, err)
+
 	var corednsMetrics *pmetric.Metrics
 	var schedulerMetrics *pmetric.Metrics
 	var kubeProxyMetrics *pmetric.Metrics
 	var apiMetrics *pmetric.Metrics
 	var controllerManagerMetrics *pmetric.Metrics
+	var etcdMetrics *pmetric.Metrics
 
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 
@@ -204,8 +208,9 @@ func testHistogramMetrics(t *testing.T) {
 						} else if metricToConsider.Name() == "workqueue_queue_duration_seconds" && m.MetricCount() == expectedControllerManagerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedControllerManagerMetrics.ResourceMetrics().Len() {
 							controllerManagerMetrics = &m
 							break OUTER
-						} else {
-							fmt.Println(metricToConsider.Name())
+						} else if metricToConsider.Name() == "etcd_cluster_version" && m.MetricCount() == expectedEtcdMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedEtcdMetrics.ResourceMetrics().Len() {
+							etcdMetrics = &m
+							break OUTER
 						}
 					}
 				}
@@ -216,6 +221,7 @@ func testHistogramMetrics(t *testing.T) {
 		assert.NotNil(tt, kubeProxyMetrics)
 		assert.NotNil(tt, apiMetrics)
 		assert.NotNil(tt, controllerManagerMetrics)
+		assert.NotNil(tt, etcdMetrics)
 
 	}, 3*time.Minute, 5*time.Second)
 
@@ -224,6 +230,7 @@ func testHistogramMetrics(t *testing.T) {
 	require.NotNil(t, kubeProxyMetrics)
 	require.NotNil(t, apiMetrics)
 	require.NotNil(t, controllerManagerMetrics)
+	require.NotNil(t, etcdMetrics)
 
 	err = pmetrictest.CompareMetrics(expectedCoreDNSMetrics, *corednsMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -420,6 +427,35 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.port", metricNames...),
+		pmetrictest.IgnoreResourceAttributeValue("server.address"),
+		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
+	)
+	assert.NoError(t, err)
+
+	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreMetricValues(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.port", metricNames...),
+		pmetrictest.IgnoreResourceAttributeValue("server.address"),
+		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 	)
 	assert.NoError(t, err)
 }

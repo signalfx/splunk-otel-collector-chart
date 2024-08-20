@@ -245,23 +245,8 @@ receivers:
           config:
             scrape_configs:
             - job_name: "etcd"
-              scheme: https
-              tls_config:
-                cert_file: /otel/etc/etcd/tls.crt
-                key_file: /otel/etc/etcd/tls.key
-                {{- if .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
-                insecure_skip_verify: true
-                {{- else }}
-                ca_file: /otel/etc/etcd/cacert.pem
-                insecure_skip_verify: false
-                {{- end }}
-              {{- if eq .Values.distribution "openshift" }}
-              static_configs:
-                - targets: ["`endpoint`:9979"]
-              {{- else }}
               static_configs:
                 - targets: ["`endpoint`:2381"]
-              {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
       prometheus/kube-controller-manager:
