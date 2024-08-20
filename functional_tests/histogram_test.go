@@ -171,6 +171,9 @@ func testHistogramMetrics(t *testing.T) {
 	expectedControllerManagerMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "controller_manager_metrics.yaml"))
 	require.NoError(t, err)
 
+	expectedCoreDNSMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "coredns_metrics.yaml"))
+	require.NoError(t, err)
+
 	var corednsMetrics *pmetric.Metrics
 	var schedulerMetrics *pmetric.Metrics
 	var kubeProxyMetrics *pmetric.Metrics
@@ -186,7 +189,7 @@ func testHistogramMetrics(t *testing.T) {
 				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" {
+						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" && m.MetricCount() == expectedCoreDNSMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedCoreDNSMetrics.ResourceMetrics().Len() {
 							corednsMetrics = &m
 							break OUTER
 						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" && m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
@@ -222,10 +225,7 @@ func testHistogramMetrics(t *testing.T) {
 	require.NotNil(t, apiMetrics)
 	require.NotNil(t, controllerManagerMetrics)
 
-	expectedMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "coredns_metrics.yaml"))
-	require.NoError(t, err)
-
-	err = pmetrictest.CompareMetrics(expectedMetrics, *corednsMetrics,
+	err = pmetrictest.CompareMetrics(expectedCoreDNSMetrics, *corednsMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricValues(),
