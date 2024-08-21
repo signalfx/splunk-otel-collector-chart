@@ -1,5 +1,39 @@
 # Upgrade guidelines
 
+# 0.106.0 to 0.107.0
+
+The Java instrumentation using in Operator auto-instrumentation had a major version bump from v1.32.2 to v2.6.0 which does have some breaking changes.
+
+
+| **Missing Expected Resource**                         | **Unexpected Resource**                                     |
+|-------------------------------------------------------|-------------------------------------------------------------|
+| cluster_name:ci-k8s-cluster                           | cluster_name:ci-k8s-cluster                                 |
+| container.image.name:quay.io/splunko11ytest/java_test | container.image.name:quay.io/splunko11ytest/java_test       |
+| container.image.tag:latest                            | container.image.tag:latest                                  |
+| customfield1:customvalue1                             | customfield1:customvalue1                                   |
+| customfield2:customvalue2                             | customfield2:customvalue2                                   |
+| deployment.environment:dev                            | deployment.environment:dev                                  |
+| host.name:kind-control-plane                          | host.name:kind-control-plane                                |
+| k8s.cluster.name:dev-operator                         | k8s.cluster.name:dev-operator                               |
+| k8s.container.name:java-test                          | k8s.container.name:java-test                                |
+| k8s.namespace.name:default                            | k8s.namespace.name:default                                  |
+| k8s.node.name:kind-control-plane                      | k8s.node.name:kind-control-plane                            |
+| k8s.pod.labels.app:java-test                          | k8s.pod.labels.app:java-test                                |
+| os.type:linux                                         | os.type:linux                                               |
+| process.command_args:[/opt/java/openjdk/bin/java ...] | process.command_args:[/opt/java/openjdk/bin/java ...]       |
+| process.executable.path:/opt/java/openjdk/bin/java    | process.executable.path:/opt/java/openjdk/bin/java          |
+| process.runtime.description:Eclipse Adoptium ...      | process.runtime.description:Eclipse Adoptium ...            |
+| process.runtime.name:OpenJDK Runtime Environment      | process.runtime.name:OpenJDK Runtime Environment            |
+| process.runtime.version:21.0.2+13-LTS                 | process.runtime.version:21.0.2+13-LTS                       |
+| service.name:java-test                                | service.name:java-test                                      |
+| service.version:latest                                | service.version:latest                                      |
+|                                                       | telemetry.distro.name:opentelemetry-java-instrumentation    |
+|                                                       | telemetry.distro.version:splunk-2.6.0-otel-2.6.0            |
+| telemetry.sdk.language:java                           | telemetry.sdk.language:java                                 |
+| telemetry.sdk.name:opentelemetry                      | telemetry.sdk.name:opentelemetry                            |
+
+https://docs.splunk.com/observability/en/apm/span-tags/migrate-apm-custom-reporting.html#http-semantic-convention-changes
+
 # 0.93.0 to 0.94.0
 
 The `networkExplorer` option is removed.
