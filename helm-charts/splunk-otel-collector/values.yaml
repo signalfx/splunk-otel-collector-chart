@@ -271,8 +271,8 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# OpenTelemetry collector running as an daemonset agent on every node.
-# It collects metrics and traces and send them to Signalfx backend.
+# OpenTelemetry collector running as a daemonset agent on every node.
+# It collects metrics and traces and send them to Observability Cloud backend.
 ################################################################################
 
 agent:
@@ -418,7 +418,7 @@ agent:
   # OTel agent extra pod labels
   podLabels: {}
 
-  # Extra enviroment variables to be set in the OTel agent container
+  # Extra environment variables to be set in the OTel agent container
   extraEnvs: []
 
   # Extra volumes to be mounted to the agent daemonset.
