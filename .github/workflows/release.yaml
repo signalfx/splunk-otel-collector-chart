@@ -1,6 +1,7 @@
 name: Release Charts
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -20,9 +21,9 @@ jobs:
       - name: Validate Chart.yaml Update
         id: check_update_chart
         run: |
-          VERSION_DIFF=$(git diff HEAD^ -- "*Chart.yaml" | grep -E "^\+version:" || echo "")
-          echo "VERSION_DIFF=$VERSION_DIFF"  # example value: +version: 0.80.1
-          if [[ ! -z "$VERSION_DIFF" ]]; then
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/signalfx/splunk-otel-collector-chart/releases/latest | grep tag_name | cut -d - -f 4 | cut -d \" -f 1)
+          CURRENT_VERSION=$(cat helm-charts/splunk-otel-collector/Chart.yaml | grep -E "^version:" | cut -d " " -f 2)
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "New release needed, creating..."
             echo "VALID_UPDATE=1" >> $GITHUB_OUTPUT
           else
