@@ -4,9 +4,7 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
-## [v0.105.1] - 2024-08-20
-
-This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector vv0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/vv0.105.0).
+## [0.105.1] - 2024-08-20
 
 ### 🛑 Breaking changes 🛑
 
@@ -20,7 +18,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   It applies a default configuration applying scrape targets per node.
   By default, the Target Allocator looks for all ServiceMonitor and PodMonitor CRDs across all namespaces.
   This can be tuned by overriding the service account associated with the Target Allocator.
-  
+
 
 ### 💡 Enhancements 💡
 
