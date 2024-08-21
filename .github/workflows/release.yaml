@@ -7,7 +7,7 @@ on:
     # Release only if the 'version' field in Chart.yaml was updated
     paths:
       - helm-charts/**/Chart.yaml
-
+  workflow_dispatch:
 jobs:
   maybe_update:
     runs-on: ubuntu-latest
