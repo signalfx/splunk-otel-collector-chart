@@ -68,6 +68,13 @@ jobs:
         run: |
           cd functional_tests
           TEARDOWN_BEFORE_SETUP=true go test -v -tags ${{ matrix.test-job }}
+      - name: 'Upload test results'
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}
+          path: functional_tests/results
+          retention-days: 5
 
   eks-test:
     name: Test helm install in EKS - credentials needed

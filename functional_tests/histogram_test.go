@@ -249,6 +249,10 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "coredns_metrics.yaml"), *corednsMetrics))
+	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeSchedulerMetrics, *schedulerMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -267,6 +271,10 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "scheduler_metrics.yaml"), *schedulerMetrics))
+	}
 
 	metricNames := []string{"aggregator_discovery_aggregation_count_total",
 		"apiserver_audit_event_total",
@@ -475,6 +483,10 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "proxy_metrics.yaml"), *kubeProxyMetrics))
+	}
 
 	err = pmetrictest.CompareMetrics(expectedApiMetrics, *apiMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -492,6 +504,10 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "api_metrics.yaml"), *apiMetrics))
+	}
 
 	err = pmetrictest.CompareMetrics(expectedControllerManagerMetrics, *controllerManagerMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -517,6 +533,10 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("server.port"),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "controller_metrics.yaml"), *controllerManagerMetrics))
+	}
 
 	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -544,4 +564,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 	)
 	assert.NoError(t, err)
+	if err != nil {
+		require.NoError(t, os.MkdirAll("results", 0755))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "etcd_metrics.yaml"), *etcdMetrics))
+	}
 }
