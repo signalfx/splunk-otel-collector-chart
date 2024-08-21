@@ -21,7 +21,7 @@ resourceMetrics:
             stringValue: kube-controller-manager-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: b52f820f-ec34-4f98-b8a2-e0d04f3b380d
+            stringValue: 8fa45e1f-80b6-40d3-a87d-5e7c6e9ff8e7
         - key: net.host.name
           value:
             stringValue: 172.18.0.2
@@ -49,24 +49,74 @@ resourceMetrics:
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeMetrics:
       - metrics:
-          - description: Distribution of freed heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+          - description: '[ALPHA] Number of namespace syncs happened in root ca cert publisher.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: code
+                      value:
+                        stringValue: "200"
+                  bucketCounts:
+                    - "0"
+                    - "1"
+                    - "2"
+                    - "2"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "6"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0.087509688
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: root_ca_cert_publisher_sync_duration_seconds
+          - description: Distribution of heap allocations by approximate size. Bucket counts increase monotonically. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - bucketCounts:
-                    - "7484"
-                    - "231538"
-                    - "119141"
-                    - "91321"
-                    - "65844"
-                    - "12932"
-                    - "5136"
-                    - "1624"
-                    - "2309"
-                    - "224"
-                    - "49"
-                    - "82"
-                  count: "537684"
+                    - "15365"
+                    - "261941"
+                    - "168711"
+                    - "101213"
+                    - "64280"
+                    - "20598"
+                    - "5154"
+                    - "2043"
+                    - "2194"
+                    - "513"
+                    - "283"
+                    - "188"
+                  count: "642483"
                   explicitBounds:
                     - 8.999999999999998
                     - 24.999999999999996
@@ -80,14 +130,52 @@ resourceMetrics:
                     - 13568.999999999998
                     - 27264.999999999996
                   startTimeUnixNano: "1000000"
-                  sum: 7.0828264e+07
+                  sum: 9.1403968e+07
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: go_gc_heap_frees_by_size_bytes_total
-          - description: '[ALPHA] A metric measuring the latency for nodesync which updates loadbalancer hosts on cluster node updates.'
+            name: go_gc_heap_allocs_by_size_bytes
+          - description: Distribution of freed heap allocations by approximate size. Bucket counts increase monotonically. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "10882"
+                    - "222030"
+                    - "127604"
+                    - "82554"
+                    - "54068"
+                    - "10349"
+                    - "4436"
+                    - "1693"
+                    - "2014"
+                    - "345"
+                    - "82"
+                    - "83"
+                  count: "516140"
+                  explicitBounds:
+                    - 8.999999999999998
+                    - 24.999999999999996
+                    - 64.99999999999999
+                    - 144.99999999999997
+                    - 320.99999999999994
+                    - 704.9999999999999
+                    - 1536.9999999999998
+                    - 3200.9999999999995
+                    - 6528.999999999999
+                    - 13568.999999999998
+                    - 27264.999999999996
+                  startTimeUnixNano: "1000000"
+                  sum: 6.5807368e+07
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_gc_heap_frees_by_size_bytes
+          - description: '[ALPHA] The ratio of chosen deleted pod''s ages to the current youngest pod''s age (at the time). Should be <2. The intent of this metric is to measure the rough efficacy of the LogarithmicScaleDown feature gate''s effect on the sorting (and deletion) of pods when a replicaset scales down. This only considers Ready pods when calculating and reporting.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
@@ -99,17 +187,90 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
                   explicitBounds:
+                    - 0.25
+                    - 0.5
                     - 1
+                    - 2
+                    - 4
+                    - 8
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: replicaset_controller_sorting_deletion_age_ratio
+          - description: '[ALPHA] Duration of syncEndpoints() in seconds'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "10"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "10"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: endpoint_slice_mirroring_controller_endpoints_sync_duration
+          - description: '[ALPHA] Number of endpoints removed on each Service sync'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "16"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "16"
+                  explicitBounds:
                     - 2
                     - 4
                     - 8
@@ -124,6 +285,7 @@ resourceMetrics:
                     - 4096
                     - 8192
                     - 16384
+                    - 32768
                   startTimeUnixNano: "1000000"
                   sum: 0
                   timeUnixNano: "1000000"
@@ -131,168 +293,7 @@ resourceMetrics:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: service_controller_nodesync_latency_seconds
-          - description: '[ALPHA] Client side rate limiter latency in seconds. Broken down by verb, and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "625"
-                    - "0"
-                    - "58"
-                    - "6"
-                    - "10"
-                    - "2"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "701"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 8.607644721999991
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PATCH
-                  bucketCounts:
-                    - "15"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "15"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 2.1097e-05
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: POST
-                  bucketCounts:
-                    - "68"
-                    - "0"
-                    - "25"
-                    - "1"
-                    - "7"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "101"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 3.785444816
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PUT
-                  bucketCounts:
-                    - "162"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "162"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 0.00023612100000000005
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_rate_limiter_duration_seconds
+            name: endpoint_slice_controller_endpoints_removed_per_sync
           - description: '[ALPHA] '
             histogram:
               aggregationTemporality: 2
@@ -328,19 +329,23 @@ resourceMetrics:
                     - 5
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.005
+                  sum: 0.004
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: authentication_token_cache_request_duration_seconds
-          - description: '[ALPHA] Duration of syncEndpoints() in seconds'
+          - description: '[ALPHA] Authorization duration in seconds broken out by result.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - bucketCounts:
-                    - "11"
+                - attributes:
+                    - key: result
+                      value:
+                        stringValue: allowed
+                  bucketCounts:
+                    - "16"
                     - "0"
                     - "0"
                     - "0"
@@ -356,7 +361,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "11"
+                  count: "16"
                   explicitBounds:
                     - 0.001
                     - 0.002
@@ -374,31 +379,96 @@ resourceMetrics:
                     - 8.192
                     - 16.384
                   startTimeUnixNano: "1000000"
-                  sum: 0
+                  sum: 6.591399999999999e-05
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: endpoint_slice_mirroring_controller_endpoints_sync_duration
-          - description: '[ALPHA] Authentication duration in seconds broken out by result.'
+            name: authorization_duration_seconds
+          - description: Deprecated. Prefer the identical /sched/pauses/total/gc:seconds.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "5"
+                    - "15"
+                    - "6"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "26"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.0006022400000000001
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_gc_pauses_seconds
+          - description: '[ALPHA] Response size in bytes. Broken down by verb and host.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - attributes:
-                    - key: result
+                    - key: host
                       value:
-                        stringValue: success
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: GET
                   bucketCounts:
+                    - "19"
+                    - "77"
+                    - "39"
+                    - "4"
+                    - "19"
+                    - "25"
                     - "17"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
+                  count: "200"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 608322
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PATCH
+                  bucketCounts:
                     - "0"
                     - "0"
                     - "0"
+                    - "1"
+                    - "16"
                     - "0"
                     - "0"
                     - "0"
@@ -408,29 +478,140 @@ resourceMetrics:
                     - "0"
                   count: "17"
                   explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
                   startTimeUnixNano: "1000000"
-                  sum: 0.00048096700000000006
+                  sum: 54864
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: POST
+                  bucketCounts:
+                    - "0"
+                    - "40"
+                    - "1"
+                    - "23"
+                    - "41"
+                    - "2"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "107"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 118523
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PUT
+                  bucketCounts:
+                    - "0"
+                    - "4"
+                    - "80"
+                    - "6"
+                    - "35"
+                    - "20"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "145"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 257868
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: authentication_duration_seconds
+            name: rest_client_response_size_bytes
+          - description: '[ALPHA] Distribution of the remaining lifetime on the certificate used to authenticate a request.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0
+                    - 1800
+                    - 3600
+                    - 7200
+                    - 21600
+                    - 43200
+                    - 86400
+                    - 172800
+                    - 345600
+                    - 604800
+                    - 2.592e+06
+                    - 7.776e+06
+                    - 1.5552e+07
+                    - 3.1104e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_client_certificate_expiration_seconds
           - description: '[ALPHA] Number of EndpointSlices changed on each Service sync'
             histogram:
               aggregationTemporality: 2
@@ -440,19 +621,19 @@ resourceMetrics:
                       value:
                         stringValue: Disabled
                   bucketCounts:
-                    - "8"
+                    - "7"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                    - "10"
+                    - "9"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "18"
+                  count: "16"
                   explicitBounds:
                     - 0.005
                     - 0.01
@@ -466,715 +647,13 @@ resourceMetrics:
                     - 5
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 10
+                  sum: 9
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: endpoint_slice_controller_endpointslices_changed_per_sync
-          - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "482"
-                    - "140"
-                    - "58"
-                    - "8"
-                    - "10"
-                    - "2"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "701"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 14.809113147000012
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PATCH
-                  bucketCounts:
-                    - "3"
-                    - "8"
-                    - "0"
-                    - "0"
-                    - "3"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "15"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 2.183105739000001
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: POST
-                  bucketCounts:
-                    - "43"
-                    - "15"
-                    - "23"
-                    - "4"
-                    - "9"
-                    - "7"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "101"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 9.229199516
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PUT
-                  bucketCounts:
-                    - "111"
-                    - "50"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "162"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 0.9682192579999993
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_request_duration_seconds
-          - description: '[ALPHA] Request latency in seconds. Broken down by status code.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: code
-                      value:
-                        stringValue: "201"
-                  bucketCounts:
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "1"
-                  explicitBounds:
-                    - 0.25
-                    - 0.5
-                    - 0.7
-                    - 1
-                    - 1.5
-                    - 3
-                    - 5
-                    - 10
-                  startTimeUnixNano: "1000000"
-                  sum: 0.005494714
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: apiserver_delegated_authn_request_duration_seconds
-          - description: '[ALPHA] Response size in bytes. Broken down by verb and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "36"
-                    - "190"
-                    - "335"
-                    - "66"
-                    - "63"
-                    - "8"
-                    - "3"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "701"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 502775
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PATCH
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "14"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "15"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 46176
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: POST
-                  bucketCounts:
-                    - "0"
-                    - "38"
-                    - "1"
-                    - "20"
-                    - "40"
-                    - "2"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "101"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 112678
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PUT
-                  bucketCounts:
-                    - "0"
-                    - "4"
-                    - "93"
-                    - "7"
-                    - "38"
-                    - "20"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "162"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 277999
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_response_size_bytes
-          - description: '[ALPHA] The time it took to delete the job since it became eligible for deletion'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 0.1
-                    - 0.2
-                    - 0.4
-                    - 0.8
-                    - 1.6
-                    - 3.2
-                    - 6.4
-                    - 12.8
-                    - 25.6
-                    - 51.2
-                    - 102.4
-                    - 204.8
-                    - 409.6
-                    - 819.2
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: ttl_after_finished_controller_job_deletion_duration_seconds
-          - description: '[ALPHA] Number of endpoints removed on each Service sync'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "18"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "18"
-                  explicitBounds:
-                    - 2
-                    - 4
-                    - 8
-                    - 16
-                    - 32
-                    - 64
-                    - 128
-                    - 256
-                    - 512
-                    - 1024
-                    - 2048
-                    - 4096
-                    - 8192
-                    - 16384
-                    - 32768
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: endpoint_slice_controller_endpoints_removed_per_sync
-          - description: '[ALPHA] The ratio of chosen deleted pod''s ages to the current youngest pod''s age (at the time). Should be <2.The intent of this metric is to measure the rough efficacy of the LogarithmicScaleDown feature gate''s effect onthe sorting (and deletion) of pods when a replicaset scales down. This only considers Ready pods when calculating and reporting.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: replicaset_controller_sorting_deletion_age_ratio
-          - description: '[ALPHA] Histogram of the number of seconds the last auth exec plugin client certificate lived before being rotated. If auth exec plugin client certificates are unused, histogram will contain no data.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 600
-                    - 1800
-                    - 3600
-                    - 14400
-                    - 86400
-                    - 604800
-                    - 2.592e+06
-                    - 7.776e+06
-                    - 1.5552e+07
-                    - 3.1104e+07
-                    - 1.24416e+08
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_exec_plugin_certificate_rotation_age
-          - description: '[ALPHA] Number of endpoints added on each Service sync'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "18"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "18"
-                  explicitBounds:
-                    - 2
-                    - 4
-                    - 8
-                    - 16
-                    - 32
-                    - 64
-                    - 128
-                    - 256
-                    - 512
-                    - 1024
-                    - 2048
-                    - 4096
-                    - 8192
-                    - 16384
-                    - 32768
-                  startTimeUnixNano: "1000000"
-                  sum: 4
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: endpoint_slice_controller_endpoints_added_per_sync
-          - description: '[ALPHA] Request size in bytes. Broken down by verb and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "701"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "701"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PATCH
-                  bucketCounts:
-                    - "1"
-                    - "2"
-                    - "1"
-                    - "0"
-                    - "8"
-                    - "3"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "15"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 38336
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: POST
-                  bucketCounts:
-                    - "1"
-                    - "54"
-                    - "19"
-                    - "7"
-                    - "19"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "101"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 50276
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: 172.18.0.2:6443
-                    - key: verb
-                      value:
-                        stringValue: PUT
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "85"
-                    - "10"
-                    - "45"
-                    - "22"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "162"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 316562
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_request_size_bytes
           - description: '[ALPHA] How long in seconds an item stays in workqueue before being requested.'
             histogram:
               aggregationTemporality: 2
@@ -1187,15 +666,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "18"
+                    - "23"
+                    - "10"
                     - "16"
-                    - "18"
                     - "7"
-                    - "5"
+                    - "3"
                     - "0"
                     - "0"
                     - "0"
-                  count: "64"
+                  count: "59"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1208,7 +687,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.18798073000000012
+                  sum: 0.3306854940000001
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1219,70 +698,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "1"
-                  explicitBounds:
-                    - 1e-08
-                    - 1e-07
-                    - 1e-06
-                    - 9.999999999999999e-06
-                    - 9.999999999999999e-05
-                    - 0.001
-                    - 0.01
-                    - 0.1
-                    - 1
-                    - 10
-                  startTimeUnixNano: "1000000"
-                  sum: 0.000148171
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: name
-                      value:
-                        stringValue: DynamicCABundle-csr-controller
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "3"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "4"
-                  explicitBounds:
-                    - 1e-08
-                    - 1e-07
-                    - 1e-06
-                    - 9.999999999999999e-06
-                    - 9.999999999999999e-05
-                    - 0.001
-                    - 0.01
-                    - 0.1
-                    - 1
-                    - 10
-                  startTimeUnixNano: "1000000"
-                  sum: 0.052898770000000005
-                  timeUnixNano: "1000000"
-                - attributes:
-                    - key: name
-                      value:
-                        stringValue: DynamicCABundle-request-header
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
                     - "1"
                     - "1"
-                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -1301,7 +718,69 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 9.771199999999999e-05
+                  sum: 0.000134299
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: DynamicCABundle-csr-controller
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "3"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "4"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000989034
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: DynamicCABundle-request-header
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 6.3209e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1311,9 +790,9 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                    - "2"
                     - "1"
+                    - "2"
+                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -1332,7 +811,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.000295747
+                  sum: 5.3865999999999996e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1342,9 +821,9 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
+                    - "0"
+                    - "0"
                     - "1"
-                    - "0"
-                    - "0"
                     - "0"
                     - "0"
                     - "1"
@@ -1363,7 +842,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.400767277
+                  sum: 0.20039477500000002
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1373,8 +852,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "19"
-                    - "0"
+                    - "17"
+                    - "2"
                     - "1"
                     - "0"
                     - "10"
@@ -1394,7 +873,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.8366690530000002
+                  sum: 0.39918466599999997
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1464,15 +943,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "11"
+                    - "9"
                     - "0"
-                    - "1"
-                    - "2"
+                    - "3"
+                    - "3"
                     - "4"
                     - "0"
                     - "0"
                     - "0"
-                  count: "18"
+                  count: "19"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1485,7 +964,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.20779939100000006
+                  sum: 0.240433734
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1496,10 +975,10 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "19"
-                    - "4"
                     - "3"
                     - "6"
-                    - "9"
+                    - "7"
+                    - "6"
                     - "0"
                     - "0"
                     - "0"
@@ -1516,7 +995,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.3130688700000001
+                  sum: 0.274977654
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1586,15 +1065,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "8"
-                    - "4"
-                    - "1"
+                    - "12"
+                    - "0"
+                    - "0"
                     - "0"
                     - "2"
                     - "0"
                     - "0"
                     - "0"
-                  count: "15"
+                  count: "14"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1607,7 +1086,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.09276665200000002
+                  sum: 0.079190493
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1617,7 +1096,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "17"
+                    - "15"
                     - "0"
                     - "0"
                     - "0"
@@ -1625,7 +1104,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "19"
+                  count: "17"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1638,7 +1117,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.092625437
+                  sum: 0.08151744899999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1648,15 +1127,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "10"
-                    - "0"
+                    - "9"
                     - "0"
                     - "0"
                     - "1"
                     - "0"
                     - "0"
                     - "0"
-                  count: "11"
+                    - "0"
+                  count: "10"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1669,7 +1148,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.04657466199999999
+                  sum: 0.008489321999999997
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1714,10 +1193,10 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
+                    - "5"
                     - "0"
                     - "0"
-                  count: "1"
+                  count: "5"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1730,7 +1209,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.587656241
+                  sum: 3.6698504740000004
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1769,16 +1248,16 @@ resourceMetrics:
                   bucketCounts:
                     - "0"
                     - "0"
-                    - "3"
-                    - "458"
-                    - "179"
-                    - "28"
+                    - "7"
+                    - "473"
+                    - "143"
+                    - "36"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "668"
+                  count: "659"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1791,7 +1270,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.011920654000000004
+                  sum: 0.012077585000000024
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1916,20 +1395,19 @@ resourceMetrics:
                 - attributes:
                     - key: name
                       value:
-                        stringValue: node_lifecycle_controller
+                        stringValue: node
                   bucketCounts:
                     - "0"
                     - "0"
                     - "0"
-                    - "2"
-                    - "3"
-                    - "1"
-                    - "0"
-                    - "1"
                     - "0"
                     - "0"
                     - "0"
-                  count: "7"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -1942,7 +1420,38 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.03453261700000001
+                  sum: 0
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: node_lifecycle_controller
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "6"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "8"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0.023829819999999995
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1952,9 +1461,9 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
+                    - "9"
                     - "0"
-                    - "7"
-                    - "2"
+                    - "0"
                     - "0"
                     - "4"
                     - "0"
@@ -1973,7 +1482,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.140300688
+                  sum: 0.07911397599999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -1983,7 +1492,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -1991,7 +1500,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "1"
+                  count: "2"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2004,7 +1513,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.034849878
+                  sum: 0.039778326999999995
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2014,8 +1523,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "18"
-                    - "0"
+                    - "17"
+                    - "1"
                     - "0"
                     - "0"
                     - "4"
@@ -2035,7 +1544,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.14258935400000003
+                  sum: 0.14240075600000002
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2165,15 +1674,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "28"
-                    - "0"
+                    - "27"
                     - "1"
-                    - "3"
-                    - "9"
+                    - "2"
+                    - "4"
+                    - "5"
                     - "0"
                     - "0"
                     - "0"
-                  count: "41"
+                  count: "39"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2186,7 +1695,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.15043826700000004
+                  sum: 0.11725713200000003
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2320,8 +1829,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
-                    - "4"
+                    - "3"
+                    - "2"
                     - "0"
                     - "0"
                   count: "6"
@@ -2337,7 +1846,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.59970324
+                  sum: 0.41562541199999997
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2398,7 +1907,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 2.8427100669999996
+                  sum: 3.662269746
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2438,15 +1947,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "38"
-                    - "4"
+                    - "35"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "12"
                     - "0"
                     - "0"
-                    - "4"
                     - "0"
-                    - "0"
-                    - "0"
-                  count: "46"
+                  count: "48"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2459,7 +1968,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.3784656
+                  sum: 0.8110731150000003
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2530,8 +2039,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
                     - "0"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -2550,7 +2059,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 5.836e-05
+                  sum: 0.000259194
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2590,15 +2099,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "3"
+                    - "4"
+                    - "0"
+                    - "0"
                     - "1"
                     - "1"
-                    - "0"
                     - "1"
                     - "0"
                     - "0"
-                    - "0"
-                  count: "6"
+                  count: "7"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2611,7 +2120,37 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.08647205100000001
+                  sum: 0.6953364989999999
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: validatingadmissionpolicy-status
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2678,6 +2217,539 @@ resourceMetrics:
                 value:
                   stringValue: histogram
             name: workqueue_queue_duration_seconds
+          - description: '[ALPHA] Number of endpoints added on each Service sync'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: clusterCIDR
+                      value:
+                        stringValue: 10.244.0.0/16
+                  bucketCounts:
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 1
+                    - 5
+                    - 25
+                    - 125
+                    - 625
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: node_ipam_controller_cidrset_allocation_tries_per_request
+          - description: '[ALPHA] Client side rate limiter latency in seconds. Broken down by verb, and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "134"
+                    - "1"
+                    - "44"
+                    - "8"
+                    - "9"
+                    - "4"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "200"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 9.836870049
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PATCH
+                  bucketCounts:
+                    - "17"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "17"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 2.2502000000000002e-05
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: POST
+                  bucketCounts:
+                    - "75"
+                    - "0"
+                    - "23"
+                    - "0"
+                    - "9"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "107"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 5.061467736999997
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PUT
+                  bucketCounts:
+                    - "145"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "145"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0.00022481699999999993
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_rate_limiter_duration_seconds
+          - description: '[ALPHA] CEL compilation time in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.005
+                    - 0.01
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 5
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_cel_compilation_duration_seconds
+          - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "96"
+                    - "35"
+                    - "44"
+                    - "9"
+                    - "10"
+                    - "5"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "200"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 12.578945927000007
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PATCH
+                  bucketCounts:
+                    - "4"
+                    - "9"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "4"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "17"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 3.3372112920000006
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: POST
+                  bucketCounts:
+                    - "50"
+                    - "15"
+                    - "23"
+                    - "1"
+                    - "11"
+                    - "7"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "107"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 11.268858019000001
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PUT
+                  bucketCounts:
+                    - "88"
+                    - "54"
+                    - "1"
+                    - "1"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "145"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 1.507132858
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_request_duration_seconds
+          - description: '[STABLE] Time between when a cronjob is scheduled to be run, and when the corresponding job is created'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 16
+                    - 32
+                    - 64
+                    - 128
+                    - 256
+                    - 512
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: cronjob_controller_job_creation_skew_duration_seconds
+          - description: Distribution of individual non-GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total non-GC-related stop-the-world time (/sched/pauses/total/other:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_stopping_other_seconds
+          - description: '[ALPHA] The time it took to delete the job since it became eligible for deletion'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.8
+                    - 1.6
+                    - 3.2
+                    - 6.4
+                    - 12.8
+                    - 25.6
+                    - 51.2
+                    - 102.4
+                    - 204.8
+                    - 409.6
+                    - 819.2
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: ttl_after_finished_controller_job_deletion_duration_seconds
+          - description: '[ALPHA] CEL evaluation time in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.005
+                    - 0.01
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 5
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_cel_evaluation_duration_seconds
           - description: '[ALPHA] Request latency in seconds. Broken down by status code.'
             histogram:
               aggregationTemporality: 2
@@ -2707,13 +2779,13 @@ resourceMetrics:
                     - 5
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.001132087
+                  sum: 0.004823868
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: apiserver_delegated_authz_request_duration_seconds
+            name: apiserver_delegated_authn_request_duration_seconds
           - description: '[ALPHA] Latencies in seconds of data encryption key(DEK) generation operations.'
             histogram:
               aggregationTemporality: 2
@@ -2757,11 +2829,46 @@ resourceMetrics:
                 value:
                   stringValue: histogram
             name: apiserver_storage_data_key_generation_duration_seconds
-          - description: '[ALPHA] Time between when a cronjob is scheduled to be run, and when the corresponding job is created'
+          - description: Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (this is measured directly in /sched/pauses/stopping/gc:seconds), during which some threads may still be running. Bucket counts increase monotonically.
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "5"
+                    - "15"
+                    - "6"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "26"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.0006022400000000001
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_total_gc_seconds
+          - description: '[ALPHA] A metric measuring the latency for updating each load balancer hosts.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -2784,6 +2891,11 @@ resourceMetrics:
                     - 128
                     - 256
                     - 512
+                    - 1024
+                    - 2048
+                    - 4096
+                    - 8192
+                    - 16384
                   startTimeUnixNano: "1000000"
                   sum: 0
                   timeUnixNano: "1000000"
@@ -2791,8 +2903,8 @@ resourceMetrics:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: cronjob_controller_cronjob_job_creation_skew_duration_seconds
-          - description: Distribution individual GC-related stop-the-world pause latencies.
+            name: service_controller_update_loadbalancer_host_latency_seconds
+          - description: '[ALPHA] Latency, in seconds, between the time when a taint effect has been activated for the Pod and its deletion via TaintEvictionController.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
@@ -2802,68 +2914,457 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "7"
-                    - "17"
-                    - "8"
                     - "0"
                     - "0"
                     - "0"
-                  count: "32"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                   explicitBounds:
-                    - -5e-324
-                    - 9.999999999999999e-10
-                    - 9.999999999999999e-09
-                    - 9.999999999999998e-08
-                    - 1.0239999999999999e-06
-                    - 1.0239999999999999e-05
-                    - 0.00010239999999999998
-                    - 0.0010485759999999998
-                    - 0.010485759999999998
-                    - 0.10485759999999998
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 10
+                    - 30
+                    - 60
+                    - 120
+                    - 180
+                    - 240
                   startTimeUnixNano: "1000000"
-                  sum: NaN
+                  sum: 0
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: go_gc_pauses_seconds_total
-          - description: Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running.
+            name: taint_eviction_controller_pod_deletion_duration_seconds
+          - description: Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running. Bucket counts increase monotonically.
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - bucketCounts:
+                    - "1173"
+                    - "637"
+                    - "2875"
+                    - "1221"
+                    - "223"
+                    - "14"
                     - "0"
-                    - "1535"
                     - "0"
-                    - "822"
-                    - "2091"
-                    - "3011"
-                    - "1030"
-                    - "290"
-                    - "21"
-                    - "2"
-                    - "0"
-                  count: "8802"
+                  count: "6143"
                   explicitBounds:
-                    - -5e-324
-                    - 9.999999999999999e-10
-                    - 9.999999999999999e-09
-                    - 9.999999999999998e-08
-                    - 1.0239999999999999e-06
-                    - 1.0239999999999999e-05
-                    - 0.00010239999999999998
-                    - 0.0010485759999999998
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
                     - 0.010485759999999998
-                    - 0.10485759999999998
+                    - 0.11744051199999998
                   startTimeUnixNano: "1000000"
-                  sum: NaN
+                  sum: 0.041746112
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: go_sched_latencies_seconds
+          - description: '[ALPHA] Authentication duration in seconds broken out by result.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: result
+                      value:
+                        stringValue: success
+                  bucketCounts:
+                    - "16"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "16"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000331944
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: authentication_duration_seconds
+          - description: '[ALPHA] Request size in bytes. Broken down by verb and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "200"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "200"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PATCH
+                  bucketCounts:
+                    - "1"
+                    - "5"
+                    - "1"
+                    - "0"
+                    - "7"
+                    - "3"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "17"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 34721
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: POST
+                  bucketCounts:
+                    - "1"
+                    - "57"
+                    - "22"
+                    - "7"
+                    - "19"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "107"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 52198
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: verb
+                      value:
+                        stringValue: PUT
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "76"
+                    - "13"
+                    - "55"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "145"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 173226
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_request_size_bytes
+          - description: Distribution of individual non-GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (measured directly in /sched/pauses/stopping/other:seconds). Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_total_other_seconds
+          - description: '[ALPHA] Number of endpoints added on each Service sync'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "16"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "16"
+                  explicitBounds:
+                    - 2
+                    - 4
+                    - 8
+                    - 16
+                    - 32
+                    - 64
+                    - 128
+                    - 256
+                    - 512
+                    - 1024
+                    - 2048
+                    - 4096
+                    - 8192
+                    - 16384
+                    - 32768
+                  startTimeUnixNano: "1000000"
+                  sum: 4
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: endpoint_slice_controller_endpoints_added_per_sync
+          - description: '[ALPHA] A metric measuring the latency for nodesync which updates loadbalancer hosts on cluster node updates.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 16
+                    - 32
+                    - 64
+                    - 128
+                    - 256
+                    - 512
+                    - 1024
+                    - 2048
+                    - 4096
+                    - 8192
+                    - 16384
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: service_controller_nodesync_latency_seconds
+          - description: '[ALPHA] Duration in seconds for NodeController to update the health of all nodes.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "27"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "27"
+                  explicitBounds:
+                    - 0.01
+                    - 0.04
+                    - 0.16
+                    - 0.64
+                    - 2.56
+                    - 10.24
+                    - 40.96
+                    - 163.84
+                  startTimeUnixNano: "1000000"
+                  sum: 0.017431722999999993
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: node_collector_update_all_nodes_health_duration_seconds
+          - description: '[ALPHA] Histogram of the number of seconds the last auth exec plugin client certificate lived before being rotated. If auth exec plugin client certificates are unused, histogram will contain no data.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 600
+                    - 1800
+                    - 3600
+                    - 14400
+                    - 86400
+                    - 604800
+                    - 2.592e+06
+                    - 7.776e+06
+                    - 1.5552e+07
+                    - 3.1104e+07
+                    - 1.24416e+08
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_exec_plugin_certificate_rotation_age
           - description: '[ALPHA] How long in seconds processing an item from workqueue takes.'
             histogram:
               aggregationTemporality: 2
@@ -2878,13 +3379,13 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "48"
-                    - "10"
-                    - "3"
+                    - "43"
+                    - "13"
+                    - "0"
                     - "3"
                     - "0"
                     - "0"
-                  count: "64"
+                  count: "59"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2897,7 +3398,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 1.5048770210000002
+                  sum: 2.639294359000001
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2908,14 +3409,14 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
+                    - "2"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "1"
+                  count: "2"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2928,7 +3429,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 4.247e-05
+                  sum: 7.7095e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2959,7 +3460,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.00060043
+                  sum: 0.000744315
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -2970,14 +3471,14 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "2"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "2"
+                  count: "1"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -2990,7 +3491,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 9.123e-05
+                  sum: 2.8934e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3021,7 +3522,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 9.0258e-05
+                  sum: 5.5123e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3052,7 +3553,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.202414
+                  sum: 0.505574071
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3062,11 +3563,11 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "23"
-                    - "3"
+                    - "19"
+                    - "7"
                     - "2"
-                    - "0"
-                    - "2"
+                    - "1"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -3083,7 +3584,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.03594755999999999
+                  sum: 0.020845419
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3155,13 +3656,13 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "9"
-                    - "5"
+                    - "11"
                     - "2"
+                    - "4"
                     - "2"
                     - "0"
                     - "0"
-                  count: "18"
+                  count: "19"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3174,7 +3675,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 1.4085752250000003
+                  sum: 1.8336191409999996
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3205,7 +3706,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 1.3731153929999997
+                  sum: 1.6506292250000003
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3275,15 +3776,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
+                    - "1"
+                    - "4"
                     - "0"
-                    - "5"
-                    - "0"
-                    - "9"
+                    - "8"
                     - "0"
                     - "1"
                     - "0"
                     - "0"
-                  count: "15"
+                  count: "14"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3296,7 +3797,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.679607831
+                  sum: 0.6358130330000001
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3306,15 +3807,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
+                    - "1"
+                    - "3"
                     - "4"
-                    - "5"
-                    - "9"
+                    - "8"
                     - "0"
                     - "1"
                     - "0"
                     - "0"
-                  count: "19"
+                  count: "17"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3327,7 +3828,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.6331135269999999
+                  sum: 0.6888996699999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3338,14 +3839,14 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "11"
+                    - "10"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "11"
+                  count: "10"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3358,7 +3859,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.00024120599999999997
+                  sum: 0.00021828100000000002
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3401,12 +3902,12 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                    - "1"
-                    - "0"
+                    - "5"
                     - "0"
                     - "0"
-                  count: "1"
+                    - "0"
+                    - "0"
+                  count: "5"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3419,7 +3920,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.01426963
+                  sum: 0.025283864
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3458,16 +3959,16 @@ resourceMetrics:
                   bucketCounts:
                     - "0"
                     - "0"
-                    - "3"
-                    - "573"
-                    - "92"
+                    - "1"
+                    - "537"
+                    - "119"
+                    - "2"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                  count: "668"
+                  count: "659"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3480,7 +3981,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.004400437
+                  sum: 0.004994353999999997
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3605,20 +4106,19 @@ resourceMetrics:
                 - attributes:
                     - key: name
                       value:
-                        stringValue: node_lifecycle_controller
+                        stringValue: node
                   bucketCounts:
                     - "0"
                     - "0"
                     - "0"
-                    - "3"
-                    - "3"
-                    - "0"
-                    - "1"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "7"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3631,7 +4131,38 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.005788887
+                  sum: 0
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: node_lifecycle_controller
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "6"
+                    - "1"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "8"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0.005602995999999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3641,9 +4172,9 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "3"
-                    - "10"
-                    - "0"
+                    - "4"
+                    - "8"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -3662,7 +4193,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.000323583
+                  sum: 0.00069763
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3673,14 +4204,14 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
+                    - "2"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "1"
+                  count: "2"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3693,7 +4224,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 4.1597e-05
+                  sum: 8.9167e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3703,8 +4234,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "16"
-                    - "6"
+                    - "14"
+                    - "8"
                     - "0"
                     - "0"
                     - "0"
@@ -3724,7 +4255,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.000206755
+                  sum: 0.000344169
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -3855,14 +4386,14 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "20"
-                    - "2"
-                    - "8"
                     - "9"
+                    - "13"
+                    - "9"
+                    - "6"
                     - "2"
                     - "0"
                     - "0"
-                  count: "41"
+                  count: "39"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -3875,7 +4406,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.9244713900000002
+                  sum: 0.8035203130000002
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4009,8 +4540,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "5"
-                    - "0"
                     - "1"
+                    - "0"
                     - "0"
                     - "0"
                   count: "6"
@@ -4026,7 +4557,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.11421542100000001
+                  sum: 0.08754944399999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4087,7 +4618,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.611012178
+                  sum: 0.8116132939999999
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4127,15 +4658,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "40"
-                    - "6"
+                    - "47"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "46"
+                  count: "48"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -4148,7 +4679,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.00041243100000000016
+                  sum: 0.00027870099999999996
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4239,7 +4770,7 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 2.3083e-05
+                  sum: 4.7589e-05
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4279,15 +4810,15 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "4"
+                    - "5"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
                     - "1"
                     - "0"
                     - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                  count: "6"
+                  count: "7"
                   explicitBounds:
                     - 1e-08
                     - 1e-07
@@ -4300,7 +4831,37 @@ resourceMetrics:
                     - 1
                     - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0.7010433049999999
+                  sum: 0.7021705919999999
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: validatingadmissionpolicy-status
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
                   timeUnixNano: "1000000"
                 - attributes:
                     - key: name
@@ -4367,16 +4928,116 @@ resourceMetrics:
                 value:
                   stringValue: histogram
             name: workqueue_work_duration_seconds
-          - description: '[ALPHA] Number of endpoints added on each Service sync'
+          - description: '[ALPHA] Duration in seconds for NodeController to update the health of a single node.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "26"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "27"
+                  explicitBounds:
+                    - 0.001
+                    - 0.004
+                    - 0.016
+                    - 0.064
+                    - 0.256
+                    - 1.024
+                    - 4.096
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0.009113469
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: node_collector_update_node_health_duration_seconds
+          - description: '[ALPHA] Time for comparison of old to new for the purposes of CRDValidationRatcheting during an UPDATE in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1e-05
+                    - 4e-05
+                    - 0.00016
+                    - 0.00064
+                    - 0.00256
+                    - 0.01024
+                    - 0.04096
+                    - 0.16384
+                    - 0.65536
+                    - 2.62144
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiextensions_apiserver_validation_ratcheting_seconds
+          - description: Distribution of individual GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total GC-related stop-the-world time (/sched/pauses/total/gc:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "11"
+                    - "1"
+                    - "10"
+                    - "4"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "26"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000400704
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_stopping_gc_seconds
+          - description: '[ALPHA] Request latency in seconds. Broken down by status code.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - attributes:
-                    - key: clusterCIDR
+                    - key: code
                       value:
-                        stringValue: 10.244.0.0/16
+                        stringValue: "201"
                   bucketCounts:
                     - "1"
+                    - "0"
+                    - "0"
+                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -4384,195 +5045,22 @@ resourceMetrics:
                     - "0"
                   count: "1"
                   explicitBounds:
+                    - 0.25
+                    - 0.5
+                    - 0.7
                     - 1
+                    - 1.5
+                    - 3
                     - 5
-                    - 25
-                    - 125
-                    - 625
+                    - 10
                   startTimeUnixNano: "1000000"
-                  sum: 0
+                  sum: 0.001369719
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: node_ipam_controller_cidrset_allocation_tries_per_request
-          - description: '[ALPHA] Number of namespace syncs happened in root ca cert publisher.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: code
-                      value:
-                        stringValue: "200"
-                  bucketCounts:
-                    - "0"
-                    - "1"
-                    - "4"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "6"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.11418175700000001
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: root_ca_cert_publisher_sync_duration_seconds
-          - description: Distribution of heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "11278"
-                    - "291739"
-                    - "166523"
-                    - "113490"
-                    - "76112"
-                    - "18183"
-                    - "6236"
-                    - "1998"
-                    - "2476"
-                    - "380"
-                    - "247"
-                    - "186"
-                  count: "688848"
-                  explicitBounds:
-                    - 8.999999999999998
-                    - 24.999999999999996
-                    - 64.99999999999999
-                    - 144.99999999999997
-                    - 320.99999999999994
-                    - 704.9999999999999
-                    - 1536.9999999999998
-                    - 3200.9999999999995
-                    - 6528.999999999999
-                    - 13568.999999999998
-                    - 27264.999999999996
-                  startTimeUnixNano: "1000000"
-                  sum: 9.4502704e+07
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: go_gc_heap_allocs_by_size_bytes_total
-          - description: '[ALPHA] Distribution of the remaining lifetime on the certificate used to authenticate a request.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 0
-                    - 1800
-                    - 3600
-                    - 7200
-                    - 21600
-                    - 43200
-                    - 86400
-                    - 172800
-                    - 345600
-                    - 604800
-                    - 2.592e+06
-                    - 7.776e+06
-                    - 1.5552e+07
-                    - 3.1104e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: apiserver_client_certificate_expiration_seconds
-          - description: '[ALPHA] A metric measuring the latency for updating each load balancer hosts.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 16
-                    - 32
-                    - 64
-                    - 128
-                    - 256
-                    - 512
-                    - 1024
-                    - 2048
-                    - 4096
-                    - 8192
-                    - 16384
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: service_controller_update_loadbalancer_host_latency_seconds
+            name: apiserver_delegated_authz_request_duration_seconds
         scope:
           name: otelcol/prometheusreceiver
           version: v0.105.0

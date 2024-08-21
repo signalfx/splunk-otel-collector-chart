@@ -237,6 +237,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.IgnoreMetricAttributeValue("to", "coredns_forward_request_duration_seconds"),
+		pmetrictest.IgnoreMetricAttributeValue("rcode", "coredns_forward_request_duration_seconds"),
 		pmetrictest.IgnoreResourceAttributeValue("server.address"),
 		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
@@ -556,7 +557,7 @@ func testHistogramMetrics(t *testing.T) {
 	assert.NoError(t, err)
 	if err != nil {
 		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "controller_metrics.yaml"), *controllerManagerMetrics))
+		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "controller_manager_metrics.yaml"), *controllerManagerMetrics))
 	}
 
 	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
