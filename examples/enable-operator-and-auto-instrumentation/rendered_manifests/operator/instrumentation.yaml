@@ -57,10 +57,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-go:v0.10.1-alpha
   java:
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.6.0
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.7.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-java:v2.6.0
+        value: splunk.zc.method=splunk-otel-java:v2.7.0
       - name: SPLUNK_OTEL_AGENT
         valueFrom:
           fieldRef:
