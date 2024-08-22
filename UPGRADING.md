@@ -1,38 +1,72 @@
 # Upgrade guidelines
 
-# 0.106.0 to 0.107.0
+## 0.105.3 to 0.107.0
 
-The Java instrumentation using in Operator auto-instrumentation had a major version bump from v1.32.2 to v2.6.0 which does have some breaking changes.
+The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.6.0.
+This major update introduces several breaking changes, including updates to metrics names and span
+attributes. Below we have supplied a customer migration guide and outlined the key changes to
+highlight the impact.
 
+Please refer to the [2.x metrics and HTTP semantic conventions migration guide](https://docs.splunk.com/observability/en/gdi/get-data-in/application/java/migrate-metrics.html#new-metric-names-for-version-2-x)
+to update your custom dashboards, detectors, or alerts using Java application telemetry data.
 
-| **Missing Expected Resource**                         | **Unexpected Resource**                                     |
-|-------------------------------------------------------|-------------------------------------------------------------|
-| cluster_name:ci-k8s-cluster                           | cluster_name:ci-k8s-cluster                                 |
-| container.image.name:quay.io/splunko11ytest/java_test | container.image.name:quay.io/splunko11ytest/java_test       |
-| container.image.tag:latest                            | container.image.tag:latest                                  |
-| customfield1:customvalue1                             | customfield1:customvalue1                                   |
-| customfield2:customvalue2                             | customfield2:customvalue2                                   |
-| deployment.environment:dev                            | deployment.environment:dev                                  |
-| host.name:kind-control-plane                          | host.name:kind-control-plane                                |
-| k8s.cluster.name:dev-operator                         | k8s.cluster.name:dev-operator                               |
-| k8s.container.name:java-test                          | k8s.container.name:java-test                                |
-| k8s.namespace.name:default                            | k8s.namespace.name:default                                  |
-| k8s.node.name:kind-control-plane                      | k8s.node.name:kind-control-plane                            |
-| k8s.pod.labels.app:java-test                          | k8s.pod.labels.app:java-test                                |
-| os.type:linux                                         | os.type:linux                                               |
-| process.command_args:[/opt/java/openjdk/bin/java ...] | process.command_args:[/opt/java/openjdk/bin/java ...]       |
-| process.executable.path:/opt/java/openjdk/bin/java    | process.executable.path:/opt/java/openjdk/bin/java          |
-| process.runtime.description:Eclipse Adoptium ...      | process.runtime.description:Eclipse Adoptium ...            |
-| process.runtime.name:OpenJDK Runtime Environment      | process.runtime.name:OpenJDK Runtime Environment            |
-| process.runtime.version:21.0.2+13-LTS                 | process.runtime.version:21.0.2+13-LTS                       |
-| service.name:java-test                                | service.name:java-test                                      |
-| service.version:latest                                | service.version:latest                                      |
-|                                                       | telemetry.distro.name:opentelemetry-java-instrumentation    |
-|                                                       | telemetry.distro.version:splunk-2.6.0-otel-2.6.0            |
-| telemetry.sdk.language:java                           | telemetry.sdk.language:java                                 |
-| telemetry.sdk.name:opentelemetry                      | telemetry.sdk.name:opentelemetry                            |
+### Breaking Changes Overview
 
-https://docs.splunk.com/observability/en/apm/span-tags/migrate-apm-custom-reporting.html#http-semantic-convention-changes
+**Span Attribute Name Changes**
+
+| Old Attribute (1.x)           | New Attribute (2.x)           |
+| ----------------------------- | ----------------------------- |
+| http.method                   | http.request.method           |
+| http.status_code              | http.response.status_code     |
+| http.request_content_length   | http.request.body.size        |
+| http.response_content_length  | http.response.body.size       |
+| http.target                   | url.path and url.query        |
+| http.scheme                   | url.scheme                    |
+| http.client_ip                | client.address                |
+
+**Metric Name Changes**
+
+| Old Metric (1.x)                                                        | New Metric (2.x)                                     |
+|-------------------------------------------------------------------------|------------------------------------------------------|
+| db.pool.connections.create_time                                         | db.client.connections.create_time (Histogram, ms)    |
+| db.pool.connections.idle.max                                            | db.client.connections.idle.max                       |
+| db.pool.connections.idle.min                                            | db.client.connections.idle.min                       |
+| db.pool.connections.max                                                 | db.client.connections.max                            |
+| db.pool.connections.pending_threads                                     | db.client.connections.pending_requests               |
+| db.pool.connections.timeouts                                            | db.client.connections.timeouts                       |
+| db.pool.connections.idle                                                | db.client.connections.usage[state=idle]              |
+| db.pool.connections.active                                              | db.client.connections.usage[state=used]              |
+| db.pool.connections.use_time                                            | db.client.connections.use_time (Histogram, ms)       |
+| db.pool.connections.wait_time                                           | db.client.connections.wait_time (Histogram, ms)      |
+| runtime.jvm.buffer.count                                                | jvm.buffer.count                                     |
+| runtime.jvm.buffer.total.capacity                                       | jvm.buffer.memory.limit                              |
+| runtime.jvm.buffer.memory.used                                          | jvm.buffer.memory.usage                              |
+| runtime.jvm.classes.loaded                                              | jvm.class.count                                      |
+| runtime.jvm.classes.unloaded                                            | jvm.class.unloaded                                   |
+| runtime.jvm.gc.concurrent.phase.time                                    | jvm.gc.duration (Histogram, <concurrent gcs>)        |
+| runtime.jvm.gc.pause                                                    | jvm.gc.duration (<non-concurrent gcs>)               |
+| runtime.jvm.gc.memory.allocated \| process.runtime.jvm.memory.allocated | jvm.memory.allocated*                                |
+| runtime.jvm.memory.committed                                            | jvm.memory.committed                                 |
+| runtime.jvm.memory.max                                                  | jvm.memory.limit                                     |
+| runtime.jvm.gc.max.data.size                                            | jvm.memory.limit{jvm.memory.pool.name=<long lived>}  |
+| runtime.jvm.memory.used                                                 | jvm.memory.used                                      |
+| runtime.jvm.gc.live.data.size                                           | jvm.memory.used_after_last_gc{jvm.memory.pool.name=} |
+| runtime.jvm.threads.daemon \| runtime.jvm.threads.live                  | jvm.thread.count                                     |
+
+**Dropped Metrics**
+
+- executor.tasks.completed
+- executor.tasks.submitted
+- executor.threads
+- executor.threads.active
+- executor.threads.core
+- executor.threads.idle
+- executor.threads.max
+- runtime.jvm.memory.usage.after.gc
+- runtime.jvm.gc.memory.promoted
+- runtime.jvm.gc.overhead
+- runtime.jvm.threads.peak
+- runtime.jvm.threads.states                                     |
 
 # 0.93.0 to 0.94.0
 
