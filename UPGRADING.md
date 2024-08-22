@@ -2,17 +2,18 @@
 
 ## 0.105.3 to 0.107.0
 
-The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.6.0.
-This major update introduces several breaking changes, including updates to metrics names and span
-attributes. Below we have supplied a customer migration guide and outlined the key changes to
-highlight the impact.
+The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.7.0.
+This major update introduces several breaking changes. Below we have supplied a customer migration
+guide and outlined the key changes to highlight the impact.
 
-Please refer to the [2.x metrics and HTTP semantic conventions migration guide](https://docs.splunk.com/observability/en/gdi/get-data-in/application/java/migrate-metrics.html#new-metric-names-for-version-2-x)
+Please refer to the [Migration guide for OpenTelemetry Java 2.x](https://docs.splunk.com/observability/en/gdi/get-data-in/application/java/migrate-metrics.html)
 to update your custom dashboards, detectors, or alerts using Java application telemetry data.
 
 ### Breaking Changes Overview
-
-**Span Attribute Name Changes**
+- Runtime metrics will now be enabled by default, this can increase the number of metrics collected.
+- The default protocol changed from gRPC to http/protobuf. For custom Java exporter endpoint
+configurations, verify that you’re sending data to http/protobuf endpoints like this [example](https://github.com/signalfx/splunk-otel-collector-chart/blob/splunk-otel-collector-0.107.0/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml#L59).
+- Span Attribute Name Changes:
 
 | Old Attribute (1.x)           | New Attribute (2.x)           |
 | ----------------------------- | ----------------------------- |
@@ -24,7 +25,7 @@ to update your custom dashboards, detectors, or alerts using Java application te
 | http.scheme                   | url.scheme                    |
 | http.client_ip                | client.address                |
 
-**Metric Name Changes**
+- Metric Name Changes:
 
 | Old Metric (1.x)                                                        | New Metric (2.x)                                     |
 |-------------------------------------------------------------------------|------------------------------------------------------|
@@ -53,20 +54,19 @@ to update your custom dashboards, detectors, or alerts using Java application te
 | runtime.jvm.gc.live.data.size                                           | jvm.memory.used_after_last_gc{jvm.memory.pool.name=} |
 | runtime.jvm.threads.daemon \| runtime.jvm.threads.live                  | jvm.thread.count                                     |
 
-**Dropped Metrics**
-
-- executor.tasks.completed
-- executor.tasks.submitted
-- executor.threads
-- executor.threads.active
-- executor.threads.core
-- executor.threads.idle
-- executor.threads.max
-- runtime.jvm.memory.usage.after.gc
-- runtime.jvm.gc.memory.promoted
-- runtime.jvm.gc.overhead
-- runtime.jvm.threads.peak
-- runtime.jvm.threads.states                                     |
+- Dropped Metrics:
+  - executor.tasks.completed
+  - executor.tasks.submitted
+  - executor.threads
+  - executor.threads.active
+  - executor.threads.core
+  - executor.threads.idle
+  - executor.threads.max
+  - runtime.jvm.memory.usage.after.gc
+  - runtime.jvm.gc.memory.promoted
+  - runtime.jvm.gc.overhead
+  - runtime.jvm.threads.peak
+  - runtime.jvm.threads.states
 
 # 0.93.0 to 0.94.0
 
