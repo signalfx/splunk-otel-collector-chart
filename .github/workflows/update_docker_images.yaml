@@ -26,7 +26,7 @@ jobs:
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
             yaml_value_path: '.operator.instrumentation.spec.java'
-            filter: 'v1.'
+            filter: 'v2.'
           - name: 'nodejs'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
