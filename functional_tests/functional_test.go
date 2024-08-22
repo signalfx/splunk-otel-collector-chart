@@ -659,6 +659,7 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
 		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
