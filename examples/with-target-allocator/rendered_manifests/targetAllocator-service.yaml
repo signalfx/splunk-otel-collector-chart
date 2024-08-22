@@ -1,0 +1,15 @@
+---
+# Source: splunk-otel-collector/templates/targetAllocator-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: default-splunk-otel-collector-ta
+spec:
+  selector:
+    app: targetAllocator
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 80
+      targetPort: http-port

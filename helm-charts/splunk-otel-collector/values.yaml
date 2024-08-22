@@ -223,7 +223,7 @@ autodetect:
 # Optional: Configuration for additional metadata that will be added to all the
 # telemetry as extra attributes.
 # IMPORTANT: Additional attributes configured with `fromLabels` and
-# `fromAttributes` options are only applied to traces and logs. Pod labels are
+# `fromAnnotations` options are only applied to traces and logs. Pod labels are
 # always sent to Splunk Observability (if enabled) as metric properties.
 ################################################################################
 
@@ -271,8 +271,8 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# OpenTelemetry collector running as an daemonset agent on every node.
-# It collects metrics and traces and send them to Signalfx backend.
+# OpenTelemetry collector running as a daemonset agent on every node.
+# It collects metrics and traces and send them to the Observability Cloud backend.
 ################################################################################
 
 agent:
@@ -339,10 +339,6 @@ agent:
       containerPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
-    otlp-http-old:
-      containerPort: 55681
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
     sfx-forwarder:
       containerPort: 9080
       hostPort: 9080
@@ -417,15 +413,12 @@ agent:
 
   # OTel agent annotations
   annotations: {}
-  podAnnotations:
-    # This annotation is a workaround to avoid filling the syslog with warnings from appArmor such as:
-    # Apr 16 13:05:49 localhost kernel: [7954196.731418] audit: type=1400 audit(1713272749.057:5567969): apparmor="DENIED" operation="ptrace" class="ptrace" profile="cri-containerd.apparmor.d" pid=4151892 comm="otelcol" requested_mask="read" denied_mask="read" peer="unconfined"
-    container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
+  podAnnotations: {}
 
   # OTel agent extra pod labels
   podLabels: {}
 
-  # Extra enviroment variables to be set in the OTel agent container
+  # Extra environment variables to be set in the OTel agent container
   extraEnvs: []
 
   # Extra volumes to be mounted to the agent daemonset.
@@ -1080,10 +1073,6 @@ gateway:
       containerPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs]
-    otlp-http-old:
-      containerPort: 55681
-      protocol: TCP
-      enabled_for: [metrics, traces, logs]
     jaeger-thrift:
       containerPort: 14268
       protocol: TCP
@@ -1206,7 +1195,7 @@ operator:
         tag: v2.7.0
       nodejs:
         repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
-        tag: v2.9.0
+        tag: v2.11.0
       dotnet:
         repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
         tag: v1.6.0
@@ -1242,6 +1231,44 @@ certmanager:
   enabled: false
   installCRDs: true
 
+################################################################################
+# Target Allocator
+# Notice: Target Allocator related features should be considered to have an alpha
+# maturity level and be experimental. There may be breaking changes or Operator
+# features may be replaced entirely with a better alternative in the future.
+#
+# The Target Allocator is running as a deployment with a replica count of 1.
+# It discovers scraping configurations from ServiceMonitor and PodMonitor CRDs and
+# assigns them to collectors.
+# Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+################################################################################
+
+targetAllocator:
+  enabled: false
+  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.105.0
+  serviceAccount:
+    # Specifies whether a ServiceAccount should be created
+    create: true
+    # The name of the ServiceAccount to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+    # Service account annotations
+    annotations: {}
+  config:
+    allocation_strategy: per-node
+    collector_selector:
+      matchlabels:
+        component: otel-collector-agent
+    prometheus_cr:
+      enabled: true
+      scrapeInterval: 30s
+      # An empty value means any service monitor will be accepted.
+      service_monitor_selector: {}
+      # An empty value means any pod monitor will be accepted.
+      pod_monitor_selector: {}
+
+    filter_strategy: relabel-config
 
 ################################################################################
 # Helm Chart Feature Gates.
@@ -1256,3 +1283,7 @@ featureGates:
   # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
   # From the other hand, it does not support all Prometheus configuration options.
   useLightPrometheusReceiver: false
+  # The feature gate enables experimental exporter batching instead of batch processor. This feature
+  # ensures the backpressure is propagated to the file readers and no data is dropped.
+  # Not recommended to use with enabled gateway.
+  noDropLogsPipeline: false

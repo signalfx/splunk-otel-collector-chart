@@ -1,0 +1,132 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: opentelemetry-targetallocator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opentelemetry-targetallocator-role
+rules:
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - alertmanagers
+      - prometheuses
+      - prometheuses/finalizers
+      - alertmanagers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+    verbs:
+      - '*'
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - '*'
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - nodes
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    verbs: ["get"]
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opentelemetry-targetallocator-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opentelemetry-targetallocator-role
+subjects:
+  - kind: ServiceAccount
+    name: opentelemetry-targetallocator
+    namespace: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: targetallocator-deployment
+  labels:
+    app: targetallocator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: targetallocator
+  template:
+    metadata:
+      labels:
+        app: targetallocator
+    spec:
+      serviceAccountName: opentelemetry-targetallocator
+      containers:
+        - name: targetallocator
+          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.105.0
+          ports:
+            - containerPort: 8080
+              name: http-port
+          volumeMounts:
+            - name: config-volume
+              mountPath: /conf/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: targetallocator-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: targetallocator-service
+spec:
+  selector:
+    app: targetallocator
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 80
+      targetPort: http-port
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: targetallocator-config
+data:
+  targetallocator.yaml: |
+    allocation_strategy: per-node
+    collector_selector:
+      matchlabels:
+        # Helm chart daemonset pod label:
+        component: otel-collector-agent
+    prometheus_cr:
+      enabled: true
+      scrapeInterval: 10s
+      # An empty value means any service monitor will be accepted.
+      service_monitor_selector: {}
+      # An empty value means any pod monitor will be accepted.
+      pod_monitor_selector: {}
+
+    filter_strategy: relabel-config

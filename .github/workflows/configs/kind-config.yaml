@@ -11,6 +11,24 @@ nodes:
       - |
         kind: KubeletConfiguration
         serverTLSBootstrap: true
+      - |
+        kind: ClusterConfiguration
+        scheduler:
+          extraArgs:
+            bind-address: "0.0.0.0"
+        apiServer:
+          extraArgs:
+            bind-address: "0.0.0.0"
+        controllerManager:
+          extraArgs:
+            bind-address: "0.0.0.0"
+        etcd:
+          local:
+            extraArgs:
+              listen-metrics-urls: "http://0.0.0.0:2381"
+      - |
+        kind: KubeProxyConfiguration
+        metricsBindAddress: "0.0.0.0:10249"
     extraPortMappings:
       - containerPort: 80
         hostPort: 80

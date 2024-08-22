@@ -1,0 +1,33 @@
+---
+# Source: splunk-otel-collector/templates/targetAllocator-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: default-splunk-otel-collector-ta
+  labels:
+    app: targetAllocator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: targetAllocator
+  template:
+    metadata:
+      labels:
+        app: targetAllocator
+    spec:
+      serviceAccountName: default-splunk-otel-collector-ta
+      containers:
+        - name: targetallocator
+          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.105.0
+          ports:
+            - containerPort: 8080
+              name: http-port
+          volumeMounts:
+            - name: config-volume
+              mountPath: /conf/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: default-splunk-otel-collector-ta-configmap

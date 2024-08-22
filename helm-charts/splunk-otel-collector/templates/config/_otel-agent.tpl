@@ -40,6 +40,7 @@ receivers:
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:
     collection_interval: 10s
+    root_path: {{ .Values.isWindows | ternary "C:\\hostfs" "/hostfs" }}
     scrapers:
       cpu:
       disk:
@@ -241,6 +242,17 @@ receivers:
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
+  {{- end }}
+
+  {{- if .Values.targetAllocator.enabled  }}
+  prometheus/ta:
+    config:
+      global:
+        scrape_interval: 30s
+    target_allocator:
+      endpoint: http://{{ template "splunk-otel-collector.fullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      interval: 30s
+      collector_id: ${env:K8S_POD_NAME}
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
@@ -700,7 +712,9 @@ service:
         {{- if not $gatewayEnabled }}
         - filter/logs
         {{- end }}
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         - resourcedetection
         - resource
         {{- if not $gatewayEnabled }}
@@ -742,7 +756,9 @@ service:
         {{- end }}
       processors:
         - memory_limiter
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
@@ -803,7 +819,15 @@ service:
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
-      receivers: [hostmetrics, kubeletstats, otlp, receiver_creator, signalfx]
+      receivers:
+        - hostmetrics
+        - kubeletstats
+        - otlp
+        - receiver_creator
+        - signalfx
+        {{- if .Values.targetAllocator.enabled  }}
+        - prometheus/ta
+        {{- end }}
       processors:
         - memory_limiter
         - batch
