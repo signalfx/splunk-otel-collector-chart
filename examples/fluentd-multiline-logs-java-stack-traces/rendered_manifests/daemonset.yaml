@@ -33,7 +33,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: aca315f4269e11271514cbed58cc40ab206d0bc1583d88f6b14fa50338e41d17
+        checksum/config: 2af2dd98a147486bca3d57c8fe7c9a835f3fa95cc9faca0c61bd291785401fac
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -188,6 +188,24 @@ spec:
               secretKeyRef:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
+          # Env variables for host metrics receiver
+          - name: HOST_PROC
+            value: /hostfs/proc
+          - name: HOST_SYS
+            value: /hostfs/sys
+          - name: HOST_ETC
+            value: /hostfs/etc
+          - name: HOST_VAR
+            value: /hostfs/var
+          - name: HOST_RUN
+            value: /hostfs/run
+          - name: HOST_DEV
+            value: /hostfs/dev
+          # until https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/5879
+          # is resolved fall back to previous gopsutil mountinfo path:
+          # https://github.com/shirou/gopsutil/issues/1271
+          - name: HOST_PROC_MOUNTINFO
+            value: /proc/self/mountinfo
 
         readinessProbe:
           httpGet:
