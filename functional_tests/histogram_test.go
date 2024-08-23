@@ -35,7 +35,7 @@ const (
 	otlpReceiverPort = 4317
 
 	testValuesFile = "test_values.yaml.tmpl"
-	testDir        = "testdata_histogram"
+	testDir        = "testdata_histogram/expected/1.30"
 	valuesDir      = "values"
 )
 
@@ -87,7 +87,7 @@ func deployChartsAndApps(t *testing.T) {
 	chart, err := loader.Load(chartPath)
 	require.NoError(t, err)
 
-	valuesBytes, err := os.ReadFile(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata_histogram", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
 
 	hostEp := hostEndpoint(t)
