@@ -290,6 +290,9 @@ receivers:
     storage: file_storage
     retry_on_failure:
       enabled: true
+      {{- if .Values.featureGates.noDropLogsPipeline }}
+      max_elapsed_time: 0s
+      {{- end }}
     operators:
       {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
