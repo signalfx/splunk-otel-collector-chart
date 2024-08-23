@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"text/template"
@@ -34,9 +35,7 @@ import (
 const (
 	otlpReceiverPort = 4317
 
-	testValuesFile = "test_values.yaml.tmpl"
-	testDir        = "testdata_histogram/expected/1.30"
-	valuesDir      = "values"
+	valuesDir = "values"
 )
 
 var setupRun = sync.Once{}
@@ -156,6 +155,11 @@ func Test_Histograms(t *testing.T) {
 }
 
 func testHistogramMetrics(t *testing.T) {
+	k8sVersion := os.Getenv("K8S_VERSION")
+	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
+
+	testDir := filepath.Join("testdata_histogram", "expected", majorMinor)
+
 	otlpMetricsSink := setupOnce(t)
 	waitForMetrics(t, 5, otlpMetricsSink)
 
