@@ -203,7 +203,7 @@ func testHistogramMetrics(t *testing.T) {
 						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" && m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
 							kubeProxyMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" { //&& m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" && m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
 							schedulerMetrics = &m
 							break OUTER
 						} else if metricToConsider.Name() == "apiserver_audit_event_total" && m.MetricCount() == expectedApiMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedApiMetrics.ResourceMetrics().Len() {
@@ -272,7 +272,12 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
 		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
+		pmetrictest.IgnoreResourceAttributeValue("net.host.port"), pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreMetricAttributeValue("server.address"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
+		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
