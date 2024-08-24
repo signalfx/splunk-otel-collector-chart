@@ -253,6 +253,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreSubsequentDataPoints("coredns_forward_request_duration_seconds"),
+		pmetrictest.IgnoreSubsequentDataPoints("coredns_proxy_request_duration_seconds"),
 	)
 	assert.NoError(t, err)
 	if err != nil {
