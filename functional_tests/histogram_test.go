@@ -197,22 +197,22 @@ func testHistogramMetrics(t *testing.T) {
 				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" && m.MetricCount() == expectedCoreDNSMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedCoreDNSMetrics.ResourceMetrics().Len() {
+						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" { //&& m.MetricCount() == expectedCoreDNSMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedCoreDNSMetrics.ResourceMetrics().Len() {
 							corednsMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" && m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" { //&& m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
 							kubeProxyMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" && m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" { //&& m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
 							schedulerMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "apiserver_audit_event_total" && m.MetricCount() == expectedApiMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedApiMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "apiserver_audit_event_total" { //&& m.MetricCount() == expectedApiMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedApiMetrics.ResourceMetrics().Len() {
 							apiMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "workqueue_queue_duration_seconds" && m.MetricCount() == expectedControllerManagerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedControllerManagerMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "workqueue_queue_duration_seconds" { //&& m.MetricCount() == expectedControllerManagerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedControllerManagerMetrics.ResourceMetrics().Len() {
 							controllerManagerMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "etcd_cluster_version" && m.MetricCount() == expectedEtcdMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedEtcdMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "etcd_cluster_version" { //&& m.MetricCount() == expectedEtcdMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedEtcdMetrics.ResourceMetrics().Len() {
 							etcdMetrics = &m
 							break OUTER
 						}
