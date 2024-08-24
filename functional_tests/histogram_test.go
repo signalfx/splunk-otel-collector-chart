@@ -242,6 +242,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.IgnoreMetricAttributeValue("to", "coredns_forward_request_duration_seconds"),
 		pmetrictest.IgnoreMetricAttributeValue("rcode", "coredns_forward_request_duration_seconds"),
+		pmetrictest.IgnoreMetricAttributeValue("to", "coredns_proxy_request_duration_seconds"),
+		pmetrictest.IgnoreMetricAttributeValue("rcode", "coredns_proxy_request_duration_seconds"),
 		pmetrictest.IgnoreResourceAttributeValue("server.address"),
 		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
