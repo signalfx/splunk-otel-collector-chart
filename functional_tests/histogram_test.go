@@ -203,7 +203,7 @@ func testHistogramMetrics(t *testing.T) {
 						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" && m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
 							kubeProxyMetrics = &m
 							break OUTER
-						} else if metricToConsider.Name() == "scheduler_scheduling_attempt_duration_seconds" && m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
+						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" { //&& m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
 							schedulerMetrics = &m
 							break OUTER
 						} else if metricToConsider.Name() == "apiserver_audit_event_total" && m.MetricCount() == expectedApiMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedApiMetrics.ResourceMetrics().Len() {
