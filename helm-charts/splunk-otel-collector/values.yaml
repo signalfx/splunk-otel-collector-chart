@@ -1028,7 +1028,7 @@ priorityClassName: ""
 readinessProbe:
   initialDelaySeconds: 0
 livenessProbe:
-  initialDelaySeconds: 0
+  initialDelaySeconds: 600
 
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
