@@ -22,14 +22,7 @@ kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.
 ## Config switches
 
 When running tests you can use the following env vars to help with local development:
-<<<<<<< HEAD
 - `SKIP_SETUP`: skip setting up the chart and apps. Useful if they are already deployed.
 - `SKIP_TEARDOWN`: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
 - `SKIP_TESTS`: skip running tests, just set up and tear down the cluster.
 - `TEARDOWN_BEFORE_SETUP`: delete all the deployments made by these tests before setting up.
-=======
-SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
-SKIP_TEARDOWN: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
-SKIP_TESTS: skip running tests, just set up and tear down the cluster.
-TEARDOWN_BEFORE_SETUP: delete all the deployments made by these tests before setting up.
->>>>>>> c5c219ca (WIP - add tests)
