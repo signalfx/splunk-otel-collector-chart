@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.105.3 to 0.107.0
+## 0.105.3 to 0.105.4
 
 The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.7.0.
 This major update introduces several breaking changes. Below we have supplied a customer migration
