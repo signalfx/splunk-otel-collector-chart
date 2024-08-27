@@ -53,6 +53,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
+      automountServiceAccountToken: false
       nodeSelector:
         {{- if $clusterReceiver.nodeSelector }}
         {{ toYaml $clusterReceiver.nodeSelector | nindent 8 }}
@@ -184,6 +185,9 @@ spec:
         resources:
           {{- toYaml $clusterReceiver.resources | nindent 10 }}
         volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: serviceaccount-token
+          readOnly: true
         {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
         - name: secret
           mountPath: /otel/etc
@@ -203,6 +207,24 @@ spec:
         {{- end }}
       terminationGracePeriodSeconds: {{ $clusterReceiver.terminationGracePeriodSeconds }}
       volumes:
+      - name: serviceaccount-token
+        projected:
+          defaultMode: 0444
+          sources:
+            - serviceAccountToken:
+                expirationSeconds: 3607
+                path: token
+            - configMap:
+                name: kube-root-ca.crt
+                items:
+                  - key: ca.crt
+                    path: ca.crt
+            - downwardAPI:
+                items:
+                  - path: namespace
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
       - name: collector-configmap
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-otel-k8s-cluster-receiver
