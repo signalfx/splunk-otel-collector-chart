@@ -17,7 +17,9 @@ spec:
         app: targetAllocator
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.targetAllocatorServiceAccountName" . }}
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}}}
       automountServiceAccountToken: false
+      {{- end }}
       containers:
         - name: targetallocator
           image: {{ .Values.targetAllocator.image }}
@@ -27,13 +29,16 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /conf/
+            {{- if .Values.featureGates.explicitMountServiceAccountToken }}
             - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
               name: serviceaccount-token
               readOnly: true
+            {{- end }}
       volumes:
         - name: config-volume
           configMap:
             name: {{ template "splunk-otel-collector.targetAllocatorConfigMapName" . }}
+        {{- if .Values.featureGates.explicitMountServiceAccountToken }}
         - name: serviceaccount-token
           projected:
             defaultMode: 0444
@@ -51,4 +56,5 @@ spec:
                       fieldRef:
                         apiVersion: v1
                         fieldPath: metadata.namespace
+        {{- end }}
 {{- end }}

@@ -34,7 +34,6 @@ spec:
         checksum/config: 46120e273729662ace76af8d16ace9c7feb5dfebe47ddf4f5a2a0a5eb6329d5f
     spec:
       serviceAccountName: default-splunk-otel-collector
-      automountServiceAccountToken: false
       nodeSelector:
           kubernetes.io/os: linux
       containers:
@@ -108,31 +107,10 @@ spec:
             cpu: 4
             memory: 8Gi
         volumeMounts:
-        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          name: serviceaccount-token
-          readOnly: true
         - mountPath: /conf
           name: collector-configmap
       terminationGracePeriodSeconds: 600
       volumes:
-      - name: serviceaccount-token
-        projected:
-          defaultMode: 0444
-          sources:
-            - serviceAccountToken:
-                expirationSeconds: 3607
-                path: token
-            - configMap:
-                name: kube-root-ca.crt
-                items:
-                  - key: ca.crt
-                    path: ca.crt
-            - downwardAPI:
-                items:
-                  - path: namespace
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.namespace
       - name: collector-configmap
         configMap:
           name: default-splunk-otel-collector-otel-collector
