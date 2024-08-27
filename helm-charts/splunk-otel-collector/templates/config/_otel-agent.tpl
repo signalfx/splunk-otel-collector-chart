@@ -44,7 +44,6 @@ receivers:
     scrapers:
       cpu:
       disk:
-      filesystem:
       memory:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
@@ -55,6 +54,10 @@ receivers:
       processes:
       # System processes metrics, disabled by default
       # process:
+  hostmetrics/filesystem:
+    collection_interval: 10s
+    scrapers:
+      filesystem:
 
   receiver_creator:
     watch_observers: [k8s_observer]
@@ -964,6 +967,7 @@ service:
     metrics:
       receivers:
         - hostmetrics
+        - hostmetrics/filesystem
         - kubeletstats
         - otlp
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
