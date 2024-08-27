@@ -1085,6 +1085,31 @@ func testAgentMetrics(t *testing.T) {
 		"up",
 	}
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, nil)
+
+	expectedHostmetricsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_hostmetrics_metrics.yaml"))
+	require.NoError(t, err)
+	selectHostmetricsMetrics := selectMetricSet(expectedHostmetricsMetrics, "system.filesystem.usage", agentMetricsConsumer, false)
+	require.NotNil(t, selectHostmetricsMetrics)
+
+	err = pmetrictest.CompareMetrics(expectedHostmetricsMetrics, *selectHostmetricsMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreResourceAttributeValue("device"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("device", "system.network.errors", "system.network.io", "disk.utilization", "system.filesystem.usage", "system.disk.operations"),
+		pmetrictest.IgnoreMetricAttributeValue("mode", "system.filesystem.usage"),
+		pmetrictest.IgnoreMetricAttributeValue("direction", "system.network.errors", "system.network.io"),
+		pmetrictest.IgnoreSubsequentDataPoints("system.disk.operations", "system.network.errors", "system.network.io"),
+		pmetrictest.IgnoreMetricValues(),
+		pmetrictest.IgnoreScopeVersion(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+	)
+	assert.NoError(t, err)
+
 	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml"))
 	require.NoError(t, err)
 
