@@ -135,12 +135,15 @@ data:
         scrapers:
           cpu: null
           disk: null
-          filesystem: null
           load: null
           memory: null
           network: null
           paging: null
           processes: null
+      hostmetrics/filesystem:
+        collection_interval: 10s
+        scrapers:
+          filesystem: null
       jaeger:
         protocols:
           grpc:
@@ -258,6 +261,7 @@ data:
           - resource
           receivers:
           - hostmetrics
+          - hostmetrics/filesystem
           - kubeletstats
           - otlp
           - receiver_creator
