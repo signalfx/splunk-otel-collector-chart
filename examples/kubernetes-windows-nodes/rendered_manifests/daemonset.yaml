@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: f4ff6c3833bc151410474578db8459674d03f3af89ed142d63488bd34ad96890
+        checksum/config: f95ae29e0b138bff1a41dd9ad58e9d7754008cf9c4212808332d62867f20d349
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       dnsPolicy: ClusterFirstWithHostNet
@@ -123,19 +123,6 @@ spec:
               secretKeyRef:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
-          # Env variables for host metrics receiver
-          - name: HOST_PROC
-            value: C:\hostfs\proc
-          - name: HOST_SYS
-            value: C:\hostfs\sys
-          - name: HOST_ETC
-            value: C:\hostfs\etc
-          - name: HOST_VAR
-            value: C:\hostfs\var
-          - name: HOST_RUN
-            value: C:\hostfs\run
-          - name: HOST_DEV
-            value: C:\hostfs\dev
 
         readinessProbe:
           initialDelaySeconds: 60
