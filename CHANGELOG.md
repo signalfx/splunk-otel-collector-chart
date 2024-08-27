@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.105.4] - 2024-08-26
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
+
+### 🛑 Breaking changes 🛑
+
+- `operator`: Bump java from v1.32.3 to v2.7.0 in helm-charts/splunk-otel-collector/values.yaml ([#1349](https://github.com/signalfx/splunk-otel-collector-chart/pull/1349))
+  This is a major upgrade. If you use Java auto-instrumentation please review the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01053-01070)
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Retry indefinitely on filelog receiver if noDropLogsPipeline feature gate is enabled. ([#1410](https://github.com/signalfx/splunk-otel-collector-chart/pull/1410))
+
 ## [0.105.3] - 2024-08-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
