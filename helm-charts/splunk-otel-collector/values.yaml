@@ -121,6 +121,11 @@ splunkPlatform:
       enabled: false
       storagePath: "/var/addon/splunk/exporter_queue"
 
+  # Option to set fsync value for filestorage extension used by the agent. Enabling this option will ensure
+  # database integrity at the cost of performance. If not set it will use default value for this extension.
+  # Refer to: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage#file-storage
+  # fsyncEnabled: true
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
