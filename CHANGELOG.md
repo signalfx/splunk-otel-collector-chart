@@ -4,6 +4,17 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.105.5] - 2024-08-28
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
+
+### 💡 Enhancements 💡
+
+- `all`: Offer an experimental feature gate to mount service tokens in specific containers. ([#1421](https://github.com/signalfx/splunk-otel-collector-chart/pull/1421))
+  Kubernetes API access tokens are currently granted via mounting them on all containers of the cluster receiver,
+  gateway and daemonset. They are also enabled for the target allocator deployment.
+  This experimental change defines how to mount the service account token on specific containers.
+
 ## [0.105.4] - 2024-08-26
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
