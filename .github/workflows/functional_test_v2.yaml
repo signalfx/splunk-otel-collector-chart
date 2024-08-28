@@ -221,7 +221,7 @@ jobs:
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.4'
+      - uses: 'google-github-actions/auth@v2.1.5'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
@@ -284,7 +284,7 @@ jobs:
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.4'
+      - uses: 'google-github-actions/auth@v2.1.5'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
