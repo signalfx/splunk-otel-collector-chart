@@ -14,7 +14,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Kubernetes API access tokens are currently granted via mounting them on all containers of the cluster receiver,
   gateway and daemonset. They are also enabled for the target allocator deployment.
   This experimental change defines how to mount the service account token on specific containers.
-  
 
 ## [0.105.4] - 2024-08-26
 
