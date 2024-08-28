@@ -1,0 +1,4795 @@
+resourceMetrics:
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - name: go_gc_heap_frees_bytes_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 7.029872e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 3.707136e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_heap_objects_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 116352
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_metadata_mspan_inuse_bytes
+          - name: go_memstats_alloc_bytes_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 1.0737008e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 1.451746e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_buck_hash_sys_bytes
+          - name: go_memstats_frees_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 57500
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 15600
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_mcache_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_endpoint_changes_pending
+          - name: kubeproxy_sync_proxy_rules_service_changes_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 8
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 1.048576e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_max_fds
+          - gauge:
+              dataPoints:
+                - asDouble: 6.108032e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_gc_heap_goal_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 116352
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_mspan_inuse_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 3
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: table
+                      value:
+                        stringValue: filter
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 44
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: table
+                      value:
+                        stringValue: nat
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_iptables_total
+          - name: go_gc_cycles_automatic_gc_cycles_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 6
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_gc_heap_frees_objects_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 54064
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_gc_cpu_fraction
+          - gauge:
+              dataPoints:
+                - asDouble: 15384
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_objects
+          - name: go_memstats_lookups_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: kubeproxy_sync_proxy_rules_endpoint_changes_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 11
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_cgo_go_to_c_calls_calls_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_os_stacks_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 6.3488e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_inuse_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 4
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_sched_gomaxprocs_threads
+          - name: kubeproxy_sync_proxy_rules_iptables_restore_failures_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: rest_client_requests_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 7
+                  attributes:
+                    - key: code
+                      value:
+                        stringValue: "200"
+                    - key: host
+                      value:
+                        stringValue: kind-control-plane:6443
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: method
+                      value:
+                        stringValue: GET
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 1
+                  attributes:
+                    - key: code
+                      value:
+                        stringValue: "201"
+                    - key: host
+                      value:
+                        stringValue: kind-control-plane:6443
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: method
+                      value:
+                        stringValue: POST
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_gc_cycles_forced_gc_cycles_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 3.707136e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_alloc_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.72445039249e+09
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_start_time_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 499712
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_heap_free_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 13824
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_metadata_mspan_free_bytes
+          - name: go_memstats_mallocs_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 72884
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 2.4491272e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 373
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_series_added
+          - name: apiserver_audit_event_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_gc_heap_allocs_objects_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 69448
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 4.161536e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_heap_released_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 9.596752e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_metadata_other_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 9.596752e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_gc_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 4800
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_mcache_inuse_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: up
+          - name: go_gc_heap_allocs_bytes_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 1.0737008e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 15384
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_gc_heap_objects_objects
+          - gauge:
+              dataPoints:
+                - asDouble: 4800
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_metadata_mcache_inuse_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.7244504138304167e+09
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_last_timestamp_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: build_date
+                      value:
+                        stringValue: "2023-06-15T00:55:52Z"
+                    - key: compiler
+                      value:
+                        stringValue: gc
+                    - key: git_commit
+                      value:
+                        stringValue: 8cfcba0b15c343a8dc48567a74c29ec4844e0b9e
+                    - key: git_tree_state
+                      value:
+                        stringValue: clean
+                    - key: git_version
+                      value:
+                        stringValue: v1.25.11
+                    - key: go_version
+                      value:
+                        stringValue: go1.19.10
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: major
+                      value:
+                        stringValue: "1"
+                    - key: minor
+                      value:
+                        stringValue: "25"
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: platform
+                      value:
+                        stringValue: linux/amd64
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubernetes_build_info
+          - gauge:
+              dataPoints:
+                - asDouble: 16
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_open_fds
+          - gauge:
+              dataPoints:
+                - asDouble: 373
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_samples_scraped
+          - name: apiserver_audit_requests_rejected_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_gc_cycles_total_gc_cycles_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 6
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 1.572864e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_heap_stacks_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.451746e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_profiling_buckets_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.1010048e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 53
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_sched_goroutines_goroutines
+          - gauge:
+              dataPoints:
+                - asDouble: 8
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_threads
+          - gauge:
+              dataPoints:
+                - asDouble: 4.5412352e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_resident_memory_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 373
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_samples_post_metric_relabeling
+          - name: go_gc_heap_tiny_allocs_objects_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 3436
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 10800
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_metadata_mcache_free_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 3.707136e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_alloc_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_service_changes_pending
+          - gauge:
+              dataPoints:
+                - asDouble: Infinity
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: rest_client_exec_plugin_ttl_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 0.00377029
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_duration_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 2.641664e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_heap_unused_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 714086
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_other_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 4.161536e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_released_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.724450538513302e+09
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_last_gc_time_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 1.7244504137669163e+09
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_last_queued_timestamp_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                    - key: version
+                      value:
+                        stringValue: go1.19.10
+                  timeUnixNano: "1000000"
+            name: go_info
+          - gauge:
+              dataPoints:
+                - asDouble: 2.4491272e+07
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memory_classes_total_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.572864e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_stack_inuse_bytes
+          - name: go_gc_duration_seconds_count
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "6"
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: go_gc_duration_seconds_sum
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0.000500636
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 1.4107e-05
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: quantile
+                      value:
+                        stringValue: "0"
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 2.8113e-05
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: quantile
+                      value:
+                        stringValue: "0.25"
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 6.0083e-05
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: quantile
+                      value:
+                        stringValue: "0.5"
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9.7983e-05
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: quantile
+                      value:
+                        stringValue: "0.75"
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000248123
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: quantile
+                      value:
+                        stringValue: "1"
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_gc_duration_seconds_quantile
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_gc_limiter_last_enabled_gc_cycle
+          - gauge:
+              dataPoints:
+                - asDouble: 4096
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_gc_stack_starting_size_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 53
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_goroutines
+          - gauge:
+              dataPoints:
+                - asDouble: 4.661248e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_heap_idle_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 130176
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_mspan_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 6.108032e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_next_gc_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 714086
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_other_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.572864e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: go_memstats_stack_sys_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: traffic_policy
+                      value:
+                        stringValue: external
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: traffic_policy
+                      value:
+                        stringValue: internal
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: kubeproxy_sync_proxy_rules_no_local_endpoints_total
+          - name: process_cpu_seconds_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0.17
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 7.7182976e+08
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_virtual_memory_bytes
+          - gauge:
+              dataPoints:
+                - asDouble: 1.8446744073709552e+19
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: http.scheme
+                      value:
+                        stringValue: http
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-dfzvr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 91995651-8584-4749-974c-977d86a5bd60
+                    - key: net.host.name
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: net.host.port
+                      value:
+                        stringValue: "10249"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10249"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10249
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-proxy
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: process_virtual_memory_max_bytes
+        scope: {}

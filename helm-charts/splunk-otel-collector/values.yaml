@@ -1287,3 +1287,8 @@ featureGates:
   # ensures the backpressure is propagated to the file readers and no data is dropped.
   # Not recommended to use with enabled gateway.
   noDropLogsPipeline: false
+  # The feature gate enables an experiment to define explicitly tokens on the daemonset and gateway, cluster receiver
+  # and target allocator deployments.
+  explicitMountServiceAccountToken: false
+  # Use a specific metrics pipeline to report control plane metrics as histograms.
+  useControlPlaneMetricsHistogramData: false
