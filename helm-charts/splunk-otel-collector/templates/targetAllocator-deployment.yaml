@@ -17,7 +17,7 @@ spec:
         app: targetAllocator
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.targetAllocatorServiceAccountName" . }}
-      {{- if .Values.featureGates.explicitMountServiceAccountToken }}}}
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       automountServiceAccountToken: false
       {{- end }}
       containers:
