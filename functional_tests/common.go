@@ -5,8 +5,12 @@ package functional_tests
 
 import (
 	"context"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
@@ -65,4 +69,14 @@ func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) 
 	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
 		"failed to receive %d entries,  received %d metrics in %d minutes", entriesNum,
 		len(mc.AllMetrics()), timeoutMinutes)
+}
+
+func writeNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
+	require.NoError(t, os.MkdirAll("results", 0755))
+	require.NoError(t, golden.WriteTraces(t, filepath.Join("results", filepath.Base(file)), *trace))
+}
+
+func writeNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
+	require.NoError(t, os.MkdirAll("results", 0755))
+	require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", filepath.Base(file)), *metric))
 }

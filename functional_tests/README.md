@@ -26,3 +26,4 @@ When running tests you can use the following env vars to help with local develop
 - `SKIP_TEARDOWN`: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
 - `SKIP_TESTS`: skip running tests, just set up and tear down the cluster.
 - `TEARDOWN_BEFORE_SETUP`: delete all the deployments made by these tests before setting up.
+- `UPDATE_EXPECTED_RESULTS`: run golden.WriteMetrics() methods to generate new golden files for expected test results

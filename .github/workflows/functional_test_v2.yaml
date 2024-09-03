@@ -4,6 +4,12 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      UPDATE_EXPECTED_RESULTS:
+        description: 'Set this to true to update expected results and collect new test output.'
+        required: false
+        default: false
 
 env:
   # Make sure to exit early if cache segment download times out after 2 minutes.
@@ -62,14 +68,15 @@ jobs:
       - name: Deploy cert-manager
         run: |
           make cert-manager
-      - name: run functional tests
+      - name: Run functional tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
+          UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags ${{ matrix.test-job }}
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
       - name: 'Upload test results'
-        if: failure()
+        if: failure() && env.UPDATE_EXPECTED_RESULTS == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}
