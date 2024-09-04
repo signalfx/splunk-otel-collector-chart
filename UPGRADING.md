@@ -1,5 +1,37 @@
 # Upgrade guidelines
 
+## 0.105.5 to 0.108.0
+
+We've simplified the Helm chart configuration for `operator` auto-instrumentation.
+The values previously under `.Values.operator.instrumentation.spec.*` have been moved to `.Values.instrumentation.*`.
+
+- **No Action Needed**: If you have no customizations under `.Values.operator.instrumentation.spec.*`, no migration is required.
+- **Action Required**: Continuing to use the old values path will result in a Helm install or upgrade error, blocking the process.
+
+Migration Steps:
+
+1. **Find** any references to `.Values.operator.instrumentation.spec.*` in your Helm values with custom values.
+2. **Migrate** them from `.Values.operator.instrumentation.spec.*` to `.Values.instrumentation.*`.
+
+Example Migration:
+
+Before (Deprecated Path):
+
+```yaml
+operator:
+  instrumentation:
+    spec:
+      endpoint: XXX
+      ...
+```
+
+After (Updated Path):
+```yaml
+instrumentation:
+  endpoint: XXX
+  ...
+```
+
 ## 0.105.3 to 0.105.4
 
 The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.7.0.
