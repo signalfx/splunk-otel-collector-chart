@@ -22,7 +22,17 @@ tests:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "true"
       - contains:
-          path: spec.nodjs.env
+          path: spec.nodejs.env
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://$(NODEJS_OTEL_AGENT):4318"
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_PROFILER_ENABLED
+            value: "false"
+      - contains:
+          path: spec.nodejs.env
           content:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "false"
