@@ -1,0 +1,28 @@
+suite: splunk-otel-collector.operatorCustomized
+templates:
+  - "operator/instrumentation.yaml"
+values:
+  - ./values/operator_customized.yaml
+tests:
+  - it: should render the Instrumentation spec correctly with default values
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.exporter.endpoint
+          value: http://RELEASE-NAME-splunk-otel-collector:4317
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_ENABLED
+            value: "true"
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_MEMORY_ENABLED
+            value: "true"
+      - contains:
+          path: spec.nodjs.env
+          content:
+            name: SPLUNK_PROFILER_MEMORY_ENABLED
+            value: "false"

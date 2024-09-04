@@ -1,0 +1,13 @@
+suite: splunk-otel-collector.operatorDefault
+templates:
+  - "operator/instrumentation.yaml"
+values:
+  - ./values/operator_default.yaml
+tests:
+  - it: should render the Instrumentation spec correctly with default values
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.exporter.endpoint
+          value: http://$(SPLUNK_OTEL_AGENT):4317
