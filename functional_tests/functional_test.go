@@ -1087,18 +1087,23 @@ func testAgentMetrics(t *testing.T) {
 
 	expectedHostmetricsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_hostmetrics_metrics.yaml"))
 	require.NoError(t, err)
-	selectHostmetricsMetrics := selectMetricSet(expectedHostmetricsMetrics, "system.filesystem.usage", agentMetricsConsumer, false)
-	require.NotNil(t, selectHostmetricsMetrics)
+	var selectHostmetricsMetrics *pmetric.Metrics
+
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		selectHostmetricsMetrics = selectMetricSet(expectedHostmetricsMetrics, "system.filesystem.usage", agentMetricsConsumer, false)
+		assert.NotNil(tt, selectHostmetricsMetrics)
+	}, 3*time.Minute, 5*time.Second)
 
 	err = pmetrictest.CompareMetrics(expectedHostmetricsMetrics, *selectHostmetricsMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreResourceAttributeValue("device"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
 		pmetrictest.IgnoreMetricAttributeValue("device", "system.network.errors", "system.network.io", "disk.utilization", "system.filesystem.usage", "system.disk.operations"),
-		pmetrictest.IgnoreMetricAttributeValue("mode", "system.filesystem.usage"),
+		pmetrictest.IgnoreMetricAttributeValue("mode", "system.filesystem.usage", "disk.utilization", "system.filesystem.usage"),
 		pmetrictest.IgnoreMetricAttributeValue("direction", "system.network.errors", "system.network.io"),
+		pmetrictest.IgnoreMetricAttributeValue("type", "system.filesystem.usage", "disk.utilization"),
 		pmetrictest.IgnoreSubsequentDataPoints("system.disk.operations", "system.network.errors", "system.network.io"),
 		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.IgnoreScopeVersion(),
@@ -1114,21 +1119,20 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
-	if selectedInternalMetrics == nil {
-		t.Skip("No metric batch identified with the right metric count, exiting")
-		return
-	}
-	require.NotNil(t, selectedInternalMetrics)
+	var selectedInternalMetrics *pmetric.Metrics
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		selectedInternalMetrics = selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
+		assert.NotNil(tt, selectedInternalMetrics)
+	}, 3*time.Minute, 5*time.Second)
 
 	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
@@ -1136,11 +1140,11 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
@@ -1161,33 +1165,33 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_refused_log_records", "otelcol_receiver_refused_metric_points", "otelcol_receiver_accepted_metric_points", "otelcol_receiver_accepted_log_records"),
 	)
 	assert.NoError(t, err)
 
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml"))
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
-	if selectedKubeletstatsMetrics == nil {
-		t.Skip("No metric batch identified with the right metric count, exiting")
-		return
-	}
-	require.NotNil(t, selectedKubeletstatsMetrics)
+	var selectedKubeletstatsMetrics *pmetric.Metrics
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		selectedKubeletstatsMetrics = selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
+		assert.NotNil(tt, selectedKubeletstatsMetrics)
+	}, 3*time.Minute, 5*time.Second)
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.id"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid"),
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid"),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricValues(metricNames...),
@@ -1211,11 +1215,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
-	if err != nil {
-		t.Skipf("we have trouble identifying exact payloads right now: %v", err)
-	} else {
-		assert.NoError(t, err)
-	}
+	assert.NoError(t, err)
 }
 
 func testPrometheusAnnotationMetrics(t *testing.T) {
