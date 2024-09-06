@@ -1,0 +1,53 @@
+suite: splunk-otel-collector.operatorDefault
+templates:
+  - "operator/instrumentation.yaml"
+values:
+  - ./values/operator_default.yaml
+tests:
+  - it: should render the Instrumentation spec correctly with default values
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.exporter.endpoint
+          value: http://$(SPLUNK_OTEL_AGENT):4317
+      - contains:
+          path: spec.propagators
+          content: tracecontext
+      - contains:
+          path: spec.propagators
+          content: baggage
+      - contains:
+          path: spec.propagators
+          content: b3
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_OTEL_AGENT
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+      - contains:
+          path: spec.dotnet.env
+          content:
+            name: OTEL_DOTNET_AUTO_PLUGINS
+            value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+      - contains:
+          path: spec.dotnet.env
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://$(SPLUNK_OTEL_AGENT):4318
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_OTEL_AGENT
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+      - contains:
+          path: spec.java.env
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://$(SPLUNK_OTEL_AGENT):4318
