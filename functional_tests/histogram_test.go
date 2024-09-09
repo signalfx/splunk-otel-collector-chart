@@ -265,7 +265,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, *corednsMetrics)
+		writeNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, corednsMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeSchedulerMetrics, *schedulerMetrics,
@@ -293,7 +293,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, *etcdMetrics)
+		writeNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, etcdMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeProxyMetrics, *kubeProxyMetrics,
@@ -321,7 +321,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, *selected)
+		writeNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, &expectedKubeProxyMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedApiMetrics, *apiMetrics,
@@ -341,7 +341,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedApiMetricsFile, *apiMetrics)
+		writeNewExpectedMetricsResult(t, expectedApiMetricsFile, apiMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedControllerManagerMetrics, *controllerManagerMetrics,
@@ -369,7 +369,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, *controllerManagerMetrics)
+		writeNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, controllerManagerMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
@@ -399,6 +399,6 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedEtcdMetricsFile, *etcdMetrics)
+		writeNewExpectedMetricsResult(t, expectedEtcdMetricsFile, etcdMetrics)
 	}
 }

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       UPDATE_EXPECTED_RESULTS:
-        description: 'Set this to true to update expected results and collect new test output.'
+        description: 'Set this to true to update expected results and collect updated test output as a Github workflow artifact.'
         required: false
         default: false
 

@@ -612,7 +612,7 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedTracesFile, *selectedTrace)
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -676,7 +676,7 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedTracesFile, *selectedTrace)
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -741,7 +741,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedTracesFile, *selectedTrace)
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -799,7 +799,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	var selected *pmetric.Metrics
+	var selectedMetrics *pmetric.Metrics
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricsConsumer.AllMetrics()[h]
 		foundCorrectSet := false
@@ -819,15 +819,15 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			continue
 		}
 		if m.ResourceMetrics().Len() == expectedMetrics.ResourceMetrics().Len() && m.MetricCount() == expectedMetrics.MetricCount() {
-			selected = &m
+			selectedMetrics = &m
 			break
 		}
 	}
-	require.NotNil(t, selected)
+	require.NotNil(t, selectedMetrics)
 
 	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
 
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selected,
+	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
@@ -864,7 +864,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedMetricsFile, *selectedMetric)
+		writeNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
 	}
 	require.NoError(t, err)
 }
@@ -1170,7 +1170,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedMetricsFile, *selectedMetric)
+		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
 	}
 	assert.NoError(t, err)
 
@@ -1224,7 +1224,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedMetricsFile, *selectedMetric)
+		writeNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 		t.Skipf("we have trouble identifying exact payloads right now: %v", err)
 	} else {
 		assert.NoError(t, err)
