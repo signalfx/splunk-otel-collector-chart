@@ -163,22 +163,28 @@ func testHistogramMetrics(t *testing.T) {
 	otlpMetricsSink := setupOnce(t)
 	waitForMetrics(t, 5, otlpMetricsSink)
 
-	expectedKubeSchedulerMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "scheduler_metrics.yaml"))
+	expectedKubeSchedulerMetricsFile := filepath.Join(testDir, "scheduler_metrics.yaml")
+	expectedKubeSchedulerMetrics, err := golden.ReadMetrics(expectedKubeSchedulerMetricsFile)
 	require.NoError(t, err)
 
-	expectedKubeProxyMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "proxy_metrics.yaml"))
+	expectedKubeProxyMetricsFile := filepath.Join(testDir, "proxy_metrics.yaml")
+	expectedKubeProxyMetrics, err := golden.ReadMetrics(expectedKubeProxyMetricsFile)
 	require.NoError(t, err)
 
-	expectedApiMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "api_metrics.yaml"))
+	expectedApiMetricsFile := filepath.Join(testDir, "api_metrics.yaml")
+	expectedApiMetrics, err := golden.ReadMetrics(expectedApiMetricsFile)
 	require.NoError(t, err)
 
-	expectedControllerManagerMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "controller_manager_metrics.yaml"))
+	expectedControllerManagerMetricsFile := filepath.Join(testDir, "controller_manager_metrics.yaml")
+	expectedControllerManagerMetrics, err := golden.ReadMetrics(expectedControllerManagerMetricsFile)
 	require.NoError(t, err)
 
-	expectedCoreDNSMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "coredns_metrics.yaml"))
+	expectedCoreDNSMetricsFile := filepath.Join(testDir, "coredns_metrics.yaml")
+	expectedCoreDNSMetrics, err := golden.ReadMetrics(expectedCoreDNSMetricsFile)
 	require.NoError(t, err)
 
-	expectedEtcdMetrics, err := golden.ReadMetrics(filepath.Join(testDir, "etcd_metrics.yaml"))
+	expectedEtcdMetricsFile := filepath.Join(testDir, "etcd_metrics.yaml")
+	expectedEtcdMetrics, err := golden.ReadMetrics(expectedEtcdMetricsFile)
 	require.NoError(t, err)
 
 	var corednsMetrics *pmetric.Metrics
@@ -258,9 +264,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("coredns_proxy_request_duration_seconds"),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "coredns_metrics.yaml"), *corednsMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, corednsMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeSchedulerMetrics, *schedulerMetrics,
@@ -287,9 +292,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "scheduler_metrics.yaml"), *schedulerMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, etcdMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeProxyMetrics, *kubeProxyMetrics,
@@ -316,9 +320,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "proxy_metrics.yaml"), *kubeProxyMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, &expectedKubeProxyMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedApiMetrics, *apiMetrics,
@@ -337,9 +340,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "api_metrics.yaml"), *apiMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedApiMetricsFile, apiMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedControllerManagerMetrics, *controllerManagerMetrics,
@@ -366,9 +368,8 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "controller_manager_metrics.yaml"), *controllerManagerMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, controllerManagerMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
@@ -397,8 +398,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	assert.NoError(t, err)
-	if err != nil {
-		require.NoError(t, os.MkdirAll("results", 0755))
-		require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", "etcd_metrics.yaml"), *etcdMetrics))
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedEtcdMetricsFile, etcdMetrics)
 	}
 }
