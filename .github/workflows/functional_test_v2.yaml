@@ -68,7 +68,7 @@ jobs:
       - name: Deploy cert-manager
         run: |
           make cert-manager
-      - name: Run functional tests
+      - name: run functional tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
           UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
