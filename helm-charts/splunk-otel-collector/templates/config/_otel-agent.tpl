@@ -9,12 +9,18 @@ extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
+    {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
+    fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
+    {{- end }}
   {{- end }}
 
   {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   file_storage/persistent_queue:
     directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
     timeout: 0
+    {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
+    fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
+    {{- end }}
   {{- end }}
 
 

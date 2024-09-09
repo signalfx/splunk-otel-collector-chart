@@ -20,17 +20,17 @@ spec:
     - tracecontext
     - baggage
     - b3
-  {{- with .Values.operator.instrumentation.spec.sampler }}
+  {{- with .Values.instrumentation.sampler }}
   sampler:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   env:
     {{- if .Values.splunkObservability.profilingEnabled }}
-    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
     - name: SPLUNK_PROFILER_ENABLED
       value: "true"
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.operator.instrumentation.spec.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
     - name: SPLUNK_PROFILER_MEMORY_ENABLED
       value: "true"
     {{- end }}
@@ -42,7 +42,7 @@ spec:
           apiVersion: v1
           fieldPath: status.hostIP
     {{- end }}
-    {{- with .Values.operator.instrumentation.spec.env }}
+    {{- with .Values.instrumentation.env }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 {{ include "splunk-otel-collector.operator.instrumentation-libraries" . }}
