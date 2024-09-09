@@ -20,13 +20,12 @@ jobs:
         # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
         # To check latest versions, see: https://hub.docker.com/r/kindest/node/tags
         k8s-version:
+          - v1.31.0 # Support: 28 Aug 2025 - 28 Oct 2025
           - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
           - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
           - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
-          - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
-          - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
           # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
-          - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+          - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
         test-job:
           - functional
           - histogram
