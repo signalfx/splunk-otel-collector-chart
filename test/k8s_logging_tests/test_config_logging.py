@@ -83,12 +83,12 @@ def test_metric_index_from_annotations(setup, index, expected):
     assert len(events) >= expected
 
 @pytest.mark.parametrize("index,sourcetype,expected", [
-    ("test_metrics", "test:metrics", 1)
+    ("test_metrics", "sourcetype-anno", 1)
 ])
 def test_metric_sourcetype_from_annotations(setup, index, sourcetype, expected):
 
     '''
-    Test that metrics are being assigned the "test:metrics" sourcetype, as defined by splunk.com/metricsSourceType annotation added during setup
+    Test that metrics are being assigned the "sourcetype-anno" sourcetype, as defined by splunk.com/sourcetype annotation added during setup
     '''
     logger.info("testing for metrics index={0} sourcetype={1} expected={2} event(s)".format(index, sourcetype, expected))
     search_query = "index={0} filter=\"sourcetype={1}\"".format(index, sourcetype)
