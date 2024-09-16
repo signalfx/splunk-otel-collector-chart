@@ -1,6 +1,8 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build functional
+
 package functional_tests
 
 import (
@@ -14,15 +16,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
 	"text/template"
 	"time"
 
-	"github.com/docker/docker/api/types"
-	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
@@ -78,29 +77,6 @@ const (
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
-
-// Test_Functions tests the chart with a real k8s cluster.
-// Run the following commands prior to running the test locally:
-//
-// export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
-// export KUBE_TEST_ENV=kind
-// export K8S_VERSION=v1.28.0
-// kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
-// kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-// make cert-manager
-// kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
-// kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
-// kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
-// On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
-// kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.6.0 --name kind
-// kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
-// kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
-
-// When running tests you can use the following env vars to help with local development:
-// SKIP_SETUP: skip setting up the chart and apps. Useful if they are already deployed.
-// SKIP_TEARDOWN: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
-// SKIP_TESTS: skip running tests, just set up and tear down the cluster.
-// TEARDOWN_BEFORE_SETUP: delete all the deployments made by these tests before setting up.
 
 var globalSinks *sinks
 
@@ -334,14 +310,18 @@ func deployChartsAndApps(t *testing.T) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
+	// CRDs sometimes take time to register. We retry deploying the pod monitor until such a time all CRDs are deployed.
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+		if err != nil {
+			_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+			assert.NoError(tt, err2)
+			if err2 != nil {
+				assert.NoError(tt, err)
+			}
 		}
-	}
+	}, 1*time.Minute, 5*time.Second)
+
 	// Service
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
 	require.NoError(t, err)
@@ -587,7 +567,7 @@ func testNodeJSTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
 					selectedTrace = &trace
 					break
 				}
@@ -601,20 +581,28 @@ func testNodeJSTraces(t *testing.T) {
 	maskScopeVersion(expectedTraces)
 
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.command"),
+		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
+		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
+		ptracetest.IgnoreResourceAttributeValue("process.owner"),
+		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
+		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("os.version"),
 		ptracetest.IgnoreTraceID(),
 		ptracetest.IgnoreSpanID(),
@@ -623,7 +611,9 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
-
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+	}
 	require.NoError(t, err)
 }
 
@@ -643,7 +633,7 @@ func testJavaTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
 					selectedTrace = &trace
 					break
 				}
@@ -651,7 +641,6 @@ func testJavaTraces(t *testing.T) {
 		}
 		return selectedTrace != nil
 	}, 3*time.Minute, 5*time.Second)
-
 	require.NotNil(t, selectedTrace)
 
 	maskScopeVersion(*selectedTrace)
@@ -670,9 +659,11 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
 		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
+		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("thread.id"),
 		ptracetest.IgnoreSpanAttributeValue("thread.name"),
@@ -684,7 +675,9 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
-
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+	}
 	require.NoError(t, err)
 }
 
@@ -703,7 +696,7 @@ func testDotNetTraces(t *testing.T) {
 		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
-				if expectedTraces.SpanCount() == trace.SpanCount() {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
 					selectedTrace = &trace
 					break
 				}
@@ -713,7 +706,6 @@ func testDotNetTraces(t *testing.T) {
 		}
 		return selectedTrace != nil
 	}, 3*time.Minute, 5*time.Second)
-
 	require.NotNil(t, selectedTrace)
 
 	maskScopeVersion(*selectedTrace)
@@ -748,7 +740,9 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
-
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+	}
 	require.NoError(t, err)
 }
 
@@ -805,7 +799,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	var selected *pmetric.Metrics
+	var selectedMetrics *pmetric.Metrics
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricsConsumer.AllMetrics()[h]
 		foundCorrectSet := false
@@ -825,16 +819,15 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			continue
 		}
 		if m.ResourceMetrics().Len() == expectedMetrics.ResourceMetrics().Len() && m.MetricCount() == expectedMetrics.MetricCount() {
-			selected = &m
+			selectedMetrics = &m
 			break
 		}
 	}
-
-	require.NotNil(t, selected)
+	require.NotNil(t, selectedMetrics)
 
 	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
 
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selected,
+	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
@@ -870,14 +863,16 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts"),
 	)
-
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
+	}
 	require.NoError(t, err)
 }
 
 func testAgentLogs(t *testing.T) {
 
 	logsConsumer := setupOnce(t).logsConsumer
-	waitForLogs(t, 25, logsConsumer)
+	waitForLogs(t, 5, logsConsumer)
 
 	var helloWorldResource pcommon.Resource
 	var helloWorldLogRecord *plog.LogRecord
@@ -887,46 +882,54 @@ func testAgentLogs(t *testing.T) {
 	var indices []string
 	var journalDsourceTypes []string
 
-	for i := 0; i < len(logsConsumer.AllLogs()); i++ {
-		l := logsConsumer.AllLogs()[i]
-		for j := 0; j < l.ResourceLogs().Len(); j++ {
-			rl := l.ResourceLogs().At(j)
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		for i := 0; i < len(logsConsumer.AllLogs()); i++ {
+			l := logsConsumer.AllLogs()[i]
+			for j := 0; j < l.ResourceLogs().Len(); j++ {
+				rl := l.ResourceLogs().At(j)
+				if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
+					if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
+						sourcetype := value.AsString()
+						journalDsourceTypes = append(journalDsourceTypes, sourcetype)
+					}
+				}
 				if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 					sourcetype := value.AsString()
-					journalDsourceTypes = append(journalDsourceTypes, sourcetype)
+					sourcetypes = append(sourcetypes, sourcetype)
 				}
-			}
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
-				sourcetype := value.AsString()
-				sourcetypes = append(sourcetypes, sourcetype)
-			}
-			if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
-				index := value.AsString()
-				indices = append(indices, index)
-			}
-			if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
-				if "pod-w-index-w-ns-exclude" == value.AsString() {
-					excludePods = false
+				if value, ok := rl.Resource().Attributes().Get("com.splunk.index"); ok {
+					index := value.AsString()
+					indices = append(indices, index)
 				}
-				if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
-					excludeNs = false
-				}
-			}
-
-			for k := 0; k < rl.ScopeLogs().Len(); k++ {
-				sl := rl.ScopeLogs().At(k)
-				for m := 0; m < sl.LogRecords().Len(); m++ {
-					logRecord := sl.LogRecords().At(m)
-					if logRecord.Body().AsString() == "Hello World" {
-						helloWorldLogRecord = &logRecord
-						helloWorldResource = rl.Resource()
+				if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
+					if "pod-w-index-w-ns-exclude" == value.AsString() {
+						excludePods = false
 					}
+					if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
+						excludeNs = false
+					}
+				}
 
+				for k := 0; k < rl.ScopeLogs().Len(); k++ {
+					sl := rl.ScopeLogs().At(k)
+					for m := 0; m < sl.LogRecords().Len(); m++ {
+						logRecord := sl.LogRecords().At(m)
+						if logRecord.Body().AsString() == "Hello World" {
+							helloWorldLogRecord = &logRecord
+							helloWorldResource = rl.Resource()
+						}
+
+					}
 				}
 			}
 		}
-	}
+		assert.NotNil(tt, helloWorldLogRecord)
+		assert.Contains(tt, sourcetypes, "kube:container:pod-w-index-wo-ns-index")
+		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-w-ns-index")
+		assert.Contains(tt, sourcetypes, "kube:container:pod-wo-index-wo-ns-index")
+		assert.Contains(tt, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
+	}, 3*time.Minute, 5*time.Second)
+
 	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
 		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
 	} else {
@@ -1087,7 +1090,33 @@ func testAgentMetrics(t *testing.T) {
 		"up",
 	}
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, nil)
-	expectedInternalMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml"))
+
+	expectedHostmetricsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_hostmetrics_metrics.yaml"))
+	require.NoError(t, err)
+	selectHostmetricsMetrics := selectMetricSet(expectedHostmetricsMetrics, "system.filesystem.usage", agentMetricsConsumer, false)
+	require.NotNil(t, selectHostmetricsMetrics)
+
+	err = pmetrictest.CompareMetrics(expectedHostmetricsMetrics, *selectHostmetricsMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreResourceAttributeValue("device"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("device", "system.network.errors", "system.network.io", "disk.utilization", "system.filesystem.usage", "system.disk.operations"),
+		pmetrictest.IgnoreMetricAttributeValue("mode", "system.filesystem.usage"),
+		pmetrictest.IgnoreMetricAttributeValue("direction", "system.network.errors", "system.network.io"),
+		pmetrictest.IgnoreSubsequentDataPoints("system.disk.operations", "system.network.errors", "system.network.io"),
+		pmetrictest.IgnoreMetricValues(),
+		pmetrictest.IgnoreScopeVersion(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+	)
+	assert.NoError(t, err)
+
+	expectedInternalMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml")
+	expectedInternalMetrics, err := golden.ReadMetrics(expectedInternalMetricsFile)
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
@@ -1140,9 +1169,13 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
+	}
 	assert.NoError(t, err)
 
-	expectedKubeletStatsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml"))
+	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
+	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
 	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
@@ -1150,6 +1183,7 @@ func testAgentMetrics(t *testing.T) {
 		return
 	}
 	require.NotNil(t, selectedKubeletstatsMetrics)
+
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
@@ -1189,7 +1223,8 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
-	if err != nil {
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 		t.Skipf("we have trouble identifying exact payloads right now: %v", err)
 	} else {
 		assert.NoError(t, err)
@@ -1378,7 +1413,7 @@ func setupTraces(t *testing.T) *consumertest.TracesSink {
 	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpReceiverPort)
 	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpHTTPReceiverPort)
 
-	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, tc)
+	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopSettings(), cfg, tc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1396,7 +1431,7 @@ func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, mc)
+	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1419,8 +1454,8 @@ func setupHEC(t *testing.T) (*consumertest.LogsSink, *consumertest.MetricsSink) 
 
 	lc := new(consumertest.LogsSink)
 	mc := new(consumertest.MetricsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
-	mrcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopCreateSettings(), mCfg, mc)
+	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
+	mrcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), mCfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1444,7 +1479,7 @@ func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecLogsObjectsReceiverPort)
 
 	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopCreateSettings(), cfg, lc)
+	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1513,48 +1548,6 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 		return missingCount == 0
 	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
 		"failed to receive all metrics %d minutes", timeoutMinutes)
-}
-
-func hostEndpoint(t *testing.T) string {
-	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
-		return host
-	}
-	if runtime.GOOS == "darwin" {
-		return "host.docker.internal"
-	}
-
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
-	require.NoError(t, err)
-	client.NegotiateAPIVersion(context.Background())
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
-	require.NoError(t, err)
-	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
-			return ipam.Gateway
-		}
-	}
-	require.Fail(t, "failed to find host endpoint")
-	return ""
-}
-
-func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces in %d minutes", entriesNum,
-		len(tc.AllTraces()), timeoutMinutes)
-}
-
-func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
-	timeoutMinutes := 3
-	require.Eventuallyf(t, func() bool {
-		return len(lc.AllLogs()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
-		len(lc.AllLogs()), timeoutMinutes)
 }
 
 func maskScopeVersion(traces ptrace.Traces) {

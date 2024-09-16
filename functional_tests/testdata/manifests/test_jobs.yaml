@@ -36,13 +36,14 @@ spec:
         splunk.com/sourcetype: "sourcetype-anno"
         splunk.com/customField: pod-value-1
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-index
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -62,13 +63,14 @@ spec:
       annotations:
         splunk.com/exclude: "false"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-wo-index-w-ns-index
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -89,13 +91,14 @@ spec:
         splunk.com/index: "pod-anno"
         splunk.com/customField: pod-value-2
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-wo-ns-index
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -115,13 +118,14 @@ spec:
       annotations:
         splunk.com/index: "pod-anno"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -141,13 +145,14 @@ spec:
       annotations:
         splunk.com/exclude: "true"
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-w-index-w-ns-exclude
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -165,13 +170,14 @@ spec:
       labels:
         app: pod-wo-index-wo-ns-index
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
       - name: pod-wo-index-wo-ns-index
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ

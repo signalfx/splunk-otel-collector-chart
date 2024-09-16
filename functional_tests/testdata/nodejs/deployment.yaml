@@ -15,7 +15,10 @@ spec:
       annotations:
         instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
+      automountServiceAccountToken: false
       containers:
         - image: quay.io/splunko11ytest/nodejs_test:latest
           name: nodejs-test
           imagePullPolicy: IfNotPresent
+      nodeSelector:
+        kubernetes.io/os: "linux"

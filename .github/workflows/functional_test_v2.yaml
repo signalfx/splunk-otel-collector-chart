@@ -4,6 +4,12 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      UPDATE_EXPECTED_RESULTS:
+        description: 'Set this to true to update expected results and collect updated test output as a Github workflow artifact.'
+        required: false
+        default: false
 
 env:
   # Make sure to exit early if cache segment download times out after 2 minutes.
@@ -27,6 +33,9 @@ jobs:
           - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
           # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
           - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+        test-job:
+          - functional
+          - histogram
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +46,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
@@ -62,9 +71,17 @@ jobs:
       - name: run functional tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
+          UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
         run: |
           cd functional_tests
-          go test -v
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
+      - name: 'Upload test results'
+        if: failure() && env.UPDATE_EXPECTED_RESULTS == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}
+          path: functional_tests/results
+          retention-days: 5
 
   eks-test:
     name: Test helm install in EKS - credentials needed
@@ -86,7 +103,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
@@ -112,7 +129,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
@@ -149,7 +166,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
@@ -184,7 +201,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          go test -v
+          go test -v -tags functional
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
@@ -205,20 +222,20 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.3'
+      - uses: 'google-github-actions/auth@v2.1.5'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.1.0
+      - uses: google-github-actions/setup-gcloud@v2.1.1
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.2.0
+      - uses: google-github-actions/get-gke-credentials@v2.2.1
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
@@ -231,7 +248,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
@@ -268,20 +285,20 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.3'
+      - uses: 'google-github-actions/auth@v2.1.5'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.1.0
+      - uses: google-github-actions/setup-gcloud@v2.1.1
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.2.0
+      - uses: google-github-actions/get-gke-credentials@v2.2.1
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
@@ -299,7 +316,7 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          go test -v
+          go test -v -tags functional
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
@@ -320,7 +337,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
@@ -347,4 +364,4 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
         run: |
           cd functional_tests
-          go test -v
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional

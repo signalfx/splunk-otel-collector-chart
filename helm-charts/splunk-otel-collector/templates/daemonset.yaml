@@ -61,6 +61,9 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+      automountServiceAccountToken: false
+      {{- end }}
       nodeSelector:
         {{- if .Values.nodeSelector }}
         {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -431,11 +434,35 @@ spec:
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
+        {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: serviceaccount-token
+          readOnly: true
+        {{- end }}
         {{- if $agent.extraVolumeMounts }}
         {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+      - name: serviceaccount-token
+        projected:
+          defaultMode: 0444
+          sources:
+          - serviceAccountToken:
+              path: token
+          - configMap:
+              name: kube-root-ca.crt
+              items:
+              - key: ca.crt
+                path: ca.crt
+          - downwardAPI:
+              items:
+              - path: namespace
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+      {{- end }}
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi

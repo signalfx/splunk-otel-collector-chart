@@ -125,6 +125,11 @@ splunkPlatform:
       enabled: false
       storagePath: "/var/addon/splunk/exporter_queue"
 
+  # Option to set fsync value for filestorage extension used by the agent. Enabling this option will ensure
+  # database integrity at the cost of performance. If not set it will use default value for this extension.
+  # Refer to: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage#file-storage
+  # fsyncEnabled: true
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
@@ -275,8 +280,8 @@ extraAttributes:
 ################################################################################
 
 ################################################################################
-# OpenTelemetry collector running as an daemonset agent on every node.
-# It collects metrics and traces and send them to Signalfx backend.
+# OpenTelemetry collector running as a daemonset agent on every node.
+# It collects metrics and traces and send them to the Observability Cloud backend.
 ################################################################################
 
 agent:
@@ -417,15 +422,12 @@ agent:
 
   # OTel agent annotations
   annotations: {}
-  podAnnotations:
-    # This annotation is a workaround to avoid filling the syslog with warnings from appArmor such as:
-    # Apr 16 13:05:49 localhost kernel: [7954196.731418] audit: type=1400 audit(1713272749.057:5567969): apparmor="DENIED" operation="ptrace" class="ptrace" profile="cri-containerd.apparmor.d" pid=4151892 comm="otelcol" requested_mask="read" denied_mask="read" peer="unconfined"
-    container.apparmor.security.beta.kubernetes.io/otel-collector: unconfined
+  podAnnotations: {}
 
   # OTel agent extra pod labels
   podLabels: {}
 
-  # Extra enviroment variables to be set in the OTel agent container
+  # Extra environment variables to be set in the OTel agent container
   extraEnvs: []
 
   # Extra volumes to be mounted to the agent daemonset.
@@ -1168,60 +1170,6 @@ service:
 
 operator:
   enabled: false
-  # For more details, refer to: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
-  instrumentation:
-    # Overrides for default instrumentation configurations can be specified here.
-    # Source: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/operator/instrumentation.yaml
-    # Rendered Default: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml
-    spec:
-      # Optional "endpoint" parameter for exporting data to a specific target.
-      # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
-      # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
-      # must be overridden here.
-      # exporter:
-        # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
-      # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
-      # sampler:
-        # type: traceidratio
-        # argument: "0.95"
-      # Optional "environment variable" parameters that can configure all instrumentation libraries.
-      # If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
-      # env:
-      # Auto-instrumentation Libraries (Start)
-      # Below are configurations for the instrumentation libraries utilized in Auto-instrumentation.
-      # Highlights:
-      #   - Maturity varies among libraries (e.g., Java is more mature than Go). Check each library's stability here: https://opentelemetry.io/docs/instrumentation/#status-and-releases
-      #   - Some libraries may be enabled by default. The current status can be checked here: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
-      #   - Splunk provides best-effort support for native OpenTelemetry libraries, while offering full support for its own distributions.
-      # Each library supports the following fields:
-      #   - repository: Specifies the Docker image repository.
-      #   - tag: Indicates the Docker image tag.
-      #   - env: (Optional) Allows you to add any additional environment variables.
-      java:
-        repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-        tag: v1.32.2
-      nodejs:
-        repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
-        tag: v2.9.0
-      dotnet:
-        repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-        tag: v1.6.0
-        env:
-          - name: OTEL_DOTNET_AUTO_PLUGINS
-            value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
-      go:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
-        tag: v0.10.1-alpha
-      apache-httpd:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
-        tag: 1.0.4
-      python:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
-        tag: 0.44b0
-      nginx:
-        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
-        tag: 1.0.4
-      # Auto-instrumentation Libraries (End)
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
@@ -1231,6 +1179,87 @@ operator:
       issuerAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
+
+# The default Splunk Instrumentation object deployed when operator.enabled=true.
+# For more details see:
+# - Splunk Documentation: https://docs.splunk.com/observability/en/gdi/opentelemetry/automatic-discovery/k8s/k8s-backend.html#optional-configure-the-instrumentation
+# - OpenTelemetry Documentation: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
+instrumentation:
+  # Optional "endpoint" parameter for exporting data to a specific target.
+  # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
+  # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint
+  # must be overridden here.
+  endpoint: ""
+  # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
+  # endpoint: http://splunk-otel-collector:4317
+
+  # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
+  sampler: {}
+  # type: traceidratio
+  # argument: "0.95"
+
+  # Optional "environment variable" parameters that can configure all instrumentation libraries.
+  # - If splunkObservability.profilingEnabled=true, environment variables enabling profiling will be added automatically.
+  # - If the agent is used as the endpoint to receive traces, the SPLUNK_OTEL_AGENT environment variables will be added automatically.
+  env: []
+  # - name: ENV_VAR1
+  #   value: value1
+  # - name: ENV_VAR2
+  #   value: value2
+
+  # Auto-instrumentation Libraries
+  # Below are configurations for the instrumentation libraries utilized in Auto-instrumentation.
+  # Highlights:
+  #   - Maturity varies among libraries (e.g., Java is more mature than Go). Check each library's stability here: https://opentelemetry.io/docs/instrumentation/#status-and-releases
+  #   - Some libraries may be enabled by default. The current status can be checked here: https://github.com/open-telemetry/opentelemetry-operator#controlling-instrumentation-capabilities
+  #   - Splunk provides best-effort support for native OpenTelemetry libraries, while offering full support for its own distributions.
+  # Each library supports the following fields:
+  #   - repository: Specifies the Docker image repository.
+  #   - tag: Indicates the Docker image tag.
+  #   - env: (Optional) Allows you to add any additional environment variables.
+  java:
+    repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
+    tag: v2.7.0
+    # env:
+    #   - name: JAVA_ENV_VAR
+    #     value: java_value
+  nodejs:
+    repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
+    tag: v2.11.0
+    # env:
+    #   - name: NODEJS_ENV_VAR
+    #     value: nodejs_value
+  dotnet:
+    repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
+    tag: v1.6.0
+    env:
+      - name: OTEL_DOTNET_AUTO_PLUGINS
+        value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+  go:
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
+    tag: v0.10.1-alpha
+    # env:
+    #   - name: GO_ENV_VAR
+    #     value: go_value
+  apache-httpd:
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+    tag: 1.0.4
+    # env:
+    #   - name: APACHE_ENV_VAR
+    #     value: apache_value
+  python:
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+    tag: 0.44b0
+    # env:
+    # - name: PYTHON_ENV_VAR
+    #   value: python_value
+  nginx:
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+    tag: 1.0.4
+    # env:
+    #   - name: NGINX_ENV_VAR
+    #     value: nginx_value
+  # Auto-instrumentation Libraries (End)
 
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
@@ -1290,3 +1319,12 @@ featureGates:
   # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
   # From the other hand, it does not support all Prometheus configuration options.
   useLightPrometheusReceiver: false
+  # The feature gate enables experimental exporter batching instead of batch processor. This feature
+  # ensures the backpressure is propagated to the file readers and no data is dropped.
+  # Not recommended to use with enabled gateway.
+  noDropLogsPipeline: false
+  # The feature gate enables an experiment to define explicitly tokens on the daemonset and gateway, cluster receiver
+  # and target allocator deployments.
+  explicitMountServiceAccountToken: false
+  # Use a specific metrics pipeline to report control plane metrics as histograms.
+  useControlPlaneMetricsHistogramData: false

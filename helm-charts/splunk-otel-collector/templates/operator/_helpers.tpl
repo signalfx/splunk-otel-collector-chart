@@ -12,10 +12,10 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
 
   {{- /* Check if the endpoint is overridden in the Helm values */ -}}
   {{- $endpointOverridden := and
-      .Values.operator.instrumentation.spec
-      .Values.operator.instrumentation.spec.exporter
-      .Values.operator.instrumentation.spec.exporter.endpoint
-      (ne .Values.operator.instrumentation.spec.exporter.endpoint "")
+      .Values.instrumentation
+      .Values.instrumentation.exporter
+      .Values.instrumentation.exporter.endpoint
+      (ne .Values.instrumentation.exporter.endpoint "")
   -}}
 
   {{- /* Validate the configuration */ -}}
@@ -40,12 +40,12 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
 
   {{- /* Use the user-defined endpoint if specified in the Helm values */ -}}
   {{- if and
-    .Values.operator.instrumentation.spec
-    .Values.operator.instrumentation.spec.exporter
-    .Values.operator.instrumentation.spec.exporter.endpoint
-    (ne .Values.operator.instrumentation.spec.exporter.endpoint "")
+    .Values.instrumentation
+    .Values.instrumentation.exporter
+    .Values.instrumentation.exporter.endpoint
+    (ne .Values.instrumentation.exporter.endpoint "")
   }}
-  {{- $endpoint = .Values.operator.instrumentation.spec.exporter.endpoint -}}
+  {{- $endpoint = .Values.instrumentation.exporter.endpoint -}}
   {{- /* Use the agent service endpoint if the agent is enabled */ -}}
   {{- else if .Values.agent.service.enabled -}}
     {{- $endpoint = printf "http://%s-agent.%s.svc.cluster.local:4317" (include "splunk-otel-collector.fullname" .) .Release.Namespace -}}
@@ -57,7 +57,7 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
     {{- $endpoint = printf "http://%s:4317" (include "splunk-otel-collector.fullname" .) -}}
   {{- /* Fail if no valid endpoint is available */ -}}
   {{- else -}}
-    {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), either agent.enabled=true, gateway.enabled=true, or .Values.operator.instrumentation.spec.exporter.endpoint must be set" -}}
+    {{- fail "When operator.enabled=true, (splunkPlatform.tracesEnabled=true or splunkObservability.tracesEnabled=true), either agent.enabled=true, gateway.enabled=true, or .Values.instrumentation.exporter.endpoint must be set" -}}
   {{- end -}}
 
   {{- /* Return the determined endpoint */ -}}
@@ -81,8 +81,8 @@ Helper to define entries for instrumentation libraries.
   {{- $instLibAliases := dict "apache-httpd" "apacheHttpd" -}}
 
   {{- /* Iterate over each specified instrumentation library */ -}}
-  {{- if .Values.operator.instrumentation.spec -}}
-    {{- range $key, $value := .Values.operator.instrumentation.spec -}}
+  {{- if .Values.instrumentation -}}
+    {{- range $key, $value := .Values.instrumentation -}}
       {{- /* Check for required fields to determine if it is an instrumentation library */ -}}
       {{- if and (eq (kindOf $value) "map") $value.repository $value.tag -}}
         {{- $instLibName := get $instLibAliases $key | default $key -}}
@@ -129,7 +129,7 @@ Helper to check if env (list of dictionaries) has an environment variable (dicti
 Helper for generating environment variables for each instrumentation library.
 - Prioritizes user-supplied environment variables over defaults.
 - For OTEL_RESOURCE_ATTRIBUTES, combines default attributes with any user-supplied values.
-- For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python'), but user-supplied values will override these.
+- For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python', `java`), but user-supplied values will override these.
 */}}
 {{- define "splunk-otel-collector.operator.extract-instrumentation-env" }}
   {{- /* Initialize Splunk default Otel resource attribute; always included */ -}}
@@ -153,7 +153,7 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Handle custom or default exporter endpoint */ -}}
   {{- $customOtelExporterEndpoint := "" }}
-  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") }}
+  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") (eq .instLibName "java") }}
     {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
   {{- end }}
   {{- if .env }}
