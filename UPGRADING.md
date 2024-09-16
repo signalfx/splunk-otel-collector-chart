@@ -1,5 +1,105 @@
 # Upgrade guidelines
 
+## 0.105.5 to 0.108.0
+
+We've simplified the Helm chart configuration for `operator` auto-instrumentation.
+The values previously under `.Values.operator.instrumentation.spec.*` have been moved to `.Values.instrumentation.*`.
+
+- **No Action Needed**: If you have no customizations under `.Values.operator.instrumentation.spec.*`, no migration is required.
+- **Action Required**: Continuing to use the old values path will result in a Helm install or upgrade error, blocking the process.
+
+Migration Steps:
+
+1. **Find** any references to `.Values.operator.instrumentation.spec.*` in your Helm values with custom values.
+2. **Migrate** them from `.Values.operator.instrumentation.spec.*` to `.Values.instrumentation.*`.
+
+Example Migration:
+
+Before (Deprecated Path):
+
+```yaml
+operator:
+  instrumentation:
+    spec:
+      endpoint: XXX
+      ...
+```
+
+After (Updated Path):
+```yaml
+instrumentation:
+  endpoint: XXX
+  ...
+```
+
+## 0.105.3 to 0.105.4
+
+The `Java instrumentation` for Operator auto-instrumentation has been upgraded from v1.32.2 to v2.7.0.
+This major update introduces several breaking changes. Below we have supplied a customer migration
+guide and outlined the key changes to highlight the impact.
+
+Please refer to the [Migration guide for OpenTelemetry Java 2.x](https://docs.splunk.com/observability/en/gdi/get-data-in/application/java/migrate-metrics.html)
+to update your custom dashboards, detectors, or alerts using Java application telemetry data.
+
+### Breaking Changes Overview
+- Runtime metrics will now be enabled by default, this can increase the number of metrics collected.
+- The default protocol changed from gRPC to http/protobuf. For custom Java exporter endpoint
+configurations, verify that you’re sending data to http/protobuf endpoints like this [example](https://github.com/signalfx/splunk-otel-collector-chart/blob/splunk-otel-collector-0.107.0/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml#L59).
+- Span Attribute Name Changes:
+
+| Old Attribute (1.x)           | New Attribute (2.x)           |
+| ----------------------------- | ----------------------------- |
+| http.method                   | http.request.method           |
+| http.status_code              | http.response.status_code     |
+| http.request_content_length   | http.request.body.size        |
+| http.response_content_length  | http.response.body.size       |
+| http.target                   | url.path and url.query        |
+| http.scheme                   | url.scheme                    |
+| http.client_ip                | client.address                |
+
+- Metric Name Changes:
+
+| Old Metric (1.x)                                                        | New Metric (2.x)                                     |
+|-------------------------------------------------------------------------|------------------------------------------------------|
+| db.pool.connections.create_time                                         | db.client.connections.create_time (Histogram, ms)    |
+| db.pool.connections.idle.max                                            | db.client.connections.idle.max                       |
+| db.pool.connections.idle.min                                            | db.client.connections.idle.min                       |
+| db.pool.connections.max                                                 | db.client.connections.max                            |
+| db.pool.connections.pending_threads                                     | db.client.connections.pending_requests               |
+| db.pool.connections.timeouts                                            | db.client.connections.timeouts                       |
+| db.pool.connections.idle                                                | db.client.connections.usage[state=idle]              |
+| db.pool.connections.active                                              | db.client.connections.usage[state=used]              |
+| db.pool.connections.use_time                                            | db.client.connections.use_time (Histogram, ms)       |
+| db.pool.connections.wait_time                                           | db.client.connections.wait_time (Histogram, ms)      |
+| runtime.jvm.buffer.count                                                | jvm.buffer.count                                     |
+| runtime.jvm.buffer.total.capacity                                       | jvm.buffer.memory.limit                              |
+| runtime.jvm.buffer.memory.used                                          | jvm.buffer.memory.usage                              |
+| runtime.jvm.classes.loaded                                              | jvm.class.count                                      |
+| runtime.jvm.classes.unloaded                                            | jvm.class.unloaded                                   |
+| runtime.jvm.gc.concurrent.phase.time                                    | jvm.gc.duration (Histogram, <concurrent gcs>)        |
+| runtime.jvm.gc.pause                                                    | jvm.gc.duration (<non-concurrent gcs>)               |
+| runtime.jvm.gc.memory.allocated \| process.runtime.jvm.memory.allocated | jvm.memory.allocated*                                |
+| runtime.jvm.memory.committed                                            | jvm.memory.committed                                 |
+| runtime.jvm.memory.max                                                  | jvm.memory.limit                                     |
+| runtime.jvm.gc.max.data.size                                            | jvm.memory.limit{jvm.memory.pool.name=<long lived>}  |
+| runtime.jvm.memory.used                                                 | jvm.memory.used                                      |
+| runtime.jvm.gc.live.data.size                                           | jvm.memory.used_after_last_gc{jvm.memory.pool.name=} |
+| runtime.jvm.threads.daemon \| runtime.jvm.threads.live                  | jvm.thread.count                                     |
+
+- Dropped Metrics:
+  - executor.tasks.completed
+  - executor.tasks.submitted
+  - executor.threads
+  - executor.threads.active
+  - executor.threads.core
+  - executor.threads.idle
+  - executor.threads.max
+  - runtime.jvm.memory.usage.after.gc
+  - runtime.jvm.gc.memory.promoted
+  - runtime.jvm.gc.overhead
+  - runtime.jvm.threads.peak
+  - runtime.jvm.threads.states
+
 # 0.93.0 to 0.94.0
 
 The `networkExplorer` option is removed.

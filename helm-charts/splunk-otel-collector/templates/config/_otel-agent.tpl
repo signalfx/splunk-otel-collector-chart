@@ -9,12 +9,18 @@ extensions:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
+    {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
+    fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
+    {{- end }}
   {{- end }}
 
   {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   file_storage/persistent_queue:
     directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
     timeout: 0
+    {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
+    fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
+    {{- end }}
   {{- end }}
 
 
@@ -88,7 +94,7 @@ receivers:
       # Receivers for collecting k8s control plane metrics.
       # Distributions besides Kubernetes and Openshift are not supported.
       # Verified with Kubernetes v1.22 and Openshift v4.10.59.
-      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
+      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
@@ -208,6 +214,138 @@ receivers:
       {{- end }}
       {{- end }}
 
+      {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+      # Receivers for collecting k8s control plane metrics as native OpenTelemetry metrics, including histogram data.
+      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
+      # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
+      # will fail the verification.
+      {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
+      prometheus/coredns:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "coredns"
+              {{- if eq .Values.distribution "openshift" }}
+              static_configs:
+                - targets: ["`endpoint`:9154"]
+              tls_config:
+                insecure_skip_verify: true
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:9153"]
+              {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+      prometheus/etcd:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["k8s-app"] == "etcd"
+        {{- else }}
+        rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main" || labels["component"] == "etcd")
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "etcd"
+              static_configs:
+                - targets: ["`endpoint`:2381"]
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
+      prometheus/kube-controller-manager:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "kube-controller-manager" && labels["kube-controller-manager"] == "true"
+        {{- else }}
+        rule: type == "pod" && (labels["k8s-app"] == "kube-controller-manager" || labels["component"] == "kube-controller-manager")
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "kube-controller-manager"
+              static_configs:
+                - targets: ["`endpoint`:10257"]
+              scheme: https
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
+      prometheus/kubernetes-apiserver:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else }}
+        rule: type == "port" && port == 443 && (pod.labels["k8s-app"] == "kube-apiserver" || pod.labels["component"] == "kube-apiserver")
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-apiserver"
+              scheme: https
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
+              static_configs:
+                - targets: ["`endpoint`:`port`"]
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
+      prometheus/kubernetes-proxy:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "port" && pod.labels["app"] == "sdn" && (port == 9101 || port == 29101)
+        {{- else }}
+        rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-proxy"
+              {{- if eq .Values.distribution "openshift" }}
+              scheme: https
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+              static_configs:
+                - targets: ["`endpoint`:`port`"]
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:10249"]
+              {{- end }}
+      {{- end }}
+      {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
+      prometheus/kubernetes-scheduler:
+        {{- if eq .Values.distribution "openshift" }}
+        rule: type == "pod" && labels["app"] == "openshift-kube-scheduler" && labels["scheduler"] == "true"
+        {{- else }}
+        rule: type == "pod" && (labels["k8s-app"] == "kube-scheduler" || labels["component"] == "kube-scheduler")
+        {{- end }}
+        config:
+          config:
+            scrape_configs:
+            - job_name: "kubernetes-scheduler"
+              static_configs:
+                - targets: ["`endpoint`:10259"]
+              scheme: https
+              tls_config:
+                ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                insecure_skip_verify: true
+              authorization:
+                credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                type: Bearer
+      {{- end }}
+      {{- end }}
+    {{- end }}
+
   kubeletstats:
     collection_interval: 10s
     {{- if eq .Values.distribution "gke/autopilot" }}
@@ -289,6 +427,9 @@ receivers:
     storage: file_storage
     retry_on_failure:
       enabled: true
+      {{- if .Values.featureGates.noDropLogsPipeline }}
+      max_elapsed_time: 0s
+      {{- end }}
     operators:
       {{- if not .Values.logsCollection.containers.containerRuntime }}
       - type: router
@@ -672,6 +813,14 @@ exporters:
     sync_host_metadata: true
   {{- end }}
 
+  {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+  signalfx/histograms:
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    send_otlp_histograms: true
+  {{- end }}
+
 service:
   telemetry:
     metrics:
@@ -711,7 +860,9 @@ service:
         {{- if not $gatewayEnabled }}
         - filter/logs
         {{- end }}
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         - resourcedetection
         - resource
         {{- if not $gatewayEnabled }}
@@ -753,7 +904,9 @@ service:
         {{- end }}
       processors:
         - memory_limiter
+        {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
+        {{- end }}
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
@@ -818,7 +971,9 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
+        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
+        {{- end }}
         - signalfx
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
@@ -883,6 +1038,20 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
+    {{- end }}
+
+    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    metrics/histograms:
+      receivers:
+       - receiver_creator
+      processors:
+        - memory_limiter
+        - batch
+        - resource/add_agent_k8s
+        - resourcedetection
+        - resource
+      exporters:
+        - signalfx/histograms
     {{- end }}
 {{- end }}
 {{/*

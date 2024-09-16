@@ -154,6 +154,9 @@
               }
             }
           }
+        },
+        "fsyncEnabled": {
+          "type": "boolean"
         }
       },
       "anyOf": [
@@ -1426,13 +1429,263 @@
       "type": "object",
       "additionalProperties": true
     },
-    "certmanager": {
-      "description": "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
+    "opentelemetry-operator": {
+      "description": "OpenTelemetry Operator configuration (legacy). Prefer using 'operator' for new installations. This field is provided for backward compatibility with older Helm versions or custom distributions. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
       "type": "object",
       "additionalProperties": true
     },
-    "opentelemetry-operator": {
-      "description": "OpenTelemetry Operator configuration (legacy). Prefer using 'operator' for new installations. This field is provided for backward compatibility with older Helm versions or custom distributions. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
+    "instrumentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "description": "Optional endpoint parameter for exporting data to a specific target."
+        },
+        "sampler": {
+          "type": "object",
+          "description": "Optional sampler parameter for enabling trace sampling.",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "argument": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "env": {
+          "type": "array",
+          "description": "Optional environment variable parameters that can configure all instrumentation libraries.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+          }
+        },
+        "java": {
+          "type": "object",
+          "description": "Configuration for Java Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "nodejs": {
+          "type": "object",
+          "description": "Configuration for Node.js Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "dotnet": {
+          "type": "object",
+          "description": "Configuration for .NET Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "go": {
+          "type": "object",
+          "description": "Configuration for Go Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "apache-httpd": {
+          "type": "object",
+          "description": "Configuration for Apache HTTPD Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "python": {
+          "type": "object",
+          "description": "Configuration for Python Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        },
+        "nginx": {
+          "type": "object",
+          "description": "Configuration for NGINX Auto-instrumentation Library.",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "env": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["repository", "tag"]
+        }
+      }
+    },
+    "certmanager": {
+      "description": "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
       "type": "object",
       "additionalProperties": true
     },

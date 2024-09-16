@@ -25,16 +25,16 @@ jobs:
           - name: 'java'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
-            yaml_value_path: '.operator.instrumentation.spec.java'
-            filter: 'v1.'
+            yaml_value_path: '.instrumentation.java'
+            filter: 'v2.'
           - name: 'nodejs'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
-            yaml_value_path: '.operator.instrumentation.spec.nodejs'
+            yaml_value_path: '.instrumentation.nodejs'
           - name: 'dotnet'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
-            yaml_value_path: '.operator.instrumentation.spec.dotnet'
+            yaml_value_path: '.instrumentation.dotnet'
           - name: 'fluentd-hec'
             component: 'agent'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
@@ -66,7 +66,7 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: Update ${{ matrix.name }} instrumentation version
           title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           commit-message: Update ${{ matrix.name }} instrumentation version
           title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_TAG }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}

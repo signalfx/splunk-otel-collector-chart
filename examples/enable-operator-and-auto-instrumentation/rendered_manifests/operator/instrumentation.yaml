@@ -7,13 +7,13 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.105.0
+    helm.sh/chart: splunk-otel-collector-0.105.5
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.105.0"
     app: splunk-otel-collector
     component: otel-operator
-    chart: splunk-otel-collector-0.105.0
+    chart: splunk-otel-collector-0.105.5
     release: default
     heritage: Helm
     app.kubernetes.io/component: otel-operator
@@ -57,20 +57,29 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-go:v0.10.1-alpha
   java:
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.32.2
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.7.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-java:v1.32.2
+        value: splunk.zc.method=splunk-otel-java:v2.7.0
+      - name: SPLUNK_OTEL_AGENT
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.hostIP
+      # java auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
+      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://$(SPLUNK_OTEL_AGENT):4318
   nginx:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
   nodejs:
-    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.9.0
+    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.11.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-js:v2.9.0
+        value: splunk.zc.method=splunk-otel-js:v2.11.0
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.44b0
     env:

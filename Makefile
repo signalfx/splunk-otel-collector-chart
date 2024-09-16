@@ -81,7 +81,7 @@ pre-commit: render ## Test the Helm chart with pre-commit
 .PHONY: unittest
 unittest: ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
-	cd helm-charts/splunk-otel-collector && helm unittest --strict -f ../../test/unittests/*.yaml . || exit 1
+	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../test/unittests/*.yaml" . || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management

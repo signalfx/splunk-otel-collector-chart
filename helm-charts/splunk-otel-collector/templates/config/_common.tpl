@@ -376,14 +376,26 @@ splunk_hec/platform_logs:
     enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}
     initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
     max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
+    {{- if .Values.featureGates.noDropLogsPipeline }}
+    max_elapsed_time: 0s
+    {{- else }}
     max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+    {{- end }}
   sending_queue:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
-    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- if .addPersistentStorage }}
     storage: file_storage/persistent_queue
     {{- end }}
+  {{- if not .Values.featureGates.noDropLogsPipeline }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+  {{- else }}
+    num_consumers: 25
+  batcher:
+    enabled: true
+    flush_timeout: 200ms
+    min_size_items: 2048
+  {{- end }}
 {{- end }}
 
 {{/*
