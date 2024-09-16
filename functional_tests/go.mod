@@ -21,9 +21,9 @@ require (
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.106.1
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.15.3
-	k8s.io/api v0.30.3
+	k8s.io/api v0.31.1
 	k8s.io/apiextensions-apiserver v0.30.1
-	k8s.io/apimachinery v0.31.0
+	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.30.3
 )
 
