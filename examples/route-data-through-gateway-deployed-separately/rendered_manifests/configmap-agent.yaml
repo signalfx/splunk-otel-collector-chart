@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.105.5
+    helm.sh/chart: splunk-otel-collector-0.109.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.109.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.105.5
+    chart: splunk-otel-collector-0.109.0
     release: default
     heritage: Helm
 data:
@@ -22,6 +22,10 @@ data:
         endpoint: <custom-gateway-url>:4317
         tls:
           insecure: true
+      otlphttp/entities:
+        headers:
+          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
       sapm:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace
@@ -156,6 +160,7 @@ data:
         - container
         - pod
         - node
+      nop: null
       otlp:
         protocols:
           grpc:
@@ -247,6 +252,15 @@ data:
         logs:
           exporters:
           - otlp
+        logs/entities:
+          exporters:
+          - otlphttp/entities
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          receivers:
+          - nop
         metrics:
           exporters:
           - otlp
