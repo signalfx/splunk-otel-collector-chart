@@ -4,6 +4,37 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.109.0] - 2024-09-17
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.109.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.109.0).
+
+### 🛑 Breaking changes 🛑
+
+- `operator`: Operator Helm values previously under `.Values.operator.instrumentation.spec.*` have been moved to `.Values.instrumentation.*` ([#1436](https://github.com/signalfx/splunk-otel-collector-chart/pull/1436))
+  If you use custom values under `.Values.operator.instrumentation.spec.*` please review the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01055-01080)
+
+### 💡 Enhancements 💡
+
+- `agent`: Added `fsyncFlag` configuration to allow users to enable fsync on the filestorage. ([#1425](https://github.com/signalfx/splunk-otel-collector-chart/pull/1425))
+- `agent`: Add a feature gate `useControlPlaneMetricsHistogramData` ([#1372](https://github.com/signalfx/splunk-otel-collector-chart/pull/1372))
+  This feature gate allows to gather control plane metrics and send them as histogram data to Observability Cloud.
+  This is an experimental feature under heavy development.
+  
+- `agent`: Add base configuration to support the new continuous discovery mechanism. ([#1455](https://github.com/signalfx/splunk-otel-collector-chart/pull/1455))
+  The new continuous discovery mechanism is disabled by default. To enable it, set the following values in your configuration:
+  ```yaml
+  agent:
+    discovery:
+      enabled: true
+    featureGates: splunk.continuousDiscovery
+  ```
+  
+- `operator`: Bump nodejs to v2.12.0 in helm-charts/splunk-otel-collector/values.yaml ([#1434](https://github.com/signalfx/splunk-otel-collector-chart/pull/1434))
+
+### 🧰 Bug fixes 🧰
+
+- `targetAllocator`: Fix the name of the service account token given when featureGates.explicitMountServiceAccountToken is true ([#1427](https://github.com/signalfx/splunk-otel-collector-chart/pull/1427))
+
 ## [0.105.5] - 2024-08-28
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.105.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.105.0).
