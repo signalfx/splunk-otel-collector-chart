@@ -19,7 +19,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - `agent`: Add a feature gate `useControlPlaneMetricsHistogramData` ([#1372](https://github.com/signalfx/splunk-otel-collector-chart/pull/1372))
   This feature gate allows to gather control plane metrics and send them as histogram data to Observability Cloud.
   This is an experimental feature under heavy development.
-  
+
 - `agent`: Add base configuration to support the new continuous discovery mechanism. ([#1455](https://github.com/signalfx/splunk-otel-collector-chart/pull/1455))
   The new continuous discovery mechanism is disabled by default. To enable it, set the following values in your configuration:
   ```yaml
@@ -28,7 +28,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
       enabled: true
     featureGates: splunk.continuousDiscovery
   ```
-  
+
 - `operator`: Bump nodejs to v2.12.0 in helm-charts/splunk-otel-collector/values.yaml ([#1434](https://github.com/signalfx/splunk-otel-collector-chart/pull/1434))
 
 ### 🧰 Bug fixes 🧰
