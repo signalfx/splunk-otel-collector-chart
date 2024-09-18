@@ -40,6 +40,9 @@ receivers:
     endpoint: 0.0.0.0:8006
   {{- end }}
 
+  # Placeholder receiver needed for discovery mode
+  nop:
+
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
 
@@ -821,6 +824,12 @@ exporters:
     send_otlp_histograms: true
   {{- end }}
 
+  # To send entities (applicable only if discovery mode is enabled)
+  otlphttp/entities:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+
 service:
   telemetry:
     metrics:
@@ -1053,6 +1062,12 @@ service:
       exporters:
         - signalfx/histograms
     {{- end }}
+
+    logs/entities:
+      # Receivers are added dinamically if discovery mode is enabled
+      receivers: [nop]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [otlphttp/entities]
 {{- end }}
 {{/*
 Discovery properties for the otel-collector agent

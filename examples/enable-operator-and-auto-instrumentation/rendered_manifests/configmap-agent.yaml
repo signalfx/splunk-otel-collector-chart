@@ -18,6 +18,10 @@ metadata:
 data:
   relay: |
     exporters:
+      otlphttp/entities:
+        headers:
+          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        logs_endpoint: https://ingest.us0.signalfx.com/v3/event
       sapm:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         endpoint: https://ingest.us0.signalfx.com/v2/trace
@@ -275,6 +279,7 @@ data:
         - container
         - pod
         - node
+      nop: null
       otlp:
         protocols:
           grpc:
@@ -380,6 +385,15 @@ data:
           - filelog
           - fluentforward
           - otlp
+        logs/entities:
+          exporters:
+          - otlphttp/entities
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          receivers:
+          - nop
         metrics:
           exporters:
           - signalfx

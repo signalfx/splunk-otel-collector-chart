@@ -18,6 +18,10 @@ metadata:
 data:
   relay: |
     exporters:
+      otlphttp/entities:
+        headers:
+          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        logs_endpoint: https://ingest..signalfx.com/v3/event
       splunk_hec/platform_metrics:
         disable_compression: true
         endpoint: CHANGEME
@@ -189,6 +193,7 @@ data:
         - container
         - pod
         - node
+      nop: null
       otlp:
         protocols:
           grpc:
@@ -272,6 +277,15 @@ data:
       - k8s_observer
       - zpages
       pipelines:
+        logs/entities:
+          exporters:
+          - otlphttp/entities
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          receivers:
+          - nop
         metrics:
           exporters:
           - splunk_hec/platform_metrics
