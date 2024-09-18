@@ -700,8 +700,6 @@ func testDotNetTraces(t *testing.T) {
 					selectedTrace = &trace
 					break
 				}
-				selectedTrace = &trace
-				break
 			}
 		}
 		return selectedTrace != nil
