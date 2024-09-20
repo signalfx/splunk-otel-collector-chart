@@ -73,6 +73,7 @@ receivers:
   {{- end }}
 
 processors:
+  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -197,7 +198,8 @@ exporters:
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- if $clusterReceiver.eventsEnabled }}
-    sourcetype: kube:events
+    sourcetype: kube-receiver-pawel-test:events
+    #index: {{ .Values.splunkPlatform.receiverIndex | quote }}
   {{- end }}
   {{- end }}
 
@@ -283,6 +285,7 @@ service:
         - k8s_events
       processors:
         - memory_limiter
+        #- k8sattributes/clusterReceiver
         - batch
         - attributes/drop_event_attrs
         - resourcedetection
@@ -290,6 +293,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -306,12 +310,14 @@ service:
       processors:
         - memory_limiter
         - batch
+        #- k8sattributes/clusterReceiver
         - resourcedetection
         - resource
         - transform/add_sourcetype
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -328,11 +334,13 @@ service:
       processors:
         - memory_limiter
         - batch
+        #- k8sattributes/clusterReceiver
         - resourcedetection
         - resource
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         - signalfx
     {{- end }}
