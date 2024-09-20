@@ -7,17 +7,21 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.105.5
+    helm.sh/chart: splunk-otel-collector-0.109.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.105.0"
+    app.kubernetes.io/version: "0.109.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.105.5
+    chart: splunk-otel-collector-0.109.0
     release: default
     heritage: Helm
 data:
   relay: |
     exporters:
+      otlphttp/entities:
+        headers:
+          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        logs_endpoint: https://ingest..signalfx.com/v3/event
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: CHANGEME
@@ -37,7 +41,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.105.5
+        splunk_app_version: 0.109.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -60,7 +64,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.105.5
+        splunk_app_version: 0.109.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -326,6 +330,7 @@ data:
         - container
         - pod
         - node
+      nop: null
       otlp:
         protocols:
           grpc:
@@ -425,6 +430,15 @@ data:
           - filelog
           - fluentforward
           - otlp
+        logs/entities:
+          exporters:
+          - otlphttp/entities
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          receivers:
+          - nop
         metrics:
           exporters:
           - splunk_hec/platform_metrics
