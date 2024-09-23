@@ -8,7 +8,7 @@ go 1.22.0
 toolchain go1.22.5
 
 require (
-	github.com/docker/docker v27.1.1+incompatible
+	github.com/docker/docker v27.3.1+incompatible
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.106.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.106.2-0.20240808194002-5374bbac3595
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.106.1
