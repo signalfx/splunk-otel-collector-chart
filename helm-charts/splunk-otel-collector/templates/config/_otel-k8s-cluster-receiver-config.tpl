@@ -82,6 +82,8 @@ processors:
   {{- end }}
 
   batch:
+    metadata_keys:
+      - X-SF-Token
     send_batch_max_size: 32768
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}

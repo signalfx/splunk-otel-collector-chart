@@ -39,7 +39,9 @@ data:
         node: ${K8S_NODE_NAME}
       zpages: null
     processors:
-      batch: null
+      batch:
+        metadata_keys:
+        - X-SF-Token
       filter/logs:
         logs:
           exclude:

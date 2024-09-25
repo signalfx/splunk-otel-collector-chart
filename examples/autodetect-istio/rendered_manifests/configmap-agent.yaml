@@ -65,7 +65,9 @@ data:
           match_type: regexp
           metric_names:
           - istio_.*
-      batch: null
+      batch:
+        metadata_keys:
+        - X-SF-Token
       filter/logs:
         logs:
           exclude:

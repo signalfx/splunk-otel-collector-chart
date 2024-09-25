@@ -40,7 +40,9 @@ data:
       pprof: null
       zpages: null
     processors:
-      batch: null
+      batch:
+        metadata_keys:
+        - X-SF-Token
       filter/logs:
         logs:
           exclude:
