@@ -44,6 +44,8 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
+    metadata_keys:
+      - X-SF-Token
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}

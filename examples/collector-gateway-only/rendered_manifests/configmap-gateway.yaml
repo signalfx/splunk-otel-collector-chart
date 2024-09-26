@@ -37,7 +37,9 @@ data:
           endpoint: https://api.CHANGEME.signalfx.com
       zpages: null
     processors:
-      batch: null
+      batch:
+        metadata_keys:
+        - X-SF-Token
       filter/logs:
         logs:
           exclude:
