@@ -20,6 +20,7 @@ jobs:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
+      UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
     strategy:
       fail-fast: false
       matrix:
@@ -71,12 +72,11 @@ jobs:
       - name: run functional tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
-          UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
         run: |
           cd functional_tests
           TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
       - name: 'Upload test results'
-        if: failure() && env.UPDATE_EXPECTED_RESULTS == 'true'
+        if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}
