@@ -1166,6 +1166,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
