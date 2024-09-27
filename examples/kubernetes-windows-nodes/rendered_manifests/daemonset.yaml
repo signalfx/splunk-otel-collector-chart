@@ -123,19 +123,6 @@ spec:
               secretKeyRef:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
-          # Env variables for host metrics receiver
-          - name: HOST_PROC
-            value: C:\hostfs\proc
-          - name: HOST_SYS
-            value: C:\hostfs\sys
-          - name: HOST_ETC
-            value: C:\hostfs\etc
-          - name: HOST_VAR
-            value: C:\hostfs\var
-          - name: HOST_RUN
-            value: C:\hostfs\run
-          - name: HOST_DEV
-            value: C:\hostfs\dev
 
         readinessProbe:
           initialDelaySeconds: 60

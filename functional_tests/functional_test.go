@@ -1119,7 +1119,7 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, true)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1145,7 +1145,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
@@ -1166,6 +1166,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
@@ -1223,10 +1224,8 @@ func testAgentMetrics(t *testing.T) {
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		writeNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
-		t.Skipf("we have trouble identifying exact payloads right now: %v", err)
-	} else {
-		assert.NoError(t, err)
 	}
+	assert.NoError(t, err)
 }
 
 func testPrometheusAnnotationMetrics(t *testing.T) {

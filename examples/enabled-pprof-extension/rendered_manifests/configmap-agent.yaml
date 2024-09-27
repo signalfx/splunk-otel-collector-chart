@@ -134,6 +134,7 @@ data:
     receivers:
       hostmetrics:
         collection_interval: 10s
+        root_path: /hostfs
         scrapers:
           cpu: null
           disk: null

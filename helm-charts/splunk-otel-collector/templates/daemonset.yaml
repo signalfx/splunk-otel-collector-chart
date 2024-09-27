@@ -316,19 +316,6 @@ spec:
                 key: splunk_platform_hec_token
           {{- end }}
           {{- if eq (include "splunk-otel-collector.metricsEnabled" .) "true" }}
-          # Env variables for host metrics receiver
-          - name: HOST_PROC
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\proc" "/hostfs/proc" }}
-          - name: HOST_SYS
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\sys" "/hostfs/sys" }}
-          - name: HOST_ETC
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\etc" "/hostfs/etc" }}
-          - name: HOST_VAR
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\var" "/hostfs/var" }}
-          - name: HOST_RUN
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\run" "/hostfs/run" }}
-          - name: HOST_DEV
-            value: {{ .Values.isWindows | ternary "C:\\hostfs\\dev" "/hostfs/dev" }}
           {{- if not .Values.isWindows }}
           # until https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/5879
           # is resolved fall back to previous gopsutil mountinfo path:
