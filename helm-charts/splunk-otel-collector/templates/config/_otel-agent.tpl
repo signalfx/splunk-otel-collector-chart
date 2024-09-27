@@ -49,7 +49,9 @@ receivers:
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:
     collection_interval: 10s
-    root_path: {{ .Values.isWindows | ternary "C:\\hostfs" "/hostfs" }}
+    {{- if not .Values.isWindows }}
+    root_path: "/hostfs"
+    {{- end }}
     scrapers:
       cpu:
       disk:
