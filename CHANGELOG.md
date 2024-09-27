@@ -4,6 +4,23 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.110.0] - 2024-09-27
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.110.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.110.0).
+
+### 💡 Enhancements 💡
+
+- `template`: Add default metadata key for token to batch processor ([#1467](https://github.com/signalfx/splunk-otel-collector-chart/pull/1467))
+  Add default metadata key for token to batch processor.
+  This will allow the token to be retrieved from the context. When SAPM is deprecated and
+  OTLP used, this will be the normal mode of operation.
+- `operator`: Bump operator to 0.56.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#1446](https://github.com/signalfx/splunk-otel-collector-chart/pull/1446))
+- `operator`: Bump java to v2.8.1 in helm-charts/splunk-otel-collector/values.yaml ([#1458](https://github.com/signalfx/splunk-otel-collector-chart/pull/1458))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: use root_path to configure the hostmetricsreceiver, instead of environment variables. ([#1462](https://github.com/signalfx/splunk-otel-collector-chart/pull/1462))
+
 ## [0.109.0] - 2024-09-17
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.109.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.109.0).
