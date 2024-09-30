@@ -217,69 +217,7 @@ k8sattributes/clusterReceiver:
         name: k8s.namespace.name
     - sources:
       - from: resource_attribute
-        name: k8s.pod.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.ip
-{{/*    - sources:*/}}
-{{/*      - from: resource_attribute*/}}
-{{/*        name: ip*/}}
-    - sources:
-      - from: connection
-{{/*    - sources:*/}}
-{{/*      - from: resource_attribute*/}}
-{{/*        name: host.name*/}}
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.hostname
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.start_time
-    - sources:
-      - from: resource_attribute
-        name: k8s.replicaset.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.replicaset.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.deployment.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.deployment.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.daemonset.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.daemonset.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.statefulset.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.statefulset.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.cronjob.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.cronjob.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.job.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.job.name
-    - sources:
-      - from: resource_attribute
         name: k8s.node.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.cluster.uid
   extract:
     metadata:
       - k8s.namespace.name
@@ -298,14 +236,6 @@ k8sattributes/clusterReceiver:
       - key: splunk.com/index
         tag_name: com.splunk.index
         from: pod
-      {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
-    {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
-    labels:
-      {{- range .Values.extraAttributes.podLabels }}
-      - key: {{ . }}
-      {{- end }}
-      {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
-    {{- end }}
 {{- end }}
 
 {{/*
