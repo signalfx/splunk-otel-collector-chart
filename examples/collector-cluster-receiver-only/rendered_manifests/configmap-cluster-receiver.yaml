@@ -130,6 +130,7 @@ data:
           - resourcedetection
           - resource
           - transform/add_sourcetype
+          - k8sattributes/clusterReceiver
           receivers:
           - k8sobjects
         metrics:
