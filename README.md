@@ -84,7 +84,7 @@ This distribution currently supports:
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
   - Interested in sending logs to Splunk Cloud via OTLP for improved backpressure handling and performance? [Sign up for the preview](https://voc.splunk.com/preview/otlp) today!
 
-**Fluentd logs engine will be deprecated in October 2025.** While it can still be used until then, migrating to the native OTEL logs engine before this date is strongly recommended.
+**Fluentd logs engine is now deprecated and will reach End Of Support in October 2025.** Migrating to the native OTEL logs engine before this date is strongly recommended.
 
 ## Supported Kubernetes distributions
 
