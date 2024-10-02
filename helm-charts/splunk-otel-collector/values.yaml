@@ -173,7 +173,7 @@ splunkObservability:
 #   otel-collector agent for further processing.
 # - `otel`: utilize native OpenTelemetry log collection.
 #
-# `fluentd` will be deprecated soon, so it's recommended to use `otel` instead.
+# `fluentd` will be deprecated in October 2025, so it's recommended to use `otel` instead.
 ################################################################################
 
 logsEngine: otel
@@ -657,7 +657,7 @@ logsCollection:
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
 # Applicable only if "logsEngine: fluentd".
-# Fluentd will be deprecated soon, so it's recommended to use "logsEngine: otel" instead.
+# Fluentd logs engine is now deprecated and will reach End Of Support in October 2025, it is strongly recommended to use "logsEngine: otel" instead.
 ################################################################################
 
 fluentd:
