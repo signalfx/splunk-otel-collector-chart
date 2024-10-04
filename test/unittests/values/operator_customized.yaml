@@ -20,7 +20,7 @@ instrumentation:
   nodejs:
     env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://$(NODEJS_OTEL_AGENT):4318
+      value: http://SOME-OTHER-RELEASE-NAME-splunk-otel-collector-agent.NAMESPACE.svc.cluster.local:4318
     - name: SPLUNK_PROFILER_ENABLED
       value: "false"
     - name: SPLUNK_PROFILER_MEMORY_ENABLED
