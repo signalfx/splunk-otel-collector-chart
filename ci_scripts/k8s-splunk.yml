@@ -60,7 +60,7 @@ spec:
     runAsGroup: 0
   containers:
     - name: splunk
-      image: docker.io/splunk/splunk:SPLUNK_VERSION
+      image: docker.io/splunk/splunk:ENV_SPLUNK_VERSION
       ports:
         - name: web-interface
           containerPort: 8000
@@ -77,11 +77,11 @@ spec:
         - name: SPLUNK_USER
           value: root
         - name: SPLUNK_PASSWORD
-          value: helloworld
+          value: ENV_CI_SPLUNK_PASSWORD
         - name: SPLUNK_LAUNCH_CONF
           value: OPTIMISTIC_ABOUT_FILE_LOCKING=1
         - name: SPLUNK_HEC_TOKEN
-          value: 00000000-0000-0000-0000-0000000000000
+          value: ENV_CI_SPLUNK_HEC_TOKEN
       volumeMounts:
         - name: config-volume
           mountPath: /tmp/defaults/

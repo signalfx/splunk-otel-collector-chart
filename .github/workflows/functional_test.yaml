@@ -5,7 +5,7 @@ on:
 
 jobs:
   functional-test:
-    name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}
+    name: Kubernetes ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }} Splunk ${{ matrix.splunk_version }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -26,6 +26,7 @@ jobs:
           - "cri-o"
         splunk_version:
           - 9.3.0
+          - 8.2.9
     env:
       CI_SPLUNK_PORT: 8089
       CI_SPLUNK_USERNAME: admin
@@ -74,7 +75,9 @@ jobs:
             sleep 1;
           done
           # Install Splunk on minikube
-          sed -i "s/SPLUNK_VERSION/${SPLUNK_VERSION}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/ENV_SPLUNK_VERSION/${SPLUNK_VERSION}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/ENV_CI_SPLUNK_PASSWORD/${CI_SPLUNK_PASSWORD}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/ENV_CI_SPLUNK_HEC_TOKEN/${CI_SPLUNK_HEC_TOKEN}/g" ci_scripts/k8s-splunk.yml
           cat ci_scripts/k8s-splunk.yml
           kubectl apply -f ci_scripts/k8s-splunk.yml
           # Wait until splunk is ready
