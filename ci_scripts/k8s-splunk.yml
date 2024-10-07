@@ -60,7 +60,7 @@ spec:
     runAsGroup: 0
   containers:
     - name: splunk
-      image: docker.io/splunk/splunk:8.2.0
+      image: docker.io/splunk/splunk:SPLUNK_VERSION
       ports:
         - name: web-interface
           containerPort: 8000
