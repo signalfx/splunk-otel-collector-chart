@@ -1071,7 +1071,11 @@ service:
     logs/entities:
       # Receivers are added dinamically if discovery mode is enabled
       receivers: [nop]
-      processors: [memory_limiter, batch, resourcedetection]
+      processors:
+        - memory_limiter
+        - batch
+        - resourcedetection
+        - resource
       exporters: [otlphttp/entities]
 {{- end }}
 {{/*
