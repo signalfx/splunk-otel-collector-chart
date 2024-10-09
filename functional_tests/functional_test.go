@@ -9,10 +9,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/client-go/dynamic"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,7 +43,11 @@ import (
 	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -721,6 +721,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("os.build_id"),
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
