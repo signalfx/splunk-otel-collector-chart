@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: b130bf8cd94d52402b415458b6f9f838fdc0609e7d774f1e8ff66dfedff7130e
+        checksum/config: ce63ef411129c40307d07c4376fef440173538532285be330be3dd6df6d47b3d
         kubectl.kubernetes.io/default-container: otel-collector
         sidecar.istio.io/inject: "false"
     spec:
