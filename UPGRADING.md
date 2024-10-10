@@ -44,7 +44,7 @@ to update your custom dashboards, detectors, or alerts using Java application te
 ### Breaking Changes Overview
 - Runtime metrics will now be enabled by default, this can increase the number of metrics collected.
 - The default protocol changed from gRPC to http/protobuf. For custom Java exporter endpoint
-configurations, verify that you’re sending data to http/protobuf endpoints like this [example](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml#L57).
+configurations, verify that you’re sending data to http/protobuf endpoints like this [example](https://github.com/signalfx/splunk-otel-collector-chart/blob/splunk-otel-collector-0.105.4/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml#L59).
 - Span Attribute Name Changes:
 
 | Old Attribute (1.x)           | New Attribute (2.x)           |
