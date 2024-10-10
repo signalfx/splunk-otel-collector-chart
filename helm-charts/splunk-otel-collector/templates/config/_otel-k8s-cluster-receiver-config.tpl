@@ -73,6 +73,7 @@ receivers:
   {{- end }}
 
 processors:
+  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -290,6 +291,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -312,6 +314,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -333,6 +336,7 @@ service:
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         - signalfx
     {{- end }}
