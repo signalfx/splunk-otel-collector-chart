@@ -403,6 +403,9 @@ splunk_hec/platform_metrics:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
+  {{- if .Values.splunkPlatform.sourcetype }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  {{- end }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
   max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
@@ -444,6 +447,9 @@ splunk_hec/platform_traces:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.tracesIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
+  {{- if .Values.splunkPlatform.sourcetype }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  {{- end }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
   max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}

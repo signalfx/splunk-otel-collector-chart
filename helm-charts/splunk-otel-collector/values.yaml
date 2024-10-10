@@ -47,7 +47,7 @@ splunkPlatform:
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
-  # be container name.
+  # be container name. For metrics and traces it will default to "httpevent".
   sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   maxConnections: 200
