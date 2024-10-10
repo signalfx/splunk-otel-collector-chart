@@ -75,9 +75,10 @@ jobs:
             sleep 1;
           done
           # set splunk version, hec_token, splunk password in k8s-splunk.yaml file
-          sed -i "s/ENV_SPLUNK_VERSION/${SPLUNK_VERSION}/g" ci_scripts/k8s-splunk.yml
-          sed -i "s/ENV_CI_SPLUNK_PASSWORD/${CI_SPLUNK_PASSWORD}/g" ci_scripts/k8s-splunk.yml
-          sed -i "s/ENV_CI_SPLUNK_HEC_TOKEN/${CI_SPLUNK_HEC_TOKEN}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/splunk:9.3.0/splunk:${SPLUNK_VERSION}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/value: helloworld/value: ${CI_SPLUNK_PASSWORD}/g" ci_scripts/k8s-splunk.yml
+          sed -i "s/value: 00000000-0000-0000-0000-0000000000000/value: ${CI_SPLUNK_HEC_TOKEN}/g" ci_scripts/k8s-splunk.yml
+          cat ci_scripts/k8s-splunk.yml
           # Install Splunk on minikube
           kubectl apply -f ci_scripts/k8s-splunk.yml
           # Wait until splunk is ready
