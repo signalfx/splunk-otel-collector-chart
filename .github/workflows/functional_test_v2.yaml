@@ -365,3 +365,44 @@ jobs:
         run: |
           cd functional_tests
           TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+
+  gce-autopilot-test:
+    name: Test helm install in GCE (kops) - credentials needed
+    needs: kubernetes-test
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    concurrency:
+      group: gce-access
+    env:
+      KUBE_TEST_ENV: gce
+      SKIP_TESTS: "true"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.21.8
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: Set kubeconfig
+        run: echo "$GCE_KUBECONFIG" > /tmp/kubeconfig
+        env:
+          GCE_KUBECONFIG: ${{ secrets.GCE_KUBECONFIG }}
+      - name: run functional tests
+        uses: mobiledevops/secret-to-file-action@v1
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+          KUBECONFIG: /tmp/kubeconfig
+        run: |
+          cd functional_tests
+          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
