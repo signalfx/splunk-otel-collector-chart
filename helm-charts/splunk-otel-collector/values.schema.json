@@ -215,6 +215,10 @@
         "infrastructureMonitoringEventsEnabled": {
           "description": "Send Kubernetes events to Splunk Observability Infrastructure Monitoring",
           "type": "boolean"
+        },
+        "insecureSkipVerify": {
+          "description": "Skip Verification of SSL certificate",
+          "type": "boolean"
         }
       },
       "anyOf": [
