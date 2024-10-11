@@ -64,7 +64,7 @@ write_output() {
       else print "    [CERTIFICATE REDACTED]";
       next;
   }
-  /ca\.crt|client\.crt|client\.key/ {
+  /ca\.crt|client\.crt|client\.key|tls\.crt|tls\.key/ {
       print "    [SENSITIVE DATA REDACTED]";
       next;
   }
