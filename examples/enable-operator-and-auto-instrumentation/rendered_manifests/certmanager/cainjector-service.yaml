@@ -1,8 +1,7 @@
 ---
-# Source: splunk-otel-collector/charts/certmanager/templates/cainjector-serviceaccount.yaml
+# Source: splunk-otel-collector/charts/certmanager/templates/cainjector-service.yaml
 apiVersion: v1
-kind: ServiceAccount
-automountServiceAccountToken: true
+kind: Service
 metadata:
   name: default-certmanager-cainjector
   namespace: default
@@ -14,3 +13,13 @@ metadata:
     app.kubernetes.io/version: "v1.16.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: certmanager-v1.16.1
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 9402
+    name: http-metrics
+  selector:
+    app.kubernetes.io/name: cainjector
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: "cainjector"
