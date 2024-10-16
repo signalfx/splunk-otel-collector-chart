@@ -69,6 +69,7 @@ const (
 	eksTestKubeEnv                         = "eks"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
+	gceTestKubeEnv                         = "gce"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
@@ -532,7 +533,7 @@ func Test_Functions(t *testing.T) {
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
 	switch kubeTestEnv {
-	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv:
+	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = kindValuesDir
 	case eksTestKubeEnv:
 		expectedValuesDir = eksValuesDir
