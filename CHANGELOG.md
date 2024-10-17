@@ -4,6 +4,25 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.111.0] - 2024-10-12
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.111.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.111.0).
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Added a note anbout the deprecation of the `fluentd` option in the chart ([#1460](https://github.com/signalfx/splunk-otel-collector-chart/pull/1460))
+
+### 💡 Enhancements 💡
+
+- `chart`: Propagated "sourcetype" to work for metrics and traces ([#1376](https://github.com/signalfx/splunk-otel-collector-chart/pull/1376))
+- `agent`: The agent is now deployed with a Kubernetes service for receiving telemetry data by default ([#1485](https://github.com/signalfx/splunk-otel-collector-chart/pull/1485))
+- `operator`: Bump dotnet to v1.7.0 in helm-charts/splunk-otel-collector/values.yaml ([#1474](https://github.com/signalfx/splunk-otel-collector-chart/pull/1474))
+- `operator`: Bump nodejs to v2.13.0 in helm-charts/splunk-otel-collector/values.yaml ([#1470](https://github.com/signalfx/splunk-otel-collector-chart/pull/1470))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Add k8s.node.name attribute to discovered service entities to fix broken link in the UI. ([#1494](https://github.com/signalfx/splunk-otel-collector-chart/pull/1494))
+
 ## [0.110.0] - 2024-09-27
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.110.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.110.0).
