@@ -11,16 +11,16 @@ metadata:
     app.kubernetes.io/name: startupapicheck
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "startupapicheck"
-    app.kubernetes.io/version: "v1.14.4"
+    app.kubernetes.io/version: "v1.16.1"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.14.4
+    helm.sh/chart: certmanager-v1.16.1
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook-weight: "-5"
 rules:
   - apiGroups: ["cert-manager.io"]
-    resources: ["certificates"]
+    resources: ["certificaterequests"]
     verbs: ["create"]
 ---
 # Source: splunk-otel-collector/charts/certmanager/templates/startupapicheck-rbac.yaml
@@ -34,9 +34,9 @@ metadata:
     app.kubernetes.io/name: startupapicheck
     app.kubernetes.io/instance: default
     app.kubernetes.io/component: "startupapicheck"
-    app.kubernetes.io/version: "v1.14.4"
+    app.kubernetes.io/version: "v1.16.1"
     app.kubernetes.io/managed-by: Helm
-    helm.sh/chart: certmanager-v1.14.4
+    helm.sh/chart: certmanager-v1.16.1
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
