@@ -7,7 +7,6 @@ Find the official troubleshooting documentation for the Splunk Distribution of t
 
 ##The linked page does not exist## For general troubleshooting of the Splunk Distribution of the OpenTelemetry Collector see [Splunk OpenTelemetry Collector troubleshooting documentation](https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md](https://docs.splunk.com/observability/en/gdi/opentelemetry/troubleshooting.html).
 
-##The linked page does not exist## You might review the [OpenTelemetry Collector troubleshooting documentation](https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/troubleshooting.md) as well.
 
 ## Gathering Support Information
 
