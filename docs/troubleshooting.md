@@ -5,7 +5,7 @@ Find the official troubleshooting documentation for the Splunk Distribution of t
 * [Troubleshoot the Collector for Kubernetes](https://docs.splunk.com/observability/en/gdi/opentelemetry/collector-kubernetes/k8s-troubleshooting/troubleshoot-k8s-landing.html)
 * [Troubleshoot the Collector for Kubernetes containers](https://docs.splunk.com/observability/en/gdi/opentelemetry/troubleshooting.html)
 
-##The linked page does not exist## For general troubleshooting of the Splunk Distribution of the OpenTelemetry Collector see [Splunk OpenTelemetry Collector troubleshooting documentation](https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md](https://docs.splunk.com/observability/en/gdi/opentelemetry/troubleshooting.html).
+For general troubleshooting of the Splunk Distribution of the OpenTelemetry Collector see [Splunk OpenTelemetry Collector troubleshooting documentation](https://docs.splunk.com/observability/en/gdi/opentelemetry/troubleshooting.html).
 
 
 ## Gathering Support Information
