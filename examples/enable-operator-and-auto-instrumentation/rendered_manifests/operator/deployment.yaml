@@ -4,9 +4,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: operator-0.56.0
+    helm.sh/chart: operator-0.71.2
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.98.0"
+    app.kubernetes.io/version: "0.110.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     
@@ -34,13 +34,13 @@ spec:
             - --enable-leader-election
             - --health-probe-addr=:8081
             - --webhook-port=9443
-            - --collector-image=quay.io/signalfx/splunk-otel-collector:0.98.0
+            - --collector-image=quay.io/signalfx/splunk-otel-collector:0.110.0
           command:
             - /manager
           env:
             - name: ENABLE_WEBHOOKS
               value: "true"
-          image: "ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.98.0"
+          image: "ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.110.0"
           name: manager
           ports:
             - containerPort: 8080
@@ -76,9 +76,8 @@ spec:
         - args:
             - --secure-listen-address=0.0.0.0:8443
             - --upstream=http://127.0.0.1:8080/
-            - --logtostderr=true
             - --v=0
-          image: "quay.io/brancz/kube-rbac-proxy:v0.15.0"
+          image: "quay.io/brancz/kube-rbac-proxy:v0.18.1"
           name: kube-rbac-proxy
           ports:
             - containerPort: 8443

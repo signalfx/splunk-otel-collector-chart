@@ -17,6 +17,9 @@ metadata:
     release: default
     heritage: Helm
     app.kubernetes.io/component: otel-operator
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
 spec:
   exporter:
     endpoint: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4317
