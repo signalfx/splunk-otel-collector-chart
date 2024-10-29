@@ -202,7 +202,7 @@ data:
           - prometheus/agent
         traces:
           exporters:
-          - sapm
+          - otlphttp
           processors:
           - memory_limiter
           - probabilistic_sampler

@@ -243,7 +243,7 @@ data:
           - prometheus/agent
         traces:
           exporters:
-          - sapm
+          - otlphttp
           - signalfx
           processors:
           - memory_limiter

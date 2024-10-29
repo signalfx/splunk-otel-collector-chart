@@ -204,7 +204,7 @@ data:
           - prometheus/collector
         traces:
           exporters:
-          - sapm
+          - otlphttp
           processors:
           - memory_limiter
           - k8sattributes

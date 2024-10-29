@@ -325,7 +325,7 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - sapm
+          - otlphttp
           - signalfx
           processors:
           - memory_limiter
