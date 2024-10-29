@@ -21,6 +21,19 @@ sapm:
 {{- end }}
 
 {{/*
+Common config for the otel-collector otlphttp exporter
+*/}}
+{{- define "splunk-otel-collector.otlpHttpExporter" -}}
+{{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
+otlphttp:
+  metrics_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/datapoint/otlp
+  traces_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace/otlp
+  headers:
+    "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+{{- end }}
+{{- end }}
+
+{{/*
 Common config for the otel-collector traces receivers
 */}}
 {{- define "splunk-otel-collector.otelReceivers" -}}

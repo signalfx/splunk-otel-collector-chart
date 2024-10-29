@@ -111,6 +111,14 @@ exporters:
       num_consumers: 32
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
+    sending_queue:
+      queue_size: 512
+    retry_on_failure:
+      enabled: false
+  {{- end }}
+
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
