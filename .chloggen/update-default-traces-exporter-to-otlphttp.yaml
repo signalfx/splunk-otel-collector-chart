@@ -9,4 +9,7 @@ issues: [1518]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: |
+  If you use the sapm exporter with custom settings, you have two options:
+  - Migrate your sapm settings to the new otlphttp exporter.
+  - Retain SAPM settings by moving them to your agent.config or gateway.config overrides to ensure they remain effective.

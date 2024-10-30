@@ -22,6 +22,15 @@ data:
         endpoint: <custom-gateway-url>:4317
         tls:
           insecure: true
+      otlphttp:
+        headers:
+          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        metrics_endpoint: https://ingest.CHANGEME.signalfx.com/v2/datapoint/otlp
+        retry_on_failure:
+          enabled: false
+        sending_queue:
+          queue_size: 512
+        traces_endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace/otlp
       otlphttp/entities:
         headers:
           X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
