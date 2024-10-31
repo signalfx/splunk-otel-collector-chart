@@ -22,8 +22,6 @@ data:
         headers:
           X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         metrics_endpoint: https://ingest.us0.signalfx.com/v2/datapoint/otlp
-        sending_queue:
-          queue_size: 512
         traces_endpoint: https://ingest.us0.signalfx.com/v2/trace/otlp
       otlphttp/entities:
         headers:

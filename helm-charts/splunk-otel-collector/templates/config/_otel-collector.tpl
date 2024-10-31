@@ -108,7 +108,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
     sending_queue:
-      queue_size: 512
+      num_consumers: 32
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
