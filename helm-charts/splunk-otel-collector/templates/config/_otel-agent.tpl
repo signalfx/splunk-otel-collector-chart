@@ -786,8 +786,6 @@ exporters:
   {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
     sending_queue:
       queue_size: 512
-    retry_on_failure:
-      enabled: false
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
