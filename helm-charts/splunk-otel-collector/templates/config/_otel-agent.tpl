@@ -783,7 +783,7 @@ exporters:
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
@@ -966,7 +966,7 @@ service:
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - sapm
+        - otlphttp
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces

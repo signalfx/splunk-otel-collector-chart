@@ -106,7 +106,7 @@ exporters:
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
     sending_queue:
       num_consumers: 32
   {{- end }}
@@ -170,7 +170,7 @@ service:
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - sapm
+        - otlphttp
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
