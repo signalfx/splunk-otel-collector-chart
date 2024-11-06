@@ -1,7 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build configuration
+//go:build configuration_switching
 
 package functional_tests
 

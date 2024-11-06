@@ -37,6 +37,7 @@ jobs:
         test-job:
           - functional
           - histogram
+          - configuration_switching
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
