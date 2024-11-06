@@ -1,0 +1,17 @@
+---
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+  metricsEnabled: {{ .MetricsEnabled }}
+  logsEnabled: {{ .LogsEnabled }}
+  metricsIndex: myMetricsIndex
+
+{{ if .MetricsEnabled  }}
+agent:
+  config:
+    exporters:
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
+{{ end }}
+clusterName: dev-operator
+
