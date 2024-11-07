@@ -14,7 +14,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   If you use the sapm exporter with custom settings, you have two options:
   - Migrate your sapm settings to the new otlphttp exporter.
   - Retain SAPM settings by moving them to your agent.config or gateway.config overrides to ensure they remain effective.
-  
 
 ### 💡 Enhancements 💡
 
