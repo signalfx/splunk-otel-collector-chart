@@ -4,6 +4,24 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.112.0] - 2024-11-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.112.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.112.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, gateway, chart`: update default traces exporter to otlphttp ([#1518](https://github.com/signalfx/splunk-otel-collector-chart/pull/1518))
+  If you use the sapm exporter with custom settings, you have two options:
+  - Migrate your sapm settings to the new otlphttp exporter.
+  - Retain SAPM settings by moving them to your agent.config or gateway.config overrides to ensure they remain effective.
+  
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump operator to 0.71.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#1511](https://github.com/signalfx/splunk-otel-collector-chart/pull/1511))
+- `operator`: Bump java to v2.9.0 in helm-charts/splunk-otel-collector/values.yaml ([#1509](https://github.com/signalfx/splunk-otel-collector-chart/pull/1509))
+- `operator`: Bump nodejs to v2.14.0 in helm-charts/splunk-otel-collector/values.yaml ([#1519](https://github.com/signalfx/splunk-otel-collector-chart/pull/1519))
+
 ## [0.111.0] - 2024-10-12
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.111.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.111.0).
