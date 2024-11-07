@@ -71,6 +71,26 @@ func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) 
 		len(mc.AllMetrics()), timeoutMinutes)
 }
 
+func checkNoEventsReceived(t *testing.T, lc *consumertest.LogsSink) {
+	require.True(t, len(lc.AllLogs()) == 0,
+		"received %d logs, expected 0 logs", len(lc.AllLogs()))
+}
+
+func checkNoMetricsReceived(t *testing.T, lc *consumertest.MetricsSink) {
+	require.True(t, len(lc.AllMetrics()) == 0,
+		"received %d metrics, expected 0 metrics", len(lc.AllMetrics()))
+}
+
+func resetMetricsSink(t *testing.T, mc *consumertest.MetricsSink) {
+	mc.Reset()
+	t.Logf("Metrics sink reset, current metrics: %d", len(mc.AllMetrics()))
+}
+
+func resetLogsSink(t *testing.T, lc *consumertest.LogsSink) {
+	lc.Reset()
+	t.Logf("Logs sink reset, current logs: %d", len(lc.AllLogs()))
+}
+
 func writeNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteTraces(t, filepath.Join("results", filepath.Base(file)), *trace))
