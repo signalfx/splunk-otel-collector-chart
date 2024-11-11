@@ -9,9 +9,9 @@ toolchain go1.22.5
 
 require (
 	github.com/docker/docker v27.1.1+incompatible
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.106.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.106.2-0.20240808194002-5374bbac3595
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.106.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.113.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.113.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.113.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.106.1
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.113.0
@@ -121,11 +121,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.106.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.106.1 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.113.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.106.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.106.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.106.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/signalfx v0.106.1 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.113.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.113.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/signalfx v0.113.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
@@ -159,7 +159,7 @@ require (
 	go.opentelemetry.io/collector/config/confighttp v0.113.0 // indirect
 	go.opentelemetry.io/collector/config/confignet v1.19.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v1.19.0 // indirect
-	go.opentelemetry.io/collector/config/configretry v1.12.0 // indirect
+	go.opentelemetry.io/collector/config/configretry v1.19.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.113.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v1.19.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.113.0 // indirect
@@ -167,17 +167,17 @@ require (
 	go.opentelemetry.io/collector/consumer v0.113.0 // indirect
 	go.opentelemetry.io/collector/consumer/consumererror v0.113.0 // indirect
 	go.opentelemetry.io/collector/consumer/consumerprofiles v0.113.0 // indirect
-	go.opentelemetry.io/collector/exporter v0.106.1 // indirect
+	go.opentelemetry.io/collector/exporter v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/experimental/storage v0.113.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.12.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.19.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.113.0 // indirect
 	go.opentelemetry.io/collector/pdata/pprofile v0.113.0 // indirect
 	go.opentelemetry.io/collector/pipeline v0.113.0 // indirect
 	go.opentelemetry.io/collector/receiver v0.113.0 // indirect
 	go.opentelemetry.io/collector/receiver/receiverprofiles v0.113.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.106.1 // indirect
+	go.opentelemetry.io/collector/semconv v0.113.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.56.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.56.0 // indirect
 	go.opentelemetry.io/otel v1.31.0 // indirect
