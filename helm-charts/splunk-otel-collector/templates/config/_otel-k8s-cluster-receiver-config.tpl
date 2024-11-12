@@ -73,7 +73,7 @@ receivers:
   {{- end }}
 
 processors:
-  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
+{{/*  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}*/}}
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -116,6 +116,10 @@ processors:
       - context: log
         statements:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["k8s.resource.name"]], ""))
+  {{- end }}
+
+  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
   {{- end }}
 
   # Resource attributes specific to the collector itself.
