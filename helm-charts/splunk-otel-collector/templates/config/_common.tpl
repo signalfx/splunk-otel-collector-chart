@@ -224,9 +224,7 @@ k8sattributes/clusterReceiver:
       - k8s.node.name
       - k8s.pod.name
       - k8s.pod.uid
-      - container.id
-      - container.image.name
-      - container.image.tag
+      - k8s.pod.ip
     annotations:
       - key: splunk.com/sourcetype
         from: pod
