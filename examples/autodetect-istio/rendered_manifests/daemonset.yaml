@@ -7,13 +7,13 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.112.1
+    helm.sh/chart: splunk-otel-collector-0.113.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.113.0"
     app: splunk-otel-collector
     component: otel-collector-agent
-    chart: splunk-otel-collector-0.112.1
+    chart: splunk-otel-collector-0.113.0
     release: default
     heritage: Helm
 spec:
@@ -32,7 +32,11 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
+<<<<<<< HEAD
         checksum/config: 66b21e5dabb057fd110eebd50a90c0e8e58156b6b26cc4c606645bc772ba91e7
+=======
+        checksum/config: e503248ce4c1f757af3fdac6c7c27c8d13b0292497134c7fc6884452c60a02df
+>>>>>>> f632525f (Prepare release 0.113.0)
         kubectl.kubernetes.io/default-container: otel-collector
         sidecar.istio.io/inject: "false"
     spec:

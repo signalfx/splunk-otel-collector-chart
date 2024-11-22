@@ -4,6 +4,15 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.113.0] - 2024-11-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.113.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.113.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fixes hostmetrics receiver to use the correct mount path of the host's filesystem from inside the container ([#1547](https://github.com/signalfx/splunk-otel-collector-chart/pull/1547))
+- `agent`: Fix bug where sometimes Instrumentation opentelemetry.io/v1alpha1 can be installed too early ([#1544](https://github.com/signalfx/splunk-otel-collector-chart/pull/1544))
+
 ## [0.112.1] - 2024-11-20
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.112.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.112.0).
