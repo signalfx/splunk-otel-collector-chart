@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.112.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.112.0"
+    app.kubernetes.io/version: "0.113.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.112.1
     release: default
@@ -137,6 +137,7 @@ data:
     receivers:
       hostmetrics:
         collection_interval: 10s
+        root_path: /hostfs
         scrapers:
           cpu: null
           disk: null
