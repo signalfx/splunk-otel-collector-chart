@@ -345,7 +345,11 @@ data:
         scrapers:
           cpu: null
           disk: null
-          filesystem: null
+          filesystem:
+            exclude_mount_points:
+              match_type: regexp
+              mount_points:
+              - /var/.*
           load: null
           memory: null
           network: null
