@@ -56,6 +56,10 @@ receivers:
       cpu:
       disk:
       filesystem:
+        # exclude mount points that are accessible from the collector container
+        exclude_mount_points:
+          match_type: regexp
+          mount_points: [/var/.*]
       memory:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
