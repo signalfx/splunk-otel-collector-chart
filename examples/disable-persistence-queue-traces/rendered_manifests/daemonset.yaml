@@ -32,11 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-<<<<<<< HEAD
-        checksum/config: ef6f7965727ca30cdf440838ca6301d52c9ca24c4d1f1d41a6d2490b64d2f084
-=======
-        checksum/config: afc411e671e4bc4c73bb03837338d5b5afc46ebb557ff6984de5486428bbff0a
->>>>>>> f632525f (Prepare release 0.113.0)
+        checksum/config: b004ddf898fc1caa94ef51614938704a33563cdd32c01bdb097a597162642cc3
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
