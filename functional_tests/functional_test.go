@@ -930,8 +930,8 @@ func testAgentLogs(t *testing.T) {
 		assert.Contains(tt, sourcetypes, "sourcetype-anno") // pod-wo-index-w-ns-index has a sourcetype annotation
 	}, 3*time.Minute, 5*time.Second)
 
-	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") {
-		t.Log("Skipping test for journald sourcetypes for cluster version 1.30")
+	if strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.30") || strings.HasPrefix(os.Getenv("K8S_VERSION"), "v1.31") {
+		t.Log("Skipping test for journald sourcetypes for cluster version 1.30 and 1.31")
 	} else {
 		t.Run("test journald sourcetypes are set", func(t *testing.T) {
 			assert.Contains(t, journalDsourceTypes, "kube:journald:containerd.service")
