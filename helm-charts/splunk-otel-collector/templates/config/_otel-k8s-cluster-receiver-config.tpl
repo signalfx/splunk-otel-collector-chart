@@ -117,7 +117,11 @@ processors:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["k8s.resource.name"]], ""))
   {{- end }}
 
-  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if or
+    (and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+    (and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+    (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") 
+  }}
   {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
   {{- end }}
 
