@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.112.1
+    helm.sh/chart: splunk-otel-collector-0.113.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.113.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.112.1
+    chart: splunk-otel-collector-0.113.0
     release: default
     heritage: Helm
 data:
@@ -144,7 +144,11 @@ data:
         scrapers:
           cpu: null
           disk: null
-          filesystem: null
+          filesystem:
+            exclude_mount_points:
+              match_type: regexp
+              mount_points:
+              - /var/.*
           load: null
           memory: null
           network: null
