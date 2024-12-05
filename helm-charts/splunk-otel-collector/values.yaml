@@ -1168,13 +1168,14 @@ operator:
   enabled: false
   admissionWebhooks:
     certManager:
-      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+      # Annotate the issuer and certificate to ensure they are created after the cert-manager CRDs
+      # have been installed and cert-manager is ready.
       issuerAnnotations:
         "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+        "helm.sh/hook-weight": "2"
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "3"
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:
