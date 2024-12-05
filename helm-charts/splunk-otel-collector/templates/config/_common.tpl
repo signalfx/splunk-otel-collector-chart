@@ -211,6 +211,36 @@ k8sattributes:
       {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
     {{- end }}
 {{- end }}
+{{- define "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" -}}
+k8sattributes/clusterReceiver:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.namespace.name
+    - sources:
+      - from: resource_attribute
+        name: k8s.node.name
+  extract:
+    metadata:
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.name
+      - k8s.pod.uid
+      - container.id
+      - container.image.name
+      - container.image.tag
+    {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true"}}
+    annotations:
+      - key: splunk.com/sourcetype
+        from: pod
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: namespace
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: pod
+    {{- end}}
+{{- end }}
 
 {{/*
 Common config for K8s attributes processor adding k8s metadata to metrics resource attributes.
