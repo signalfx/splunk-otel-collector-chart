@@ -6,8 +6,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
-      UPDATE_EXPECTED_RESULTS:
-        description: 'Set this to true to update expected results and collect updated test output as a Github workflow artifact.'
+      UPLOAD_UPDATED_EXPECTED_RESULTS:
+        description: 'Set this to true to upload updated golden file expected results and upload these results as a Github workflow artifact.'
+        required: false
+        default: false
+      UPLOAD_KUBERNETES_DEBUG_INFO:
+        description: 'Set this to true to collect the debug info of the k8s cluster and upload this info as a Github workflow artifact.'
         required: false
         default: false
 
@@ -20,7 +24,8 @@ jobs:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
-      UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
+      UPLOAD_UPDATED_EXPECTED_RESULTS: ${{ github.event.inputs.UPLOAD_UPDATED_EXPECTED_RESULTS || 'false' }}
+      UPLOAD_KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.UPLOAD_KUBERNETES_DEBUG_INFO || 'false' }}
     strategy:
       fail-fast: false
       matrix:
@@ -71,13 +76,28 @@ jobs:
         run: |
           make cert-manager
       - name: run functional tests
+        id: run-functional-tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
           cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
-      - name: 'Upload test results'
-        if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
+      - name: Collect Kubernetes Cluster debug info on failure
+        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
+        id: collect-debug-info
+        run: |
+          echo "Functional tests failed. Collecting debug info for current state of the Kubernetes cluster..."
+          cd tools
+          ./splunk_kubernetes_debug_info.sh
+      - name: Upload Kubernetes Cluster debug info
+        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-version }}
+          path: tools/splunk_kubernetes_debug_info_*
+          retention-days: 5
+      - name: Upload test results
+        if: always() && env.UPLOAD_UPDATED_EXPECTED_RESULTS == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}

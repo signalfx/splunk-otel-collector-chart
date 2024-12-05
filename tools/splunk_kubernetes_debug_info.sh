@@ -87,7 +87,7 @@ write_output() {
 collect_data_namespace() {
    local ns=$1
 
-   object_types=("deployments" "daemonsets" "configmaps" "secrets" "networkpolicies" "svc" "ingress" "endpoints" "roles" "rolebindings" "otelinst")
+   object_types=("deployments" "daemonsets" "configmaps" "secrets" "networkpolicies" "svc" "ingress" "endpoints" "roles" "rolebindings" "otelinst" "jobs" "events")
    for type in "${object_types[@]}"; do
     stdbuf -oL echo "Collecting $type data for $ns namespace with $k8s_object_name_filter name filter"
      if [[ "$type" == "deployment" ||  "$type" == "daemonset" || "$type" == "configmaps" || "$type" == "secrets" ]]; then
@@ -201,21 +201,6 @@ collect_data_cluster() {
   output=$(eval "$cmd")
   write_output "$output" "$temp_dir/cluster_custom_resource_definitions.yaml" "$cmd"
 
-  echo "Collecting pod security policies..."
-  cmd="kubectl get psp -o yaml"
-  output=$(eval "$cmd")
-  write_output "$output" "$temp_dir/cluster_pod_security_policies.yaml" "$cmd"
-
-  echo "Collecting security context constraints..."
-  cmd="kubectl get scc -o yaml"
-  output=$(eval "$cmd")
-  write_output "$output" "$temp_dir/cluster_security_context_constraints.yaml" "$cmd"
-
-  echo "Collecting MutatingWebhookConfiguration objects..."
-  cmd="kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io -o yaml; kubectl describe mutatingwebhookconfiguration.admissionregistration.k8s.io; kubectl get --raw /metrics | grep apiserver_admission_webhook_rejection_count;"
-  output=$(eval "$cmd")
-  write_output "$output" "$temp_dir/cluster_webhooks.yaml" "$cmd"
-
   echo "Checking for cert-manager installation..."
   cert_manager_pods=$(kubectl get pods --all-namespaces -l app=cert-manager --no-headers)
   if [ -n "$cert_manager_pods" ]; then
@@ -230,6 +215,33 @@ collect_data_cluster() {
     cmd="helm get values $release -n $namespace"
     output=$(eval "$cmd")
     write_output "$output" "$temp_dir/helm_values_${release}_${namespace}.yaml" "$cmd"
+  done
+}
+
+collect_cluster_resources() {
+  # List of cluster-scoped resource types to collect
+  cluster_object_types=(
+    "crds"
+    "psp"
+    "scc"
+    "mutatingwebhookconfiguration.admissionregistration.k8s.io"
+    "validatingwebhookconfiguration.admissionregistration.k8s.io"
+  )
+
+  for type in "${cluster_object_types[@]}"; do
+    echo "Collecting $type cluster-scoped resources..."
+
+    # Fetch each object's name
+    kubectl get "$type" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | while read object; do
+      # Get the API version for this object, fallback to "unknown"
+      api_version=$(kubectl get "$type" "$object" -o jsonpath='{.apiVersion}' 2>/dev/null || echo "unknown")
+      api_version=${api_version//\//_} # Sanitize slashes in API version
+
+      # Collect YAML output
+      cmd="kubectl get $type $object -o yaml"
+      output=$(eval "$cmd")
+      write_output "$output" "$temp_dir/cluster_${type//./_}_${api_version}_${object}.yaml" "$cmd"
+    done
   done
 }
 
@@ -279,8 +291,11 @@ script_start_time=$(date +"%Y-%m-%d %H:%M:%S")
 echo "Script start time: $script_start_time"
 echo "Script start time: $script_start_time" >> "$output_file"
 
-# Collect cluster-wide data
+# Collect cluster instance specific data
 collect_data_cluster
+
+# Collect cluster scoped resources data
+collect_cluster_resources
 
 # Function to manage parallel processing of namespaces
 collect_data_namespace_namespaces() {
