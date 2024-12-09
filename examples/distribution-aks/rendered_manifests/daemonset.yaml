@@ -41,11 +41,13 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
-        
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/control-plane
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+        - key: kubernetes.io/system-node
+          effect: NoSchedule
+          operator: Exists
       containers:
       - name: otel-collector
         command:
