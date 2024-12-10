@@ -84,13 +84,13 @@ spec:
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
           operator: Equal
-        {{- if eq .Values.distribution "openshift" }}
-        - key: node-role.kubernetes.io/infra
+        {{- if eq .Values.distribution "aks" }}
+        - key: kubernetes.io/system-node
           effect: NoSchedule
           operator: Exists
         {{- end }}
-        {{- if eq .Values.distribution "aks" }}
-        - key: kubernetes.io/system-node
+        {{- if eq .Values.distribution "openshift" }}
+        - key: node-role.kubernetes.io/infra
           effect: NoSchedule
           operator: Exists
         {{- end }}
