@@ -1,0 +1,50 @@
+---
+# Source: splunk-otel-collector/templates/operator/job-operator-startupapicheck.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  default-splunk-otel-collector-operator-startupapicheck
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.113.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.113.0"
+    app: splunk-otel-collector
+    component: otel-operator
+    chart: splunk-otel-collector-0.113.0
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-operator
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "4"
+spec:
+  template:
+    spec:
+      containers:
+        - name: startupapicheck
+          image: "busybox:latest"
+          env:
+            - name: MANAGER_METRICS_SERVICE_CLUSTERIP
+              value: "default-splunk-otel-collector-operator"
+            - name: MANAGER_METRICS_SERVICE_PORT
+              value: "8443"
+          command:
+            - sh
+            - -c
+            - |
+              i=0
+              while [ $i -lt 300 ]; do
+                if wget -qO- "$MANAGER_METRICS_SERVICE_CLUSTERIP:$MANAGER_METRICS_SERVICE_PORT" 2>&1 | grep -qv "HTTP/1.0 400 Bad Request"; then
+                  echo "Operator service is available."
+                  exit 0
+                fi
+                echo "Waiting for operator service to become available... (attempt $i)"
+                i=$((i + 1))
+                sleep 1
+              done
+              echo "Timeout reached. Operator service did not become available."
+              exit 1
+      restartPolicy: Never
