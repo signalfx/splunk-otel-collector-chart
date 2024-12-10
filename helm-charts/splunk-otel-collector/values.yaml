@@ -1009,8 +1009,8 @@ secret:
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
 
-# The olerations for deploying agent collector daemonset. By default, it targets control-plane, worker,
-# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection.
+# The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
+# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
 # If set, the specified tolerations will override the defaults.
 tolerations: []
 
