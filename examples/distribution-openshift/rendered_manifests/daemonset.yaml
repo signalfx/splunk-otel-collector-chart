@@ -43,8 +43,10 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
+          operator: Equal
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
+          operator: Equal
         - key: node-role.kubernetes.io/infra
           effect: NoSchedule
           operator: Exists

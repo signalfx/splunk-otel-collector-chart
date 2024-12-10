@@ -80,8 +80,10 @@ spec:
       {{- else }}
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
+          operator: Equal
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
+          operator: Equal
         {{- if eq .Values.distribution "openshift" }}
         - key: node-role.kubernetes.io/infra
           effect: NoSchedule

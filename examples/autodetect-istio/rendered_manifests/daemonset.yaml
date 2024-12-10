@@ -44,8 +44,10 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
+          operator: Equal
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
+          operator: Equal
       initContainers:
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.113.0
