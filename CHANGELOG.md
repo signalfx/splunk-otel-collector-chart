@@ -4,6 +4,17 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.114.0] - 2024-12-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.114.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.114.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Configure k8s attributes processor for cluster receiver to ingest events into index defined in namespace annotation ([#1481](https://github.com/signalfx/splunk-otel-collector-chart/pull/1481))
+- `operator`: Bump dotnet to v1.8.0 in helm-charts/splunk-otel-collector/values.yaml ([#1538](https://github.com/signalfx/splunk-otel-collector-chart/pull/1538))
+- `operator`: Bump java to v2.10.0 in helm-charts/splunk-otel-collector/values.yaml ([#1551](https://github.com/signalfx/splunk-otel-collector-chart/pull/1551))
+- `operator`: Bump nodejs to v2.15.0 in helm-charts/splunk-otel-collector/values.yaml ([#1558](https://github.com/signalfx/splunk-otel-collector-chart/pull/1558))
+
 ## [0.113.0] - 2024-11-22
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.113.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.113.0).
