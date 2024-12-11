@@ -42,11 +42,12 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
-        
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/control-plane
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+          operator: Exists
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+          operator: Exists
       initContainers:
         - name: migrate-checkpoint
           image: quay.io/signalfx/splunk-otel-collector:0.113.0
