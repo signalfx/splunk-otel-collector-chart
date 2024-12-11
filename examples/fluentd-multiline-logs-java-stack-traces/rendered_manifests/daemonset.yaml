@@ -44,10 +44,10 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
       initContainers:
         - name: prepare-fluentd-config
           image: splunk/fluentd-hec:1.3.3

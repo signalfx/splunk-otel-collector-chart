@@ -42,10 +42,10 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
       containers:
       - name: otel-collector
         command:

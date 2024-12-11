@@ -80,10 +80,10 @@ spec:
       {{- else }}
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
-          operator: Equal
+          operator: Exists
         {{- if eq .Values.distribution "aks" }}
         - key: kubernetes.io/system-node
           effect: NoSchedule
