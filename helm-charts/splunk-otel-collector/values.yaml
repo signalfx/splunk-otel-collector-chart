@@ -1009,14 +1009,24 @@ secret:
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
 
-# Configures tolerations for deploying the agent collector DaemonSet.
-# - Set to null to omit the tolerations section entirely.
-# - Set to an empty list to apply the default tolerations defined in the template:
-#   https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/daemonset.yaml
-#   By default, it targets control-plane, worker, and k8s distribution-specific nodes
-#   (infrastructure or system) to ensure logs and metrics collection from all nodes, taking distribution into account.
-# - Set custom tolerations and they will explicitly and completely be used as the value for tolerations.
-tolerations: []
+# The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
+# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
+# If set, the specified tolerations will override the defaults.
+tolerations:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+    operator: Exists
+  - key: kubernetes.io/system-node
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+    operator: Exists
+# Defines which nodes should be selected to deploy the o11y collector daemonset.
+
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.
 nodeSelector: {}
