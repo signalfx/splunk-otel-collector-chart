@@ -250,6 +250,8 @@ data:
         - field: attributes.time
           type: remove
         poll_interval: 200ms
+        preserve_leading_whitespaces: false
+        preserve_trailing_whitespaces: false
         retry_on_failure:
           enabled: true
         start_at: beginning

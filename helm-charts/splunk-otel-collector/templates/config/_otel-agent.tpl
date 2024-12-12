@@ -423,6 +423,8 @@ receivers:
       {{- range $_, $excludePath := .Values.logsCollection.containers.excludePaths }}
       - {{ $excludePath }}
       {{- end }}
+    preserve_leading_whitespaces: {{ .Values.logsCollection.containers.preserveLeadingWhitespaces | default false }}
+    preserve_trailing_whitespaces: {{ .Values.logsCollection.containers.preserveTrailingWhitespaces | default false }}
     start_at: beginning
     include_file_path: true
     include_file_name: false
