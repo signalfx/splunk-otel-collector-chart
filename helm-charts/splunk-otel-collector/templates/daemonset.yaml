@@ -74,26 +74,9 @@ spec:
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.tolerations }}
       tolerations:
-      {{- if and (.Values.tolerations) (ne (len .Values.tolerations) 0) }}
-        {{ toYaml .Values.tolerations | nindent 8 }}
-      {{- else }}
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
-          operator: Exists
-        - key: node-role.kubernetes.io/control-plane
-          effect: NoSchedule
-          operator: Exists
-        {{- if eq .Values.distribution "aks" }}
-        - key: kubernetes.io/system-node
-          effect: NoSchedule
-          operator: Exists
-        {{- end }}
-        {{- if eq .Values.distribution "openshift" }}
-        - key: node-role.kubernetes.io/infra
-          effect: NoSchedule
-          operator: Exists
-        {{- end }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not $agent.skipInitContainers) }}
       initContainers:
