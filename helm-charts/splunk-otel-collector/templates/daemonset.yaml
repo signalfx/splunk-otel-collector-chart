@@ -74,8 +74,9 @@ spec:
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if ne .Values.tolerations nil }}
       tolerations:
-      {{- if and (.Values.tolerations) (ne (len .Values.tolerations) 0) }}
+      {{- if (ne (len .Values.tolerations) 0) }}
         {{ toYaml .Values.tolerations | nindent 8 }}
       {{- else }}
         - key: node-role.kubernetes.io/master
@@ -94,6 +95,7 @@ spec:
           effect: NoSchedule
           operator: Exists
         {{- end }}
+      {{- end }}
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not $agent.skipInitContainers) }}
       initContainers:
