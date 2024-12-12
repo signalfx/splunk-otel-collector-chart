@@ -56,10 +56,15 @@ receivers:
       cpu:
       disk:
       filesystem:
-        # exclude mount points that are accessible from the collector container
-        exclude_mount_points:
-          match_type: regexp
-          mount_points: [/var/.*]
+        # Collect metrics from the root filesystem only to avoid scraping errors since the collector
+        # doesn't have access to all filesystems on the host by default. To collect metrics from
+        # other devices, ensure that they are mounted to the collector container using
+        # agent.extraVolumeMounts and agent.extraVolumes helm values options and override this list
+        # using agent.config.hostmetrics.filesystem.include_mount_points.mount_points helm value.
+        include_mount_points:
+          match_type: strict
+          mount_points:
+            - "/"
       memory:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)

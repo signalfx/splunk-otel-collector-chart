@@ -293,10 +293,10 @@ data:
           cpu: null
           disk: null
           filesystem:
-            exclude_mount_points:
-              match_type: regexp
+            include_mount_points:
+              match_type: strict
               mount_points:
-              - /var/.*
+              - /
           load: null
           memory: null
           network: null
