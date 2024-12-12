@@ -621,6 +621,11 @@ logsCollection:
     # Set to 0 to remove any size limit.
     maxRecombineLogSize: 1048576
 
+    # Whether to preserve leading whitespaces in logs.
+    preserveLeadingWhitespaces: false
+    # Whether to preserve trailing whitespaces in logs.
+    preserveTrailingWhitespaces: false
+
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
