@@ -847,7 +847,12 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
