@@ -31,7 +31,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: fc1948ab34d8173f04fa0f56f5988af51b3ae3867d0a45cf295a220e85c05676
+        checksum/config: 3e84de6ea3a9275b36fb5d076b3e0fd13a2fc31ba2cfdaaa902f1ec08c08d361
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -46,27 +46,6 @@ spec:
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
-          - name: K8S_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: K8S_POD_IP
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: status.podIP
-          - name: K8S_POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: K8S_POD_UID
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.uid
-          - name: K8S_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:

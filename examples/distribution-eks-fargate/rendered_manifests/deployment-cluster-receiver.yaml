@@ -33,7 +33,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: d78e0d008e7296fe1c3fa48154a5840e42560b5d8324d3264b164f9c928e3373
+        checksum/config: c8f03daad2fec68be38d7cfdae387152d1c319d78c40eaea6626d3a7fea76bd3
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -53,15 +53,6 @@ spec:
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c", "/splunk-scripts/init-eks-fargate-cluster-receiver.sh"]
-          env:
-            - name: K8S_POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: K8S_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
           volumeMounts:
             - name: init-eks-fargate-cluster-receiver-script
               mountPath: /splunk-scripts
@@ -79,27 +70,6 @@ spec:
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
-          - name: K8S_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: K8S_POD_IP
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: status.podIP
-          - name: K8S_POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: K8S_POD_UID
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.uid
-          - name: K8S_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
           - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
