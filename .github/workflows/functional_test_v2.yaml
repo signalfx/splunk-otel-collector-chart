@@ -400,7 +400,7 @@ jobs:
         env:
           GCE_KUBECONFIG: ${{ secrets.GCE_KUBECONFIG }}
       - name: run functional tests
-        uses: mobiledevops/secret-to-file-action@v1
+#        uses: mobiledevops/secret-to-file-action@v1
         env:
           HOST_ENDPOINT: 0.0.0.0
           KUBECONFIG: /tmp/kubeconfig
