@@ -212,7 +212,12 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   extensions: [health_check, k8s_observer]
   {{- else }}

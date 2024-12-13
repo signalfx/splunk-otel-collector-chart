@@ -558,6 +558,5 @@ prometheus/{{ $receiver }}:
         - __name__
       scrape_interval: 10s
       static_configs:
-      - targets:
-        - "${K8S_POD_IP}:8889"
+      - targets: [localhost:8889]
 {{- end }}

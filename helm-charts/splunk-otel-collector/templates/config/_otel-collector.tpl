@@ -137,7 +137,12 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   extensions:
     - health_check
     - zpages
