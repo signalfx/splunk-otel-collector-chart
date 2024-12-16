@@ -19,8 +19,9 @@ spec:
   template:
     spec:
       containers:
-        - name: wget
-          image: "busybox:latest"
+        - name: startupapicheck
+{{/*          image: {{ template "splunk-otel-collector.image.job" . }}*/}}
+          image: registry.access.redhat.com/ubi9/ubi
           env:
             - name: WEBHOOK_SERVICE_CLUSTERIP
               value: "{{ template "splunk-otel-collector.fullname" . }}-operator-webhook"

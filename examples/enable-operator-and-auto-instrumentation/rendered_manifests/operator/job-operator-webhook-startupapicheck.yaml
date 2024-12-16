@@ -24,8 +24,9 @@ spec:
   template:
     spec:
       containers:
-        - name: wget
-          image: "busybox:latest"
+        - name: startupapicheck
+
+          image: registry.access.redhat.com/ubi9/ubi
           env:
             - name: WEBHOOK_SERVICE_CLUSTERIP
               value: "default-splunk-otel-collector-operator-webhook"

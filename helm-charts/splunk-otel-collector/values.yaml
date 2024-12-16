@@ -973,7 +973,6 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
-
 ################################################################################
 # Extra system configuration
 ################################################################################
@@ -1262,6 +1261,10 @@ instrumentation:
     #   - name: NGINX_ENV_VAR
     #     value: nginx_value
   # Auto-instrumentation Libraries (End)
+  # Jobs related to installing, uninstalling, or managing Instrumentation.
+#  job:
+#    repository: registry.access.redhat.com/ubi9/ubi
+#    tag: latest
 
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values

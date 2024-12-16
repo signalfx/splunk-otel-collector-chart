@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
         - name: startupapicheck
-          image: "busybox:latest"
+{{/*          image: {{ template "splunk-otel-collector.image.job" . }}*/}}
+          image: registry.access.redhat.com/ubi9/ubi
           env:
             - name: MANAGER_METRICS_SERVICE_CLUSTERIP
               value: "{{ template "splunk-otel-collector.fullname" . }}-operator"

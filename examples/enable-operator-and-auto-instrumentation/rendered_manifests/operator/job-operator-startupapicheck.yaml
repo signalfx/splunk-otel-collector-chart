@@ -25,7 +25,8 @@ spec:
     spec:
       containers:
         - name: startupapicheck
-          image: "busybox:latest"
+
+          image: registry.access.redhat.com/ubi9/ubi
           env:
             - name: MANAGER_METRICS_SERVICE_CLUSTERIP
               value: "default-splunk-otel-collector-operator"

@@ -1,4 +1,11 @@
 {{/*
+Create the job image name.
+*/}}
+{{/*{{- define "splunk-otel-collector.image.job" -}}*/}}
+{{/*{{- printf "%s:%s" .Values.instrumentation.job.repository .Values.instrumentation.job.tag | trimSuffix ":" -}}*/}}
+{{/*{{- end -}}*/}}
+
+{{/*
 Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operator.
 - Checks for a valid endpoint for exporting telemetry data.
 - Validates that the operator is configured correctly according to user input and default settings.
