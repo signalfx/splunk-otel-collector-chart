@@ -3,7 +3,7 @@
 # Description:
 # This script collects debugging information from a Kubernetes cluster.
 # It retrieves networking, firewall, security policies, custom resource definitions (CRDs),
-# and logs from specified pods and secrets (sanitized). The outputs are saved to files for each namespace and object type.
+# and logs from specified pods. The outputs are saved to files for each namespace and object type.
 # This helps in diagnosing and troubleshooting cluster configurations.
 # Finally, it compresses all the collected files into a ZIP archive.
 #
@@ -28,7 +28,7 @@
 #
 # Objects Scraped:
 # - Pod logs for agent, cluster-receiver, certmanager, operator, gateway, splunk pods
-# - Deployments, daemonsets, secrets, Helm releases matching K8S_OBJECT_NAME_FILTER
+# - Deployments, daemonsets, Helm releases matching K8S_OBJECT_NAME_FILTER
 # - NetworkPolicies, Services, Ingress resources, Endpoints, Roles, RoleBindings, Security contexts
 # - OpenTelemetry Instrumentation objects
 # - Custom Resource Definitions (CRDs), Pod Security Policies (PSPs), Security Context Constraints (SCCs)
@@ -87,10 +87,10 @@ write_output() {
 collect_data_namespace() {
    local ns=$1
 
-   object_types=("configmaps" "daemonsets" "deployments" "endpoints" "events" "ingress" "jobs" "networkpolicies" "otelinst" "rolebindings" "roles" "secrets" "svc")
+   object_types=("configmaps" "daemonsets" "deployments" "endpoints" "events" "ingress" "jobs" "networkpolicies" "otelinst" "rolebindings" "roles" "svc")
    for type in "${object_types[@]}"; do
     stdbuf -oL echo "Collecting $type data for $ns namespace with $k8s_object_name_filter name filter"
-     if [[ "$type" == "deployment" ||  "$type" == "daemonset" || "$type" == "configmaps" || "$type" == "secrets" ]]; then
+     if [[ "$type" == "deployment" ||  "$type" == "daemonset" || "$type" == "configmaps" ]]; then
        kubectl get "$type" -n "$ns" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep -E "$k8s_object_name_filter" | while read object; do
          cmd="kubectl get $type $object -n $ns -o yaml"
          output=$(eval "$cmd")
