@@ -87,7 +87,7 @@ write_output() {
 collect_data_namespace() {
    local ns=$1
 
-   object_types=("deployments" "daemonsets" "configmaps" "secrets" "networkpolicies" "svc" "ingress" "endpoints" "roles" "rolebindings" "otelinst" "jobs" "events")
+   object_types=("configmaps" "daemonsets" "deployments" "endpoints" "events" "ingress" "jobs" "networkpolicies" "otelinst" "rolebindings" "roles" "secrets" "svc")
    for type in "${object_types[@]}"; do
     stdbuf -oL echo "Collecting $type data for $ns namespace with $k8s_object_name_filter name filter"
      if [[ "$type" == "deployment" ||  "$type" == "daemonset" || "$type" == "configmaps" || "$type" == "secrets" ]]; then
