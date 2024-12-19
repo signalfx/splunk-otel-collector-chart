@@ -1681,6 +1681,27 @@
             }
           },
           "required": ["repository", "tag"]
+        },
+        "jobs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startupapicheck": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "repository": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },

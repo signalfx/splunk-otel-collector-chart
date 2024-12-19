@@ -975,7 +975,6 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
-
 ################################################################################
 # Extra system configuration
 ################################################################################
@@ -1178,13 +1177,14 @@ operator:
   enabled: false
   admissionWebhooks:
     certManager:
-      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+      # Annotate the issuer and certificate to ensure they are created after the cert-manager CRDs
+      # have been installed and cert-manager is ready.
       issuerAnnotations:
         "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+        "helm.sh/hook-weight": "2"
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "3"
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:
@@ -1271,6 +1271,13 @@ instrumentation:
     #   - name: NGINX_ENV_VAR
     #     value: nginx_value
   # Auto-instrumentation Libraries (End)
+  # Jobs related to installing, uninstalling, or managing Operator Instrumentation.
+  jobs:
+    # Enables waiting for the operator to be available and ready before deploying instrumentation as a hook post-install step.
+    startupapicheck:
+      enabled: true
+      repository: registry.access.redhat.com/ubi9/ubi
+      tag: latest
 
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
