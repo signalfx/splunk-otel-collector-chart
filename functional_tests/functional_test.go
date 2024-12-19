@@ -193,8 +193,18 @@ func deployChartsAndApps(t *testing.T) {
 	install := action.NewInstall(actionConfig)
 	install.Namespace = "default"
 	install.ReleaseName = "sock"
+	install.Timeout = 5 * time.Minute
+
 	_, err = install.Run(chart, values)
 	if err != nil {
+		// This is a workaround to invalidate the client cache and load the newly deployed CRDs
+		// TODO: Find a better way to invalidate the cache and pull in CRDs, see: https://github.com/helm/helm/blob/cfd07493f46efc9debd9cc1b02a0961186df7fdf/pkg/action/install.go#L188
+		actionConfig = new(action.Configuration)
+		if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
+			t.Logf(format+"\n", v...)
+		}); err != nil {
+			require.NoError(t, err)
+		}
 		t.Logf("error reported during helm install: %v\n", err)
 		retryUpgrade := action.NewUpgrade(actionConfig)
 		retryUpgrade.Namespace = "default"
