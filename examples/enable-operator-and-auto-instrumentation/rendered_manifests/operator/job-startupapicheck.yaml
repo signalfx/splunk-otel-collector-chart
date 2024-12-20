@@ -1,0 +1,73 @@
+---
+# Source: splunk-otel-collector/templates/operator/job-startupapicheck.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: default-splunk-otel-collector-operator-startupapicheck
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.113.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.113.0"
+    app: splunk-otel-collector
+    component: otel-operator
+    chart: splunk-otel-collector-0.113.0
+    release: default
+    heritage: Helm
+    app.kubernetes.io/component: otel-operator
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "4"
+spec:
+  template:
+    spec:
+      containers:
+        - name: startupapicheck
+          image: registry.access.redhat.com/ubi9/ubi:latest
+          env:
+            - name: MANAGER_METRICS_SERVICE_CLUSTERIP
+              value: "default-splunk-otel-collector-operator"
+            - name: MANAGER_METRICS_SERVICE_PORT
+              value: "8443"
+            - name: WEBHOOK_SERVICE_CLUSTERIP
+              value: "default-splunk-otel-collector-operator-webhook"
+            - name: WEBHOOK_SERVICE_PORT
+              value: "443"
+          command:
+            - sh
+            - -c
+            - |
+              operator_service_checked=false
+              operator_webhook_service_checked=false
+
+              for i in $(seq 1 300); do
+                # Checks for the Operator and Operator Webhook service availability using curl
+                # The services are ready when curl receives an HTTP 400 error response.
+
+                if [ "$operator_service_checked" = false ]; then
+                  curl_output_operator=$(curl -s -o /dev/null -w "%{http_code}" "$MANAGER_METRICS_SERVICE_CLUSTERIP:$MANAGER_METRICS_SERVICE_PORT")
+                  if [ "$curl_output_operator" = "400" ]; then
+                    operator_service_checked=true
+                  fi
+                fi
+
+                if [ "$operator_webhook_service_checked" = false ]; then
+                  curl_output_webhook=$(curl -s -o /dev/null -w "%{http_code}" "$WEBHOOK_SERVICE_CLUSTERIP:$WEBHOOK_SERVICE_PORT")
+                  if [ "$curl_output_webhook" = "400" ]; then
+                    operator_webhook_service_checked=true
+                  fi
+                fi
+
+                echo "Attempt $i: Operator Service=${operator_service_checked}, Operator Webhook Service=${operator_webhook_service_checked}"
+                sleep 1
+
+                if [ "$operator_service_checked" = true ] && [ "$operator_webhook_service_checked" = true ]; then
+                  echo "All checks passed."
+                  exit 0
+                fi
+              done
+              echo "Timeout reached. Not all checks completed successfully."
+              exit 1
+      restartPolicy: Never

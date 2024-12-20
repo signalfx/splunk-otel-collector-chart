@@ -9,6 +9,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/discovery"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -92,6 +94,20 @@ type sinks struct {
 	agentMetricsConsumer              *consumertest.MetricsSink
 	k8sclusterReceiverMetricsConsumer *consumertest.MetricsSink
 	tracesConsumer                    *consumertest.TracesSink
+}
+
+type cacheInvalidatingRESTClientGetter struct {
+	genericclioptions.RESTClientGetter
+	log func(string, ...interface{})
+}
+
+func (c *cacheInvalidatingRESTClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
+	discoveryClient, err := c.RESTClientGetter.ToDiscoveryClient()
+	if err == nil {
+		c.log("Clearing discovery cache")
+		discoveryClient.Invalidate()
+	}
+	return discoveryClient, err
 }
 
 func setupOnce(t *testing.T) *sinks {
@@ -184,24 +200,31 @@ func deployChartsAndApps(t *testing.T) {
 	err = yaml.Unmarshal(buf.Bytes(), &values)
 	require.NoError(t, err)
 
+	// When using the Helm sdk, there can be cache invalidation issues we can get around with this,
+	// Helm cli users don't face this issue. Deploying CRD instances via Helm templates
+	// and CR instances via a post-install hook will fail without this.
+	// Related issue: https://github.com/helm/helm/issues/6452
+	// Draft of upstream fix: https://github.com/jvoravong/helm/pull/1/files
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
+	wrappedGetter := &cacheInvalidatingRESTClientGetter{
+		RESTClientGetter: kube.GetConfig(testKubeConfig, "", "default"),
+		log: func(format string, args ...interface{}) {
+			fmt.Printf(format+"\n", args...)
+		},
+	}
+
+	if err := actionConfig.Init(wrappedGetter, "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
 		t.Logf(format+"\n", v...)
 	}); err != nil {
 		require.NoError(t, err)
 	}
+
 	install := action.NewInstall(actionConfig)
 	install.Namespace = "default"
 	install.ReleaseName = "sock"
+	install.Timeout = 5 * time.Minute
+
 	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
 
 	waitForAllDeploymentsToStart(t, client)
 
