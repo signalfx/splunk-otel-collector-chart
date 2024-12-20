@@ -1681,6 +1681,18 @@
             }
           },
           "required": ["repository", "tag"]
+        },
+        "job": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            }
+          }
         }
       }
     },
