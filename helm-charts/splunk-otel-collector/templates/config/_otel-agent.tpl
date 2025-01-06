@@ -40,16 +40,31 @@ receivers:
     endpoint: 0.0.0.0:8006
   {{- end }}
 
+  # Placeholder receiver needed for discovery mode
+  nop:
+
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:
     collection_interval: 10s
+    {{- if not .Values.isWindows }}
+    root_path: "/hostfs"
+    {{- end }}
     scrapers:
       cpu:
       disk:
       filesystem:
+        # Collect metrics from the root filesystem only to avoid scraping errors since the collector
+        # doesn't have access to all filesystems on the host by default. To collect metrics from
+        # other devices, ensure that they are mounted to the collector container using
+        # agent.extraVolumeMounts and agent.extraVolumes helm values options and override this list
+        # using agent.config.hostmetrics.filesystem.include_mount_points.mount_points helm value.
+        include_mount_points:
+          match_type: strict
+          mount_points:
+            - "/"
       memory:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)
@@ -667,6 +682,8 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
+    metadata_keys:
+      - X-SF-Token
 
   # Resource detection processor is configured to override all host and cloud
   # attributes because OTel Collector Agent is the source of truth for all host
@@ -775,7 +792,7 @@ exporters:
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
@@ -821,10 +838,21 @@ exporters:
     send_otlp_histograms: true
   {{- end }}
 
+  # To send entities (applicable only if discovery mode is enabled)
+  otlphttp/entities:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
@@ -952,7 +980,7 @@ service:
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - sapm
+        - otlphttp
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
@@ -1053,6 +1081,16 @@ service:
       exporters:
         - signalfx/histograms
     {{- end }}
+
+    logs/entities:
+      # Receivers are added dinamically if discovery mode is enabled
+      receivers: [nop]
+      processors:
+        - memory_limiter
+        - batch
+        - resourcedetection
+        - resource
+      exporters: [otlphttp/entities]
 {{- end }}
 {{/*
 Discovery properties for the otel-collector agent

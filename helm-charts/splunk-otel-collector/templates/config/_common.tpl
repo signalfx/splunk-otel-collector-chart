@@ -10,13 +10,15 @@ memory_limiter:
 {{- end }}
 
 {{/*
-Common config for the otel-collector sapm exporter
+Common config for the otel-collector otlphttp exporter
 */}}
-{{- define "splunk-otel-collector.otelSapmExporter" -}}
+{{- define "splunk-otel-collector.otlpHttpExporter" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
-sapm:
-  endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace
-  access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+otlphttp:
+  metrics_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/datapoint/otlp
+  traces_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace/otlp
+  headers:
+    "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
 {{- end }}
 {{- end }}
 
@@ -208,6 +210,36 @@ k8sattributes:
       {{- end }}
       {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
     {{- end }}
+{{- end }}
+{{- define "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" -}}
+k8sattributes/clusterReceiver:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.namespace.name
+    - sources:
+      - from: resource_attribute
+        name: k8s.node.name
+  extract:
+    metadata:
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.name
+      - k8s.pod.uid
+      - container.id
+      - container.image.name
+      - container.image.tag
+    {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true"}}
+    annotations:
+      - key: splunk.com/sourcetype
+        from: pod
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: namespace
+      - key: splunk.com/index
+        tag_name: com.splunk.index
+        from: pod
+    {{- end}}
 {{- end }}
 
 {{/*
@@ -404,6 +436,9 @@ splunk_hec/platform_metrics:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
+  {{- if .Values.splunkPlatform.sourcetype }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  {{- end }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
   max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
@@ -445,6 +480,9 @@ splunk_hec/platform_traces:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.tracesIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
+  {{- if .Values.splunkPlatform.sourcetype }}
+  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
+  {{- end }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
   max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
@@ -521,6 +559,5 @@ prometheus/{{ $receiver }}:
         - __name__
       scrape_interval: 10s
       static_configs:
-      - targets:
-        - "${K8S_POD_IP}:8889"
+      - targets: [localhost:8889]
 {{- end }}

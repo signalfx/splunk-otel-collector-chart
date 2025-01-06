@@ -4,11 +4,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    helm.sh/chart: operator-0.49.1
+    helm.sh/chart: operator-0.71.2
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.95.0"
+    app.kubernetes.io/version: "0.110.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
+    
     app.kubernetes.io/component: controller-manager
   name: default-operator-leader-election
   namespace: default

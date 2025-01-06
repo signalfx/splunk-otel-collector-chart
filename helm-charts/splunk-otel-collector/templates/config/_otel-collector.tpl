@@ -44,6 +44,8 @@ processors:
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
   batch:
+    metadata_keys:
+      - X-SF-Token
 
   {{- include "splunk-otel-collector.resourceDetectionProcessor" . | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
@@ -104,7 +106,7 @@ exporters:
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  {{- include "splunk-otel-collector.otelSapmExporter" . | nindent 2 }}
+  {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
     sending_queue:
       num_consumers: 32
   {{- end }}
@@ -135,7 +137,12 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   extensions:
     - health_check
     - zpages
@@ -168,7 +175,7 @@ service:
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - sapm
+        - otlphttp
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces

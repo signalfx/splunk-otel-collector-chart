@@ -66,7 +66,7 @@ func setupOtlpReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, mc)
+	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(), cfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -258,6 +258,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreSubsequentDataPoints("coredns_forward_request_duration_seconds"),
@@ -288,6 +289,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
@@ -316,6 +318,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("server_go_version", "etcd_server_go_version"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
@@ -336,6 +339,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
@@ -364,6 +368,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("server.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
@@ -394,6 +399,7 @@ func testHistogramMetrics(t *testing.T) {
 		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)

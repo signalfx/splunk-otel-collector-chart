@@ -43,6 +43,12 @@ install-tools: ## Install tools (macOS/Linux)
 .PHONY: dep-update
 dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart with the dependencies specified in the Chart.yaml
 	@{ \
+	DIR=helm-charts/splunk-otel-collector ;\
+	LOCK_FILE=$$DIR/Chart.lock ;\
+	if [ -f "$$LOCK_FILE" ] ; then \
+		echo "Removing existing Chart.lock file..."; \
+		rm -f "$$LOCK_FILE" || exit 1; \
+	fi ;\
 	if ! (helm repo list | grep -q open-telemetry) ; then \
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
 	fi ;\
@@ -51,10 +57,13 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 	fi ;\
 	helm repo update open-telemetry jetstack || exit 1; \
 	DEP_OK=true ;\
-	DIR=helm-charts/splunk-otel-collector ;\
 	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then DEP_OK=false ; fi ;\
 	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then DEP_OK=false ; fi ;\
 	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
+	if [ -f "$$LOCK_FILE" ] ; then \
+		echo "Removing Chart.lock file post-update..."; \
+		rm -f "$$LOCK_FILE" || exit 1; \
+	fi ;\
 	}
 
 # Example Usage:

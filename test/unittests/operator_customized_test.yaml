@@ -10,7 +10,7 @@ tests:
           count: 1
       - equal:
           path: spec.exporter.endpoint
-          value: http://RELEASE-NAME-splunk-otel-collector:4317
+          value: http://RELEASE-NAME-splunk-otel-collector-agent.NAMESPACE.svc.cluster.local:4317
       - contains:
           path: spec.env
           content:
@@ -25,7 +25,7 @@ tests:
           path: spec.nodejs.env
           content:
             name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "http://$(NODEJS_OTEL_AGENT):4318"
+            value: "http://SOME-OTHER-RELEASE-NAME-splunk-otel-collector-agent.NAMESPACE.svc.cluster.local:4318"
       - contains:
           path: spec.nodejs.env
           content:

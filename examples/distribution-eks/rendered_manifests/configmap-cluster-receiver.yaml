@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.105.5
+    helm.sh/chart: splunk-otel-collector-0.113.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.105.0"
+    app.kubernetes.io/version: "0.113.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.105.5
+    chart: splunk-otel-collector-0.113.0
     release: default
     heritage: Helm
 data:
@@ -111,7 +111,7 @@ data:
             scrape_interval: 10s
             static_configs:
             - targets:
-              - ${K8S_POD_IP}:8889
+              - localhost:8889
     service:
       extensions:
       - health_check
@@ -140,4 +140,9 @@ data:
           - prometheus/k8s_cluster_receiver
       telemetry:
         metrics:
-          address: 0.0.0.0:8889
+          readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: localhost
+                  port: 8889

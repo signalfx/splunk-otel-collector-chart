@@ -9,10 +9,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/client-go/dynamic"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,7 +43,11 @@ import (
 	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -69,6 +69,7 @@ const (
 	eksTestKubeEnv                         = "eks"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
+	gceTestKubeEnv                         = "gce"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
@@ -532,7 +533,7 @@ func Test_Functions(t *testing.T) {
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
 	switch kubeTestEnv {
-	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv:
+	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = kindValuesDir
 	case eksTestKubeEnv:
 		expectedValuesDir = eksValuesDir
@@ -700,8 +701,6 @@ func testDotNetTraces(t *testing.T) {
 					selectedTrace = &trace
 					break
 				}
-				selectedTrace = &trace
-				break
 			}
 		}
 		return selectedTrace != nil
@@ -723,6 +722,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("os.build_id"),
 		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
@@ -1045,10 +1045,6 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_exporter_sent_spans",
 		"otelcol_otelsvc_k8s_ip_lookup_miss",
 		"otelcol_processor_accepted_spans",
-		"otelcol_processor_dropped_spans",
-		"otelcol_processor_refused_spans",
-		"otelcol_processor_refused_log_records",
-		"otelcol_processor_dropped_log_records",
 		"otelcol_processor_accepted_log_records",
 		"otelcol_exporter_queue_size",
 		"otelcol_exporter_sent_metric_points",
@@ -1066,8 +1062,6 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_processor_accepted_metric_points",
 		"otelcol_processor_filter_logs_filtered",
 		"otelcol_receiver_accepted_metric_points",
-		"otelcol_processor_dropped_metric_points",
-		"otelcol_processor_refused_metric_points",
 		"otelcol_receiver_accepted_log_records",
 		"otelcol_receiver_refused_log_records",
 		"otelcol_receiver_refused_metric_points",
@@ -1121,7 +1115,7 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, true)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1134,8 +1128,8 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
@@ -1143,11 +1137,11 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
 		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
@@ -1168,6 +1162,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
@@ -1225,10 +1220,8 @@ func testAgentMetrics(t *testing.T) {
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		writeNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
-		t.Skipf("we have trouble identifying exact payloads right now: %v", err)
-	} else {
-		assert.NoError(t, err)
 	}
+	assert.NoError(t, err)
 }
 
 func testPrometheusAnnotationMetrics(t *testing.T) {
@@ -1325,8 +1318,6 @@ func testHECMetrics(t *testing.T) {
 		"otelcol_exporter_sent_metric_points",
 		"otelcol_exporter_sent_log_records",
 		"otelcol_otelsvc_k8s_ip_lookup_miss",
-		"otelcol_processor_refused_log_records",
-		"otelcol_processor_dropped_log_records",
 		"otelcol_processor_accepted_log_records",
 		"otelcol_otelsvc_k8s_namespace_added",
 		"otelcol_otelsvc_k8s_pod_added",
@@ -1339,8 +1330,6 @@ func testHECMetrics(t *testing.T) {
 		"otelcol_process_runtime_total_sys_memory_bytes",
 		"otelcol_process_uptime",
 		"otelcol_processor_accepted_metric_points",
-		"otelcol_processor_dropped_metric_points",
-		"otelcol_processor_refused_metric_points",
 		"otelcol_receiver_accepted_metric_points",
 		"otelcol_receiver_refused_metric_points",
 		"otelcol_scraper_errored_metric_points",
@@ -1413,7 +1402,7 @@ func setupTraces(t *testing.T) *consumertest.TracesSink {
 	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpReceiverPort)
 	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpHTTPReceiverPort)
 
-	rcvr, err := f.CreateTracesReceiver(context.Background(), receivertest.NewNopSettings(), cfg, tc)
+	rcvr, err := f.CreateTraces(context.Background(), receivertest.NewNopSettings(), cfg, tc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1431,7 +1420,7 @@ func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, mc)
+	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(), cfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1454,8 +1443,8 @@ func setupHEC(t *testing.T) (*consumertest.LogsSink, *consumertest.MetricsSink) 
 
 	lc := new(consumertest.LogsSink)
 	mc := new(consumertest.MetricsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
-	mrcvr, err := f.CreateMetricsReceiver(context.Background(), receivertest.NewNopSettings(), mCfg, mc)
+	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(), cfg, lc)
+	mrcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(), mCfg, mc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1479,7 +1468,7 @@ func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecLogsObjectsReceiverPort)
 
 	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogsReceiver(context.Background(), receivertest.NewNopSettings(), cfg, lc)
+	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(), cfg, lc)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -1489,11 +1478,6 @@ func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
 	})
 
 	return lc
-}
-
-type dimensionFilter struct {
-	key   string
-	value string
 }
 
 func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(string, pcommon.Map) bool) {

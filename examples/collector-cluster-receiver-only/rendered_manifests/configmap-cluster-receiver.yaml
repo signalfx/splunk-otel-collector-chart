@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.105.5
+    helm.sh/chart: splunk-otel-collector-0.113.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.105.0"
+    app.kubernetes.io/version: "0.113.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.105.5
+    chart: splunk-otel-collector-0.113.0
     release: default
     heritage: Helm
 data:
@@ -36,6 +36,23 @@ data:
     processors:
       batch:
         send_batch_max_size: 32768
+      k8sattributes/clusterReceiver:
+        extract:
+          metadata:
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - container.id
+          - container.image.name
+          - container.image.tag
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.namespace.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.node.name
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
@@ -116,7 +133,7 @@ data:
             scrape_interval: 10s
             static_configs:
             - targets:
-              - ${K8S_POD_IP}:8889
+              - localhost:8889
     service:
       extensions:
       - health_check
@@ -130,6 +147,7 @@ data:
           - resourcedetection
           - resource
           - transform/add_sourcetype
+          - k8sattributes/clusterReceiver
           receivers:
           - k8sobjects
         metrics:
@@ -155,4 +173,9 @@ data:
           - prometheus/k8s_cluster_receiver
       telemetry:
         metrics:
-          address: 0.0.0.0:8889
+          readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: localhost
+                  port: 8889

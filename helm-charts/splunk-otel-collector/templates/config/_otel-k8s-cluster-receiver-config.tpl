@@ -117,6 +117,14 @@ processors:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["k8s.resource.name"]], ""))
   {{- end }}
 
+  {{- if or
+    (and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+    (and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+    (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true")
+  }}
+  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
+  {{- end }}
+
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
     attributes:
@@ -204,7 +212,12 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8889
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   extensions: [health_check, k8s_observer]
   {{- else }}
@@ -290,6 +303,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -312,6 +326,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -333,6 +348,7 @@ service:
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
         {{- end }}
+        - k8sattributes/clusterReceiver
       exporters:
         - signalfx
     {{- end }}

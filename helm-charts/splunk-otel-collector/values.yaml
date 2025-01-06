@@ -47,7 +47,7 @@ splunkPlatform:
   # Optional. Default value for `source` field.
   source: "kubernetes"
   # Optional. Default value for `sourcetype` field. For container logs, it will
-  # be container name.
+  # be container name. For metrics and traces it will default to "httpevent".
   sourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   maxConnections: 200
@@ -173,7 +173,7 @@ splunkObservability:
 #   otel-collector agent for further processing.
 # - `otel`: utilize native OpenTelemetry log collection.
 #
-# `fluentd` will be deprecated soon, so it's recommended to use `otel` instead.
+# `fluentd` will be deprecated in October 2025, so it's recommended to use `otel` instead.
 ################################################################################
 
 logsEngine: otel
@@ -404,7 +404,7 @@ agent:
   service:
     # create a service for the agents with a local internalTrafficPolicy
     # so that agent pods can be discovered via dns etc
-    enabled: false
+    enabled: true
 
   # hostNetwork schedules the pod with the host's network namespace.
   # Disabling this value will affect monitoring of some control plane
@@ -657,7 +657,7 @@ logsCollection:
 ################################################################################
 # Fluentd sidecar configuration for logs collection.
 # Applicable only if "logsEngine: fluentd".
-# Fluentd will be deprecated soon, so it's recommended to use "logsEngine: otel" instead.
+# Fluentd logs engine is now deprecated and will reach End Of Support in October 2025, it is strongly recommended to use "logsEngine: otel" instead.
 ################################################################################
 
 fluentd:
@@ -958,6 +958,8 @@ image:
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
     repository: quay.io/signalfx/splunk-otel-collector
+    # For the FIPS-140 enabled version, use this repository instead:
+    # repository: quay.io/signalfx/splunk-otel-collector-fips
     # The tag of the Splunk OTel Collector image, default value is the chart appVersion
     tag: ""
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
@@ -1009,19 +1011,27 @@ secret:
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
 
-# This default tolerations allow the daemonset to be deployed on control-plane
-# nodes, so that we can also collect logs and metrics from those nodes.
+# The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
+# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule
+    operator: Exists
   - key: node-role.kubernetes.io/control-plane
     effect: NoSchedule
+    operator: Exists
+  - key: kubernetes.io/system-node
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+    operator: Exists
 
-# Defines which nodes should be selected to deploy the o11y collector daemonset.
+# Defines which nodes should be selected to deploy the agent collector daemonset.
 nodeSelector: {}
 terminationGracePeriodSeconds: 600
 
-# Defines node affinity to restrict deployment of the o11y collector daemonset.
+# Defines node affinity to restrict deployment of the agent collector daemonset.
 affinity: {}
 
 # Defines priorityClassName to assign a priority class to pods.
@@ -1175,6 +1185,11 @@ operator:
       issuerAnnotations:
         "helm.sh/hook": post-install,post-upgrade
         "helm.sh/hook-weight": "1"
+  # Collector deployment via the operator is not supported at this time.
+  # The collector image repository is specified here to meet operator subchart constraints.
+  manager:
+    collectorImage:
+      repository: quay.io/signalfx/splunk-otel-collector
 
 # The default Splunk Instrumentation object deployed when operator.enabled=true.
 # For more details see:
@@ -1215,19 +1230,19 @@ instrumentation:
   #   - env: (Optional) Allows you to add any additional environment variables.
   java:
     repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-    tag: v2.7.0
+    tag: v2.10.0
     # env:
     #   - name: JAVA_ENV_VAR
     #     value: java_value
   nodejs:
     repository: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js
-    tag: v2.11.0
+    tag: v2.15.0
     # env:
     #   - name: NODEJS_ENV_VAR
     #     value: nodejs_value
   dotnet:
     repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-    tag: v1.6.0
+    tag: v1.8.0
     env:
       - name: OTEL_DOTNET_AUTO_PLUGINS
         value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
