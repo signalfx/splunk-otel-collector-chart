@@ -232,6 +232,10 @@ k8sattributes/clusterReceiver:
     {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true"}}
     annotations:
       - key: splunk.com/sourcetype
+        tag_name: com.splunk.sourcetype
+        from: namespace
+      - key: splunk.com/sourcetype
+        tag_name: com.splunk.sourcetype
         from: pod
       - key: splunk.com/index
         tag_name: com.splunk.index
@@ -265,6 +269,9 @@ k8sattributes/metrics:
   extract:
     metadata: []
     annotations:
+      - key: splunk.com/sourcetype
+        tag_name: com.splunk.sourcetype
+        from: namespace
       - key: splunk.com/sourcetype
         tag_name: com.splunk.sourcetype
         from: pod
@@ -336,6 +343,20 @@ resource/logs:
       action: delete
     {{- end }}
     {{- end }}
+    {{- end }}
+{{- end }}
+
+{{/*
+Resource processor for metrics manipulations
+*/}}
+{{- define "splunk-otel-collector.resourceMetricsProcessor" -}}
+resource/metrics:
+  attributes:
+    {{- if .Values.splunkPlatform.sourcetype }}
+    # Insert the sourcetype value from values.yaml if it has not already been set through annotations.
+    - key: com.splunk.sourcetype
+      value: "{{.Values.splunkPlatform.sourcetype }}"
+      action: insert
     {{- end }}
 {{- end }}
 
@@ -436,9 +457,6 @@ splunk_hec/platform_metrics:
   token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  {{- if .Values.splunkPlatform.sourcetype }}
-  sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
-  {{- end }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
   max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}

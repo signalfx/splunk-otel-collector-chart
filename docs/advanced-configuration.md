@@ -564,7 +564,8 @@ Manage Splunk OTel Collector Logging with these supported annotations.
 * Filter logs using pod and/or namespace annotation
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `false` (default: false), set `splunk.com/exclude` annotation to `true` on pod and/or namespace to exclude its logs from ingested.
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `true` (default: false), set `splunk.com/include` annotation to `true` on pod and/or namespace to only include its logs from ingested. All other logs will be ignored.
-* Use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME` for logs and defaults to "httpevent" for metrics.
+* For logs, use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME`.
+* For metrics, use the `splunk.com/sourcetype` annotation on the namespace to override the sourcetype field. If not set, it defaults to `httpevent`.
 
 ### Performance of native OpenTelemetry logs collection
 
