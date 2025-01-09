@@ -425,6 +425,9 @@
                     },
                     "caFile": {
                       "type": "string"
+                    },
+                    "annotations": {
+                      "type": "object"
                     }
                   }
                 },
@@ -1188,6 +1191,9 @@
         },
         "validateSecret": {
           "type": "boolean"
+        },
+        "annotations": {
+          "type": "object"
         }
       }
     },

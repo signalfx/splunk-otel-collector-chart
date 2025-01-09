@@ -320,6 +320,8 @@ agent:
         # NOTE: The content of the file itself should be used here, not the file path.
         #       The file will be stored as a secret in kubernetes.
         caFile: ""
+        # Secret annotations
+        annotations: {}
       # Specifies whether the etcd's TLS cert will be verified. If set to false, a CA certificate must be made
       # available as part of the etcd secret to verify the TLS cert with.
       skipVerify: true
@@ -1010,6 +1012,8 @@ secret:
   name: ""
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
+  # Secret annotations
+  annotations: {}
 
 # The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
 # and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
