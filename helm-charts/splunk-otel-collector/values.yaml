@@ -1176,6 +1176,8 @@ service:
 
 operator:
   enabled: false
+  crds:
+    create: false
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
