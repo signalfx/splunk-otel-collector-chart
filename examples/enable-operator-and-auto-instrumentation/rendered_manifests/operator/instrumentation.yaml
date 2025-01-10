@@ -47,10 +47,10 @@ spec:
       - name: OTEL_RESOURCE_ATTRIBUTES
         value: splunk.zc.method=autoinstrumentation-go:v0.10.1-alpha
   java:
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.10.0
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.11.0
     env:
       - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-java:v2.10.0
+        value: splunk.zc.method=splunk-otel-java:v2.11.0
       # java auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
       # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
