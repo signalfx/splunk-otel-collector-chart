@@ -59,11 +59,10 @@ clusterName: test
 environment: test
 cloudProvider: gcp
 distribution: gke/autopilot
-
+operatorcrds:
+  install: true
 operator:
   enabled: true
-  crds:
-    create: false
   admissionWebhooks:
     certManager:
       enabled: false

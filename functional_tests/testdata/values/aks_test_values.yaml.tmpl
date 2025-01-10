@@ -67,11 +67,10 @@ readinessProbe:
   initialDelaySeconds: 60
 livenessProbe:
   initialDelaySeconds: 60
-
+operatorcrds:
+  install: true
 operator:
   enabled: true
-  crds:
-    create: false
   admissionWebhooks:
     certManager:
       enabled: false

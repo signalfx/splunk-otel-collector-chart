@@ -1174,8 +1174,22 @@ service:
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
+# Should the CRDs be installed by a chart's crd/ directory or by using templates.
+operatorcrds:
+  # Should the CRDs be installed
+  install: false
+
 operator:
   enabled: false
+  # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
+  # a race condition with helm.
+  # See: https://github.com/open-telemetry/opentelemetry-helm-charts/issues/677
+  # Users of this chart should _never_ set this to be true. If a user wishes
+  # to install the CRDs through the opentelemetry-operator chart, it is recommended
+  # to install the opentelemetry-operator chart separately and prior to the installation
+  # of this chart.
+  crds:
+    create: false
   admissionWebhooks:
     certManager:
       # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
