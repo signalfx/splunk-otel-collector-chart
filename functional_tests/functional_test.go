@@ -172,41 +172,6 @@ func deployChartsAndApps(t *testing.T) {
 		}
 	}
 
-	// deploy the operator CRDs
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "operator_crds.yaml"))
-	require.NoError(t, err)
-
-	for _, resourceYAML := range strings.Split(string(stream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err := decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed CRD %s", crd.Name)
-			for _, version := range crd.Spec.Versions {
-				sch.AddKnownTypeWithName(
-					schema.GroupVersionKind{
-						Group:   crd.Spec.Group,
-						Version: version.Name,
-						Kind:    crd.Spec.Names.Kind,
-					},
-					&unstructured.Unstructured{},
-				)
-			}
-		}
-	}
-
 	codecs := serializer.NewCodecFactory(sch)
 	crdDecode := codecs.UniversalDeserializer().Decode
 	// Prometheus pod monitor
@@ -514,29 +479,6 @@ func teardown(t *testing.T) {
 	}
 
 	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err := decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(context.Background(), crd.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-		}
-	}
-
-	crdstream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "operator_crds.yaml"))
 	require.NoError(t, err)
 	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
 		if len(resourceYAML) == 0 {
