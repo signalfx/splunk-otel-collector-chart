@@ -1174,6 +1174,11 @@ service:
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
+# Should the CRDs be installed by a chart's crd/ directory or by using templates.
+operatorcrds:
+  # Should the CRDs be installed
+  install: false
+
 operator:
   enabled: false
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
@@ -1199,11 +1204,6 @@ operator:
   manager:
     collectorImage:
       repository: quay.io/signalfx/splunk-otel-collector
-
-# Should the CRDs be installed by a chart's crd/ directory or by using templates.
-operatorcrds:
-  # Should the CRDs be installed
-  install: true
 
 # The default Splunk Instrumentation object deployed when operator.enabled=true.
 # For more details see:

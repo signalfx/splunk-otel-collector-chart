@@ -28,9 +28,8 @@ dependencies:
     repository: https://charts.jetstack.io
     condition: certmanager.enabled
   - name: opentelemetry-operator-crds
-    version: "0.0.0"
+    version: "0.0.1"
     alias: operatorcrds
-    # TODO: See if we can improve this conditional more
     condition: operatorcrds.install
   - name: opentelemetry-operator
     version: 0.71.2
