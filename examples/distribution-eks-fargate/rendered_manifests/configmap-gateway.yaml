@@ -207,6 +207,7 @@ data:
         traces:
           exporters:
           - otlphttp
+          - signalfx
           processors:
           - memory_limiter
           - k8sattributes
