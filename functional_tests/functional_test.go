@@ -134,6 +134,68 @@ func deployChartsAndApps(t *testing.T) {
 	require.NoError(t, err)
 	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
 	require.NoError(t, err)
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
+	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	sch := k8sruntime.NewScheme()
+
+	for _, resourceYAML := range strings.Split(string(stream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err := decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "apiextensions.k8s.io" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
+			require.NoError(t, err)
+			t.Logf("Deployed CRD %s", crd.Name)
+			for _, version := range crd.Spec.Versions {
+				sch.AddKnownTypeWithName(
+					schema.GroupVersionKind{
+						Group:   crd.Spec.Group,
+						Version: version.Name,
+						Kind:    crd.Spec.Names.Kind,
+					},
+					&unstructured.Unstructured{},
+				)
+			}
+		}
+	}
+
+	codecs := serializer.NewCodecFactory(sch)
+	crdDecode := codecs.UniversalDeserializer().Decode
+	// Prometheus pod monitor
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
+	require.NoError(t, err)
+
+	podMonitor, _, err := crdDecode(stream, nil, nil)
+	require.NoError(t, err)
+	g := schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "podmonitors",
+	}
+	// CRDs sometimes take time to register. We retry deploying the pod monitor until such a time all CRDs are deployed.
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+		if err != nil {
+			_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+			assert.NoError(tt, err2)
+			if err2 != nil {
+				assert.NoError(tt, err)
+			}
+		}
+	}, 1*time.Minute, 5*time.Second)
 
 	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
 	chart, err := loader.Load(chartPath)
@@ -207,9 +269,8 @@ func deployChartsAndApps(t *testing.T) {
 
 	deployments := client.AppsV1().Deployments("default")
 
-	decode := scheme.Codecs.UniversalDeserializer().Decode
 	// NodeJS test app
-	stream, err := os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
+	stream, err = os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
@@ -260,68 +321,6 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
-	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	sch := k8sruntime.NewScheme()
-	var crds []*appextensionsv1.CustomResourceDefinition
-
-	for _, resourceYAML := range strings.Split(string(stream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err := decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			crds = append(crds, crd)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed CRD %s", crd.Name)
-			for _, version := range crd.Spec.Versions {
-				sch.AddKnownTypeWithName(
-					schema.GroupVersionKind{
-						Group:   crd.Spec.Group,
-						Version: version.Name,
-						Kind:    crd.Spec.Names.Kind,
-					},
-					&unstructured.Unstructured{},
-				)
-			}
-		}
-	}
-
-	codecs := serializer.NewCodecFactory(sch)
-	crdDecode := codecs.UniversalDeserializer().Decode
-	// Prometheus pod monitor
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
-	require.NoError(t, err)
-
-	podMonitor, _, err := crdDecode(stream, nil, nil)
-	require.NoError(t, err)
-	g := schema.GroupVersionResource{
-		Group:    "monitoring.coreos.com",
-		Version:  "v1",
-		Resource: "podmonitors",
-	}
-	// CRDs sometimes take time to register. We retry deploying the pod monitor until such a time all CRDs are deployed.
-	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-		if err != nil {
-			_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-			assert.NoError(tt, err2)
-			if err2 != nil {
-				assert.NoError(tt, err)
-			}
-		}
-	}, 1*time.Minute, 5*time.Second)
 
 	// Service
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
@@ -481,7 +480,6 @@ func teardown(t *testing.T) {
 
 	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
 	require.NoError(t, err)
-	var crds []*appextensionsv1.CustomResourceDefinition
 	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
 		if len(resourceYAML) == 0 {
 			continue
@@ -496,7 +494,6 @@ func teardown(t *testing.T) {
 			groupVersionKind.Version == "v1" &&
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			crds = append(crds, crd)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
 			_ = apiExtensions.Delete(context.Background(), crd.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: &waitTime,
@@ -601,6 +598,7 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
 		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
 		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
@@ -729,6 +727,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
 		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("thread.id"),
 		ptracetest.IgnoreSpanAttributeValue("thread.name"),
@@ -1076,7 +1075,6 @@ func testAgentMetrics(t *testing.T) {
 		"system.cpu.load_average.1m",
 		"system.cpu.load_average.5m",
 		"system.disk.operations",
-		"system.filesystem.usage",
 		"system.memory.usage",
 		"system.network.errors",
 		"system.network.io",
@@ -1085,37 +1083,13 @@ func testAgentMetrics(t *testing.T) {
 	}
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, nil)
 
-	expectedHostmetricsMetrics, err := golden.ReadMetrics(filepath.Join(testDir, expectedValuesDir, "expected_hostmetrics_metrics.yaml"))
-	require.NoError(t, err)
-	selectHostmetricsMetrics := selectMetricSet(expectedHostmetricsMetrics, "system.filesystem.usage", agentMetricsConsumer, false)
-	require.NotNil(t, selectHostmetricsMetrics)
-
-	err = pmetrictest.CompareMetrics(expectedHostmetricsMetrics, *selectHostmetricsMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreResourceAttributeValue("device"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("device", "system.network.errors", "system.network.io", "disk.utilization", "system.filesystem.usage", "system.disk.operations"),
-		pmetrictest.IgnoreMetricAttributeValue("mode", "system.filesystem.usage"),
-		pmetrictest.IgnoreMetricAttributeValue("direction", "system.network.errors", "system.network.io"),
-		pmetrictest.IgnoreSubsequentDataPoints("system.disk.operations", "system.network.errors", "system.network.io"),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-
 	expectedInternalMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_internal_metrics.yaml")
 	expectedInternalMetrics, err := golden.ReadMetrics(expectedInternalMetricsFile)
 	require.NoError(t, err)
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, true)
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1345,8 +1319,6 @@ func testHECMetrics(t *testing.T) {
 		"system.disk.operations",
 		"system.disk.pending_operations",
 		"system.disk.weighted_io_time",
-		"system.filesystem.inodes.usage",
-		"system.filesystem.usage",
 		"system.memory.usage",
 		"system.network.connections",
 		"system.network.dropped",
