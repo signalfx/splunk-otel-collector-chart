@@ -535,16 +535,18 @@ func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string,
 		l := logs[i]
 		for j := 0; j < l.ResourceLogs().Len(); j++ {
 			rl := l.ResourceLogs().At(j)
-			sl := rl.ScopeLogs().At(j)
-			for k := 0; k < sl.LogRecords().Len(); k++ {
-				tmpAttribute, ok := sl.LogRecords().At(k).Attributes().Get(attributeName)
-				if ok {
-					if !contains(resourceAttributes, tmpAttribute.AsString()) {
-						resourceAttributes = append(resourceAttributes, tmpAttribute.AsString())
+			for k := 0; k < rl.ScopeLogs().Len(); k++ {
+				sl := rl.ScopeLogs().At(k)
+				for m := 0; m < sl.LogRecords().Len(); m++ {
+					tmpAttribute, ok := sl.LogRecords().At(m).Attributes().Get(attributeName)
+					if ok {
+						if !contains(resourceAttributes, tmpAttribute.AsString()) {
+							resourceAttributes = append(resourceAttributes, tmpAttribute.AsString())
+						}
+					} else {
+						fmt.Println("== Resource Attribute not found: ", attributeName)
+						notFoundCounter++
 					}
-				} else {
-					fmt.Println("== Resource Attribute not found: ", attributeName)
-					notFoundCounter++
 				}
 			}
 		}
