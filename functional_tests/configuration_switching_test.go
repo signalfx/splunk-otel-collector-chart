@@ -530,6 +530,7 @@ func contains(list []string, newValue string) bool {
 func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string, int) {
 	var resourceAttributes []string
 	var notFoundCounter int = 0
+	var foundCounter int = 0
 
 	for i := 0; i < len(logs); i++ {
 		l := logs[i]
@@ -543,14 +544,17 @@ func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string,
 						if !contains(resourceAttributes, tmpAttribute.AsString()) {
 							resourceAttributes = append(resourceAttributes, tmpAttribute.AsString())
 						}
+						foundCounter++
 					} else {
 						fmt.Println("== Resource Attribute not found: ", attributeName)
+						fmt.Printf("Log Record Body: %v\n", sl.LogRecords().At(m).Body().AsRaw())
 						notFoundCounter++
 					}
 				}
 			}
 		}
 	}
+	fmt.Printf("Counters: Found: %d | Not Found: %d\n", foundCounter, notFoundCounter)
 	return resourceAttributes, notFoundCounter
 }
 
@@ -563,7 +567,7 @@ func getMetricsResourceAttribute(metrics []pmetric.Metrics, attributeName string
 		// agent metrics
 		"system.", "k8s.node.",
 		// cluster receiver metrics
-		"k8s.deployment.", "k8s.namespace.", "k8s.replicaset.", "k8s.daemonset.", "k8s.node.",
+		"k8s.deployment.", "k8s.namespace.", "k8s.replicaset.", "k8s.daemonset.",
 	}
 
 	for i := 0; i < len(metrics); i++ {
@@ -601,7 +605,7 @@ func getMetricsResourceAttribute(metrics []pmetric.Metrics, attributeName string
 			}
 		}
 	}
-	fmt.Printf("Counters: Found: %d, Skipped: %d, not Found: %d\n", foundCounter, skippedCounter, notFoundCounter)
+	fmt.Printf("Counters: Found: %d | Skipped: %d | Not Found: %d\n", foundCounter, skippedCounter, notFoundCounter)
 	return resourceAttributes, notFoundCounter
 }
 
