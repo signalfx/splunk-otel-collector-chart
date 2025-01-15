@@ -180,7 +180,7 @@ func Test_Functions(t *testing.T) {
 	t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
 	t.Run("logs and metrics index switch", testIndexSwitch)
 	t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
-	t.Run("resource attributes verification", testVerifyResourceAttributes)
+	t.Run("logs and metrics attributes verification", testVerifyLogsAndMetricsAttributes)
 
 }
 
@@ -348,7 +348,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	resetLogsSink(t, logsObjectsConsumer)
 }
 
-func testVerifyResourceAttributes(t *testing.T) {
+func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	attributesList := [4]string{"k8s.node.name", "k8s.pod.name", "k8s.pod.uid", "k8s.namespace.name"}
 
 	hostEp := hostEndpoint(t)
@@ -356,7 +356,7 @@ func testVerifyResourceAttributes(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 
-	t.Run("verify cluster receiver resource attributes", func(t *testing.T) {
+	t.Run("verify cluster receiver attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort)
@@ -371,15 +371,15 @@ func testVerifyResourceAttributes(t *testing.T) {
 		t.Logf("===> >>>> Logs: %v", len(logsObjectsConsumer.AllLogs()))
 
 		for _, attr := range attributesList {
-			t.Log("Checking resourceAttribute: ", attr)
-			resourceAttrValues, notFoundCounter := getLogsResourceAttribute(logsObjectsConsumer.AllLogs(), attr)
-			assert.True(t, len(resourceAttrValues) >= 1)
+			t.Log("Checking attribute: ", attr)
+			attrValues, notFoundCounter := getLogsAttributes(logsObjectsConsumer.AllLogs(), attr)
+			assert.True(t, len(attrValues) >= 1)
 			assert.Equal(t, 0, notFoundCounter)
-			t.Logf("Resource Attributes: %v", resourceAttrValues)
+			t.Logf("Attributes: %v", attrValues)
 		}
 	})
 
-	t.Run("verify cluster receiver metrics resource attributes", func(t *testing.T) {
+	t.Run("verify cluster receiver metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort)
@@ -390,19 +390,19 @@ func testVerifyResourceAttributes(t *testing.T) {
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 		resetMetricsSink(t, hecMetricsConsumer)
-		t.Logf("===> >>>> Metrics: %v", len(hecMetricsConsumer.AllMetrics()))
+		t.Logf("===> >>>> Metrics: %d", len(hecMetricsConsumer.AllMetrics()))
 
 		waitForMetrics(t, 5, hecMetricsConsumer)
 		for _, attr := range attributesList {
-			t.Log("Checking resourceAttribute: ", attr)
-			resourceAttrValues, notFoundCounter := getMetricsResourceAttribute(hecMetricsConsumer.AllMetrics(), attr)
-			assert.True(t, len(resourceAttrValues) >= 1)
+			t.Log("Checking attributes: ", attr)
+			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)
+			assert.True(t, len(attrValues) >= 1)
 			assert.Equal(t, 0, notFoundCounter)
-			t.Logf("Resource Attributes for %s: %v", attr, resourceAttrValues)
+			t.Logf("Resource Attributes for %s: %v", attr, attrValues)
 		}
 	})
 
-	t.Run("verify agent logs resource attributes", func(t *testing.T) {
+	t.Run("verify agent logs attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
 		agentLogsConsumer := setupOnce(t).logsConsumer
 
@@ -415,15 +415,15 @@ func testVerifyResourceAttributes(t *testing.T) {
 
 		waitForLogs(t, 5, agentLogsConsumer)
 		for _, attr := range attributesList {
-			t.Log("Checking resourceAttribute: ", attr)
-			resourceAttrValues, notFoundCounter := getLogsResourceAttribute(agentLogsConsumer.AllLogs(), attr)
-			assert.True(t, len(resourceAttrValues) >= 1)
+			t.Log("Checking attribute: ", attr)
+			attrValues, notFoundCounter := getLogsAttributes(agentLogsConsumer.AllLogs(), attr)
+			assert.True(t, len(attrValues) >= 1)
 			assert.Equal(t, 0, notFoundCounter)
-			t.Logf("Resource Attributes: %v", resourceAttrValues)
+			t.Logf("Attributes: %v", attrValues)
 		}
 	})
 
-	t.Run("verify metrics resource attributes", func(t *testing.T) {
+	t.Run("verify metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
 		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
 
@@ -436,11 +436,11 @@ func testVerifyResourceAttributes(t *testing.T) {
 
 		waitForMetrics(t, 5, hecMetricsConsumer)
 		for _, attr := range attributesList {
-			t.Log("Checking resourceAttribute: ", attr)
-			resourceAttrValues, notFoundCounter := getMetricsResourceAttribute(hecMetricsConsumer.AllMetrics(), attr)
-			assert.True(t, len(resourceAttrValues) >= 1)
+			t.Log("Checking attribute: ", attr)
+			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)
+			assert.True(t, len(attrValues) >= 1)
 			assert.Equal(t, 0, notFoundCounter)
-			t.Logf("Resource Attributes for %s: %v", attr, resourceAttrValues)
+			t.Logf("Attributes for %s: %v", attr, attrValues)
 		}
 	})
 }
@@ -527,8 +527,8 @@ func contains(list []string, newValue string) bool {
 	return false
 }
 
-func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string, int) {
-	var resourceAttributes []string
+func getLogsAttributes(logs []plog.Logs, attributeName string) ([]string, int) {
+	var attributes []string
 	var notFoundCounter int = 0
 	var foundCounter int = 0
 
@@ -541,12 +541,12 @@ func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string,
 				for m := 0; m < sl.LogRecords().Len(); m++ {
 					tmpAttribute, ok := sl.LogRecords().At(m).Attributes().Get(attributeName)
 					if ok {
-						if !contains(resourceAttributes, tmpAttribute.AsString()) {
-							resourceAttributes = append(resourceAttributes, tmpAttribute.AsString())
+						if !contains(attributes, tmpAttribute.AsString()) {
+							attributes = append(attributes, tmpAttribute.AsString())
 						}
 						foundCounter++
 					} else {
-						fmt.Println("== Resource Attribute not found: ", attributeName)
+						fmt.Println("=== Attribute not found: ", attributeName)
 						fmt.Printf("Log Record Body: %v\n", sl.LogRecords().At(m).Body().AsRaw())
 						notFoundCounter++
 					}
@@ -555,10 +555,10 @@ func getLogsResourceAttribute(logs []plog.Logs, attributeName string) ([]string,
 		}
 	}
 	fmt.Printf("Counters: Found: %d | Not Found: %d\n", foundCounter, notFoundCounter)
-	return resourceAttributes, notFoundCounter
+	return attributes, notFoundCounter
 }
 
-func getMetricsResourceAttribute(metrics []pmetric.Metrics, attributeName string) ([]string, int) {
+func getMetricsAttributes(metrics []pmetric.Metrics, attributeName string) ([]string, int) {
 	var resourceAttributes []string
 	var notFoundCounter int = 0
 	var foundCounter int = 0
