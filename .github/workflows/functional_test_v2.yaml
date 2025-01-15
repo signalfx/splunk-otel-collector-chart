@@ -237,22 +237,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout main if in a PR
-        if: github.event_name == 'pull_request'
+      - name: Checkout old release
         uses: actions/checkout@v4
         with:
           path: base
-          ref: main
-      - name: Checkout previous main commit if in main
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: HEAD
-          fetch-depth: 2
-      - name: Checkout fixed previous release v0.109.0
-        if: github.event_name != 'pull_request'
-        run: cd base && git checkout splunk-otel-collector-0.109.0
+          ref: splunk-otel-collector-0.109.0
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version: ~1.21.8
@@ -283,7 +273,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set certmanager.enabled=true --set environment=dev
       - name: Update dependencies
         run: |
           make dep-update
