@@ -273,7 +273,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set certmanager.enabled=true --set environment=dev
+          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set environment=dev
       - name: Update dependencies
         run: |
           make dep-update
