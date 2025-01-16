@@ -755,3 +755,92 @@ jobs:
       - name: check crds are installed
         run: |
           kubectl get crds | grep 'opentelemetry.io'
+
+  kubernetes-test-upgrade-by-enabling-subchart-with-install:
+    name: Test helm upgrade in kind by explicitly enabling subchart with crds
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout old release
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: splunk-otel-collector-0.113.0
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.22.5
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          node_image: kindest/node:v1.30.0
+          kubectl_version: v1.30.0
+          cluster_name: kind
+          config: ./.github/workflows/configs/kind-config.yaml
+      - name: Fix kubelet TLS server certificates
+        run: |
+          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+      - name: Update dependencies
+        run: |
+          cd base && make dep-update
+      - name: Deploy cert-manager
+        run: |
+          cd base && make cert-manager
+      - name: install helm chart with operator enabled
+        run: |
+          cd base && helm install sock helm-charts/splunk-otel-collector --debug \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set operator.enabled=true --set environment=dev --set clusterName=dev
+        continue-on-error: true
+      - name: check crds are installed
+        run: |
+          kubectl get crds | grep 'opentelemetry.io'
+
+          echo "get instrumentations - none if install failed"
+          kubectl get instrumentations.opentelemetry.io -A
+      - name: check operator
+        run: |
+          kubectl describe po -lapp.kubernetes.io/name=operator
+          kubectl get po -lapp.kubernetes.io/name=operator -o=name | xargs -n 1 kubectl wait --for=condition=Ready --timeout=2m
+          kubectl describe po -lapp.kubernetes.io/name=operator
+        continue-on-error: true
+      - name: upgrade old again
+        run: |
+          cd base && helm upgrade sock helm-charts/splunk-otel-collector --debug \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set operator.enabled=true --set environment=dev --set clusterName=dev
+        continue-on-error: true
+      - name: check helm release status
+        run: |
+          helm status sock
+      - name: check instrumentations installed
+        run: |
+          kubectl describe instrumentations.opentelemetry.io -A
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: try to import instrumentation in helm
+        run: |
+          NAMESPACE=default
+          RELEASE_NAME=sock
+          kubectl get -n $NAMESPACE instrumentations.opentelemetry.io -o name | xargs -I % kubectl annotate -n $NAMESPACE % meta.helm.sh/release-name=$RELEASE_NAME
+          kubectl get -n $NAMESPACE instrumentations.opentelemetry.io -o name | xargs -I % kubectl annotate -n $NAMESPACE % meta.helm.sh/release-namespace=$NAMESPACE
+      - name: upgrade helm chart with install flag
+        run: |
+          helm upgrade --install sock helm-charts/splunk-otel-collector --debug \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set operator.enabled=true --set operatorcrds.install=true --set environment=dev --set clusterName=dev
+      - name: check crds are installed
+        run: |
+          kubectl get crds | grep 'opentelemetry.io'
