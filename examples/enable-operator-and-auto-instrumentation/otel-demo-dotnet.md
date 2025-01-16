@@ -24,7 +24,7 @@ curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main
 #### 2.1 Deploy the Helm Chart with the Operator enabled
 
 To install the chart with operator in an existing cluster, make sure you have cert-manager installed and available.
-Both the cert-manager and operator are subcharts of this chart and can be enabled with `--set certmanager.enabled=true,operator.enabled=true`.
+Both the cert-manager and operator are subcharts of this chart and can be enabled with `--set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true`.
 These helm install commands will deploy the chart to the current namespace for this example.
 
 ```bash
@@ -32,7 +32,7 @@ These helm install commands will deploy the chart to the current namespace for t
 kubectl get pods -l app=cert-manager --all-namespaces
 
 # If cert-manager is deployed, make sure to remove certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 #### 2.2 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully

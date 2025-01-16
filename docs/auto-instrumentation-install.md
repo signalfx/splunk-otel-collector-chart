@@ -26,6 +26,8 @@ these frameworks often have pre-built instrumentation capabilities already avail
 ### 1. Deploy the Helm Chart with the Operator enabled
 
 - **Operator Deployment (Required)**
+  - `operatorcrds.install`: Set to `true` to install the CRDs required by the operator.
+    - **Required**: Must be set unless CRDs are pre-installed manually.
   - `operator.enabled`: Set to `true` to enable deploying the operator.
     - **Required**: This configuration is necessary for the operator's deployment within your cluster.
 
@@ -70,7 +72,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
 kubectl get pods -l app=cert-manager --all-namespaces
 
 # If cert-manager is not deployed, make sure to add certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
@@ -284,6 +286,11 @@ in a Kubernetes environment. An operator is a method of packaging, deploying, an
 In the context of setting up observability in a Kubernetes environment, an operator simplifies the management of
 application auto-instrumentation, making it easier to gain valuable insights into application performance.
 
+The OpenTelemetry operator relies on
+[Custom Resource Definitions (CRDs)](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)
+to manage auto-instrumentation configurations in Kubernetes.
+Ensure the required CRDs are deployed before the operator (by configuring `operatorcrds.install=true`).
+
 With this Splunk OTel Collector chart, the
 [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection)
 can be deployed (by configuring `operator.enabled=true`) to your cluster and start auto-instrumenting your applications.
@@ -402,6 +409,40 @@ provides best effort support with issues related to native OpenTelemetry instrum
 | python                  | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-java-instrumentation)         | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java         |
 | apache-httpd            | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
 | nginx                   | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
+
+### CRD Management
+
+When deploying the operator, the required Custom Resource Definitions (CRDs) must be deployed beforehand.
+
+#### Recommended Approach: Automated CRD Deployment
+
+Set the Helm chart value `operatorcrds.install=true` to allow the chart to handle CRD deployment automatically.
+_This option deploys the CRDs using a local subchart, available at https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds._
+
+#### Alternative Approach: Manual CRD Deployment
+
+If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
+
+```bash
+curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
+```
+
+#### CRD Updates
+
+With Helm v3.0 and later, CRDs created by this chart are not updated automatically. To update CRDs, you must apply the updated CRD definitions manually.
+Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/) for more details.
+
+#### CRD Cleanup
+
+When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following commands:
+
+```bash
+kubectl delete crd opentelemetrycollectors.opentelemetry.io
+kubectl delete crd opampbridges.opentelemetry.io
+kubectl delete crd instrumentations.opentelemetry.io
+```
 
 ### Documentation Resources
 
