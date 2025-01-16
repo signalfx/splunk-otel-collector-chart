@@ -876,11 +876,11 @@ jobs:
       - name: Deploy cert-manager
         run: |
           make cert-manager
-      - name: helm install with operator enabled and no crds
+      - name: helm install with operator and crd subchart enabled
         run: |
           helm install sock helm-charts/splunk-otel-collector --debug \
           --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
-          --set operator.enabled=true --set environment=dev --set clusterName=dev
+          --set operator.enabled=true --set operatorcrds.install=true --set environment=dev --set clusterName=dev
         continue-on-error: true
       - name: check crds are installed
         run: |
@@ -1029,7 +1029,7 @@ jobs:
           kubectl get -n $NAMESPACE instrumentations.opentelemetry.io -o name | xargs -I % kubectl annotate -n $NAMESPACE % meta.helm.sh/release-namespace=$NAMESPACE
       - name: upgrade helm chart
         run: |
-          helm upgrade --install sock helm-charts/splunk-otel-collector --debug \
+          helm upgrade sock helm-charts/splunk-otel-collector --debug \
           --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
           --set operator.enabled=true --set operatorcrds.install=true --set environment=dev --set clusterName=dev
       - name: check crds are still installed
