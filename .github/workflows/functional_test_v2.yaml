@@ -1035,3 +1035,7 @@ jobs:
       - name: check crds are still installed
         run: |
           kubectl get crds -Lapp.kubernetes.io/managed-by | grep 'opentelemetry.io'
+      - name: check instrumentations still installed
+        run: |
+          kubectl get instrumentations.opentelemetry.io -A
+          kubectl get instrumentations.opentelemetry.io -o=json | jq -r '.items[] | .metadata.name, .metadata.annotations'
