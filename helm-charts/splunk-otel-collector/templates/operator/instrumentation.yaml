@@ -13,6 +13,11 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-operator
+{{- if .Values.operator.crds.create }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+{{- end }}
 spec:
   exporter:
     endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . }}
