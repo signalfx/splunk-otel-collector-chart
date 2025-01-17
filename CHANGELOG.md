@@ -15,7 +15,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   - Previously, CRDs were installed using templates (`operator.crds.create=true`), which could cause race conditions and installation failures.
   - CRD installation is now handled via Helm's native `crds/` directory for better stability, using a [localized subchart](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds).
   - If you use `operator.enabled=true` you may have to follow some migration steps, please see the [Upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0113-to-0116).
-  
 
 ### 💡 Enhancements 💡
 
