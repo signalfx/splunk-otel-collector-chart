@@ -42,7 +42,7 @@ jobs:
       - name: Check operator becomes ready
         run: |
           kubectl get po -lapp.kubernetes.io/name=operator -o=name | xargs -n 1 kubectl wait --for=condition=Ready --timeout=2m
-          kubectl get po -lapp.kubernetes.io/name=operator
+          kubectl get po -lapp.kubernetes.io/name=operator | grep "operator"
       - name: check instrumentation
         run: |
           kubectl get instrumentations.opentelemetry.io | grep "splunk-otel-collector"
