@@ -22,6 +22,7 @@ operatorcrds:
   install: true
 operator:
   enabled: true
+```
 
 To install the chart:
 
@@ -36,11 +37,13 @@ If you're using chart versions 0.110.0 to 1.113.0, CRDs are likely deployed via 
 #### Step 1: Delete the Existing Chart
 
 Remove the chart to prepare for a fresh installation:
+
 ```bash
 helm delete <release-name>
 ```
 
 #### Step 2: Verify or Remove Existing CRDs
+
 Check if the following CRDs are present and delete them if necessary:
 
 ```bash
@@ -54,6 +57,7 @@ kubectl delete crd instrumentations.opentelemetry.io
 ```
 
 #### Step 3: Reinstall with Recommended Values
+
 Reinstall the chart with the updated configuration:
 ```bash
 helm install <release-name> splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
@@ -69,6 +73,7 @@ operator:
 operator:
   crds:
     create: true
+```
 
 **Warning**: This method may cause race conditions during installation or upgrades, leading to errors like:
 ```plaintext
