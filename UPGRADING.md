@@ -7,6 +7,7 @@ Chart version 0.116.0 introduces a localized subchart for installing CustomResou
 Existing installations of the Splunk OpenTelemetry Collector chart that are being upgraded from versions prior to 0.116.0 and have the operator enabled (`operator.enabled=true`), can keep the operator related CRDs installed by explicitly setting the option `operator.crds.create` to `true`.
 
 Example custom values yaml to keep the operator related CRDs installed:
+
 ```yaml
 operator:
   enabled: true
@@ -16,8 +17,8 @@ operator:
 ```
 
 Example helm upgrade command:
-```bash
 
+```bash
 helm upgrade my-splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 --values custom-values.yaml \
 --set operator.crds.create=true
