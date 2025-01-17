@@ -15,6 +15,14 @@ operator:
       ...
 ```
 
+Example helm upgrade command:
+```bash
+
+helm upgrade my-splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
+--values custom-values.yaml \
+--set operator.crds.create=true
+```
+
 ## 0.105.5 to 0.108.0
 
 We've simplified the Helm chart configuration for `operator` auto-instrumentation.
