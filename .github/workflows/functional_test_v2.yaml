@@ -494,6 +494,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: common setup for kind and cert-manager
         uses: ./.github/workflows/common_steps.yaml@setup-kind
       - name: helm install with operator and CRD subchart enabled
@@ -513,6 +514,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: common setup for kind and cert-manager
         uses: ./.github/workflows/common_steps.yaml@setup-kind
       - name: install CRDs from Helm template with kubectl
