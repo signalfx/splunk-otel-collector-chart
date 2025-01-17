@@ -428,7 +428,13 @@ curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator
 curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
 curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
+You can also use below helm template command to get the CRD yamls from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
 
+```bash
+helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
+--set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster,operatorcrds.install=true" \
+| yq e '. | select(.kind == "CustomResourceDefinition")' \
+| kubectl apply -f -
 #### CRD Updates
 
 With Helm v3.0 and later, CRDs created by this chart are not updated automatically. To update CRDs, you must apply the updated CRD definitions manually.
