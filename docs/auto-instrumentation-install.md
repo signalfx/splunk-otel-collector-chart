@@ -425,9 +425,9 @@ _Please note, helm will not update or delete these CRDs after initial install as
 If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
-curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
-curl -sL https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/config/crd/bases/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
 
 You can also use below helm template command to get the CRD yamls from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
