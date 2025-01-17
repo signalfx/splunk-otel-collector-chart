@@ -1,12 +1,16 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: bug_fix
+change_type: breaking
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: operator
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: Move operator CRD installation to the crds/ folder via a subchart to resolve Helm install ordering issues
 # One or more tracking issues related to the change
-issues: [1561]
+issues: [1561,1619]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: |
+  - Users enabling the operator (`.Values.operator.enabled=true`) must now set `operatorcrds.install=true` in Helm values or [manually manage CRD installation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management).
+  - Previously, CRDs were installed using templates (`operator.crds.create=true`), which could cause race conditions and installation failures.
+  - CRD installation is now handled via Helm's native `crds/` directory for better stability, using a [localized subchart](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds).
+  - If you use `operator.enabled=true` you may have to follow some migration steps, please see the [Upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0113-to-0116).

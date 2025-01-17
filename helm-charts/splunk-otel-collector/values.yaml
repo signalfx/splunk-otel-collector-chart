@@ -1174,9 +1174,10 @@ service:
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
-# Should the CRDs be installed by a chart's crd/ directory or by using templates.
+# Specify whether the chart should install CRDs automatically.
+# Related Documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management
 operatorcrds:
-  # Should the CRDs be installed
+  # Set to true to install CRDs automatically, or false to manage them manually.
   install: false
 
 operator:
