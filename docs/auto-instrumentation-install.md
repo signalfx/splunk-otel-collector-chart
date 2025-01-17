@@ -289,7 +289,7 @@ application auto-instrumentation, making it easier to gain valuable insights int
 The OpenTelemetry operator relies on
 [Custom Resource Definitions (CRDs)](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)
 to manage auto-instrumentation configurations in Kubernetes.
-Ensure the required CRDs are deployed before the operator (by configuring `operatorcrds.install=true`).
+Ensure the required CRDs are deployed before the operator by configuring `operatorcrds.install=true`.
 
 With this Splunk OTel Collector chart, the
 [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection)
