@@ -418,6 +418,7 @@ When deploying the operator, the required Custom Resource Definitions (CRDs) mus
 
 Set the Helm chart value `operatorcrds.install=true` to allow the chart to handle CRD installation automatically.
 _This option deploys the CRDs using a local subchart, available at [opentelemetry-operator-crds](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)._
+_Please note, helm will not update or delete these CRDs after initial install as noted in their [documentation](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#some-caveats-and-explanations)._
 
 #### Alternative Approach: Manual CRD Deployment
 
