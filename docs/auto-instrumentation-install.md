@@ -449,7 +449,13 @@ kubectl delete crd opentelemetrycollectors.opentelemetry.io
 kubectl delete crd opampbridges.opentelemetry.io
 kubectl delete crd instrumentations.opentelemetry.io
 ```
+You can use below combination of helm and kubectl command to delete CRDs.
 
+```bash
+helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
+--set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster,operatorcrds.install=true" \
+| yq e '. | select(.kind == "CustomResourceDefinition")' \
+| kubectl delete --dry-run=client -f -
 ### Documentation Resources
 
 - https://developers.redhat.com/devnation/tech-talks/using-opentelemetry-on-kubernetes
