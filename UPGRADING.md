@@ -18,9 +18,10 @@ CRD deployment has evolved over chart versions:
 New users are advised to deploy CRDs via the `crds/` directory. For a fresh installation, use the following Helm values:
 
 ```yaml
-operatorcrds.install: true
-operator.enabled: true
-```
+operatorcrds:
+  install: true
+operator:
+  enabled: true
 
 To install the chart:
 
