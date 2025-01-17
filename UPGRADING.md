@@ -64,9 +64,11 @@ helm install <release-name> splunk-otel-collector --set operatorcrds.install=tru
 If you're using chart versions 0.110.0 to 1.113.0 and prefer to continue deploying CRDs via Helm templates (not recommended), you can do so with the following values:
 
 ```yaml
-operator.enabled: true
-operator.crds.create: true
-```
+operator:
+  enabled: true
+operator:
+  crds:
+    create: true
 
 **Warning**: This method may cause race conditions during installation or upgrades, leading to errors like:
 ```plaintext
