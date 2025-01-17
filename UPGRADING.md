@@ -1,35 +1,76 @@
 # Upgrade guidelines
 
-## 0.105.5 to 0.108.0
+## 0.113.0 to 0.116.0
 
-We've simplified the Helm chart configuration for `operator` auto-instrumentation.
-The values previously under `.Values.operator.instrumentation.spec.*` have been moved to `.Values.instrumentation.*`.
+This guide provides steps for new users, transitioning users, and those maintaining previous operator CRD configurations:
+- New users: No migration for CRDs is required.
+- Previous users: Migration may be needed if using `operator.enabled=true`.
 
-- **No Action Needed**: If you have no customizations under `.Values.operator.instrumentation.spec.*`, no migration is required.
-- **Action Required**: Continuing to use the old values path will result in a Helm install or upgrade error, blocking the process.
+CRD deployment has evolved over chart versions:
+- Before 0.110.0: CRDs were deployed via a crds/ directory (upstream default).
+- 0.110.0 to 1.113.0: CRDs were deployed using Helm templates  (upstream default), which had reported issues.
+- 0.116.0 and later:  Users must now explicitly configure their preferred CRD deployment method or deploy the
+  [CRDs manually](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management)
+  to avoid potential issues. Users can deploy CRDs via a crds/ directory again by enabling a newly added value.
 
-Migration Steps:
+### **New Users**
 
-1. **Find** any references to `.Values.operator.instrumentation.spec.*` in your Helm values with custom values.
-2. **Migrate** them from `.Values.operator.instrumentation.spec.*` to `.Values.instrumentation.*`.
-
-Example Migration:
-
-Before (Deprecated Path):
+New users are advised to deploy CRDs via the `crds/` directory. For a fresh installation, use the following Helm values:
 
 ```yaml
-operator:
-  instrumentation:
-    spec:
-      endpoint: XXX
-      ...
+operatorcrds.install: true
+operator.enabled: true
 ```
 
-After (Updated Path):
+To install the chart:
+
+```bash
+helm install <release-name> splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
+```
+
+### **Current Users (Recommended Migration to `crds/` Directory)**
+
+If you're using chart versions 0.110.0 to 1.113.0, CRDs are likely deployed via Helm templates. To migrate to the recommended `crds/` directory deployment:
+
+#### Step 1: Delete the Existing Chart
+
+Remove the chart to prepare for a fresh installation:
+```bash
+helm delete <release-name>
+```
+
+#### Step 2: Verify or Remove Existing CRDs
+Check if the following CRDs are present and delete them if necessary:
+
+```bash
+kubectl get crds | grep opentelemetry
+```
+
+```bash
+kubectl delete crd opentelemetrycollectors.opentelemetry.io
+kubectl delete crd opampbridges.opentelemetry.io
+kubectl delete crd instrumentations.opentelemetry.io
+```
+
+#### Step 3: Reinstall with Recommended Values
+Reinstall the chart with the updated configuration:
+```bash
+helm install <release-name> splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
+```
+
+### **Previous Users (Maintaining Legacy Helm Templates)**
+
+If you're using chart versions 0.110.0 to 1.113.0 and prefer to continue deploying CRDs via Helm templates (not recommended), you can do so with the following values:
+
 ```yaml
-instrumentation:
-  endpoint: XXX
-  ...
+operator.enabled: true
+operator.crds.create: true
+```
+
+**Warning**: This method may cause race conditions during installation or upgrades, leading to errors like:
+```plaintext
+ERROR: INSTALLATION FAILED: failed post-install: warning: Hook post-install splunk-otel-collector/templates/operator/instrumentation.yaml failed: 1 error occurred:
+* Internal error occurred: failed calling webhook "minstrumentation.kb.io": failed to call webhook: Post "https://splunk-otel-collector-operator-webhook.default.svc:443/mutate-opentelemetry-io-v1alpha1-instrumentation?timeout=10s": dial tcp X.X.X.X:443: connect: connection refused
 ```
 
 ## 0.105.3 to 0.105.4
