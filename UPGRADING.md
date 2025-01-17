@@ -1,5 +1,20 @@
 # Upgrade guidelines
 
+## 0.113.0 to 0.116.0
+
+Chart version 0.116.0 introduces a localized subchart for installing CustomResourceDefinitions (CRDs) for the OpenTelemetry Operator and by default disables the installation of CRDs from the upstream `opentelemetry-operator` chart by setting the argument `operator.crds.create` to `false`. These changes are made to ensure that new installs of the Splunk OpenTelemetry Collector chart use Helm's CRD installation mechanism, which is more reliable and less error-prone than the previous method which treated CRDs as regular Kubernetes resources causing issues with Helm not recognizing the new resource types at install time.
+
+Existing installations of the Splunk OpenTelemetry Collector chart that are being upgraded from versions prior to 0.116.0 and have the operator enabled (`operator.enabled=true`), can keep the operator related CRDs installed by explicitly setting the option `operator.crds.create` to `true`.
+
+Example custom values yaml to keep the operator related CRDs installed:
+```yaml
+operator:
+  enabled: true
+  crds:
+    create: true
+      ...
+```
+
 ## 0.105.5 to 0.108.0
 
 We've simplified the Helm chart configuration for `operator` auto-instrumentation.
