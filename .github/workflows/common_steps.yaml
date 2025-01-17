@@ -1,0 +1,48 @@
+name: Common Steps
+on: workflow_call
+
+jobs:
+  setup-kind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.22.5
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          node_image: kindest/node:v1.30.0
+          kubectl_version: v1.30.0
+          cluster_name: kind
+          config: ./.github/workflows/configs/kind-config.yaml
+      - name: Fix kubelet TLS server certificates
+        run: |
+          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: Deploy cert-manager
+        run: |
+          make cert-manager
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check operator becomes ready
+        run: |
+          kubectl get po -lapp.kubernetes.io/name=operator -o=name | xargs -n 1 kubectl wait --for=condition=Ready --timeout=2m
+          kubectl get po -lapp.kubernetes.io/name=operator
+      - name: check instrumentation
+        run: |
+          kubectl get instrumentations.opentelemetry.io | grep "splunk-otel-collector"
