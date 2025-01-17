@@ -26,7 +26,7 @@ operator:
 To install the chart:
 
 ```bash
-helm install <release-name> splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
+helm install <release-name> splunk-otel-collector-chart/splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
 ```
 
 ### **Current Users (Recommended Migration to `crds/` Directory)**
