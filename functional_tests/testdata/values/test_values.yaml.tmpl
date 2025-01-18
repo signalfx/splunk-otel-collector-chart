@@ -76,9 +76,10 @@ operator:
 targetAllocator:
   enabled: true
 
-{{ if (eq .KubeTestEnv "kind") }}
-clusterName: dev-operator
-{{ else if (eq .KubeTestEnv "eks") }}
+
+{{ if (eq .KubeTestEnv "eks") }}
 cloudProvider: aws
 distribution: eks
+{{ else }}
+clusterName: dev-operator
 {{ end }}
