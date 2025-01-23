@@ -488,3 +488,49 @@ jobs:
         run: |
           cd functional_tests
           TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+
+  helm-test-new-install-w-subchart:
+    name: Test helm install in kind with subchart
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: common setup for kind and cert-manager
+        uses: ./.github/workflows/common_steps.yaml@setup-kind
+      - name: helm install with operator and CRD subchart enabled
+        run: |
+          helm install sock helm-charts/splunk-otel-collector --debug \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set environment=dev --set clusterName=dev \
+          --set operator.enabled=true --set operatorcrds.install=true
+      - name: check CRDs are installed
+        run: |
+          kubectl get crds | grep 'opentelemetry.io'
+      - name: check operator and instrumentation
+        uses: ./.github/workflows/common_steps.yaml@check-operator
+
+  helm-test-new-install-wo-subchart:
+    name: Test helm install in kind without helm managed CRDs. CRDs are installed using kubectl.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: common setup for kind and cert-manager
+        uses: ./.github/workflows/common_steps.yaml@setup-kind
+      - name: install CRDs from Helm template with kubectl
+        run: |
+          helm template helm-charts/splunk-otel-collector/ --include-crds \
+          --set=splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster \
+          --set=operatorcrds.install=true \
+          | yq e '. | select(.kind == "CustomResourceDefinition")' | kubectl apply -f -
+      - name: check CRDs are installed
+        run: |
+          kubectl get crds | grep 'opentelemetry.io'
+      - name: helm install with operator enabled and no crd subchart
+        run: |
+          helm install sock helm-charts/splunk-otel-collector --debug \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set environment=dev --set clusterName=dev \
+          --set operator.enabled=true
+      - name: check operator and instrumentation
+        uses: ./.github/workflows/common_steps.yaml@check-operator
