@@ -1,0 +1,26 @@
+---
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+  metricsEnabled: true
+  metricsIndex: myMetricsIndex
+
+agent:
+  enabled: false
+
+clusterReceiver:
+  enabled: {{ .ClusterReceiverEnabled }}
+  config:
+    exporters:
+      splunk_hec/platform_logs:
+        endpoint: {{ .LogObjectsHecEndpoint }}
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
+  k8sObjects:
+    - name: pods
+      mode: pull
+      interval: 5s
+    - name: events
+      mode: watch
+
+clusterName: dev-operator
