@@ -183,8 +183,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
-          # Temp to verify env is clean enough
-          helm delete sock
+          helm list --quiet | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
           cd base && helm upgrade sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
       - name: Update dependencies
         run: |
@@ -238,8 +237,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
-          # Temp to verify env is clean enough
-          helm delete sock
+          helm list --quiet | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
           cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set environment=dev
       - name: Update dependencies
         run: |
