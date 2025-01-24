@@ -22,8 +22,15 @@ kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.
 ## Config switches
 
 When running tests you can use the following env vars to help with local development:
-- `SKIP_SETUP`: skip setting up the chart and apps. Useful if they are already deployed.
-- `SKIP_TEARDOWN`: skip deleting the chart and apps as part of cleanup. Useful to keep around for local development.
-- `SKIP_TESTS`: skip running tests, just set up and tear down the cluster.
-- `TEARDOWN_BEFORE_SETUP`: delete all the deployments made by these tests before setting up.
-- `UPDATE_EXPECTED_RESULTS`: run golden.WriteMetrics() methods to generate new golden files for expected test results
+- `KUBECONFIG`: Path to the kubeconfig file for the test cluster.
+- `KUBE_TEST_ENV`: Set the type of cluster (e.g., `kind`, `eks`, `gce`).
+- `SKIP_SETUP`: Skip setting up the chart/apps (useful if already deployed).
+- `SKIP_TEARDOWN`: Skip cleanup (useful to keep apps for local dev).
+- `SKIP_TESTS`: Skip tests; only set up and tear down the cluster.
+- `TEARDOWN_BEFORE_SETUP`: Clean up deployments before setting up.
+- `TAGS`: Specify which tests to run (e.g., `TAGS="functional"`).
+- `UPDATE_EXPECTED_RESULTS`: Generate new golden files for test results.
+
+## Run
+
+From the root repository directory run `make functionaltest`.
