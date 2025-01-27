@@ -1,3 +1,8 @@
+{{/*Create the startupapicheck job image name.*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-job.image" -}}
+{{- printf "%s:%s" .Values.instrumentation.jobs.startupapicheck.repository .Values.instrumentation.jobs.startupapicheck.tag | trimSuffix ":" -}}
+{{- end -}}
+
 {{/*
 Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operator.
 - Checks for a valid endpoint for exporting telemetry data.
