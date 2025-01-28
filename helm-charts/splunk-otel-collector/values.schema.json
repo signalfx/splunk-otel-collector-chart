@@ -1123,6 +1123,26 @@
               ]
             }
           }
+        },
+        "validateSecret": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
         }
       }
     },

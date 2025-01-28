@@ -975,6 +975,16 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
+  # Image to be used by init container to validate the secret presence ahead of starting the collector.
+  # Effective only if `secret.create` is set to false and `secret.validateSecret` is set to true (default).
+  validateSecret:
+    # The registry and name of the Universal Base Image 9 image to pull
+    repository: registry.access.redhat.com/ubi9/ubi
+    # The tag of the Universal Base Image 9, default value is latest
+    tag: ""
+    # The policy that specifies when the user wants the Universal Base images to be pulled
+    pullPolicy: IfNotPresent
+
 
 ################################################################################
 # Extra system configuration
