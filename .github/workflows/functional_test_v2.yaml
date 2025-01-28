@@ -16,6 +16,7 @@ on:
         default: false
 
 env:
+  GO_VERSION: 1.22.10
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
@@ -48,17 +49,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.22.5
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Create kind cluster
         uses: helm/kind-action@v1.12.0
         with:
@@ -80,8 +72,7 @@ jobs:
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} TAGS=${{ matrix.test-job }} make functionaltest
       - name: Collect Kubernetes Cluster debug info on failure
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
         id: collect-debug-info
@@ -119,17 +110,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -149,8 +131,8 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
+
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
@@ -182,17 +164,8 @@ jobs:
         run: cd base && git checkout HEAD^
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -210,6 +183,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
+          helm list | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
           cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
       - name: Update dependencies
         run: |
@@ -221,8 +195,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          go test -v -tags functional
+          TAGS=functional make functionaltest
 
   eks-upgrade-from-release-test:
     name: Test helm upgrade from release in EKS - credentials needed
@@ -245,17 +218,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -273,6 +237,7 @@ jobs:
           cd base && make cert-manager
       - name: Deploy previous version of the chart
         run: |
+          helm list | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
           cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set environment=dev
       - name: Update dependencies
         run: |
@@ -284,8 +249,8 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          go test -v -tags functional
+          TAGS=functional make functionaltest
+
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: kubernetes-test
@@ -300,17 +265,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - uses: 'google-github-actions/auth@v2.1.7'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
@@ -330,8 +286,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
@@ -363,17 +318,8 @@ jobs:
         run: cd base && git checkout HEAD^
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - uses: 'google-github-actions/auth@v2.1.7'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
@@ -398,8 +344,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          go test -v -tags functional
+          TAGS=functional make functionaltest
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
@@ -415,17 +360,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Set up kubelogin for non-interactive login
         uses: azure/use-kubelogin@v1.2
         with:
@@ -446,8 +382,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
 
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
@@ -463,17 +398,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Update dependencies
         run: |
           make dep-update
@@ -486,5 +412,4 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
           KUBECONFIG: /tmp/kubeconfig
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
