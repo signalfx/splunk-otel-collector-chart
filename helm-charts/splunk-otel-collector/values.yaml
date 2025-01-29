@@ -1192,14 +1192,9 @@ operator:
   crds:
     create: false
   admissionWebhooks:
-    certManager:
-      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
-      issuerAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+    autoGenerateCert:
+      enabled: true
+      certPeriodDays: 3650
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:
@@ -1286,12 +1281,6 @@ instrumentation:
     #   - name: NGINX_ENV_VAR
     #     value: nginx_value
   # Auto-instrumentation Libraries (End)
-
-# The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
-# Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
-certmanager:
-  enabled: false
-  installCRDs: true
 
 ################################################################################
 # Target Allocator

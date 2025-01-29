@@ -1705,12 +1705,14 @@
     "certmanager": {
       "description": "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "deprecated": true
     },
     "cert-manager": {
       "description": "Configuration for cert-manager (legacy). Prefer using 'certmanager' for new installations. This field is included to support backward compatibility with older Helm versions or custom distributions. cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "deprecated": true
     },
     "targetAllocator": {
       "description": "Target Allocator configuration.",
