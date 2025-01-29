@@ -68,10 +68,6 @@ these frameworks often have pre-built instrumentation capabilities already avail
         - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml).
 
 ```bash
-# Check if cert-manager is already installed, don't deploy a second cert-manager.
-kubectl get pods -l app=cert-manager --all-namespaces
-
-# If cert-manager is not deployed, make sure to add certmanager.enabled=true to the list of values to set
 helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 

@@ -13,7 +13,9 @@
 #   ./render-examples.sh extra-values.yaml
 #   ./render-examples.sh values1.yaml values2.yaml
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+EXAMPLES_DIR="$SCRIPT_DIR/../examples"
+source "$SCRIPT_DIR/base_util.sh"
 
 render_task() {
   example_dir=$1
@@ -47,6 +49,9 @@ render_task() {
     exit 1
   fi
 
+  # Redact data that has a unique value per run such as certificate data for the operator webhook
+  redact_files "${rendered_manifests_dir}" "**webhook.yaml"
+
   # Move the chart renders
   cp -rp "${rendered_manifests_dir}/splunk-otel-collector/templates/"* "$rendered_manifests_dir"
   if [ $? -ne 0 ]; then
@@ -74,12 +79,12 @@ render_task() {
 # Collect additional values files passed as arguments
 values_files=("$@")
 
-for example_dir in $SCRIPT_DIR/*/; do
+for example_dir in $EXAMPLES_DIR/*/; do
   render_task "${example_dir}" &
 done
 wait # Let all the render tasks finish
 
-for example_dir in $SCRIPT_DIR/*/; do
+for example_dir in $EXAMPLES_DIR/*/; do
   rendered_manifests_dir="${example_dir}rendered_manifests"
   if [ ! -d "${rendered_manifests_dir}" ]; then
     echo "Examples were rendered, failure occurred"

@@ -1195,6 +1195,8 @@ operator:
     autoGenerateCert:
       enabled: true
       certPeriodDays: 3650
+    certManager:
+      enabled: false
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:

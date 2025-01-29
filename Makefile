@@ -67,7 +67,7 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 #		make render VALUES="values1.yaml values2.yaml"
 .PHONY: render
 render: dep-update ## Render the Helm chart with the examples as input. Users can also provide value overrides.
-	@examples/render-examples.sh $(VALUES) || exit 1
+	@ci_scripts/render-examples.sh $(VALUES) || exit 1
 
 ##@ Test
 # Tasks related to testing the Helm chart
