@@ -113,6 +113,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: gateway
       resource/logs:
         attributes:
         - action: upsert
@@ -201,6 +206,7 @@ data:
           - batch
           - resource/add_collector_k8s
           - resourcedetection
+          - resource/add_mode
           - resource/add_cluster_name
           receivers:
           - prometheus/collector

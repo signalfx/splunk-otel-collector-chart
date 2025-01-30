@@ -58,6 +58,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: clusterReceiver
       resource/k8s_cluster:
         attributes:
         - action: insert
@@ -137,6 +142,7 @@ data:
           - resource/add_collector_k8s
           - resourcedetection
           - resource
+          - resource/add_mode
           receivers:
           - prometheus/k8s_cluster_receiver
         metrics/eks:

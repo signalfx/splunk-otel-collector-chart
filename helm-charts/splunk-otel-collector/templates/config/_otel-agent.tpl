@@ -746,6 +746,13 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
+  resource/add_mode:
+    attributes:
+      - action: insert
+        value: "agent"
+        key: otelcol.service.mode
+
   {{- if .Values.isWindows }}
   metricstransform:
     transforms:
@@ -1050,6 +1057,7 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
+        - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8sattributes/metrics
         {{- end }}
