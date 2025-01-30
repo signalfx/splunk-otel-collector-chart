@@ -174,7 +174,6 @@ processors:
         value: "clusterReceiver"
         key: otelcol.service.mode
 
-
   resource/k8s_cluster:
     attributes:
       # XXX: Added so that Smart Agent metrics and OTel metrics don't map to the same MTS identity
