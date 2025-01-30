@@ -43,31 +43,52 @@ button on any of our documentation pages.
 
 ## Contributing via Pull Requests
 
-Contributions via Pull Requests (PRs) are much appreciated. Before sending us a
-pull request, please ensure that:
+We appreciate your contributions! Here’s a breakdown of the steps based on your relationship with the owner SignalFX organization:
 
-1. You are working against the latest source on the `main` branch.
-2. You check existing open, and recently merged, pull requests to make sure
-   someone else hasn't addressed the problem already.
-3. You open an issue to discuss any significant work - we would hate for your
-   time to be wasted.
-4. You submit PRs that are easy to review and ideally less 500 lines of code.
-   Multiple PRs can be submitted for larger contributions.
+### Case 1: Public Contributors (No Connection to SignalFX Organization)
+
+As a **public contributor** with no relation to SignalFX organization, you will likely **not have permission to create a feature branch** in the SignalFX repository. Here’s what to do:
+
+1. **Fork the repository**: Create a fork of the repository and work on your own feature branch.
+2. **Submit a PR from your fork**: Open a PR from your forked repository.
+3. **Request help from SignalFX Team**: Since you don't have the required permissions to create a github.com/signalfx/splunk-otel-collector-chart owned feature branch, kindly request help from the SignalFX team members who are code owners. We will assist in getting your PR set up for proper testing.
+4. **Security and testing**: We may need to slightly modify or re-create your PR to ensure it works with our live Kubernetes test clusters, as this is a security requirement for accessing these clusters.
+
+### Case 2: SignalFX Members (New to the Project)
+
+As a **SignalFX team member** who is new to this project, you are allowed to work with forks for personal work, but for merging changes into the main repository, you must follow these steps:
+
+1. **Fork for personal work**: Continue using your fork for personal development and initial testing.
+2. **Create a PR with SignalFX-owned feature branch**: When you're ready to submit a PR to the main repository, create a feature branch **owned by github.com/signalfx/splunk-otel-collector-chart**. This ensures that the **functional tests** can run on our live test clusters (EKS, GKE, AKS).
+3. **Get help if needed**: If you're unsure about how to create the feature branch under the SignalFX organization, just ask the team for assistance.
+
+### Case 3: Regular Contributors (Co-Owners of the Project)
+
+As a **regular contributor** who is a co-owner of the repository, you are fully responsible for maintaining and supporting the project. You will follow these steps:
+
+1. **Create SignalFX-owned feature branches**: Continue managing and maintaining the repository using **github.com/signalfx/splunk-otel-collector-chart owned feature branches**.
+2. **Run functional tests**: Ensure that all your PRs pass full validation, including tests against real Kubernetes test clusters (EKS, GKE, AKS), to ensure everything is working as expected.
+3. **Support the community**: Take responsibility for the community by maintaining test coverage, supporting contributors, and helping new contributors integrate with the project.
+
+### Best Practices for PRs
+
+Contributions via Pull Requests (PRs) are much appreciated. Before sending us a pull request, please ensure that:
+
+1. **Work against the latest `main` branch**: Ensure your branch is up to date with the latest code in the `main` branch.
+2. **Check for duplicate work**: Review existing open and recently merged PRs to avoid duplicating someone else’s work.
+4. **Keep your PR manageable**: Ideally, submit PRs that are **less than 500 lines of code**. For larger contributions, consider splitting them into multiple PRs to make review easier.
 
 To send us a pull request, please:
 
-1. Fork the repository.
-2. Modify the source; please ensure a single change per PR. If you also
-   reformat all the code, it will be hard for us to focus on your change.
-3. Please follow the versioning instructions found in the [RELEASE.md](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/RELEASE.md).
-4. Ensure local tests pass and add new tests related to the contribution.
-5. Add a CHANGELOG.md entry (make chlog-new) if the behavior of this chart is altered, see [Changelog Guidelines](https://signalfx/splunk-otel-collector-chart/blob/main/CONTRIBUTING.md#changelog-guidelines).
-6. Render example documentation (make render) if chart templates are updated.
-7. Commit to your fork using clear commit messages.
-8. Send us a pull request, answering any default questions in the pull request
-   interface.
-9. Pay attention to any automated CI failures reported in the pull request, and
-   stay involved in the conversation.
+1. **Fork the repository**: Begin by forking the repository.
+2. **Make a single change per PR**: Focus on a **single change** per PR. If you need to reformat code, do it in a separate PR.
+3. **Follow versioning instructions**: Refer to the [RELEASE.md](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/RELEASE.md) for versioning guidelines.
+4. **Ensure tests pass**: Run tests locally and add new tests as needed for your contribution.
+5. **Update the CHANGELOG**: If your PR alters functionality, add an entry to `CHANGELOG.md` using `make chlog-new`. Refer to the [Changelog Guidelines](https://signalfx/splunk-otel-collector-chart/blob/main/CONTRIBUTING.md#changelog-guidelines).
+6. **Render example documentation**: If chart templates are updated, run `make render` to generate updated documentation.
+7. **Commit with clear messages**: Use **clear commit messages** that describe your changes.
+8. **Submit the PR**: Open a PR and answer any default questions in the PR interface.
+9. **Engage with CI feedback**: Pay attention to any automated CI failures reported in your PR and stay involved in the conversation to resolve issues.
 
 GitHub provides additional documentation on [forking a
 repository](https://help.github.com/articles/fork-a-repo/) and [creating a pull
