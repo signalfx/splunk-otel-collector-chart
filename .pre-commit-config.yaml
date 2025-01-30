@@ -17,6 +17,7 @@ repos:
       exclude: "^examples|^test"
     - id: check-yaml
       # Can't check source yaml since it has go templates in it.
-      exclude: "^helm-charts"
+      # Can't check operator-webhook.yaml due to redacted TLS certificate information causing yaml format issues.
+      exclude: "^helm-charts|operator-webhook.yaml"
       args: [ --allow-multiple-documents ]
     - id: check-added-large-files

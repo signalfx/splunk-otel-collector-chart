@@ -56,31 +56,8 @@ write_output() {
     fi
   fi
 
-  # Redact sensitive information
-  output=$(echo "$output" | awk '
-  /BEGIN CERTIFICATE/,/END CERTIFICATE/ {
-      if (/BEGIN CERTIFICATE/) print;
-      else if (/END CERTIFICATE/) print;
-      else print "    [CERTIFICATE REDACTED]";
-      next;
-  }
-  /ca\.crt|client\.crt|client\.key|tls\.crt|tls\.key/ {
-      print "    [SENSITIVE DATA REDACTED]";
-      next;
-  }
-  /[Tt][Oo][Kk][Ee][Nn]/ {
-      print "    [TOKEN REDACTED]";
-      next;
-  }
-  /[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]/ {
-      print "    [PASSWORD REDACTED]";
-      next;
-  }
-  {print}')
-
-  # Write command and output to file
-  echo "# Command: $cmd" > "$file_name"
-  echo "$output" >> "$file_name"
+  # Redact sensitive information from output
+  redact_sensitive_info "$output" "$file_name"
 }
 
 # Function to collect data for a given namespace
