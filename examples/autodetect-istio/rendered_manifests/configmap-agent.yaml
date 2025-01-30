@@ -143,6 +143,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: agent
       resource/logs:
         attributes:
         - action: upsert
@@ -466,6 +471,7 @@ data:
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - resource/add_mode
           receivers:
           - prometheus/agent
         traces:

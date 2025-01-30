@@ -130,6 +130,11 @@ data:
         - action: insert
           key: deployment.environment
           value: CHANGEME
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: agent
       resource/logs:
         attributes:
         - action: upsert
@@ -427,6 +432,7 @@ data:
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - resource/add_mode
           receivers:
           - prometheus/agent
         traces:
