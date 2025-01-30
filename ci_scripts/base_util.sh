@@ -447,3 +447,54 @@ maybe_update_version() {
     fi
     echo "Image update process completed successfully for '$yaml_file_path'."
 }
+
+# Function: redact_sensitive_info
+# Description: Redacts sensitive information from a given input string and returns the redacted content as a string.
+#              The function uses `awk` to redact specific patterns such as certificates, sensitive data, tokens, and passwords.
+# Usage: redact_sensitive_info "$input_string"
+redact_sensitive_info() {
+    local input="$1"
+
+    # Redact sensitive information from the input string using awk and return the result
+    echo "$input" | awk '
+    # Redact certificate sections
+    /BEGIN CERTIFICATE/,/END CERTIFICATE/ {
+        if (/BEGIN CERTIFICATE/) print;
+        else if (/END CERTIFICATE/) print;
+        else print "    [CERTIFICATE REDACTED]";
+        next;
+    }
+    # Redact sensitive data patterns like caBundle, certificates, keys
+    /caBundle|ca\.crt|client\.crt|client\.key|tls\.crt|tls\.key/ {
+        print "    [SENSITIVE DATA REDACTED]";
+        next;
+    }
+    # Redact tokens
+    /[Tt][Oo][Kk][Ee][Nn]/ {
+        print "    [TOKEN REDACTED]";
+        next;
+    }
+    # Redact passwords
+    /[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]/ {
+        print "    [PASSWORD REDACTED]";
+        next;
+    }
+    # Print other content unchanged
+    {print}
+    '
+}
+
+# Function: redact_files
+# Description: Redacts sensitive information from all files matching the provided file pattern in the specified directory using a for loop.
+# Usage: redact_files "path/to/directory" "*.yaml"
+redact_files() {
+    local dir="$1"
+    local file_pattern="$2"
+
+    # Use find to search for files matching the pattern in the specified directory
+    for file in $(find "$dir" -type f -name "$file_pattern"); do
+        # Redact the content of the file and save it back to the original file
+        redacted_content=$(redact_sensitive_info "$(cat "$file")")
+        echo "$redacted_content" > "$file"
+    done
+}
