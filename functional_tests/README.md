@@ -17,6 +17,7 @@ kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
 kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.8.0 --name kind
 kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
 kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
+kind load docker-image ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.50b0 --name kind
 ```
 
 ## Config switches
