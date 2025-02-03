@@ -81,10 +81,6 @@ spec:
         ` }}
         {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
-      {{- if $clusterReceiver.securityContext }}
-      securityContext:
-        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $clusterReceiver.securityContext) | nindent 8 }}
-      {{- end }}
       {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
       initContainers:
         - name: cluster-receiver-node-discoverer
@@ -129,6 +125,10 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
+        {{- if $clusterReceiver.securityContext }}
+        securityContext:
+        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $clusterReceiver.securityContext) | nindent 10 }}
+        {{- end }}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $clusterReceiver.resources.limits.memory | int64 }}"

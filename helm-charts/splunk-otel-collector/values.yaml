@@ -475,7 +475,16 @@ clusterReceiver:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 20000
+    runAsGroup: 20000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
@@ -1138,7 +1147,15 @@ gateway:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 20000
+    runAsGroup: 20000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 

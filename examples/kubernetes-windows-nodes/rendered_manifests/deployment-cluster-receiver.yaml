@@ -45,6 +45,15 @@ spec:
         - --config=C:\\conf\relay.yaml
         image: quay.io/signalfx/splunk-otel-collector-windows:0.117.0
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 20000
+          runAsNonRoot: true
+          windowsOptions: {}
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
