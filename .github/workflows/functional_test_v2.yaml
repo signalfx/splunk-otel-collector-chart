@@ -274,7 +274,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2.1.2
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.3.0
+      - uses: google-github-actions/get-gke-credentials@v2.3.1
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
@@ -327,7 +327,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2.1.2
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.3.0
+      - uses: google-github-actions/get-gke-credentials@v2.3.1
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
