@@ -731,6 +731,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {
@@ -1348,6 +1355,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {
