@@ -6027,12 +6027,21 @@ resourceMetrics:
                     - key: k8s.cluster.name
                       value:
                         stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.node.uid
                       value:
-                        stringValue: e879976d-29c7-441f-926a-e4d94e6e3795
+                        stringValue: 30cea3fc-191d-4891-ad80-7aea7a5bfef2
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: dotnet-test-6f6d54979f-lfcqx
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 85bd538b-5c34-4c4a-80e5-7c3a9c29340a
                     - key: metric_source
                       value:
                         stringValue: kubernetes
