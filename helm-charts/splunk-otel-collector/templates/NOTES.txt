@@ -81,3 +81,9 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
   - Status: Instrumentation language maturity varies. See `operator.instrumentation.spec` and documentation for utilized instrumentation details.
   - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry distributions of auto-instrumentation libraries.
 {{- end }}
+{{- if not (eq (toString .Values.gateway.securityContext) "<nil>") }}
+[WARNING] "gateway.securityContext" parameter is deprecated. Please use "gateway.podSecurityContext" instead.
+{{ end }}
+{{- if not (eq (toString .Values.clusterReceiver.securityContext) "<nil>") }}
+[WARNING] "clusterReceiver.securityContext" parameter is deprecated. Please use "clusterReceiver.podSecurityContext" instead.
+{{ end }}
