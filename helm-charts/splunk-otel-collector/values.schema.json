@@ -605,7 +605,11 @@
               "type": "boolean"
             },
             "internalTrafficPolicy": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                  "Local",
+                  "Cluster"
+              ]
             }
           }
         },
