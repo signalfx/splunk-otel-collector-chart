@@ -40,6 +40,6 @@ spec:
     app: {{ template "splunk-otel-collector.name" . }}
     component: otel-collector-agent
     release: {{ .Release.Name }}
-  internalTrafficPolicy: Local
+  internalTrafficPolicy: {{ default "Local" .Values.agent.service.internalTrafficPolicy }}
 {{- end }}
 {{- end }}
