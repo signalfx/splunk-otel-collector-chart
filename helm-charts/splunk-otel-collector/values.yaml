@@ -408,7 +408,8 @@ agent:
     # so that agent pods can be discovered via dns etc
     enabled: true
 
-    # (optional) Override the default service internal traffic policy
+    # (optional) Override the default service internal traffic policy,
+    # valid values are "Local" and "Cluster".
     internalTrafficPolicy: "Local"
 
   # hostNetwork schedules the pod with the host's network namespace.
