@@ -4,6 +4,18 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.118.0] - 2025-02-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.118.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.118.0).
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver, gateway`: Add new dimension `otelcol.service.mode` to internal metrics to identify collector mode ([#1634](https://github.com/signalfx/splunk-otel-collector-chart/pull/1634))
+- `operator`: Add tests for Python support ([#1641](https://github.com/signalfx/splunk-otel-collector-chart/pull/1641))
+- `chart`: Add optional annotations to secrets ([#1599](https://github.com/signalfx/splunk-otel-collector-chart/pull/1599))
+- `operator`: Bump java to v2.12.0 in helm-charts/splunk-otel-collector/values.yaml ([#1631](https://github.com/signalfx/splunk-otel-collector-chart/pull/1631))
+- `chart`: Offer to use the UBI image to perform secret validation ([#1635](https://github.com/signalfx/splunk-otel-collector-chart/pull/1635))
+
 ## [0.117.0] - 2025-01-22
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.117.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.117.0).

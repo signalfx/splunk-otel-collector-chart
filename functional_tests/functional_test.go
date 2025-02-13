@@ -308,6 +308,19 @@ func deployChartsAndApps(t *testing.T) {
 			require.NoError(t, err)
 		}
 	}
+	// Python test app
+	stream, err = os.ReadFile(filepath.Join(testDir, "python", "deployment.yaml"))
+	require.NoError(t, err)
+	deployment, _, err = decode(stream, nil, nil)
+	require.NoError(t, err)
+	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	if err != nil {
+		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		assert.NoError(t, err2)
+		if err2 != nil {
+			require.NoError(t, err)
+		}
+	}
 	// Prometheus annotation
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"))
 	require.NoError(t, err)
@@ -433,6 +446,9 @@ func teardown(t *testing.T) {
 	_ = deployments.Delete(context.Background(), "java-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = deployments.Delete(context.Background(), "python-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
 	_ = deployments.Delete(context.Background(), "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
@@ -541,6 +557,7 @@ func Test_Functions(t *testing.T) {
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
+	t.Run("Python traces captured", testPythonTraces)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
 	t.Run("test HEC metrics", testHECMetrics)
@@ -573,6 +590,75 @@ func testNodeJSTraces(t *testing.T) {
 		}
 		return selectedTrace != nil
 	}, 3*time.Minute, 5*time.Second)
+	require.NotNil(t, selectedTrace)
+
+	maskScopeVersion(*selectedTrace)
+	maskScopeVersion(expectedTraces)
+
+	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("container.id"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.command"),
+		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
+		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
+		ptracetest.IgnoreResourceAttributeValue("process.owner"),
+		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
+		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
+		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("os.version"),
+		ptracetest.IgnoreTraceID(),
+		ptracetest.IgnoreSpanID(),
+		ptracetest.IgnoreStartTimestamp(),
+		ptracetest.IgnoreEndTimestamp(),
+		ptracetest.IgnoreResourceSpansOrder(),
+		ptracetest.IgnoreScopeSpansOrder(),
+	)
+	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+	}
+	require.NoError(t, err)
+}
+
+func testPythonTraces(t *testing.T) {
+	tracesConsumer := setupOnce(t).tracesConsumer
+
+	var expectedTraces ptrace.Traces
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_python_traces.yaml")
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+
+	waitForTraces(t, 10, tracesConsumer)
+
+	var selectedTrace *ptrace.Traces
+
+	read := 0
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i > read; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "python") {
+				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
+					selectedTrace = &trace
+					break
+				}
+			}
+		}
+		read = len(tracesConsumer.AllTraces()) - 1
+		return selectedTrace != nil
+	}, 1*time.Minute, 5*time.Second)
 	require.NotNil(t, selectedTrace)
 
 	maskScopeVersion(*selectedTrace)

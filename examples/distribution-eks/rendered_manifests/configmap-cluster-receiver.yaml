@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.117.0
+    helm.sh/chart: splunk-otel-collector-0.118.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.117.0"
+    app.kubernetes.io/version: "0.118.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.117.0
+    chart: splunk-otel-collector-0.118.0
     release: default
     heritage: Helm
 data:
@@ -55,6 +55,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: clusterReceiver
       resource/k8s_cluster:
         attributes:
         - action: insert
@@ -136,6 +141,7 @@ data:
           - resource/add_collector_k8s
           - resourcedetection
           - resource
+          - resource/add_mode
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:

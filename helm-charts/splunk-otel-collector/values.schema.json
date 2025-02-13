@@ -425,6 +425,9 @@
                     },
                     "caFile": {
                       "type": "string"
+                    },
+                    "annotations": {
+                      "type": "object"
                     }
                   }
                 },
@@ -728,6 +731,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {
@@ -1123,6 +1133,26 @@
               ]
             }
           }
+        },
+        "validateSecret": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
         }
       }
     },
@@ -1188,6 +1218,9 @@
         },
         "validateSecret": {
           "type": "boolean"
+        },
+        "annotations": {
+          "type": "object"
         }
       }
     },
@@ -1322,6 +1355,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {

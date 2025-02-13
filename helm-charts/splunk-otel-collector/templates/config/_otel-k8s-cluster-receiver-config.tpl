@@ -167,6 +167,13 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
+  resource/add_mode:
+    attributes:
+      - action: insert
+        value: "clusterReceiver"
+        key: otelcol.service.mode
+
   resource/k8s_cluster:
     attributes:
       # XXX: Added so that Smart Agent metrics and OTel metrics don't map to the same MTS identity
@@ -278,6 +285,7 @@ service:
         - resource/add_collector_k8s
         - resourcedetection
         - resource
+        - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8sattributes/metrics
         {{- end }}
