@@ -131,15 +131,6 @@ processors:
       - action: insert
         key: k8s.node.name
         value: "${K8S_NODE_NAME}"
-      - action: insert
-        key: k8s.pod.name
-        value: "${K8S_POD_NAME}"
-      - action: insert
-        key: k8s.pod.uid
-        value: "${K8S_POD_UID}"
-      - action: insert
-        key: k8s.namespace.name
-        value: "${K8S_NAMESPACE}"
 
   resource:
     attributes:
