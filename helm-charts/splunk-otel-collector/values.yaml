@@ -1231,6 +1231,8 @@ operator:
 # - Splunk Documentation: https://docs.splunk.com/observability/en/gdi/opentelemetry/automatic-discovery/k8s/k8s-backend.html#optional-configure-the-instrumentation
 # - OpenTelemetry Documentation: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 instrumentation:
+  # (optional) Deploy when the operator is disabled (in case when managed by external chart)
+  enabled: false
   # Optional "endpoint" parameter for exporting data to a specific target.
   # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
   # will default to the gateway, given it is enabled. If neither the agent nor the gateway is enabled, the endpoint

@@ -1,4 +1,4 @@
-{{- if .Values.operator.enabled }}
+{{- if or .Values.operator.enabled .Values.instrumentation.enabled }}
 {{- include "splunk-otel-collector.operator.validation-rules" . -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
