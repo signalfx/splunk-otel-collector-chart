@@ -44,6 +44,9 @@ jobs:
           - functional
           - histogram
           - configuration_switching
+        kind-setup:
+          - kind-config.yaml
+          - kind-config-ipv6.yaml
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +60,7 @@ jobs:
           node_image: kindest/node:${{ matrix.k8s-version }}
           kubectl_version: ${{ matrix.k8s-version }}
           cluster_name: kind
-          config: ./.github/workflows/configs/kind-config.yaml
+          config: ./.github/workflows/configs/${{ matrix.kind-setup }}
       - name: Fix kubelet TLS server certificates
         run: |
           kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
