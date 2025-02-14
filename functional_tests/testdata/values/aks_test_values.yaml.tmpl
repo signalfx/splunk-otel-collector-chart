@@ -73,3 +73,15 @@ operator:
   enabled: true
   nodeSelector:
     kubernetes.io/os: "linux"
+  admissionWebhooks:
+    certManager:
+      enabled: true
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+certmanager:
+  enabled: true
+  installCRDs: true

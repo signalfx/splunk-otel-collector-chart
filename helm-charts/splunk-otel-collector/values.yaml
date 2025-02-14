@@ -1304,6 +1304,12 @@ instrumentation:
     #     value: nginx_value
   # Auto-instrumentation Libraries (End)
 
+# The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
+# Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
+certmanager:
+  enabled: false
+  installCRDs: true
+
 ################################################################################
 # Target Allocator
 # Notice: Target Allocator related features should be considered to have an alpha

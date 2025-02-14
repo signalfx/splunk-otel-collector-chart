@@ -19,7 +19,7 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 CHLOGGEN ?= $(LOCALBIN)/chloggen
 
-CERTMANAGER_VERSION ?= v1.14.4
+CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
 
 # The help target as provided
 .PHONY: help
@@ -52,8 +52,13 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 	if ! (helm repo list | grep -q open-telemetry) ; then \
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
 	fi ;\
+	if ! (helm repo list | grep -q jetstack) ; then \
+		helm repo add jetstack https://charts.jetstack.io || exit 1; \
+	fi ;\
+	helm repo update open-telemetry jetstack || exit 1; \
 	DEP_OK=true ;\
 	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then DEP_OK=false ; fi ;\
+	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then DEP_OK=false ; fi ;\
 	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
 	if [ -f "$$LOCK_FILE" ] ; then \
 		echo "Removing Chart.lock file post-update..."; \
