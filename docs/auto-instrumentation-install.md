@@ -541,7 +541,7 @@ This is the default and simplest method for generating a TLS certificate. It aut
 
 **Configuration:**
 - Set `admissionWebhooks.certManager.enabled` to `false` and `admissionWebhooks.autoGenerateCert.enabled` to `true`.
-- Helm generates a self-signed certificate, valid for 10 years, and creates a secret for the webhook.
+- Helm generates a self-signed certificate, valid for 10 years, and creates a secret for the webhook. The validity of this self-signed certificate can be adjusted with the config `operator.admissionWebhooks.autoGenerateCert.certPeriodDays`
 - The certificate is automatically recreated on every Helm upgrade.
 
 This is the easiest setup for users and does not require additional configuration.
