@@ -44,6 +44,7 @@ jobs:
           - functional
           - histogram
           - configuration_switching
+          - istio
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
