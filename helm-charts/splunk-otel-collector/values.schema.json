@@ -603,6 +603,13 @@
           "properties": {
             "enabled": {
               "type": "boolean"
+            },
+            "internalTrafficPolicy": {
+              "type": "string",
+              "enum": [
+                  "Local",
+                  "Cluster"
+              ]
             }
           }
         },
