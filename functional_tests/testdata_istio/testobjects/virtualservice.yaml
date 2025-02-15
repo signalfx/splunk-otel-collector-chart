@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: httpbin
+  namespace: istio-system
+spec:
+  hosts:
+    - "httpbin.example.com"
+    - "httpbin.istio-workloads.svc.cluster.local"
+  gateways:
+    - httpbin-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: /status
+        - uri:
+            prefix: /delay
+      route:
+        - destination:
+            port:
+              number: 8000
+            host: httpbin.istio-workloads.svc.cluster.local

@@ -5,10 +5,14 @@ package functional_tests
 
 import (
 	"context"
+	"fmt"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.opentelemetry.io/collector/receiver/receivertest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -17,6 +21,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -99,4 +104,22 @@ func writeNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Trace
 func writeNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", filepath.Base(file)), *metric))
+}
+
+func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
+	mc := new(consumertest.MetricsSink)
+	f := signalfxreceiver.NewFactory()
+	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
+	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
+
+	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(), cfg, mc)
+	require.NoError(t, err)
+
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, err, "failed creating metrics receiver")
+	t.Cleanup(func() {
+		assert.NoError(t, rcvr.Shutdown(context.Background()))
+	})
+
+	return mc
 }
