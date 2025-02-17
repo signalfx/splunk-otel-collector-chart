@@ -184,6 +184,7 @@ k8sattributes:
       - k8s.node.name
       - k8s.pod.name
       - k8s.pod.uid
+      - k8s.pod.ip
       - container.id
       - container.image.name
       - container.image.tag
@@ -226,6 +227,7 @@ k8sattributes/clusterReceiver:
       - k8s.node.name
       - k8s.pod.name
       - k8s.pod.uid
+      - k8s.pod.ip
       - container.id
       - container.image.name
       - container.image.tag
@@ -263,7 +265,11 @@ k8sattributes/metrics:
     - sources:
       - from: connection
   extract:
-    metadata: []
+    metadata:
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.name
+      - k8s.pod.uid
     annotations:
       - key: splunk.com/sourcetype
         from: pod
