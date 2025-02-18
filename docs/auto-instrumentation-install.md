@@ -540,7 +540,7 @@ In Kubernetes, the API server communicates with operator webhook components over
 This is the default and simplest method for generating a TLS certificate. It automatically creates a self-signed certificate for the webhook. It is suitable for internal environments or testing purposes but may not be trusted by clients outside your cluster.
 
 **Configuration:**
-- Set `admissionWebhooks.certManager.enabled` to `false` and `admissionWebhooks.autoGenerateCert.enabled` to `true`.
+- Set `operator.admissionWebhooks.certManager.enabled` to `false` and `operator.admissionWebhooks.autoGenerateCert.enabled` to `true`.
 - Helm generates a self-signed certificate, valid for 10 years, and creates a secret for the webhook. The validity of this self-signed certificate can be adjusted with the config `operator.admissionWebhooks.autoGenerateCert.certPeriodDays`
 - The certificate is automatically recreated on every Helm upgrade.
 
