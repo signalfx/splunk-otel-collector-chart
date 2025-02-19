@@ -1239,7 +1239,10 @@ instrumentation:
   # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
   # endpoint: http://splunk-otel-collector:4317
   # Optional "propagators" parameter for enabling trace context propagation, see: https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
-  propagators: []
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
   # "tracecontext": W3C Trace Context
   # "baggage": W3C Baggage
   # "b3": B3 Single
