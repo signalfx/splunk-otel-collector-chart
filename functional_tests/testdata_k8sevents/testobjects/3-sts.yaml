@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: k8sevents-test
+  namespace: k8sevents-test
+spec:
+  serviceName: k8sevents-test
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8sevents-test
+  template:
+    metadata:
+      labels:
+        app: k8sevents-test
+    spec:
+      serviceAccountName: k8sevents-test
+      containers:
+        - image: busybox:latest
+          imagePullPolicy: Always
+          name: k8sevents-test
+          command: ["sleep", "infinity"]
+          ports:
+            - containerPort: 80
+              name: http

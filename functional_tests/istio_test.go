@@ -1,3 +1,5 @@
+// Copyright Splunk Inc.
+// SPDX-License-Identifier: Apache-2.0
 //go:build istio
 
 package functional_tests
@@ -29,7 +31,6 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
-	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -272,34 +273,6 @@ func downloadIstio(t *testing.T, version string) string {
 	return istioctlPath
 }
 
-func checkPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string, timeout time.Duration) {
-	require.Eventually(t, func() bool {
-		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
-			LabelSelector: labelSelector,
-		})
-		require.NoError(t, err)
-		if len(pods.Items) == 0 {
-			return false
-		}
-		for _, pod := range pods.Items {
-			if pod.Status.Phase != v1.PodRunning {
-				return false
-			}
-			ready := false
-			for _, condition := range pod.Status.Conditions {
-				if condition.Type == v1.PodReady && condition.Status == v1.ConditionTrue {
-					ready = true
-					break
-				}
-			}
-			if !ready {
-				return false
-			}
-		}
-		return true
-	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready", namespace, labelSelector)
-}
-
 func runCommand(t *testing.T, command string) {
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Stdout = os.Stdout
@@ -346,32 +319,6 @@ func createObjectFromURL(t *testing.T, config string, url string) {
 		_, err = k8stest.CreateObject(k8sClient, docBytes)
 		require.NoError(t, err, "failed to create object from document")
 	}
-}
-
-func createNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
-	ns := &v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-	_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{})
-	require.NoError(t, err, "failed to create namespace %s", name)
-
-	require.Eventually(t, func() bool {
-		_, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
-		return err == nil
-	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
-}
-
-func labelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
-	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
-	require.NoError(t, err)
-	if ns.Labels == nil {
-		ns.Labels = make(map[string]string)
-	}
-	ns.Labels[key] = value
-	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
-	require.NoError(t, err)
 }
 
 func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path string) {

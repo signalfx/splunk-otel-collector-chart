@@ -1,0 +1,21 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   apiUrl: {{ .ApiURL }}
+   logsEnabled: true
+   metricsEnabled: false
+   tracesEnabled: false
+
+splunkPlatform:
+  endpoint: {{ .LogURL }}
+  token: " 00000000-0000-0000-0000-0000000000000"
+
+agent:
+  enabled: false
+
+clusterReceiver:
+  enabled: true
+  eventsEnabled: true
+
+environment: dev
+clusterName: dev-operator
