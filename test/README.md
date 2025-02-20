@@ -1,7 +1,7 @@
 # Splunk Platform Functional Test Environment Setup
 
 ## Prerequisites
-* Python version must be > 3.x
+* Golang version >= 1.22.10
 * Kubectl = v1.15.2
 * Minikube = v1.20.0
 * Helm = 3.3.x
@@ -52,34 +52,8 @@
     For example: `index=ci_events`
 
 ## Testing Instructions
-1. (Optional) Use a virtual environment for the test
+1. Start tests
     ```
-    virtualenv --python=python3.6 venv
-    source venv/bin/activate
+    go test -v -tags splunk_integration
     ```
-2. Install the dependencies
-    ```
-    pip install -r requirements.txt
-    export PYTHONWARNINGS="ignore:Unverified HTTPS request"
-    ```
-3. Start the test with the required options configured
-    ```
-    python -m pytest \
-    --splunkd-url https://localhost:8089 \
-    --splunk-user admin \
-    --splunk-password helloworld \
-    -p no:warnings -s
-    ```
-    **Options are:**
-    --splunkd-url
-    * Description: splunkd url used to send test data to.
-    * Default: https://localhost:8089
-
-    --splunk-user
-    * Description: splunk username
-    * Default: admin
-
-    --splunk-password
-    * Description: splunk user password
-    * Default: helloworld
 
