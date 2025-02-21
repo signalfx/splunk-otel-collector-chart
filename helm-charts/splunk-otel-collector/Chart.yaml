@@ -32,7 +32,7 @@ dependencies:
     alias: operatorcrds
     condition: operatorcrds.install
   - name: opentelemetry-operator
-    version: 0.71.2
+    version: 0.80.2
     alias: operator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: operator.enabled
