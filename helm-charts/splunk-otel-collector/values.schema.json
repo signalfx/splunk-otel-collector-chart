@@ -1496,6 +1496,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "enabled": {
+          "description": "Flag to enable instrumentation when operator is deployed via external chart.",
+          "type": "boolean"
+        },
         "endpoint": {
           "type": "string",
           "description": "Optional endpoint parameter for exporting data to a specific target."
