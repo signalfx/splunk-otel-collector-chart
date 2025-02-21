@@ -1238,7 +1238,19 @@ instrumentation:
   endpoint: ""
   # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
   # endpoint: http://splunk-otel-collector:4317
-
+  # Optional "propagators" parameter for enabling trace context propagation, see: https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  # "tracecontext": W3C Trace Context
+  # "baggage": W3C Baggage
+  # "b3": B3 Single
+  # "b3multi": B3 Multi
+  # "jaeger": Jaeger
+  # "xray": AWS X-Ray (third party)
+  # "ottrace": OT Trace (third party)
+  # "none": No automatically configured propagator.
   # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
   sampler: {}
   # type: traceidratio

@@ -1500,6 +1500,23 @@
           "type": "string",
           "description": "Optional endpoint parameter for exporting data to a specific target."
         },
+        "propagators": {
+          "type": "array",
+          "description": "Optional propagators parameter for enabling trace context propagation.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "tracecontext",
+              "baggage",
+              "b3",
+              "b3multi",
+              "jaeger",
+              "ottrace",
+              "xray",
+              "none"
+            ]
+          }
+        },
         "sampler": {
           "type": "object",
           "description": "Optional sampler parameter for enabling trace sampling.",
