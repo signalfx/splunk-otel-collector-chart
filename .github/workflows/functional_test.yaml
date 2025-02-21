@@ -14,12 +14,12 @@ jobs:
         # To check latest Minikube versions, see: https://raw.githubusercontent.com/kubernetes/minikube/master/pkg/minikube/constants/constants_kubernetes_versions.go
         # TODO: Automate updating this and expand/contract matrix coverage for other Kubernetes distributions
         kubernetes_version:
+          - v1.31.0 # Support: 28 Aug 2025 - 28 Oct 2025
           - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
           - v1.29.4 # Support: 28 Dec 2024 - 28 Feb 2025
           - v1.28.9 # Support: 28 Aug 2024 - 28 Oct 2024
-          - v1.27.13  # Support: 28 Apr 2024 - 28 Jun 2024
           # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
-          - v1.26.15 # Support: 28 Dec 2023 - 28 Feb 2024
+          - v1.27.13  # Support: 28 Apr 2024 - 28 Jun 2024
         container_runtime:
           - "docker"
           - "containerd"
