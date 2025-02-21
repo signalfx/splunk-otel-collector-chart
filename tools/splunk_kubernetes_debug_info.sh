@@ -35,6 +35,10 @@
 # - Cert-manager related objects
 # - MutatingWebhookConfiguration objects
 
+# Include the base utility functions for setting and debugging variables
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/../ci_scripts/base_util.sh"
+
 # Helper function to write output to a file
 write_output() {
   local output="$1"
@@ -57,7 +61,7 @@ write_output() {
   fi
 
   # Redact sensitive information from output
-  redact_sensitive_info "$output" "$file_name"
+  redact_sensitive_info "$output" > "$file_name"
 }
 
 # Function to collect data for a given namespace
