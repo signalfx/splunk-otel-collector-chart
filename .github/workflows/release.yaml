@@ -18,8 +18,8 @@ jobs:
       - name: Check if the release is needed
         id: check_update_chart
         run: |
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/signalfx/splunk-otel-collector-chart/releases/latest | grep tag_name | cut -d - -f 4 | cut -d \" -f 1)
-          CURRENT_VERSION=$(cat helm-charts/splunk-otel-collector/Chart.yaml | grep -E "^version:" | cut -d " " -f 2)
+          LATEST_VERSION=$(curl -s https://signalfx.github.io/splunk-otel-collector-chart/index.yaml | yq e '.entries["splunk-otel-collector"][0].version')
+          CURRENT_VERSION=$(yq e '.version' helm-charts/splunk-otel-collector/Chart.yaml)
           if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "New release needed, creating..."
             echo "NEED_RELEASE=1" >> $GITHUB_OUTPUT
