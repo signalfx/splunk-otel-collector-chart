@@ -415,10 +415,8 @@ splunk_hec/platform_logs:
     {{- if .addPersistentStorage }}
     storage: file_storage/persistent_queue
     {{- end }}
-  {{- if not .Values.featureGates.noDropLogsPipeline }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
-  {{- else }}
-    num_consumers: 25
+  {{- if .Values.featureGates.noDropLogsPipeline }}
   batcher:
     enabled: true
     flush_timeout: 200ms
