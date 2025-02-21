@@ -860,6 +860,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage

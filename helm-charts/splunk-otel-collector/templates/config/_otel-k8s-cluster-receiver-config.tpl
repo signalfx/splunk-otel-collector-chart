@@ -225,6 +225,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   extensions: [health_check, k8s_observer]
   {{- else }}
