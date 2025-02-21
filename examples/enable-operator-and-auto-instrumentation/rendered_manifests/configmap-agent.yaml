@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.118.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.118.0"
+    app.kubernetes.io/version: "0.119.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.118.0
     release: default
@@ -306,11 +306,7 @@ data:
           - job_name: otel-agent
             metric_relabel_configs:
             - action: drop
-              regex: otelcol_rpc_.*
-              source_labels:
-              - __name__
-            - action: drop
-              regex: otelcol_http_.*
+              regex: promhttp_metric_handler_errors.*
               source_labels:
               - __name__
             - action: drop
@@ -459,3 +455,6 @@ data:
                 prometheus:
                   host: localhost
                   port: 8889
+                  without_scope_info: true
+                  without_type_suffix: true
+                  without_units: true
