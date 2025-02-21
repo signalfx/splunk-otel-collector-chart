@@ -1,5 +1,99 @@
 # Upgrade guidelines
 
+## 0.118.0 to 0.119.0
+
+This guide provides steps for new users, transitioning users, and those maintaining previously deployed Operator-related TLS certificates and configurations.
+
+- New users: No migration is required for Operator TLS certificates.
+- Previous users: Migration may be needed if using `operator.enabled=true` or `certmanager.enabled=true`.
+
+To maintain previous functionality and avoid breaking changes, review the following sections.
+
+### **Maintaining Previous Functionality via Helm Values Update**
+
+#### **Scenario 1: Operator and cert-manager Deployed via This Helm Chart**
+
+If you previously deployed both the Operator and cert-manager via this Helm chart (`operator.enabled=true` and `certmanager.enabled=true`), add the following values:
+
+```yaml
+operator:
+  admissionWebhooks:
+    certManager:
+      enabled: true
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+certmanager:
+  enabled: true
+  installCRDs: true
+```
+
+#### **Scenario 2: Operator Deployed with External cert-manager (Not Managed by This Helm Chart)**
+
+If you deployed the Operator via this Helm chart and used an externally managed cert-manager (`operator.enabled=true` and `certmanager.enabled=false`), you can preserve functionality by adding the following Helm values or using the `--reuse-values` argument:
+
+```yaml
+operator:
+  admissionWebhooks:
+    certManager:
+      enabled: true
+```
+
+### **Adopting New Functionality (Requires Migration Steps)**
+
+If you want to migrate from cert-manager-managed certificates to the now default Helm-generated certificates, additional steps may be required to avoid conflicts.
+
+#### **Potential Upgrade Issue: Existing Secret Conflict**
+
+If you see an error message like the following during Helm install/upgrade:
+
+```
+warning: Upgrade "{helm_release_name}" failed: pre-upgrade hooks failed: warning: Hook pre-upgrade splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml failed: 1 error occurred:* secrets "splunk-otel-collector-operator-controller-manager-service-cert" already exists
+```
+
+This typically occurs because:
+- cert-manager deletes its `Certificate` resources immediately.
+- However, cert-manager does not delete the associated **secrets** instantly. It waits for its garbage collector process to remove them.
+
+You will first have to delete this chart, wait for cert-manager to do garbage collection, and then install the latest version of this chart.
+With the assumption your Helm release is named "splunk-otel-collector", we show the commands to run below.
+- `Be aware these steps likely include the operator being unavailable and having down time for this service in your environment.`
+
+#### **Step 1: Verify If the Old Secret Still Exists**
+
+Use a command like this to delete the chart in your namespace:
+
+```bash
+helm delete splunk-otel-collector --namespace <your_namespace>
+```
+
+#### **Step 2: Verify If the Old Cert Manager Secret Does Not Exists Anymore**
+
+Use the following command to check if the certificate secret remains in your namespace:
+
+```bash
+kubectl get secret splunk-otel-collector-operator-controller-manager-service-cert --namespace <your_namespace>
+```
+
+#### **Step 3: Wait for Secret Removal or Manually Delete It**
+
+If the secret still exists, you must wait for cert-manager to remove it or delete it manually:
+
+```bash
+kubectl delete secret splunk-otel-collector-operator-controller-manager-service-cert --namespace <your_namespace>
+```
+
+#### **Step 4: Proceed with Helm Install**
+
+Once the secret is no longer present, you can install the chart with the latest version (`0.119.0`) successfully:
+
+```bash
+helm install splunk-otel-collector splunk-otel-collector-chart/splunk-otel-collector --values ~/values.yaml --namespace <your_namespace>
+```
+
 ## 0.113.0 to 0.116.0
 
 This guide provides steps for new users, transitioning users, and those maintaining previous operator CRD configurations:
