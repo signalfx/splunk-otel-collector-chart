@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.118.0 to 0.119.0
+## 0.119.0 to 0.120.0
 
 This guide provides steps for new users, transitioning users, and those maintaining previously deployed Operator-related TLS certificates and configurations.
 
