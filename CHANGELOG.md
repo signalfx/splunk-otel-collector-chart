@@ -4,6 +4,31 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.119.0] - 2025-02-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.119.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.119.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Enable support for custom propagators in `spec.propagators` within Instrumentation Configuration. ([#1663](https://github.com/signalfx/splunk-otel-collector-chart/pull/1663))
+  This change allows users to specify custom propagators in `spec.propagators` when configuring OpenTelemetry Instrumentation.
+
+## [0.119.0] - 2025-02-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.119.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.119.0).
+
+### 🚩 Deprecations 🚩
+
+- `clusterReceiver`: Deprecate the `securityContext` field in favor of the `podSecurityContext`. ([#1647](https://github.com/signalfx/splunk-otel-collector-chart/pull/1647))
+- `gateway`: Deprecate the `securityContext` field in favor of the `podSecurityContext`. ([#1647](https://github.com/signalfx/splunk-otel-collector-chart/pull/1647))
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add an option to set the security context for the container. ([#1647](https://github.com/signalfx/splunk-otel-collector-chart/pull/1647))
+- `gateway`: Add an option to set the security context for the container. ([#1647](https://github.com/signalfx/splunk-otel-collector-chart/pull/1647))
+- `operator`: Bump dotnet to v1.9.0 in helm-charts/splunk-otel-collector/values.yaml ([#1651](https://github.com/signalfx/splunk-otel-collector-chart/pull/1651))
+- `operator`: Bump java to v2.13.0 in helm-charts/splunk-otel-collector/values.yaml ([#1669](https://github.com/signalfx/splunk-otel-collector-chart/pull/1669))
+
 ## [0.118.0] - 2025-02-04
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.118.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.118.0).
