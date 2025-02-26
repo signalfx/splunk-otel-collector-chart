@@ -20,4 +20,4 @@ repos:
       exclude: "^helm-charts|operator-webhook.yaml"
       args: [ --allow-multiple-documents ]
     - id: check-added-large-files
-      args: [ --maxkb=3000 ]
+      args: [ --maxkb=1500 ]
