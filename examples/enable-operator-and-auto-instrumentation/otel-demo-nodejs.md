@@ -45,11 +45,6 @@ kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io
 # NAME                                      WEBHOOKS   AGE
 # splunk-otel-collector-operator-mutation   3          2m
 
-# TODO: Validate these inputs andoutput
-kubectl get validatingwebhookconfiguration.admissionregistration.k8s.io
-# NAME                                      WEBHOOKS   AGE
-# splunk-otel-collector-operator-mutation   3          2m
-
 kubectl get otelinst
 # NAME                    AGE   ENDPOINT
 # splunk-otel-collector   5m    http://$(SPLUNK_OTEL_AGENT):4317
