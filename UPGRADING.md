@@ -13,10 +13,11 @@ To maintain previous functionality and avoid breaking changes, review the follow
 
 #### **Scenario 1: Operator and cert-manager Deployed via This Helm Chart**
 
-If you previously deployed both the Operator and cert-manager via this Helm chart (`operator.enabled=true` and `certmanager.enabled=true`), add the following values:
+If you previously deployed both the Operator and cert-manager via this Helm chart (`operator.enabled=true` and `certmanager.enabled=true`), you can preserve functionality by adding the following values:
 
 ```yaml
 operator:
+  enabled: true
   admissionWebhooks:
     certManager:
       enabled: true
@@ -33,10 +34,11 @@ certmanager:
 
 #### **Scenario 2: Operator Deployed with External cert-manager (Not Managed by This Helm Chart)**
 
-If you deployed the Operator via this Helm chart and used an externally managed cert-manager (`operator.enabled=true` and `certmanager.enabled=false`), you can preserve functionality by adding the following Helm values or using the `--reuse-values` argument:
+If you previously deployed the Operator and used an externally managed cert-manager (`operator.enabled=true` and `certmanager.enabled=false`), you can preserve functionality by adding the following values:
 
 ```yaml
 operator:
+  enabled: true
   admissionWebhooks:
     certManager:
       enabled: true
@@ -44,11 +46,11 @@ operator:
 
 ### **Adopting New Functionality (Requires Migration Steps)**
 
-If you want to migrate from cert-manager-managed certificates to the now default Helm-generated certificates, additional steps may be required to avoid conflicts.
+If you want to migrate from cert-manager managed certificates to the now default Helm-generated certificates, additional steps may be required to avoid conflicts.
 
 #### **Potential Upgrade Issue: Existing Secret Conflict**
 
-If you see an error message like the following during Helm install/upgrade:
+If you see an error message like the following during a Helm install or upgrade:
 
 ```
 warning: Upgrade "{helm_release_name}" failed: pre-upgrade hooks failed: warning: Hook pre-upgrade splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml failed: 1 error occurred:* secrets "splunk-otel-collector-operator-controller-manager-service-cert" already exists
@@ -62,7 +64,7 @@ You will first have to delete this chart, wait for cert-manager to do garbage co
 With the assumption your Helm release is named "splunk-otel-collector", we show the commands to run below.
 - `Be aware these steps likely include the operator being unavailable and having down time for this service in your environment.`
 
-#### **Step 1: Verify If the Old Secret Still Exists**
+#### **Step 1: Delete this Helm Chart**
 
 Use a command like this to delete the chart in your namespace:
 
@@ -88,7 +90,7 @@ kubectl delete secret splunk-otel-collector-operator-controller-manager-service-
 
 #### **Step 4: Proceed with Helm Install**
 
-Once the secret is no longer present, you can install the chart with the latest version (`0.119.0`) successfully:
+Once the secret is no longer present, you can install the chart with the latest version (`0.120.0`) successfully:
 
 ```bash
 helm install splunk-otel-collector splunk-otel-collector-chart/splunk-otel-collector --values ~/values.yaml --namespace <your_namespace>
