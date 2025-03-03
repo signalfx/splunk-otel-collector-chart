@@ -23,9 +23,8 @@ curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main
 
 #### 2.1 Deploy the Helm Chart with the Operator enabled
 
-To install the chart with operator in an existing cluster, make sure you have cert-manager installed and available.
-Both the cert-manager and operator are subcharts of this chart and can be enabled with `--set operatorcrds.install=true,operator.enabled=true`.
-These helm install commands will deploy the chart to the current namespace for this example.
+To install the chart with the operator, set the following values with this Helm command.
+This Helm install command deploys the chart to the current namespace, assumed to be the `default` namespace for this exercise.
 
 ```bash
 helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
