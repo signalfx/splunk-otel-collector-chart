@@ -19,16 +19,11 @@ curl https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main
 
 #### 2.1 Deploy the Helm Chart with the Operator enabled
 
-To install the chart with operator in an existing cluster, make sure you have cert-manager installed and available.
-Both the cert-manager and operator are subcharts of this chart and can be enabled with `--set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true`.
-These helm install commands will deploy the chart to the current namespace for this example.
+To install the chart with the operator, set the following values with this Helm command.
+This Helm install command deploys the chart to the current namespace, assumed to be the `default` namespace for this exercise.
 
 ```bash
-# Check if a cert-manager is already installed by looking for cert-manager pods.
-kubectl get pods -l app=cert-manager --all-namespaces
-
-# If cert-manager is deployed, make sure to remove certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 #### 2.2 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
@@ -42,15 +37,11 @@ kubectl get pods
 # splunk-otel-collector-agent-2mtfn                               2/2     Running            0                5m
 # splunk-otel-collector-agent-k4gc8                               2/2     Running            0                5m
 # splunk-otel-collector-agent-wjt98                               2/2     Running            0                5m
-# splunk-otel-collector-certmanager-69b98cc84d-2vzl7              1/1     Running            0                5m
-# splunk-otel-collector-certmanager-cainjector-76db6dcbbf-4625c   1/1     Running            0                5m
-# splunk-otel-collector-certmanager-webhook-bc68cd487-dctrf       1/1     Running            0                5m
 # splunk-otel-collector-k8s-cluster-receiver-8449bfdc8-hhbvz      1/1     Running            0                5m
 # splunk-otel-collector-operator-754c9d78f8-9ztwg                 2/2     Running            0                5m
 
 kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io
 # NAME                                      WEBHOOKS   AGE
-# splunk-otel-collector-certmanager-webhooh 1          8m
 # splunk-otel-collector-operator-mutation   3          2m
 
 kubectl get otelinst
