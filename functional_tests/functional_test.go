@@ -1145,7 +1145,7 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_process_uptime",
 		"otelcol_receiver_accepted_spans",
 		"otelcol_processor_accepted_metric_points",
-		"otelcol_processor_filter_logs_filtered",
+		"otelcol_processor_filter_logs.filtered",
 		"otelcol_receiver_accepted_metric_points",
 		"otelcol_receiver_accepted_log_records",
 		"otelcol_receiver_refused_log_records",

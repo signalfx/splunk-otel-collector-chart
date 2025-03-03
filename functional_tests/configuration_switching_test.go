@@ -9,12 +9,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
-	"go.opentelemetry.io/collector/component/componenttest"
-	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/receiver/receivertest"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,6 +16,13 @@ import (
 	"testing"
 	"text/template"
 	"time"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
+	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/receiver/receivertest"
+	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -176,6 +177,9 @@ func Test_Functions(t *testing.T) {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
+
+	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
+	t.Setenv("KUBE_TEST_ENV", "kind")
 
 	t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
 	t.Run("logs and metrics index switch", testIndexSwitch)
