@@ -229,7 +229,13 @@ jobs:
       - name: Deploy previous version of the chart
         run: |
           helm list | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx --set operator.enabled=true --set environment=dev
+          cd base && helm install sock helm-charts/splunk-otel-collector \
+          --set cloudProvider=aws --set distribution=eks \
+          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
+          --set operator.enabled=true --set environment=dev \
+          --set operator.admissionWebhooks.certManager.enabled=false \
+          --set operator.admissionWebhooks.autoGenerateCert.enabled=true \
+          --set certmanager.enabled=false
       - name: Update dependencies
         run: |
           make dep-update
