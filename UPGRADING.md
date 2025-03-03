@@ -95,7 +95,9 @@ Once the secret is no longer present, you can install the chart with the latest 
 ```bash
 helm install splunk-otel-collector splunk-otel-collector-chart/splunk-otel-collector --values ~/values.yaml --namespace <your_namespace>
 ```
+#### **Step 5 (Optional): Delete cert-manager CRDs**
 
+Helm delete will not remove CRDs objects created as part of the cert-manager installation. You can find the command to delete cert-manager CRDs in their official documentation [here](https://cert-manager.io/docs/installation/helm/#uninstalling-with-helm).
 ## 0.113.0 to 0.116.0
 
 This guide provides steps for new users, transitioning users, and those maintaining previous operator CRD configurations:
