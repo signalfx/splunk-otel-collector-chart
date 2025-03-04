@@ -16,7 +16,7 @@ on:
         default: false
 
 env:
-  GO_VERSION: 1.22.10
+  GO_VERSION: 1.23.6
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
