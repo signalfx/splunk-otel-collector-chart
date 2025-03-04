@@ -804,3 +804,18 @@ helm install my-opentelemetry-ebpf --set=endpoint.address=<my-splunk-otel-collec
 ```
 
 where <my-splunk-otel-collector-gateway> is the gateway service name captured in the step 2.
+
+### Using a Collector Version for FedRAMP Compliance
+
+A FedRAMP-compliant distribution of the collector is available for use with this Helm chart.
+To enable this distribution, set the following values in your Helm configuration.
+
+Note: `initContainers` must be skipped, as the required binaries are not included in this distribution for compliance reasons.
+
+```yaml
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-fips
+agent:
+  skipInitContainers: true
+```
