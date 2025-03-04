@@ -6,7 +6,7 @@ on:
 jobs:
   functional-test:
     name: K8s ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}, Splunk ${{ matrix.splunk_version }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
