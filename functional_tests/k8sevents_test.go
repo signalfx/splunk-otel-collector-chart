@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"sync"
 	"testing"
 	"text/template"
@@ -52,7 +53,6 @@ var eventsLogsConsumer *consumertest.LogsSink
 // SKIP_TESTS: if set to true, the test will skip the test
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
-
 func Test_K8SEvents(t *testing.T) {
 	eventsLogsConsumer := setup(t)
 	if os.Getenv("SKIP_TESTS") == "true" {
@@ -60,32 +60,65 @@ func Test_K8SEvents(t *testing.T) {
 		return
 	}
 
-	selectedLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", eventsLogsConsumer, func(body string) string {
-		re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in \d+ms \(\d+ms including waiting\)`)
-		return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
+	waitForLogs(t, 3, eventsLogsConsumer)
+
+	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
+		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
+		k8sEventsLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
+			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\)`)
+			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
+		})
+		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
+
+		expectedEventsLogsFile := "testdata_k8sevents/expected_k8sevents.yaml"
+		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
+		require.NoError(t, err, "failed to read expected events logs from file")
+
+		err = plogtest.CompareLogs(expectedEventsLogs, k8sEventsLogs,
+			plogtest.IgnoreTimestamp(),
+			plogtest.IgnoreObservedTimestamp(),
+			plogtest.IgnoreResourceAttributeValue("host.name"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
+			plogtest.IgnoreResourceLogsOrder(),
+			plogtest.IgnoreScopeLogsOrder(),
+			plogtest.IgnoreLogRecordsOrder(),
+		)
+		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+			writeNewExpectedLogsResult(t, expectedEventsLogsFile, &k8sEventsLogs)
+		}
+		require.NoError(t, err)
 	})
 
-	removeFlakyLogRecordAttr(selectedLogs, "container.id") // flaky - k8sattribute processor might not have received the container id when the "started container" event is ingested
+	t.Run("CheckK8SObjectsLogs", func(t *testing.T) {
+		k8sObjectsLogs := selectResLogs("com.splunk.sourcetype", "kube:object:*", eventsLogsConsumer)
+		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "uid"}, "21d0b84b-f1ae-4ae4-959f-31d7581a272b")
+		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "resourceVersion"}, "85980")
+		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
+		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
+		// k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "functional_test.test")
 
-	expectedLogsFile := "testdata_k8sevents/expected_k8sevents.yaml"
-	expectedLogs, err := golden.ReadLogs(expectedLogsFile)
-	require.NoError(t, err, "failed to read expected logs from file")
+		expectedObjectsLogsFile := "testdata_k8sevents/expected_k8sobjects.yaml"
+		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
+		require.NoError(t, err, "failed to read expected objects logs from file")
 
-	err = plogtest.CompareLogs(expectedLogs, selectedLogs,
-		plogtest.IgnoreTimestamp(),
-		plogtest.IgnoreObservedTimestamp(),
-		plogtest.IgnoreResourceAttributeValue("host.name"),
-		plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
-		plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
-		plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
-		plogtest.IgnoreResourceLogsOrder(),
-		plogtest.IgnoreScopeLogsOrder(),
-		plogtest.IgnoreLogRecordsOrder(),
-	)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedLogsResult(t, expectedLogsFile, &selectedLogs)
-	}
-	require.NoError(t, err)
+		err = plogtest.CompareLogs(expectedObjectsLogs, k8sObjectsLogs,
+			plogtest.IgnoreTimestamp(),
+			plogtest.IgnoreObservedTimestamp(),
+			plogtest.IgnoreResourceAttributeValue("host.name"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
+			plogtest.IgnoreResourceLogsOrder(),
+			plogtest.IgnoreScopeLogsOrder(),
+			plogtest.IgnoreLogRecordsOrder(),
+		)
+		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+			writeNewExpectedLogsResult(t, expectedObjectsLogsFile, &k8sObjectsLogs)
+		}
+		require.NoError(t, err)
+	})
 }
 
 func setup(t *testing.T) *consumertest.LogsSink {
@@ -216,7 +249,7 @@ func setupHECLogsReceiver(t *testing.T, port int) *consumertest.LogsSink {
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", splunkHecReceiverPort)
 
 	receiver := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(), cfg, receiver)
+	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, receiver)
 	require.NoError(t, err)
 
 	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
@@ -234,54 +267,66 @@ func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	k8stest.DeleteObject(k8sClient, obj)
 }
 
-func selectLogs(t *testing.T, attributeName, attributeValue string, logSink *consumertest.LogsSink, modifyBodyFunc func(string) string) plog.Logs {
+func selectResLogs(attributeName, attributeValue string, logSink *consumertest.LogsSink) plog.Logs {
 	selectedLogs := plog.NewLogs()
-	// collapse logs across resource logs into a single one to reduce flakiness in test runs
-	for h := 0; h < len(logSink.AllLogs()); h++ {
-		logs := logSink.AllLogs()[h]
+	for _, logs := range logSink.AllLogs() {
 		for i := 0; i < logs.ResourceLogs().Len(); i++ {
 			resourceLogs := logs.ResourceLogs().At(i)
-			var existingResLog plog.ResourceLogs
-			foundResource := false
-			for j := 0; j < selectedLogs.ResourceLogs().Len(); j++ {
-				if compareAttributes(resourceLogs.Resource().Attributes(), selectedLogs.ResourceLogs().At(j).Resource().Attributes()) {
-					existingResLog = selectedLogs.ResourceLogs().At(j)
-					foundResource = true
-					break
-				}
-			}
-			if !foundResource {
-				existingResLog = selectedLogs.ResourceLogs().AppendEmpty()
-				resourceLogs.Resource().Attributes().CopyTo(existingResLog.Resource().Attributes())
-			}
-			for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
-				scopeLogs := resourceLogs.ScopeLogs().At(j)
-				var existingScopeLog plog.ScopeLogs
-				foundScope := false
-				for k := 0; k < existingResLog.ScopeLogs().Len(); k++ {
-					if compareAttributes(scopeLogs.Scope().Attributes(), existingResLog.ScopeLogs().At(k).Scope().Attributes()) {
-						existingScopeLog = existingResLog.ScopeLogs().At(k)
-						foundScope = true
-						break
-					}
-				}
-				if !foundScope {
-					existingScopeLog = existingResLog.ScopeLogs().AppendEmpty()
-					scopeLogs.Scope().Attributes().CopyTo(existingScopeLog.Scope().Attributes())
-				}
-				for k := 0; k < scopeLogs.LogRecords().Len(); k++ {
-					logRecord := scopeLogs.LogRecords().At(k)
-					attributes := logRecord.Attributes()
-					if attr, ok := attributes.Get(attributeName); ok && attr.Str() == attributeValue {
-						modifiedBody := modifyBodyFunc(logRecord.Body().Str())
-						logRecord.Body().SetStr(modifiedBody)
-						logRecord.CopyTo(existingScopeLog.LogRecords().AppendEmpty())
-					}
+			attributes := resourceLogs.Resource().Attributes()
+			if attr, ok := attributes.Get(attributeName); ok {
+				if match, _ := regexp.MatchString(attributeValue, attr.Str()); match {
+					resourceLogs.CopyTo(selectedLogs.ResourceLogs().AppendEmpty())
 				}
 			}
 		}
 	}
+	return selectedLogs
+}
 
+func selectLogs(t *testing.T, attributeName, attributeValue string, inLogs *plog.Logs, modifyBodyFunc func(string) string) plog.Logs {
+	selectedLogs := plog.NewLogs()
+	// collapse logs across resource logs into a single one to reduce flakiness in test runs
+	for h := 0; h < inLogs.ResourceLogs().Len(); h++ {
+		resourceLogs := inLogs.ResourceLogs().At(h)
+		var existingResLog plog.ResourceLogs
+		foundResource := false
+		for j := 0; j < selectedLogs.ResourceLogs().Len(); j++ {
+			if compareAttributes(resourceLogs.Resource().Attributes(), selectedLogs.ResourceLogs().At(j).Resource().Attributes()) {
+				existingResLog = selectedLogs.ResourceLogs().At(j)
+				foundResource = true
+				break
+			}
+		}
+		if !foundResource {
+			existingResLog = selectedLogs.ResourceLogs().AppendEmpty()
+			resourceLogs.Resource().Attributes().CopyTo(existingResLog.Resource().Attributes())
+		}
+		for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
+			scopeLogs := resourceLogs.ScopeLogs().At(j)
+			var existingScopeLog plog.ScopeLogs
+			foundScope := false
+			for k := 0; k < existingResLog.ScopeLogs().Len(); k++ {
+				if compareAttributes(scopeLogs.Scope().Attributes(), existingResLog.ScopeLogs().At(k).Scope().Attributes()) {
+					existingScopeLog = existingResLog.ScopeLogs().At(k)
+					foundScope = true
+					break
+				}
+			}
+			if !foundScope {
+				existingScopeLog = existingResLog.ScopeLogs().AppendEmpty()
+				scopeLogs.Scope().Attributes().CopyTo(existingScopeLog.Scope().Attributes())
+			}
+			for k := 0; k < scopeLogs.LogRecords().Len(); k++ {
+				logRecord := scopeLogs.LogRecords().At(k)
+				attributes := logRecord.Attributes()
+				if attr, ok := attributes.Get(attributeName); ok && attr.Str() == attributeValue {
+					modifiedBody := modifyBodyFunc(logRecord.Body().Str())
+					logRecord.Body().SetStr(modifiedBody)
+					logRecord.CopyTo(existingScopeLog.LogRecords().AppendEmpty())
+				}
+			}
+		}
+	}
 	return selectedLogs
 }
 
@@ -307,5 +352,65 @@ func removeFlakyLogRecordAttr(logs plog.Logs, attributeName string) {
 				logRecord.Attributes().Remove(attributeName)
 			}
 		}
+	}
+}
+
+func updateLogRecordBody(logs plog.Logs, path []string, newValue string) plog.Logs {
+	for i := 0; i < logs.ResourceLogs().Len(); i++ {
+		resourceLogs := logs.ResourceLogs().At(i)
+		for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
+			scopeLogs := resourceLogs.ScopeLogs().At(j)
+			for k := 0; k < scopeLogs.LogRecords().Len(); k++ {
+				logRecord := scopeLogs.LogRecords().At(k)
+				body := logRecord.Body()
+				if body.Type() == pcommon.ValueTypeMap {
+					updateMap(body.Map(), path, newValue)
+				}
+			}
+		}
+	}
+	return logs
+}
+
+func updateMap(m pcommon.Map, path []string, newValue string) {
+	if len(path) == 0 {
+		return
+	}
+	key := path[0]
+	if len(path) == 1 {
+		m.PutStr(key, newValue)
+		return
+	}
+	if nestedValue, ok := m.Get(key); ok {
+		switch nestedValue.Type() {
+		case pcommon.ValueTypeMap:
+			updateMap(nestedValue.Map(), path[1:], newValue)
+		case pcommon.ValueTypeSlice:
+			index, err := strconv.Atoi(path[1])
+			if err != nil {
+				fmt.Printf("updateMap: invalid index %s\n", path[1])
+				return
+			}
+			if index < nestedValue.Slice().Len() {
+				updateSlice(nestedValue.Slice(), path[2:], newValue, index)
+			}
+		default:
+			fmt.Printf("updateMap: unexpected type %v\n", nestedValue.Type())
+		}
+	}
+}
+
+func updateSlice(s pcommon.Slice, path []string, newValue string, index int) {
+	if len(path) == 0 {
+		return
+	}
+	if len(path) == 1 {
+		if s.At(index).Type() == pcommon.ValueTypeMap {
+			s.At(index).Map().PutStr(path[0], newValue)
+		}
+		return
+	}
+	if s.At(index).Type() == pcommon.ValueTypeMap {
+		updateMap(s.At(index).Map(), path[1:], newValue)
 	}
 }

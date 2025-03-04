@@ -514,8 +514,8 @@ clusterReceiver:
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
-  # * namespace:
-  #     only collects objects from the specified namespace, by default it's all namespaces
+  # * namespaces:
+  #     only collects objects from the specified list of namespaces, by default it's all namespaces
   # * labelSelector:
   #     select objects by label(s)
   # * fieldSelector:

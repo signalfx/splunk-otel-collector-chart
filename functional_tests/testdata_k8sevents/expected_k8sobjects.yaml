@@ -1,0 +1,226 @@
+resourceLogs:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-d765cb764-hxl8q
+        - key: com.splunk.source
+          value:
+            stringValue: kubernetes
+        - key: com.splunk.sourcetype
+          value:
+            stringValue: kube:object:services
+        - key: com.splunk.index
+          value:
+            stringValue: main
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: container.image.name
+                value:
+                  stringValue: busybox
+              - key: container.image.tag
+                value:
+                  stringValue: latest
+              - key: deployment.environment
+                value:
+                  stringValue: dev
+              - key: event.domain
+                value:
+                  stringValue: k8s
+              - key: event.name
+                value:
+                  stringValue: k8sevents-test
+              - key: k8s.cluster.name
+                value:
+                  stringValue: dev-operator
+              - key: k8s.namespace.name
+                value:
+                  stringValue: k8sevents-test
+              - key: k8s.node.name
+                value:
+                  stringValue: kind-control-plane
+              - key: k8s.pod.name
+                value:
+                  stringValue: k8sevents-test-0
+              - key: k8s.pod.uid
+                value:
+                  stringValue: bb716e06-8c99-4156-8ca9-85325760cdd9
+              - key: k8s.resource.name
+                value:
+                  stringValue: services
+              - key: metric_source
+                value:
+                  stringValue: kubernetes
+              - key: os.type
+                value:
+                  stringValue: linux
+            body:
+              kvlistValue:
+                values:
+                  - key: object
+                    value:
+                      kvlistValue:
+                        values:
+                          - key: apiVersion
+                            value:
+                              stringValue: v1
+                          - key: kind
+                            value:
+                              stringValue: Service
+                          - key: metadata
+                            value:
+                              kvlistValue:
+                                values:
+                                  - key: creationTimestamp
+                                    value:
+                                      stringValue: "2025-03-04T01:59:10Z"
+                                  - key: managedFields
+                                    value:
+                                      arrayValue:
+                                        values:
+                                          - kvlistValue:
+                                              values:
+                                                - key: apiVersion
+                                                  value:
+                                                    stringValue: v1
+                                                - key: fieldsType
+                                                  value:
+                                                    stringValue: FieldsV1
+                                                - key: fieldsV1
+                                                  value:
+                                                    kvlistValue:
+                                                      values:
+                                                        - key: f:spec
+                                                          value:
+                                                            kvlistValue:
+                                                              values:
+                                                                - key: f:clusterIP
+                                                                  value:
+                                                                    kvlistValue: {}
+                                                                - key: f:internalTrafficPolicy
+                                                                  value:
+                                                                    kvlistValue: {}
+                                                                - key: f:ports
+                                                                  value:
+                                                                    kvlistValue:
+                                                                      values:
+                                                                        - key: .
+                                                                          value:
+                                                                            kvlistValue: {}
+                                                                        - key: k:{"port":80,"protocol":"TCP"}
+                                                                          value:
+                                                                            kvlistValue:
+                                                                              values:
+                                                                                - key: .
+                                                                                  value:
+                                                                                    kvlistValue: {}
+                                                                                - key: f:name
+                                                                                  value:
+                                                                                    kvlistValue: {}
+                                                                                - key: f:port
+                                                                                  value:
+                                                                                    kvlistValue: {}
+                                                                                - key: f:protocol
+                                                                                  value:
+                                                                                    kvlistValue: {}
+                                                                                - key: f:targetPort
+                                                                                  value:
+                                                                                    kvlistValue: {}
+                                                                - key: f:selector
+                                                                  value:
+                                                                    kvlistValue: {}
+                                                                - key: f:sessionAffinity
+                                                                  value:
+                                                                    kvlistValue: {}
+                                                                - key: f:type
+                                                                  value:
+                                                                    kvlistValue: {}
+                                                - key: manager
+                                                  value:
+                                                    stringValue: functional_tests.test
+                                                - key: operation
+                                                  value:
+                                                    stringValue: Update
+                                                - key: time
+                                                  value:
+                                                    stringValue: "2025-03-04T01:59:10Z"
+                                  - key: name
+                                    value:
+                                      stringValue: k8sevents-test
+                                  - key: namespace
+                                    value:
+                                      stringValue: k8sevents-test
+                                  - key: resourceVersion
+                                    value:
+                                      stringValue: "85980"
+                                  - key: uid
+                                    value:
+                                      stringValue: 21d0b84b-f1ae-4ae4-959f-31d7581a272b
+                          - key: spec
+                            value:
+                              kvlistValue:
+                                values:
+                                  - key: clusterIP
+                                    value:
+                                      stringValue: None
+                                  - key: clusterIPs
+                                    value:
+                                      arrayValue:
+                                        values:
+                                          - stringValue: None
+                                  - key: internalTrafficPolicy
+                                    value:
+                                      stringValue: Cluster
+                                  - key: ipFamilies
+                                    value:
+                                      arrayValue:
+                                        values:
+                                          - stringValue: IPv4
+                                  - key: ipFamilyPolicy
+                                    value:
+                                      stringValue: SingleStack
+                                  - key: ports
+                                    value:
+                                      arrayValue:
+                                        values:
+                                          - kvlistValue:
+                                              values:
+                                                - key: name
+                                                  value:
+                                                    stringValue: http
+                                                - key: port
+                                                  value:
+                                                    doubleValue: 80
+                                                - key: protocol
+                                                  value:
+                                                    stringValue: TCP
+                                                - key: targetPort
+                                                  value:
+                                                    doubleValue: 80
+                                  - key: selector
+                                    value:
+                                      kvlistValue:
+                                        values:
+                                          - key: app
+                                            value:
+                                              stringValue: k8sevents-test
+                                  - key: sessionAffinity
+                                    value:
+                                      stringValue: None
+                                  - key: type
+                                    value:
+                                      stringValue: ClusterIP
+                          - key: status
+                            value:
+                              kvlistValue:
+                                values:
+                                  - key: loadBalancer
+                                    value:
+                                      kvlistValue: {}
+                  - key: type
+                    value:
+                      stringValue: ADDED
+            spanId: ""
+            traceId: ""
+        scope: {}

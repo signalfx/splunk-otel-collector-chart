@@ -16,6 +16,12 @@ agent:
 clusterReceiver:
   enabled: true
   eventsEnabled: true
+  k8sObjects:
+    - name: services
+      mode: watch
+      namespaces:
+      - k8sevents-test
+      interval: 10s
 
 environment: dev
 clusterName: dev-operator
