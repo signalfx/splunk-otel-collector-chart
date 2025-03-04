@@ -963,12 +963,12 @@ image:
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
     repository: quay.io/signalfx/splunk-otel-collector
-    # For the FIPS-140 enabled version, use this repository instead:
-    # repository: quay.io/signalfx/splunk-otel-collector-fips
     # The tag of the Splunk OTel Collector image, default value is the chart appVersion
     tag: ""
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
+    # To use the FIPS-140 enabled version, set this value to true
+    # As a result, the repository will become quay.io/signalfx/splunk-otel-collector-fips
     fipsEnabled: false
 
   # Image to be used by init container that patches log directories on the host, so the collector can read from them as a non-root user.
