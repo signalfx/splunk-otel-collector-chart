@@ -969,6 +969,7 @@ image:
     tag: ""
     # The policy that specifies when the user wants the opentelemetry collector images to be pulled
     pullPolicy: IfNotPresent
+    fipsEnabled: false
 
   # Image to be used by init container that patches log directories on the host, so the collector can read from them as a non-root user.
   # Effective only if `agent.securityContext.runAsUser` and `agent.securityContext.runAsGroup` are set to non-zero values.

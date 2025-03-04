@@ -210,9 +210,12 @@ Create the fluentd image name.
 Create the opentelemetry collector image name.
 */}}
 {{- define "splunk-otel-collector.image.otelcol" -}}
-{{- printf "%s:%s" .Values.image.otelcol.repository (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
+{{- $repository := .Values.image.otelcol.repository -}}
+{{- if .Values.image.otelcol.fipsEnabled -}}
+{{- $repository = printf "%s-fips" $repository -}}
 {{- end -}}
-
+{{- printf "%s:%s" $repository (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
+{{- end -}}
 {{/*
 Create the patch-log-dirs image name.
 */}}
