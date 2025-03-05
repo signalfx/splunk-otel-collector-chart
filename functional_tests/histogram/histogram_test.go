@@ -1,17 +1,12 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build histogram
-
-package functional_tests
+package histogram
 
 import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"go.opentelemetry.io/collector/pdata/pmetric"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,16 +15,20 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/receiver/receivertest"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
+
+	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
 const (
@@ -82,14 +81,12 @@ func deployChartsAndApps(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
-	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
-	chart, err := loader.Load(chartPath)
+	chart := internal.LoadCollectorChart(t)
+
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
 
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata_histogram", valuesDir, "test_values.yaml.tmpl"))
-	require.NoError(t, err)
-
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -158,10 +155,10 @@ func testHistogramMetrics(t *testing.T) {
 	k8sVersion := os.Getenv("K8S_VERSION")
 	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
 
-	testDir := filepath.Join("testdata_histogram", "expected", majorMinor)
+	testDir := filepath.Join("testdata", "expected", majorMinor)
 
 	otlpMetricsSink := setupOnce(t)
-	waitForMetrics(t, 5, otlpMetricsSink)
+	internal.WaitForMetrics(t, 5, otlpMetricsSink)
 
 	expectedKubeSchedulerMetricsFile := filepath.Join(testDir, "scheduler_metrics.yaml")
 	expectedKubeSchedulerMetrics, err := golden.ReadMetrics(expectedKubeSchedulerMetricsFile)
@@ -266,7 +263,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, corednsMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, corednsMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeSchedulerMetrics, *schedulerMetrics,
@@ -295,7 +292,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, etcdMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, etcdMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedKubeProxyMetrics, *kubeProxyMetrics,
@@ -324,7 +321,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, &expectedKubeProxyMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, &expectedKubeProxyMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedApiMetrics, *apiMetrics,
@@ -345,7 +342,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedApiMetricsFile, apiMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedApiMetricsFile, apiMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedControllerManagerMetrics, *controllerManagerMetrics,
@@ -374,7 +371,7 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, controllerManagerMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, controllerManagerMetrics)
 	}
 
 	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
@@ -405,6 +402,6 @@ func testHistogramMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedEtcdMetricsFile, etcdMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedEtcdMetricsFile, etcdMetrics)
 	}
 }

@@ -72,7 +72,7 @@ jobs:
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} TAGS=${{ matrix.test-job }} make functionaltest
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
       - name: Collect Kubernetes Cluster debug info on failure
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
         id: collect-debug-info
@@ -129,7 +129,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
@@ -188,7 +188,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TAGS=functional make functionaltest
+          SUITE=functional make functionaltest
 
   eks-upgrade-from-release-test:
     name: Test helm upgrade from release in EKS - credentials needed
@@ -243,7 +243,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TAGS=functional make functionaltest
+          SUITE=functional make functionaltest
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
@@ -281,7 +281,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
@@ -340,7 +340,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TAGS=functional make functionaltest
+          SUITE=functional make functionaltest
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
@@ -379,7 +379,7 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
@@ -410,4 +410,4 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
           KUBECONFIG: /tmp/kubeconfig
         run: |
-          TEARDOWN_BEFORE_SETUP=true TAGS=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest

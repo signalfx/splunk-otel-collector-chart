@@ -1,8 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
-//go:build istio
 
-package functional_tests
+package istio
 
 import (
 	"archive/tar"
@@ -29,7 +28,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -75,7 +73,7 @@ func setupOnce(t *testing.T) *consumertest.MetricsSink {
 		// create an API server
 		internal.CreateApiServer(t, apiPort)
 
-		istioMetricsConsumer = setupSignalfxReceiver(t, signalFxReceiverPort)
+		istioMetricsConsumer = internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
 
 		if os.Getenv("SKIP_SETUP") == "true" {
 			t.Log("Skipping setup as SKIP_SETUP is set to true")
@@ -104,33 +102,31 @@ func deployIstioAndCollector(t *testing.T) {
 	patchResource(t, clientset, "istio-system", "istio-ingressgateway", "deployments", `{"spec":{"template":{"spec":{"containers":[{"name":"istio-proxy","ports":[{"containerPort":8080,"hostPort":80},{"containerPort":8443,"hostPort":443}]}]}}}}`)
 	patchResource(t, clientset, "istio-system", "istio-ingressgateway", "services", `{"spec": {"type": "ClusterIP"}}`)
 
-	createNamespace(t, clientset, "istio-workloads")
-	labelNamespace(t, clientset, "istio-workloads", "istio-injection", "enabled")
+	internal.CreateNamespace(t, clientset, "istio-workloads")
+	internal.LabelNamespace(t, clientset, "istio-workloads", "istio-injection", "enabled")
 
 	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 	require.NoError(t, err)
 
-	_, err = k8stest.CreateObjects(k8sClient, "testdata_istio/testobjects")
+	_, err = k8stest.CreateObjects(k8sClient, "testdata/testobjects")
 	require.NoError(t, err)
 	deployment, err := clientset.AppsV1().Deployments("istio-workloads").Get(context.TODO(), "httpbin", metav1.GetOptions{})
 	require.NoError(t, err, "failed to get httpbin deployment")
 	t.Logf("Deployment %s created successfully", deployment.Name)
 
-	checkPodsReady(t, clientset, "istio-system", "app=istio-ingressgateway", 5*time.Minute)
-	checkPodsReady(t, clientset, "istio-system", "app=istiod", 2*time.Minute)
-	checkPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute)
+	internal.CheckPodsReady(t, clientset, "istio-system", "app=istio-ingressgateway", 5*time.Minute)
+	internal.CheckPodsReady(t, clientset, "istio-system", "app=istiod", 2*time.Minute)
+	internal.CheckPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute)
 
 	// Send traffic through ingress gateways
 	sendWorkloadHTTPRequests(t)
 
-	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
-	chart, err := loader.Load(chartPath)
+	chart := internal.LoadCollectorChart(t)
+
+	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
 
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata_istio", "istio_values.yaml.tmpl"))
-	require.NoError(t, err)
-
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -387,12 +383,12 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata_istio/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata_istio/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true)
 	})
 }
 
@@ -400,7 +396,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
-	waitForMetrics(t, 2, istioMetricsConsumer)
+	internal.WaitForMetrics(t, 2, istioMetricsConsumer)
 
 	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, istioMetricsConsumer, ignoreLen, 5*time.Minute, 30*time.Second)
 	if selectedMetrics == nil {
@@ -447,7 +443,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
 	}
 	require.NoError(t, err)
 }
