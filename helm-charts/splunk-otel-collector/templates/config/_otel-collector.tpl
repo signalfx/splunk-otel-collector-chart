@@ -143,6 +143,8 @@ exporters:
   {{- end }}
 service:
   telemetry:
+    resource:
+      service.name: otel-collector
     metrics:
       readers:
         - pull:
