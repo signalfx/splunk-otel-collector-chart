@@ -853,6 +853,8 @@ exporters:
 
 service:
   telemetry:
+    resource:
+      service.name: otel-agent
     metrics:
       readers:
         - pull:

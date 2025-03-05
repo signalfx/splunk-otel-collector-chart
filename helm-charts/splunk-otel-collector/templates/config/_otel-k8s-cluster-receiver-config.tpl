@@ -218,6 +218,8 @@ exporters:
 
 service:
   telemetry:
+    resource:
+      service.name: otel-k8s-cluster-receiver
     metrics:
       readers:
         - pull:
