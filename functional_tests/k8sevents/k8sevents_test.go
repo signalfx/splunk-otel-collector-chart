@@ -58,8 +58,8 @@ func Test_K8SEvents(t *testing.T) {
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
 		k8sEventsLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
-			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\).*`)
-			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
+			re := regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\).*`)
+			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
 
 		// These container attributes may not get added by the k8sattributesprocessor on the events about container image pull/start
@@ -76,6 +76,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreObservedTimestamp(),
 			plogtest.IgnoreResourceAttributeValue("host.name"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
+			plogtest.IgnoreLogRecordAttributeValue("k8s.statefulset.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
 			plogtest.IgnoreResourceLogsOrder(),
@@ -205,7 +206,8 @@ func deployWorkloadAndCollector(t *testing.T) {
 
 	// Deploy the workload
 	internal.CreateNamespace(t, clientset, "k8sevents-test")
-	createdObjs, err := k8stest.CreateObjects(k8sClient, "testdata/testobjects")
+	internal.AnnotateNamespace(t, clientset, "k8sevents-test", "com.splunk.index", "index_from_namespace")
+	createdObjs, err := k8stest.CreateObjects(k8sClient, "testdata_k8sevents/testobjects")
 	require.NoError(t, err)
 	require.NotEmpty(t, createdObjs)
 
