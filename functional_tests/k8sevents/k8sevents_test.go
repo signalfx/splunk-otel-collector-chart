@@ -52,7 +52,6 @@ var eventsLogsConsumer *consumertest.LogsSink
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
 func Test_K8SEvents(t *testing.T) {
-	t.Skip("Skip until fixed")
 	eventsLogsConsumer := setup(t)
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
