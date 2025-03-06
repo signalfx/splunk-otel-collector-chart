@@ -67,7 +67,7 @@ func Test_K8SEvents(t *testing.T) {
 			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
 		})
 
-		// These container attributes may not get added by the k8sattributesprocessor on the events about container creation
+		// These container attributes may not get added by the k8sattributesprocessor on the events about container image pull/start
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.name")
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.tag")
