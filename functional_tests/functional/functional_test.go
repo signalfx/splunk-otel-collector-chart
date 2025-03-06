@@ -1,9 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build functional
-
-package functional_tests
+package functional
 
 import (
 	"bytes"
@@ -34,7 +32,6 @@ import (
 	"go.opentelemetry.io/collector/receiver/receivertest"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -100,12 +97,13 @@ func setupOnce(t *testing.T) *sinks {
 		// set ingest pipelines
 		logs, metrics := setupHEC(t)
 		globalSinks = &sinks{
-			logsConsumer:                      logs,
-			hecMetricsConsumer:                metrics,
-			logsObjectsConsumer:               setupHECLogsObjects(t),
-			agentMetricsConsumer:              setupSignalfxReceiver(t, signalFxReceiverPort),
-			k8sclusterReceiverMetricsConsumer: setupSignalfxReceiver(t, signalFxReceiverK8sClusterReceiverPort),
-			tracesConsumer:                    setupTraces(t),
+			logsConsumer:         logs,
+			hecMetricsConsumer:   metrics,
+			logsObjectsConsumer:  setupHECLogsObjects(t),
+			agentMetricsConsumer: internal.SetupSignalfxReceiver(t, signalFxReceiverPort),
+			k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
+				signalFxReceiverK8sClusterReceiverPort),
+			tracesConsumer: setupTraces(t),
 		}
 		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 			teardown(t)
@@ -196,9 +194,7 @@ func deployChartsAndApps(t *testing.T) {
 		}
 	}, 1*time.Minute, 5*time.Second)
 
-	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
-	chart, err := loader.Load(chartPath)
-	require.NoError(t, err)
+	chart := internal.LoadCollectorChart(t)
 
 	var valuesBytes []byte
 	switch kubeTestEnv {
@@ -212,7 +208,7 @@ func deployChartsAndApps(t *testing.T) {
 
 	require.NoError(t, err)
 
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -573,7 +569,7 @@ func testNodeJSTraces(t *testing.T) {
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
-	waitForTraces(t, 10, tracesConsumer)
+	internal.WaitForTraces(t, 10, tracesConsumer)
 
 	var selectedTrace *ptrace.Traces
 
@@ -627,7 +623,7 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+		internal.WriteNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -640,7 +636,7 @@ func testPythonTraces(t *testing.T) {
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
-	waitForTraces(t, 10, tracesConsumer)
+	internal.WaitForTraces(t, 10, tracesConsumer)
 
 	var selectedTrace *ptrace.Traces
 
@@ -696,7 +692,7 @@ func testPythonTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+		internal.WriteNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -709,7 +705,7 @@ func testJavaTraces(t *testing.T) {
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
-	waitForTraces(t, 10, tracesConsumer)
+	internal.WaitForTraces(t, 10, tracesConsumer)
 
 	var selectedTrace *ptrace.Traces
 
@@ -760,7 +756,7 @@ func testJavaTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+		internal.WriteNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -773,7 +769,7 @@ func testDotNetTraces(t *testing.T) {
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 
-	waitForTraces(t, 30, tracesConsumer)
+	internal.WaitForTraces(t, 30, tracesConsumer)
 	var selectedTrace *ptrace.Traces
 
 	require.Eventually(t, func() bool {
@@ -825,7 +821,7 @@ func testDotNetTraces(t *testing.T) {
 		ptracetest.IgnoreScopeSpansOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
+		internal.WriteNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)
 	}
 	require.NoError(t, err)
 }
@@ -949,7 +945,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
 	}
 	require.NoError(t, err)
 }
@@ -957,7 +953,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 func testAgentLogs(t *testing.T) {
 
 	logsConsumer := setupOnce(t).logsConsumer
-	waitForLogs(t, 5, logsConsumer)
+	internal.WaitForLogs(t, 5, logsConsumer)
 
 	var helloWorldResource pcommon.Resource
 	var helloWorldLogRecord *plog.LogRecord
@@ -1066,7 +1062,7 @@ func testAgentLogs(t *testing.T) {
 
 func testK8sObjects(t *testing.T) {
 	logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
-	waitForLogs(t, 5, logsObjectsConsumer)
+	internal.WaitForLogs(t, 5, logsObjectsConsumer)
 
 	var kinds []string
 	var sourceTypes []string
@@ -1225,7 +1221,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedInternalMetricsFile, selectedInternalMetrics)
 	}
 	assert.NoError(t, err)
 
@@ -1279,7 +1275,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		writeNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
+		internal.WriteNewExpectedMetricsResult(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 	}
 	assert.NoError(t, err)
 }

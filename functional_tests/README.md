@@ -29,7 +29,7 @@ When running tests you can use the following env vars to help with local develop
 - `SKIP_TEARDOWN`: Skip cleanup (useful to keep apps for local dev).
 - `SKIP_TESTS`: Skip tests; only set up and tear down the cluster.
 - `TEARDOWN_BEFORE_SETUP`: Clean up deployments before setting up.
-- `TAGS`: Specify which tests to run (e.g., `TAGS="functional"`).
+- `SUITE`: Specify which test suite to run (e.g., `SUITE="functional"`).
 - `UPDATE_EXPECTED_RESULTS`: Generate new golden files for test results.
 
 ## Run

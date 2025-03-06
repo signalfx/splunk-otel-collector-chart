@@ -1,9 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build configuration_switching
-
-package functional_tests
+package configuration_switching
 
 import (
 	"bytes"
@@ -28,7 +26,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/kube"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +41,7 @@ const (
 	hecMetricsReceiverPort     = 8091
 	apiPort                    = 8881
 	hecLogsObjectsReceiverPort = 8092
-	testDir                    = "testdata_configuration_switching"
+	testDir                    = "testdata"
 	valuesDir                  = "values"
 )
 
@@ -84,15 +81,13 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
-	chartPath := filepath.Join("..", "helm-charts", "splunk-otel-collector")
-	chart, err := loader.Load(chartPath)
-	require.NoError(t, err)
+	chart := internal.LoadCollectorChart(t)
 
 	var valuesBytes []byte
 	valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, valuesFileName))
 	require.NoError(t, err)
 
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -195,11 +190,11 @@ func testAgentLogsAndMetrics(t *testing.T) {
 	agentLogsConsumer := setupOnce(t).logsConsumer
 
 	t.Run("check logs and metrics received when both are enabled", func(t *testing.T) {
-		resetLogsSink(t, agentLogsConsumer)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		checkNoMetricsReceived(t, hecMetricsConsumer)
-		checkNoEventsReceived(t, agentLogsConsumer)
+		internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
+		internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
@@ -207,17 +202,17 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 
-		waitForMetrics(t, 5, hecMetricsConsumer)
-		waitForLogs(t, 5, agentLogsConsumer)
+		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
+		internal.WaitForLogs(t, 5, agentLogsConsumer)
 		uninstallDeployment(t)
 	})
 
 	t.Run("check metrics only enabled", func(t *testing.T) {
-		resetLogsSink(t, agentLogsConsumer)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		checkNoMetricsReceived(t, hecMetricsConsumer)
-		checkNoEventsReceived(t, agentLogsConsumer)
+		internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
+		internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
@@ -225,14 +220,14 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 
-		waitForMetrics(t, 5, hecMetricsConsumer)
-		checkNoEventsReceived(t, agentLogsConsumer)
+		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
+		internal.CheckNoEventsReceived(t, agentLogsConsumer)
 		uninstallDeployment(t)
 	})
 
 	t.Run("check logs only enabled", func(t *testing.T) {
-		resetLogsSink(t, agentLogsConsumer)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": false,
@@ -240,10 +235,10 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 
-		waitForLogs(t, 5, agentLogsConsumer)
+		internal.WaitForLogs(t, 5, agentLogsConsumer)
 		uninstallDeployment(t)
-		resetLogsSink(t, agentLogsConsumer)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 	})
 }
 
@@ -256,9 +251,9 @@ func testIndexSwitch(t *testing.T) {
 
 	valuesFileName := "values_indexes_switching.yaml.tmpl"
 	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
-	checkNoMetricsReceived(t, hecMetricsConsumer)
+	internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
 	agentLogsConsumer := setupOnce(t).logsConsumer
-	checkNoEventsReceived(t, agentLogsConsumer)
+	internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
 	t.Run("check logs and metrics index switching", func(t *testing.T) {
 		replacements := map[string]interface{}{
@@ -267,8 +262,8 @@ func testIndexSwitch(t *testing.T) {
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 
-		waitForMetrics(t, 3, hecMetricsConsumer)
-		waitForLogs(t, 3, agentLogsConsumer)
+		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
+		internal.WaitForLogs(t, 3, agentLogsConsumer)
 
 		var sourcetypes []string
 		var indices []string
@@ -291,11 +286,11 @@ func testIndexSwitch(t *testing.T) {
 			"Sourcetype":           nonDefaultSourcetype,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetLogsSink(t, agentLogsConsumer)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		waitForMetrics(t, 3, hecMetricsConsumer)
-		waitForLogs(t, 3, agentLogsConsumer)
+		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
+		internal.WaitForLogs(t, 3, agentLogsConsumer)
 		logs = agentLogsConsumer.AllLogs()
 		sourcetypes, indices = getLogsIndexAndSourceType(logs)
 		t.Logf("Indices: %v", indices)
@@ -308,15 +303,15 @@ func testIndexSwitch(t *testing.T) {
 		assert.True(t, mIndices[0] == newMetricsIndex)
 	})
 	uninstallDeployment(t)
-	resetLogsSink(t, agentLogsConsumer)
-	resetMetricsSink(t, hecMetricsConsumer)
+	internal.ResetLogsSink(t, agentLogsConsumer)
+	internal.ResetMetricsSink(t, hecMetricsConsumer)
 }
 
 func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	valuesFileName := "values_cluster_receiver_switching.yaml.tmpl"
 	namespace := "default"
 	logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -332,7 +327,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 		pods = listPodsInNamespace(t, namespace)
 		assert.True(t, len(pods.Items) == 1)
 		assert.True(t, strings.HasPrefix(pods.Items[0].Name, "sock-splunk-otel-collector-agent"))
-		checkNoEventsReceived(t, logsObjectsConsumer)
+		internal.CheckNoEventsReceived(t, logsObjectsConsumer)
 
 		t.Log("cluster receiver enabled")
 		replacements = map[string]interface{}{
@@ -340,22 +335,22 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetLogsSink(t, logsObjectsConsumer)
+		internal.ResetLogsSink(t, logsObjectsConsumer)
 
 		pods = listPodsInNamespace(t, namespace)
 		assert.True(t, len(pods.Items) == 2)
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-agent"))
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-k8s-cluster-receiver"))
-		waitForLogs(t, 5, logsObjectsConsumer)
+		internal.WaitForLogs(t, 5, logsObjectsConsumer)
 	})
 	uninstallDeployment(t)
-	resetLogsSink(t, logsObjectsConsumer)
+	internal.ResetLogsSink(t, logsObjectsConsumer)
 }
 
 func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	attributesList := [4]string{"k8s.node.name", "k8s.pod.name", "k8s.pod.uid", "k8s.namespace.name"}
 
-	hostEp := hostEndpoint(t)
+	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
@@ -370,8 +365,8 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetLogsSink(t, logsObjectsConsumer)
-		waitForLogs(t, 5, logsObjectsConsumer)
+		internal.ResetLogsSink(t, logsObjectsConsumer)
+		internal.WaitForLogs(t, 5, logsObjectsConsumer)
 		t.Logf("===> >>>> Logs: %v", len(logsObjectsConsumer.AllLogs()))
 
 		for _, attr := range attributesList {
@@ -393,10 +388,10 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 		t.Logf("===> >>>> Metrics: %d", len(hecMetricsConsumer.AllMetrics()))
 
-		waitForMetrics(t, 5, hecMetricsConsumer)
+		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
 		for _, attr := range attributesList {
 			t.Log("Checking attributes: ", attr)
 			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)
@@ -415,9 +410,9 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 			"LogsEnabled":    true,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetLogsSink(t, agentLogsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
 
-		waitForLogs(t, 5, agentLogsConsumer)
+		internal.WaitForLogs(t, 5, agentLogsConsumer)
 		for _, attr := range attributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getLogsAttributes(agentLogsConsumer.AllLogs(), attr)
@@ -436,9 +431,9 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 			"LogsEnabled":    true,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		resetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		waitForMetrics(t, 5, hecMetricsConsumer)
+		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
 		for _, attr := range attributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)

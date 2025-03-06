@@ -1,11 +1,17 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package functional_tests
+package internal
 
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
+	"time"
+
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -14,14 +20,11 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/receiver/receivertest"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"os"
-	"path/filepath"
-	"runtime"
-	"testing"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
@@ -29,7 +32,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func hostEndpoint(t *testing.T) string {
+func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
 		return host
 	}
@@ -53,7 +56,7 @@ func hostEndpoint(t *testing.T) string {
 	return ""
 }
 
-func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
+func WaitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
 	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
 		return len(tc.AllTraces()) > entriesNum
@@ -62,7 +65,7 @@ func waitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
 		len(tc.AllTraces()), timeoutMinutes)
 }
 
-func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
+func WaitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
 	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
 		return len(lc.AllLogs()) > entriesNum
@@ -71,7 +74,7 @@ func waitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
 		len(lc.AllLogs()), timeoutMinutes)
 }
 
-func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) {
+func WaitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) {
 	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
 		return len(mc.AllMetrics()) > entriesNum
@@ -80,42 +83,42 @@ func waitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) 
 		len(mc.AllMetrics()), timeoutMinutes)
 }
 
-func checkNoEventsReceived(t *testing.T, lc *consumertest.LogsSink) {
+func CheckNoEventsReceived(t *testing.T, lc *consumertest.LogsSink) {
 	require.True(t, len(lc.AllLogs()) == 0,
 		"received %d logs, expected 0 logs", len(lc.AllLogs()))
 }
 
-func checkNoMetricsReceived(t *testing.T, lc *consumertest.MetricsSink) {
+func CheckNoMetricsReceived(t *testing.T, lc *consumertest.MetricsSink) {
 	require.True(t, len(lc.AllMetrics()) == 0,
 		"received %d metrics, expected 0 metrics", len(lc.AllMetrics()))
 }
 
-func resetMetricsSink(t *testing.T, mc *consumertest.MetricsSink) {
+func ResetMetricsSink(t *testing.T, mc *consumertest.MetricsSink) {
 	mc.Reset()
 	t.Logf("Metrics sink reset, current metrics: %d", len(mc.AllMetrics()))
 }
 
-func resetLogsSink(t *testing.T, lc *consumertest.LogsSink) {
+func ResetLogsSink(t *testing.T, lc *consumertest.LogsSink) {
 	lc.Reset()
 	t.Logf("Logs sink reset, current logs: %d", len(lc.AllLogs()))
 }
 
-func writeNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
+func WriteNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteTraces(t, filepath.Join("results", filepath.Base(file)), *trace))
 }
 
-func writeNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
+func WriteNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", filepath.Base(file)), *metric))
 }
 
-func writeNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
+func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteLogs(t, filepath.Join("results", filepath.Base(file)), *log))
 }
 
-func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
+func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
@@ -133,7 +136,8 @@ func setupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	return mc
 }
 
-func checkPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string, timeout time.Duration) {
+func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
+	timeout time.Duration) {
 	require.Eventually(t, func() bool {
 		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
 			LabelSelector: labelSelector,
@@ -161,7 +165,7 @@ func checkPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready", namespace, labelSelector)
 }
 
-func createNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
+func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -176,7 +180,7 @@ func createNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }
 
-func labelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
+func LabelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
 	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
 	require.NoError(t, err)
 	if ns.Labels == nil {
@@ -185,4 +189,11 @@ func labelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, va
 	ns.Labels[key] = value
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
+}
+
+func LoadCollectorChart(t *testing.T) *chart.Chart {
+	chartPath := filepath.Join("..", "..", "helm-charts", "splunk-otel-collector")
+	c, err := loader.Load(chartPath)
+	require.NoError(t, err)
+	return c
 }
