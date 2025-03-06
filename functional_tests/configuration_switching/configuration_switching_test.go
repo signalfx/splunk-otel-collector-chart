@@ -15,11 +15,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/receiver/receivertest"
 	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/assert"
@@ -37,12 +34,8 @@ import (
 )
 
 const (
-	hecReceiverPort            = 8090
-	hecMetricsReceiverPort     = 8091
-	apiPort                    = 8881
-	hecLogsObjectsReceiverPort = 8092
-	testDir                    = "testdata"
-	valuesDir                  = "values"
+	testDir   = "testdata"
+	valuesDir = "values"
 )
 
 var globalSinks *sinks
@@ -57,14 +50,10 @@ type sinks struct {
 
 func setupOnce(t *testing.T) *sinks {
 	setupRun.Do(func() {
-		// create an API server
-		internal.CreateApiServer(t, apiPort)
-		// set ingest pipelines
-		logs, metrics := setupHEC(t)
 		globalSinks = &sinks{
-			logsConsumer:        logs,
-			hecMetricsConsumer:  metrics,
-			logsObjectsConsumer: setupHECLogsObjects(t),
+			logsConsumer:        internal.SetupHECLogsSink(t),
+			hecMetricsConsumer:  internal.SetupHECMetricsSink(t),
+			logsObjectsConsumer: internal.SetupHECObjectsSink(t),
 		}
 		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 			teardown(t)
@@ -92,8 +81,8 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]interface{}{
-		"LogHecEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, hecReceiverPort),
-		"MetricHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecMetricsReceiverPort),
+		"LogHecEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+		"MetricHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
 	}
 	for k, v := range repl {
 		replacements[k] = v
@@ -315,7 +304,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort)
+	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 	t.Run("check cluster receiver enabled", func(t *testing.T) {
 		replacements := map[string]interface{}{
@@ -358,7 +347,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	t.Run("verify cluster receiver attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
-		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort)
+		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": true,
@@ -381,7 +370,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	t.Run("verify cluster receiver metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
-		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort)
+		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": true,
@@ -625,52 +614,4 @@ func uninstallDeployment(t *testing.T) {
 	}
 	t.Logf("Uninstalled release: %v", uninstallResponse)
 	waitForAllPodsToBeRemoved(t, "default")
-}
-
-func setupHEC(t *testing.T) (*consumertest.LogsSink, *consumertest.MetricsSink) {
-	// the splunkhecreceiver does poorly at receiving logs and metrics. Use separate ports for now.
-	f := splunkhecreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecReceiverPort)
-
-	mCfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	mCfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecMetricsReceiverPort)
-
-	lc := new(consumertest.LogsSink)
-	mc := new(consumertest.MetricsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, lc)
-	mrcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), mCfg, mc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating logs receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	require.NoError(t, mrcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating metrics receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, mrcvr.Shutdown(context.Background()))
-	})
-
-	return lc, mc
-}
-
-func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
-	f := splunkhecreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecLogsObjectsReceiverPort)
-
-	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, lc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating logs receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return lc
 }

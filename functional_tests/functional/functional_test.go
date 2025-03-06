@@ -19,17 +19,13 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.opentelemetry.io/collector/receiver/otlpreceiver"
-	"go.opentelemetry.io/collector/receiver/receivertest"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/kube"
@@ -53,14 +49,8 @@ import (
 )
 
 const (
-	hecReceiverPort                        = 8090
-	hecMetricsReceiverPort                 = 8091
-	hecLogsObjectsReceiverPort             = 8092
 	signalFxReceiverPort                   = 9443
 	signalFxReceiverK8sClusterReceiverPort = 19443
-	otlpReceiverPort                       = 4317
-	otlpHTTPReceiverPort                   = 4318
-	apiPort                                = 8881
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
 	autopilotTestKubeEnv                   = "gke/autopilot"
@@ -93,17 +83,15 @@ type sinks struct {
 func setupOnce(t *testing.T) *sinks {
 	setupRun.Do(func() {
 		// create an API server
-		internal.CreateApiServer(t, apiPort)
-		// set ingest pipelines
-		logs, metrics := setupHEC(t)
+		internal.SetupSignalFxApiServer(t)
 		globalSinks = &sinks{
-			logsConsumer:         logs,
-			hecMetricsConsumer:   metrics,
-			logsObjectsConsumer:  setupHECLogsObjects(t),
+			logsConsumer:         internal.SetupHECLogsSink(t),
+			hecMetricsConsumer:   internal.SetupHECMetricsSink(t),
+			logsObjectsConsumer:  internal.SetupHECObjectsSink(t),
 			agentMetricsConsumer: internal.SetupSignalfxReceiver(t, signalFxReceiverPort),
 			k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
 				signalFxReceiverK8sClusterReceiverPort),
-			tracesConsumer: setupTraces(t),
+			tracesConsumer: internal.SetupOTLPTracesSink(t),
 		}
 		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 			teardown(t)
@@ -225,11 +213,11 @@ func deployChartsAndApps(t *testing.T) {
 	}{
 		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
 		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, hecReceiverPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecMetricsReceiverPort),
-		fmt.Sprintf("%s:%d", hostEp, otlpReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, apiPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEp, hecLogsObjectsReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+		fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
+		fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+		fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
 		kubeTestEnv,
 	}
 	tmpl, err := template.New("").Parse(string(valuesBytes))
@@ -1447,73 +1435,6 @@ func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset)
 		}
 		return true
 	}, 5*time.Minute, 10*time.Second)
-}
-
-func setupTraces(t *testing.T) *consumertest.TracesSink {
-	tc := new(consumertest.TracesSink)
-	f := otlpreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpReceiverPort)
-	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", otlpHTTPReceiverPort)
-
-	rcvr, err := f.CreateTraces(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, tc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating traces receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return tc
-}
-
-func setupHEC(t *testing.T) (*consumertest.LogsSink, *consumertest.MetricsSink) {
-	// the splunkhecreceiver does poorly at receiving logs and metrics. Use separate ports for now.
-	f := splunkhecreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecReceiverPort)
-
-	mCfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	mCfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecMetricsReceiverPort)
-
-	lc := new(consumertest.LogsSink)
-	mc := new(consumertest.MetricsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, lc)
-	mrcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), mCfg, mc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating logs receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	require.NoError(t, mrcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating metrics receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, mrcvr.Shutdown(context.Background()))
-	})
-
-	return lc, mc
-}
-
-func setupHECLogsObjects(t *testing.T) *consumertest.LogsSink {
-	f := splunkhecreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", hecLogsObjectsReceiverPort)
-
-	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, lc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating logs receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return lc
 }
 
 func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(string, pcommon.Map) bool) {

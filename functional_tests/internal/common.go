@@ -5,7 +5,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,13 +12,10 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.opentelemetry.io/collector/receiver/receivertest"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	v1 "k8s.io/api/core/v1"
@@ -28,7 +24,6 @@ import (
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -116,24 +111,6 @@ func WriteNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Me
 func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
 	require.NoError(t, os.MkdirAll("results", 0755))
 	require.NoError(t, golden.WriteLogs(t, filepath.Join("results", filepath.Base(file)), *log))
-}
-
-func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
-	mc := new(consumertest.MetricsSink)
-	f := signalfxreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
-
-	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, mc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating metrics receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return mc
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,

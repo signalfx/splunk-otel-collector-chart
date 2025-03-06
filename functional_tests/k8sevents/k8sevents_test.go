@@ -36,11 +36,6 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-const (
-	apiPort               = 8881
-	splunkHecReceiverPort = 8089
-)
-
 var setupRun = sync.Once{}
 var eventsLogsConsumer *consumertest.LogsSink
 
@@ -134,9 +129,9 @@ func setup(t *testing.T) *consumertest.LogsSink {
 			teardown(t, k8sClient)
 		}
 
-		internal.CreateApiServer(t, apiPort)
+		internal.SetupSignalFxApiServer(t)
 
-		eventsLogsConsumer = setupHECLogsReceiver(t, splunkHecReceiverPort)
+		eventsLogsConsumer = internal.SetupHECLogsSink(t)
 
 		if os.Getenv("SKIP_SETUP") == "true" {
 			t.Log("Skipping setup as SKIP_SETUP is set to true")
@@ -169,8 +164,8 @@ func deployWorkloadAndCollector(t *testing.T) {
 		ApiURL string
 		LogURL string
 	}{
-		fmt.Sprintf("http://%s:%d", hostEp, apiPort),
-		fmt.Sprintf("http://%s:%d", hostEp, splunkHecReceiverPort),
+		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+		fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 	}
 	tmpl, err := template.New("").Parse(string(valuesBytes))
 	require.NoError(t, err)
@@ -246,7 +241,7 @@ metadata:
 func setupHECLogsReceiver(t *testing.T, port int) *consumertest.LogsSink {
 	f := splunkhecreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", splunkHecReceiverPort)
+	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", internal.HECLogsReceiverPort)
 
 	receiver := new(consumertest.LogsSink)
 	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, receiver)

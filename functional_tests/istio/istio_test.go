@@ -41,7 +41,6 @@ import (
 )
 
 const (
-	apiPort              = 8881
 	signalFxReceiverPort = 9943
 	istioVersion         = "1.24.2"
 )
@@ -71,7 +70,7 @@ func setupOnce(t *testing.T) *consumertest.MetricsSink {
 		}
 
 		// create an API server
-		internal.CreateApiServer(t, apiPort)
+		internal.SetupSignalFxApiServer(t)
 
 		istioMetricsConsumer = internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
 
@@ -136,7 +135,7 @@ func deployIstioAndCollector(t *testing.T) {
 		ApiURL    string
 	}{
 		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, apiPort),
+		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
 	tmpl, err := template.New("").Parse(string(valuesBytes))
 	require.NoError(t, err)
