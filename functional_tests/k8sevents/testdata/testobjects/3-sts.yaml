@@ -13,13 +13,19 @@ spec:
     metadata:
       labels:
         app: k8sevents-test
+      annotations:
+        splunk.com/index: index_from_pod
     spec:
       serviceAccountName: k8sevents-test
       containers:
         - image: busybox:latest
           imagePullPolicy: Always
-          name: k8sevents-test
+          name: container-1
           command: ["sleep", "infinity"]
           ports:
             - containerPort: 80
               name: http
+        - image: alpine:latest
+          imagePullPolicy: Always
+          name: container-2
+          command: ["sleep", "infinity"]

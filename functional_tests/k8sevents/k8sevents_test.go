@@ -52,7 +52,6 @@ var eventsLogsConsumer *consumertest.LogsSink
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
 func Test_K8SEvents(t *testing.T) {
-	t.Skip("Skip until fixed")
 	eventsLogsConsumer := setup(t)
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
@@ -64,8 +63,8 @@ func Test_K8SEvents(t *testing.T) {
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
 		k8sEventsLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
-			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\)`)
-			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
+			re := regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\)`)
+			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
 
@@ -96,7 +95,7 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "resourceVersion"}, "85980")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
-		// k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "functional_test.test")
+		// k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes based on test env
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
@@ -207,6 +206,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 
 	// Deploy the workload
 	internal.CreateNamespace(t, clientset, "k8sevents-test")
+	internal.AnnotateNamespace(t, clientset, "k8sevents-test", "com.splunk.index", "index_from_namespace")
 	createdObjs, err := k8stest.CreateObjects(k8sClient, "testdata/testobjects")
 	require.NoError(t, err)
 	require.NotEmpty(t, createdObjs)
