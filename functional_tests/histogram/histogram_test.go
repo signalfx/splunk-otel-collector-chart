@@ -5,7 +5,6 @@ package histogram
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,13 +16,10 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/receiver/receivertest"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/kube"
@@ -43,7 +39,7 @@ var histogramMetricsConsumer *consumertest.MetricsSink
 
 func setupOnce(t *testing.T) *consumertest.MetricsSink {
 	setupRun.Do(func() {
-		histogramMetricsConsumer = setupOtlpReceiver(t, otlpReceiverPort)
+		histogramMetricsConsumer = internal.SetupSignalfxReceiver(t, otlpReceiverPort)
 
 		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 			teardown(t)
@@ -57,24 +53,6 @@ func setupOnce(t *testing.T) *consumertest.MetricsSink {
 	})
 
 	return histogramMetricsConsumer
-}
-
-func setupOtlpReceiver(t *testing.T, port int) *consumertest.MetricsSink {
-	mc := new(consumertest.MetricsSink)
-	f := signalfxreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
-
-	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, mc)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, err, "failed creating metrics receiver")
-	t.Cleanup(func() {
-		assert.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return mc
 }
 
 func deployChartsAndApps(t *testing.T) {
