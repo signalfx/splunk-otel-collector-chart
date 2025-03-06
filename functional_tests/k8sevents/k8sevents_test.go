@@ -66,7 +66,11 @@ func Test_K8SEvents(t *testing.T) {
 			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\).*`)
 			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
 		})
+
+		// These container attributes may not get added by the k8sattributesprocessor on the events about container creation
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
+		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.name")
+		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.tag")
 
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"
 		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
