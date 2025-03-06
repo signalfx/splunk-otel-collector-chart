@@ -63,7 +63,7 @@ func Test_K8SEvents(t *testing.T) {
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
 		k8sEventsLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
-			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\)`)
+			re := regexp.MustCompile(`Successfully pulled image "busybox:latest" in .* \(.* including waiting\).*`)
 			return re.ReplaceAllString(body, `Successfully pulled image "busybox:latest" in <time> (<time> including waiting)`)
 		})
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
