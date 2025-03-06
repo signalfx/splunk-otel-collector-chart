@@ -96,7 +96,7 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "resourceVersion"}, "85980")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
-		// k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "functional_test.test")
+		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes when the test name which runs k8s client changes
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
