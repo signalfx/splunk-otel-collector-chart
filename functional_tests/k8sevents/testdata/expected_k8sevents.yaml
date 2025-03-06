@@ -3,7 +3,7 @@ resourceLogs:
       attributes:
         - key: host.name
           value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-859c547cf4gxb2v
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-85d7cfbb9bhldfw
         - key: com.splunk.source
           value:
             stringValue: kubernetes
@@ -51,16 +51,16 @@ resourceLogs:
                   stringValue: k8sevents-test
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6564"
+                  stringValue: "41768"
               - key: k8s.object.uid
                 value:
-                  stringValue: f2e7892f-3bd7-4fa1-a942-4e0e53d7206b
+                  stringValue: 4570e7a8-45cb-4ec3-a762-86d432681925
               - key: k8s.statefulset.name
                 value:
                   stringValue: k8sevents-test
               - key: k8s.statefulset.uid
                 value:
-                  stringValue: f2e7892f-3bd7-4fa1-a942-4e0e53d7206b
+                  stringValue: 4570e7a8-45cb-4ec3-a762-86d432681925
               - key: metric_source
                 value:
                   stringValue: kubernetes
@@ -76,9 +76,32 @@ resourceLogs:
             body:
               stringValue: create Pod k8sevents-test-0 in StatefulSet k8sevents-test successful
             spanId: ""
-            timeUnixNano: "1741202680000000000"
+            timeUnixNano: "1741277160000000000"
             traceId: ""
+        scope: {}
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-85d7cfbb9bhldfw
+        - key: com.splunk.source
+          value:
+            stringValue: kubernetes
+        - key: com.splunk.sourcetype
+          value:
+            stringValue: kube:events
+        - key: com.splunk.index
+          value:
+            stringValue: index_from_pod
+    scopeLogs:
+      - logRecords:
           - attributes:
+              - key: otel.log.severity.text
+                value:
+                  stringValue: Normal
+              - key: otel.log.severity.number
+                value:
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -99,7 +122,7 @@ resourceLogs:
                   stringValue: k8sevents-test
               - key: k8s.node.name
                 value:
-                  stringValue: ""
+                  stringValue: kind-control-plane
               - key: k8s.object.api_version
                 value:
                   stringValue: v1
@@ -114,51 +137,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6568"
+                  stringValue: "41770"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Successfully assigned k8sevents-test/k8sevents-test-0 to kind-control-plane
             spanId: ""
-            timeUnixNano: "1741202680000000000"
+            timeUnixNano: "1741277160000000000"
             traceId: ""
-        scope: {}
-  - resource:
-      attributes:
-        - key: host.name
-          value:
-            stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-859c547cf4gxb2v
-        - key: com.splunk.source
-          value:
-            stringValue: kubernetes
-        - key: com.splunk.sourcetype
-          value:
-            stringValue: kube:events
-        - key: com.splunk.index
-          value:
-            stringValue: index_from_pod
-    scopeLogs:
-      - logRecords:
           - attributes:
+              - key: otel.log.severity.text
+                value:
+                  stringValue: Normal
+              - key: otel.log.severity.number
+                value:
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -197,34 +203,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Pulling image "busybox:latest"
             spanId: ""
-            timeUnixNano: "1741202680000000000"
+            timeUnixNano: "1741277161000000000"
             traceId: ""
           - attributes:
+              - key: otel.log.severity.text
+                value:
+                  stringValue: Normal
+              - key: otel.log.severity.number
+                value:
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -263,34 +269,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Successfully pulled image "busybox:latest" in <time> (<time> including waiting)
             spanId: ""
-            timeUnixNano: "1741202681000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
+              - key: otel.log.severity.text
+                value:
+                  stringValue: Normal
+              - key: otel.log.severity.number
+                value:
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -329,34 +335,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Created container container-1
             spanId: ""
-            timeUnixNano: "1741202681000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
+              - key: otel.log.severity.text
+                value:
+                  stringValue: Normal
+              - key: otel.log.severity.number
+                value:
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -395,40 +401,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Started container container-1
             spanId: ""
-            timeUnixNano: "1741202681000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
-              - key: container.image.name
+              - key: otel.log.severity.text
                 value:
-                  stringValue: alpine
-              - key: container.image.tag
+                  stringValue: Normal
+              - key: otel.log.severity.number
                 value:
-                  stringValue: latest
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -467,40 +467,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Pulling image "alpine:latest"
             spanId: ""
-            timeUnixNano: "1741202681000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
-              - key: container.image.name
+              - key: otel.log.severity.text
                 value:
-                  stringValue: alpine
-              - key: container.image.tag
+                  stringValue: Normal
+              - key: otel.log.severity.number
                 value:
-                  stringValue: latest
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -539,40 +533,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Successfully pulled image "alpine:latest" in <time> (<time> including waiting)
             spanId: ""
-            timeUnixNano: "1741202684000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
-              - key: container.image.name
+              - key: otel.log.severity.text
                 value:
-                  stringValue: alpine
-              - key: container.image.tag
+                  stringValue: Normal
+              - key: otel.log.severity.number
                 value:
-                  stringValue: latest
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -611,40 +599,34 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Created container container-2
             spanId: ""
-            timeUnixNano: "1741202684000000000"
+            timeUnixNano: "1741277162000000000"
             traceId: ""
           - attributes:
-              - key: container.image.name
+              - key: otel.log.severity.text
                 value:
-                  stringValue: alpine
-              - key: container.image.tag
+                  stringValue: Normal
+              - key: otel.log.severity.number
                 value:
-                  stringValue: latest
+                  doubleValue: 9
               - key: deployment.environment
                 value:
                   stringValue: dev
@@ -683,31 +665,25 @@ resourceLogs:
                   stringValue: k8sevents-test-0
               - key: k8s.object.resource_version
                 value:
-                  stringValue: "6570"
+                  stringValue: "41773"
               - key: k8s.object.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: k8s.pod.name
                 value:
                   stringValue: k8sevents-test-0
               - key: k8s.pod.uid
                 value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
+                  stringValue: 114fb04b-2063-4923-a43e-01376a3d3d60
               - key: metric_source
                 value:
                   stringValue: kubernetes
               - key: os.type
                 value:
                   stringValue: linux
-              - key: otel.log.severity.number
-                value:
-                  doubleValue: 9
-              - key: otel.log.severity.text
-                value:
-                  stringValue: Normal
             body:
               stringValue: Started container container-2
             spanId: ""
-            timeUnixNano: "1741202684000000000"
+            timeUnixNano: "1741277163000000000"
             traceId: ""
         scope: {}

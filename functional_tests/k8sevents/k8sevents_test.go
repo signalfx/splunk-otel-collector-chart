@@ -207,7 +207,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 	// Deploy the workload
 	internal.CreateNamespace(t, clientset, "k8sevents-test")
 	internal.AnnotateNamespace(t, clientset, "k8sevents-test", "com.splunk.index", "index_from_namespace")
-	createdObjs, err := k8stest.CreateObjects(k8sClient, "testdata_k8sevents/testobjects")
+	createdObjs, err := k8stest.CreateObjects(k8sClient, "testdata/testobjects")
 	require.NoError(t, err)
 	require.NotEmpty(t, createdObjs)
 
