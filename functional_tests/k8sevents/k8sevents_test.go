@@ -108,6 +108,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
+			plogtest.IgnoreLogRecordAttributeValue("com.splunk.index"), // this can be different based on whether the k8sattributes processor matches a pod, remove once processor is disabled
 			plogtest.IgnoreResourceLogsOrder(),
 			plogtest.IgnoreScopeLogsOrder(),
 			plogtest.IgnoreLogRecordsOrder(),
