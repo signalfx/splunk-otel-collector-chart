@@ -216,6 +216,9 @@ k8sattributes/clusterReceiver:
   pod_association:
     - sources:
       - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
         name: k8s.namespace.name
     - sources:
       - from: resource_attribute

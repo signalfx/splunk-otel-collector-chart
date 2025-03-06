@@ -174,3 +174,14 @@ func LoadCollectorChart(t *testing.T) *chart.Chart {
 	require.NoError(t, err)
 	return c
 }
+
+func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
+	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+	require.NoError(t, err)
+	if ns.Annotations == nil {
+		ns.Annotations = make(map[string]string)
+	}
+	ns.Annotations[key] = value
+	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
+	require.NoError(t, err)
+}
