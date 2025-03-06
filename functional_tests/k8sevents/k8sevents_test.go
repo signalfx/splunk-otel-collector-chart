@@ -5,7 +5,6 @@ package k8sevents
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,13 +18,10 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/receiver/receivertest"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/kube"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -108,6 +104,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
+			plogtest.IgnoreResourceAttributeValue("com.splunk.index"), // this is flaky, the index can be the value from pod annotation due to the k8sattributes processor in the pipeline or main
 			plogtest.IgnoreResourceLogsOrder(),
 			plogtest.IgnoreScopeLogsOrder(),
 			plogtest.IgnoreLogRecordsOrder(),
@@ -238,23 +235,6 @@ kind: Namespace
 metadata:
   name: k8sevents-test
 `)
-}
-
-func setupHECLogsReceiver(t *testing.T, port int) *consumertest.LogsSink {
-	f := splunkhecreceiver.NewFactory()
-	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", internal.HECLogsReceiverPort)
-
-	receiver := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, receiver)
-	require.NoError(t, err)
-
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
-	t.Cleanup(func() {
-		require.NoError(t, rcvr.Shutdown(context.Background()))
-	})
-
-	return receiver
 }
 
 func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
