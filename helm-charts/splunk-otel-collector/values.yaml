@@ -1384,3 +1384,6 @@ featureGates:
   explicitMountServiceAccountToken: false
   # Use a specific metrics pipeline to report control plane metrics as histograms.
   useControlPlaneMetricsHistogramData: false
+  # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
+  # rolled over during high load.
+  fixMissedLogsDuringLogRotation: false

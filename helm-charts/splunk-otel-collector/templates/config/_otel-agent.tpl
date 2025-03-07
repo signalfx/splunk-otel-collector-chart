@@ -410,14 +410,31 @@ receivers:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
+    {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
     {{- if .Values.isWindows }}
     include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
     {{- else }}
     include: ["/var/log/pods/*/*/*.log"]
     {{- end }}
+    {{- else }}
+    {{- if .Values.isWindows }}
+    include: ["C:\\var\\log\\pods\\*\\*\\*.log*"]
+    {{- else }}
+    include: ["/var/log/pods/*/*/*.log*"]
+    {{- end }}
+    {{- end }}
     # Exclude logs. The file format is
     # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<restart_count>.log
     exclude:
+      {{- if .Values.featureGates.fixMissedLogsDuringLogRotation }}
+      {{- if .Values.isWindows }}
+      - "C:\\var\\log\\pods\\*\\*\\*.log*.gz"
+      - "C:\\var\\log\\pods\\*\\*\\*.log*.tmp"
+      {{- else }}
+      - "/var/log/pods/*/*/*.log*.gz"
+      - "/var/log/pods/*/*/*.log*.tmp"
+      {{- end }}
+      {{- end }}
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       {{- if .Values.isWindows }}
       - "C:\\var\\log\\pods\\{{ template "splunk-otel-collector.namespace" . }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
@@ -516,10 +533,18 @@ receivers:
         value: ""
       # Extract metadata from file path
       - type: regex_parser
+        {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
         {{- if .Values.isWindows }}
         regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
         {{- else }}
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
+        {{- end }}
+        {{- else }}
+        {{- if .Values.isWindows }}
+        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log'
+        {{- else }}
+        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log'
+        {{- end }}
         {{- end }}
         parse_from: attributes["log.file.path"]
       # Move out attributes to Attributes
