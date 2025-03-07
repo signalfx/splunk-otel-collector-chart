@@ -18,10 +18,6 @@ metadata:
 data:
   relay: |
     exporters:
-      otlphttp/entities:
-        headers:
-          X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-        logs_endpoint: https://ingest..signalfx.com/v3/event
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: http://localhost:8088/services/collector
@@ -266,7 +262,6 @@ data:
         storage: file_storage
       fluentforward:
         endpoint: 0.0.0.0:8006
-      nop: null
       otlp:
         protocols:
           grpc:
@@ -312,16 +307,6 @@ data:
           - filelog
           - fluentforward
           - otlp
-        logs/entities:
-          exporters:
-          - otlphttp/entities
-          processors:
-          - memory_limiter
-          - batch
-          - resourcedetection
-          - resource
-          receivers:
-          - nop
       telemetry:
         metrics:
           readers:
