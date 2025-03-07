@@ -16,6 +16,24 @@ agent:
       telemetry:
         logs:
           level: debug
+    receivers:
+      receiver_creator:
+        receivers:
+          prometheus/kubernetes-apiserver:
+            rule: type == "pod" && pod.labels["component"] == "kube-apiserver"
+            config:
+              config:
+                scrape_configs:
+                  - job_name: "kubernetes-apiserver"
+                    scheme: https
+                    authorization:
+                      credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                      type: Bearer
+                    tls_config:
+                      ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                      insecure_skip_verify: true
+                    static_configs:
+                      - targets: [ "`endpoint`:6443" ]
   controlPlaneMetrics:
     etcd:
       enabled: true
