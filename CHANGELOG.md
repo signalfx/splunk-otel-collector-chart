@@ -4,6 +4,28 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.120.1] - 2025-03-07
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: For the option, `clusterReceiver.eventsEnabled`, the logs pipeline for k8s_events now adds attributes of the type `k8s.<objectkind>.name` and `k8s.<objectkind>.uid`. ([#1691](https://github.com/signalfx/splunk-otel-collector-chart/pull/1691))
+  For example, if the log k8s event is about object type `StatefulSet`, the exported log to Splunk will have these 2 additional attributes:
+  ```
+    k8s.statefulset.name: value(k8s.object.name)
+    k8s.statefulset.uid: value(k8s.object.uid)
+  ```
+  The existing attributes `k8s.object.kind`, `k8s.object.name` and `k8s.object.uid` are still present.
+  In addition to these, if the event is for kind Pod, and the k8s.object.fieldPath has a specific container spec, the log will have an additional attribute `k8s.container.name` with the value of the container name.
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Do not setup the entities pipeline if Splunk Observability isn't enabled. ([#1699](https://github.com/signalfx/splunk-otel-collector-chart/pull/1699))
+- `agent`: a fix for a scenario where some logs might be missed due to the pod log file being rolled over during high load, set featureGates.fixMissedLogsDuringLogRotation to true to enable the fix ([#1690](https://github.com/signalfx/splunk-otel-collector-chart/pull/1690))
+- `all`: Restore values of `service.name` resource attribute for internal metrics changed in 0.120.0 ([#1692](https://github.com/signalfx/splunk-otel-collector-chart/pull/1692))
+  The value of `service.name` resource attribute was changed to `otelcol` due to a library upgrade
+  in the Prometheus receiver. This change restores the values that were set before the based on the
+  collector mode: `otel-agent`, `otel-collector` or `otel-k8s-cluster-receiver`.
+
 ## [0.120.0] - 2025-03-03
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.120.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.120.0).
