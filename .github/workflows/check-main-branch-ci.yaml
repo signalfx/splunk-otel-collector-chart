@@ -1,0 +1,58 @@
+name: Check main branch status
+
+on:
+  pull_request:
+
+jobs:
+  block-release-if-main-broken:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          # Fetch all history so we can access the base branch commit
+          fetch-depth: 0
+
+      - name: Get base version
+        # Pull the Chart.yaml from the base commit, then extract `.version` using yq
+        run: |
+          base_version=$(git show origin/${{ github.event.pull_request.base.ref }}:helm-charts/splunk-otel-collector/Chart.yaml \
+            | yq e '.version' -)
+          echo "base_version=$base_version" >> $GITHUB_ENV
+
+      - name: Get PR version
+        # Extract `.version` from the PR's current Chart.yaml
+        run: |
+          pr_version=$(yq e '.version' helm-charts/splunk-otel-collector/Chart.yaml)
+          echo "pr_version=$pr_version" >> $GITHUB_ENV
+
+      - name: Compare versions
+        id: compare
+        run: |
+          echo "Base version: ${{ env.base_version }}"
+          echo "PR version: ${{ env.pr_version }}"
+
+          if [ "${{ env.base_version }}" = "${{ env.pr_version }}" ]; then
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "No version change detected — skipping main-branch check."
+          else
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "Version changed!"
+          fi
+
+      - name: Check main branch build status
+        # Only run this step if the version actually changed
+        if: steps.compare.outputs.version_changed == 'true'
+        run: |
+          response=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/main/status")
+
+          state=$(echo "$response" | jq -r '.state')
+
+          if [ "$state" != "success" ]; then
+            echo "Release cannot be created until the main branch status is success. The current status is $state."
+            exit 1
+          fi
+
+          echo "Main branch is healthy. Proceed..."
