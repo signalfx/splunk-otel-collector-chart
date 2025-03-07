@@ -29,6 +29,31 @@ jobs:
           fi
           exit 0
 
+      - name: Check last workflow run status on main
+        id: check_main_status
+        run: |
+          end=$((SECONDS+900)) // 15 minutes
+          while [ $SECONDS -lt $end ]; do
+            STATUS=$(gh run list --branch main --limit 1 --json status,conclusion --jq '.[0].status')
+            CONCLUSION=$(gh run list --branch main --limit 1 --json status,conclusion --jq '.[0].conclusion')
+            if [ "$STATUS" == "completed" ]; then
+              if [ "$CONCLUSION" == "success" ]; then
+                echo "The last workflow run on main was successful."
+                exit 0
+              else
+                echo "The last workflow run on main was not successful. Blocking release."
+                exit 1
+              fi
+            fi
+            echo "The last workflow run on main is still in progress. Waiting..."
+            sleep 30
+          done
+          echo "The last workflow run on main did not complete within the timeour. Please try create the release after the run completes."
+          exit 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
+
       - name: Configure Git
         run: git config user.name "$GITHUB_ACTOR" && git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
