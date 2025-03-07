@@ -98,7 +98,9 @@ jobs:
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: eks-access
     env:
@@ -134,7 +136,9 @@ jobs:
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: eks-access
     env:
@@ -193,7 +197,9 @@ jobs:
   eks-upgrade-from-release-test:
     name: Test helm upgrade from release in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: eks-access
     env:
@@ -248,7 +254,9 @@ jobs:
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: gke-autopilot-access
     env:
@@ -286,7 +294,9 @@ jobs:
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: gke-autopilot-access
     env:
@@ -345,7 +355,9 @@ jobs:
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: aks-windows-group
     env:
@@ -384,7 +396,9 @@ jobs:
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     concurrency:
       group: gce-access
     env:
