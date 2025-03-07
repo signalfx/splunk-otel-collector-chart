@@ -40,8 +40,10 @@ receivers:
     endpoint: 0.0.0.0:8006
   {{- end }}
 
+  {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode
   nop:
+  {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
@@ -835,21 +837,21 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
-  {{- end }}
-
-  {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
-  signalfx/histograms:
-    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    send_otlp_histograms: true
-  {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+
+  {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
+  signalfx/histograms:
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    send_otlp_histograms: true
+  {{- end }}
+  {{- end }}
 
 service:
   telemetry:
@@ -1081,7 +1083,18 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+    logs/entities:
+      # Receivers are added dinamically if discovery mode is enabled
+      receivers: [nop]
+      processors:
+        - memory_limiter
+        - batch
+        - resourcedetection
+        - resource
+      exporters: [otlphttp/entities]
+
+    {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
     metrics/histograms:
       receivers:
        - receiver_creator
@@ -1094,16 +1107,7 @@ service:
       exporters:
         - signalfx/histograms
     {{- end }}
-
-    logs/entities:
-      # Receivers are added dinamically if discovery mode is enabled
-      receivers: [nop]
-      processors:
-        - memory_limiter
-        - batch
-        - resourcedetection
-        - resource
-      exporters: [otlphttp/entities]
+    {{- end }}
 {{- end }}
 {{/*
 Discovery properties for the otel-collector agent
