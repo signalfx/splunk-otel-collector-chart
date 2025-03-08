@@ -168,8 +168,8 @@ func LabelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, va
 	require.NoError(t, err)
 }
 
-func LoadCollectorChart(t *testing.T) *chart.Chart {
-	chartPath := filepath.Join("..", "..", "helm-charts", "splunk-otel-collector")
+func LoadCollectorChart(t *testing.T, subdir string) *chart.Chart {
+	chartPath := filepath.Join("..", "..", subdir, "helm-charts", "splunk-otel-collector")
 	c, err := loader.Load(chartPath)
 	require.NoError(t, err)
 	return c

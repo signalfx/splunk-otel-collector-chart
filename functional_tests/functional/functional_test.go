@@ -61,6 +61,7 @@ const (
 	manifestsDir                           = "manifests"
 	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
+	helmActionTimeout                      = 5 * time.Minute
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -93,22 +94,24 @@ func setupOnce(t *testing.T) *sinks {
 				signalFxReceiverK8sClusterReceiverPort),
 			tracesConsumer: internal.SetupOTLPTracesSink(t),
 		}
+
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		internal.AcquireLeaseForTest(t, testKubeConfig)
 		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t)
+			teardown(t, testKubeConfig)
 		}
 		// deploy the chart and applications.
 		if os.Getenv("SKIP_SETUP") == "true" {
 			t.Log("Skipping setup as SKIP_SETUP is set to true")
 			return
 		}
-		deployChartsAndApps(t)
+		deployChartsAndApps(t, testKubeConfig)
 	})
 
 	return globalSinks
 }
-func deployChartsAndApps(t *testing.T) {
-	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
@@ -182,7 +185,7 @@ func deployChartsAndApps(t *testing.T) {
 		}
 	}, 1*time.Minute, 5*time.Second)
 
-	chart := internal.LoadCollectorChart(t)
+	chart := internal.LoadCollectorChart(t, "")
 
 	var valuesBytes []byte
 	switch kubeTestEnv {
@@ -235,18 +238,35 @@ func deployChartsAndApps(t *testing.T) {
 	}); err != nil {
 		require.NoError(t, err)
 	}
+
 	install := action.NewInstall(actionConfig)
 	install.Namespace = "default"
 	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
+	install.Timeout = helmActionTimeout
+
+	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
+	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
+	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
+	if upgradeFromValues != "" {
+		// install the base chart
+		initValuesBytes, rfErr := os.ReadFile(filepath.Join(testDir, valuesDir, upgradeFromValues))
+		require.NoError(t, rfErr)
+		initChart := internal.LoadCollectorChart(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
+		var initValues map[string]interface{}
+		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
+		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
+
+		// test the upgrade
+		upgrade := action.NewUpgrade(actionConfig)
+		upgrade.Namespace = "default"
+		upgrade.Install = true
+		upgrade.Timeout = helmActionTimeout
+		_, err = upgrade.Run("sock", chart, values)
+	} else {
+		_, err = install.Run(chart, values)
 	}
+	require.NoError(t, err)
 
 	waitForAllDeploymentsToStart(t, client)
 
@@ -405,14 +425,12 @@ func deployChartsAndApps(t *testing.T) {
 			return
 		}
 		t.Log("Cleaning up cluster")
-		teardown(t)
+		teardown(t, testKubeConfig)
 
 	})
 }
 
-func teardown(t *testing.T) {
-	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+func teardown(t *testing.T, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
@@ -515,6 +533,7 @@ func teardown(t *testing.T) {
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
+	uninstall.Timeout = helmActionTimeout
 	_, _ = uninstall.Run("sock")
 }
 
