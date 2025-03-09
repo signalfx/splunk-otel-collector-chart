@@ -58,7 +58,7 @@ func Test_K8SEvents(t *testing.T) {
 			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
 
-		// These container attributes may not get added by the k8sattributesprocessor on the events about container image pull/start
+		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.name")
 		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.tag")
@@ -92,6 +92,10 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes when the test name which runs k8s client changes
+
+		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
+		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.name")
+		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.tag")
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
