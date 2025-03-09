@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	otlpReceiverPort = 4317
-
-	valuesDir = "values"
+	otlpReceiverPort     = 4317
+	valuesDir            = "values"
+	helmUninstallTimeout = 5 * time.Minute
 )
 
 var setupRun = sync.Once{}
@@ -116,7 +116,11 @@ func teardown(t *testing.T) {
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	uninstall.Timeout = helmUninstallTimeout
+	_, err := uninstall.Run("sock")
+	if err != nil {
+		t.Logf("error reported during helm uninstall: %v\n", err)
+	}
 }
 
 func Test_Histograms(t *testing.T) {
