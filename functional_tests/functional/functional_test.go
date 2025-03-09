@@ -61,6 +61,7 @@ const (
 	manifestsDir                           = "manifests"
 	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
+	helmUninstallTimeout                   = 5 * time.Minute
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -515,7 +516,11 @@ func teardown(t *testing.T) {
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	uninstall.Timeout = helmUninstallTimeout
+	_, err = uninstall.Run("sock")
+	if err != nil {
+		t.Logf("error reported during helm uninstall: %v\n", err)
+	}
 }
 
 func Test_Functions(t *testing.T) {
