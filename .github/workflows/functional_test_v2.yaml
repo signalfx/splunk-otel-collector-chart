@@ -101,8 +101,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
@@ -139,8 +137,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
@@ -200,8 +196,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
@@ -257,8 +251,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gke-autopilot-access
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
@@ -297,8 +289,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gke-autopilot-access
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
@@ -358,8 +348,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: aks-windows-group
     env:
       KUBE_TEST_ENV: aks
       SKIP_TESTS: "true"
@@ -399,8 +387,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gce-access
     env:
       KUBE_TEST_ENV: gce
       SKIP_TESTS: "true"

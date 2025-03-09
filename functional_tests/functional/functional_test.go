@@ -61,6 +61,7 @@ const (
 	manifestsDir                           = "manifests"
 	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
+	helmUninstallTimeout                   = 5 * time.Minute
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -120,6 +121,8 @@ func deployChartsAndApps(t *testing.T) {
 	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	internal.AcquireLeaseForTest(t, client)
 
 	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
 	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
@@ -515,7 +518,11 @@ func teardown(t *testing.T) {
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	uninstall.Timeout = helmUninstallTimeout
+	_, err = uninstall.Run("sock")
+	if err != nil {
+		t.Logf("error reported during helm uninstall: %v\n", err)
+	}
 }
 
 func Test_Functions(t *testing.T) {
