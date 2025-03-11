@@ -1279,9 +1279,7 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		"istio_agent_go_gc_cycles_total_gc_cycles_total",
 		"istio_agent_go_gc_duration_seconds_sum",
 		"istio_agent_go_gc_duration_seconds_count",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_bucket",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
+		"istio_agent_go_gc_heap_allocs_by_size_bytes_total",
 	}
 	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
 	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
