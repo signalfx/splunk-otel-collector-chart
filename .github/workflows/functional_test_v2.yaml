@@ -214,7 +214,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: base
-          ref: splunk-otel-collector-0.109.0
+          ref: splunk-otel-collector-0.120.0
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
