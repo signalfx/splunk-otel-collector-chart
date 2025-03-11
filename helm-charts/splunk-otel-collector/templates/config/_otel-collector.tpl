@@ -110,6 +110,7 @@ exporters:
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sending_queue:
       num_consumers: 32
+    send_otlp_histograms: true
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}

@@ -862,6 +862,7 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
+    send_otlp_histograms: true
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:

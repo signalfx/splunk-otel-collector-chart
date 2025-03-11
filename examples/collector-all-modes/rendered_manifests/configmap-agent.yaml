@@ -31,6 +31,7 @@ data:
         api_url: http://default-splunk-otel-collector:6060
         correlation: null
         ingest_url: http://default-splunk-otel-collector:9943
+        send_otlp_histograms: true
         sync_host_metadata: true
     extensions:
       health_check:

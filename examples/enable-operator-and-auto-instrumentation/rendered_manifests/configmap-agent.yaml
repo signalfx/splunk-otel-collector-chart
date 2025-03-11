@@ -32,6 +32,7 @@ data:
         api_url: https://api.us0.signalfx.com
         correlation: null
         ingest_url: https://ingest.us0.signalfx.com
+        send_otlp_histograms: true
         sync_host_metadata: true
       splunk_hec/o11y:
         disable_compression: true

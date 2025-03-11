@@ -32,6 +32,7 @@ data:
         api_url: https://api.CHANGEME.signalfx.com
         correlation: null
         ingest_url: https://ingest.CHANGEME.signalfx.com
+        send_otlp_histograms: true
         sync_host_metadata: true
     extensions:
       health_check:
