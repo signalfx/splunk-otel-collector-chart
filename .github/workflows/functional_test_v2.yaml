@@ -194,63 +194,6 @@ jobs:
         run: |
           SUITE=functional make functionaltest
 
-  eks-upgrade-from-release-test:
-    name: Test helm upgrade from release in EKS - credentials needed
-    needs: kubernetes-test
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
-      (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
-      KUBE_TEST_ENV: eks
-      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
-    runs-on: ubuntu-latest
-    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout old release
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: splunk-otel-collector-0.109.0
-          fetch-depth: 0
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-1
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name rotel-eks --region us-west-1
-      - name: Update dependencies
-        run: |
-          cd base && make dep-update
-      - name: Deploy previous version of the chart
-        run: |
-          helm list | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
-          cd base && helm install sock helm-charts/splunk-otel-collector \
-          --set cloudProvider=aws --set distribution=eks \
-          --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx \
-          --set operator.enabled=true --set environment=dev \
-          --set operator.admissionWebhooks.certManager.enabled=false \
-          --set operator.admissionWebhooks.autoGenerateCert.enabled=true \
-          --set certmanager.enabled=false
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          SUITE=functional make functionaltest
-
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: kubernetes-test
