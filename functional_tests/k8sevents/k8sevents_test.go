@@ -96,6 +96,9 @@ func Test_K8SEvents(t *testing.T) {
 		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
 		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.name")
 		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.tag")
+		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.node.name")
+		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.name")
+		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.uid")
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
@@ -106,7 +109,6 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreObservedTimestamp(),
 			plogtest.IgnoreResourceAttributeValue("host.name"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
-			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
 			plogtest.IgnoreResourceAttributeValue("com.splunk.index"), // this is flaky, the index can be the value from pod annotation due to the k8sattributes processor in the pipeline or main
 			plogtest.IgnoreResourceLogsOrder(),

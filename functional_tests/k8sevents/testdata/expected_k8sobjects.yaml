@@ -31,15 +31,6 @@ resourceLogs:
               - key: k8s.namespace.name
                 value:
                   stringValue: k8sevents-test
-              - key: k8s.node.name
-                value:
-                  stringValue: kind-control-plane
-              - key: k8s.pod.name
-                value:
-                  stringValue: k8sevents-test-0
-              - key: k8s.pod.uid
-                value:
-                  stringValue: ce3f6e1c-f11a-404d-bfd3-5f41811f9133
               - key: k8s.resource.name
                 value:
                   stringValue: services
