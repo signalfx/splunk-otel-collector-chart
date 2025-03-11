@@ -12,6 +12,10 @@ agent:
     - name: SPLUNK_DEBUG_CONFIG_SERVER
       value: "true"
   config:
+    # disable batching as the control plain metrics are compared separately for each receiver
+    processor:
+      batch:
+        timeout: 0
     service:
       telemetry:
         logs:

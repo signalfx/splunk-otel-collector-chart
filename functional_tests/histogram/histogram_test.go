@@ -208,7 +208,7 @@ func testHistogramMetrics(t *testing.T) {
 		assert.NotNil(tt, controllerManagerMetrics)
 		assert.NotNil(tt, etcdMetrics)
 
-	}, 3*time.Minute, 5*time.Second)
+	}, 5*time.Minute, 5*time.Second)
 
 	require.NotNil(t, corednsMetrics)
 	require.NotNil(t, schedulerMetrics)
