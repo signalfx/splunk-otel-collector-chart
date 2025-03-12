@@ -101,8 +101,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
@@ -139,8 +137,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: eks-access
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
@@ -180,19 +176,14 @@ jobs:
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
       - name: Update dependencies
         run: |
-          cd base && make dep-update
-      - name: Deploy previous version of the chart
-        run: |
-          helm list | grep -q "^sock$" && echo "Found previous 'sock' release. Deleting..." && helm delete sock
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
-      - name: Update dependencies
-        run: |
-          make dep-update
+          make dep-update && cd base && make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
+          UPGRADE_FROM_VALUES: aws_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_CHART_DIR: base
         run: |
-          SUITE=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
@@ -200,8 +191,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gke-autopilot-access
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
@@ -240,8 +229,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gke-autopilot-access
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
@@ -283,17 +270,14 @@ jobs:
           project_id: ${{ secrets.GKE_PROJECT }}
       - name: Update dependencies
         run: |
-          make dep-update
-      - name: Deploy previous version of the chart
-        run: |
-          cd base
-          helm dependency update helm-charts/splunk-otel-collector
-          helm install sock helm-charts/splunk-otel-collector --set cloudProvider=gcp --set distribution=gke/autopilot --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+          make dep-update && cd base && make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
+          UPGRADE_FROM_VALUES: gke_autopilot_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_CHART_DIR: base
         run: |
-          SUITE=functional make functionaltest
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
@@ -301,8 +285,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: aks-windows-group
     env:
       KUBE_TEST_ENV: aks
       SKIP_TESTS: "true"
@@ -342,8 +324,6 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.ref == 'refs/heads/main')
-    concurrency:
-      group: gce-access
     env:
       KUBE_TEST_ENV: gce
       SKIP_TESTS: "true"
