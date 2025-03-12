@@ -231,7 +231,9 @@ func getCompareMetricsOptions(file string, expectedMetrics *pmetric.Metrics, act
 		removeAttr := []string{"code", "resource", "subresource", "verb", "component", "scope", "version"}
 		removeAttributes(expectedMetrics, "apiserver_request_total", removeAttr)
 		removeAttributes(actualMetrics, "apiserver_request_total", removeAttr)
-		fmt.Printf("Metric names ignore %d", len(metricNames))
+
+		// apiserver_watch_events_total metric can conditionally have below attributes
+		removeAttributes(expectedMetrics, "apiserver_watch_events_total", []string{"group"})
 
 		componentIgnoreOptions = []pmetrictest.CompareMetricsOption{
 			pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
