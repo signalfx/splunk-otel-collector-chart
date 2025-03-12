@@ -85,7 +85,7 @@ func testHistogramMetrics(t *testing.T) {
 	testInputs := []TestInput{
 		{"scheduler_metrics.yaml", "scheduler_queue_incoming_pods_total"},
 		{"kubeproxy_metrics.yaml", "kubeproxy_sync_proxy_rules_iptables_total"},
-		{"api_server_metrics.yaml", "apiserver_flowcontrol_current_r"},
+		{"api_server_metrics.yaml", "apiserver_request_total"},
 		{"controller_manager_metrics.yaml", "endpoint_slice_controller_endpoints_removed_per_sync"},
 		{"coredns_metrics.yaml", "coredns_dns_request_duration_seconds"},
 		{"etcd_metrics.yaml", "etcd_cluster_version"},
