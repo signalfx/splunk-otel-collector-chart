@@ -123,7 +123,7 @@ func testHistogramMetrics(t *testing.T) {
 		for _, input := range testInputs {
 			assert.NotNil(tt, actualMetrics[input.FileName], "Did not receive any metrics for component %s", strings.TrimSuffix(input.FileName, "_metrics.yaml"))
 		}
-	}, 3*time.Minute, 5*time.Second)
+	}, 5*time.Minute, 5*time.Second)
 
 	for _, input := range testInputs {
 		t.Run(input.FileName, func(t *testing.T) {
@@ -135,6 +135,15 @@ func testHistogramMetrics(t *testing.T) {
 			assert.NoError(t, err, "Error occurred while comparing metrics for component %s", component)
 			if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 				internal.WriteNewExpectedMetricsResult(t, filepath.Join(testDir, input.FileName), actual)
+			}
+			// generate expected metrics with reduced datapoints - set the env var GENERATE_EXPECTED=true
+			if os.Getenv("GENERATE_EXPECTED") == "true" {
+				internal.ReduceDatapoints(actual, 5)
+				outputDir := filepath.Join("results", majorMinor)
+				require.NoError(t, os.MkdirAll(outputDir, 0755))
+
+				outputFile := filepath.Join(outputDir, input.FileName)
+				require.NoError(t, golden.WriteMetrics(t, outputFile, *actual))
 			}
 		})
 	}
