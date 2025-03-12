@@ -16,6 +16,7 @@ on:
         default: false
 
 env:
+  GO_VERSION: 1.23.6
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
@@ -43,24 +44,18 @@ jobs:
           - functional
           - histogram
           - configuration_switching
+          - k8sevents
+          - istio
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.22.5
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Create kind cluster
-        uses: helm/kind-action@v1.11.0
+        uses: helm/kind-action@v1.12.0
         with:
           node_image: kindest/node:${{ matrix.k8s-version }}
           kubectl_version: ${{ matrix.k8s-version }}
@@ -72,16 +67,12 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
-      - name: Deploy cert-manager
-        run: |
-          make cert-manager
       - name: run functional tests
         id: run-functional-tests
         env:
           K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} go test -v -tags ${{ matrix.test-job }}
+          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
       - name: Collect Kubernetes Cluster debug info on failure
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
         id: collect-debug-info
@@ -107,29 +98,21 @@ jobs:
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: eks-access
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -142,26 +125,24 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
-      - name: Deploy cert-manager
-        run: |
-          make cert-manager
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: eks-access
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout main if in a PR
@@ -182,17 +163,8 @@ jobs:
         run: cd base && git checkout HEAD^
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -204,59 +176,40 @@ jobs:
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
       - name: Update dependencies
         run: |
-          cd base && make dep-update
-      - name: Deploy cert-manager
-        run: |
-          cd base && make cert-manager
-      - name: Deploy previous version of the chart
-        run: |
-          cd base && helm install sock helm-charts/splunk-otel-collector --set cloudProvider=aws --set distribution=eks --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: Deploy cert-manager
-        run: |
-          make cert-manager
+          make dep-update && cd base && make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
+          UPGRADE_FROM_VALUES: aws_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_CHART_DIR: base
         run: |
-          cd functional_tests
-          go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: gke-autopilot-access
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.7'
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
+      - uses: 'google-github-actions/auth@v2.1.8'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.1.2
+      - uses: google-github-actions/setup-gcloud@v2.1.4
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.3.0
+      - uses: google-github-actions/get-gke-credentials@v2.3.3
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
@@ -268,19 +221,19 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: gke-autopilot-access
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout main if in a PR
@@ -301,69 +254,48 @@ jobs:
         run: cd base && git checkout HEAD^
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-      - uses: 'google-github-actions/auth@v2.1.7'
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
+      - uses: 'google-github-actions/auth@v2.1.8'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.1.2
+      - uses: google-github-actions/setup-gcloud@v2.1.4
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@v2.3.0
+      - uses: google-github-actions/get-gke-credentials@v2.3.3
         with:
           cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
           location: ${{ secrets.GKE_REGION }}
           project_id: ${{ secrets.GKE_PROJECT }}
       - name: Update dependencies
         run: |
-          make dep-update
-      - name: Deploy previous version of the chart
-        run: |
-          cd base
-          helm dependency update helm-charts/splunk-otel-collector
-          helm install sock helm-charts/splunk-otel-collector --set cloudProvider=gcp --set distribution=gke/autopilot --set splunkObservability.realm=us0 --set splunkObservability.accessToken=xxxxx
+          make dep-update && cd base && make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
+          UPGRADE_FROM_VALUES: gke_autopilot_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_CHART_DIR: base
         run: |
-          cd functional_tests
-          go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: aks-windows-group
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: aks
       SKIP_TESTS: "true"
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Set up kubelogin for non-interactive login
         uses: azure/use-kubelogin@v1.2
         with:
@@ -384,34 +316,25 @@ jobs:
         env:
           HOST_ENDPOINT: 0.0.0.0
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
     needs: kubernetes-test
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    concurrency:
-      group: gce-access
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gce
       SKIP_TESTS: "true"
     runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ~1.21.8
-          cache: false
-      - name: Cache Go
-        id: go-cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
       - name: Update dependencies
         run: |
           make dep-update
@@ -424,5 +347,4 @@ jobs:
           HOST_ENDPOINT: 0.0.0.0
           KUBECONFIG: /tmp/kubeconfig
         run: |
-          cd functional_tests
-          TEARDOWN_BEFORE_SETUP=true go test -v -tags functional
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest

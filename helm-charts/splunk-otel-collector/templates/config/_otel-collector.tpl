@@ -98,6 +98,13 @@ processors:
         key: deployment.environment
   {{- end }}
 
+  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
+  resource/add_mode:
+    attributes:
+      - action: insert
+        value: "gateway"
+        key: otelcol.service.mode
+
 exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
@@ -139,6 +146,8 @@ exporters:
   {{- end }}
 service:
   telemetry:
+    resource:
+      service.name: otel-collector
     metrics:
       readers:
         - pull:
@@ -146,6 +155,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   extensions:
     - health_check
     - zpages
@@ -179,6 +191,7 @@ service:
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
         - otlphttp
+        - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
@@ -262,6 +275,7 @@ service:
         - batch
         - resource/add_collector_k8s
         - resourcedetection
+        - resource/add_mode
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
         {{- end }}

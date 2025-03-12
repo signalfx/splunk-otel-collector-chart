@@ -72,7 +72,7 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 #		make render VALUES="values1.yaml values2.yaml"
 .PHONY: render
 render: dep-update ## Render the Helm chart with the examples as input. Users can also provide value overrides.
-	@examples/render-examples.sh $(VALUES) || exit 1
+	@ci_scripts/render-examples.sh $(VALUES) || exit 1
 
 ##@ Test
 # Tasks related to testing the Helm chart
@@ -91,6 +91,14 @@ pre-commit: render ## Test the Helm chart with pre-commit
 unittest: ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
 	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../test/unittests/*.yaml" . || exit 1
+
+# Example Usage:
+#   make functionaltest
+#   make functionaltest SKIP_SETUP=true SKIP_TEARDOWN=true SKIP_TESTS=true TEARDOWN_BEFORE_SETUP=true SUITE="functional" UPDATE_EXPECTED_RESULTS=true KUBE_TEST_ENV="kind" KUBECONFIG="/path/to/kubeconfig"
+.PHONY: functionaltest
+functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
+	@echo "Running functional tests for this helm chart..."
+	cd functional_tests && go test -v ./$(SUITE)/... || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management

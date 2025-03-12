@@ -1,5 +1,184 @@
 # Upgrade guidelines
 
+## 0.119.0 to 0.120.0
+
+This guide provides steps for new users, transitioning users, and those maintaining previously deployed Operator-related TLS certificates and configurations.
+
+- New users: No migration is required for Operator TLS certificates.
+- Previous users: Migration may be needed if using `operator.enabled=true` or `certmanager.enabled=true`.
+
+To maintain previous functionality and avoid breaking changes, review the following sections.
+
+### **Maintaining Previous Functionality via Helm Values Update**
+
+#### **Scenario 1: Operator and cert-manager Deployed via This Helm Chart**
+
+If you previously deployed both the Operator and cert-manager via this Helm chart (`operator.enabled=true` and `certmanager.enabled=true`), you can preserve functionality by adding the following values:
+
+```yaml
+operator:
+  enabled: true
+  admissionWebhooks:
+    certManager:
+      enabled: true
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+certmanager:
+  enabled: true
+  installCRDs: true
+```
+
+#### **Scenario 2: Operator Deployed with External cert-manager (Not Managed by This Helm Chart)**
+
+If you previously deployed the Operator and used an externally managed cert-manager (`operator.enabled=true` and `certmanager.enabled=false`), you can preserve functionality by adding the following values:
+
+```yaml
+operator:
+  enabled: true
+  admissionWebhooks:
+    certManager:
+      enabled: true
+```
+
+### **Adopting New Functionality (Requires Migration Steps)**
+
+If you want to migrate from cert-manager managed certificates to the now default Helm-generated certificates, additional steps may be required to avoid conflicts.
+
+#### **Potential Upgrade Issue: Existing Secret Conflict**
+
+If you see an error message like the following during a Helm install or upgrade:
+
+```
+warning: Upgrade "{helm_release_name}" failed: pre-upgrade hooks failed: warning: Hook pre-upgrade splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml failed: 1 error occurred:* secrets "splunk-otel-collector-operator-controller-manager-service-cert" already exists
+```
+
+This typically occurs because:
+- cert-manager deletes its `Certificate` resources immediately.
+- However, cert-manager does not delete the associated **secrets** instantly. It waits for its garbage collector process to remove them.
+
+You will first have to delete this chart, wait for cert-manager to do garbage collection, and then install the latest version of this chart.
+With the assumption your Helm release is named "splunk-otel-collector", we show the commands to run below.
+- `Be aware these steps likely include the operator being unavailable and having down time for this service in your environment.`
+
+#### **Step 1: Delete this Helm Chart**
+
+Use a command like this to delete the chart in your namespace:
+
+```bash
+helm delete splunk-otel-collector --namespace <your_namespace>
+```
+
+#### **Step 2: Verify If the Old Cert Manager Secret Does Not Exists Anymore**
+
+Use the following command to check if the certificate secret remains in your namespace:
+
+```bash
+kubectl get secret splunk-otel-collector-operator-controller-manager-service-cert --namespace <your_namespace>
+```
+
+#### **Step 3: Wait for Secret Removal or Manually Delete It**
+
+If the secret still exists, you must wait for cert-manager to remove it or delete it manually:
+
+```bash
+kubectl delete secret splunk-otel-collector-operator-controller-manager-service-cert --namespace <your_namespace>
+```
+
+#### **Step 4: Proceed with Helm Install**
+
+Once the secret is no longer present, you can install the chart with the latest version (`0.120.0`) successfully:
+
+```bash
+helm install splunk-otel-collector splunk-otel-collector-chart/splunk-otel-collector --values ~/values.yaml --namespace <your_namespace>
+```
+#### **Step 5 (Optional): Delete cert-manager CRDs**
+
+Helm delete will not remove CRDs objects created as part of the cert-manager installation. You can find the command to delete cert-manager CRDs in their official documentation [here](https://cert-manager.io/docs/installation/helm/#uninstalling-with-helm).
+## 0.113.0 to 0.116.0
+
+This guide provides steps for new users, transitioning users, and those maintaining previous operator CRD configurations:
+- New users: No migration for CRDs is required.
+- Previous users: Migration may be needed if using `operator.enabled=true`.
+
+CRD deployment has evolved over chart versions:
+- Before 0.110.0: CRDs were deployed via a crds/ directory (upstream default).
+- 0.110.0 to 1.113.0: CRDs were deployed using Helm templates  (upstream default), which had reported issues.
+- 0.116.0 and later:  Users must now explicitly configure their preferred CRD deployment method or deploy the
+  [CRDs manually](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management)
+  to avoid potential issues. Users can deploy CRDs via a crds/ directory again by enabling a newly added value.
+
+### **New Users**
+
+New users are advised to deploy CRDs via the `crds/` directory. For a fresh installation, use the following Helm values:
+
+```yaml
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+```
+
+To install the chart:
+
+```bash
+helm install <release-name> splunk-otel-collector-chart/splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
+```
+
+### **Current Users (Recommended Migration to `crds/` Directory)**
+
+If you're using chart versions 0.110.0 to 1.113.0, CRDs are likely deployed via Helm templates. To migrate to the recommended `crds/` directory deployment:
+
+#### Step 1: Delete the Existing Chart
+
+Remove the chart to prepare for a fresh installation:
+
+```bash
+helm delete <release-name>
+```
+
+#### Step 2: Verify or Remove Existing CRDs
+
+Check if the following CRDs are present and delete them if necessary:
+
+```bash
+kubectl get crds | grep opentelemetry
+```
+
+```bash
+kubectl delete crd opentelemetrycollectors.opentelemetry.io
+kubectl delete crd opampbridges.opentelemetry.io
+kubectl delete crd instrumentations.opentelemetry.io
+```
+
+#### Step 3: Reinstall with Recommended Values
+
+Reinstall the chart with the updated configuration:
+```bash
+helm install <release-name> splunk-otel-collector --set operatorcrds.install=true,operator.enabled=true <extra_args>
+```
+
+### **Previous Users (Maintaining Legacy Helm Templates)**
+
+If you're using chart versions 0.110.0 to 1.113.0 and prefer to continue deploying CRDs via Helm templates (not recommended), you can do so with the following values:
+
+```yaml
+operator:
+  enabled: true
+operator:
+  crds:
+    create: true
+```
+
+**Warning**: This method may cause race conditions during installation or upgrades, leading to errors like:
+```plaintext
+ERROR: INSTALLATION FAILED: failed post-install: warning: Hook post-install splunk-otel-collector/templates/operator/instrumentation.yaml failed: 1 error occurred:
+* Internal error occurred: failed calling webhook "minstrumentation.kb.io": failed to call webhook: Post "https://splunk-otel-collector-operator-webhook.default.svc:443/mutate-opentelemetry-io-v1alpha1-instrumentation?timeout=10s": dial tcp X.X.X.X:443: connect: connection refused
+```
+
 ## 0.105.5 to 0.108.0
 
 We've simplified the Helm chart configuration for `operator` auto-instrumentation.

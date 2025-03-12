@@ -320,6 +320,8 @@ agent:
         # NOTE: The content of the file itself should be used here, not the file path.
         #       The file will be stored as a secret in kubernetes.
         caFile: ""
+        # Secret annotations
+        annotations: {}
       # Specifies whether the etcd's TLS cert will be verified. If set to false, a CA certificate must be made
       # available as part of the etcd secret to verify the TLS cert with.
       skipVerify: true
@@ -473,9 +475,12 @@ clusterReceiver:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Security context applied to the otel-collector container in the cluster receiver deployment.
+  containerSecurityContext: {}
 
   # k8s cluster receiver collector annotations
   annotations: {}
@@ -509,8 +514,8 @@ clusterReceiver:
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
-  # * namespace:
-  #     only collects objects from the specified namespace, by default it's all namespaces
+  # * namespaces:
+  #     only collects objects from the specified list of namespaces, by default it's all namespaces
   # * labelSelector:
   #     select objects by label(s)
   # * fieldSelector:
@@ -975,6 +980,16 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
+  # Image to be used by a container to validate the secret's presence ahead of starting a helm install or upgrade using pre-install and pre-upgrade Helm hooks.
+  # Effective only if `secret.create` is set to false and `secret.validateSecret` is set to true (default).
+  validateSecret:
+    # The registry and name of the Universal Base Image 9 image to pull
+    repository: registry.access.redhat.com/ubi9/ubi
+    # The tag of the Universal Base Image 9, default value is latest
+    tag: ""
+    # The policy that specifies when the user wants the Universal Base images to be pulled
+    pullPolicy: IfNotPresent
+
 
 ################################################################################
 # Extra system configuration
@@ -1010,6 +1025,8 @@ secret:
   name: ""
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
+  # Secret annotations
+  annotations: {}
 
 # The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
 # and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
@@ -1124,9 +1141,12 @@ gateway:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Security context applied to the otel-collector container in the gateway deployment.
+  containerSecurityContext: {}
 
   # OTel collector annotations
   annotations: {}
@@ -1174,17 +1194,29 @@ service:
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-operator?modal=values
 ################################################################################
 
+# Specify whether the chart should install CRDs automatically.
+# Related Documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management
+operatorcrds:
+  # Set to true to install CRDs automatically, or false to manage them manually.
+  install: false
+
 operator:
   enabled: false
+  # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
+  # a race condition with helm.
+  # See: https://github.com/open-telemetry/opentelemetry-helm-charts/issues/677
+  # Users of this chart should _never_ set this to be true. If a user wishes
+  # to install the CRDs through the opentelemetry-operator chart, it is recommended
+  # to install the opentelemetry-operator chart separately and prior to the installation
+  # of this chart.
+  crds:
+    create: false
   admissionWebhooks:
+    autoGenerateCert:
+      enabled: true
+      certPeriodDays: 3650
     certManager:
-      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
-      issuerAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+      enabled: false
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:
@@ -1203,7 +1235,19 @@ instrumentation:
   endpoint: ""
   # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
   # endpoint: http://splunk-otel-collector:4317
-
+  # Optional "propagators" parameter for enabling trace context propagation, see: https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  # "tracecontext": W3C Trace Context
+  # "baggage": W3C Baggage
+  # "b3": B3 Single
+  # "b3multi": B3 Multi
+  # "jaeger": Jaeger
+  # "xray": AWS X-Ray (third party)
+  # "ottrace": OT Trace (third party)
+  # "none": No automatically configured propagator.
   # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
   sampler: {}
   # type: traceidratio
@@ -1228,9 +1272,10 @@ instrumentation:
   #   - repository: Specifies the Docker image repository.
   #   - tag: Indicates the Docker image tag.
   #   - env: (Optional) Allows you to add any additional environment variables.
+  # Auto-instrumentation Libraries (Start)
   java:
     repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-    tag: v2.10.0
+    tag: v2.13.0
     # env:
     #   - name: JAVA_ENV_VAR
     #     value: java_value
@@ -1242,13 +1287,13 @@ instrumentation:
     #     value: nodejs_value
   dotnet:
     repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-    tag: v1.8.0
+    tag: v1.9.0
     env:
       - name: OTEL_DOTNET_AUTO_PLUGINS
         value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
   go:
-    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
-    tag: v0.10.1-alpha
+    repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
+    tag: v0.19.0-alpha
     # env:
     #   - name: GO_ENV_VAR
     #     value: go_value
@@ -1260,7 +1305,7 @@ instrumentation:
     #     value: apache_value
   python:
     repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
-    tag: 0.44b0
+    tag: 0.50b0
     # env:
     # - name: PYTHON_ENV_VAR
     #   value: python_value
@@ -1339,3 +1384,6 @@ featureGates:
   explicitMountServiceAccountToken: false
   # Use a specific metrics pipeline to report control plane metrics as histograms.
   useControlPlaneMetricsHistogramData: false
+  # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
+  # rolled over during high load.
+  fixMissedLogsDuringLogRotation: false

@@ -13,16 +13,18 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-operator
+{{- if .Values.operator.crds.create }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "5"
+{{- end }}
 spec:
   exporter:
     endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . }}
+  {{- with .Values.instrumentation.propagators }}
   propagators:
-    - tracecontext
-    - baggage
-    - b3
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.instrumentation.sampler }}
   sampler:
     {{- toYaml . | nindent 4 }}

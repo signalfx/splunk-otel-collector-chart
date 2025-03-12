@@ -26,6 +26,8 @@ these frameworks often have pre-built instrumentation capabilities already avail
 ### 1. Deploy the Helm Chart with the Operator enabled
 
 - **Operator Deployment (Required)**
+  - `operatorcrds.install`: Set to `true` to install the CRDs required by the operator.
+    - **Required**: Must be set unless CRDs are pre-installed manually.
   - `operator.enabled`: Set to `true` to enable deploying the operator.
     - **Required**: This configuration is necessary for the operator's deployment within your cluster.
 
@@ -66,11 +68,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
         - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml).
 
 ```bash
-# Check if cert-manager is already installed, don't deploy a second cert-manager.
-kubectl get pods -l app=cert-manager --all-namespaces
-
-# If cert-manager is not deployed, make sure to add certmanager.enabled=true to the list of values to set
-helm install splunk-otel-collector -f ./my_values.yaml --set operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
@@ -284,6 +282,11 @@ in a Kubernetes environment. An operator is a method of packaging, deploying, an
 In the context of setting up observability in a Kubernetes environment, an operator simplifies the management of
 application auto-instrumentation, making it easier to gain valuable insights into application performance.
 
+The OpenTelemetry operator relies on
+[Custom Resource Definitions (CRDs)](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)
+to manage auto-instrumentation configurations in Kubernetes.
+Ensure the required CRDs are deployed before the operator by configuring `operatorcrds.install=true`.
+
 With this Splunk OTel Collector chart, the
 [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection)
 can be deployed (by configuring `operator.enabled=true`) to your cluster and start auto-instrumenting your applications.
@@ -403,13 +406,153 @@ provides best effort support with issues related to native OpenTelemetry instrum
 | apache-httpd            | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
 | nginx                   | OpenTelemetry | Available   | Needs Validation |                              | [Link](https://github.com/open-telemetry/opentelemetry-apache-httpd-instrumentation) | ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd |
 
-### Documentation Resources
+### CRD Management
 
-- https://developers.redhat.com/devnation/tech-talks/using-opentelemetry-on-kubernetes
-- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md
-- https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
-- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#opentelemetry-auto-instrumentation-injection
-- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#use-customized-or-vendor-instrumentation
+When deploying the operator, the required Custom Resource Definitions (CRDs) must be deployed beforehand.
+
+#### Recommended Approach: Automated CRD Deployment
+
+Set the Helm chart value `operatorcrds.install=true` to allow the chart to handle CRD installation automatically.
+_This option deploys the CRDs using a local subchart, available at [opentelemetry-operator-crds](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)._
+_Please note, helm will not update or delete these CRDs after initial install as noted in their [documentation](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#some-caveats-and-explanations)._
+
+#### Alternative Approach: Manual CRD Deployment
+
+If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
+
+```bash
+curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
+curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
+```
+
+You can also use below helm template command to get the CRD yamls from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
+
+```bash
+helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
+--set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster,operatorcrds.install=true" \
+| yq e '. | select(.kind == "CustomResourceDefinition")' \
+| kubectl apply -f -
+```
+
+#### CRD Updates
+
+With Helm v3.0 and later, CRDs created by this chart are not updated automatically. To update CRDs, you must apply the updated CRD definitions manually.
+Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/) for more details.
+
+#### CRD Cleanup
+
+When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following commands:
+
+```bash
+kubectl delete crd opentelemetrycollectors.opentelemetry.io
+kubectl delete crd opampbridges.opentelemetry.io
+kubectl delete crd instrumentations.opentelemetry.io
+```
+You can use below combination of helm and kubectl command to delete CRDs.
+
+```bash
+helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
+--set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster,operatorcrds.install=true" \
+| yq e '. | select(.kind == "CustomResourceDefinition")' \
+| kubectl delete --dry-run=client -f -
+```
+
+### TLS Certificate Requirement for Kubernetes Operator Webhooks
+
+In Kubernetes, the API server communicates with operator webhook components over HTTPS, which requires a valid TLS certificate that the API server trusts. The operator supports several methods for configuring the required certificate, each with different levels of complexity and security.
+
+---
+
+#### 1. **Using a Self-Signed Certificate Generated by the Chart**
+
+This is the default and simplest method for generating a TLS certificate. It automatically creates a self-signed certificate for the webhook, making it suitable for internal environments or testing purposes. However, it may not be trusted by clients outside your cluster.
+
+**Note**: The following settings reflect the default values starting in **v1.20.0** of this chart. You only need to update them if using a **previous chart version** or if additional customization is required.
+
+```yaml
+operator:
+  admissionWebhooks:
+    autoGenerateCert:
+      enabled: true
+      certPeriodDays: 3650
+    certManager:
+      enabled: false
+```
+
+- Setting `operator.admissionWebhooks.certManager.enabled` to `false` and `operator.admissionWebhooks.autoGenerateCert.enabled` to `true` ensures that Helm generates a self-signed TLS certificate.
+- Helm generates a self-signed certificate that is valid for 10 years (3650 days) and stores it in a secret for the Operator webhook. The certificate's validity period can be adjusted using `operator.admissionWebhooks.autoGenerateCert.certPeriodDays`.
+- The certificate is **automatically regenerated** on every Helm upgrade. To disable this behavior, set `operator.admissionWebhooks.autoGenerateCert.recreate` to `false`.
+
+---
+
+#### 2. **Using a cert-manager Certificate**
+
+Using `cert-manager` offers more control over certificate management and is more suitable for production environments. However, due to Helm’s install/upgrade order of operations, cert-manager CRDs and certificates cannot be installed within the same Helm operation. To work around this limitation, you can choose one of the following options:
+
+##### Option 1: **Pre-deploy cert-manager**
+
+If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm.
+
+**Configuration:**
+```yaml
+operator:
+  admissionWebhooks:
+    certManager:
+      enabled: true
+```
+
+##### Option 2: **Deploy cert-manager and the operator together**
+
+If you need to install `cert-manager` along with the operator, use a Helm post-install or post-upgrade hook to ensure that the certificate is created after cert-manager CRDs are installed.
+
+**Configuration:**
+```yaml
+operator:
+  admissionWebhooks:
+    certManager:
+      enabled: true
+      certificateAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+      issuerAnnotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "1"
+certmanager:
+  enabled: true
+  installCRDs: true
+```
+
+This method is useful when installing `cert-manager` as a subchart or as part of a larger Helm chart installation.
+
+---
+
+#### 3. **Using a Custom Externally Generated Certificate**
+
+For full control, you can use an externally generated certificate. This is suitable if you already have a certificate issued by a trusted CA or have specific security requirements.
+
+**Configuration:**
+- Set both `operator.admissionWebhooks.certManager.enabled` and `operator.admissionWebhooks.autoGenerateCert.enabled` to `false`.
+- Provide the paths to your certificate (`certFile`), private key (`keyFile`), and CA certificate (`caFile`) in the values.
+
+**Example:**
+```yaml
+operator:
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: false
+    certFile: /path/to/cert.crt
+    keyFile: /path/to/cert.key
+    caFile: /path/to/ca.crt
+```
+
+This method allows you to use a certificate that is trusted by external systems, such as certificates issued by a corporate CA.
+
+---
+
+For more advanced use cases, refer to the [official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml) for detailed configuration options and scenarios.
 
 ### Troubleshooting the Operator and Cert Manager
 
@@ -429,55 +572,10 @@ kubectl logs -l app=cainjector
 kubectl logs -l app=webhook
 ```
 
-#### Operator Issues
+### Documentation Resources
 
-##### Networking and Firewall Requirements
-
-Ensure the Mutating Webhook used by the operator for pod auto-instrumentation is not hindered by network policies or firewall rules. Key points to ensure:
-
-- **Webhook Accessibility**: The webhook must freely communicate with the cluster IP and the Kubernetes API server. Ensure network policies or firewall rules permit operator-related services to interact with these endpoints.
-- **Required Ports**: Policies should explicitly allow traffic to the necessary ports for seamless operation.
-
-Use the following command to identify the IP addresses and ports that need to be accessible:
-
-```bash
-kubectl get svc -n {operator_namespace}
-# Example output indicating necessary IP and port configurations:
-# NAME                                          TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)                                       AGE
-# kubernetes                                    ClusterIP  10.0.0.1      <none>       443/TCP                                       10d
-# splunk-splunk-otel-collector-agent            ClusterIP  10.0.176.113  <none>       8006/TCP,14250/TCP,14268/TCP,...              3d17h
-# splunk-splunk-otel-collector-operator         ClusterIP  10.0.254.125  <none>       8443/TCP,8080/TCP                             3d17h
-# splunk-splunk-otel-collector-operator-webhook ClusterIP  10.0.222.223  <none>       443/TCP                                       3d17h
-```
-
-- **Configuration Action**: Adjust your network policies and firewall settings based on the service endpoints and ports listed by the command. This ensures the webhook and operator services can properly communicate within the cluster.
-
-#### Cert-Manager Issues
-
-If the operator seems to be hanging, it could be due to the cert-manager not auto-creating the required certificate. To troubleshoot:
-
-- Check the health and logs of the cert-manager pods for potential issues.
-- Consider restarting the cert-manager pods.
-- Ensure that your cluster has only one instance of cert-manager, which should include `certmanager`, `certmanager-cainjector`, and `certmanager-webhook`.
-
-For additional guidance, refer to the official cert-manager documentation:
-- [Troubleshooting Guide](https://cert-manager.io/docs/troubleshooting/)
-- [Uninstallation Guide](https://cert-manager.io/v1.2-docs/installation/uninstall/kubernetes/)
-
-##### Validate Certificates
-
-Ensure that the certificate, which the cert-manager creates and the operator utilizes, is available.
-
-```bash
-kubectl get certificates
-# NAME                                          READY   SECRET                                                           AGE
-# splunk-otel-collector-operator-serving-cert   True    splunk-otel-collector-operator-controller-manager-service-cert   5m
-```
-
-##### Using a Self-Signed Certificate for the Webhook
-
-The operator supports various methods for managing TLS certificates for the webhook. Below are the options available through the operator, with a brief description for each. For detailed configurations and specific use cases, please refer to the operator’s
-[official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml)
-
-**Note**: While using a self-signed certificate offers a quicker and simpler setup, it has limitations, such as not being trusted by default by clients.
-This may be acceptable for testing purposes or internal environments. For complete configurations and additional guidance, please refer to the provided link to the Helm chart documentation.
+- https://developers.redhat.com/devnation/tech-talks/using-opentelemetry-on-kubernetes
+- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md
+- https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
+- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#opentelemetry-auto-instrumentation-injection
+- https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md#use-customized-or-vendor-instrumentation

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.113.0
+    helm.sh/chart: splunk-otel-collector-0.120.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.113.0"
+    app.kubernetes.io/version: "0.120.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.113.0
+    chart: splunk-otel-collector-0.120.1
     release: default
     heritage: Helm
 data:
@@ -113,6 +113,11 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: gateway
       resource/logs:
         attributes:
         - action: upsert
@@ -149,11 +154,7 @@ data:
           - job_name: otel-collector
             metric_relabel_configs:
             - action: drop
-              regex: otelcol_rpc_.*
-              source_labels:
-              - __name__
-            - action: drop
-              regex: otelcol_http_.*
+              regex: promhttp_metric_handler_errors.*
               source_labels:
               - __name__
             - action: drop
@@ -201,12 +202,14 @@ data:
           - batch
           - resource/add_collector_k8s
           - resourcedetection
+          - resource/add_mode
           - resource/add_cluster_name
           receivers:
           - prometheus/collector
         traces:
           exporters:
           - otlphttp
+          - signalfx
           processors:
           - memory_limiter
           - k8sattributes
@@ -224,3 +227,8 @@ data:
                 prometheus:
                   host: localhost
                   port: 8889
+                  without_scope_info: true
+                  without_type_suffix: true
+                  without_units: true
+        resource:
+          service.name: otel-collector

@@ -425,6 +425,9 @@
                     },
                     "caFile": {
                       "type": "string"
+                    },
+                    "annotations": {
+                      "type": "object"
                     }
                   }
                 },
@@ -728,6 +731,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {
@@ -1123,6 +1133,26 @@
               ]
             }
           }
+        },
+        "validateSecret": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
         }
       }
     },
@@ -1188,6 +1218,9 @@
         },
         "validateSecret": {
           "type": "boolean"
+        },
+        "annotations": {
+          "type": "object"
         }
       }
     },
@@ -1322,6 +1355,13 @@
           "type": "object"
         },
         "securityContext": {
+          "description": "[DEPRECATED] Use podSecurityContext instead.",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
           "type": "object"
         },
         "terminationGracePeriodSeconds": {
@@ -1424,6 +1464,24 @@
       "type": "boolean",
       "deprecated": true
     },
+    "operatorcrds": {
+      "description": "Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
+      "type": "object",
+      "properties": {
+        "install": {
+          "type": "boolean"
+        }
+      }
+    },
+    "operator-crds": {
+      "description": "Configuration for operator-crds (legacy). Prefer using 'operatorcrds' for new installations. Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
+      "type": "object",
+      "properties": {
+        "install": {
+          "type": "boolean"
+        }
+      }
+    },
     "operator": {
       "description": "OpenTelemetry Operator configuration. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
       "type": "object",
@@ -1441,6 +1499,23 @@
         "endpoint": {
           "type": "string",
           "description": "Optional endpoint parameter for exporting data to a specific target."
+        },
+        "propagators": {
+          "type": "array",
+          "description": "Optional propagators parameter for enabling trace context propagation.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "tracecontext",
+              "baggage",
+              "b3",
+              "b3multi",
+              "jaeger",
+              "ottrace",
+              "xray",
+              "none"
+            ]
+          }
         },
         "sampler": {
           "type": "object",
