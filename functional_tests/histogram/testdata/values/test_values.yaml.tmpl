@@ -20,7 +20,7 @@ agent:
       receiver_creator:
         receivers:
           prometheus/kubernetes-apiserver:
-            rule: type == "pod" && pod.labels["component"] == "kube-apiserver"
+            rule: type == "pod" && labels["component"] == "kube-apiserver"
             config:
               config:
                 scrape_configs:
