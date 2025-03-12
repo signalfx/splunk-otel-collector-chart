@@ -185,21 +185,3 @@ func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key,
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 }
-
-func RemoveFlakyMetrics(metrics *pmetric.Metrics, flakyMetrics []string) {
-	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
-		resourceMetrics := metrics.ResourceMetrics().At(i)
-		for j := 0; j < resourceMetrics.ScopeMetrics().Len(); j++ {
-			scopeMetrics := resourceMetrics.ScopeMetrics().At(j)
-			metricSlice := scopeMetrics.Metrics()
-			metricSlice.RemoveIf(func(metric pmetric.Metric) bool {
-				for _, flakyMetric := range flakyMetrics {
-					if metric.Name() == flakyMetric {
-						return true
-					}
-				}
-				return false
-			})
-		}
-	}
-}
