@@ -69,7 +69,7 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
-	chart := internal.LoadCollectorChart(t, "")
+	chart := internal.LoadCollectorChart(t)
 
 	var valuesBytes []byte
 	valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, valuesFileName))

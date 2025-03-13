@@ -185,7 +185,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		}
 	}, 1*time.Minute, 5*time.Second)
 
-	chart := internal.LoadCollectorChart(t, "")
+	chart := internal.LoadCollectorChart(t)
 
 	var valuesBytes []byte
 	switch kubeTestEnv {
@@ -251,9 +251,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		// install the base chart
 		initValuesBytes, rfErr := os.ReadFile(filepath.Join(testDir, valuesDir, upgradeFromValues))
 		require.NoError(t, rfErr)
-		initChart := internal.LoadCollectorChart(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
+		initChart := internal.LoadCollectorChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
 		var initValues map[string]interface{}
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
+		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
 
@@ -262,8 +263,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		upgrade.Namespace = "default"
 		upgrade.Install = true
 		upgrade.Timeout = helmActionTimeout
+		t.Log("Running helm upgrade")
 		_, err = upgrade.Run("sock", chart, values)
 	} else {
+		t.Log("Running helm install")
 		_, err = install.Run(chart, values)
 	}
 	require.NoError(t, err)
