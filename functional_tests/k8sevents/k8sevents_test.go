@@ -153,7 +153,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 	require.NoError(t, err)
 
-	chart := internal.LoadCollectorChart(t, "")
+	chart := internal.LoadCollectorChart(t)
 
 	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "k8sevents_values.yaml.tmpl"))
 	require.NoError(t, err)

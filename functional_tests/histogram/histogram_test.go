@@ -59,7 +59,7 @@ func deployChartsAndApps(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
-	chart := internal.LoadCollectorChart(t, "")
+	chart := internal.LoadCollectorChart(t)
 
 	valuesBytes, err := os.ReadFile(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)

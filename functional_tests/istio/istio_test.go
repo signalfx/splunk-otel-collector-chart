@@ -120,7 +120,7 @@ func deployIstioAndCollector(t *testing.T) {
 	// Send traffic through ingress gateways
 	sendWorkloadHTTPRequests(t)
 
-	chart := internal.LoadCollectorChart(t, "")
+	chart := internal.LoadCollectorChart(t)
 
 	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
