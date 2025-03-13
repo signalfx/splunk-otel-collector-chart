@@ -12,10 +12,15 @@ fullnameOverride: ""
 namespaceOverride: ""
 
 ################################################################################
-# clusterName is an optional parameter. It can be set to an arbitrary value that identifies
-# your K8s cluster. The value will be associated with every trace, metric and
-# log as "k8s.cluster.name" attribute. It's optional on EKS and GKE, but required
-# on all other Kubernetes services.
+# clusterName is an optional parameter that is used as the "k8s.cluster.name" attribute
+# for all traces, metrics, and logs. 
+#
+# For EKS and GKE clusters:
+#   - Do NOT set this field if you have 'distribution' set to values staring with 'eks' or 'gke'.
+#     The cluster name is auto-discovered from the cloud provider.
+#
+# For other distributions:
+#   - It MUST be set so that telemetry can be tagged with "k8s.cluster.name".
 ################################################################################
 
 clusterName: ""
