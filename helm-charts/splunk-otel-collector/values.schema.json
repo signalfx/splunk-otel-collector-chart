@@ -1114,7 +1114,7 @@
             }
           }
         },
-         "initPatchLogDirs": {
+        "initPatchLogDirs": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -1157,7 +1157,7 @@
       }
     },
     "podDisruptionBudget": {
-       "description": "Limits number of pods may be unavailable due to voluntary disruptions.",
+      "description": "Limits number of pods may be unavailable due to voluntary disruptions.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -1543,7 +1543,10 @@
                 "type": "string"
               }
             },
-            "required": ["name", "value"],
+            "required": [
+              "name",
+              "value"
+            ],
             "additionalProperties": false
           }
         },
@@ -1570,12 +1573,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "nodejs": {
           "type": "object",
@@ -1600,12 +1609,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "dotnet": {
           "type": "object",
@@ -1630,12 +1645,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "go": {
           "type": "object",
@@ -1660,12 +1681,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "apache-httpd": {
           "type": "object",
@@ -1690,12 +1717,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "python": {
           "type": "object",
@@ -1720,12 +1753,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         },
         "nginx": {
           "type": "object",
@@ -1750,12 +1789,18 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["repository", "tag"]
+          "required": [
+            "repository",
+            "tag"
+          ]
         }
       }
     },
@@ -1849,9 +1894,13 @@
     {
       "if": {
         "properties": {
-          "distribution": { "pattern": "^(gke|eks).*" }
+          "distribution": {
+            "pattern": "^(gke|eks).*"
+          }
         },
-        "required": ["distribution"]
+        "required": [
+          "distribution"
+        ]
       },
       "then": {
         "properties": {
