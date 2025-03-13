@@ -15,13 +15,11 @@ import (
 	"text/template"
 	"time"
 
-	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"gopkg.in/yaml.v3"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/kube"
 	corev1 "k8s.io/api/core/v1"
@@ -285,7 +283,6 @@ func testIndexSwitch(t *testing.T) {
 		internal.ResetLogsSink(t, agentLogsConsumer)
 		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
 		internal.WaitForLogs(t, 3, agentLogsConsumer)
 		logs = agentLogsConsumer.AllLogs()
 		sourcetypes, indices = getLogsIndexAndSourceType(logs)
@@ -295,7 +292,7 @@ func testIndexSwitch(t *testing.T) {
 		assert.True(t, len(indices) == 1)
 		assert.True(t, len(sourcetypes) == 1)
 
-		waitForMetrics(t, 3, hecMetricsConsumer)
+		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
 		mIndices = getMetricsIndex(hecMetricsConsumer.AllMetrics())
 		assert.True(t, len(mIndices) == 1)
 		assert.True(t, mIndices[0] == newMetricsIndex)
@@ -316,7 +313,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 	t.Run("check cluster receiver enabled", func(t *testing.T) {
-		resetLogsSink(t, logsObjectsConsumer)
+		internal.ResetLogsSink(t, logsObjectsConsumer)
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": false,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
