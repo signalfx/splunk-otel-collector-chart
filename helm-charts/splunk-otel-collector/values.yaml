@@ -475,9 +475,12 @@ clusterReceiver:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Security context applied to the otel-collector container in the cluster receiver deployment.
+  containerSecurityContext: {}
 
   # k8s cluster receiver collector annotations
   annotations: {}
@@ -511,8 +514,8 @@ clusterReceiver:
   #     - "watch" mode will setup a long connection using the watch API to just get updates.
   # * name: [REQUIRED]
   #     name of the object, e.g. `pods`, `namespaces`.
-  # * namespace:
-  #     only collects objects from the specified namespace, by default it's all namespaces
+  # * namespaces:
+  #     only collects objects from the specified list of namespaces, by default it's all namespaces
   # * labelSelector:
   #     select objects by label(s)
   # * fieldSelector:
@@ -1138,9 +1141,12 @@ gateway:
   affinity: {}
 
   # Pod configurations
-  securityContext: {}
+  podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
+
+  # Security context applied to the otel-collector container in the gateway deployment.
+  containerSecurityContext: {}
 
   # OTel collector annotations
   annotations: {}
@@ -1206,14 +1212,11 @@ operator:
   crds:
     create: false
   admissionWebhooks:
+    autoGenerateCert:
+      enabled: true
+      certPeriodDays: 3650
     certManager:
-      # Annotate the certificate and issuer to ensure they are created after the cert-manager CRDs have been installed.
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
-      issuerAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
+      enabled: false
   # Collector deployment via the operator is not supported at this time.
   # The collector image repository is specified here to meet operator subchart constraints.
   manager:
@@ -1232,7 +1235,19 @@ instrumentation:
   endpoint: ""
   # endpoint: http://$(SPLUNK_OTEL_AGENT):4317
   # endpoint: http://splunk-otel-collector:4317
-
+  # Optional "propagators" parameter for enabling trace context propagation, see: https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  # "tracecontext": W3C Trace Context
+  # "baggage": W3C Baggage
+  # "b3": B3 Single
+  # "b3multi": B3 Multi
+  # "jaeger": Jaeger
+  # "xray": AWS X-Ray (third party)
+  # "ottrace": OT Trace (third party)
+  # "none": No automatically configured propagator.
   # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler
   sampler: {}
   # type: traceidratio
@@ -1257,9 +1272,10 @@ instrumentation:
   #   - repository: Specifies the Docker image repository.
   #   - tag: Indicates the Docker image tag.
   #   - env: (Optional) Allows you to add any additional environment variables.
+  # Auto-instrumentation Libraries (Start)
   java:
     repository: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java
-    tag: v2.12.0
+    tag: v2.13.0
     # env:
     #   - name: JAVA_ENV_VAR
     #     value: java_value
@@ -1271,13 +1287,13 @@ instrumentation:
     #     value: nodejs_value
   dotnet:
     repository: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet
-    tag: v1.8.0
+    tag: v1.9.0
     env:
       - name: OTEL_DOTNET_AUTO_PLUGINS
         value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
   go:
-    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go
-    tag: v0.10.1-alpha
+    repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
+    tag: v0.19.0-alpha
     # env:
     #   - name: GO_ENV_VAR
     #     value: go_value
@@ -1368,3 +1384,6 @@ featureGates:
   explicitMountServiceAccountToken: false
   # Use a specific metrics pipeline to report control plane metrics as histograms.
   useControlPlaneMetricsHistogramData: false
+  # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
+  # rolled over during high load.
+  fixMissedLogsDuringLogRotation: false

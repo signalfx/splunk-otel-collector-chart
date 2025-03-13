@@ -40,8 +40,10 @@ receivers:
     endpoint: 0.0.0.0:8006
   {{- end }}
 
+  {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode
   nop:
+  {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
@@ -410,14 +412,31 @@ receivers:
   {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
+    {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
     {{- if .Values.isWindows }}
     include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
     {{- else }}
     include: ["/var/log/pods/*/*/*.log"]
     {{- end }}
+    {{- else }}
+    {{- if .Values.isWindows }}
+    include: ["C:\\var\\log\\pods\\*\\*\\*.log*"]
+    {{- else }}
+    include: ["/var/log/pods/*/*/*.log*"]
+    {{- end }}
+    {{- end }}
     # Exclude logs. The file format is
     # /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<restart_count>.log
     exclude:
+      {{- if .Values.featureGates.fixMissedLogsDuringLogRotation }}
+      {{- if .Values.isWindows }}
+      - "C:\\var\\log\\pods\\*\\*\\*.log*.gz"
+      - "C:\\var\\log\\pods\\*\\*\\*.log*.tmp"
+      {{- else }}
+      - "/var/log/pods/*/*/*.log*.gz"
+      - "/var/log/pods/*/*/*.log*.tmp"
+      {{- end }}
+      {{- end }}
       {{- if .Values.logsCollection.containers.excludeAgentLogs }}
       {{- if .Values.isWindows }}
       - "C:\\var\\log\\pods\\{{ template "splunk-otel-collector.namespace" . }}_{{ include "splunk-otel-collector.fullname" . }}*_*\\otel-collector\\*.log"
@@ -516,10 +535,18 @@ receivers:
         value: ""
       # Extract metadata from file path
       - type: regex_parser
+        {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
         {{- if .Values.isWindows }}
         regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
         {{- else }}
         regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
+        {{- end }}
+        {{- else }}
+        {{- if .Values.isWindows }}
+        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log'
+        {{- else }}
+        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log'
+        {{- end }}
         {{- end }}
         parse_from: attributes["log.file.path"]
       # Move out attributes to Attributes
@@ -835,15 +862,6 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
-  {{- end }}
-
-  {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
-  signalfx/histograms:
-    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    send_otlp_histograms: true
-  {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
@@ -851,8 +869,19 @@ exporters:
     headers:
       "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
 
+  {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
+  signalfx/histograms:
+    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    send_otlp_histograms: true
+  {{- end }}
+  {{- end }}
+
 service:
   telemetry:
+    resource:
+      service.name: otel-agent
     metrics:
       readers:
         - pull:
@@ -860,6 +889,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   extensions:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
     - file_storage
@@ -1076,7 +1108,18 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+    logs/entities:
+      # Receivers are added dinamically if discovery mode is enabled
+      receivers: [nop]
+      processors:
+        - memory_limiter
+        - batch
+        - resourcedetection
+        - resource
+      exporters: [otlphttp/entities]
+
+    {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
     metrics/histograms:
       receivers:
        - receiver_creator
@@ -1089,16 +1132,7 @@ service:
       exporters:
         - signalfx/histograms
     {{- end }}
-
-    logs/entities:
-      # Receivers are added dinamically if discovery mode is enabled
-      receivers: [nop]
-      processors:
-        - memory_limiter
-        - batch
-        - resourcedetection
-        - resource
-      exporters: [otlphttp/entities]
+    {{- end }}
 {{- end }}
 {{/*
 Discovery properties for the otel-collector agent

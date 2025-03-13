@@ -143,6 +143,8 @@ exporters:
   {{- end }}
 service:
   telemetry:
+    resource:
+      service.name: otel-collector
     metrics:
       readers:
         - pull:
@@ -150,6 +152,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   extensions:
     - health_check
     - zpages

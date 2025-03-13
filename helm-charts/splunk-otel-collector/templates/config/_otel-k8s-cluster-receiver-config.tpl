@@ -98,6 +98,27 @@ processors:
   {{- end }}
 
   {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+
+  # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
+  transform/k8sevents:
+    error_mode: ignore
+    log_statements:
+      - conditions:
+          - resource.attributes["k8s.object.kind"] == "HorizontalPodAutoscaler"
+        statements:
+          - set(resource.attributes["k8s.hpa.name"], resource.attributes["k8s.object.name"])
+          - set(resource.attributes["k8s.hpa.uid"], resource.attributes["k8s.object.uid"])
+      - conditions:
+          - resource.attributes["k8s.object.kind"] != "HorizontalPodAutoscaler"
+        statements:
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"], "lower"), "name"], ".")], resource.attributes["k8s.object.name"])
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"], "lower"), "uid"], ".")], resource.attributes["k8s.object.uid"])
+      - conditions:
+          - resource.attributes["k8s.object.kind"] == "Pod" and IsMatch(resource.attributes["k8s.object.fieldpath"], "spec\\.containers.*")
+        statements:
+          - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
+          - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
+
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
@@ -218,6 +239,8 @@ exporters:
 
 service:
   telemetry:
+    resource:
+      service.name: otel-k8s-cluster-receiver
     metrics:
       readers:
         - pull:
@@ -225,6 +248,9 @@ service:
               prometheus:
                 host: localhost
                 port: 8889
+                without_scope_info: true
+                without_units: true
+                without_type_suffix: true
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   extensions: [health_check, k8s_observer]
   {{- else }}
@@ -311,6 +337,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - transform/k8sevents
         - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}

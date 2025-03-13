@@ -216,6 +216,9 @@ k8sattributes/clusterReceiver:
   pod_association:
     - sources:
       - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
         name: k8s.namespace.name
     - sources:
       - from: resource_attribute
@@ -415,10 +418,8 @@ splunk_hec/platform_logs:
     {{- if .addPersistentStorage }}
     storage: file_storage/persistent_queue
     {{- end }}
-  {{- if not .Values.featureGates.noDropLogsPipeline }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
-  {{- else }}
-    num_consumers: 25
+  {{- if .Values.featureGates.noDropLogsPipeline }}
   batcher:
     enabled: true
     flush_timeout: 200ms
@@ -545,11 +546,7 @@ prometheus/{{ $receiver }}:
     - job_name: "otel-{{ $job }}"
       metric_relabel_configs:
       - action: drop
-        regex: "otelcol_rpc_.*"
-        source_labels:
-        - __name__
-      - action: drop
-        regex: "otelcol_http_.*"
+        regex: "promhttp_metric_handler_errors.*"
         source_labels:
         - __name__
       - action: drop
