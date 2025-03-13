@@ -445,7 +445,7 @@ agent:
   # Discovery mode attempts to automatically configure the agent with bundled metric receiver configuration.
   # For more details, refer to: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#discovery-mode
   # The discovery feature requires the metrics pipeline which is always enabled for `splunkObservability`.
-  # If used with `splunkPlatform`, `metricsEnabled` and `metricsIndex` fileds have to be set.
+  # If used with `splunkPlatform`, the `metricsEnabled` and `metricsIndex` fields have to be set.
 
   discovery:
     enabled: false
