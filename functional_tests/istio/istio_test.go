@@ -16,7 +16,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -52,37 +51,6 @@ const (
 // SKIP_TESTS: if set to true, the test will skip the test
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
-
-var setupRun = sync.Once{}
-var istioMetricsConsumer *consumertest.MetricsSink
-
-func setupOnce(t *testing.T) *consumertest.MetricsSink {
-	setupRun.Do(func() {
-
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-			testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-			require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-			k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-			require.NoError(t, err)
-			istioctlPath := downloadIstio(t, istioVersion)
-			teardown(t, k8sClient, istioctlPath)
-		}
-
-		// create an API server
-		internal.SetupSignalFxApiServer(t)
-
-		istioMetricsConsumer = internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
-
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployIstioAndCollector(t)
-	})
-
-	return istioMetricsConsumer
-}
 
 func deployIstioAndCollector(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -374,7 +342,26 @@ func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 }
 
 func Test_IstioMetrics(t *testing.T) {
-	_ = setupOnce(t)
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+		require.NoError(t, err)
+		istioctlPath := downloadIstio(t, istioVersion)
+		teardown(t, k8sClient, istioctlPath)
+	}
+
+	// create an API server
+	internal.SetupSignalFxApiServer(t)
+	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
+
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployIstioAndCollector(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -382,22 +369,22 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true, metricsSink)
 	})
 }
 
-func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool) {
+func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool, metricsSink *consumertest.MetricsSink) {
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
-	internal.WaitForMetrics(t, 2, istioMetricsConsumer)
+	internal.WaitForMetrics(t, 2, metricsSink)
 
-	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, istioMetricsConsumer, ignoreLen, 5*time.Minute, 30*time.Second)
+	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen, 5*time.Minute, 30*time.Second)
 	if selectedMetrics == nil {
 		t.Error("No metric batch identified with the right metric count, exiting")
 		return

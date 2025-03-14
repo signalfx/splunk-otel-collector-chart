@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -69,8 +68,6 @@ var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 
 var globalSinks *sinks
 
-var setupRun = sync.Once{}
-
 var expectedValuesDir string
 
 type sinks struct {
@@ -82,36 +79,20 @@ type sinks struct {
 	tracesConsumer                    *consumertest.TracesSink
 }
 
-func setupOnce(t *testing.T) *sinks {
-	setupRun.Do(func() {
-		// create an API server
-		internal.SetupSignalFxApiServer(t)
-		globalSinks = &sinks{
-			logsConsumer:         internal.SetupHECLogsSink(t),
-			hecMetricsConsumer:   internal.SetupHECMetricsSink(t),
-			logsObjectsConsumer:  internal.SetupHECObjectsSink(t),
-			agentMetricsConsumer: internal.SetupSignalfxReceiver(t, signalFxReceiverPort),
-			k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
-				signalFxReceiverK8sClusterReceiverPort),
-			tracesConsumer: internal.SetupOTLPTracesSink(t),
-		}
-
-		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-		internal.AcquireLeaseForTest(t, testKubeConfig)
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t, testKubeConfig)
-		}
-		// deploy the chart and applications.
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployChartsAndApps(t, testKubeConfig)
-	})
-
-	return globalSinks
+func setupSinks(t *testing.T) {
+	// create an API server
+	internal.SetupSignalFxApiServer(t)
+	globalSinks = &sinks{
+		logsConsumer:         internal.SetupHECLogsSink(t),
+		hecMetricsConsumer:   internal.SetupHECMetricsSink(t),
+		logsObjectsConsumer:  internal.SetupHECObjectsSink(t),
+		agentMetricsConsumer: internal.SetupSignalfxReceiver(t, signalFxReceiverPort),
+		k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
+			signalFxReceiverK8sClusterReceiverPort),
+		tracesConsumer: internal.SetupOTLPTracesSink(t),
+	}
 }
+
 func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
@@ -546,7 +527,23 @@ func teardown(t *testing.T, testKubeConfig string) {
 }
 
 func Test_Functions(t *testing.T) {
-	_ = setupOnce(t)
+	setupSinks(t)
+
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+
+	internal.AcquireLeaseForTest(t, testKubeConfig)
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t, testKubeConfig)
+	}
+
+	// deploy the chart and applications.
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployChartsAndApps(t, testKubeConfig)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -577,7 +574,7 @@ func Test_Functions(t *testing.T) {
 }
 
 func testNodeJSTraces(t *testing.T) {
-	tracesConsumer := setupOnce(t).tracesConsumer
+	tracesConsumer := globalSinks.tracesConsumer
 
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_nodejs_traces.yaml")
@@ -644,7 +641,7 @@ func testNodeJSTraces(t *testing.T) {
 }
 
 func testPythonTraces(t *testing.T) {
-	tracesConsumer := setupOnce(t).tracesConsumer
+	tracesConsumer := globalSinks.tracesConsumer
 
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_python_traces.yaml")
@@ -713,7 +710,7 @@ func testPythonTraces(t *testing.T) {
 }
 
 func testJavaTraces(t *testing.T) {
-	tracesConsumer := setupOnce(t).tracesConsumer
+	tracesConsumer := globalSinks.tracesConsumer
 
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
@@ -777,7 +774,7 @@ func testJavaTraces(t *testing.T) {
 }
 
 func testDotNetTraces(t *testing.T) {
-	tracesConsumer := setupOnce(t).tracesConsumer
+	tracesConsumer := globalSinks.tracesConsumer
 
 	var expectedTraces ptrace.Traces
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_dotnet_traces.yaml")
@@ -887,7 +884,7 @@ func shortenNames(value string) string {
 }
 
 func testK8sClusterReceiverMetrics(t *testing.T) {
-	metricsConsumer := setupOnce(t).k8sclusterReceiverMetricsConsumer
+	metricsConsumer := globalSinks.k8sclusterReceiverMetricsConsumer
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver.yaml")
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
@@ -967,7 +964,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 func testAgentLogs(t *testing.T) {
 
-	logsConsumer := setupOnce(t).logsConsumer
+	logsConsumer := globalSinks.logsConsumer
 	internal.WaitForLogs(t, 5, logsConsumer)
 
 	var helloWorldResource pcommon.Resource
@@ -1076,7 +1073,7 @@ func testAgentLogs(t *testing.T) {
 }
 
 func testK8sObjects(t *testing.T) {
-	logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
+	logsObjectsConsumer := globalSinks.logsObjectsConsumer
 	internal.WaitForLogs(t, 5, logsObjectsConsumer)
 
 	var kinds []string
@@ -1125,7 +1122,7 @@ func testK8sObjects(t *testing.T) {
 }
 
 func testAgentMetrics(t *testing.T) {
-	agentMetricsConsumer := setupOnce(t).agentMetricsConsumer
+	agentMetricsConsumer := globalSinks.agentMetricsConsumer
 
 	metricNames := []string{
 		"container.filesystem.available",
@@ -1296,7 +1293,7 @@ func testAgentMetrics(t *testing.T) {
 }
 
 func testPrometheusAnnotationMetrics(t *testing.T) {
-	agentMetricsConsumer := setupOnce(t).agentMetricsConsumer
+	agentMetricsConsumer := globalSinks.agentMetricsConsumer
 
 	metricNames := []string{
 		"istio_agent_cert_expiry_seconds",
@@ -1358,7 +1355,7 @@ func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *co
 }
 
 func testHECMetrics(t *testing.T) {
-	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+	hecMetricsConsumer := globalSinks.hecMetricsConsumer
 
 	metricNames := []string{
 		"container.cpu.time",

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -18,7 +17,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
@@ -32,28 +30,6 @@ const (
 
 	valuesDir = "values"
 )
-
-var setupRun = sync.Once{}
-
-var histogramMetricsConsumer *consumertest.MetricsSink
-
-func setupOnce(t *testing.T) *consumertest.MetricsSink {
-	setupRun.Do(func() {
-		histogramMetricsConsumer = internal.SetupSignalfxReceiver(t, otlpReceiverPort)
-
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t)
-		}
-		// deploy the chart and applications.
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployChartsAndApps(t)
-	})
-
-	return histogramMetricsConsumer
-}
 
 func deployChartsAndApps(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -120,22 +96,28 @@ func teardown(t *testing.T) {
 }
 
 func Test_Histograms(t *testing.T) {
-	_ = setupOnce(t)
+	otlpMetricsSink := internal.SetupSignalfxReceiver(t, otlpReceiverPort)
+
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t)
+	}
+	// deploy the chart and applications.
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployChartsAndApps(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
 
-	t.Run("histogram metrics captured", testHistogramMetrics)
-}
-
-func testHistogramMetrics(t *testing.T) {
 	k8sVersion := os.Getenv("K8S_VERSION")
 	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
 
 	testDir := filepath.Join("testdata", "expected", majorMinor)
 
-	otlpMetricsSink := setupOnce(t)
 	internal.WaitForMetrics(t, 5, otlpMetricsSink)
 
 	expectedKubeSchedulerMetricsFile := filepath.Join(testDir, "scheduler_metrics.yaml")
