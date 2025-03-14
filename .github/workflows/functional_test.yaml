@@ -3,6 +3,12 @@ name: Splunk Platform Functional Test
 on:
   pull_request:
 
+env:
+  GO_VERSION: 1.24.1
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+
 jobs:
   functional-test:
     name: K8s ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}, Splunk ${{ matrix.splunk_version }}
@@ -42,6 +48,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
 
 #      # Leave this here for debugging
 #      - name: Setup upterm session
@@ -97,30 +107,13 @@ jobs:
           kubectl apply -f test/test_setup.yaml
           sleep 60
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Run functional tests
+      - name: Run Splunk Integration Tests
+        env:
+          K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
-          kubectl get nodes
-          export PYTHONWARNINGS="ignore:Unverified HTTPS request"
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           cd test
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          echo "Running functional tests....."
-          python -m pytest \
-          	--splunkd-url https://$CI_SPLUNK_HOST:8089 \
-          	--splunk-user admin \
-          	--splunk-password $CI_SPLUNK_PASSWORD \
-          	-p no:warnings -s
-#          # Leave this here for debugging
-#          sleep 180
-#          echo "Getting agent logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/agent/{print $1}' | xargs kubectl logs
-#          echo "Getting collector logs....."
-#          kubectl get pods -l release=ci-sck --no-headers=true  | awk '/cluster/{print $1}' | xargs kubectl logs
+          go test -v -tags splunk_integration
 
       - name: Print splunk-otel-collector logs
         if: always()
