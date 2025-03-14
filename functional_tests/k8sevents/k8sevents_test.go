@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -32,7 +31,6 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-var setupRun = sync.Once{}
 var eventsLogsConsumer *consumertest.LogsSink
 
 // Env vars to control the test behavior
@@ -43,7 +41,25 @@ var eventsLogsConsumer *consumertest.LogsSink
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
 func Test_K8SEvents(t *testing.T) {
-	eventsLogsConsumer := setup(t)
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+		require.NoError(t, err)
+		teardown(t, k8sClient)
+	}
+
+	internal.SetupSignalFxApiServer(t)
+
+	eventsLogsConsumer = internal.SetupHECLogsSink(t)
+
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployWorkloadAndCollector(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -120,31 +136,6 @@ func Test_K8SEvents(t *testing.T) {
 		}
 		require.NoError(t, err)
 	})
-}
-
-func setup(t *testing.T) *consumertest.LogsSink {
-	setupRun.Do(func() {
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-			testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-			require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-			k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-			require.NoError(t, err)
-			teardown(t, k8sClient)
-		}
-
-		internal.SetupSignalFxApiServer(t)
-
-		eventsLogsConsumer = internal.SetupHECLogsSink(t)
-
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployWorkloadAndCollector(t)
-	})
-
-	return eventsLogsConsumer
 }
 
 func deployWorkloadAndCollector(t *testing.T) {

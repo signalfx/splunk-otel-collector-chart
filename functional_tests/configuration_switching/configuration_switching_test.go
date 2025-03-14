@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -39,26 +38,10 @@ const (
 
 var globalSinks *sinks
 
-var setupRun = sync.Once{}
-
 type sinks struct {
 	logsConsumer        *consumertest.LogsSink
 	hecMetricsConsumer  *consumertest.MetricsSink
 	logsObjectsConsumer *consumertest.LogsSink
-}
-
-func setupOnce(t *testing.T) *sinks {
-	setupRun.Do(func() {
-		globalSinks = &sinks{
-			logsConsumer:        internal.SetupHECLogsSink(t),
-			hecMetricsConsumer:  internal.SetupHECMetricsSink(t),
-			logsObjectsConsumer: internal.SetupHECObjectsSink(t),
-		}
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t)
-		}
-	})
-	return globalSinks
 }
 
 func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]interface{}) {
@@ -155,7 +138,15 @@ func waitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
 }
 
 func Test_Functions(t *testing.T) {
-	_ = setupOnce(t)
+	globalSinks = &sinks{
+		logsConsumer:        internal.SetupHECLogsSink(t),
+		hecMetricsConsumer:  internal.SetupHECMetricsSink(t),
+		logsObjectsConsumer: internal.SetupHECObjectsSink(t),
+	}
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -174,8 +165,8 @@ func Test_Functions(t *testing.T) {
 func testAgentLogsAndMetrics(t *testing.T) {
 
 	valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
-	agentLogsConsumer := setupOnce(t).logsConsumer
+	hecMetricsConsumer := globalSinks.hecMetricsConsumer
+	agentLogsConsumer := globalSinks.logsConsumer
 
 	t.Run("check logs and metrics received when both are enabled", func(t *testing.T) {
 		internal.ResetLogsSink(t, agentLogsConsumer)
@@ -238,9 +229,9 @@ func testIndexSwitch(t *testing.T) {
 	var nonDefaultSourcetype = "my-sourcetype"
 
 	valuesFileName := "values_indexes_switching.yaml.tmpl"
-	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+	hecMetricsConsumer := globalSinks.hecMetricsConsumer
 	internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
-	agentLogsConsumer := setupOnce(t).logsConsumer
+	agentLogsConsumer := globalSinks.logsConsumer
 	internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
 	t.Run("check logs and metrics index switching", func(t *testing.T) {
@@ -306,7 +297,7 @@ func testIndexSwitch(t *testing.T) {
 func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	valuesFileName := "values_cluster_receiver_switching.yaml.tmpl"
 	namespace := "default"
-	logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
+	logsObjectsConsumer := globalSinks.logsObjectsConsumer
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
@@ -354,7 +345,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify cluster receiver attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
-		logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
+		logsObjectsConsumer := globalSinks.logsObjectsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
@@ -377,7 +368,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify cluster receiver metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
-		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
@@ -400,7 +391,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify agent logs attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-		agentLogsConsumer := setupOnce(t).logsConsumer
+		agentLogsConsumer := globalSinks.logsConsumer
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
@@ -421,7 +412,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
