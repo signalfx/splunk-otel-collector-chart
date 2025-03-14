@@ -16,8 +16,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -26,6 +24,8 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/stretchr/testify/require"
 )
+
+const Namespace = "default"
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
@@ -168,17 +168,6 @@ func LabelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, va
 	require.NoError(t, err)
 }
 
-func LoadCollectorChart(t *testing.T) *chart.Chart {
-	return LoadCollectorChartFromDir(t, "helm-charts/splunk-otel-collector")
-}
-
-func LoadCollectorChartFromDir(t *testing.T, dir string) *chart.Chart {
-	chartPath := filepath.Join("..", "..", dir)
-	c, err := loader.Load(chartPath)
-	require.NoError(t, err)
-	return c
-}
-
 func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
 	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
 	require.NoError(t, err)
@@ -188,4 +177,24 @@ func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key,
 	ns.Annotations[key] = value
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
+}
+
+func WaitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
+	require.Eventually(t, func() bool {
+		di, err := client.AppsV1().Deployments(Namespace).List(context.Background(), metav1.ListOptions{})
+		require.NoError(t, err)
+		for _, d := range di.Items {
+			if d.Status.ReadyReplicas != d.Status.Replicas {
+				var messages string
+				for _, c := range d.Status.Conditions {
+					messages += c.Message
+					messages += "\n"
+				}
+
+				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
+				return false
+			}
+		}
+		return true
+	}, 10*time.Minute, 10*time.Second)
 }

@@ -17,7 +17,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-	"text/template"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
@@ -26,8 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -88,50 +85,17 @@ func deployIstioAndCollector(t *testing.T) {
 	// Send traffic through ingress gateways
 	sendWorkloadHTTPRequests(t)
 
-	chart := internal.LoadCollectorChart(t)
-
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "istio_values.yaml.tmpl"))
+	valuesFile, err := filepath.Abs(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
-
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-
-	replacements := struct {
-		IngestURL string
-		ApiURL    string
-	}{
-		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+	replacements := map[string]any{
+		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
-	tmpl, err := template.New("").Parse(string(valuesBytes))
-	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -165,17 +129,8 @@ metadata:
 `)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
-	actionConfig := new(action.Configuration)
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	uninstall := action.NewUninstall(actionConfig)
-	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	internal.ChartUninstall(t, testKubeConfig)
 }
 
 func downloadIstio(t *testing.T, version string) string {
