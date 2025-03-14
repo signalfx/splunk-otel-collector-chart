@@ -98,7 +98,7 @@ unittest: ## Run unittests on the Helm chart
 .PHONY: functionaltest
 functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
 	@echo "Running functional tests for this helm chart..."
-	cd functional_tests && go test -v ./$(SUITE)/... || exit 1
+	cd functional_tests && go test -v -timeout 20m ./$(SUITE)/... || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management
