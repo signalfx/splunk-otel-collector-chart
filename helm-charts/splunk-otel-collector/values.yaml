@@ -18,7 +18,7 @@ namespaceOverride: ""
 # For EKS and GKE clusters:
 #   - Do NOT set this field if you have 'distribution' set to values starting with 'eks' or 'gke'.
 #     The cluster name is auto-discovered from the cloud provider.
-#     Note: In EKS, the collector should be able to assume the node's IAM role, as it requires 
+#     Note: In EKS, the collector should be able to assume the node's IAM role, as it requires
 #     the EC2:DescribeInstances permission, which is available by default unless disabled manually.
 #
 # For other distributions:
