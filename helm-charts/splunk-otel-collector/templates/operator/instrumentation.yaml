@@ -21,10 +21,10 @@ metadata:
 spec:
   exporter:
     endpoint: {{ include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" . }}
+  {{- with .Values.instrumentation.propagators }}
   propagators:
-    - tracecontext
-    - baggage
-    - b3
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.instrumentation.sampler }}
   sampler:
     {{- toYaml . | nindent 4 }}

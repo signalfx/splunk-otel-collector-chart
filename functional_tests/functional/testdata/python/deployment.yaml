@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-test
+  template:
+    metadata:
+      name: python-test
+      labels:
+        app: python-test
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: quay.io/splunko11ytest/python_test:latest
+          name: python-test
+          imagePullPolicy: IfNotPresent
+      nodeSelector:
+        kubernetes.io/os: "linux"

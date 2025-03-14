@@ -1,0 +1,37 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   ingestUrl: {{ .IngestURL }}
+   apiUrl: {{ .ApiURL }}
+
+autodetect:
+  istio: true
+
+agent:
+  config:
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - receiver_creator
+
+  controlPlaneMetrics:
+    apiserver:
+      enabled: false
+    controllerManager:
+      enabled: false
+    coredns:
+      enabled: false
+    etcd:
+      enabled: false
+    proxy:
+      enabled: false
+    scheduler:
+      enabled: false
+
+
+clusterReceiver:
+  enabled: false
+
+environment: dev
+clusterName: dev-operator

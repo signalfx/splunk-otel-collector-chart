@@ -221,6 +221,13 @@ Create the patch-log-dirs image name.
 {{- end -}}
 
 {{/*
+Create the validateSecret image name.
+*/}}
+{{- define "splunk-otel-collector.image.validateSecret" -}}
+{{- printf "%s:%s" .Values.image.initPatchLogDirs.repository .Values.image.initPatchLogDirs.tag | trimSuffix ":" -}}
+{{- end -}}
+
+{{/*
   This helper converts the input value of memory to MiB.
   Input needs to be a valid value as supported by k8s memory resource field.
  */}}

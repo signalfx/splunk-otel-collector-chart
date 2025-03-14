@@ -21,6 +21,15 @@ This example demonstrates how to:
 - **Single App Focus:** Explore trace-related performance of a single instrumented NodeJS application in the APM console.
 - **Simplified Use Case:** Although relations between applications will not be showcased in the APM console, this demo offers a simplified setup suitable for understanding basic instrumentation and trace visualization.
 
+## [Simple Webserver - .NET Instrumentation](./otel-demo-nodejs.md)
+This example demonstrates how to:
+- Deploy the chart to the current namespace and the demo to the `dotnet-demo` namespace.
+- Instrument a single .NET application.
+
+**Highlights:**
+- **Single App Focus:** Explore trace-related performance of a single instrumented .NET application in the APM console.
+- **Simplified Use Case:** Although relations between applications will not be showcased in the APM console, this demo offers a simplified setup suitable for understanding basic instrumentation and trace visualization.
+
 ## Exploring Traces and Applications in APM Console
 The examples provide practical insights into using the APM console for exploring application relations and traces.
 Whether dealing with multiple applications interacting with each other or focusing on a single application, you will gain hands-on experience in visualizing trace data using Splunk Observability APM.

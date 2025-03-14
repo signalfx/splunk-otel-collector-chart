@@ -1,3 +1,6 @@
+// Copyright Splunk Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package internal
 
 import (
@@ -10,7 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func CreateApiServer(t *testing.T, port int) {
+const SignalFxAPIPort = 8881
+
+func SetupSignalFxApiServer(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(200)
@@ -18,7 +23,7 @@ func CreateApiServer(t *testing.T, port int) {
 
 	_, cancelCtx := context.WithCancel(context.Background())
 	s := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
 		Handler: mux,
 	}
 
