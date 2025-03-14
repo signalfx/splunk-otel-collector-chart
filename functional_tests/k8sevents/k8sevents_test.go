@@ -4,14 +4,12 @@
 package k8sevents
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"testing"
-	"text/template"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
@@ -21,8 +19,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
@@ -144,58 +140,24 @@ func deployWorkloadAndCollector(t *testing.T) {
 	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 	require.NoError(t, err)
 
-	chart := internal.LoadCollectorChart(t)
-
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "k8sevents_values.yaml.tmpl"))
+	valuesFile, err := filepath.Abs(filepath.Join("testdata", "k8sevents_values.yaml.tmpl"))
 	require.NoError(t, err)
-
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "host endpoint not found")
 	}
-
-	// Deploy collector
-	replacements := struct {
-		ApiURL string
-		LogURL string
-	}{
-		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+	replacements := map[string]any{
+		"ApiURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+		"LogURL": fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 	}
-	tmpl, err := template.New("").Parse(string(valuesBytes))
-	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
 
 	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
 
-	internal.CheckPodsReady(t, clientset, "default", "component=otel-k8s-cluster-receiver", 3*time.Minute)
+	internal.CheckPodsReady(t, clientset, internal.Namespace, "component=otel-k8s-cluster-receiver", 3*time.Minute)
 	time.Sleep(30 * time.Second)
 
 	// Deploy the workload
@@ -217,14 +179,8 @@ func deployWorkloadAndCollector(t *testing.T) {
 }
 
 func teardown(t *testing.T, k8sClient *k8stest.K8sClient) {
-	actionConfig := new(action.Configuration)
 	testKubeConfig := os.Getenv("KUBECONFIG")
-	require.NoError(t, actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), t.Logf))
-	uninstall := action.NewUninstall(actionConfig)
-	_, err := uninstall.Run("sock")
-	if err != nil {
-		t.Logf("error during helm uninstall: %v\n", err)
-	}
+	internal.ChartUninstall(t, testKubeConfig)
 
 	deleteObject(t, k8sClient, `
 apiVersion: v1
