@@ -34,6 +34,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
@@ -147,6 +148,20 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed CRD %s", crd.Name)
+
+			// Wait for CRD to be Established before moving on
+			require.EventuallyWithT(t, func(tt *assert.CollectT) {
+				latest, getErr := apiExtensions.Get(context.Background(), crd.Name, metav1.GetOptions{})
+				assert.NoError(tt, getErr)
+				established := false
+				for _, cond := range latest.Status.Conditions {
+					if cond.Type == appextensionsv1.Established && cond.Status == appextensionsv1.ConditionTrue {
+						established = true
+					}
+				}
+				assert.True(tt, established)
+			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crd.Name)
+
 			for _, version := range crd.Spec.Versions {
 				sch.AddKnownTypeWithName(
 					schema.GroupVersionKind{
@@ -162,10 +177,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 
 	codecs := serializer.NewCodecFactory(sch)
 	crdDecode := codecs.UniversalDeserializer().Decode
+
 	// Prometheus pod monitor
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
 	require.NoError(t, err)
-
 	podMonitor, _, err := crdDecode(stream, nil, nil)
 	require.NoError(t, err)
 	g := schema.GroupVersionResource{
@@ -173,17 +188,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	// CRDs sometimes take time to register. We retry deploying the pod monitor until such a time all CRDs are deployed.
-	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-		if err != nil {
-			_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-			assert.NoError(tt, err2)
-			if err2 != nil {
-				assert.NoError(tt, err)
-			}
-		}
-	}, 1*time.Minute, 5*time.Second)
+	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	assert.NoError(t, err)
 
 	chart := internal.LoadCollectorChart(t)
 
@@ -361,13 +367,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Resource: "servicemonitors",
 	}
 	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := dynamicClient.Resource(g).Namespace("default").Update(context.Background(), serviceMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
+	assert.NoError(t, err)
+
 	// Read jobs
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
@@ -526,6 +527,10 @@ func teardown(t *testing.T, testKubeConfig string) {
 		_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
+		require.Eventually(t, func() bool {
+			_, err := client.CoreV1().Namespaces().Get(context.Background(), nm.Name, metav1.GetOptions{})
+			return k8serrors.IsNotFound(err)
+		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
 	}
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
