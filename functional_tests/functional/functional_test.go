@@ -4,7 +4,6 @@
 package functional
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -12,7 +11,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"text/template"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
@@ -25,9 +23,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"gopkg.in/yaml.v3"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -169,98 +164,39 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(context.Background(),
+		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
-	chart := internal.LoadCollectorChart(t)
-
-	var valuesBytes []byte
+	var valuesFile string
 	switch kubeTestEnv {
 	case autopilotTestKubeEnv:
-		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
+		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
 	case aksTestKubeEnv:
-		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
+		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
 	default:
-		valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
+		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
 	}
-
-	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
 
-	replacements := struct {
-		K8sClusterEndpoint    string
-		AgentEndpoint         string
-		LogHecEndpoint        string
-		MetricHecEndpoint     string
-		OtlpEndpoint          string
-		ApiURLEndpoint        string
-		LogObjectsHecEndpoint string
-		KubeTestEnv           string
-	}{
-		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
-		fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
-		kubeTestEnv,
+	replacements := map[string]any{
+		"K8sClusterEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
+		"AgentEndpoint":         fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"LogHecEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+		"MetricHecEndpoint":     fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
+		"OtlpEndpoint":          fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
+		"ApiURLEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
+		"KubeTestEnv":           kubeTestEnv,
 	}
-	tmpl, err := template.New("").Parse(string(valuesBytes))
-	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.WaitForAllDeploymentsToStart(t, client)
 
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	install.Timeout = helmActionTimeout
-
-	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
-	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
-	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
-	if upgradeFromValues != "" {
-		// install the base chart
-		initValuesBytes, rfErr := os.ReadFile(filepath.Join(testDir, valuesDir, upgradeFromValues))
-		require.NoError(t, rfErr)
-		initChart := internal.LoadCollectorChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
-		var initValues map[string]interface{}
-		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
-		t.Log("Running helm install of the base release")
-		_, err = install.Run(initChart, initValues)
-		require.NoError(t, err)
-
-		// test the upgrade
-		upgrade := action.NewUpgrade(actionConfig)
-		upgrade.Namespace = "default"
-		upgrade.Install = true
-		upgrade.Timeout = helmActionTimeout
-		t.Log("Running helm upgrade")
-		_, err = upgrade.Run("sock", chart, values)
-	} else {
-		t.Log("Running helm install")
-		_, err = install.Run(chart, values)
-	}
-	require.NoError(t, err)
-
-	waitForAllDeploymentsToStart(t, client)
-
-	deployments := client.AppsV1().Deployments("default")
+	deployments := client.AppsV1().Deployments(internal.Namespace)
 
 	// NodeJS test app
 	stream, err = os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
@@ -333,7 +269,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	service, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = client.CoreV1().Services("default").Create(context.Background(), service.(*corev1.Service), metav1.CreateOptions{})
+	_, err = client.CoreV1().Services(internal.Namespace).Create(context.Background(), service.(*corev1.Service),
+		metav1.CreateOptions{})
 	require.NoError(t, err)
 
 	// Prometheus service monitor
@@ -347,7 +284,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace("default").Create(context.Background(), serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(context.Background(),
+		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
 	// Read jobs
@@ -402,7 +340,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		}
 	}
 
-	waitForAllDeploymentsToStart(t, client)
+	internal.WaitForAllDeploymentsToStart(t, client)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -424,7 +362,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 	extensionsClient, err := clientset.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	waitTime := int64(0)
-	deployments := client.AppsV1().Deployments("default")
+	deployments := client.AppsV1().Deployments(internal.Namespace)
 	require.NoError(t, err)
 	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
@@ -441,9 +379,10 @@ func teardown(t *testing.T, testKubeConfig string) {
 	_ = deployments.Delete(context.Background(), "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services("default").Delete(context.Background(), "prometheus-annotation-service", metav1.DeleteOptions{
-		GracePeriodSeconds: &waitTime,
-	})
+	_ = client.CoreV1().Services(internal.Namespace).Delete(context.Background(), "prometheus-annotation-service",
+		metav1.DeleteOptions{
+			GracePeriodSeconds: &waitTime,
+		})
 
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
@@ -513,17 +452,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 			return k8serrors.IsNotFound(err)
 		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
 	}
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	uninstall := action.NewUninstall(actionConfig)
-	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
-	uninstall.Timeout = helmActionTimeout
-	_, _ = uninstall.Run("sock")
+	internal.ChartUninstall(t, testKubeConfig)
 }
 
 func Test_Functions(t *testing.T) {
@@ -1426,26 +1355,6 @@ func testHECMetrics(t *testing.T) {
 		"system.processes.created",
 	}
 	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames, nil)
-}
-
-func waitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
-	require.Eventually(t, func() bool {
-		di, err := client.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
-		require.NoError(t, err)
-		for _, d := range di.Items {
-			if d.Status.ReadyReplicas != d.Status.Replicas {
-				var messages string
-				for _, c := range d.Status.Conditions {
-					messages += c.Message
-					messages += "\n"
-				}
-
-				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
-				return false
-			}
-		}
-		return true
-	}, 5*time.Minute, 10*time.Second)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {
