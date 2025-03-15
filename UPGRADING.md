@@ -366,9 +366,8 @@ operator:
 ## 0.67.0 to 0.68.0
 
 There is a new receiver: [Kubernetes Objects Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) that can pull or watch any object from Kubernetes API server.
-It will replace the [Kubernetes Events Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver) in the future.
 
-To migrate from Kubernetes Events Receiver to Kubernetes Object Receiver, configure `clusterReceiver` values.yaml section with:
+To use the Kubernetes Object Receiver instead of the Kubernetes Events Receiver to collect k8s events, configure `clusterReceiver` values.yaml section with:
 
 ```yaml
 k8sObjects:

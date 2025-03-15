@@ -71,11 +71,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
 {{ end }}
-{{- $crEventsEnabled := toString $clusterReceiver.eventsEnabled }}
-{{- if not (or (eq $crEventsEnabled "<nil>") (eq $crEventsEnabled "false")) }}
-[WARNING] "clusterReceiver.eventsEnabled" parameter is deprecated. Soon it will be replaced with "clusterReceiver.k8sObjects".
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0670-to-0680
-{{ end }}
 {{- if .Values.operator.enabled }}
 [INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true)! The operator can automatically instrument Kubernetes hosted applications.
   - Status: Instrumentation language maturity varies. See `operator.instrumentation.spec` and documentation for utilized instrumentation details.
