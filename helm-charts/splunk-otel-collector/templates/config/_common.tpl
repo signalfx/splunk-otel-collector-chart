@@ -355,12 +355,10 @@ Resource processor for metrics manipulations
 {{- define "splunk-otel-collector.resourceMetricsProcessor" -}}
 resource/metrics:
   attributes:
-    {{- if .Values.splunkPlatform.sourcetype }}
     # Insert the sourcetype value from values.yaml if it has not already been set through annotations.
     - key: com.splunk.sourcetype
       value: "{{.Values.splunkPlatform.sourcetype }}"
       action: insert
-    {{- end }}
 {{- end }}
 
 {{/*
