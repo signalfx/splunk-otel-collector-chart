@@ -36,10 +36,7 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-const (
-	signalFxReceiverPort = 9943
-	istioVersion         = "1.24.2"
-)
+const istioVersion = "1.24.2"
 
 // Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
@@ -92,7 +89,7 @@ func deployIstioAndCollector(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
@@ -309,7 +306,7 @@ func Test_IstioMetrics(t *testing.T) {
 
 	// create an API server
 	internal.SetupSignalFxApiServer(t)
-	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
+	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")

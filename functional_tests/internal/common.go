@@ -25,10 +25,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	Namespace   = "default"
-	waitTimeout = 3 * time.Minute
-)
+var Namespace = "default"
+
+const waitTimeout = 3 * time.Minute
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {

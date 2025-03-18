@@ -1,0 +1,18 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   apiUrl: {{ .ApiURL }}
+   ingestUrl: {{ .IngestURL }}
+
+clusterName: test-cluster
+
+agent:
+  discovery:
+    enabled: true
+  config:
+    exporters:
+      otlphttp/entities:
+        logs_endpoint: {{ .EventsURL }}/v1/logs
+
+clusterReceiver:
+  enabled: false

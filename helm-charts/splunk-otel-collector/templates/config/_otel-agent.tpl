@@ -868,9 +868,13 @@ exporters:
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
+    {{- if $gatewayEnabled }}
+    endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4318
+    {{- else }}
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    {{- end }}
 
   {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
   signalfx/histograms:

@@ -113,6 +113,11 @@ exporters:
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sending_queue:
       num_consumers: 32
+  # To send entities (applicable only if discovery mode is enabled)
+  otlphttp/entities:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -144,6 +149,21 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
+
+{{- if and
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+  (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+}}
+connectors:
+  # Routing connector to separate entity events from regular logs
+  routing/logs:
+    default_pipelines: [logs]
+    table:
+      - context: log
+        condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true
+        pipelines: [logs/entities]
+{{- end }}
+
 service:
   telemetry:
     resource:
@@ -244,10 +264,32 @@ service:
       exporters: [signalfx]
     {{- end }}
 
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    # entity events
+    logs/entities:
+      receivers:
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+        - routing/logs
+        {{- else }}
+        - otlp
+        {{- end }}
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/entities]
+    {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    logs/split:
+      receivers: [otlp]
+      exporters: [routing/logs]
+    {{- end }}
     # default logs + profiling data pipeline
     logs:
-      receivers: [otlp]
+      receivers:
+        {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+        - routing/logs
+        {{- else }}
+        - otlp
+        {{- end }}
       processors:
         - memory_limiter
         - k8sattributes
