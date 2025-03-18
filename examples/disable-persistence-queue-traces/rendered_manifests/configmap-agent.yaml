@@ -161,8 +161,12 @@ data:
       k8sattributes/metrics:
         extract:
           annotations:
+          - from: namespace
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
           - from: pod
             key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
           - from: namespace
             key: splunk.com/metricsIndex
             tag_name: com.splunk.index

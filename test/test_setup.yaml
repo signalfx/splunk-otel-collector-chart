@@ -26,6 +26,7 @@ metadata:
   name: default
   annotations:
     splunk.com/metricsIndex: test_metrics
+    splunk.com/sourcetype: sourcetype-anno
 ---
 apiVersion: batch/v1
 kind: Job
