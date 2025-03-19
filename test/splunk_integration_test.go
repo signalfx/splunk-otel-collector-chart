@@ -18,7 +18,7 @@ func Test_Functions(t *testing.T) {
 
 	t.Run("verify log ingestion by using annotations", testVerifyLogsIngestionUsingAnnotations)
 	t.Run("custom metadata fields annotations", testVerifyCustomMetadataFieldsAnnotations)
-	t.Run("metric index annotations", testVerifyMetricIndexAnnotations)
+	t.Run("metric index annotations", testVerifyMetricIndexAndSourcetypeAnnotations)
 
 }
 
@@ -72,11 +72,12 @@ func testVerifyCustomMetadataFieldsAnnotations(t *testing.T) {
 	}
 }
 
-func testVerifyMetricIndexAnnotations(t *testing.T) {
+func testVerifyMetricIndexAndSourcetypeAnnotations(t *testing.T) {
 	t.Run("metrics sent to metricIndex", func(t *testing.T) {
 		fmt.Println("Test that metrics are being sent to 'test_metrics' index, as defined by splunk.com/metricsIndex annotation added during setup")
 		index := "test_metrics"
-		searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index
+		sourcetype := "test_metrics"
+		searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\""
 		startTime := "-1h@h"
 		events := CheckEventsFromSplunk(searchQuery, startTime)
 		fmt.Println(" =========>  Events received: ", len(events))
