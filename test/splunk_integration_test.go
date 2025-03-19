@@ -76,7 +76,7 @@ func testVerifyMetricIndexAndSourcetypeAnnotations(t *testing.T) {
 	t.Run("metrics sent to metricIndex", func(t *testing.T) {
 		fmt.Println("Test that metrics are being sent to 'test_metrics' index, as defined by splunk.com/metricsIndex annotation added during setup")
 		index := "test_metrics"
-		sourcetype := "test_metrics"
+		sourcetype := "sourcetype-anno"
 		searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\""
 		startTime := "-1h@h"
 		events := CheckEventsFromSplunk(searchQuery, startTime)
