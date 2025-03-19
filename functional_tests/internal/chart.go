@@ -46,6 +46,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	install := action.NewInstall(actionConfig)
 	install.Namespace = Namespace
 	install.ReleaseName = chartReleaseName
+	install.Wait = true
 	install.Timeout = helmActionTimeout
 
 	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
@@ -66,7 +67,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		// test the upgrade
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = Namespace
-		upgrade.Install = true
+		upgrade.Wait = true
 		upgrade.Timeout = helmActionTimeout
 		t.Log("Running helm upgrade")
 		_, err = upgrade.Run(chartReleaseName, loadChart(t), values)

@@ -41,10 +41,6 @@ type sinks struct {
 func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]interface{}) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
@@ -61,7 +57,6 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, valuesFileName))
 	require.NoError(t, err)
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
-	internal.WaitForAllDeploymentsToStart(t, client)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
