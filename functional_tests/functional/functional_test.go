@@ -194,7 +194,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		"KubeTestEnv":           kubeTestEnv,
 	}
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
-	internal.WaitForAllDeploymentsToStart(t, client)
 
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 
@@ -339,8 +338,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			t.Logf("Deployed job %s", job.Name)
 		}
 	}
-
-	internal.WaitForAllDeploymentsToStart(t, client)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {

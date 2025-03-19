@@ -178,23 +178,3 @@ func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key,
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 }
-
-func WaitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
-	require.Eventually(t, func() bool {
-		di, err := client.AppsV1().Deployments(Namespace).List(context.Background(), metav1.ListOptions{})
-		require.NoError(t, err)
-		for _, d := range di.Items {
-			if d.Status.ReadyReplicas != d.Status.Replicas {
-				var messages string
-				for _, c := range d.Status.Conditions {
-					messages += c.Message
-					messages += "\n"
-				}
-
-				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
-				return false
-			}
-		}
-		return true
-	}, 10*time.Minute, 10*time.Second)
-}
