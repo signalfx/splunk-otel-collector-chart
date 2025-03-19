@@ -4,25 +4,18 @@
 package histogram
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-	"text/template"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"gopkg.in/yaml.v3"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -33,109 +26,51 @@ const (
 	valuesDir = "values"
 )
 
-var setupRun = sync.Once{}
-
-var histogramMetricsConsumer *consumertest.MetricsSink
-
-func setupOnce(t *testing.T) *consumertest.MetricsSink {
-	setupRun.Do(func() {
-		histogramMetricsConsumer = internal.SetupSignalfxReceiver(t, otlpReceiverPort)
-
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t)
-		}
-		// deploy the chart and applications.
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployChartsAndApps(t)
-	})
-
-	return histogramMetricsConsumer
-}
-
-func deployChartsAndApps(t *testing.T) {
+func deployChart(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-
-	chart := internal.LoadCollectorChart(t, "")
-
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
-	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-
-	replacements := struct {
-		IngestURL string
-	}{
-		fmt.Sprintf("http://%s:%d", hostEp, otlpReceiverPort),
+	replacements := map[string]any{
+		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, otlpReceiverPort),
 	}
-	tmpl, err := template.New("").Parse(string(valuesBytes))
+	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
 }
 
 func teardown(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	uninstall := action.NewUninstall(actionConfig)
-	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	internal.ChartUninstall(t, testKubeConfig)
 }
 
 func Test_Histograms(t *testing.T) {
-	_ = setupOnce(t)
+	otlpMetricsSink := internal.SetupSignalfxReceiver(t, otlpReceiverPort)
+
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t)
+	}
+	// deploy the chart and applications.
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployChart(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
 
-	t.Run("histogram metrics captured", testHistogramMetrics)
-}
-
-func testHistogramMetrics(t *testing.T) {
 	k8sVersion := os.Getenv("K8S_VERSION")
 	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
 
 	testDir := filepath.Join("testdata", "expected", majorMinor)
 
-	otlpMetricsSink := setupOnce(t)
 	internal.WaitForMetrics(t, 5, otlpMetricsSink)
 
 	expectedKubeSchedulerMetricsFile := filepath.Join(testDir, "scheduler_metrics.yaml")

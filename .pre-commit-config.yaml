@@ -15,6 +15,11 @@ repos:
       exclude: "^examples|^test"
     - id: end-of-file-fixer
       exclude: "^examples|^test"
+    - id: pretty-format-json
+      args:
+        - --autofix
+        - --no-sort-keys
+    - id: check-json
     - id: check-yaml
       # Can't check source yaml since it has go templates in it.
       # Can't check operator-webhook.yaml due to redacted TLS certificate information causing yaml format issues.

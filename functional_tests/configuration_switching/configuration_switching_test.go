@@ -4,26 +4,18 @@
 package configuration_switching
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-	"text/template"
-	"time"
-
-	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -40,26 +32,10 @@ const (
 
 var globalSinks *sinks
 
-var setupRun = sync.Once{}
-
 type sinks struct {
 	logsConsumer        *consumertest.LogsSink
 	hecMetricsConsumer  *consumertest.MetricsSink
 	logsObjectsConsumer *consumertest.LogsSink
-}
-
-func setupOnce(t *testing.T) *sinks {
-	setupRun.Do(func() {
-		globalSinks = &sinks{
-			logsConsumer:        internal.SetupHECLogsSink(t),
-			hecMetricsConsumer:  internal.SetupHECMetricsSink(t),
-			logsObjectsConsumer: internal.SetupHECObjectsSink(t),
-		}
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			teardown(t)
-		}
-	})
-	return globalSinks
 }
 
 func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]interface{}) {
@@ -68,12 +44,6 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-
-	chart := internal.LoadCollectorChart(t, "")
-
-	var valuesBytes []byte
-	valuesBytes, err = os.ReadFile(filepath.Join(testDir, valuesDir, valuesFileName))
 	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
@@ -88,36 +58,10 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 		replacements[k] = v
 	}
 
-	tmpl, err := template.New("").Parse(string(valuesBytes))
+	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, valuesFileName))
 	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
-
-	waitForAllDeploymentsToStart(t, client)
-	t.Log("Deployments started")
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.WaitForAllDeploymentsToStart(t, client)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -132,51 +76,37 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 }
 func teardown(t *testing.T) {
 	t.Log("Running teardown")
-	uninstallDeployment(t)
-}
-
-func waitForAllDeploymentsToStart(t *testing.T, client *kubernetes.Clientset) {
-	require.Eventually(t, func() bool {
-		di, err := client.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{})
-		require.NoError(t, err)
-		for _, d := range di.Items {
-			if d.Status.ReadyReplicas != d.Status.Replicas {
-				var messages string
-				for _, c := range d.Status.Conditions {
-					messages += c.Message
-					messages += "\n"
-				}
-
-				t.Logf("Deployment not ready: %s, %s", d.Name, messages)
-				return false
-			}
-		}
-		return true
-	}, 5*time.Minute, 10*time.Second)
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	internal.ChartUninstall(t, testKubeConfig)
 }
 
 func Test_Functions(t *testing.T) {
-	_ = setupOnce(t)
+	globalSinks = &sinks{
+		logsConsumer:        internal.SetupHECLogsSink(t),
+		hecMetricsConsumer:  internal.SetupHECMetricsSink(t),
+		logsObjectsConsumer: internal.SetupHECObjectsSink(t),
+	}
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
 
-	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
-	t.Setenv("KUBE_TEST_ENV", "kind")
-
 	t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
 	t.Run("logs and metrics index switch", testIndexSwitch)
 	t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
 	t.Run("logs and metrics attributes verification", testVerifyLogsAndMetricsAttributes)
-
 }
 
 func testAgentLogsAndMetrics(t *testing.T) {
 
 	valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
-	agentLogsConsumer := setupOnce(t).logsConsumer
+	hecMetricsConsumer := globalSinks.hecMetricsConsumer
+	agentLogsConsumer := globalSinks.logsConsumer
 
 	t.Run("check logs and metrics received when both are enabled", func(t *testing.T) {
 		internal.ResetLogsSink(t, agentLogsConsumer)
@@ -193,7 +123,6 @@ func testAgentLogsAndMetrics(t *testing.T) {
 
 		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
 		internal.WaitForLogs(t, 5, agentLogsConsumer)
-		uninstallDeployment(t)
 	})
 
 	t.Run("check metrics only enabled", func(t *testing.T) {
@@ -211,7 +140,6 @@ func testAgentLogsAndMetrics(t *testing.T) {
 
 		internal.WaitForMetrics(t, 5, hecMetricsConsumer)
 		internal.CheckNoEventsReceived(t, agentLogsConsumer)
-		uninstallDeployment(t)
 	})
 
 	t.Run("check logs only enabled", func(t *testing.T) {
@@ -225,26 +153,25 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		deployChartsAndApps(t, valuesFileName, replacements)
 
 		internal.WaitForLogs(t, 5, agentLogsConsumer)
-		uninstallDeployment(t)
-		internal.ResetLogsSink(t, agentLogsConsumer)
-		internal.ResetMetricsSink(t, hecMetricsConsumer)
 	})
 }
 
 func testIndexSwitch(t *testing.T) {
-	var metricsIndex string = "metricsIndex"
-	var newMetricsIndex string = "newMetricsIndex"
-	var logsIndex string = "main"
-	var newLogsIndex string = "newLogsIndex"
+	var metricsIndex = "metricsIndex"
+	var newMetricsIndex = "newMetricsIndex"
+	var logsIndex = "main"
+	var newLogsIndex = "newLogsIndex"
 	var nonDefaultSourcetype = "my-sourcetype"
 
 	valuesFileName := "values_indexes_switching.yaml.tmpl"
-	hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+	hecMetricsConsumer := globalSinks.hecMetricsConsumer
+	internal.ResetMetricsSink(t, hecMetricsConsumer)
 	internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
-	agentLogsConsumer := setupOnce(t).logsConsumer
+	agentLogsConsumer := globalSinks.logsConsumer
+	internal.ResetLogsSink(t, agentLogsConsumer)
 	internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
-	t.Run("check logs and metrics index switching", func(t *testing.T) {
+	t.Run("default_source_type", func(t *testing.T) {
 		replacements := map[string]interface{}{
 			"MetricsIndex": metricsIndex,
 			"LogsIndex":    logsIndex,
@@ -258,82 +185,82 @@ func testIndexSwitch(t *testing.T) {
 		var indices []string
 		logs := agentLogsConsumer.AllLogs()
 		sourcetypes, indices = getLogsIndexAndSourceType(logs)
-		assert.True(t, len(sourcetypes) > 1) // we are also receiving logs from other kind containers
-		assert.Contains(t, sourcetypes, "kube:container:kindnet-cni")
-		assert.True(t, len(indices) == 1)
-		assert.True(t, indices[0] == logsIndex)
+		assert.Greater(t, len(sourcetypes), 1) // we are receiving logs from different containers
+		// check sourcetypes have same prefix
+		prefix := "kube:container:"
+		for _, element := range sourcetypes {
+			if !strings.HasPrefix(element, prefix) {
+				t.Errorf("Element does not start with the prefix %q: %s", prefix, element)
+			}
+		}
+		assert.NotContains(t, sourcetypes, nonDefaultSourcetype)
+		assert.Len(t, indices, 1)
+		assert.Equal(t, logsIndex, indices[0])
 
 		var mIndices []string
 		mIndices = getMetricsIndex(hecMetricsConsumer.AllMetrics())
-		assert.True(t, len(mIndices) == 1)
-		assert.True(t, mIndices[0] == metricsIndex)
+		assert.Len(t, mIndices, 1)
+		assert.Equal(t, metricsIndex, mIndices[0])
+	})
 
-		replacements = map[string]interface{}{
+	t.Run("non_default_source_type", func(t *testing.T) {
+		replacements := map[string]interface{}{
 			"MetricsIndex":         newMetricsIndex,
 			"LogsIndex":            newLogsIndex,
 			"NonDefaultSourcetype": true,
 			"Sourcetype":           nonDefaultSourcetype,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		internal.ResetLogsSink(t, agentLogsConsumer)
-		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
 		internal.WaitForLogs(t, 3, agentLogsConsumer)
-		logs = agentLogsConsumer.AllLogs()
-		sourcetypes, indices = getLogsIndexAndSourceType(logs)
+		logs := agentLogsConsumer.AllLogs()
+		sourcetypes, indices := getLogsIndexAndSourceType(logs)
 		t.Logf("Indices: %v", indices)
 		assert.Contains(t, indices, newLogsIndex)
 		assert.Contains(t, sourcetypes, nonDefaultSourcetype)
-		assert.True(t, len(indices) == 1)
-		assert.True(t, len(sourcetypes) == 1)
-		mIndices = getMetricsIndex(hecMetricsConsumer.AllMetrics())
-		assert.True(t, len(mIndices) == 1)
-		assert.True(t, mIndices[0] == newMetricsIndex)
+
+		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
+		mIndices := getMetricsIndex(hecMetricsConsumer.AllMetrics())
+		assert.Contains(t, mIndices, newMetricsIndex)
 	})
-	uninstallDeployment(t)
-	internal.ResetLogsSink(t, agentLogsConsumer)
-	internal.ResetMetricsSink(t, hecMetricsConsumer)
 }
 
 func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	valuesFileName := "values_cluster_receiver_switching.yaml.tmpl"
-	namespace := "default"
-	logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
+	logsObjectsConsumer := globalSinks.logsObjectsConsumer
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
 	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
-	t.Run("check cluster receiver enabled", func(t *testing.T) {
+	t.Run("check cluster receiver disabled", func(t *testing.T) {
+		internal.ResetLogsSink(t, logsObjectsConsumer)
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": false,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		var pods *corev1.PodList
-		pods = listPodsInNamespace(t, namespace)
-		assert.True(t, len(pods.Items) == 1)
+		pods := listPodsInNamespace(t, internal.Namespace)
+		assert.Len(t, pods.Items, 1)
 		assert.True(t, strings.HasPrefix(pods.Items[0].Name, "sock-splunk-otel-collector-agent"))
 		internal.CheckNoEventsReceived(t, logsObjectsConsumer)
+	})
 
-		t.Log("cluster receiver enabled")
-		replacements = map[string]interface{}{
+	t.Run("check cluster receiver enabled", func(t *testing.T) {
+		internal.ResetLogsSink(t, logsObjectsConsumer)
+		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": true,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 		internal.ResetLogsSink(t, logsObjectsConsumer)
-
-		pods = listPodsInNamespace(t, namespace)
-		assert.True(t, len(pods.Items) == 2)
+		pods := listPodsInNamespace(t, internal.Namespace)
+		assert.Len(t, pods.Items, 2)
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-agent"))
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-k8s-cluster-receiver"))
 		internal.WaitForLogs(t, 5, logsObjectsConsumer)
 	})
-	uninstallDeployment(t)
-	internal.ResetLogsSink(t, logsObjectsConsumer)
 }
 
 func testVerifyLogsAndMetricsAttributes(t *testing.T) {
@@ -346,7 +273,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify cluster receiver attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
-		logsObjectsConsumer := setupOnce(t).logsObjectsConsumer
+		logsObjectsConsumer := globalSinks.logsObjectsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
@@ -369,7 +296,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify cluster receiver metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
-		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 		replacements := map[string]interface{}{
@@ -392,7 +319,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify agent logs attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-		agentLogsConsumer := setupOnce(t).logsConsumer
+		agentLogsConsumer := globalSinks.logsConsumer
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
@@ -413,7 +340,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 
 	t.Run("verify metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
-		hecMetricsConsumer := setupOnce(t).hecMetricsConsumer
+		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 
 		replacements := map[string]interface{}{
 			"MetricsEnabled": true,
@@ -455,13 +382,6 @@ func listPodsInNamespace(t *testing.T, namespace string) *corev1.PodList {
 	require.NoError(t, err)
 	t.Logf("There are %d pods in the namespace %q\n", len(pods.Items), namespace)
 	return pods
-}
-
-func waitForAllPodsToBeRemoved(t *testing.T, namespace string) {
-	timeoutMinutes := 2
-	require.Eventuallyf(t, func() bool {
-		return len(listPodsInNamespace(t, namespace).Items) == 0
-	}, time.Duration(timeoutMinutes)*time.Minute, 5*time.Second, "There are still %d pods in the namespace", len(listPodsInNamespace(t, namespace).Items))
 }
 
 func getLogsIndexAndSourceType(logs []plog.Logs) ([]string, []string) {
@@ -595,23 +515,4 @@ func getMetricsAttributes(metrics []pmetric.Metrics, attributeName string) ([]st
 	}
 	fmt.Printf("Counters: Found: %d | Skipped: %d | Not Found: %d\n", foundCounter, skippedCounter, notFoundCounter)
 	return resourceAttributes, notFoundCounter
-}
-
-func uninstallDeployment(t *testing.T) {
-	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-
-	uninstall := action.NewUninstall(actionConfig)
-	uninstallResponse, err := uninstall.Run("sock")
-	if err != nil {
-		t.Logf("Failed to uninstall release: %v", err)
-	}
-	t.Logf("Uninstalled release: %v", uninstallResponse)
-	waitForAllPodsToBeRemoved(t, "default")
 }

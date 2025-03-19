@@ -143,22 +143,11 @@ jobs:
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout main if in a PR
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: main
-      - name: Checkout previous main commit if in main
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: HEAD
-          fetch-depth: 2
-      - name: Checkout previous main commit if in main
-        if: github.event_name != 'pull_request'
-        run: cd base && git checkout HEAD^
+      - name: Download the latest published release to use as a base for the upgrade
+        run: |
+          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+          helm repo update
+          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -174,12 +163,12 @@ jobs:
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
       - name: Update dependencies
         run: |
-          make dep-update && cd base && make dep-update
+          make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
           UPGRADE_FROM_VALUES: aws_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base
+          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
@@ -232,22 +221,11 @@ jobs:
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout main if in a PR
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: main
-      - name: Checkout previous main commit if in main
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          path: base
-          ref: HEAD
-          fetch-depth: 2
-      - name: Checkout previous main commit if in main
-        if: github.event_name != 'pull_request'
-        run: cd base && git checkout HEAD^
+      - name: Download the latest published release to use as a base for the upgrade
+        run: |
+          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+          helm repo update
+          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -266,12 +244,12 @@ jobs:
           project_id: ${{ secrets.GKE_PROJECT }}
       - name: Update dependencies
         run: |
-          make dep-update && cd base && make dep-update
+          make dep-update
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
           UPGRADE_FROM_VALUES: gke_autopilot_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base
+          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 

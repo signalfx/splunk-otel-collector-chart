@@ -16,9 +16,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"sync"
 	"testing"
-	"text/template"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
@@ -27,8 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/kube"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -52,37 +48,6 @@ const (
 // SKIP_TESTS: if set to true, the test will skip the test
 // UPDATE_EXPECTED_RESULTS: if set to true, the test will update the expected results
 // KUBECONFIG: the path to the kubeconfig file
-
-var setupRun = sync.Once{}
-var istioMetricsConsumer *consumertest.MetricsSink
-
-func setupOnce(t *testing.T) *consumertest.MetricsSink {
-	setupRun.Do(func() {
-
-		if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-			t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-			testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-			require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-			k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-			require.NoError(t, err)
-			istioctlPath := downloadIstio(t, istioVersion)
-			teardown(t, k8sClient, istioctlPath)
-		}
-
-		// create an API server
-		internal.SetupSignalFxApiServer(t)
-
-		istioMetricsConsumer = internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
-
-		if os.Getenv("SKIP_SETUP") == "true" {
-			t.Log("Skipping setup as SKIP_SETUP is set to true")
-			return
-		}
-		deployIstioAndCollector(t)
-	})
-
-	return istioMetricsConsumer
-}
 
 func deployIstioAndCollector(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -120,50 +85,17 @@ func deployIstioAndCollector(t *testing.T) {
 	// Send traffic through ingress gateways
 	sendWorkloadHTTPRequests(t)
 
-	chart := internal.LoadCollectorChart(t, "")
-
-	valuesBytes, err := os.ReadFile(filepath.Join("testdata", "istio_values.yaml.tmpl"))
+	valuesFile, err := filepath.Abs(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
-
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-
-	replacements := struct {
-		IngestURL string
-		ApiURL    string
-	}{
-		fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
-		fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+	replacements := map[string]any{
+		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
-	tmpl, err := template.New("").Parse(string(valuesBytes))
-	require.NoError(t, err)
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, replacements)
-	require.NoError(t, err)
-	var values map[string]interface{}
-	err = yaml.Unmarshal(buf.Bytes(), &values)
-	require.NoError(t, err)
-
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	install := action.NewInstall(actionConfig)
-	install.Namespace = "default"
-	install.ReleaseName = "sock"
-	_, err = install.Run(chart, values)
-	if err != nil {
-		t.Logf("error reported during helm install: %v\n", err)
-		retryUpgrade := action.NewUpgrade(actionConfig)
-		retryUpgrade.Namespace = "default"
-		retryUpgrade.Install = true
-		_, err = retryUpgrade.Run("sock", chart, values)
-		require.NoError(t, err)
-	}
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -197,17 +129,8 @@ metadata:
 `)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
-	actionConfig := new(action.Configuration)
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", "default"), "default", os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	uninstall := action.NewUninstall(actionConfig)
-	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
-	_, _ = uninstall.Run("sock")
+	internal.ChartUninstall(t, testKubeConfig)
 }
 
 func downloadIstio(t *testing.T, version string) string {
@@ -374,7 +297,26 @@ func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 }
 
 func Test_IstioMetrics(t *testing.T) {
-	_ = setupOnce(t)
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+		require.NoError(t, err)
+		istioctlPath := downloadIstio(t, istioVersion)
+		teardown(t, k8sClient, istioctlPath)
+	}
+
+	// create an API server
+	internal.SetupSignalFxApiServer(t)
+	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
+
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployIstioAndCollector(t)
+	}
+
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -382,22 +324,22 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true)
+		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true, metricsSink)
 	})
 }
 
-func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool) {
+func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool, metricsSink *consumertest.MetricsSink) {
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
-	internal.WaitForMetrics(t, 2, istioMetricsConsumer)
+	internal.WaitForMetrics(t, 2, metricsSink)
 
-	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, istioMetricsConsumer, ignoreLen, 5*time.Minute, 30*time.Second)
+	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen, 5*time.Minute, 30*time.Second)
 	if selectedMetrics == nil {
 		t.Error("No metric batch identified with the right metric count, exiting")
 		return
