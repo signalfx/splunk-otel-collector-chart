@@ -25,7 +25,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const Namespace = "default"
+const (
+	Namespace   = "default"
+	waitTimeout = 3 * time.Minute
+)
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
@@ -52,30 +55,27 @@ func HostEndpoint(t *testing.T) string {
 }
 
 func WaitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
-	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
-		return len(tc.AllTraces()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d traces in %d minutes", entriesNum,
-		len(tc.AllTraces()), timeoutMinutes)
+		return len(tc.AllTraces()) >= entriesNum
+	}, waitTimeout, 1*time.Second,
+		"failed to receive %d entries,  received %d traces in %f minutes", entriesNum,
+		len(tc.AllTraces()), waitTimeout.Minutes())
 }
 
 func WaitForLogs(t *testing.T, entriesNum int, lc *consumertest.LogsSink) {
-	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
-		return len(lc.AllLogs()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d logs in %d minutes", entriesNum,
-		len(lc.AllLogs()), timeoutMinutes)
+		return len(lc.AllLogs()) >= entriesNum
+	}, waitTimeout, 1*time.Second,
+		"failed to receive %d entries,  received %d logs in %f minutes", entriesNum,
+		len(lc.AllLogs()), waitTimeout.Minutes())
 }
 
 func WaitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) {
-	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
-		return len(mc.AllMetrics()) > entriesNum
-	}, time.Duration(timeoutMinutes)*time.Minute, 1*time.Second,
-		"failed to receive %d entries,  received %d metrics in %d minutes", entriesNum,
-		len(mc.AllMetrics()), timeoutMinutes)
+		return len(mc.AllMetrics()) >= entriesNum
+	}, waitTimeout, 1*time.Second,
+		"failed to receive %d entries,  received %d metrics in %f minutes", entriesNum,
+		len(mc.AllMetrics()), waitTimeout.Minutes())
 }
 
 func CheckNoEventsReceived(t *testing.T, lc *consumertest.LogsSink) {
