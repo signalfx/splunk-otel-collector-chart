@@ -76,7 +76,7 @@ spec:
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "15"
         - name: SIZE
           value: "256"
         - name: FREQ
@@ -103,11 +103,11 @@ spec:
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "100"
         - name: SIZE
           value: "256"
         - name: FREQ
-          value: "1"
+          value: "0.1"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -129,23 +129,23 @@ spec:
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "200"
         - name: SIZE
           value: "256"
         - name: FREQ
-          value: "1"
+          value: "0.01"
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pod-w-exclude-wo-ns-exclude
+  name: pod-wo-index-w-exclude-w-ns-index
   namespace: ns-w-index
 spec:
   parallelism: 1
   template:
     metadata:
       labels:
-        app: pod-w-index-w-ns-exclude
+        app: pod-wo-index-w-exclude-w-ns-index
       annotations:
         splunk.com/exclude: "true"
     spec:
@@ -155,11 +155,11 @@ spec:
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "50"
         - name: SIZE
           value: "256"
         - name: FREQ
-          value: "1"
+          value: "0.1"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -179,8 +179,8 @@ spec:
         image: docker.io/rock1017/log-generator:2.2.6
         env:
         - name: MESSAGE_COUNT
-          value: "10"
+          value: "45"
         - name: SIZE
           value: "256"
         - name: FREQ
-          value: "1"
+          value: "0.1"
