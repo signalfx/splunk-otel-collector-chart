@@ -239,13 +239,13 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 	t.Run("check cluster receiver disabled", func(t *testing.T) {
-		internal.ResetLogsSink(t, logsObjectsConsumer)
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": false,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
 		internal.WaitForTerminatingPods(t, clientset, internal.Namespace)
+		internal.ResetLogsSink(t, logsObjectsConsumer)
 		pods := listPodsInNamespace(t, internal.Namespace)
 		assert.Len(t, pods.Items, 1)
 		assert.True(t, strings.HasPrefix(pods.Items[0].Name, "sock-splunk-otel-collector-agent"))
@@ -253,7 +253,6 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	})
 
 	t.Run("check cluster receiver enabled", func(t *testing.T) {
-		internal.ResetLogsSink(t, logsObjectsConsumer)
 		replacements := map[string]interface{}{
 			"ClusterReceiverEnabled": true,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
