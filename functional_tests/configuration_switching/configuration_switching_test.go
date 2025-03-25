@@ -206,6 +206,8 @@ func testIndexSwitch(t *testing.T) {
 			"Sourcetype":           nonDefaultSourcetype,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
+		internal.ResetMetricsSink(t, hecMetricsConsumer)
+		internal.ResetLogsSink(t, agentLogsConsumer)
 
 		internal.WaitForLogs(t, 3, agentLogsConsumer)
 		logs := agentLogsConsumer.AllLogs()
@@ -221,6 +223,13 @@ func testIndexSwitch(t *testing.T) {
 }
 
 func testClusterReceiverEnabledOrDisabled(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(config)
+	require.NoError(t, err)
+
 	valuesFileName := "values_cluster_receiver_switching.yaml.tmpl"
 	logsObjectsConsumer := globalSinks.logsObjectsConsumer
 	hostEp := internal.HostEndpoint(t)
@@ -236,6 +245,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
+		internal.WaitForTerminatingPods(t, clientset, internal.Namespace)
 		pods := listPodsInNamespace(t, internal.Namespace)
 		assert.Len(t, pods.Items, 1)
 		assert.True(t, strings.HasPrefix(pods.Items[0].Name, "sock-splunk-otel-collector-agent"))
@@ -249,6 +259,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
+		internal.WaitForTerminatingPods(t, clientset, internal.Namespace)
 		internal.ResetLogsSink(t, logsObjectsConsumer)
 		pods := listPodsInNamespace(t, internal.Namespace)
 		assert.Len(t, pods.Items, 2)
