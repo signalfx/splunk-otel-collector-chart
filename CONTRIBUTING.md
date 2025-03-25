@@ -122,9 +122,19 @@ In that case use the following arguments to start minikube cluster:
 ```bash
 minikube start --cni calico --vm-driver=virtualbox
 ```
-> :warn: Adding or removing components is not officially supported by Splunk as
-> it may change performance characteristics and/or system behavior. Support is
-> provided if issues experienced can be reproduced with official builds.
+
+### Troubleshooting
+
+In some local Kubernetes clusters like "minikube" and "kind", you might run into TLS verification issue when callig
+the kubelet API. In order to quickly resolve it add the following section to your values.yaml file:
+
+```yaml
+agent:
+  config:
+    receivers:
+      kubeletestats:
+        insecure_skip_verify: true
+```
 
 ## Licensing
 
