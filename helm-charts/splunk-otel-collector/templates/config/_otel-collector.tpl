@@ -12,12 +12,6 @@ extensions:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
   {{- end }}
 
-  {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-  file_storage/persistent_queue_gateway:
-    directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/gateway
-    timeout: 0
-  {{- end }}
-
 
   zpages:
 
@@ -147,9 +141,6 @@ service:
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
-    {{- end }}
-    {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-    - file_storage/persistent_queue_gateway
     {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
