@@ -178,3 +178,23 @@ func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key,
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 }
+
+func WaitForTerminatingPods(t *testing.T, clientset *kubernetes.Clientset, namespace string) {
+	require.Eventually(t, func() bool {
+		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+		require.NoError(t, err)
+
+		terminatingPods := 0
+		for _, pod := range pods.Items {
+			if pod.Status.Phase == v1.PodRunning || pod.Status.Phase == v1.PodPending {
+				continue
+			}
+			// Check if the pod is terminating
+			if pod.DeletionTimestamp != nil {
+				terminatingPods++
+			}
+		}
+
+		return terminatingPods == 0
+	}, 2*time.Minute, 5*time.Second, "there are still terminating pods after 2 minutes")
+}
