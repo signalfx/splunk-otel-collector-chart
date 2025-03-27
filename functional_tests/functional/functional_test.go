@@ -44,7 +44,6 @@ import (
 )
 
 const (
-	signalFxReceiverPort                   = 9443
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
@@ -56,7 +55,6 @@ const (
 	manifestsDir                           = "manifests"
 	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
-	helmActionTimeout                      = 5 * time.Minute
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -81,7 +79,7 @@ func setupSinks(t *testing.T) {
 		logsConsumer:         internal.SetupHECLogsSink(t),
 		hecMetricsConsumer:   internal.SetupHECMetricsSink(t),
 		logsObjectsConsumer:  internal.SetupHECObjectsSink(t),
-		agentMetricsConsumer: internal.SetupSignalfxReceiver(t, signalFxReceiverPort),
+		agentMetricsConsumer: internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort),
 		k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
 			signalFxReceiverK8sClusterReceiverPort),
 		tracesConsumer: internal.SetupOTLPTracesSink(t),
@@ -185,7 +183,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 
 	replacements := map[string]any{
 		"K8sClusterEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
-		"AgentEndpoint":         fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"AgentEndpoint":         fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"LogHecEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 		"MetricHecEndpoint":     fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
 		"OtlpEndpoint":          fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
