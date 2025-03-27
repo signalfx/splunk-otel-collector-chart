@@ -218,7 +218,7 @@ service:
     - k8s_observer
     {{- end }}
     {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-    - file_storage/persistent_queue_cluster_receiver
+    - file_storage/persistent_queue
     {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
