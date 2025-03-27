@@ -16,7 +16,7 @@ extensions:
   {{- end }}
 
   {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-  file_storage/persistent_queue_cluster_receiver:
+  file_storage/persistent_queue:
     directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/clusterReceiver
     timeout: 0
   {{- end }}
@@ -195,7 +195,6 @@ exporters:
     disable_compression: true
   {{- end }}
 
-  {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
@@ -206,7 +205,6 @@ exporters:
     sourcetype: kube:events
   {{- end }}
   {{- end }}
-  {{- $_ := unset . "addPersistentStorage" }}
 
 service:
   telemetry:
