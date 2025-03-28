@@ -22,6 +22,8 @@ const (
 	HECMetricsReceiverPort = 8091
 	HECObjectsReceiverPort = 8092
 	OTLPGRPCReceiverPort   = 4317
+	OTLPHTTPReceiverPort   = 4318
+	SignalFxReceiverPort   = 9943
 )
 
 func SetupHECLogsSink(t *testing.T) *consumertest.LogsSink {
@@ -74,6 +76,7 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
+	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
 
 	rcvr, err := f.CreateTraces(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, tc)
 	require.NoError(t, err)
@@ -85,6 +88,25 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 	})
 
 	return tc
+}
+
+func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
+	ls := new(consumertest.LogsSink)
+	f := otlpreceiver.NewFactory()
+	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
+	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
+	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+
+	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, ls)
+	require.NoError(t, err)
+
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, err, "failed creating logs receiver")
+	t.Cleanup(func() {
+		require.NoError(t, rcvr.Shutdown(context.Background()))
+	})
+
+	return ls
 }
 
 func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {

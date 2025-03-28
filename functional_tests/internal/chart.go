@@ -16,11 +16,11 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/kube"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
 const (
-	helmActionTimeout = 5 * time.Minute
+	HelmActionTimeout = 10 * time.Minute
 	chartReleaseName  = "sock"
 )
 
@@ -36,18 +36,12 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	err = yaml.Unmarshal(buf.Bytes(), &values)
 	require.NoError(t, err)
 
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", Namespace), Namespace, os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v...)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-
+	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	install := action.NewInstall(actionConfig)
 	install.Namespace = Namespace
 	install.ReleaseName = chartReleaseName
 	install.Wait = true
-	install.Timeout = helmActionTimeout
+	install.Timeout = HelmActionTimeout
 
 	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
 	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
@@ -68,7 +62,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = Namespace
 		upgrade.Wait = true
-		upgrade.Timeout = helmActionTimeout
+		upgrade.Timeout = HelmActionTimeout
 		t.Log("Running helm upgrade")
 		_, err = upgrade.Run(chartReleaseName, loadChart(t), values)
 	} else {
@@ -79,17 +73,20 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(kube.GetConfig(testKubeConfig, "", Namespace), Namespace, os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		t.Logf(format+"\n", v)
-	}); err != nil {
-		require.NoError(t, err)
-	}
-	uninstall := action.NewUninstall(actionConfig)
+	uninstall := action.NewUninstall(InitHelmActionConfig(t, testKubeConfig))
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
-	uninstall.Timeout = helmActionTimeout
+	uninstall.Timeout = HelmActionTimeout
 	_, _ = uninstall.Run(chartReleaseName)
+}
+
+func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration {
+	actionConfig := new(action.Configuration)
+	cf := genericclioptions.NewConfigFlags(true)
+	cf.Namespace = &Namespace
+	cf.KubeConfig = &kubeConfig
+	require.NoError(t, actionConfig.Init(cf, Namespace, os.Getenv("HELM_DRIVER"), t.Logf))
+	return actionConfig
 }
 
 func loadChart(t *testing.T) *chart.Chart {
