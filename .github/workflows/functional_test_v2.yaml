@@ -46,6 +46,7 @@ jobs:
           - configuration_switching
           - k8sevents
           - istio
+          - discovery
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
