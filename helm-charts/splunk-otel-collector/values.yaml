@@ -1231,6 +1231,8 @@ operator:
   manager:
     collectorImage:
       repository: quay.io/signalfx/splunk-otel-collector
+  nodeSelector:
+    kubernetes.io/os: linux
 
 # The default Splunk Instrumentation object deployed when operator.enabled=true.
 # For more details see:
