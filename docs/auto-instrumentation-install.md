@@ -339,10 +339,9 @@ Below is a breakdown of the main and related components involved in auto-instrum
     at: https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator
   - _The OpenTelemetry Operator Chart is owned and maintained by the OpenTelemetry Community, Splunk provides best
     effort support with issues related OpenTelemetry Operator Chart._
+  - The OpenTelemetry Operator Docker image only supports Linux and cannot run on Windows nodes.
 - Sub-components
-  - Mutating Admission Webhook
-- Dependencies
-  - Cert Manager
+  - Admission and mutating webhooks, including ValidatingWebhookConfiguration and MutatingWebhookConfiguration.
 
 </details>
 
