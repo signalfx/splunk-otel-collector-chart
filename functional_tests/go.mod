@@ -4,9 +4,8 @@
 module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 
 go 1.24.0
-
 require (
-	github.com/docker/docker v27.5.1+incompatible
+	github.com/docker/docker v28.0.4+incompatible
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.121.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.121.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest v0.121.0
@@ -23,6 +22,7 @@ require (
 	k8s.io/api v0.32.2
 	k8s.io/apiextensions-apiserver v0.32.2
 	k8s.io/apimachinery v0.32.2
+	k8s.io/cli-runtime v0.32.1
 	k8s.io/client-go v0.32.2
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -201,7 +201,6 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/apiserver v0.32.2 // indirect
-	k8s.io/cli-runtime v0.32.1 // indirect
 	k8s.io/component-base v0.32.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect
