@@ -1390,6 +1390,7 @@ featureGates:
   noDropLogsPipeline: false
   # The feature gate enables an experiment to define explicitly tokens on the daemonset and gateway, cluster receiver
   # and target allocator deployments.
+  # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
   # Use a specific metrics pipeline to report control plane metrics as histograms.
   useControlPlaneMetricsHistogramData: false
