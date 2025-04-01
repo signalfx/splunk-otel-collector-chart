@@ -4,6 +4,17 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.122.0] - 2025-03-31
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.122.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.122.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent/gateway`: Ensure entity events are sent via gateway if enabled. ([#1732](https://github.com/signalfx/splunk-otel-collector-chart/pull/1732))
+- `clusterReceiver`: Removes warning from chart when the clusterReceiver.eventsEnabled flag is set to true. ([#1725](https://github.com/signalfx/splunk-otel-collector-chart/pull/1725))
+  The clusterReceiver.eventsEnabled option which used k8s_events receiver is not being deprecated.
+  This change removes the warning that was previously displayed when this flag was set to true.
+
 ## [0.121.0] - 2025-03-18
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.121.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.121.0).
