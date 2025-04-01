@@ -144,7 +144,6 @@ processors:
   {{- if or
     (and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
     (and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
-    (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true")
   }}
   {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
   {{- end }}
@@ -395,7 +394,6 @@ service:
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
         {{- end }}
-        - k8sattributes/clusterReceiver
       exporters:
         - signalfx
     {{- end }}
