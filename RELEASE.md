@@ -15,13 +15,20 @@ of `version` field.
 
 #### Using GitHub Workflows
 
-- **Manual Dispatch Github Worfklow:**
-  - Navigate to the **[Release Drafter](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml** workflow under GitHub Actions.
-  - Manually trigger the workflow. It automatically drafts a PR for the release.
-  - Review code changes, validate chart functionality, approve the PR, and merge the PR.
-- **Automatic Schedule Github Worfklow:**
-  - Automatically generated PRs are scheduled to follow collector releases.
-  - Review code changes, validate chart functionality, approve the PR, and merge the PR.
+1. When a new upstream collector release is available, the [Release Drafter workflow](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml) automatically creates a release PR every 12 hours at **00:55 UTC and 12:55 UTC**.
+   - This schedule corresponds to:
+     - **5:55 AM / 5:55 PM** during Daylight Saving Time (PDT / UTC−7)
+     - **4:55 AM / 4:55 PM** during Standard Time (PST / UTC−8)
+   - To trigger the workflow outside the scheduled times, use the ["Run workflow" button](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml) with default input parameters.
+1. After the [release PR](https://github.com/signalfx/splunk-otel-collector-chart/pulls?q=is%3Apr+is%3Aopen+%22Prepare+Release%22) is created:
+   - Review the code changes
+   - Ensure all checks have passed to validate chart functionality
+     - Note: Due to a GitHub limitation, PRs created by workflows may not trigger downstream checks automatically. A repository approver may need
+       to close and reopen the PR to kick off the required checks. This is a known issue we’re working to improve.
+   - Approve and merge the PR
+1. The [Release Charts workflow](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/.github/workflows/release.yaml) will publish the release shortly after.
+   - That’s it — you’re done!
+   - _Automation prevents duplicate or invalid releases. If a release isn’t created, you can check for failed workflow run info [here](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release.yaml)._
 
 #### Manually Making a Release
 
