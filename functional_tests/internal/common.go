@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/network"
 	docker "github.com/docker/docker/client"
 	"github.com/stretchr/testify/require"
 )
@@ -42,7 +42,7 @@ func HostEndpoint(t *testing.T) string {
 	client.NegotiateAPIVersion(context.Background())
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", types.NetworkInspectOptions{})
+	network, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
 	require.NoError(t, err)
 	for _, ipam := range network.IPAM.Config {
 		if ipam.Gateway != "" {
