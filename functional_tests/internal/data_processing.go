@@ -1,6 +1,8 @@
 package internal
 
-import "go.opentelemetry.io/collector/pdata/pmetric"
+import (
+	"go.opentelemetry.io/collector/pdata/pmetric"
+)
 
 // ReduceDatapoints reduces the number of datapoints found in any metric in input to maxDPCount.
 func ReduceDatapoints(metrics *pmetric.Metrics, maxDPCount int) {
@@ -85,4 +87,23 @@ func RemoveFlakyMetrics(metrics *pmetric.Metrics, flakyMetrics []string) {
 			})
 		}
 	}
+}
+
+// GetMetricNames returns a slice of unique metric names from the input metrics.
+func GetMetricNames(metrics *pmetric.Metrics) []string {
+	names := make(map[string]struct{})
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		for j := 0; j < metrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			for k := 0; k < metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+				metric := metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+				names[metric.Name()] = struct{}{}
+			}
+		}
+	}
+
+	uniqueNames := make([]string, 0, len(names))
+	for name := range names {
+		uniqueNames = append(uniqueNames, name)
+	}
+	return uniqueNames
 }

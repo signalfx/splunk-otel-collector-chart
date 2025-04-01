@@ -373,6 +373,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreMetricAttributeValue("service.name"),
 		pmetrictest.IgnoreMetricAttributeValue("url.scheme"),
+		pmetrictest.IgnoreMetricAttributeValue("type", "pilot_xds_expired_nonce"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
