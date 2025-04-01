@@ -23,7 +23,7 @@ of `version` field.
 1. After the [release PR](https://github.com/signalfx/splunk-otel-collector-chart/pulls?q=is%3Apr+is%3Aopen+%22Prepare+Release%22) is created:
    - Review the code changes
    - Ensure all checks have passed to validate chart functionality
-     - Note: Due to a GitHub limitation, PRs created by workflows may not trigger downstream checks automatically. A release approver may need
+     - Note: Due to a GitHub limitation, PRs created by workflows may not trigger downstream checks automatically. A repository approver may need
        to close and reopen the PR to kick off the required checks. This is a known issue we’re working to improve.
    - Approve and merge the PR
 1. The [Release Charts workflow](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/.github/workflows/release.yaml) will publish the release shortly after.
