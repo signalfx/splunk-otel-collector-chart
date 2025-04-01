@@ -11,6 +11,9 @@ splunkPlatform:
 
 agent:
   config:
+    receivers:
+      kubeletstats:
+        insecure_skip_verify: true
     exporters:
       otlp:
         endpoint: {{ .OtlpEndpoint }}
@@ -70,7 +73,7 @@ livenessProbe:
 operatorcrds:
   install: true
 operator:
-  enabled: true
+  enabled: false
   admissionWebhooks:
     certManager:
       enabled: false
@@ -78,3 +81,6 @@ operator:
       enabled: true
   nodeSelector:
     kubernetes.io/os: "linux"
+
+featureGates:
+  explicitMountServiceAccountToken: true
