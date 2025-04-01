@@ -77,8 +77,6 @@ spec:
             - containerPort: 8443
               name: https
               protocol: TCP
-      nodeSelector: 
-        kubernetes.io/os: linux
       serviceAccountName: operator
       terminationGracePeriodSeconds: 10
       volumes:

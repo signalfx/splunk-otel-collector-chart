@@ -35,8 +35,6 @@ spec:
           else exit 1
           fi
   restartPolicy: Never
-  nodeSelector: 
-    kubernetes.io/os: linux
 ---
 # Source: splunk-otel-collector/charts/operator/templates/tests/test-service-connection.yaml
 apiVersion: v1
@@ -74,5 +72,3 @@ spec:
           else exit 1
           fi
   restartPolicy: Never
-  nodeSelector: 
-    kubernetes.io/os: linux
