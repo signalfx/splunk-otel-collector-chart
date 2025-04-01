@@ -108,8 +108,6 @@ jobs:
           sleep 60
 
       - name: Run Splunk Integration Tests
-        env:
-          K8S_VERSION: ${{ matrix.k8s-version }}
         run: |
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           cd test
