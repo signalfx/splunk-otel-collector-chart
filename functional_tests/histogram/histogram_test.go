@@ -4,24 +4,27 @@
 package histogram
 
 import (
+	"bytes"
 	"fmt"
+	"go.opentelemetry.io/collector/consumer/consumertest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
 const (
-	otlpReceiverPort = 4317
+	signalFxReceiverPort = 4317
 
 	valuesDir = "values"
 )
@@ -35,7 +38,7 @@ func deployChart(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, otlpReceiverPort),
+		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -48,16 +51,34 @@ func teardown(t *testing.T) {
 	internal.ChartUninstall(t, testKubeConfig)
 }
 
-func Test_Histograms(t *testing.T) {
-	otlpMetricsSink := internal.SetupSignalfxReceiver(t, otlpReceiverPort)
+type TestInput struct {
+	ServiceName            string // service name
+	NonHistogramMetricName string // metric name which is expected to be present for the component
+	HistogramMetricName    string // metric name which is expected to be present for the component only
+}
+
+var testInputs = []TestInput{
+	{"kubernetes-scheduler", "scheduler_queue_incoming_pods_total", "scheduler_scheduling_attempt_duration_seconds"},
+	{"kubernetes-proxy", "kubeproxy_sync_proxy_rules_iptables_total", "kubeproxy_sync_proxy_rules_duration_seconds"},
+	{"kubernetes-apiserver", "apiserver_request_total", "apiserver_request_duration_seconds"},
+	{"kube-controller-manager", "endpoint_slice_controller_syncs", "endpoint_slice_controller_endpoints_added_per_sync"},
+	{"coredns", "coredns_dns_requests_total", "coredns_dns_request_duration_seconds"},
+	{"etcd", "etcd_cluster_version", "etcd_debugging_lease_ttl_total"},
+}
+
+func Test_ControlPlaneMetrics(t *testing.T) {
+
+	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		teardown(t)
 	}
-	// deploy the chart and applications.
+
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	} else {
+		// generate some traffic to coredns to reduce metric flakiness
+		performDNSQueries(t)
 		deployChart(t)
 	}
 
@@ -66,255 +87,233 @@ func Test_Histograms(t *testing.T) {
 		return
 	}
 
+	for _, isHistogram := range []bool{true, false} {
+		for _, input := range testInputs {
+			t.Run(fmt.Sprintf("%s_histograms=%t", input.ServiceName, isHistogram), func(t *testing.T) {
+				runMetricsTest(t, isHistogram, metricsSink, input)
+			})
+		}
+	}
+}
+
+func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.MetricsSink, input TestInput) {
 	k8sVersion := os.Getenv("K8S_VERSION")
 	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
 
 	testDir := filepath.Join("testdata", "expected", majorMinor)
 
-	internal.WaitForMetrics(t, 5, otlpMetricsSink)
+	internal.WaitForMetrics(t, 5, metricsSink)
 
-	expectedKubeSchedulerMetricsFile := filepath.Join(testDir, "scheduler_metrics.yaml")
-	expectedKubeSchedulerMetrics, err := golden.ReadMetrics(expectedKubeSchedulerMetricsFile)
-	require.NoError(t, err)
+	fileName := input.ServiceName + "_metrics.yaml"
+	if isHistogram {
+		fileName = input.ServiceName + "_histogram_metrics.yaml"
+	}
+	expected, _ := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	expectedMetrics := &expected
 
-	expectedKubeProxyMetricsFile := filepath.Join(testDir, "proxy_metrics.yaml")
-	expectedKubeProxyMetrics, err := golden.ReadMetrics(expectedKubeProxyMetricsFile)
-	require.NoError(t, err)
+	var actualMetrics *pmetric.Metrics
 
-	expectedApiMetricsFile := filepath.Join(testDir, "api_metrics.yaml")
-	expectedApiMetrics, err := golden.ReadMetrics(expectedApiMetricsFile)
-	require.NoError(t, err)
-
-	expectedControllerManagerMetricsFile := filepath.Join(testDir, "controller_manager_metrics.yaml")
-	expectedControllerManagerMetrics, err := golden.ReadMetrics(expectedControllerManagerMetricsFile)
-	require.NoError(t, err)
-
-	expectedCoreDNSMetricsFile := filepath.Join(testDir, "coredns_metrics.yaml")
-	expectedCoreDNSMetrics, err := golden.ReadMetrics(expectedCoreDNSMetricsFile)
-	require.NoError(t, err)
-
-	expectedEtcdMetricsFile := filepath.Join(testDir, "etcd_metrics.yaml")
-	expectedEtcdMetrics, err := golden.ReadMetrics(expectedEtcdMetricsFile)
-	require.NoError(t, err)
-
-	var corednsMetrics *pmetric.Metrics
-	var schedulerMetrics *pmetric.Metrics
-	var kubeProxyMetrics *pmetric.Metrics
-	var apiMetrics *pmetric.Metrics
-	var controllerManagerMetrics *pmetric.Metrics
-	var etcdMetrics *pmetric.Metrics
-
+	t.Logf("checking for metrics matching component %s", input.ServiceName)
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-
-		for h := len(otlpMetricsSink.AllMetrics()) - 1; h >= 0; h-- {
-			m := otlpMetricsSink.AllMetrics()[h]
+		for h := len(metricsSink.AllMetrics()) - 1; h >= 0; h-- {
+			m := metricsSink.AllMetrics()[h]
 		OUTER:
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
 				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						if metricToConsider.Name() == "coredns_dns_request_duration_seconds" && m.MetricCount() == expectedCoreDNSMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedCoreDNSMetrics.ResourceMetrics().Len() {
-							corednsMetrics = &m
-							break OUTER
-						} else if metricToConsider.Name() == "kubeproxy_sync_proxy_rules_iptables_total" && m.MetricCount() == expectedKubeProxyMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeProxyMetrics.ResourceMetrics().Len() {
-							kubeProxyMetrics = &m
-							break OUTER
-						} else if metricToConsider.Name() == "scheduler_queue_incoming_pods_total" && m.MetricCount() == expectedKubeSchedulerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedKubeSchedulerMetrics.ResourceMetrics().Len() {
-							schedulerMetrics = &m
-							break OUTER
-						} else if metricToConsider.Name() == "apiserver_audit_event_total" && m.MetricCount() == expectedApiMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedApiMetrics.ResourceMetrics().Len() {
-							apiMetrics = &m
-							break OUTER
-						} else if metricToConsider.Name() == "workqueue_queue_duration_seconds" && m.MetricCount() == expectedControllerManagerMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedControllerManagerMetrics.ResourceMetrics().Len() {
-							controllerManagerMetrics = &m
-							break OUTER
-						} else if metricToConsider.Name() == "etcd_cluster_version" && m.MetricCount() == expectedEtcdMetrics.MetricCount() && m.ResourceMetrics().Len() == expectedEtcdMetrics.ResourceMetrics().Len() {
-							etcdMetrics = &m
+						metricName := input.NonHistogramMetricName
+						if isHistogram {
+							metricName = input.HistogramMetricName
+						}
+						if metricToConsider.Name() == metricName {
+							actualMetrics = &m
 							break OUTER
 						}
 					}
 				}
 			}
 		}
-		assert.NotNil(tt, corednsMetrics)
-		assert.NotNil(tt, schedulerMetrics)
-		assert.NotNil(tt, kubeProxyMetrics)
-		assert.NotNil(tt, apiMetrics)
-		assert.NotNil(tt, controllerManagerMetrics)
-		assert.NotNil(tt, etcdMetrics)
 
-	}, 3*time.Minute, 5*time.Second)
+		assert.NotNil(tt, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
+	}, 5*time.Minute, 5*time.Second)
 
-	require.NotNil(t, corednsMetrics)
-	require.NotNil(t, schedulerMetrics)
-	require.NotNil(t, kubeProxyMetrics)
-	require.NotNil(t, apiMetrics)
-	require.NotNil(t, controllerManagerMetrics)
-	require.NotNil(t, etcdMetrics)
-
-	err = pmetrictest.CompareMetrics(expectedCoreDNSMetrics, *corednsMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("to", "coredns_forward_request_duration_seconds"),
-		pmetrictest.IgnoreMetricAttributeValue("rcode", "coredns_forward_request_duration_seconds"),
-		pmetrictest.IgnoreMetricAttributeValue("to", "coredns_proxy_request_duration_seconds"),
-		pmetrictest.IgnoreMetricAttributeValue("rcode", "coredns_proxy_request_duration_seconds"),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("coredns_forward_request_duration_seconds"),
-		pmetrictest.IgnoreSubsequentDataPoints("coredns_proxy_request_duration_seconds"),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedCoreDNSMetricsFile, corednsMetrics)
+	// Set GENERATE_EXPECTED to true to get a sample of the metrics for component - only for dev purposes
+	// The max datapoint count per metric can be adjusted as inpute to internal.ReduceDatapoints
+	if os.Getenv("GENERATE_EXPECTED") == "true" {
+		outputDir := filepath.Join("testdata", "expected", majorMinor)
+		require.NoError(t, os.MkdirAll(outputDir, 0755))
+		internal.ReduceDatapoints(actualMetrics, 1)
+		err := golden.WriteMetrics(t, filepath.Join(outputDir, fileName), *actualMetrics)
+		require.NoError(t, err)
 	}
 
-	err = pmetrictest.CompareMetrics(expectedKubeSchedulerMetrics, *schedulerMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("extension_point", "scheduler_plugin_execution_duration_seconds"),
-		pmetrictest.IgnoreMetricAttributeValue("plugin", "scheduler_plugin_execution_duration_seconds"),
-		pmetrictest.IgnoreSubsequentDataPoints("scheduler_plugin_execution_duration_seconds"),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"), pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedKubeSchedulerMetricsFile, etcdMetrics)
+	assert.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
+	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
+	if err != nil {
+		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
+		if os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+			internal.WriteNewExpectedMetricsResult(t, filepath.Join(testDir, fileName), actualMetrics)
+		}
+	}
+}
+
+func performDNSQueries(t *testing.T) {
+	overrides := `{"spec": {"dnsPolicy": "ClusterFirst"}}`
+	cmd := exec.Command("kubectl", "run", "--rm", "-i", "--tty", "dns-query", "--image=busybox", "--restart=Never", "--overrides="+overrides, "--", "sh", "-c", "for i in $(seq 1 10); do nslookup kubernetes.default.svc.cluster.local; sleep 1; done")
+	var out, stderr bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &out, &stderr
+	err := cmd.Run()
+	if err != nil {
+		t.Logf("DNS query failed: %v", err)
+		t.Logf("Standard Output: %s", out.String())
+		t.Logf("Standard Error: %s", stderr.String())
+	}
+}
+
+func checkMetrics(t *testing.T, isHistogram bool, expected, actual *pmetric.Metrics, component string) error {
+	commonAttrs := map[string]string{
+		"host.name":           "kind-control-plane",
+		"http.scheme":         "http",
+		"k8s.cluster.name":    "sock",
+		"k8s.namespace.name":  "kube-system",
+		"k8s.node.name":       "kind-control-plane",
+		"k8s.pod.uid":         ".*",
+		"net.host.name":       ".*",
+		"net.host.port":       ".*",
+		"os.type":             "linux",
+		"server.address":      ".*",
+		"server.port":         ".*",
+		"url.scheme":          "http",
+		"service.instance.id": ".*:.*",
 	}
 
-	err = pmetrictest.CompareMetrics(expectedKubeProxyMetrics, *kubeProxyMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
-		pmetrictest.IgnoreMetricAttributeValue("version", "go_info"),
-		pmetrictest.IgnoreMetricAttributeValue("build_date", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("git_commit", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("git_version", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("go_version", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("minor", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("platform", "kubernetes_build_info"),
-		pmetrictest.IgnoreMetricAttributeValue("server_go_version", "etcd_server_go_version"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedKubeProxyMetricsFile, &expectedKubeProxyMetrics)
+	componentAttrs := map[string]map[string]string{
+		"coredns": {
+			"k8s.pod.name": "coredns-.*",
+			"service.name": "coredns",
+		},
+		"etcd": {
+			"k8s.pod.name": "etcd-kind-control-plane",
+			"service.name": "etcd",
+		},
+		"kube-controller": {
+			"k8s.pod.name": "kube-controller-manager-kind-control-plane",
+			"service.name": "kube-controller-manager",
+		},
+		"kubernetes-apiserver": {
+			"k8s.pod.name": "kube-apiserver-kind-control-plane",
+			"service.name": "kubernetes-apiserver",
+		},
+		"kubernetes-proxy": {
+			"k8s.pod.name": "kube-proxy-.*",
+			"service.name": "kubernetes-proxy",
+		},
+		"kubernetes-scheduler": {
+			"k8s.pod.name": "kube-scheduler-kind-control-plane",
+			"service.name": "kubernetes-scheduler",
+		},
 	}
 
-	err = pmetrictest.CompareMetrics(expectedApiMetrics, *apiMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedApiMetricsFile, apiMetrics)
+	mergedAttrs := mergeMaps(commonAttrs, componentAttrs[component])
+
+	if isHistogram {
+		return checkHistogramMetrics(t, expected, actual, component, mergedAttrs)
+	} else {
+		return checkNonHistogramMetrics(t, expected, actual, component, mergedAttrs)
+	}
+}
+
+func mergeMaps(map1, map2 map[string]string) map[string]string {
+	merged := make(map[string]string)
+	for k, v := range map1 {
+		merged[k] = v
+	}
+	for k, v := range map2 {
+		merged[k] = v
+	}
+	return merged
+}
+
+func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, component string, attrs map[string]string) error {
+	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
+		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
+			actualRm := actual.ResourceMetrics().At(j)
+			if err := checkAttributes(t, actualRm.Resource().Attributes(), attrs, component); err != nil {
+				return err
+			}
+		}
 	}
 
-	err = pmetrictest.CompareMetrics(expectedControllerManagerMetrics, *controllerManagerMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceAttributeValue("service.name"),
-		pmetrictest.IgnoreResourceAttributeValue("server.port"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedControllerManagerMetricsFile, controllerManagerMetrics)
+	expectedNames := internal.GetMetricNames(expected)
+	actualNames := internal.GetMetricNames(actual)
+	for _, name := range expectedNames {
+		if !assert.Contains(t, actualNames, name, "Metric name %s not found in received metrics for component %s", name, component) {
+			return fmt.Errorf("metric name %s not found in received metrics for component %s", name, component)
+		}
+	}
+	return nil
+}
+
+func checkNonHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, component string, attrs map[string]string) error {
+	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
+		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
+			actualRm := actual.ResourceMetrics().At(j)
+			for k := 0; k < actualRm.ScopeMetrics().Len(); k++ {
+				sm := actualRm.ScopeMetrics().At(k)
+				for l := 0; l < sm.Metrics().Len(); l++ {
+					metric := sm.Metrics().At(l)
+					switch metric.Type() {
+					case pmetric.MetricTypeSum:
+						for m := 0; m < metric.Sum().DataPoints().Len(); m++ {
+							dp := metric.Sum().DataPoints().At(m)
+							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
+								return err
+							}
+						}
+					case pmetric.MetricTypeGauge:
+						for m := 0; m < metric.Gauge().DataPoints().Len(); m++ {
+							dp := metric.Gauge().DataPoints().At(m)
+							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
+								return err
+							}
+						}
+					case pmetric.MetricTypeHistogram:
+						for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
+							dp := metric.Histogram().DataPoints().At(m)
+							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
+								return err
+							}
+						}
+					case pmetric.MetricTypeSummary:
+						for m := 0; m < metric.Summary().DataPoints().Len(); m++ {
+							dp := metric.Summary().DataPoints().At(m)
+							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
+								return err
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
-	err = pmetrictest.CompareMetrics(expectedEtcdMetrics, *etcdMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.port"),
-		pmetrictest.IgnoreMetricAttributeValue("server_go_version", "etcd_server_go_version"),
-		pmetrictest.IgnoreMetricAttributeValue("server_version", "etcd_server_version"),
-		pmetrictest.IgnoreMetricAttributeValue("version", "go_info"),
-		pmetrictest.IgnoreMetricAttributeValue("client_api_version", "etcd_server_client_requests_total"),
-		pmetrictest.IgnoreResourceAttributeValue("server.address"),
-		pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.name"),
-		pmetrictest.IgnoreResourceAttributeValue("net.host.port"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-	)
-	assert.NoError(t, err)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedEtcdMetricsFile, etcdMetrics)
+	expectedNames := internal.GetMetricNames(expected)
+	actualNames := internal.GetMetricNames(actual)
+	for _, name := range expectedNames {
+		if !assert.Contains(t, actualNames, name, "Metric name %s not found in actual metrics", name) {
+			return fmt.Errorf("metric name %s not found in actual metrics", name)
+		}
 	}
+	return nil
+}
+
+func checkAttributes(t *testing.T, attrs pcommon.Map, expectedAttrs map[string]string, component string) error {
+	for key, regex := range expectedAttrs {
+		val, _ := attrs.Get(key)
+		if !assert.Regexp(t, regex, val.AsString(), "Attribute %s does not match regex %s for component %s", key, regex, component) {
+			return fmt.Errorf("attribute %s does not match regex %s for component %s", key, regex, component)
+		}
+	}
+	return nil
 }

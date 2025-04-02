@@ -344,7 +344,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	require.NotNil(t, selectedMetrics)
 
 	if flakyMetricNames != nil {
-		removeFlakyMetrics(selectedMetrics, flakyMetricNames)
+		internal.RemoveFlakyMetrics(selectedMetrics, flakyMetricNames)
 	}
 
 	var metricNames []string
@@ -373,6 +373,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreMetricAttributeValue("service.name"),
 		pmetrictest.IgnoreMetricAttributeValue("url.scheme"),
+		pmetrictest.IgnoreMetricAttributeValue("type", "pilot_xds_expired_nonce"),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
@@ -415,22 +416,4 @@ func selectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, metricNa
 		return false
 	}, timeout, interval, "Failed to find the expected metric %s within the timeout period", metricName)
 	return selectedMetrics
-}
-
-func removeFlakyMetrics(metrics *pmetric.Metrics, flakyMetrics []string) {
-	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
-		resourceMetrics := metrics.ResourceMetrics().At(i)
-		for j := 0; j < resourceMetrics.ScopeMetrics().Len(); j++ {
-			scopeMetrics := resourceMetrics.ScopeMetrics().At(j)
-			metricSlice := scopeMetrics.Metrics()
-			metricSlice.RemoveIf(func(metric pmetric.Metric) bool {
-				for _, flakyMetric := range flakyMetrics {
-					if metric.Name() == flakyMetric {
-						return true
-					}
-				}
-				return false
-			})
-		}
-	}
 }

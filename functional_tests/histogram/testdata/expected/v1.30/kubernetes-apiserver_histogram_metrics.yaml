@@ -1,0 +1,1958 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: kind-control-plane
+        - key: http.scheme
+          value:
+            stringValue: https
+        - key: k8s.cluster.name
+          value:
+            stringValue: sock
+        - key: k8s.namespace.name
+          value:
+            stringValue: kube-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: kube-apiserver-kind-control-plane
+        - key: k8s.pod.uid
+          value:
+            stringValue: 011307ab-929c-42a3-96d6-eacc4f0598de
+        - key: net.host.name
+          value:
+            stringValue: 172.18.0.2
+        - key: net.host.port
+          value:
+            stringValue: "6443"
+        - key: os.type
+          value:
+            stringValue: linux
+        - key: server.address
+          value:
+            stringValue: 172.18.0.2
+        - key: server.port
+          value:
+            stringValue: "6443"
+        - key: service.instance.id
+          value:
+            stringValue: 172.18.0.2:6443
+        - key: service.name
+          value:
+            stringValue: kubernetes-apiserver
+        - key: url.scheme
+          value:
+            stringValue: https
+    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    scopeMetrics:
+      - metrics:
+          - description: Deprecated. Prefer the identical /sched/pauses/total/gc:seconds.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "3"
+                    - "15"
+                    - "19"
+                    - "3"
+                    - "0"
+                    - "0"
+                  count: "40"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.004418432
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_gc_pauses_seconds
+          - description: '[ALPHA] Request filter latency distribution in seconds, for each filter type'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: filter
+                      value:
+                        stringValue: audit
+                  bucketCounts:
+                    - "1469"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1469"
+                  explicitBounds:
+                    - 0.0001
+                    - 0.0003
+                    - 0.001
+                    - 0.003
+                    - 0.01
+                    - 0.03
+                    - 0.1
+                    - 0.3
+                    - 1
+                    - 5
+                    - 10
+                    - 15
+                    - 30
+                  startTimeUnixNano: "1000000"
+                  sum: 0.0002863869999999995
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_filter_duration_seconds
+          - description: '[ALPHA] Latencies in seconds of data encryption key(DEK) generation operations.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 5e-06
+                    - 1e-05
+                    - 2e-05
+                    - 4e-05
+                    - 8e-05
+                    - 0.00016
+                    - 0.00032
+                    - 0.00064
+                    - 0.00128
+                    - 0.00256
+                    - 0.00512
+                    - 0.01024
+                    - 0.02048
+                    - 0.04096
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_storage_data_key_generation_duration_seconds
+          - description: '[ALPHA] '
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: status
+                      value:
+                        stringValue: hit
+                  bucketCounts:
+                    - "103"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "103"
+                  explicitBounds:
+                    - 0.005
+                    - 0.01
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 5
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: authentication_token_cache_request_duration_seconds
+          - description: '[ALPHA] count of watchers for mutating requests in API Priority and Fairness'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: flow_schema
+                      value:
+                        stringValue: catch-all
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "2"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "2"
+                  explicitBounds:
+                    - 0
+                    - 1
+                    - 10
+                    - 100
+                    - 1000
+                    - 10000
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_watch_count_samples
+          - description: '[ALPHA] Number of objects attached to a single etcd lease.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "13"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "14"
+                  explicitBounds:
+                    - 10
+                    - 50
+                    - 100
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                  startTimeUnixNano: "1000000"
+                  sum: 66
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: etcd_lease_object_counts
+          - description: '[ALPHA] Response latency distribution in seconds for each field validation value'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.25
+                    - 1.5
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 8
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+                    - 45
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: field_validation_request_duration_seconds
+          - description: Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "6892"
+                    - "6223"
+                    - "4497"
+                    - "4422"
+                    - "992"
+                    - "39"
+                    - "0"
+                    - "0"
+                  count: "23065"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.15202054399999998
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_latencies_seconds
+          - description: '[ALPHA] Time for comparison of old to new for the purposes of CRDValidationRatcheting during an UPDATE in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 1e-05
+                    - 4e-05
+                    - 0.00016
+                    - 0.00064
+                    - 0.00256
+                    - 0.01024
+                    - 0.04096
+                    - 0.16384
+                    - 0.65536
+                    - 2.62144
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiextensions_apiserver_validation_ratcheting_seconds
+          - description: '[ALPHA] Time taken for comparison of old vs new objects in UPDATE or PATCH requests'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: code_path
+                      value:
+                        stringValue: unequal_objects_fast
+                  bucketCounts:
+                    - "90"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "90"
+                  explicitBounds:
+                    - 0.0001
+                    - 0.0003
+                    - 0.001
+                    - 0.003
+                    - 0.01
+                    - 0.03
+                    - 0.1
+                    - 0.3
+                    - 1
+                    - 5
+                  startTimeUnixNano: "1000000"
+                  sum: 0.00026333800000000006
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_timestamp_comparison_time
+          - description: '[ALPHA] Authentication duration in seconds broken out by result.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: result
+                      value:
+                        stringValue: success
+                  bucketCounts:
+                    - "1468"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1468"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0.08503133500000006
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: authentication_duration_seconds
+          - description: '[ALPHA] Etcd request latency in seconds for each operation and object type.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: operation
+                      value:
+                        stringValue: create
+                    - key: type
+                      value:
+                        stringValue: apiservices.apiregistration.k8s.io
+                  bucketCounts:
+                    - "13"
+                    - "8"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.25
+                    - 1.5
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 8
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+                    - 45
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0.13353742
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: etcd_request_duration_seconds
+          - description: '[ALPHA] Request size in bytes. Broken down by verb and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: '[::1]:6443'
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "230"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "230"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_request_size_bytes
+          - description: 'EXPERIMENTAL: [ALPHA] Observations, at the end of every nanosecond, of utilization of seats for any stage of execution (but only initial stage for WATCHes)'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: phase
+                      value:
+                        stringValue: executing
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "106842086014"
+                    - "120351622"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "106962437636"
+                  explicitBounds:
+                    - 0
+                    - 0.1
+                    - 0.2
+                    - 0.3
+                    - 0.4
+                    - 0.5
+                    - 0.6
+                    - 0.7
+                    - 0.8
+                    - 0.9
+                    - 0.95
+                    - 0.99
+                    - 1
+                  startTimeUnixNano: "1000000"
+                  sum: 578391.6679158072
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_priority_level_seat_utilization
+          - description: Distribution of freed heap allocations by approximate size. Bucket counts increase monotonically. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "74304"
+                    - "1342970"
+                    - "1109675"
+                    - "316932"
+                    - "276655"
+                    - "239650"
+                    - "23711"
+                    - "5613"
+                    - "6057"
+                    - "1312"
+                    - "402"
+                    - "351"
+                  count: "3397632"
+                  explicitBounds:
+                    - 8.999999999999998
+                    - 24.999999999999996
+                    - 64.99999999999999
+                    - 144.99999999999997
+                    - 320.99999999999994
+                    - 704.9999999999999
+                    - 1536.9999999999998
+                    - 3200.9999999999995
+                    - 6528.999999999999
+                    - 13568.999999999998
+                    - 27264.999999999996
+                  startTimeUnixNano: "1000000"
+                  sum: 4.3539496e+08
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_gc_heap_frees_by_size_bytes
+          - description: Distribution of individual GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total GC-related stop-the-world time (/sched/pauses/total/gc:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "19"
+                    - "0"
+                    - "18"
+                    - "3"
+                    - "0"
+                    - "0"
+                  count: "40"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.004239232
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_stopping_gc_seconds
+          - description: '[ALPHA] CEL compilation time in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.005
+                    - 0.01
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 5
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_cel_compilation_duration_seconds
+          - description: '[ALPHA] Authorization duration in seconds broken out by result.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: result
+                      value:
+                        stringValue: allowed
+                  bucketCounts:
+                    - "1436"
+                    - "2"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1438"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  startTimeUnixNano: "1000000"
+                  sum: 0.03113061799999999
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: authorization_duration_seconds
+          - description: Distribution of individual non-GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total non-GC-related stop-the-world time (/sched/pauses/total/other:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_stopping_other_seconds
+          - description: '[ALPHA] How long in seconds an item stays in workqueue before being requested.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: APIServiceRegistrationController
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "10"
+                    - "2"
+                    - "8"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0.004933343000000001
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: workqueue_queue_duration_seconds
+          - description: '[STABLE] Response size distribution in bytes for each group, version, verb, resource, subresource, scope and component.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: subresource
+                      value:
+                        stringValue: /healthz
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "2"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "3"
+                  explicitBounds:
+                    - 1000
+                    - 10000
+                    - 100000
+                    - 1e+06
+                    - 1e+07
+                    - 1e+08
+                    - 1e+09
+                  startTimeUnixNano: "1000000"
+                  sum: 1532
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_response_sizes
+          - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: '[::1]:6443'
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "192"
+                    - "38"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "230"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                    - 15
+                    - 30
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0.6941597889999999
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_request_duration_seconds
+          - description: Distribution of heap allocations by approximate size. Bucket counts increase monotonically. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "87836"
+                    - "1529040"
+                    - "1294091"
+                    - "393460"
+                    - "326580"
+                    - "287707"
+                    - "27724"
+                    - "8035"
+                    - "7123"
+                    - "1728"
+                    - "516"
+                    - "559"
+                  count: "3964399"
+                  explicitBounds:
+                    - 8.999999999999998
+                    - 24.999999999999996
+                    - 64.99999999999999
+                    - 144.99999999999997
+                    - 320.99999999999994
+                    - 704.9999999999999
+                    - 1536.9999999999998
+                    - 3200.9999999999995
+                    - 6528.999999999999
+                    - 13568.999999999998
+                    - 27264.999999999996
+                  startTimeUnixNano: "1000000"
+                  sum: 5.2890716e+08
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_gc_heap_allocs_by_size_bytes
+          - description: Distribution of individual non-GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (measured directly in /sched/pauses/stopping/other:seconds). Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_total_other_seconds
+          - description: '[ALPHA] Histogram of duration of graph actions in node authorizer.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: operation
+                      value:
+                        stringValue: AddPod
+                  bucketCounts:
+                    - "10"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "10"
+                  explicitBounds:
+                    - 0.0001
+                    - 0.0002
+                    - 0.0004
+                    - 0.0008
+                    - 0.0016
+                    - 0.0032
+                    - 0.0064
+                    - 0.0128
+                    - 0.0256
+                    - 0.0512
+                    - 0.1024
+                    - 0.2048
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000169652
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: node_authorizer_graph_actions_duration_seconds
+          - description: '[ALPHA] CEL evaluation time in seconds.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 0.005
+                    - 0.01
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 1
+                    - 2.5
+                    - 5
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_cel_evaluation_duration_seconds
+          - description: '[ALPHA] Response size in bytes. Broken down by verb and host.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: host
+                      value:
+                        stringValue: '[::1]:6443'
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "32"
+                    - "130"
+                    - "54"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "216"
+                  explicitBounds:
+                    - 64
+                    - 256
+                    - 512
+                    - 1024
+                    - 4096
+                    - 16384
+                    - 65536
+                    - 262144
+                    - 1.048576e+06
+                    - 4.194304e+06
+                    - 1.6777216e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 45340
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_response_size_bytes
+          - description: 'EXPERIMENTAL: [ALPHA] Observations, at the end of every nanosecond, of the number of requests (as a fraction of the relevant limit) waiting or in regular stage of execution'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: phase
+                      value:
+                        stringValue: executing
+                    - key: request_kind
+                      value:
+                        stringValue: mutating
+                  bucketCounts:
+                    - "104879196828"
+                    - "0"
+                    - "2046970423"
+                    - "31567610"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "106957734861"
+                  explicitBounds:
+                    - 0
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 0.2
+                    - 0.3
+                    - 0.4
+                    - 0.5
+                    - 0.6
+                    - 0.7
+                    - 0.8
+                    - 0.9
+                    - 0.95
+                    - 0.99
+                    - 1
+                  startTimeUnixNano: "1000000"
+                  sum: 5.103258729413979e+06
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_read_vs_write_current_requests
+          - description: 'EXPERIMENTAL: [ALPHA] Observations, at the end of every nanosecond, of (the number of seats each priority level could use) / (nominal number of seats for that level)'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "106960559841"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "106960559841"
+                  explicitBounds:
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.2
+                    - 1.4
+                    - 1.7
+                    - 2
+                    - 2.8
+                    - 4
+                    - 6
+                  startTimeUnixNano: "1000000"
+                  sum: 578517.1782113637
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_demand_seats
+          - description: '[STABLE] Admission sub-step latency histogram in seconds, broken out for each operation and API resource and step type (validate or admit).'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: operation
+                      value:
+                        stringValue: CREATE
+                    - key: rejected
+                      value:
+                        stringValue: "false"
+                    - key: type
+                      value:
+                        stringValue: admit
+                  bucketCounts:
+                    - "376"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "377"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.5
+                    - 1
+                    - 2.5
+                  startTimeUnixNano: "1000000"
+                  sum: 0.06955795500000005
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_admission_step_admission_duration_seconds
+          - description: '[ALPHA] Distribution of the remaining lifetime on the certificate used to authenticate a request.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "741"
+                  count: "741"
+                  explicitBounds:
+                    - 0
+                    - 1800
+                    - 3600
+                    - 7200
+                    - 21600
+                    - 43200
+                    - 86400
+                    - 172800
+                    - 345600
+                    - 604800
+                    - 2.592e+06
+                    - 7.776e+06
+                    - 1.5552e+07
+                    - 3.1104e+07
+                  startTimeUnixNano: "1000000"
+                  sum: 2.336815507856276e+10
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_client_certificate_expiration_seconds
+          - description: '[ALPHA] Number of estimated seats (maximum of initial and final seats) associated with requests in API Priority and Fairness'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: flow_schema
+                      value:
+                        stringValue: catch-all
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "40"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "40"
+                  explicitBounds:
+                    - 1
+                    - 2
+                    - 4
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 40
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_work_estimated_seats
+          - description: Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (this is measured directly in /sched/pauses/stopping/gc:seconds), during which some threads may still be running. Bucket counts increase monotonically.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "3"
+                    - "15"
+                    - "19"
+                    - "3"
+                    - "0"
+                    - "0"
+                  count: "40"
+                  explicitBounds:
+                    - 6.399999999999999e-08
+                    - 6.399999999999999e-07
+                    - 7.167999999999999e-06
+                    - 8.191999999999999e-05
+                    - 0.0009175039999999999
+                    - 0.010485759999999998
+                    - 0.11744051199999998
+                  startTimeUnixNano: "1000000"
+                  sum: 0.004418432
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: go_sched_pauses_total_gc_seconds
+          - description: '[ALPHA] Length of queue in the API Priority and Fairness subsystem, as seen by each request after it is enqueued'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: flow_schema
+                      value:
+                        stringValue: endpoint-controller
+                    - key: priority_level
+                      value:
+                        stringValue: workload-high
+                  bucketCounts:
+                    - "0"
+                    - "7"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "7"
+                  explicitBounds:
+                    - 0
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                  startTimeUnixNano: "1000000"
+                  sum: 7
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_request_queue_length_after_enqueue
+          - description: '[BETA] Length of time a request spent waiting in its queue'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: execute
+                      value:
+                        stringValue: "true"
+                    - key: flow_schema
+                      value:
+                        stringValue: catch-all
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "0"
+                    - "40"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "40"
+                  explicitBounds:
+                    - 0
+                    - 0.005
+                    - 0.02
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.5
+                    - 1
+                    - 2
+                    - 5
+                    - 10
+                    - 15
+                    - 30
+                  startTimeUnixNano: "1000000"
+                  sum: 0.0013158129999999997
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_request_wait_duration_seconds
+          - description: '[STABLE] Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: subresource
+                      value:
+                        stringValue: /healthz
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "3"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "3"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.25
+                    - 1.5
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 8
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+                    - 45
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000773773
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_duration_seconds
+          - description: 'EXPERIMENTAL: [ALPHA] Observations, at the end of every nanosecond, of number of requests (as a fraction of the relevant limit) waiting or in any stage of execution (but only initial stage for WATCHes)'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: phase
+                      value:
+                        stringValue: executing
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                  bucketCounts:
+                    - "106841751876"
+                    - "0"
+                    - "85206084"
+                    - "23271748"
+                    - "11828292"
+                    - "38612"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "106962096612"
+                  explicitBounds:
+                    - 0
+                    - 0.001
+                    - 0.003
+                    - 0.01
+                    - 0.03
+                    - 0.1
+                    - 0.25
+                    - 0.5
+                    - 0.75
+                    - 1
+                  startTimeUnixNano: "1000000"
+                  sum: 578197.1326308313
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_priority_level_request_utilization
+          - description: '[STABLE] Admission controller latency histogram in seconds, identified by name and broken out for each operation and API resource and type (validate or admit).'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: CertificateApproval
+                    - key: operation
+                      value:
+                        stringValue: UPDATE
+                    - key: rejected
+                      value:
+                        stringValue: "false"
+                    - key: type
+                      value:
+                        stringValue: validate
+                  bucketCounts:
+                    - "230"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "230"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.1
+                    - 0.5
+                    - 1
+                    - 2.5
+                  startTimeUnixNano: "1000000"
+                  sum: 6.182800000000002e-05
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_admission_controller_admission_duration_seconds
+          - description: '[ALPHA] Watch event size distribution in bytes'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: kind
+                      value:
+                        stringValue: ConfigMap
+                    - key: version
+                      value:
+                        stringValue: v1
+                  bucketCounts:
+                    - "12"
+                    - "6"
+                    - "3"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "22"
+                  explicitBounds:
+                    - 1024
+                    - 2048
+                    - 4096
+                    - 8192
+                    - 16384
+                    - 32768
+                    - 65536
+                    - 131072
+                  startTimeUnixNano: "1000000"
+                  sum: 29512
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_watch_events_sizes
+          - description: '[ALPHA] Histogram of the number of seconds the last auth exec plugin client certificate lived before being rotated. If auth exec plugin client certificates are unused, histogram will contain no data.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  explicitBounds:
+                    - 600
+                    - 1800
+                    - 3600
+                    - 14400
+                    - 86400
+                    - 604800
+                    - 2.592e+06
+                    - 7.776e+06
+                    - 1.5552e+07
+                    - 3.1104e+07
+                    - 1.24416e+08
+                  startTimeUnixNano: "1000000"
+                  sum: 0
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: rest_client_exec_plugin_certificate_rotation_age
+          - description: '[ALPHA] Duration of initial stage (for a WATCH) or any (for a non-WATCH) stage of request execution in the API Priority and Fairness subsystem'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: flow_schema
+                      value:
+                        stringValue: catch-all
+                    - key: priority_level
+                      value:
+                        stringValue: catch-all
+                    - key: type
+                      value:
+                        stringValue: regular
+                  bucketCounts:
+                    - "0"
+                    - "34"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "36"
+                  explicitBounds:
+                    - 0
+                    - 0.005
+                    - 0.02
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.5
+                    - 1
+                    - 2
+                    - 5
+                    - 10
+                    - 15
+                    - 30
+                  startTimeUnixNano: "1000000"
+                  sum: 0.142297942
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_flowcontrol_request_execution_seconds
+          - description: '[ALPHA] Apiserver request body size in bytes broken out by resource and verb.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: resource
+                      value:
+                        stringValue: apiservices.apiregistration.k8s.io
+                    - key: verb
+                      value:
+                        stringValue: create
+                  bucketCounts:
+                    - "21"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 50000
+                    - 150000
+                    - 250000
+                    - 350000
+                    - 450000
+                    - 550000
+                    - 650000
+                    - 750000
+                    - 850000
+                    - 950000
+                    - 1.05e+06
+                    - 1.15e+06
+                    - 1.25e+06
+                    - 1.35e+06
+                    - 1.45e+06
+                    - 1.55e+06
+                    - 1.65e+06
+                    - 1.75e+06
+                    - 1.85e+06
+                    - 1.95e+06
+                    - 2.05e+06
+                    - 2.15e+06
+                    - 2.25e+06
+                    - 2.35e+06
+                    - 2.45e+06
+                    - 2.55e+06
+                    - 2.65e+06
+                    - 2.75e+06
+                    - 2.85e+06
+                    - 2.95e+06
+                    - 3.05e+06
+                  startTimeUnixNano: "1000000"
+                  sum: 3705
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_body_size_bytes
+          - description: '[ALPHA] Response latency distribution (not counting webhook duration and priority & fairness queue wait times) in seconds for each verb, group, version, resource, subresource, scope and component.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: subresource
+                      value:
+                        stringValue: /healthz
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "3"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "3"
+                  explicitBounds:
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.25
+                    - 1.5
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 8
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+                    - 45
+                    - 60
+                  startTimeUnixNano: "1000000"
+                  sum: 0.000773773
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_sli_duration_seconds
+          - description: '[ALPHA] How long in seconds processing an item from workqueue takes.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: APIServiceRegistrationController
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "21"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  startTimeUnixNano: "1000000"
+                  sum: 0.0071401319999999996
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: workqueue_work_duration_seconds
+        scope:
+          name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
+          version: v0.120.0
