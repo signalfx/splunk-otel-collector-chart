@@ -210,7 +210,11 @@ Create the fluentd image name.
 Create the opentelemetry collector image name.
 */}}
 {{- define "splunk-otel-collector.image.otelcol" -}}
-{{- printf "%s:%s" .Values.image.otelcol.repository (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
+{{- if .Values.image.otelcol.fips -}}
+{{- printf "%s:%s" (.Values.image.otelcol.repository | default "quay.io/signalfx/splunk-otel-collector-fips" ) (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
+{{- else }}
+{{- printf "%s:%s" (.Values.image.otelcol.repository | default "quay.io/signalfx/splunk-otel-collector" ) (.Values.image.otelcol.tag | default .Chart.AppVersion) -}}
+{{- end }}
 {{- end -}}
 
 {{/*
