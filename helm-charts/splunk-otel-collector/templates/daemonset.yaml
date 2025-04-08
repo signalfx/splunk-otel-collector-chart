@@ -109,7 +109,7 @@ spec:
             - name: fluentd-config-json
               mountPath: /fluentd/etc/json
         {{- else }}
-        {{- if not (eq .Values.distribution "gke/autopilot") }}
+        {{- if and (not (eq .Values.distribution "gke/autopilot")) (.Values.migrateLogsCheckpoints) }}
         - name: migrate-checkpoint
           image: {{ template "splunk-otel-collector.image.otelcol" . }}
           imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}

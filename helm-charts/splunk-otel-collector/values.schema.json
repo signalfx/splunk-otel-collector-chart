@@ -256,6 +256,10 @@
         "otel"
       ]
     },
+    "migrateLogsCheckpoints": {
+      "description": "Migrating Fluentd's position file to Otel checkpoints",
+      "type": "boolean"
+    },
     "cloudProvider": {
       "description": "Cloud provider where the collector is running",
       "type": "string",

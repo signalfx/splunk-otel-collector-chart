@@ -54,40 +54,6 @@ spec:
           key: node-role.kubernetes.io/infra
           operator: Exists
       initContainers:
-        - name: migrate-checkpoint
-          image: quay.io/signalfx/splunk-otel-collector:0.122.0
-          imagePullPolicy: IfNotPresent
-          command: ["/migratecheckpoint"]
-          securityContext:
-            runAsUser: 0
-          env:
-          - name: CONTAINER_LOG_PATH_FLUENTD
-            value: "/var/log/splunk-fluentd-containers.log.pos"
-          - name: CONTAINER_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
-          - name: CUSTOM_LOG_PATH_FLUENTD
-            value: "/var/log/splunk-fluentd-*.pos"
-          - name: CUSTOM_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
-          - name: CUSTOM_LOG_CAPTURE_REGEX
-            value: '\/var\/log\/splunk\-fluentd\-(?P<name>[\w0-9-_]+)\.pos'
-          - name: JOURNALD_LOG_PATH_FLUENTD
-            value: "/var/log/splunkd-fluentd-journald-*.pos.json"
-          - name: JOURNALD_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_journald_"
-          - name: JOURNALD_LOG_CAPTURE_REGEX
-            value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
-          resources:
-            limits:
-              cpu: 200m
-              memory: 500Mi
-          volumeMounts:
-            - name: checkpoint
-              mountPath: /var/addon/splunk/otel_pos
-            - name: varlog
-              mountPath: /var/log
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
       containers:
       - name: otel-collector
         command:

@@ -186,6 +186,16 @@ splunkObservability:
 logsEngine: otel
 
 ################################################################################
+# Migrating Fluentd's position file to Otel checkpoints
+# Aimed for users who have been using fluentd as a logging agent but wants to
+# use OpenTelemetry Collector.
+# Enabling this option during the switch to the `logsEngine: otel` prevents double ingestion.
+# When set to true, an initContainer is added to the daemonset and runs the migration
+################################################################################
+
+migrateLogsCheckpoints: false
+
+################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
 # - "aws" (Amazon Web Services)
 # - "gcp" (Google Cloud Platform)
