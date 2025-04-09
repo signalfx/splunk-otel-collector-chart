@@ -68,14 +68,10 @@ spec:
       {{- end }}
       containers:
       - name: otel-collector
-        command:
+        args:
         {{- if .Values.isWindows }}
-        - powershell.exe
-        - -command
-        - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
         {{- else }}
-        - /otelcol
         - --config=/conf/relay.yaml
         {{- end }}
         {{- if .Values.gateway.featureGates }}

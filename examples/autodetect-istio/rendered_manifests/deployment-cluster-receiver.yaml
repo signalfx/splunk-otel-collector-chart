@@ -39,8 +39,7 @@ spec:
           kubernetes.io/os: linux
       containers:
       - name: otel-collector
-        command:
-        - /otelcol
+        args:
         - --config=/conf/relay.yaml
         image: quay.io/signalfx/splunk-otel-collector:0.122.0
         imagePullPolicy: IfNotPresent

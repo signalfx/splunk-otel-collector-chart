@@ -243,14 +243,15 @@ spec:
           mountPath: /tmp
       {{- end }}
       - name: otel-collector
+        {{- if (eq .Values.distribution "gke/autopilot") }}
         command:
+        - /otelcol
+        {{- else }}
+        args:
+        {{- end }}
         {{- if .Values.isWindows }}
-        - powershell.exe
-        - -command
-        - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
         {{- else }}
-        - /otelcol
         - --config=/conf/relay.yaml
         {{- end }}
         {{- if .Values.agent.featureGates }}

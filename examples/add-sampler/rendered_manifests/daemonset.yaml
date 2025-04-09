@@ -55,8 +55,7 @@ spec:
           operator: Exists
       containers:
       - name: otel-collector
-        command:
-        - /otelcol
+        args:
         - --config=/conf/relay.yaml
         ports:
         - name: jaeger-grpc
