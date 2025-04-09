@@ -6,7 +6,11 @@ memory_limiter:
   # check_interval is the time between measurements of memory usage.
   check_interval: 2s
   # By default limit_mib is set to 90% of container memory limit
+  {{- if .Values.featureGates.useMemoryLimitPercentage }}
+  limit_percentage: 90
+  {{- else }}
   limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+  {{- end }}
 {{- end }}
 
 {{/*

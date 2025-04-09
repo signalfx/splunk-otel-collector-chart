@@ -228,10 +228,10 @@ Create the validateSecret image name.
 {{- end -}}
 
 {{/*
-  This helper converts the input value of memory to MiB.
+  This helper converts the input value of memory to Bytes.
   Input needs to be a valid value as supported by k8s memory resource field.
  */}}
-{{- define "splunk-otel-collector.convertMemToMib" }}
+{{- define "splunk-otel-collector.convertMemToBytes" }}
 {{- $mem := lower . -}}
 {{- if hasSuffix "e" $mem -}}
 {{- $mem = mulf (trimSuffix "e" $mem | float64) 1e18 -}}
@@ -258,7 +258,15 @@ Create the validateSecret image name.
 {{- else if hasSuffix "ki" $mem -}}
 {{- $mem = mulf (trimSuffix "ki" $mem | float64) 0x1p10 -}}
 {{- end }}
-{{- divf $mem 0x1p20 | floor -}}
+{{- $mem }}
+{{- end }}
+
+{{/*
+  This helper converts the input value of memory to MiB.
+  Input needs to be a valid value as supported by k8s memory resource field.
+ */}}
+{{- define "splunk-otel-collector.convertMemToMib" }}
+{{- divf (include "splunk-otel-collector.convertMemToBytes" .) 0x1p20 | floor -}}
 {{- end }}
 
 {{/*

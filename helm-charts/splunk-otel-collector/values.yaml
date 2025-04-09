@@ -1406,3 +1406,6 @@ featureGates:
   # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
   # rolled over during high load.
   fixMissedLogsDuringLogRotation: false
+  # The feature gate enables the use of the memory_limiter processor based on the percentage.
+  # It is required if the helm chart is used with another collector image from upstream.
+  useMemoryLimitPercentage: false
