@@ -40,10 +40,6 @@ spec:
     port: 4318
     targetPort: otlp-http
     protocol: TCP
-  - name: sfx-forwarder
-    port: 9080
-    targetPort: sfx-forwarder
-    protocol: TCP
   - name: signalfx
     port: 9943
     targetPort: signalfx

@@ -363,11 +363,6 @@ agent:
       containerPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
-    sfx-forwarder:
-      containerPort: 9080
-      hostPort: 9080
-      protocol: TCP
-      enabled_for: [traces]
     zipkin:
       containerPort: 9411
       hostPort: 9411

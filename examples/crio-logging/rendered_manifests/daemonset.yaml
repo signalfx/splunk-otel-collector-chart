@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 7eceb0e8ddc67f041710d414703023056c5bf84f5f76e3962ac721078ac644e3
+        checksum/config: c1d493f6d9b1565ec9b95c595a5a5cfb4791bb0eeb8025fa860eb497d46263a0
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -73,10 +73,6 @@ spec:
           protocol: TCP
         - name: otlp-http
           containerPort: 4318
-          protocol: TCP
-        - name: sfx-forwarder
-          containerPort: 9080
-          hostPort: 9080
           protocol: TCP
         - name: signalfx
           containerPort: 9943
