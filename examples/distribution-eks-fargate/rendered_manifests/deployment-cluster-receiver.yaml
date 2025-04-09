@@ -71,8 +71,7 @@ spec:
               name: collector-configmap
       containers:
       - name: otel-collector
-        command:
-        - /otelcol
+        args:
         - --config=/splunk-messages/config.yaml
         image: quay.io/signalfx/splunk-otel-collector:0.122.0
         imagePullPolicy: IfNotPresent

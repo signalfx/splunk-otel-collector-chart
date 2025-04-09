@@ -111,19 +111,13 @@ spec:
       {{- end }}
       containers:
       - name: otel-collector
-        command:
+        args:
         {{- if .Values.isWindows }}
-        - powershell.exe
-        - -command
-        - .\otelcol.exe
         - --config=C:\\conf\relay.yaml
-        {{- else }}
-        - /otelcol
-        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+        {{- else if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
         - --config=/splunk-messages/config.yaml
         {{- else }}
         - --config=/conf/relay.yaml
-        {{- end }}
         {{- end }}
         {{- if .Values.clusterReceiver.featureGates }}
         - --feature-gates={{ .Values.clusterReceiver.featureGates }}

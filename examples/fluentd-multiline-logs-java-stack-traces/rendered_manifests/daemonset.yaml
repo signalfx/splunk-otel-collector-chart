@@ -124,8 +124,7 @@ spec:
         - name: tmp
           mountPath: /tmp
       - name: otel-collector
-        command:
-        - /otelcol
+        args:
         - --config=/conf/relay.yaml
         ports:
         - name: fluentforward

@@ -38,10 +38,7 @@ spec:
           kubernetes.io/os: windows
       containers:
       - name: otel-collector
-        command:
-        - powershell.exe
-        - -command
-        - .\otelcol.exe
+        args:
         - --config=C:\\conf\relay.yaml
         image: quay.io/signalfx/splunk-otel-collector-windows:0.122.0
         imagePullPolicy: IfNotPresent

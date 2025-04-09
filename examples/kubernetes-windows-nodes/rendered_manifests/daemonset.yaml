@@ -54,10 +54,7 @@ spec:
           operator: Exists
       containers:
       - name: otel-collector
-        command:
-        - powershell.exe
-        - -command
-        - .\otelcol.exe
+        args:
         - --config=C:\\conf\relay.yaml
         ports:
         - name: fluentforward
