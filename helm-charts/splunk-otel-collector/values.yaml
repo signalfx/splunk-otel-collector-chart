@@ -311,6 +311,8 @@ agent:
       enabled: true
     coredns:
       # Specifies whether to collect coredns metrics.
+      # Note - when using GKE, and this is enabled, the chart will create a
+      # receiver for kubedns instead of coredns.
       enabled: true
     etcd:
       # Specifies whether to collect etcd metrics.
@@ -344,6 +346,8 @@ agent:
       skipVerify: true
     proxy:
       # Specifies whether to collect proxy metrics.
+      # Note - the prometheus receiver introduced for this component might match
+      # kube-proxy deployed in managed k8s cluster like EKS.
       enabled: true
     scheduler:
       # Specifies whether to collect scheduler metrics.
