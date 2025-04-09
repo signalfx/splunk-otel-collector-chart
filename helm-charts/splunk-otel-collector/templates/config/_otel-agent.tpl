@@ -233,10 +233,21 @@ receivers:
 
       {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.useControlPlaneMetricsHistogramData }}
       # Receivers for collecting k8s control plane metrics as native OpenTelemetry metrics, including histogram data.
-      {{- if or (eq .Values.distribution "openshift") (eq .Values.distribution "") }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
+      {{- if eq .Values.distribution "gke"}}
+      prometheus/kubedns:
+        rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+        config:
+          config:
+            scrape_configs:
+            - job_name: "kubedns"
+              static_configs:
+                - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153`']
+              tls_config:
+                insecure_skip_verify: true
+      {{- else }}
       prometheus/coredns:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
@@ -256,6 +267,7 @@ receivers:
               static_configs:
                 - targets: ["`endpoint`:9153"]
               {{- end }}
+      {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
       prometheus/etcd:
@@ -359,7 +371,6 @@ receivers:
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
                 type: Bearer
-      {{- end }}
       {{- end }}
     {{- end }}
 
