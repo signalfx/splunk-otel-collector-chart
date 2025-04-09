@@ -392,12 +392,6 @@ receivers:
     endpoint: 0.0.0.0:9943
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-  smartagent/signalfx-forwarder:
-    type: signalfx-forwarder
-    listenAddress: 0.0.0.0:9080
-  {{- end }}
-
   {{- if .Values.targetAllocator.enabled  }}
   prometheus/ta:
     config:
@@ -1008,9 +1002,6 @@ service:
       receivers:
         - otlp
         - jaeger
-        {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" $) "true") }}
-        - smartagent/signalfx-forwarder
-        {{- end }}
         - zipkin
       processors:
         - memory_limiter

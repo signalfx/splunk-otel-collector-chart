@@ -226,9 +226,6 @@ data:
         - k8s_observer
       signalfx:
         endpoint: 0.0.0.0:9943
-      smartagent/signalfx-forwarder:
-        listenAddress: 0.0.0.0:9080
-        type: signalfx-forwarder
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -286,7 +283,6 @@ data:
           receivers:
           - otlp
           - jaeger
-          - smartagent/signalfx-forwarder
           - zipkin
       telemetry:
         metrics:
