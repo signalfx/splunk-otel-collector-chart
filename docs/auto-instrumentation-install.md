@@ -34,7 +34,6 @@ these frameworks often have pre-built instrumentation capabilities already avail
 - **TLS Certificate Management (Required)**
   - **Automatically Generate a Self-Signed Certificate with Helm (Default)**
     - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
-      - **Use Case**: Suitable when cert-manager is not already installed.
 
   - **Alternative Methods**
 
