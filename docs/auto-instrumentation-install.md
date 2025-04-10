@@ -32,7 +32,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
     - **Required**: This configuration is necessary for the operator's deployment within your cluster.
 
 - **TLS Certificate Management (Required)**
-  - **Automatically Generate a Self-Signed Certificate with Helm (Recommended)**
+  - **Automatically Generate a Self-Signed Certificate with Helm (Default)**
     - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
       - **Use Case**: Suitable when cert-manager is not already installed.
 
