@@ -4,6 +4,41 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.122.1] - 2025-04-10
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.122.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.122.0).
+
+### 🛑 Breaking changes 🛑
+
+- `logs`: Disable migrateCheckpoint by default and introduce a new option `migrateLogsCheckpoints` to enable it if needed. ([#1757](https://github.com/signalfx/splunk-otel-collector-chart/pull/1757))
+- `agent`: Remove smartagent/signalfx-forwarder from the agent default config. ([#1759](https://github.com/signalfx/splunk-otel-collector-chart/pull/1759))
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Installing certmanager as part of the splunk-otel-collector helm chart is deprecated and will be removed in a future release. ([#1763](https://github.com/signalfx/splunk-otel-collector-chart/pull/1763))
+
+### 💡 Enhancements 💡
+
+- `agent`: Allow featureGates.useControlPlaneMetricsHistogramData to work with any distribution of k8s cluster. ([#1760](https://github.com/signalfx/splunk-otel-collector-chart/pull/1760))
+  Users can enable agent.controlPlaneMetrics for k8s components which run on worker nodes
+  such as kubedns (gke), coredns (aks, eks) and kube-proxy (eks) with the feature gate
+  featureGates.useControlPlaneMetricsHistogramData set to true.
+  To disable collection of metrics from specific control plane components, set the corresponding
+  component to false in the agent.controlPlaneMetrics configuration. For example:
+  agent:
+    controlPlaneMetrics:
+      coredns:
+        enabled: false
+      proxy:
+        enabled: false
+
+- `all`: Don't hardcode the command in the pod specs ([#1758](https://github.com/signalfx/splunk-otel-collector-chart/pull/1758))
+- `all`: Add useMemoryLimitPercentage feature gate ([#1761](https://github.com/signalfx/splunk-otel-collector-chart/pull/1761))
+
+### 🧰 Bug fixes 🧰
+
+- `clusterReceiver`: Removes k8sattributes processor from Splunk Observability events pipeline which is enabled by the chart config `infrastructureMonitoringEventsEnabled`. ([#1746](https://github.com/signalfx/splunk-otel-collector-chart/pull/1746))
+
 ## [0.122.0] - 2025-03-31
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.122.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.122.0).
