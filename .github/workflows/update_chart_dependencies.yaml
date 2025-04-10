@@ -27,10 +27,6 @@ jobs:
       matrix:
         # Chart dependencies to check for version updates
         include:
-          - name: 'certmanager'
-            component: 'operator'
-            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
-            dependency_name: 'cert-manager'
           - name: 'operator'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
