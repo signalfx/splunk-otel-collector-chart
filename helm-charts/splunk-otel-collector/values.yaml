@@ -1335,6 +1335,9 @@ instrumentation:
     #     value: nginx_value
   # Auto-instrumentation Libraries (End)
 
+# Note - Installing certmanager as a subchart is deprecated and will be removed in the future.
+# The recommended approach is to use the chart's default of generating self-signed cert or
+# to install cert-manager separately.
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
 certmanager:
