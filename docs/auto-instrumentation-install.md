@@ -34,14 +34,14 @@ these frameworks often have pre-built instrumentation capabilities already avail
 - **TLS Certificate Management (Required)**
   - **Automatically Generate a Self-Signed Certificate with Helm (Recommended)**
     - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
-      - **Use Case**: Suitable when cert-manager is not installed or preferred.
+      - **Use Case**: Suitable when cert-manager is not already installed.
 
   - **Alternative Methods**
 
-    - **Using cert-manager (Deprecated)**
-      - `certmanager.enabled`: Enable cert-manager by setting to `true`.
-        - **Check Before Enabling**: Ensure cert-manager is not already installed to avoid multiple instances.
-        - **Recommended**: Cert-manager simplifies the management of TLS certificates, automating issuance and renewal.
+    - **Using cert-manager**
+      -  Use an already installed certmanager by setting `operator.admissionWebhooks.certManager.enabled` to `true`.
+        -  **Use Case**: Ideal for environments already leveraging `certmanager` for certificate management.
+      -  _NOTE_ - The option to install `certmanager` with our chart is deprecated and will be removed in future releases.
 
     - **Provide Your Own Certificate**
       - Ensure both `operator.admissionWebhooks.certManager.enabled` and `operator.admissionWebhooks.autoGenerateCert.enabled` are set to `false`.
