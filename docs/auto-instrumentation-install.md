@@ -32,15 +32,17 @@ these frameworks often have pre-built instrumentation capabilities already avail
     - **Required**: This configuration is necessary for the operator's deployment within your cluster.
 
 - **TLS Certificate Management (Required)**
-  - **Using cert-manager (Recommended)**
-    - `certmanager.enabled`: Enable cert-manager by setting to `true`.
-      - **Check Before Enabling**: Ensure cert-manager is not already installed to avoid multiple instances.
-      - **Recommended**: Cert-manager simplifies the management of TLS certificates, automating issuance and renewal.
+  - **Automatically Generate a Self-Signed Certificate with Helm (Recommended)**
+    - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
+      - **Use Case**: Suitable when cert-manager is not installed or preferred.
 
   - **Alternative Methods**
-    - **Automatically Generate a Self-Signed Certificate with Helm**
-      - `operator.admissionWebhooks.autoGenerateCert.enabled`: Set to `true` to enable Helm to automatically create a self-signed certificate.
-        - **Use Case**: Suitable when cert-manager is not installed or preferred.
+
+    - **Using cert-manager (Deprecated)**
+      - `certmanager.enabled`: Enable cert-manager by setting to `true`.
+        - **Check Before Enabling**: Ensure cert-manager is not already installed to avoid multiple instances.
+        - **Recommended**: Cert-manager simplifies the management of TLS certificates, automating issuance and renewal.
+
     - **Provide Your Own Certificate**
       - Ensure both `operator.admissionWebhooks.certManager.enabled` and `operator.admissionWebhooks.autoGenerateCert.enabled` are set to `false`.
       - `operator.admissionWebhooks.cert_file`: Path to your PEM-encoded certificate.
@@ -502,7 +504,7 @@ operator:
       enabled: true
 ```
 
-##### Option 2: **Deploy cert-manager and the operator together**
+##### Option 2: **Deploy cert-manager and the operator together (Deprecated)**
 
 If you need to install `cert-manager` along with the operator, use a Helm post-install or post-upgrade hook to ensure that the certificate is created after cert-manager CRDs are installed.
 

@@ -34,7 +34,7 @@ When using the Splunk OTel Collector chart with the [OpenTelemetry Operator](htt
 ### Quick Start
 To use auto-instrumentation via the operator, these are the high-level steps:
 
-1. Deploy OpenTelemetry components to your Kubernetes cluster including cert-manager, Splunk OTel Collector, OpenTelemetry Operator, and Auto-Instrumentation Spec.
+1. Deploy OpenTelemetry components to your Kubernetes cluster including Splunk OTel Collector, OpenTelemetry Operator, and Auto-Instrumentation Spec.
 2. Apply annotations at the pod or namespace level for the Operator to know which pods to apply auto-instrumentation to.
 3. Now, allow the Operator to do the work. As Kuberenetes api requests for create and update annotated pods are processed, the Operator will intercept and alter those requests so that the internal pod application containers are instrumented.
 
