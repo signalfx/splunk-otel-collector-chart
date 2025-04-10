@@ -274,8 +274,13 @@ spec:
           {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
         env:
+          {{- if .Values.featureGates.useMemoryLimitPercentage }}
+          - name: GOMEMLIMIT
+            value: "{{ include "splunk-otel-collector.convertMemToBytes" $agent.resources.limits.memory | int64 }}"
+          {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory | int64 }}"
+          {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:

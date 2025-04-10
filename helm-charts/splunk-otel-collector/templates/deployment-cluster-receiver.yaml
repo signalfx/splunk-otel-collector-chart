@@ -129,8 +129,13 @@ spec:
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
         env:
+          {{- if .Values.featureGates.useMemoryLimitPercentage }}
+          - name: GOMEMLIMIT
+            value: "{{ include "splunk-otel-collector.convertMemToBytes" $clusterReceiver.resources.limits.memory | int64 }}"
+          {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "{{ include "splunk-otel-collector.convertMemToMib" $clusterReceiver.resources.limits.memory | int64 }}"
+          {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
