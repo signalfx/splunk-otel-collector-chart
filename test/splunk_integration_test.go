@@ -6,9 +6,17 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/tools/clientcmd"
+	"os"
 	"testing"
+	"time"
 )
 
 const EVENT_SEARCH_QUERY_STRING = "| search "
@@ -18,7 +26,7 @@ func Test_Functions(t *testing.T) {
 
 	t.Run("verify log ingestion by using annotations", testVerifyLogsIngestionUsingAnnotations)
 	t.Run("custom metadata fields annotations", testVerifyCustomMetadataFieldsAnnotations)
-	t.Run("metric index annotations", testVerifyMetricIndexAndSourcetypeAnnotations)
+	t.Run("metric namespace annotations", testVerifyMetricNamespaceAnnotations)
 
 }
 
@@ -83,4 +91,86 @@ func testVerifyMetricIndexAndSourcetypeAnnotations(t *testing.T) {
 		fmt.Println(" =========>  Events received: ", len(events))
 		assert.Greater(t, len(events), 1)
 	})
+}
+
+func testVerifyMetricNamespaceAnnotations(t *testing.T) {
+	namespace := "default"
+	defaultIndex := "ci_metrics"
+	defaultSourcetype := "httpevent"
+	annotationIndex := "test_metrics"
+	annotationSourcetype := "annotation_sourcetype"
+
+	client := createK8sClient(t)
+
+	tests := []struct {
+		name                      string
+		annotationIndexValue      string
+		annotationSourcetypeValue string
+	}{
+		{"default index and default sourcetype", "", ""},
+		{"annotation index and default sourcetype", annotationIndex, ""},
+		{"default index and annotation sourcetype", "", annotationSourcetype},
+		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			addNamespaceAnnotation(t, client, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue)
+			time.Sleep(20 * time.Second)
+
+			index := defaultIndex
+			if tt.annotationIndexValue != "" {
+				index = tt.annotationIndexValue
+			}
+			sourcetype := defaultSourcetype
+			if tt.annotationSourcetypeValue != "" {
+				sourcetype = tt.annotationSourcetypeValue
+			}
+			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.namespace.name\"=" + namespace
+			fmt.Println("Search Query: ", searchQuery)
+			startTime := "-15s@s"
+			events := CheckEventsFromSplunk(searchQuery, startTime)
+			fmt.Println(" =========>  Events received: ", len(events))
+			assert.Greater(t, len(events), 1)
+
+			removeAllNamespaceAnnotations(t, client, namespace)
+		})
+	}
+}
+
+func createK8sClient(t *testing.T) *kubernetes.Clientset {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	return client
+}
+
+func removeAllNamespaceAnnotations(t *testing.T, clientset *kubernetes.Clientset, namespace_name string) {
+	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace_name, metav1.GetOptions{})
+	require.NoError(t, err)
+	ns.Annotations = make(map[string]string)
+
+	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
+	require.NoError(t, err)
+	fmt.Printf("All annotations removed from namespace_name %s\n", namespace_name)
+}
+
+func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, namespace_name string, annotationIndex string, annotationSourcetype string) {
+	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace_name, metav1.GetOptions{})
+	require.NoError(t, err)
+	if ns.Annotations == nil {
+		ns.Annotations = make(map[string]string)
+	}
+	if annotationIndex != "" {
+		ns.Annotations["splunk.com/metricsIndex"] = annotationIndex
+	}
+	if annotationSourcetype != "" {
+		ns.Annotations["splunk.com/sourcetype"] = annotationSourcetype
+	}
+
+	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
+	require.NoError(t, err)
+	fmt.Printf("Annotation added to namespace_name %s\n", namespace_name)
 }
