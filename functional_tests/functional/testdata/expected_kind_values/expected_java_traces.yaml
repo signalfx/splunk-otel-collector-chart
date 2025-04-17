@@ -118,6 +118,9 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
+        - key: service.namespace
+          value:
+            stringValue: default
     schemaUrl: https://opentelemetry.io/schemas/1.24.0
     scopeSpans:
       - scope:
