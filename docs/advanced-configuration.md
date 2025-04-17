@@ -62,6 +62,32 @@ scrape additional metadata. The supported options are:
 
 This value can be omitted if none of the values apply.
 
+## AKS KubeletStats Receiver
+
+Unlike other Kubernetes distributions, `AKS` does not generate the kubelet’s
+self-signed certificate using the Certificate Authority that issues the
+kube-apiserver certificate, `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
+and it only adds the node name in its certificate Subject Alternative Name.
+
+When `distribution` is set to `aks`, the chart automatically sets the custom `ca_file`
+option to `/hostfs/etc/kubernetes/certs/kubeletserver.crt` and uses the node name in
+its endpoint.
+
+For custom setups (e.g., custom certificates, Windows nodes, or Linux nodes with virtual network using custom DNS),
+adjust `ca_file` and use the node IP instead.
+If you don't have access to the CA file, add `insecure_skip_verify: true` to the `kubeletstats` receiver config.
+
+```yaml
+agent:
+  config:
+    receivers:
+      kubeletstats:
+        ca_file: <Path to custom CA file>
+        endpoint: ${K8S_NODE_IP}:10255
+```
+
+
+
 ## Deployment environment
 
 Optional `environment` parameter can be used to specify an additional `deployment.environment`
