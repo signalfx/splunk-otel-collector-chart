@@ -40,9 +40,12 @@ resourceSpans:
         - key: service.name
           value:
             stringValue: python-test
+        - key: service.namespace
+          value:
+            stringValue: default
         - key: telemetry.auto.version
           value:
-            stringValue: 0.50b0
+            stringValue: 0.51b0
         - key: k8s.pod.ip
           value:
             stringValue: 10.244.0.40
