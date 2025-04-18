@@ -210,3 +210,10 @@ update-chart-dep: dep-update ## Updates the dependency version in the Chart.yaml
 .PHONY: prepare-release
 prepare-release: ## Prepares for a new release of the helm chart. Optionally specify CHART_VERSION and APP_VERSION.
 	ci_scripts/prepare-release.sh CREATE_BRANCH=${CREATE_BRANCH} CHART_VERSION=${CHART_VERSION} APP_VERSION=${APP_VERSION}
+
+.PHONY: tidy-all
+tidy-all:
+	@for dir in $$(find . -type f -name "go.mod" -exec dirname {} \; | sort | egrep '^./'); do \
+		echo "Running go mod tidy in $$dir"; \
+		(cd "$$dir" && rm -f go.sum && go mod tidy); \
+	done
