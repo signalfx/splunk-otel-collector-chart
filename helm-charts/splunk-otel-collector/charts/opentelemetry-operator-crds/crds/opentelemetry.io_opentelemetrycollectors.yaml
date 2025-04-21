@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.1
+    controller-gen.kubebuilder.io/version: v0.17.1
   name: opentelemetrycollectors.opentelemetry.io
 spec:
   group: opentelemetry.io
@@ -2387,6 +2387,8 @@ spec:
                   runAsUser:
                     format: int64
                     type: integer
+                  seLinuxChangePolicy:
+                    type: string
                   seLinuxOptions:
                     properties:
                       level:
@@ -3155,6 +3157,8 @@ spec:
                       runAsUser:
                         format: int64
                         type: integer
+                      seLinuxChangePolicy:
+                        type: string
                       seLinuxOptions:
                         properties:
                           level:
@@ -7020,6 +7024,8 @@ spec:
                   runAsUser:
                     format: int64
                     type: integer
+                  seLinuxChangePolicy:
+                    type: string
                   seLinuxOptions:
                     properties:
                       level:
@@ -7685,6 +7691,8 @@ spec:
                     - consistent-hashing
                     - per-node
                     type: string
+                  collectorNotReadyGracePeriod:
+                    type: string
                   enabled:
                     type: boolean
                   env:
@@ -7812,6 +7820,8 @@ spec:
                       runAsUser:
                         format: int64
                         type: integer
+                      seLinuxChangePolicy:
+                        type: string
                       seLinuxOptions:
                         properties:
                           level:
@@ -7867,9 +7877,69 @@ spec:
                     type: object
                   prometheusCR:
                     properties:
+                      allowNamespaces:
+                        items:
+                          type: string
+                        type: array
+                      denyNamespaces:
+                        items:
+                          type: string
+                        type: array
                       enabled:
                         type: boolean
                       podMonitorSelector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      probeSelector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      scrapeConfigSelector:
                         properties:
                           matchExpressions:
                             items:
