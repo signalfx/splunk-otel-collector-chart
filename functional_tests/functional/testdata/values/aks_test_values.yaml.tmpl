@@ -73,7 +73,8 @@ livenessProbe:
 operatorcrds:
   install: true
 operator:
-  enabled: false
+  enabled: true
+  automountServiceAccountToken: true
   admissionWebhooks:
     certManager:
       enabled: false
