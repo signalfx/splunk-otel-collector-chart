@@ -43,6 +43,11 @@ jobs:
 
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
 
+      - name: Check for Operator CRD Updates
+        if: ${{ matrix.name == 'operator' }}
+        run: |
+          make update-crds DEBUG_MODE=$DEBUG_MODE
+
       - name: Install Skopeo
         run: |
           sudo apt-get update
@@ -69,6 +74,15 @@ jobs:
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
           make render
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+
+      - name: Operator CRDs update
+        env:
+          COMPONENT: opentelemetry-operator-crds
+        if: ${{ steps.check_for_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        run: |
+          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
+          make render
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_update.outputs.CRDS_LATEST_VER }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}

@@ -217,3 +217,7 @@ tidy-all:
 		echo "Running go mod tidy in $$dir"; \
 		(cd "$$dir" && rm -f go.sum && go mod tidy); \
 	done
+
+.PHONY: update-operator-crds
+update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
+	ci_scripts/update-crds.sh
