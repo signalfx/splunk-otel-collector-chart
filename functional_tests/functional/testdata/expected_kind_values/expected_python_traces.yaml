@@ -12,7 +12,7 @@ resourceSpans:
             stringValue: 1.29.0
         - key: splunk.zc.method
           value:
-            stringValue: autoinstrumentation-python:0.50b0
+            stringValue: autoinstrumentation-python:0.51b0
         - key: k8s.container.name
           value:
             stringValue: python-test
@@ -82,6 +82,9 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
+        - key: service.namespace
+          value:
+            stringValue: default
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeSpans:
       - scope:
