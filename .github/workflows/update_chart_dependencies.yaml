@@ -46,7 +46,7 @@ jobs:
       - name: Check for Operator CRD Updates
         if: ${{ matrix.name == 'operator' }}
         run: |
-          make update-crds DEBUG_MODE=$DEBUG_MODE
+          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
 
       - name: Install Skopeo
         run: |
