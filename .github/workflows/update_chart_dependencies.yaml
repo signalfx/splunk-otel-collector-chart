@@ -44,6 +44,7 @@ jobs:
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
 
       - name: Check for Operator CRD Updates
+        id: check_for_crd_update
         if: ${{ matrix.name == 'operator' }}
         run: |
           make update-operator-crds DEBUG_MODE=$DEBUG_MODE
@@ -78,11 +79,11 @@ jobs:
       - name: Operator CRDs update
         env:
           COMPONENT: opentelemetry-operator-crds
-        if: ${{ steps.check_for_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         run: |
           make update-operator-crds DEBUG_MODE=$DEBUG_MODE
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_update.outputs.CRDS_LATEST_VER }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VER }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
