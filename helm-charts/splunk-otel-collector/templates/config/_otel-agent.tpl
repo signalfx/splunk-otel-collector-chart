@@ -384,6 +384,7 @@ receivers:
     {{ else if eq .Values.distribution "aks" }}
     ca_file: "/hostfs/etc/kubernetes/certs/kubeletserver.crt"
     endpoint: ${K8S_NODE_NAME}:10250
+    auth_type: serviceAccount
     {{- else }}
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
