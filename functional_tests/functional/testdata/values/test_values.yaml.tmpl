@@ -25,6 +25,10 @@ agent:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
+      otlphttp:
+        endpoint: {{ .OtlpHttpEndpoint }}
+        tls:
+          insecure: true
       splunk_hec/platform_metrics:
         endpoint: {{ .MetricHecEndpoint }}
     service:
