@@ -9,7 +9,7 @@ export KUBE_TEST_ENV=kind
 export K8S_VERSION=v1.29.0
 kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
 kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-make cert-manager
+make dep-update
 kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
