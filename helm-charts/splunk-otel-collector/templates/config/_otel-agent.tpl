@@ -381,7 +381,7 @@ receivers:
     # use the read-only endpoint instead.
     auth_type: none
     endpoint: ${K8S_NODE_IP}:10255
-    {{ else if eq .Values.distribution "aks" }}
+    {{ else if and (eq .Values.distribution "aks") (not .Values.isWindows) }}
     ca_file: "/hostfs/etc/kubernetes/certs/kubeletserver.crt"
     endpoint: ${K8S_NODE_NAME}:10250
     auth_type: serviceAccount
