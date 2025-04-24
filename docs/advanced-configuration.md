@@ -71,7 +71,7 @@ and it only adds the node name in its certificate Subject Alternative Name.
 
 When `distribution` is set to `aks`, the chart automatically sets the custom `ca_file`
 option to `/hostfs/etc/kubernetes/certs/kubeletserver.crt` and uses the node name in
-its endpoint.
+its endpoint. Note: This is applicable solely to non-Windows nodes at this time.
 
 For custom setups (e.g., custom certificates, Windows nodes, or Linux nodes with virtual network using custom DNS),
 adjust `ca_file` and use the node IP instead.
