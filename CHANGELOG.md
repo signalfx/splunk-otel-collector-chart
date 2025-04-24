@@ -4,6 +4,21 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.124.0] - 2025-04-24
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.124.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.124.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump dotnet to v1.10.0 in helm-charts/splunk-otel-collector/values.yaml ([#1700](https://github.com/signalfx/splunk-otel-collector-chart/pull/1700))
+- `operator`: Bump java to v2.15.0 in helm-charts/splunk-otel-collector/values.yaml ([#1767](https://github.com/signalfx/splunk-otel-collector-chart/pull/1767))
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.2 ([#1786](https://github.com/signalfx/splunk-otel-collector-chart/pull/1786))
+- `operator`: Bump operator to 0.86.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#1786](https://github.com/signalfx/splunk-otel-collector-chart/pull/1786))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Configure AKS KubeletStats receiver to use the appropriate CA file. For more information, see the following link https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#aks-kubeletstats-receiver ([#1773](https://github.com/signalfx/splunk-otel-collector-chart/pull/1773))
+
 ## [0.122.1] - 2025-04-10
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.122.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.122.0).
