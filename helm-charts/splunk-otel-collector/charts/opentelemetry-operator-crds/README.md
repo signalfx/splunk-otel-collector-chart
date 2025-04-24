@@ -30,7 +30,7 @@ Follow these steps to safely update your CRDs:
 
 #### 1. Extract Current CRDs from Your Chart
 
-Before extracting the CRDs, ensure your Helm repository is up-to-date to fetch the latest version of the splunk-otel-collector chart:
+Before extracting the CRDs, ensure your Helm repository is up-to-date. To fetch the latest version of the splunk-otel-collector chart run:
 
 ```bash
 # Update your Helm repository
@@ -70,7 +70,7 @@ kubectl apply -f /tmp/new-crds.yaml
 #### 4. Verify the Update
 ```bash
 # Check the CRDs and their versions
-kubectl get crds -o jsonpath='{range .items[?(@.spec.group=="opentelemetry.io")]}{.metadata.name}{" - "}{.spec.versions[0].name}{"\n"}{end}'
+kubectl get crds -o jsonpath='{range .items[?(@.spec.group=="opentelemetry.io")]}{.metadata.name}{" - "}{.spec.versions[*].name}{"\n"}{end}'
 ```
 
 #### 5. Continure with splunk-otel-collector Upgrade
