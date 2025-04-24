@@ -5,7 +5,9 @@ package internal
 
 import (
 	"bytes"
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"text/template"
@@ -22,6 +24,7 @@ import (
 const (
 	HelmActionTimeout = 10 * time.Minute
 	chartReleaseName  = "sock"
+	defaultChartPath  = "helm-charts/splunk-otel-collector"
 )
 
 func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any) {
@@ -57,7 +60,14 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
-
+		// if install crds option is enabled, try to update the crds
+		t.Logf("Checking if CRD installation is enabled in %s", valuesFile)
+		if update, _ := crdsInstallEnabled(values); update {
+			t.Log("Updating CRDs")
+			UpdateOperatorCRDs(t, filepath.Join("..", "..", os.Getenv("UPGRADE_FROM_CHART_DIR")), filepath.Join("..", "..", defaultChartPath), testKubeConfig)
+		} else {
+			t.Log("Skipping CRDs update")
+		}
 		// test the upgrade
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = Namespace
@@ -89,8 +99,26 @@ func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration
 	return actionConfig
 }
 
+func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, testKubeConfig string) {
+	oldCrdsVer := getDependencyVersion(t, "opentelemetry-operator-crds", oldChartPath)
+	newCrdsVer := getDependencyVersion(t, "opentelemetry-operator-crds", newChartPath)
+
+	if oldCrdsVer == newCrdsVer {
+		t.Logf("CRDs are already up to date: %s", oldCrdsVer)
+		return
+	}
+	t.Logf("Updating CRDs from %s to %s", oldCrdsVer, newCrdsVer)
+
+	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+	output, err := cmd.CombinedOutput()
+	require.NoError(t, err, "failed to apply CRDs: %s", string(output))
+
+	t.Logf("Successfully applied CRDs from %s", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+}
+
 func loadChart(t *testing.T) *chart.Chart {
-	return loadChartFromDir(t, "helm-charts/splunk-otel-collector")
+	return loadChartFromDir(t, defaultChartPath)
 }
 
 func loadChartFromDir(t *testing.T, dir string) *chart.Chart {
@@ -98,4 +126,43 @@ func loadChartFromDir(t *testing.T, dir string) *chart.Chart {
 	c, err := loader.Load(chartPath)
 	require.NoError(t, err)
 	return c
+}
+
+func getDependencyVersion(t *testing.T, dependency string, chartPath string) string {
+	chartFilePath := filepath.Join(chartPath, "Chart.yaml")
+	chartFileContent, err := os.ReadFile(chartFilePath)
+	require.NoError(t, err, "Failed to read %s", chartFilePath)
+
+	var chartData map[string]interface{}
+	err = yaml.Unmarshal(chartFileContent, &chartData)
+	require.NoError(t, err, "Failed to parse %s", chartFilePath)
+
+	dependencies, ok := chartData["dependencies"].([]interface{})
+	require.True(t, ok, "No dependencies found in %s", chartFilePath)
+
+	for _, dep := range dependencies {
+		depMap, _ := dep.(map[string]interface{})
+		if depMap["name"] == dependency {
+			version, ok := depMap["version"].(string)
+			require.True(t, ok, "Dependency version not found or invalid")
+			return version
+		}
+	}
+
+	t.Fatalf("Dependency %s not found in %s", dependency, chartFilePath)
+	return ""
+}
+
+func crdsInstallEnabled(values map[string]interface{}) (bool, error) {
+	operatorcrds, ok := values["operatorcrds"].(map[string]interface{})
+	if !ok {
+		return false, nil
+	}
+
+	install, ok := operatorcrds["install"].(bool)
+	if !ok {
+		return false, nil
+	}
+
+	return install, nil
 }
