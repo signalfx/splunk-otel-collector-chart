@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc node index.js &
+node index.js &
 nodepid=$!
 loop=0
 
