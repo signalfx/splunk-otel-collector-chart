@@ -9,13 +9,13 @@ export KUBE_TEST_ENV=kind
 export K8S_VERSION=v1.29.0
 kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
 kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-make cert-manager
+make dep-update
 kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
 # On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
 kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.8.0 --name kind
-kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v2.4.4 --name kind
+kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2 --name kind
 kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
 kind load docker-image ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.50b0 --name kind
 ```

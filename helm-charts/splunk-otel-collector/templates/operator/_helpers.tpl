@@ -153,7 +153,7 @@ Helper for generating environment variables for each instrumentation library.
 
   {{- /* Handle custom or default exporter endpoint */ -}}
   {{- $customOtelExporterEndpoint := "" }}
-  {{- if or (eq .instLibName "dotnet") (eq .instLibName "python") (eq .instLibName "java") }}
+  {{- if or (eq .instLibName "dotnet") (eq .instLibName "java") (eq .instLibName "nodejs") (eq .instLibName "python") }}
     {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
   {{- end }}
   {{- if .env }}

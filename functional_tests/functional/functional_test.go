@@ -187,6 +187,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		"LogHecEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 		"MetricHecEndpoint":     fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
 		"OtlpEndpoint":          fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
+		"OtlpHttpEndpoint":      fmt.Sprintf("%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
 		"ApiURLEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
 		"KubeTestEnv":           kubeTestEnv,
@@ -557,6 +558,7 @@ func testNodeJSTraces(t *testing.T) {
 		ptracetest.IgnoreEndTimestamp(),
 		ptracetest.IgnoreResourceSpansOrder(),
 		ptracetest.IgnoreScopeSpansOrder(),
+		ptracetest.IgnoreScopeSpanInstrumentationScopeVersion(),
 	)
 	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
 		internal.WriteNewExpectedTracesResult(t, expectedTracesFile, selectedTrace)

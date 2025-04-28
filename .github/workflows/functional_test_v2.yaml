@@ -68,6 +68,12 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
+      - name: Temporary generate new nodejs image - do not upload it
+        working-directory: functional_tests/functional/testdata/nodejs
+        run: docker buildx build --file Dockerfile --tag quay.io/splunko11ytest/nodejs_test:latest .
+      - name: Temporary update nodejs image to be used by kind
+        working-directory: functional_tests
+        run: kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
       - name: run functional tests
         id: run-functional-tests
         env:
