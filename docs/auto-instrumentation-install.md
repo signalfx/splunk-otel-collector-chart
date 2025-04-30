@@ -78,15 +78,15 @@ helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.instal
 kubectl get pods
 # NAME                                                            READY   STATUS
 # splunk-otel-collector-agent-lfthw                               2/2     Running
-# splunk-otel-collector-cert-manager-6b9fb8b95f-2lmv4             1/1     Running
-# splunk-otel-collector-cert-manager-cainjector-6d65b6d4c-khcrc   1/1     Running
-# splunk-otel-collector-cert-manager-webhook-87b7ffffc-xp4sr      1/1     Running
 # splunk-otel-collector-k8s-cluster-receiver-856f5fbcf9-pqkwg     1/1     Running
 # splunk-otel-collector-opentelemetry-operator-56c4ddb4db-zcjgh   2/2     Running
 
-kubectl get mutatingwebhookconfiguration.admissionregistration.k8s.io
+kubectl get validatingwebhookconfiguration
 # NAME                                      WEBHOOKS   AGE
-# splunk-otel-collector-cert-manager-webhook              1          14m
+# splunk-otel-collector-opentelemetry-operator-admission   3          14m
+
+kubectl get mutatingwebhookconfiguration
+# NAME                                      WEBHOOKS   AGE
 # splunk-otel-collector-opentelemetry-operator-mutation   3          14m
 
 kubectl get otelinst
@@ -554,23 +554,128 @@ This method allows you to use a certificate that is trusted by external systems,
 
 For more advanced use cases, refer to the [official Helm chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.yaml) for detailed configuration options and scenarios.
 
-### Troubleshooting the Operator and Cert Manager
+### Troubleshooting the Operator
 
-#### Check the logs for failures
+#### General Debugging Steps
 
-**Operator Logs:**
+- Check the logs for the operator to identify any issues:
+  ```bash
+  kubectl logs -l app.kubernetes.io/name=operator
+  ```
+- The operator webhooks must communicate with the Kubernetes API server. Errors related to webhook usage can often be found in the API server logs:
+  - For self-managed clusters, check logs directly:
+    ```bash
+    kubectl logs -n kube-system -l component=kube-apiserver
+    ```
+  - For managed clusters, follow the platform-specific steps to enable and view API server logs:
+    - [AKS: Monitor Logs](https://learn.microsoft.com/en-us/azure/aks/monitor-aks?tabs=cilium)
+    - [EKS: Enable or Disable Control Plane Logs](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)
+    - [GKE: View Logs](https://cloud.google.com/kubernetes-engine/docs/how-to/view-logs)
+    - [OpenShift: Logging and Monitoring](https://docs.openshift.com/container-platform/latest/logging/cluster-logging.html)
+- If using certmanager for TLS certificates, check its logs for issues:
+  ```bash
+  kubectl logs -l app=certmanager
+  kubectl logs -l app=cainjector
+  kubectl logs -l app=webhook
+  ```
+- **Verify Webhook Configurations**:
+  Check `MutatingWebhookConfiguration` and `ValidatingWebhookConfiguration`:
+  ```bash
+  kubectl get mutatingwebhookconfiguration
+  kubectl get validatingwebhookconfiguration
+  ```
+- **Inspect Network Policies**:
+  Ensure there are no network policies blocking communication between the namespace where the chart
+  is deployed and the namespace where the Kubernetes control plane resides.
+  ```bash
+  kubectl get networkpolicy -n <chart-namespace>
+  kubectl get networkpolicy -n <control-plane-namespace>
+  ```
+- **Review Events**:
+  Look for recent error or failure events in the chart namespace:
+  ```bash
+  kubectl get events -n <namespace>
+  ```
+#### Checking Operator <-> API Server Connectivity steps
+Test Operator to API Server Connection
+1. Create a `busybox` pod in the Operator's namespace:
+   ```bash
+   kubectl run busybox-test --rm -it --restart=Never -n <operator-namespace> --image=busybox -- /bin/sh
+   ```
+2. Enter the `busybox` pod:
+   ```bash
+   kubectl exec -it busybox-test -n <operator-namespace> -- /bin/sh
+   ```
+3. Attempt to contact the API Server:
+   ```bash
+   wget --spider https://kubernetes.default.svc
+   ```
+4. If the connection fails, investigate:
+  - Network policies in the Operator's namespace.
+  - Service account permissions.
 
-```bash
-kubectl logs -l app.kubernetes.io/name=operator
-```
+Test API Server to Operator Webhook Connection
+1. Create a `busybox` pod in the API Server's namespace:
+   ```bash
+   kubectl run busybox-test --rm -it --restart=Never -n <api-server-namespace> --image=busybox -- /bin/sh
+   ```
+2. Enter the `busybox` pod:
+   ```bash
+   kubectl exec -it busybox-test -n <api-server-namespace> -- /bin/sh
+   ```
+3. Attempt to contact the Operator's webhook:
+   ```bash
+   wget --spider http://<operator-webhook-service>.<operator-namespace>.svc.cluster.local
+   ```
+4. If the connection fails, investigate:
+  - The `Service` and `Endpoints` for the Operator webhook.
+  - Network policies in the Operator's namespace.
 
-**Cert-Manager Logs:**
+### Known Issues
 
-```bash
-kubectl logs -l app=certmanager
-kubectl logs -l app=cainjector
-kubectl logs -l app=webhook
-```
+**Custom Network Policies or Security Layers**
+- **Cause:** Tools like Calico, Cilium, or custom firewalls may block communication between the API
+  server and the operator webhook.
+- **Resolution:**
+  - Before reaching out to Splunk Support, consult with your infrastructure or platform
+  team who set up your cluster. They may have implemented custom network policies or security layers
+  that could be affecting communication.
+  - If you are using networking or security solutions from a third-party Kubernetes solution provider,
+    be aware that these may include configurations or custom CRDs that can impact this operator's
+    functionality. Since these configurations vary widely per provider, we cannot provide specific
+    guidance for every product here. We recommend reviewing the providers configurations, CRD definitions,
+    and deployed CRD instances in your cluster to identify any settings related to networking or
+    security that might interfere with communication between the operator and the Kubernetes API server.
+     ```bash
+     kubectl get crds
+     kubectl get <crd-name> --all-namespaces
+     kubectl get <crd-name> -n <namespace> -o yaml
+     ```
+
+**[EKS/Cilium] API Server Error: "No endpoints available for service 'splunk-otel-collector-operator-webhook'"**
+- **Cause:** This is a general known issue in setups where the Kubernetes control plane cannot communicate
+  with admission webhooks, such as the operator's webhook, in other namespaces. This occurs because
+  the customer has deployed a custom networking solution (e.g., Cilium in overlay mode) that restricts
+  the expected communication between the control plane and webhooks that are not a part of the control
+  plane. The issue is not caused by the operator itself but by the limitations of the custom networking configuration.
+- **Resolution:**
+  - **Solution 1: Enable ENI Mode in Cilium**
+    - Update the AWS Cilium setup to use ENI mode. This configuration allows the control plane to communicate
+      with webhooks in other namespaces. Refer to the [Cilium ENI Documentation](https://docs.cilium.io/en/stable/gettingstarted/eni/).
+  - **Solution 2: Run the Operator in Host Network Mode**
+    - Modify the `splunk-otel-collector-chart` Helm chart values to enable host network mode for the operator:
+      ```yaml
+      operator:
+        hostNetwork: true
+      ```
+    - Apply the updated Helm chart configuration and redeploy the operator.
+    - **Note:** While this workaround resolves the issue, running the operator in host network mode is
+      considered a less secure practice and thus the 1st solution would be more favorable for security.
+
+- **Related Links:**
+  - [Cilium Issue #21959 How to use an admission webhook with Cilium?](https://github.com/cilium/cilium/issues/21959)
+  - [OpenTelemetry Operator Issue #2260 Webhook "address is not allowed" when creating an Instrumentation on EKS](https://github.com/open-telemetry/opentelemetry-operator/issues/2260)
+  - [Cilium Issue  #30111 EKS Cilium in Overlay with ALB and webhooks: Address is not allowed](https://github.com/cilium/cilium/issues/30111)
 
 ### Documentation Resources
 
