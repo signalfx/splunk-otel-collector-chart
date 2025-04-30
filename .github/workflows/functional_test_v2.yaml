@@ -21,32 +21,31 @@ env:
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 jobs:
+  get-test-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: get matrix
+        id: test_matrix
+        run: |
+          echo "Getting test matrix"
+          matrix=`cat ci-matrix.json | jq '.functional_test_v2' | jq -r 'tostring' | tr -d '\n'`
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+    outputs:
+      matrix: ${{ steps.test_matrix.outputs.matrix }}
+
   kubernetes-test:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
       UPLOAD_UPDATED_EXPECTED_RESULTS: ${{ github.event.inputs.UPLOAD_UPDATED_EXPECTED_RESULTS || 'false' }}
       UPLOAD_KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.UPLOAD_KUBERNETES_DEBUG_INFO || 'false' }}
+    needs: get-test-matrix
     strategy:
       fail-fast: false
-      matrix:
-        # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
-        # To check latest versions, see: https://hub.docker.com/r/kindest/node/tags
-        k8s-version:
-          - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
-          - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
-          - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
-          - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
-          - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
-          # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
-          - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
-        test-job:
-          - functional
-          - histogram
-          - configuration_switching
-          - k8sevents
-          - istio
-          - discovery
+      matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -58,8 +57,8 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.12.0
         with:
-          node_image: kindest/node:${{ matrix.k8s-version }}
-          kubectl_version: ${{ matrix.k8s-version }}
+          node_image: kindest/node:${{ matrix.k8s-kind-version }}
+          kubectl_version: ${{ matrix.k8s-kind-version }}
           cluster_name: kind
           config: ./.github/workflows/configs/kind-config.yaml
       - name: Fix kubelet TLS server certificates
@@ -68,16 +67,10 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
-      - name: Temporary generate new nodejs image - do not upload it
-        working-directory: functional_tests/functional/testdata/nodejs
-        run: docker buildx build --file Dockerfile --tag quay.io/splunko11ytest/nodejs_test:latest .
-      - name: Temporary update nodejs image to be used by kind
-        working-directory: functional_tests
-        run: kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
       - name: run functional tests
         id: run-functional-tests
         env:
-          K8S_VERSION: ${{ matrix.k8s-version }}
+          K8S_VERSION: ${{ matrix.k8s-kind-version }}
         run: |
           TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPLOAD_UPDATED_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
       - name: Collect Kubernetes Cluster debug info on failure
@@ -91,14 +84,14 @@ jobs:
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.UPLOAD_KUBERNETES_DEBUG_INFO == 'true')
         uses: actions/upload-artifact@v4
         with:
-          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-version }}
+          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: tools/splunk_kubernetes_debug_info_*
           retention-days: 5
       - name: Upload test results
         if: always() && env.UPLOAD_UPDATED_EXPECTED_RESULTS == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-version }}
+          name: functional_tests-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: functional_tests/results
           retention-days: 5
 
@@ -195,7 +188,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
-      - uses: 'google-github-actions/auth@v2.1.10'
+      - uses: 'google-github-actions/auth@v2.1.8'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
@@ -237,7 +230,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
-      - uses: 'google-github-actions/auth@v2.1.10'
+      - uses: 'google-github-actions/auth@v2.1.8'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}

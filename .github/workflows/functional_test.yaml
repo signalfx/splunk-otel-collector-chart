@@ -10,29 +10,28 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 
 jobs:
-  functional-test:
-    name: K8s ${{ matrix.kubernetes_version }} ${{ matrix.container_runtime }}, Splunk ${{ matrix.splunk_version }}
+  get-test-matrix:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: get matrix
+        id: test_matrix
+        run: |
+          echo "Getting test matrix"
+          matrix=`cat ci-matrix.json | jq '.functional_test' | jq -r 'tostring' | tr -d '\n'`
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+    outputs:
+      matrix: ${{ steps.test_matrix.outputs.matrix }}
+
+  functional-test:
+    name: K8s ${{ matrix.k8s-minikube-version }} ${{ matrix.container_runtime }}, Splunk ${{ matrix.splunk_version }}
+    runs-on: ubuntu-latest
+    needs: get-test-matrix
     strategy:
       fail-fast: false
-      matrix:
-        # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
-        # To check latest Minikube versions, see: https://raw.githubusercontent.com/kubernetes/minikube/master/pkg/minikube/constants/constants_kubernetes_versions.go
-        # TODO: Automate updating this and expand/contract matrix coverage for other Kubernetes distributions
-        kubernetes_version:
-          - v1.30.0 # Support: 28 Apr 2025 - 28 Jun 2025
-          - v1.29.4 # Support: 28 Dec 2024 - 28 Feb 2025
-          - v1.28.9 # Support: 28 Aug 2024 - 28 Oct 2024
-          - v1.27.13  # Support: 28 Apr 2024 - 28 Jun 2024
-          # Test current +1 out-of-date Kubernetes version to cover EKS's extended support version matrix
-          - v1.26.15 # Support: 28 Dec 2023 - 28 Feb 2024
-        container_runtime:
-          - "docker"
-          - "containerd"
-          - "cri-o"
-        splunk_version:
-          - 9.3.0
-          - 8.2.9
+      matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     env:
       CI_SPLUNK_PORT: 8089
       CI_SPLUNK_USERNAME: admin
@@ -41,7 +40,7 @@ jobs:
       CI_INDEX_EVENTS: ci_events
       CI_INDEX_METRICS: ci_metrics
       CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-      KUBERNETES_VERSION: ${{ matrix.kubernetes_version }}
+      KUBERNETES_VERSION: ${{ matrix.k8s-minikube-version }}
       SPLUNK_VERSION: ${{ matrix.splunk_version }}
       MINIKUBE_VERSION: latest
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing

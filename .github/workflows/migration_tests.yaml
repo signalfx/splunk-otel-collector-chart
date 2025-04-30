@@ -11,20 +11,28 @@ env:
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 jobs:
+  get-test-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: get matrix
+        id: test_matrix
+        run: |
+          echo "Getting test matrix"
+          matrix=`cat ci-matrix.json | jq '.migration_tests' | jq -r 'tostring' | tr -d '\n'`
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+    outputs:
+      matrix: ${{ steps.test_matrix.outputs.matrix }}
+
   kubernetes-test:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-migration-testing
+    needs: get-test-matrix
     strategy:
       fail-fast: false
-      matrix:
-        # The kubernetes_version matrix entries are currently following native Kubernetes version support and +1, see: https://endoflife.date/kubernetes
-        # To check latest versions, see: https://hub.docker.com/r/kindest/node/tags
-        k8s-version:
-          - v1.29.0 # Support: 28 Dec 2024 - 28 Feb 2025
-          - v1.28.0 # Support: 28 Aug 2024 - 28 Oct 2024
-          - v1.27.3  # Support: 28 Apr 2024 - 28 Jun 2024
-          - v1.26.6 # Support: 28 Dec 2023 - 28 Feb 2024
-          - v1.25.11 # Support: 27 Aug 2023 - 27 Oct 2023
+      matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,8 +52,8 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.12.0
         with:
-          node_image: kindest/node:${{ matrix.k8s-version }}
-          kubectl_version: ${{ matrix.k8s-version }}
+          node_image: kindest/node:${{ matrix.k8s-kind-version }}
+          kubectl_version: ${{ matrix.k8s-kind-version }}
           cluster_name: kind
           config: ./.github/workflows/configs/kind-config.yaml
       - name: Fix kubelet TLS server certificates
