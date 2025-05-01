@@ -191,6 +191,7 @@ k8sattributes:
       - container.id
       - container.image.name
       - container.image.tag
+      - container.image.digest
     annotations:
       - key: splunk.com/sourcetype
         from: pod
