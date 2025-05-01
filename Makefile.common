@@ -1,0 +1,29 @@
+SHELL=/bin/bash
+.SHELLFLAGS = -o pipefail -c
+
+
+# SRC_ROOT is the top of the source tree.
+ALL_SRC_AND_DOC_CMD := find . -type f \( \( -name "*.md" -o -name "*.go" -o -name "*.yaml" \) \) | sort
+
+SRC_ROOT := $(shell git rev-parse --show-toplevel)
+
+GOCMD?= go
+GOOS=$(shell $(GOCMD) env GOOS)
+GOARCH=$(shell $(GOCMD) env GOARCH)
+
+TOOLS_MOD_DIR    := $(SRC_ROOT)/tools
+TOOLS_MOD_REGEX  := "\s+_\s+\".*\""
+TOOLS_PKG_NAMES  := $(shell grep -E $(TOOLS_MOD_REGEX) < $(TOOLS_MOD_DIR)/tools.go | tr -d " _\"")
+TOOLS_BIN_DIR    := $(SRC_ROOT)/.tools
+TOOLS_BIN_NAMES  := $(addprefix $(TOOLS_BIN_DIR)/, $(notdir $(TOOLS_PKG_NAMES)))
+
+MISSPELL            := $(TOOLS_BIN_DIR)/misspell -error
+
+.PHONY: goinstall-tools
+goinstall-tools: $(TOOLS_BIN_NAMES)
+
+$(TOOLS_BIN_DIR):
+	mkdir -p $@
+
+$(TOOLS_BIN_NAMES): $(TOOLS_BIN_DIR) $(TOOLS_MOD_DIR)/go.mod
+	cd $(TOOLS_MOD_DIR) && GOOS="" GOARCH="" $(GOCMD) build -o $@ -trimpath $(filter %/$(notdir $@),$(TOOLS_PKG_NAMES))

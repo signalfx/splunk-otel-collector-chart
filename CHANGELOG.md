@@ -471,7 +471,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 - `clusterReceiver`: Bring back the default translations for kubelet metrics in EKS Fargate ([#1174](https://github.com/signalfx/splunk-otel-collector-chart/pull/1174))
 - `agent`: Remove a post-delete hook which targeted one a single node for reverting file ACLs. ([#1175](https://github.com/signalfx/splunk-otel-collector-chart/pull/1175))
-  The removed hook was intended to undo the ACLs set on log directores when
+  The removed hook was intended to undo the ACLs set on log directories when
   runAsUser and runAsGroup are provided. An initContainer run as root-user updates
   the permissions of log directories to allow read access to the provided uid/gid.
   But there is no graceful way to revert these ACLs on each node as part of the

@@ -452,7 +452,7 @@ agent:
   # Enable or disable features of the agent.
   featureGates: ""
 
-  # OpenTelemetry Collector configuration for otel-agent daemonset can be overriden in this field.
+  # OpenTelemetry Collector configuration for otel-agent daemonset can be overridden in this field.
   # Default configuration defined in templates/config/_otel-agent.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
@@ -564,7 +564,7 @@ clusterReceiver:
   # k8s cluster receiver extra pod labels
   podLabels: {}
 
-  # Extra enviroment variables to be set in the OTel Cluster Receiver container
+  # Extra environment variables to be set in the OTel Cluster Receiver container
   extraEnvs: []
 
   # Extra volumes to be mounted to the k8s cluster receiver container.
@@ -574,7 +574,7 @@ clusterReceiver:
   # Enable or disable features of the cluster receiver.
   featureGates: ""
 
-  # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overriden in this field.
+  # OpenTelemetry Collector configuration for K8s Cluster Receiver deployment can be overridden in this field.
   # Default configuration defined in templates/config/_otel-k8s-cluster-receiver-config.tpl
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to null value.
@@ -695,7 +695,7 @@ fluentd:
   securityContext:
     runAsUser: 0
 
-  # Extra enviroment variables to be set in the FluentD container
+  # Extra environment variables to be set in the FluentD container
   extraEnvs: []
 
   config:
@@ -1088,7 +1088,7 @@ isWindows: false
 securityContextConstraints:
   create: true
 
-# Openshift SecurityContextConstraints can be overriden in this field.
+# Openshift SecurityContextConstraints can be overridden in this field.
 # This fields will be merged into the default config that can be found at
 # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/securityContextConstraints.yaml
 # NOTE: This config will only be used when distribution=openshift
@@ -1173,7 +1173,7 @@ gateway:
   # OTel collector extra pod labels
   podLabels: {}
 
-  # Extra enviroment variables to be set in the standalone OTel collector container
+  # Extra environment variables to be set in the standalone OTel collector container
   extraEnvs: []
 
   # Extra volumes to be mounted to the OTel Collector container.
@@ -1183,7 +1183,7 @@ gateway:
   # Enable or disable features of the gateway.
   featureGates: ""
 
-  # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overriden in this field.
+  # OpenTelemetry Collector configuration for standalone otel-collector deployment can be overridden in this field.
   # Default configuration defined in config/otel-collector-config.yaml
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.

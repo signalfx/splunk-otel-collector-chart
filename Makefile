@@ -1,6 +1,6 @@
+include ./Makefile.common
 ##@ General
 # The general settings and variables for the project
-SHELL := /bin/bash
 
 # TODO: Move CHART_FILE_PATH and VALUES_FILE_PATH here, currently set in multiple places
 # The version of the splunk-otel-collector chart
@@ -36,6 +36,7 @@ help: ## Display Makefile help information for all actions
 .PHONY: install-tools
 install-tools: ## Install tools (macOS/Linux)
 	LOCALBIN=$(LOCALBIN) GOBIN=$(LOCALBIN) ci_scripts/install-tools.sh || exit 1
+	$(MAKE) goinstall-tools
 
 ##@ Build
 # Tasks related to building the Helm chart
@@ -221,3 +222,8 @@ tidy-all:
 .PHONY: update-operator-crds
 update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
 	ci_scripts/update-crds.sh
+
+.PHONY: misspell
+misspell: $(TOOLS_BIN_DIR)/misspell
+	@echo "running $(MISSPELL)"
+	@$(MISSPELL) $$($(ALL_SRC_AND_DOC_CMD))

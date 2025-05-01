@@ -764,7 +764,7 @@ Check [Data Persistence in the OpenTelemetry Collector
 
 Note: Data Persistence is only applicable for agent daemonset.
 
-Use following in values.yaml to disable data persistense for logs or metrics or traces:
+Use following in values.yaml to disable data persistence for logs or metrics or traces:
 
 ```yaml
 agent:
@@ -800,12 +800,12 @@ agent:
   * Persistent buffering is not supported for them, as directory needs to be mounted via `hostPath`.
   * Refer [aws/fargate](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) and [gke/autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-security#built-in-security).
 * Gateway support
-  * The filestorage extention acquires an exclusive lock for the queue directory.
+  * The filestorage extension acquires an exclusive lock for the queue directory.
   * It is not possible to run the persistent buffering if there are multiple replicas of a pod and `gateway` runs 3 replicas by default.
   * Even if support is somehow provided, only one of the pods will be able to acquire the lock and run, while the others will be blocked and unable to operate.
 * Cluster Receiver support
   * Cluster receiver is a 1-replica deployment of OpenTelemetry collector.
-  * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such envrionments.
+  * As any available node can be selected by the Kubernetes control plane to run the cluster receiver pod (unless we explicitly specify the `clusterReceiver.nodeSelector` to pin the pod to a specific node), `hostPath` or `local` volume mounts wouldn't work for such environments.
   * Data Persistence is currently not applicable to the k8s cluster metrics and k8s events.
 
 ### Using OpenTelemetry eBPF helm chart with Splunk OpenTelemetry Collector for Kubernetes
