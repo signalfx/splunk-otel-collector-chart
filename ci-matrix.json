@@ -1,0 +1,47 @@
+{
+  "functional_test": {
+    "container_runtime": [
+      "docker",
+      "containerd",
+      "crio"
+    ],
+    "k8s-minikube-version": [
+      "v1.30.0",
+      "v1.29.4",
+      "v1.28.9",
+      "v1.27.13",
+      "v1.26.15"
+    ],
+    "splunk_version": [
+      "9.3.0",
+      "8.2.9"
+    ]
+  },
+  "functional_test_v2": {
+    "k8s-kind-version": [
+      "v1.30.0",
+      "v1.29.0",
+      "v1.28.0",
+      "v1.27.3",
+      "v1.26.6",
+      "v1.25.11"
+    ],
+    "test-job": [
+      "functional",
+      "histogram",
+      "configuration_switching",
+      "k8sevents",
+      "istio",
+      "discovery"
+    ]
+  },
+  "migration_tests": {
+    "k8s-kind-version": [
+      "v1.29.0",
+      "v1.28.0",
+      "v1.27.3",
+      "v1.26.6",
+      "v1.25.11"
+    ]
+  }
+}
