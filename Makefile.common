@@ -1,11 +1,9 @@
 SHELL=/bin/bash
 .SHELLFLAGS = -o pipefail -c
 
-
 # SRC_ROOT is the top of the source tree.
-ALL_SRC_AND_DOC_CMD := find . -type f \( \( -name "*.md" -o -name "*.go" -o -name "*.yaml" \) \) | sort
-
 SRC_ROOT := $(shell git rev-parse --show-toplevel)
+ALL_SRC_AND_DOC_CMD := find . -type f \( \( -name "*.md" -o -name "*.go" -o -name "*.yaml" \) \) | sort
 
 GOCMD?= go
 GOOS=$(shell $(GOCMD) env GOOS)
@@ -17,7 +15,13 @@ TOOLS_PKG_NAMES  := $(shell grep -E $(TOOLS_MOD_REGEX) < $(TOOLS_MOD_DIR)/tools.
 TOOLS_BIN_DIR    := $(SRC_ROOT)/.tools
 TOOLS_BIN_NAMES  := $(addprefix $(TOOLS_BIN_DIR)/, $(notdir $(TOOLS_PKG_NAMES)))
 
+GCI                 := $(TOOLS_BIN_DIR)/gci
+GOFUMPT             := $(TOOLS_BIN_DIR)/gofumpt
+GOIMPORTS           := $(TOOLS_BIN_DIR)/goimports
+GOVULNCHECK         := $(TOOLS_BIN_DIR)/govulncheck
+LINT                := $(TOOLS_BIN_DIR)/golangci-lint
 MISSPELL            := $(TOOLS_BIN_DIR)/misspell -error
+MISSPELL_CORRECTION := $(TOOLS_BIN_DIR)/misspell -w
 
 .PHONY: goinstall-tools
 goinstall-tools: $(TOOLS_BIN_NAMES)
@@ -27,3 +31,38 @@ $(TOOLS_BIN_DIR):
 
 $(TOOLS_BIN_NAMES): $(TOOLS_BIN_DIR) $(TOOLS_MOD_DIR)/go.mod
 	cd $(TOOLS_MOD_DIR) && GOOS="" GOARCH="" $(GOCMD) build -o $@ -trimpath $(filter %/$(notdir $@),$(TOOLS_PKG_NAMES))
+
+.PHONY: misspell
+misspell: $(TOOLS_BIN_DIR)/misspell
+	@echo "running $(MISSPELL)"
+	@$(MISSPELL) $$($(ALL_SRC_AND_DOC_CMD))
+
+.PHONY: misspell-correction
+misspell-correction: $(TOOLS_BIN_DIR)/misspell
+	@$(MISSPELL_CORRECTION) $$($(ALL_SRC_AND_DOC_CMD))
+
+.PHONY: gofmt
+fmt: $(GOFUMPT) $(GOIMPORTS)
+	$(GOFUMPT) -l -w .
+	$(GOIMPORTS) -w -local github.com/signalfx/splunk-otel-collector-chart ./
+
+.PHONY: golint
+golint: $(LINT) misspell
+	@if [ "$(SRC_ROOT)" != "$(PWD)" ]; then \
+		$(LINT) run; \
+  else \
+    echo "top-level dir is not part of a go module, skipping golint"; \
+	fi
+
+.PHONY: govulncheck
+govulncheck: $(GOVULNCHECK)
+	@if [ "$(SRC_ROOT)" != "$(PWD)" ]; then \
+		$(GOVULNCHECK) ./...; \
+  else \
+    echo "top-level dir is not part of a go module, skipping govulncheck"; \
+	fi
+
+.PHONY: gogci
+gogci: $(TOOLS_BIN_DIR)/gci
+	@echo "running $(GCI)"
+	@$(GCI) write -s standard -s default -s "prefix(github.com/signalfx/splunk-otel-collector-chart)" $$($(ALL_SRC_AND_DOC_CMD))
