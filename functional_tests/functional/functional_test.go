@@ -443,7 +443,8 @@ func teardown(t *testing.T, testKubeConfig string) {
 			GracePeriodSeconds: &waitTime,
 		})
 		require.Eventually(t, func() bool {
-			_, err := client.CoreV1().Namespaces().Get(t.Context(), nm.Name, metav1.GetOptions{})
+			_, err = client.CoreV1().Namespaces().Get(t.Context(), nm.Name, metav1.GetOptions{})
+			t.Logf("Getting Namespace: %s, Error: %v", nm.Name, err)
 			return k8serrors.IsNotFound(err)
 		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
 	}
