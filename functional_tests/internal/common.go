@@ -38,8 +38,8 @@ func HostEndpoint(t *testing.T) string {
 
 	client, err := docker.NewClientWithOpts(docker.FromEnv)
 	require.NoError(t, err)
-	client.NegotiateAPIVersion(context.Background())
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	client.NegotiateAPIVersion(t.Context())
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 	network, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
 	require.NoError(t, err)
@@ -77,13 +77,11 @@ func WaitForMetrics(t *testing.T, entriesNum int, mc *consumertest.MetricsSink) 
 }
 
 func CheckNoEventsReceived(t *testing.T, lc *consumertest.LogsSink) {
-	require.True(t, len(lc.AllLogs()) == 0,
-		"received %d logs, expected 0 logs", len(lc.AllLogs()))
+	require.Empty(t, lc.AllLogs(), "received %d logs, expected 0 logs", len(lc.AllLogs()))
 }
 
 func CheckNoMetricsReceived(t *testing.T, lc *consumertest.MetricsSink) {
-	require.True(t, len(lc.AllMetrics()) == 0,
-		"received %d metrics, expected 0 metrics", len(lc.AllMetrics()))
+	require.Empty(t, lc.AllMetrics(), "received %d metrics, expected 0 metrics", len(lc.AllMetrics()))
 }
 
 func ResetMetricsSink(t *testing.T, mc *consumertest.MetricsSink) {
@@ -115,7 +113,7 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 	timeout time.Duration,
 ) {
 	require.Eventually(t, func() bool {
-		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+		pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
 			LabelSelector: labelSelector,
 		})
 		require.NoError(t, err)
@@ -147,40 +145,40 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 			Name: name,
 		},
 	}
-	_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{})
+	_, err := clientset.CoreV1().Namespaces().Create(t.Context(), ns, metav1.CreateOptions{})
 	require.NoError(t, err, "failed to create namespace %s", name)
 
 	require.Eventually(t, func() bool {
-		_, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+		_, err := clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 		return err == nil
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }
 
 func LabelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
-	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+	ns, err := clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 	require.NoError(t, err)
 	if ns.Labels == nil {
 		ns.Labels = make(map[string]string)
 	}
 	ns.Labels[key] = value
-	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
+	_, err = clientset.CoreV1().Namespaces().Update(t.Context(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 }
 
 func AnnotateNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
-	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+	ns, err := clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 	require.NoError(t, err)
 	if ns.Annotations == nil {
 		ns.Annotations = make(map[string]string)
 	}
 	ns.Annotations[key] = value
-	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
+	_, err = clientset.CoreV1().Namespaces().Update(t.Context(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 }
 
 func WaitForTerminatingPods(t *testing.T, clientset *kubernetes.Clientset, namespace string) {
 	require.Eventually(t, func() bool {
-		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+		pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{})
 		require.NoError(t, err)
 
 		terminatingPods := 0

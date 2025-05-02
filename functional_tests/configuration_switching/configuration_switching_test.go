@@ -1,10 +1,9 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package configuration_switching
+package configurationswitching
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,7 +37,7 @@ type sinks struct {
 	logsObjectsConsumer *consumertest.LogsSink
 }
 
-func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]interface{}) {
+func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]any) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
@@ -46,7 +45,7 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-	replacements := map[string]interface{}{
+	replacements := map[string]any{
 		"LogHecEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 		"MetricHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
 	}
@@ -108,7 +107,7 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
 		internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsEnabled": true,
 			"LogsEnabled":    true,
 		}
@@ -125,7 +124,7 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		internal.CheckNoMetricsReceived(t, hecMetricsConsumer)
 		internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsEnabled": true,
 			"LogsEnabled":    false,
 		}
@@ -139,7 +138,7 @@ func testAgentLogsAndMetrics(t *testing.T) {
 		internal.ResetLogsSink(t, agentLogsConsumer)
 		internal.ResetMetricsSink(t, hecMetricsConsumer)
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsEnabled": false,
 			"LogsEnabled":    true,
 		}
@@ -165,7 +164,7 @@ func testIndexSwitch(t *testing.T) {
 	internal.CheckNoEventsReceived(t, agentLogsConsumer)
 
 	t.Run("default_source_type", func(t *testing.T) {
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsIndex": metricsIndex,
 			"LogsIndex":    logsIndex,
 		}
@@ -190,14 +189,13 @@ func testIndexSwitch(t *testing.T) {
 		assert.Len(t, indices, 1)
 		assert.Equal(t, logsIndex, indices[0])
 
-		var mIndices []string
-		mIndices = getMetricsIndex(hecMetricsConsumer.AllMetrics())
+		mIndices := getMetricsIndex(hecMetricsConsumer.AllMetrics())
 		assert.Len(t, mIndices, 1)
 		assert.Equal(t, metricsIndex, mIndices[0])
 	})
 
 	t.Run("non_default_source_type", func(t *testing.T) {
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsIndex":         newMetricsIndex,
 			"LogsIndex":            newLogsIndex,
 			"NonDefaultSourcetype": true,
@@ -237,7 +235,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
 	t.Run("check cluster receiver disabled", func(t *testing.T) {
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"ClusterReceiverEnabled": false,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
@@ -251,7 +249,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	})
 
 	t.Run("check cluster receiver enabled", func(t *testing.T) {
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"ClusterReceiverEnabled": true,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
@@ -279,7 +277,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		logsObjectsConsumer := globalSinks.logsObjectsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"ClusterReceiverEnabled": true,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
@@ -291,7 +289,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		for _, attr := range attributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getLogsAttributes(logsObjectsConsumer.AllLogs(), attr)
-			assert.True(t, len(attrValues) >= 1)
+			assert.GreaterOrEqual(t, len(attrValues), 1)
 			assert.Equal(t, 0, notFoundCounter)
 			t.Logf("Attributes: %v", attrValues)
 		}
@@ -302,7 +300,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"ClusterReceiverEnabled": true,
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
@@ -314,7 +312,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		for _, attr := range attributesList {
 			t.Log("Checking attributes: ", attr)
 			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)
-			assert.True(t, len(attrValues) >= 1)
+			assert.GreaterOrEqual(t, len(attrValues), 1)
 			assert.Equal(t, 0, notFoundCounter)
 			t.Logf("Resource Attributes for %s: %v", attr, attrValues)
 		}
@@ -324,7 +322,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
 		agentLogsConsumer := globalSinks.logsConsumer
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsEnabled": true,
 			"LogsEnabled":    true,
 		}
@@ -335,7 +333,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		for _, attr := range attributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getLogsAttributes(agentLogsConsumer.AllLogs(), attr)
-			assert.True(t, len(attrValues) >= 1)
+			assert.GreaterOrEqual(t, len(attrValues), 1)
 			assert.Equal(t, 0, notFoundCounter)
 			t.Logf("Attributes: %v", attrValues)
 		}
@@ -345,7 +343,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
 		hecMetricsConsumer := globalSinks.hecMetricsConsumer
 
-		replacements := map[string]interface{}{
+		replacements := map[string]any{
 			"MetricsEnabled": true,
 			"LogsEnabled":    true,
 		}
@@ -356,7 +354,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		for _, attr := range attributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getMetricsAttributes(hecMetricsConsumer.AllMetrics(), attr)
-			assert.True(t, len(attrValues) >= 1)
+			assert.GreaterOrEqual(t, len(attrValues), 1)
 			assert.Equal(t, 0, notFoundCounter)
 			t.Logf("Attributes for %s: %v", attr, attrValues)
 		}
@@ -381,7 +379,7 @@ func listPodsInNamespace(t *testing.T, namespace string) *corev1.PodList {
 	require.NoError(t, err)
 
 	// Get the list of pods in the specified namespace
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
+	pods, err := client.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{})
 	require.NoError(t, err)
 	t.Logf("There are %d pods in the namespace %q\n", len(pods.Items), namespace)
 	return pods
@@ -440,8 +438,8 @@ func contains(list []string, newValue string) bool {
 
 func getLogsAttributes(logs []plog.Logs, attributeName string) ([]string, int) {
 	var attributes []string
-	var notFoundCounter int = 0
-	var foundCounter int = 0
+	notFoundCounter := 0
+	foundCounter := 0
 
 	for i := 0; i < len(logs); i++ {
 		l := logs[i]
@@ -471,9 +469,9 @@ func getLogsAttributes(logs []plog.Logs, attributeName string) ([]string, int) {
 
 func getMetricsAttributes(metrics []pmetric.Metrics, attributeName string) ([]string, int) {
 	var resourceAttributes []string
-	var notFoundCounter int = 0
-	var foundCounter int = 0
-	var skippedCounter int = 0
+	notFoundCounter := 0
+	foundCounter := 0
+	skippedCounter := 0
 	prefixesForMetricsToSkip := []string{
 		// agent metrics
 		"system.", "k8s.node.",

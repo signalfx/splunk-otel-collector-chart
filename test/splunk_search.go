@@ -47,7 +47,7 @@ func getSplunkSearchResults(user string, password string, baseURL string, jobID 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	eventURL := fmt.Sprintf("%s/services/search/jobs/%s/events?output_mode=json", baseURL, jobID)
 	logger.Println("URL: " + eventURL)
-	reqEvents, err := http.NewRequest("GET", eventURL, nil)
+	reqEvents, err := http.NewRequest(http.MethodGet, eventURL, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func checkSearchJobStatusCode(user string, password string, baseURL string, jobI
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	checkReqEvents, err := http.NewRequest("GET", checkEventURL, nil)
+	checkReqEvents, err := http.NewRequest(http.MethodGet, checkEventURL, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -118,7 +118,6 @@ func checkSearchJobStatusCode(user string, password string, baseURL string, jobI
 func postSearchRequest(user string, password string, baseURL string, searchQuery string, startTime string, endTime string) string {
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	searchURL := fmt.Sprintf("%s/services/search/jobs?output_mode=json", baseURL)
-	// query := "search " + searchQuery
 	query := searchQuery
 	logger.Println("Search query: " + query)
 	data := url.Values{}
@@ -130,7 +129,7 @@ func postSearchRequest(user string, password string, baseURL string, searchQuery
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("POST", searchURL, strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, searchURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		logger.Printf("Error while preparing POST request")
 		panic(err)

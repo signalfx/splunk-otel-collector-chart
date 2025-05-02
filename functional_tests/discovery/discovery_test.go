@@ -5,6 +5,8 @@ package k8sevents
 
 import (
 	"fmt"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"path/filepath"
 	"testing"
@@ -47,7 +49,7 @@ func Test_Discovery(t *testing.T) {
 		teardown(t, testKubeConfig)
 	})
 
-	internal.SetupSignalFxApiServer(t)
+	internal.SetupSignalFxAPIServer(t)
 
 	tests := []struct {
 		name       string
@@ -185,17 +187,20 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 	install := action.NewInstall(actionConfig)
 	install.Namespace = internal.Namespace
 	install.ReleaseName = redisReleaseName
-	install.ChartPathOptions.RepoURL = redisChartRepo
+	install.RepoURL = redisChartRepo
 	install.Wait = true
 	install.Timeout = internal.HelmActionTimeout
 	hCli := cli.New()
 	hCli.KubeConfig = kubeConfig
-	chartPath, err := install.ChartPathOptions.LocateChart(redisChart, hCli)
+	chartPath, err := install.LocateChart(redisChart, hCli)
 	require.NoError(t, err)
-	ch, err := loader.Load(chartPath)
+	var ch *chart.Chart
+	ch, err = loader.Load(chartPath)
+	require.NoError(t, err)
 
 	// Install the redis chart with no replicas and no auth
-	release, err := install.Run(ch, map[string]any{
+	var release *release.Release
+	release, err = install.Run(ch, map[string]any{
 		"auth": map[string]any{
 			"enabled": false,
 		},

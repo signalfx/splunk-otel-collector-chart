@@ -4,7 +4,6 @@
 package internal
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -40,13 +39,13 @@ func setupHECLogsSink(t *testing.T, port int) *consumertest.LogsSink {
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
 	lc := new(consumertest.LogsSink)
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, lc)
+	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, lc)
 	require.NoError(t, err)
 
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating logs receiver")
 	t.Cleanup(func() {
-		require.NoError(t, rcvr.Shutdown(context.Background()))
+		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})
 
 	return lc
@@ -59,13 +58,13 @@ func SetupHECMetricsSink(t *testing.T) *consumertest.MetricsSink {
 	mCfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", HECMetricsReceiverPort)
 
 	mc := new(consumertest.MetricsSink)
-	mrcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), mCfg, mc)
+	mrcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), mCfg, mc)
 	require.NoError(t, err)
 
-	require.NoError(t, mrcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, mrcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating metrics receiver")
 	t.Cleanup(func() {
-		require.NoError(t, mrcvr.Shutdown(context.Background()))
+		require.NoError(t, mrcvr.Shutdown(t.Context()))
 	})
 
 	return mc
@@ -75,16 +74,16 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 	tc := new(consumertest.TracesSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
-	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
+	cfg.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
 
-	rcvr, err := f.CreateTraces(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, tc)
+	rcvr, err := f.CreateTraces(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, tc)
 	require.NoError(t, err)
 
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating traces receiver")
 	t.Cleanup(func() {
-		require.NoError(t, rcvr.Shutdown(context.Background()))
+		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})
 
 	return tc
@@ -94,16 +93,16 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	ls := new(consumertest.LogsSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.Protocols.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
-	cfg.Protocols.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
+	cfg.HTTP.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
 
-	rcvr, err := f.CreateLogs(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, ls)
+	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, ls)
 	require.NoError(t, err)
 
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating logs receiver")
 	t.Cleanup(func() {
-		require.NoError(t, rcvr.Shutdown(context.Background()))
+		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})
 
 	return ls
@@ -115,13 +114,13 @@ func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
 
-	rcvr, err := f.CreateMetrics(context.Background(), receivertest.NewNopSettings(f.Type()), cfg, mc)
+	rcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, mc)
 	require.NoError(t, err)
 
-	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
+	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating metrics receiver")
 	t.Cleanup(func() {
-		require.NoError(t, rcvr.Shutdown(context.Background()))
+		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})
 
 	return mc

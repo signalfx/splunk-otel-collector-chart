@@ -35,7 +35,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, replacements)
 	require.NoError(t, err)
-	var values map[string]interface{}
+	var values map[string]any
 	err = yaml.Unmarshal(buf.Bytes(), &values)
 	require.NoError(t, err)
 
@@ -55,14 +55,14 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues))
 		require.NoError(t, rfErr)
 		initChart := loadChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
-		var initValues map[string]interface{}
+		var initValues map[string]any
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
 		// if install crds option is enabled, try to update the crds
 		t.Logf("Checking if CRD installation is enabled in %s", valuesFile)
-		if update, _ := crdsInstallEnabled(values); update {
+		if update := crdsInstallEnabled(values); update {
 			t.Log("Updating CRDs")
 			UpdateOperatorCRDs(t, filepath.Join("..", "..", os.Getenv("UPGRADE_FROM_CHART_DIR")), filepath.Join("..", "..", defaultChartPath), testKubeConfig)
 		} else {
@@ -109,7 +109,7 @@ func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, 
 	}
 	t.Logf("Updating CRDs from %s to %s", oldCrdsVer, newCrdsVer)
 
-	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")) //nolint:gosec
 	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err, "failed to apply CRDs: %s", string(output))
@@ -133,15 +133,15 @@ func getDependencyVersion(t *testing.T, dependency string, chartPath string) str
 	chartFileContent, err := os.ReadFile(chartFilePath)
 	require.NoError(t, err, "Failed to read %s", chartFilePath)
 
-	var chartData map[string]interface{}
+	var chartData map[string]any
 	err = yaml.Unmarshal(chartFileContent, &chartData)
 	require.NoError(t, err, "Failed to parse %s", chartFilePath)
 
-	dependencies, ok := chartData["dependencies"].([]interface{})
+	dependencies, ok := chartData["dependencies"].([]any)
 	require.True(t, ok, "No dependencies found in %s", chartFilePath)
 
 	for _, dep := range dependencies {
-		depMap, _ := dep.(map[string]interface{})
+		depMap, _ := dep.(map[string]any)
 		if depMap["name"] == dependency {
 			version, ok := depMap["version"].(string)
 			require.True(t, ok, "Dependency version not found or invalid")
@@ -153,16 +153,16 @@ func getDependencyVersion(t *testing.T, dependency string, chartPath string) str
 	return ""
 }
 
-func crdsInstallEnabled(values map[string]interface{}) (bool, error) {
-	operatorcrds, ok := values["operatorcrds"].(map[string]interface{})
+func crdsInstallEnabled(values map[string]any) bool {
+	operatorcrds, ok := values["operatorcrds"].(map[string]any)
 	if !ok {
-		return false, nil
+		return false
 	}
 
 	install, ok := operatorcrds["install"].(bool)
 	if !ok {
-		return false, nil
+		return false
 	}
 
-	return install, nil
+	return install
 }

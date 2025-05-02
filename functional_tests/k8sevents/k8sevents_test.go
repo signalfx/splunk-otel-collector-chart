@@ -46,7 +46,7 @@ func Test_K8SEvents(t *testing.T) {
 		teardown(t, k8sClient)
 	}
 
-	internal.SetupSignalFxApiServer(t)
+	internal.SetupSignalFxAPIServer(t)
 
 	eventsLogsConsumer = internal.SetupHECLogsSink(t)
 
@@ -65,7 +65,7 @@ func Test_K8SEvents(t *testing.T) {
 
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
-		k8sEventsLogs := selectLogs(t, "k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
+		k8sEventsLogs := selectLogs("k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
 			re := regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\).*`)
 			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
@@ -192,9 +192,8 @@ metadata:
 
 func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	obj := &unstructured.Unstructured{}
-	err := yaml.Unmarshal([]byte(objYAML), obj)
-	require.NoError(t, err)
-	k8stest.DeleteObject(k8sClient, obj)
+	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
+	require.NoError(t, k8stest.DeleteObject(k8sClient, obj))
 }
 
 func selectResLogs(attributeName, attributeValue string, logSink *consumertest.LogsSink) plog.Logs {
@@ -213,7 +212,7 @@ func selectResLogs(attributeName, attributeValue string, logSink *consumertest.L
 	return selectedLogs
 }
 
-func selectLogs(t *testing.T, attributeName, attributeValue string, inLogs *plog.Logs, modifyBodyFunc func(string) string) plog.Logs {
+func selectLogs(attributeName, attributeValue string, inLogs *plog.Logs, modifyBodyFunc func(string) string) plog.Logs {
 	selectedLogs := plog.NewLogs()
 	// collapse logs across resource logs into a single one to reduce flakiness in test runs
 	for h := 0; h < inLogs.ResourceLogs().Len(); h++ {

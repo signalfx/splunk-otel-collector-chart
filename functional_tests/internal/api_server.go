@@ -9,22 +9,24 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 const SignalFxAPIPort = 8881
 
-func SetupSignalFxApiServer(t *testing.T) {
+func SetupSignalFxAPIServer(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(200)
+	mux.HandleFunc("/", func(writer http.ResponseWriter, _ *http.Request) {
+		writer.WriteHeader(http.StatusOK)
 	})
 
-	_, cancelCtx := context.WithCancel(context.Background())
+	_, cancelCtx := context.WithCancel(t.Context())
 	s := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
-		Handler: mux,
+		Addr:              fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
+		Handler:           mux,
+		ReadHeaderTimeout: 60 * time.Second,
 	}
 
 	t.Cleanup(func() {

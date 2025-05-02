@@ -5,9 +5,9 @@ package istio
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -22,6 +22,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
+	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -31,9 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	sigsyaml "sigs.k8s.io/yaml"
-
-	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
 const istioVersion = "1.24.2"
@@ -56,7 +54,7 @@ func deployIstioAndCollector(t *testing.T) {
 	require.NoError(t, err)
 
 	// Install Istio
-	istioctlPath := downloadIstio(t, istioVersion)
+	istioctlPath := downloadIstio(t)
 	runCommand(t, fmt.Sprintf("%s install -y", istioctlPath))
 
 	// Patch ingress gateway to work in kind cluster
@@ -71,7 +69,7 @@ func deployIstioAndCollector(t *testing.T) {
 
 	_, err = k8stest.CreateObjects(k8sClient, "testdata/testobjects")
 	require.NoError(t, err)
-	deployment, err := clientset.AppsV1().Deployments("istio-workloads").Get(context.TODO(), "httpbin", metav1.GetOptions{})
+	deployment, err := clientset.AppsV1().Deployments("istio-workloads").Get(t.Context(), "httpbin", metav1.GetOptions{})
 	require.NoError(t, err, "failed to get httpbin deployment")
 	t.Logf("Deployment %s created successfully", deployment.Name)
 
@@ -130,17 +128,18 @@ metadata:
 	internal.ChartUninstall(t, testKubeConfig)
 }
 
-func downloadIstio(t *testing.T, version string) string {
+func downloadIstio(t *testing.T) string {
 	var url string
-	if runtime.GOOS == "darwin" {
-		url = fmt.Sprintf("https://github.com/istio/istio/releases/download/%s/istio-%s-osx.tar.gz", version, version)
-	} else if runtime.GOOS == "linux" {
-		url = fmt.Sprintf("https://github.com/istio/istio/releases/download/%s/istio-%s-linux-amd64.tar.gz", version, version)
-	} else {
+	switch runtime.GOOS {
+	case "darwin":
+		url = fmt.Sprintf("https://github.com/istio/istio/releases/download/%s/istio-%s-osx.tar.gz", istioVersion, istioVersion)
+	case "linux":
+		url = fmt.Sprintf("https://github.com/istio/istio/releases/download/%s/istio-%s-linux-amd64.tar.gz", istioVersion, istioVersion)
+	default:
 		t.Fatalf("unsupported operating system: %s", runtime.GOOS)
 	}
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint:gosec
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -151,24 +150,26 @@ func downloadIstio(t *testing.T, version string) string {
 	tr := tar.NewReader(gz)
 	var istioDir string
 	for {
-		hdr, err := tr.Next()
-		if err == io.EOF {
+		var hdr *tar.Header
+		hdr, err = tr.Next()
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		require.NoError(t, err)
 
-		target := filepath.Join(".", hdr.Name)
+		target := filepath.Join(".", hdr.Name) //nolint:gosec
 		if hdr.FileInfo().IsDir() && istioDir == "" {
 			istioDir = target
 		}
 		if hdr.FileInfo().IsDir() {
 			require.NoError(t, os.MkdirAll(target, hdr.FileInfo().Mode()))
 		} else {
-			f, err := os.Create(target)
+			var f *os.File
+			f, err = os.Create(target)
 			require.NoError(t, err)
 			defer f.Close()
 
-			_, err = io.Copy(f, tr)
+			_, err = io.Copy(f, tr) //nolint:gosec
 			require.NoError(t, err)
 		}
 	}
@@ -199,45 +200,15 @@ func patchResource(t *testing.T, clientset *kubernetes.Clientset, namespace, nam
 	var err error
 	switch resourceType {
 	case "deployments":
-		_, err = clientset.AppsV1().Deployments(namespace).Patch(context.TODO(), name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
+		_, err = clientset.AppsV1().Deployments(namespace).Patch(t.Context(), name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
 	case "services":
-		_, err = clientset.CoreV1().Services(namespace).Patch(context.TODO(), name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
+		_, err = clientset.CoreV1().Services(namespace).Patch(t.Context(), name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
 	}
 	require.NoError(t, err)
 }
 
-func createObjectFromURL(t *testing.T, config string, url string) {
-	resp, err := http.Get(url)
-	require.NoError(t, err, "failed to fetch URL: %s", url)
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	require.NoError(t, err, "failed to read response body from URL: %s", url)
-	t.Logf("Fetched YAML content from URL %s:\n%s", url, string(body))
-	k8sClient, err := k8stest.NewK8sClient(config)
-	require.NoError(t, err, "failed to create Kubernetes client")
-
-	// Use a YAML decoder to parse the content
-	decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(body), 4096)
-	for {
-		var doc map[string]interface{}
-		err := decoder.Decode(&doc)
-		if err == io.EOF {
-			break
-		}
-		require.NoError(t, err, "failed to decode YAML document")
-		if len(doc) == 0 {
-			continue
-		}
-		docBytes, err := sigsyaml.Marshal(doc)
-		require.NoError(t, err, "failed to marshal YAML document")
-		t.Logf("Creating object from document:\n%s", string(docBytes))
-		_, err = k8stest.CreateObject(k8sClient, docBytes)
-		require.NoError(t, err, "failed to create object from document")
-	}
-}
-
 func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path string) {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
 	req.Host = host
 	req.Header.Set("Host", header)
@@ -288,9 +259,8 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 
 func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	obj := &unstructured.Unstructured{}
-	err := yaml.Unmarshal([]byte(objYAML), obj)
-	require.NoError(t, err)
-	k8stest.DeleteObject(k8sClient, obj)
+	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
+	require.NoError(t, k8stest.DeleteObject(k8sClient, obj))
 }
 
 func Test_IstioMetrics(t *testing.T) {
@@ -300,12 +270,12 @@ func Test_IstioMetrics(t *testing.T) {
 		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 		require.NoError(t, err)
-		istioctlPath := downloadIstio(t, istioVersion)
+		istioctlPath := downloadIstio(t)
 		teardown(t, k8sClient, istioctlPath)
 	}
 
 	// create an API server
-	internal.SetupSignalFxApiServer(t)
+	internal.SetupSignalFxAPIServer(t)
 	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 
 	if os.Getenv("SKIP_SETUP") == "true" {
