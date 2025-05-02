@@ -1,4 +1,5 @@
 include ./Makefile.common
+
 ##@ General
 # The general settings and variables for the project
 
@@ -20,6 +21,10 @@ $(LOCALBIN):
 CHLOGGEN ?= $(LOCALBIN)/chloggen
 
 CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
+
+FIND_MOD_ARGS=-type f -name "go.mod"
+TO_MOD_DIR=dirname {} \; | sort | egrep  '^./'
+ALL_MODS := $(shell find . $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR))
 
 # The help target as provided
 .PHONY: help
@@ -212,6 +217,18 @@ update-chart-dep: dep-update ## Updates the dependency version in the Chart.yaml
 prepare-release: ## Prepares for a new release of the helm chart. Optionally specify CHART_VERSION and APP_VERSION.
 	ci_scripts/prepare-release.sh CREATE_BRANCH=${CREATE_BRANCH} CHART_VERSION=${CHART_VERSION} APP_VERSION=${APP_VERSION}
 
+.PHONY: update-operator-crds
+update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
+	ci_scripts/update-crds.sh
+
+.PHONY: for-all
+for-all:
+	@set -e; for dir in $(ALL_MODS); do \
+		(cd "$${dir}" && \
+		echo "running $${CMD} in $${dir}" && \
+		$${CMD} ); \
+	done
+
 .PHONY: tidy-all
 tidy-all:
 	@for dir in $$(find . -type f -name "go.mod" -exec dirname {} \; | sort | egrep '^./'); do \
@@ -219,11 +236,18 @@ tidy-all:
 		(cd "$$dir" && rm -f go.sum && go mod tidy); \
 	done
 
-.PHONY: update-operator-crds
-update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
-	ci_scripts/update-crds.sh
+.PHONY: gofmt-all
+gofmt-all:
+	@$(MAKE) for-all gofmt
 
-.PHONY: misspell
-misspell: $(TOOLS_BIN_DIR)/misspell
-	@echo "running $(MISSPELL)"
-	@$(MISSPELL) $$($(ALL_SRC_AND_DOC_CMD))
+.PHONY: govulncheck-all
+govulncheck-all:
+	@$(MAKE) for-all govulncheck
+
+.PHONY: golint-all
+golint-all:
+	@$(MAKE) for-all golint
+
+.PHONY: gogci-all
+gogci-all:
+	@$(MAKE) for-all gogci
