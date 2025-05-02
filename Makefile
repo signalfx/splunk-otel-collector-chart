@@ -221,13 +221,15 @@ prepare-release: ## Prepares for a new release of the helm chart. Optionally spe
 update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
 	ci_scripts/update-crds.sh
 
-.PHONY: for-all
-for-all:
-	@set -e; for dir in $(ALL_MODS); do \
-		(cd "$${dir}" && \
-		echo "running $${CMD} in $${dir}" && \
-		$${CMD} ); \
-	done
+# Define a delegation target for each module
+.PHONY: $(ALL_MODS)
+$(ALL_MODS):
+	@echo "Running target '$(TARGET)' in module '$@' as part of group '$(GROUP)'"
+	$(MAKE) --no-print-directory -C $@ $(TARGET)
+
+# Trigger each module's delegation target
+.PHONY: for-all-target
+for-all-target: $(ALL_MODS)
 
 .PHONY: tidy-all
 tidy-all:
@@ -238,16 +240,16 @@ tidy-all:
 
 .PHONY: gofmt-all
 gofmt-all:
-	@$(MAKE) for-all gofmt
+	@$(MAKE) for-all-target TARGET='gofmt'
 
 .PHONY: govulncheck-all
 govulncheck-all:
-	@$(MAKE) for-all govulncheck
+	@$(MAKE) for-all-target TARGET='govulncheck'
 
 .PHONY: golint-all
 golint-all:
-	@$(MAKE) for-all golint
+	@$(MAKE) for-all-target TARGET='golint'
 
 .PHONY: gogci-all
 gogci-all:
-	@$(MAKE) for-all gogci
+	@$(MAKE) for-all-target TARGET='gogci'

@@ -51,25 +51,18 @@ misspell-correction: $(TOOLS_BIN_DIR)/misspell
 	@$(MISSPELL_CORRECTION) $$($(ALL_SRC_AND_DOC_CMD))
 
 .PHONY: gofmt
-fmt: $(GOFUMPT) $(GOIMPORTS)
+fmt: $(GOFUMPT) $(GOIMPORTS) misspell-correction
+	gofmt -w -s .
 	$(GOFUMPT) -l -w .
 	$(GOIMPORTS) -w -local github.com/signalfx/splunk-otel-collector-chart ./
 
 .PHONY: golint
 golint: $(LINT) misspell
-	@if [ "$(SRC_ROOT)" != "$(PWD)" ]; then \
-		$(LINT) run --allow-parallel-runners -j$(NUM_CORES); \
-  else \
-    echo "top-level dir is not part of a go module, skipping golint"; \
-	fi
+		$(LINT) run --allow-parallel-runners -j$(NUM_CORES)
 
 .PHONY: govulncheck
 govulncheck: $(GOVULNCHECK)
-	@if [ "$(SRC_ROOT)" != "$(PWD)" ]; then \
-		$(GOVULNCHECK) ./...; \
-  else \
-    echo "top-level dir is not part of a go module, skipping govulncheck"; \
-	fi
+		$(GOVULNCHECK) ./...
 
 .PHONY: gogci
 gogci: $(TOOLS_BIN_DIR)/gci
