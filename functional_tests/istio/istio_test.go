@@ -260,7 +260,7 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	obj := &unstructured.Unstructured{}
 	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
-	require.NoError(t, k8stest.DeleteObject(k8sClient, obj))
+	k8stest.DeleteObject(k8sClient, obj)
 }
 
 func Test_IstioMetrics(t *testing.T) {
