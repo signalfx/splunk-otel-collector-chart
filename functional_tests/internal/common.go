@@ -11,7 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/docker/docker/api/types/network"
+	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -19,10 +22,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/docker/docker/api/types/network"
-	docker "github.com/docker/docker/client"
-	"github.com/stretchr/testify/require"
 )
 
 var Namespace = "default"
