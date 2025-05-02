@@ -67,7 +67,6 @@ var testInputs = []TestInput{
 }
 
 func Test_ControlPlaneMetrics(t *testing.T) {
-
 	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
@@ -142,7 +141,7 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	// The max datapoint count per metric can be adjusted as inpute to internal.ReduceDatapoints
 	if os.Getenv("GENERATE_EXPECTED") == "true" {
 		outputDir := filepath.Join("testdata", "expected", majorMinor)
-		require.NoError(t, os.MkdirAll(outputDir, 0755))
+		require.NoError(t, os.MkdirAll(outputDir, 0o755))
 		internal.ReduceDatapoints(actualMetrics, 1)
 		err := golden.WriteMetrics(t, filepath.Join(outputDir, fileName), *actualMetrics)
 		require.NoError(t, err)

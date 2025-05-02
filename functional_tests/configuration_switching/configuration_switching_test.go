@@ -65,10 +65,9 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]in
 		}
 		t.Log("Cleaning up cluster")
 		teardown(t)
-
 	})
-
 }
+
 func teardown(t *testing.T) {
 	t.Log("Running teardown")
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -98,7 +97,6 @@ func Test_Functions(t *testing.T) {
 }
 
 func testAgentLogsAndMetrics(t *testing.T) {
-
 	valuesFileName := "values_logs_and_metrics_switching.yaml.tmpl"
 	hecMetricsConsumer := globalSinks.hecMetricsConsumer
 	agentLogsConsumer := globalSinks.logsConsumer
@@ -152,11 +150,11 @@ func testAgentLogsAndMetrics(t *testing.T) {
 }
 
 func testIndexSwitch(t *testing.T) {
-	var metricsIndex = "metricsIndex"
-	var newMetricsIndex = "newMetricsIndex"
-	var logsIndex = "main"
-	var newLogsIndex = "newLogsIndex"
-	var nonDefaultSourcetype = "my-sourcetype"
+	metricsIndex := "metricsIndex"
+	newMetricsIndex := "newMetricsIndex"
+	logsIndex := "main"
+	newLogsIndex := "newLogsIndex"
+	nonDefaultSourcetype := "my-sourcetype"
 
 	valuesFileName := "values_indexes_switching.yaml.tmpl"
 	hecMetricsConsumer := globalSinks.hecMetricsConsumer

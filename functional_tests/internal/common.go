@@ -98,22 +98,23 @@ func ResetLogsSink(t *testing.T, lc *consumertest.LogsSink) {
 }
 
 func WriteNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
-	require.NoError(t, os.MkdirAll("results", 0755))
+	require.NoError(t, os.MkdirAll("results", 0o755))
 	require.NoError(t, golden.WriteTraces(t, filepath.Join("results", filepath.Base(file)), *trace))
 }
 
 func WriteNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
-	require.NoError(t, os.MkdirAll("results", 0755))
+	require.NoError(t, os.MkdirAll("results", 0o755))
 	require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", filepath.Base(file)), *metric))
 }
 
 func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
-	require.NoError(t, os.MkdirAll("results", 0755))
+	require.NoError(t, os.MkdirAll("results", 0o755))
 	require.NoError(t, golden.WriteLogs(t, filepath.Join("results", filepath.Base(file)), *log))
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
-	timeout time.Duration) {
+	timeout time.Duration,
+) {
 	require.Eventually(t, func() bool {
 		pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
 			LabelSelector: labelSelector,

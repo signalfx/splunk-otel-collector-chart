@@ -7,10 +7,12 @@ import (
 	"os"
 )
 
-const HostEnvVar = "CI_SPLUNK_HOST"
-const UserEnvVar = "CI_SPLUNK_USERNAME"
-const PasswordEnvVar = "CI_SPLUNK_PASSWORD"
-const ManagementPortEnvVar = "CI_SPLUNK_PORT"
+const (
+	HostEnvVar           = "CI_SPLUNK_HOST"
+	UserEnvVar           = "CI_SPLUNK_USERNAME"
+	PasswordEnvVar       = "CI_SPLUNK_PASSWORD"
+	ManagementPortEnvVar = "CI_SPLUNK_PORT"
+)
 
 // GetConfigVariable returns the value of the environment variable with the given name.
 func GetConfigVariable(variableName string) string {
