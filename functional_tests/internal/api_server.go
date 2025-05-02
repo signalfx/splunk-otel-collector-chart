@@ -26,7 +26,7 @@ func SetupSignalFxAPIServer(t *testing.T) {
 	s := &http.Server{
 		Addr:              fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
 		Handler:           mux,
-		ReadHeaderTimeout: 60 * time.Second,
+		ReadHeaderTimeout: 60 * time.Minute,
 	}
 
 	t.Cleanup(func() {
