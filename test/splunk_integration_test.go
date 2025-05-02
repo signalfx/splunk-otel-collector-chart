@@ -20,19 +20,18 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const EVENT_SEARCH_QUERY_STRING = "| search "
-const METRIC_SEARCH_QUERY_STRING = "| mpreview "
+const (
+	EVENT_SEARCH_QUERY_STRING  = "| search "
+	METRIC_SEARCH_QUERY_STRING = "| mpreview "
+)
 
 func Test_Functions(t *testing.T) {
-
 	t.Run("verify log ingestion by using annotations", testVerifyLogsIngestionUsingAnnotations)
 	t.Run("custom metadata fields annotations", testVerifyCustomMetadataFieldsAnnotations)
 	t.Run("metric namespace annotations", testVerifyMetricNamespaceAnnotations)
-
 }
 
 func testVerifyLogsIngestionUsingAnnotations(t *testing.T) {
-
 	tests := []struct {
 		name               string
 		label              string
@@ -57,8 +56,8 @@ func testVerifyLogsIngestionUsingAnnotations(t *testing.T) {
 		})
 	}
 }
-func testVerifyCustomMetadataFieldsAnnotations(t *testing.T) {
 
+func testVerifyCustomMetadataFieldsAnnotations(t *testing.T) {
 	tests := []struct {
 		name               string
 		label              string

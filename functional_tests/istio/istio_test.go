@@ -179,7 +179,7 @@ func downloadIstio(t *testing.T, version string) string {
 
 	istioctlPath := filepath.Join(absIstioDir, "bin", "istioctl")
 	require.FileExists(t, istioctlPath, "istioctl binary not found")
-	require.NoError(t, os.Chmod(istioctlPath, 0755), "failed to set executable permission for istioctl")
+	require.NoError(t, os.Chmod(istioctlPath, 0o755), "failed to set executable permission for istioctl")
 
 	t.Cleanup(func() {
 		os.RemoveAll(absIstioDir)

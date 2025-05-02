@@ -345,7 +345,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		}
 		t.Log("Cleaning up cluster")
 		teardown(t, testKubeConfig)
-
 	})
 }
 
@@ -889,7 +888,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 }
 
 func testAgentLogs(t *testing.T) {
-
 	logsConsumer := globalSinks.logsConsumer
 	internal.WaitForLogs(t, 5, logsConsumer)
 
