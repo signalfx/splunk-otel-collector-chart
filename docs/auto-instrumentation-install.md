@@ -393,7 +393,7 @@ with Splunk customer content.
 _The native OpenTelemetry instrumentation libraries are owned and maintained by the OpenTelemetry Community, Splunk
 provides best effort support with issues related to native OpenTelemetry instrumentation libraries._
 
-| Instrumentation Library | Distribution  | Status      | Supported        | Splunk Content Compatability | Code Repo                                                                            | Image Repo                                                                     |
+| Instrumentation Library | Distribution  | Status      | Supported        | Splunk Content Compatibility | Code Repo                                                                            | Image Repo                                                                     |
 |-------------------------|---------------|-------------|------------------|------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | java                    | Splunk        | Available   | Yes              | Completely                   | [Link](github.com/signalfx/splunk-otel-java)                                         | ghcr.io/signalfx/splunk-otel-java/splunk-otel-java                             |
 | dotnet                  | Splunk        | Coming Soon |                  |                              | [Link](github.com/signalfx/splunk-otel-dotnet)                                       |                                                                                |
