@@ -1,0 +1,75 @@
+name: build-and-test
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+  pull_request:
+
+env:
+  GO_VERSION: 1.23.6
+jobs:
+  setup-environment:
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+            ./.tools
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Install dependencies
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make -j2 gomoddownload
+      - name: Install Tools
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make goinstall-tools
+  checks:
+    runs-on: ubuntu-24.04
+    needs: [setup-environment]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+        with:
+          go-version: "1.23.8"
+          cache: false
+      - name: Cache Go
+        id: go-cache
+        timeout-minutes: 5
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+            ./.tools
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Install dependencies
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make -j2 gomoddownload
+      - name: Install Tools
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make goinstall-tools
+      - name: Check for go mod dependency changes
+        run: |
+          make tidy-all
+          git diff --exit-code || (echo 'go.mod/go.sum deps changes detected, please run "make tidy-all" and commit the changes in this PR.' && exit 1)
+      - name: Check for new vulnerabilities introduced
+        run: |
+          make govulncheck-all
+      - name: Check for gofmt failures
+        run: |
+          make gofmt-all
+          git diff --exit-code || (echo 'Go code is not formatted, please run "make gofmt-all" and commit the changes in this PR.' && exit 1)
+      - name: Lint
+        run: |
+          make golint-all
