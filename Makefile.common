@@ -54,6 +54,7 @@ misspell-correction: $(TOOLS_BIN_DIR)/misspell
 gofmt: $(GOFUMPT) $(GOIMPORTS) misspell-correction
 	gofmt -w -s .
 	$(GOFUMPT) -l -w .
+	$(MAKE) gogci
 	$(GOIMPORTS) -w -local github.com/signalfx/splunk-otel-collector-chart ./
 
 .PHONY: golint
