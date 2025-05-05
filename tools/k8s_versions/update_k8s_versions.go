@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -23,11 +24,12 @@ import (
 var debug bool
 
 const (
-	EndOfLifeURL        string = "https://endoflife.date/api/kubernetes.json"
-	KindDockerHubURL    string = "https://hub.docker.com/v2/repositories/kindest/node/tags?page_size=1&page=1&ordering=last_updated&name="
-	MiniKubeURL         string = "https://raw.githubusercontent.com/kubernetes/minikube/master/pkg/minikube/constants/constants_kubernetes_versions.go"
-	KubeKindVersion     string = "k8s-kind-version"
-	KubeMinikubeVersion string = "k8s-minikube-version"
+	endOfLifeURL        string = "https://endoflife.date/api/kubernetes.json"
+	kindDockerHubURL    string = "https://hub.docker.com/v2/repositories/kindest/node/tags?page_size=1&page=1&ordering=last_updated&name="
+	miniKubeURL         string = "https://raw.githubusercontent.com/kubernetes/minikube/master/pkg/minikube/constants/constants_kubernetes_versions.go"
+	kubeKindVersion     string = "k8s-kind-version"
+	kubeMinikubeVersion string = "k8s-minikube-version"
+	ciMatrixPath        string = "ci-matrix.json"
 )
 
 type KubernetesVersion struct {
@@ -117,7 +119,7 @@ func getLatestSupportedKindImages(url string, k8sVersions []KubernetesVersion) (
 				supportedKindVersions = append(supportedKindVersions, "v"+tag)
 				break
 			}
-			tag, err = decrementMinorMinorVersion(tag)
+			tag, err = decrementPatchVersion(tag)
 			if err != nil {
 				// It's possible that kind still does not have a tag for new versions, break the loop and
 				// process other k8s versions
@@ -149,7 +151,7 @@ func imageTagExists(url string, tag string) (bool, error) {
 	return false, nil
 }
 
-func decrementMinorMinorVersion(version string) (string, error) {
+func decrementPatchVersion(version string) (string, error) {
 	parts := strings.Split(version, ".")
 	if len(parts) < 3 {
 		return "", fmt.Errorf("version does not have a minor version: %s", version)
@@ -180,10 +182,10 @@ func updateMatrixFile(filePath string, kindVersions []string, minikubeVersions [
 	}
 
 	for _, value := range testMatrix {
-		if len(kindVersions) > 0 && value[KubeKindVersion] != nil {
-			value[KubeKindVersion] = kindVersions
-		} else if len(minikubeVersions) > 0 && value[KubeMinikubeVersion] != nil {
-			value[KubeMinikubeVersion] = minikubeVersions
+		if len(kindVersions) > 0 && value[kubeKindVersion] != nil {
+			value[kubeKindVersion] = kindVersions
+		} else if len(minikubeVersions) > 0 && value[kubeMinikubeVersion] != nil {
+			value[kubeMinikubeVersion] = minikubeVersions
 		}
 	}
 	// Marshal the updated test matrix back to JSON
@@ -195,7 +197,7 @@ func updateMatrixFile(filePath string, kindVersions []string, minikubeVersions [
 	// Ensure the file ends with a new line to make the pre-commit check happy
 	updatedContent = append(updatedContent, '\n')
 
-	if err = os.WriteFile(filePath, updatedContent, 0o644); err != nil {
+	if err = os.WriteFile(filePath, updatedContent, 0o644); err != nil { //nolint:gosec
 		return fmt.Errorf("failed to write updated file: %w", err)
 	}
 	return nil
@@ -215,8 +217,13 @@ func sortVersions(versions []string) {
 	})
 }
 
-func getRequestBody(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func getRequestBody(uRL string) ([]byte, error) {
+	u, err := url.Parse(uRL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch URL: %w", err)
 	}
@@ -246,40 +253,39 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	k8sVersions, err := getSupportedKubernetesVersions(EndOfLifeURL)
+	k8sVersions, err := getSupportedKubernetesVersions(endOfLifeURL)
 	if err != nil || len(k8sVersions) == 0 {
 		log.Fatalf("Failed to get k8s versions: %v", err)
 	}
-	logDebug("Found supported k8s versions %v", k8sVersions)
+	logDebug("Supported Kubernetes versions %v", k8sVersions)
 
-	kindVersions, err := getLatestSupportedKindImages(KindDockerHubURL, k8sVersions)
+	kindVersions, err := getLatestSupportedKindImages(kindDockerHubURL, k8sVersions)
 	if err != nil {
-		log.Printf("failed to get all kind versions: %v", err)
+		log.Fatalf("Failed to get kind versions: %v", err)
 	}
-	if len(kindVersions) > 0 {
-		// needs to be sorted so we don't end up with false positive diff in the json matrix file
-		sortVersions(kindVersions)
-		logDebug("Found supported kind images: %v", kindVersions)
+	if len(kindVersions) == 0 {
+		log.Fatalf("No kind versions found")
 	}
 
-	minikubeVersions, err := getLatestSupportedMinikubeVersions(MiniKubeURL, k8sVersions)
+	// needs to be sorted so we don't end up with false positive diff in the json matrix file
+	sortVersions(kindVersions)
+	logDebug("Found supported kind images: %v", kindVersions)
+
+	minikubeVersions, err := getLatestSupportedMinikubeVersions(miniKubeURL, k8sVersions)
 	if err != nil {
-		log.Printf("failed to get minikube versions: %v", err)
+		log.Fatalf("failed to get minikube versions: %v", err)
 	}
-	if len(minikubeVersions) > 0 {
-		logDebug("Found supported minikube versions: %v", minikubeVersions)
-	}
-
-	if len(kindVersions) == 0 && len(minikubeVersions) == 0 {
-		log.Fatalf("No supported versions found. Run with -debug=true for more info.")
+	if len(minikubeVersions) == 0 {
+		log.Fatalf("No minikube versions found")
 	}
 
-	path := "ci-matrix.json"
+	logDebug("Found supported minikube versions: %v", minikubeVersions)
+
 	currentDir, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Failed to get current directory: %v ", err)
 	}
-	path = filepath.Join(currentDir, filepath.Clean(path))
+	path := filepath.Join(currentDir, filepath.Clean(ciMatrixPath))
 	err = updateMatrixFile(path, kindVersions, minikubeVersions)
 	if err != nil {
 		log.Fatalf("Failed to update matrix file: %v", err)
