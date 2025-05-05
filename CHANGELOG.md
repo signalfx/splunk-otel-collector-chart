@@ -4,6 +4,21 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.125.0] - 2025-05-05
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.125.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.125.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Keep the kubelet CPU usage metrics disabled by default for Splunk Observability users ([#1822](https://github.com/signalfx/splunk-otel-collector-chart/pull/1822))
+  `k8s.node.cpu.usage`, `k8s.pod.cpu.usage` and `container.cpu.usage` metrics are enabled by default in the kubeletstats
+  receiver upstream, but we disable them for Splunk Observability users because they are not included in the default
+  metrics set. If enabled, they will be charged as custom metrics. For now, `container_cpu_utilization` should still be
+  used. Later, it will be replaced with one of the CPU metrics from the kubelet receiver once they are fully stabilized
+  (e.g., `container.cpu.usage` or `container.cpu.time`).
+
+- `operator`: Bump nodejs to v3.1.2 in helm-charts/splunk-otel-collector/values.yaml ([#1800](https://github.com/signalfx/splunk-otel-collector-chart/pull/1800))
+
 ## [0.124.0] - 2025-04-24
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.124.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.124.0).
