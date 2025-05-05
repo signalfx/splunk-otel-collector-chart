@@ -19,8 +19,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -182,18 +180,12 @@ func teardown(t *testing.T, k8sClient *k8stest.K8sClient) {
 	testKubeConfig := os.Getenv("KUBECONFIG")
 	internal.ChartUninstall(t, testKubeConfig)
 
-	deleteObject(t, k8sClient, `
+	internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
 metadata:
   name: k8sevents-test
 `)
-}
-
-func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
-	obj := &unstructured.Unstructured{}
-	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
-	k8stest.DeleteObject(k8sClient, obj)
 }
 
 func selectResLogs(attributeName, attributeValue string, logSink *consumertest.LogsSink) plog.Logs {

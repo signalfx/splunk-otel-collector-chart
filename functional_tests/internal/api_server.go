@@ -4,7 +4,6 @@
 package internal
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,20 +21,24 @@ func SetupSignalFxAPIServer(t *testing.T) {
 		writer.WriteHeader(http.StatusOK)
 	})
 
-	_, cancelCtx := context.WithCancel(t.Context())
 	s := &http.Server{
 		Addr:              fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
 		Handler:           mux,
 		ReadHeaderTimeout: 60 * time.Minute,
 	}
 
+	errCh := make(chan error)
 	t.Cleanup(func() {
-		cancelCtx()
+		err := s.Close()
+		require.NoError(t, err)
+		err = <-errCh
+		require.NoError(t, err)
 	})
 
 	go func() {
 		if err := s.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			require.NoError(t, err)
+			errCh <- err
 		}
+		errCh <- nil
 	}()
 }

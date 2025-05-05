@@ -54,10 +54,6 @@ linters:
 
     # Excluding configuration per-path, per-linter, per-text and per-source
     rules:
-      - linters:
-          - unused
-        path: pagefile.go # This exclusion is required for Windows only
-        text: cachedBytes
 
     # Log a warning if an exclusion rule is unused.
     warn-unused: true

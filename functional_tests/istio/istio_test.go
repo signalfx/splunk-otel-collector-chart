@@ -26,9 +26,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -103,21 +101,21 @@ func deployIstioAndCollector(t *testing.T) {
 }
 
 func teardown(t *testing.T, k8sClient *k8stest.K8sClient, istioctlPath string) {
-	deleteObject(t, k8sClient, `
+	internal.DeleteObject(t, k8sClient, `
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
   name: httpbin-gateway
   namespace: istio-system
 `)
-	deleteObject(t, k8sClient, `
+	internal.DeleteObject(t, k8sClient, `
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: httpbin
   namespace: istio-system
 `)
-	deleteObject(t, k8sClient, `
+	internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -256,12 +254,6 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 	for _, req := range requests {
 		sendHTTPRequest(t, client, req.url, req.host, req.header, req.path)
 	}
-}
-
-func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
-	obj := &unstructured.Unstructured{}
-	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
-	k8stest.DeleteObject(k8sClient, obj)
 }
 
 func Test_IstioMetrics(t *testing.T) {

@@ -8,19 +8,24 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/docker/docker/api/types/network"
 	docker "github.com/docker/docker/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -149,7 +154,7 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 	require.NoError(t, err, "failed to create namespace %s", name)
 
 	require.Eventually(t, func() bool {
-		_, err := clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 		return err == nil
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }
@@ -194,4 +199,16 @@ func WaitForTerminatingPods(t *testing.T, clientset *kubernetes.Clientset, names
 
 		return terminatingPods == 0
 	}, 2*time.Minute, 5*time.Second, "there are still terminating pods after 2 minutes")
+}
+
+func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
+	obj := &unstructured.Unstructured{}
+	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
+
+	if err := k8stest.DeleteObject(k8sClient, obj); err != nil {
+		// If an object that's being deleted is not found, it's considered successful deletion.
+		// Some tests delete all resources on setup to ensure a clean running environment,
+		// so it's a valid case to attempt to delete an object that doesn't exist.
+		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
+	}
 }
