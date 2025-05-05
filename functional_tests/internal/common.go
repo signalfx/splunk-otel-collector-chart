@@ -8,8 +8,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
+
+	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/docker/docker/api/types/network"
 	docker "github.com/docker/docker/client"
@@ -21,6 +26,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -194,4 +200,13 @@ func WaitForTerminatingPods(t *testing.T, clientset *kubernetes.Clientset, names
 
 		return terminatingPods == 0
 	}, 2*time.Minute, 5*time.Second, "there are still terminating pods after 2 minutes")
+}
+
+func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
+	obj := &unstructured.Unstructured{}
+	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
+
+	if err := k8stest.DeleteObject(k8sClient, obj); err != nil {
+		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
+	}
 }
