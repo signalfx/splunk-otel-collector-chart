@@ -112,6 +112,8 @@ linters:
       enable-all: true
 
       settings:
+        shadow:
+          strict: true
         printf: # analyzer name, run `go tool vet help` to see all analyzers
           funcs: # run `go tool vet help printf` to see available settings for `printf` analyzer
             - Infof
