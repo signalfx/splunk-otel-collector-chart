@@ -16,7 +16,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   metrics set. If enabled, they will be charged as custom metrics. For now, `container_cpu_utilization` should still be
   used. Later, it will be replaced with one of the CPU metrics from the kubelet receiver once they are fully stabilized
   (e.g., `container.cpu.usage` or `container.cpu.time`).
-  
+
 - `operator`: Bump nodejs to v3.1.2 in helm-charts/splunk-otel-collector/values.yaml ([#1800](https://github.com/signalfx/splunk-otel-collector-chart/pull/1800))
 
 ## [0.124.0] - 2025-04-24
