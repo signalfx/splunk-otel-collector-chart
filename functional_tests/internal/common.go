@@ -208,6 +208,8 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 
 	if err := k8stest.DeleteObject(k8sClient, obj); err != nil {
 		// If an object that's being deleted is not found, it's considered successful deletion.
+		// Some tests delete all resources on setup to ensure a clean running environment,
+		// so it's a valid case to attempt to delete an object that doesn't exist.
 		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
 	}
 }
