@@ -63,13 +63,13 @@ jobs:
         run: |
           make tidy-all
           git diff --exit-code || (echo 'go.mod/go.sum deps changes detected, please run "make tidy-all" and commit the changes in this PR.' && exit 1)
-      - name: Check for new vulnerabilities introduced
+      - name: Check for vulnerabilities
         run: |
           make govulncheck-all
       - name: Check for gofmt failures
         run: |
           make gofmt-all
           git diff --exit-code || (echo 'Go code is not formatted, please run "make gofmt-all" and commit the changes in this PR.' && exit 1)
-      - name: Lint
+      - name: Check for lint failures
         run: |
           make golint-all
