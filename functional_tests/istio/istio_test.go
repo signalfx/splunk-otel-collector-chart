@@ -16,8 +16,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
@@ -261,7 +264,10 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 func deleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	obj := &unstructured.Unstructured{}
 	require.NoError(t, yaml.Unmarshal([]byte(objYAML), obj))
-	require.NoError(t, k8stest.DeleteObject(k8sClient, obj))
+
+	if err := k8stest.DeleteObject(k8sClient, obj); err != nil {
+		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
+	}
 }
 
 func Test_IstioMetrics(t *testing.T) {
