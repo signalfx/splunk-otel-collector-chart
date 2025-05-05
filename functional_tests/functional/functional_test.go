@@ -289,6 +289,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
+	var obj k8sruntime.Object
+	var groupVersionKind *schema.GroupVersionKind
+
 	// Read jobs
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
@@ -297,7 +300,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			continue
 		}
 
-		obj, groupVersionKind, err := decode(
+		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
 			nil)
@@ -307,7 +310,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "Namespace" {
 			nm := obj.(*corev1.Namespace)
 			nms := client.CoreV1().Namespaces()
-			_, err := nms.Create(t.Context(), nm, metav1.CreateOptions{})
+			_, err = nms.Create(t.Context(), nm, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed namespace %s", nm.Name)
 		}
@@ -320,7 +323,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			continue
 		}
 
-		obj, groupVersionKind, err := decode(
+		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
 			nil)
@@ -331,7 +334,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "Job" {
 			job := obj.(*batchv1.Job)
 			jobClient := client.BatchV1().Jobs(job.Namespace)
-			_, err := jobClient.Create(t.Context(), job, metav1.CreateOptions{})
+			_, err = jobClient.Create(t.Context(), job, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed job %s", job.Name)
 		}
@@ -343,11 +346,15 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			return
 		}
 		t.Log("Cleaning up cluster")
-		teardown(t, context.Background(), testKubeConfig)
+		// t.Cleanup is called after t.Context has been cancelled. teardown uses the passed in
+		// context to cleanup resources created for the test. A valid context needs to be used
+		// to properly delete k8s resources, otherwise all actions fail with a context
+		// cancelled error.
+		teardown(context.Background(), t, testKubeConfig) //nolint:usetesting
 	})
 }
 
-func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
+func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
@@ -378,6 +385,9 @@ func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
 			GracePeriodSeconds: &waitTime,
 		})
 
+	var groupVersionKind *schema.GroupVersionKind
+	var obj k8sruntime.Object
+
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
 	var namespaces []*corev1.Namespace
@@ -387,8 +397,6 @@ func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
 			continue
 		}
 
-		var groupVersionKind *schema.GroupVersionKind
-		var obj k8sruntime.Object
 		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
@@ -422,7 +430,7 @@ func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
 			continue
 		}
 
-		obj, groupVersionKind, err := decode(
+		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
 			nil)
@@ -460,7 +468,7 @@ func Test_Functions(t *testing.T) {
 
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-		teardown(t, t.Context(), testKubeConfig)
+		teardown(t.Context(), t, testKubeConfig)
 	}
 
 	// deploy the chart and applications.
@@ -907,7 +915,7 @@ func testAgentLogs(t *testing.T) {
 			for j := 0; j < l.ResourceLogs().Len(); j++ {
 				rl := l.ResourceLogs().At(j)
 				if value, ok := rl.Resource().Attributes().Get("com.splunk.source"); ok && value.AsString() == "/run/log/journal" {
-					if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
+					if value, ok = rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 						sourcetype := value.AsString()
 						journalDsourceTypes = append(journalDsourceTypes, sourcetype)
 					}

@@ -149,7 +149,7 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 	require.NoError(t, err, "failed to create namespace %s", name)
 
 	require.Eventually(t, func() bool {
-		_, err := clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 		return err == nil
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }

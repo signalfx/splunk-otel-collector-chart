@@ -29,13 +29,17 @@ func SetupSignalFxAPIServer(t *testing.T) {
 		ReadHeaderTimeout: 60 * time.Minute,
 	}
 
+	errCh := make(chan error)
 	t.Cleanup(func() {
 		cancelCtx()
+		err := <-errCh
+		require.NoError(t, err)
 	})
 
 	go func() {
 		if err := s.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			require.NoError(t, err)
+			errCh <- err
 		}
+		errCh <- nil
 	}()
 }

@@ -143,7 +143,8 @@ func getDependencyVersion(t *testing.T, dependency string, chartPath string) str
 	for _, dep := range dependencies {
 		depMap, _ := dep.(map[string]any)
 		if depMap["name"] == dependency {
-			version, ok := depMap["version"].(string)
+			var version string
+			version, ok = depMap["version"].(string)
 			require.True(t, ok, "Dependency version not found or invalid")
 			return version
 		}
