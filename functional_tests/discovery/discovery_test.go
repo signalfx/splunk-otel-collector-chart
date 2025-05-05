@@ -5,11 +5,12 @@ package k8sevents
 
 import (
 	"fmt"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/release"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
