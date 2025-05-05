@@ -66,7 +66,7 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 			OnNewLeader: func(identity string) {
 				t.Logf("The lease is currently held by another test %s. Waiting...", identity)
 			},
-			OnStartedLeading: func(c context.Context) {
+			OnStartedLeading: func(_ context.Context) {
 				// Signal that we've acquired the lease
 				close(becameLeader)
 			},
@@ -81,7 +81,7 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	}
 
 	// Run the leader election in a goroutine, so we can block until acquiring the lease
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	go elector.Run(ctx)
 
 	// Wait until we become leader OR the test context ends

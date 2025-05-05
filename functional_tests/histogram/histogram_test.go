@@ -218,9 +218,8 @@ func checkMetrics(t *testing.T, isHistogram bool, expected, actual *pmetric.Metr
 
 	if isHistogram {
 		return checkHistogramMetrics(t, expected, actual, component, mergedAttrs)
-	} else {
-		return checkNonHistogramMetrics(t, expected, actual, component, mergedAttrs)
 	}
+	return checkNonHistogramMetrics(t, expected, actual, component, mergedAttrs)
 }
 
 func mergeMaps(map1, map2 map[string]string) map[string]string {

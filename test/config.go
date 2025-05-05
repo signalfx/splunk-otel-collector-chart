@@ -10,7 +10,7 @@ import (
 const (
 	HostEnvVar           = "CI_SPLUNK_HOST"
 	UserEnvVar           = "CI_SPLUNK_USERNAME"
-	PasswordEnvVar       = "CI_SPLUNK_PASSWORD"
+	PasswordEnvVar       = "CI_SPLUNK_PASSWORD" //nolint:gosec
 	ManagementPortEnvVar = "CI_SPLUNK_PORT"
 )
 

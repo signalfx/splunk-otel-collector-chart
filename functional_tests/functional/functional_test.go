@@ -74,7 +74,7 @@ type sinks struct {
 
 func setupSinks(t *testing.T) {
 	// create an API server
-	internal.SetupSignalFxApiServer(t)
+	internal.SetupSignalFxAPIServer(t)
 	globalSinks = &sinks{
 		logsConsumer:         internal.SetupHECLogsSink(t),
 		hecMetricsConsumer:   internal.SetupHECMetricsSink(t),
@@ -109,7 +109,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			continue
 		}
 
-		obj, groupVersionKind, err := decode(
+		var groupVersionKind *schema.GroupVersionKind
+		var obj k8sruntime.Object
+		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
 			nil)
@@ -119,13 +121,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			crd, err := apiExtensions.Create(context.Background(), crd, metav1.CreateOptions{})
+			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed CRD %s", crd.Name)
 
 			// Wait for CRD to be Established before moving on
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
-				latest, getErr := apiExtensions.Get(context.Background(), crd.Name, metav1.GetOptions{})
+				latest, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
 				assert.NoError(tt, getErr)
 				established := false
 				for _, cond := range latest.Status.Conditions {
@@ -162,7 +164,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(context.Background(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(t.Context(),
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
@@ -175,6 +177,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	default:
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
 	}
+	assert.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
@@ -201,9 +204,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	deployment, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
-		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
 		assert.NoError(t, err2)
 		if err2 != nil {
 			require.NoError(t, err)
@@ -214,9 +217,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	deployment, _, err = decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
-		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
 		assert.NoError(t, err2)
 		if err2 != nil {
 			require.NoError(t, err)
@@ -227,9 +230,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	deployment, _, err = decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
-		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
 		assert.NoError(t, err2)
 		if err2 != nil {
 			require.NoError(t, err)
@@ -240,9 +243,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	deployment, _, err = decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
-		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
 		assert.NoError(t, err2)
 		if err2 != nil {
 			require.NoError(t, err)
@@ -253,9 +256,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	deployment, _, err = decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = deployments.Create(context.Background(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
 	if err != nil {
-		_, err2 := deployments.Update(context.Background(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
 		assert.NoError(t, err2)
 		if err2 != nil {
 			require.NoError(t, err)
@@ -267,7 +270,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	service, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = client.CoreV1().Services(internal.Namespace).Create(context.Background(), service.(*corev1.Service),
+	_, err = client.CoreV1().Services(internal.Namespace).Create(t.Context(), service.(*corev1.Service),
 		metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -282,15 +285,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(context.Background(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(t.Context(),
 		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
 	// Read jobs
 	jobstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "test_jobs.yaml"))
 	require.NoError(t, err)
-	var namespaces []*corev1.Namespace
-	var jobs []*batchv1.Job
 	for _, resourceYAML := range strings.Split(string(jobstream), "---") {
 		if len(resourceYAML) == 0 {
 			continue
@@ -305,9 +306,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Version == "v1" &&
 			groupVersionKind.Kind == "Namespace" {
 			nm := obj.(*corev1.Namespace)
-			namespaces = append(namespaces, nm)
 			nms := client.CoreV1().Namespaces()
-			_, err := nms.Create(context.Background(), nm, metav1.CreateOptions{})
+			_, err := nms.Create(t.Context(), nm, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed namespace %s", nm.Name)
 		}
@@ -330,9 +330,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Version == "v1" &&
 			groupVersionKind.Kind == "Job" {
 			job := obj.(*batchv1.Job)
-			jobs = append(jobs, job)
 			jobClient := client.BatchV1().Jobs(job.Namespace)
-			_, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
+			_, err := jobClient.Create(t.Context(), job, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed job %s", job.Name)
 		}
@@ -344,11 +343,11 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			return
 		}
 		t.Log("Cleaning up cluster")
-		teardown(t, testKubeConfig)
+		teardown(t, context.Background(), testKubeConfig)
 	})
 }
 
-func teardown(t *testing.T, testKubeConfig string) {
+func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
@@ -359,22 +358,22 @@ func teardown(t *testing.T, testKubeConfig string) {
 	waitTime := int64(0)
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 	require.NoError(t, err)
-	_ = deployments.Delete(context.Background(), "nodejs-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(context.Background(), "java-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "java-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(context.Background(), "python-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "python-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(context.Background(), "dotnet-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(context.Background(), "prometheus-annotation-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services(internal.Namespace).Delete(context.Background(), "prometheus-annotation-service",
+	_ = client.CoreV1().Services(internal.Namespace).Delete(ctx, "prometheus-annotation-service",
 		metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
@@ -388,7 +387,9 @@ func teardown(t *testing.T, testKubeConfig string) {
 			continue
 		}
 
-		obj, groupVersionKind, err := decode(
+		var groupVersionKind *schema.GroupVersionKind
+		var obj k8sruntime.Object
+		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
 			nil)
@@ -409,7 +410,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 	}
 	for _, job := range jobs {
 		jobClient := client.BatchV1().Jobs(job.Namespace)
-		_ = jobClient.Delete(context.Background(), job.Name, metav1.DeleteOptions{
+		_ = jobClient.Delete(ctx, job.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 	}
@@ -431,7 +432,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(context.Background(), crd.Name, metav1.DeleteOptions{
+			_ = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: &waitTime,
 			})
 		}
@@ -439,11 +440,12 @@ func teardown(t *testing.T, testKubeConfig string) {
 
 	for _, nm := range namespaces {
 		nmClient := client.CoreV1().Namespaces()
-		_ = nmClient.Delete(context.Background(), nm.Name, metav1.DeleteOptions{
+		_ = nmClient.Delete(ctx, nm.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 		require.Eventually(t, func() bool {
-			_, err := client.CoreV1().Namespaces().Get(context.Background(), nm.Name, metav1.GetOptions{})
+			_, err = client.CoreV1().Namespaces().Get(ctx, nm.Name, metav1.GetOptions{})
+			t.Logf("Getting Namespace: %s, Error: %v", nm.Name, err)
 			return k8serrors.IsNotFound(err)
 		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
 	}
@@ -458,7 +460,7 @@ func Test_Functions(t *testing.T) {
 
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-		teardown(t, testKubeConfig)
+		teardown(t, t.Context(), testKubeConfig)
 	}
 
 	// deploy the chart and applications.
@@ -919,10 +921,10 @@ func testAgentLogs(t *testing.T) {
 					indices = append(indices, index)
 				}
 				if value, ok := rl.Resource().Attributes().Get("k8s.container.name"); ok {
-					if "pod-w-index-w-ns-exclude" == value.AsString() {
+					if value.AsString() == "pod-w-index-w-ns-exclude" {
 						excludePods = false
 					}
-					if "pod-w-exclude-wo-ns-exclude" == value.AsString() {
+					if value.AsString() == "pod-w-exclude-wo-ns-exclude" {
 						excludeNs = false
 					}
 				}
@@ -935,7 +937,6 @@ func testAgentLogs(t *testing.T) {
 							helloWorldLogRecord = &logRecord
 							helloWorldResource = rl.Resource()
 						}
-
 					}
 				}
 			}
@@ -962,13 +963,13 @@ func testAgentLogs(t *testing.T) {
 		assert.Equal(t, "kube:container:nodejs-test", sourceType.AsString())
 		source, ok := helloWorldResource.Attributes().Get("com.splunk.source")
 		assert.True(t, ok)
-		assert.Regexp(t, regexp.MustCompile("/var/log/pods/default_nodejs-test-.*/nodejs-test/0.log"), source.AsString())
+		assert.Regexp(t, "/var/log/pods/default_nodejs-test-.*/nodejs-test/0.log", source.AsString())
 		index, ok := helloWorldResource.Attributes().Get("com.splunk.index")
 		assert.True(t, ok)
 		assert.Equal(t, "main", index.AsString())
 		podName, ok := helloWorldLogRecord.Attributes().Get("k8s.pod.name")
 		assert.True(t, ok)
-		assert.Regexp(t, regexp.MustCompile("nodejs-test-.*"), podName.AsString())
+		assert.Regexp(t, "nodejs-test-.*", podName.AsString())
 	})
 	t.Run("test index is set", func(t *testing.T) {
 		assert.Contains(t, indices, "ns-anno")
@@ -1029,7 +1030,6 @@ func testK8sObjects(t *testing.T) {
 			if value, ok := rl.Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 				sourceTypes = append(sourceTypes, value.AsString())
 			}
-
 		}
 	}
 
@@ -1232,20 +1232,20 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
 	}
 	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
 		return !podLabelPresent && !serviceLabelPresent
 	})
 	// when scraping via pod monitor, the pod attribute refers to the pod the metric is scraped from.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
 		return podLabelPresent && !serviceLabelPresent
 	})
 	// when scraping via service monitor, the pod attribute refers to the pod the metric is scraped from,
 	// and the servicelabel attribute is added by the serviceMonitor definition.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(name string, attrs pcommon.Map) bool {
+	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
 		return podLabelPresent && serviceLabelPresent
@@ -1354,7 +1354,7 @@ func testHECMetrics(t *testing.T) {
 
 func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {
 	require.Eventually(t, func() bool {
-		nms, err := client.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+		nms, err := client.CoreV1().Namespaces().List(t.Context(), metav1.ListOptions{})
 		require.NoError(t, err)
 		for _, d := range nms.Items {
 			if d.Status.Phase != corev1.NamespaceActive {
@@ -1365,7 +1365,7 @@ func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset)
 	}, 5*time.Minute, 10*time.Second)
 }
 
-func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(string, pcommon.Map) bool) {
+func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(pcommon.Map) bool) {
 	metricsToFind := map[string]bool{}
 	for _, name := range metricNames {
 		metricsToFind[name] = false
@@ -1392,7 +1392,7 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 						default:
 							panic("Unsupported type " + metric.Type().String())
 						}
-						if matchFn == nil || matchFn(metric.Name(), attrs) {
+						if matchFn == nil || matchFn(attrs) {
 							metricsToFind[metric.Name()] = true
 						}
 					}
