@@ -4,6 +4,7 @@
 package functional
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -342,11 +343,11 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			return
 		}
 		t.Log("Cleaning up cluster")
-		teardown(t, testKubeConfig)
+		teardown(t, context.Background(), testKubeConfig)
 	})
 }
 
-func teardown(t *testing.T, testKubeConfig string) {
+func teardown(t *testing.T, ctx context.Context, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
@@ -357,22 +358,22 @@ func teardown(t *testing.T, testKubeConfig string) {
 	waitTime := int64(0)
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 	require.NoError(t, err)
-	_ = deployments.Delete(t.Context(), "nodejs-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(t.Context(), "java-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "java-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(t.Context(), "python-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "python-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(t.Context(), "dotnet-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(t.Context(), "prometheus-annotation-test", metav1.DeleteOptions{
+	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services(internal.Namespace).Delete(t.Context(), "prometheus-annotation-service",
+	_ = client.CoreV1().Services(internal.Namespace).Delete(ctx, "prometheus-annotation-service",
 		metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
@@ -409,7 +410,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 	}
 	for _, job := range jobs {
 		jobClient := client.BatchV1().Jobs(job.Namespace)
-		_ = jobClient.Delete(t.Context(), job.Name, metav1.DeleteOptions{
+		_ = jobClient.Delete(ctx, job.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 	}
@@ -431,7 +432,7 @@ func teardown(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(t.Context(), crd.Name, metav1.DeleteOptions{
+			_ = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: &waitTime,
 			})
 		}
@@ -439,11 +440,11 @@ func teardown(t *testing.T, testKubeConfig string) {
 
 	for _, nm := range namespaces {
 		nmClient := client.CoreV1().Namespaces()
-		_ = nmClient.Delete(t.Context(), nm.Name, metav1.DeleteOptions{
+		_ = nmClient.Delete(ctx, nm.Name, metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
 		require.Eventually(t, func() bool {
-			_, err = client.CoreV1().Namespaces().Get(t.Context(), nm.Name, metav1.GetOptions{})
+			_, err = client.CoreV1().Namespaces().Get(ctx, nm.Name, metav1.GetOptions{})
 			t.Logf("Getting Namespace: %s, Error: %v", nm.Name, err)
 			return k8serrors.IsNotFound(err)
 		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
@@ -459,7 +460,7 @@ func Test_Functions(t *testing.T) {
 
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-		teardown(t, testKubeConfig)
+		teardown(t, t.Context(), testKubeConfig)
 	}
 
 	// deploy the chart and applications.
