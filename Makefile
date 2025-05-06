@@ -253,3 +253,7 @@ golint-all:
 .PHONY: gogci-all
 gogci-all:
 	@$(MAKE) for-all-target TARGET='gogci'
+
+.PHONY: gomoddownload
+gomoddownload:
+	@$(MAKE) for-all-target TARGET="moddownload"
