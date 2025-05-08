@@ -569,7 +569,7 @@ provided, assume it refers to the operator or chart's namespace.
 - The operator webhooks must communicate with the Kubernetes API server. Errors related to webhook usage can often be found in the API server logs:
   - For self-managed clusters, check logs directly:
     ```bash
-    kubectl logs -n <api-server-namespace> -l component=kube-apiserver
+    kubectl logs -n <apiserver-namespace> -l component=kube-apiserver
     ```
   - For managed clusters, follow the platform-specific steps to enable and view API server logs:
     - [AKS: Monitor Logs](https://learn.microsoft.com/en-us/azure/aks/monitor-aks?tabs=cilium)
@@ -593,7 +593,7 @@ provided, assume it refers to the operator or chart's namespace.
   resides and the namespace where the Kubernetes apiserver resides.
   ```bash
   kubectl get networkpolicy -n <operator-namespace>
-  kubectl get networkpolicy -n <api-server-namespace>
+  kubectl get networkpolicy -n <apiserver-namespace>
   ```
 #### Checking Operator <-> API Server Connectivity steps
 Test Operator to API Server Connection
@@ -616,11 +616,11 @@ Test Operator to API Server Connection
 Test API Server to Operator Webhook Connection
 1. Create a `busybox` pod in the API Server's namespace:
    ```bash
-   kubectl run busybox-test --rm -it --restart=Never -n <api-server-namespace> --image=busybox -- /bin/sh
+   kubectl run busybox-test --rm -it --restart=Never -n <apiserver-namespace> --image=busybox -- /bin/sh
    ```
 2. Enter the `busybox` pod:
    ```bash
-   kubectl exec -it busybox-test -n <api-server-namespace> -- /bin/sh
+   kubectl exec -it busybox-test -n <apiserver-namespace> -- /bin/sh
    ```
 3. Attempt to contact the Operator's webhook:
    ```bash
