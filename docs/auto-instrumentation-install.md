@@ -557,6 +557,10 @@ For more advanced use cases, refer to the [official Helm chart documentation](ht
 ### Troubleshooting the Operator
 
 #### General Debugging Steps
+In the following steps, the "operator namespace" refers to the namespace where the operator is deployed,
+which is the same namespace as the chart. The "API server namespace" usually defaults to `kube-system`,
+but this may vary depending on your Kubernetes distribution. If a namespace parameter is not explicitly
+provided, assume it refers to the operator or chart's namespace.
 
 - Check the logs for the operator to identify any issues:
   ```bash
@@ -585,16 +589,11 @@ For more advanced use cases, refer to the [official Helm chart documentation](ht
   kubectl get validatingwebhookconfiguration
   ```
 - **Inspect Network Policies**:
-  Ensure there are no network policies blocking communication between the namespace where the chart
-  is deployed and the namespace where the Kubernetes control plane resides.
+  Ensure there are no network policies blocking communication between the namespace where the operator
+  resides and the namespace where the Kubernetes apiserver resides.
   ```bash
-  kubectl get networkpolicy -n <chart-namespace>
-  kubectl get networkpolicy -n <control-plane-namespace>
-  ```
-- **Review Events**:
-  Look for recent error or failure events in the chart namespace:
-  ```bash
-  kubectl get events -n <namespace>
+  kubectl get networkpolicy -n <operator-namespace>
+  kubectl get networkpolicy -n <api-server-namespace>
   ```
 #### Checking Operator <-> API Server Connectivity steps
 Test Operator to API Server Connection
