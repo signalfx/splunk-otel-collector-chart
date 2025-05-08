@@ -565,7 +565,7 @@ For more advanced use cases, refer to the [official Helm chart documentation](ht
 - The operator webhooks must communicate with the Kubernetes API server. Errors related to webhook usage can often be found in the API server logs:
   - For self-managed clusters, check logs directly:
     ```bash
-    kubectl logs -n kube-system -l component=kube-apiserver
+    kubectl logs -n <api-server-namespace> -l component=kube-apiserver
     ```
   - For managed clusters, follow the platform-specific steps to enable and view API server logs:
     - [AKS: Monitor Logs](https://learn.microsoft.com/en-us/azure/aks/monitor-aks?tabs=cilium)
