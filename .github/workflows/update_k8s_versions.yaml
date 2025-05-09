@@ -1,0 +1,47 @@
+name: Check for new matrix versions and update tests if needed
+
+on:
+  schedule:
+    # Run every Monday at noon.
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+    inputs:
+      DEBUG_ARGUMENT:
+        description: 'Enable debug by setting -debug to true'
+        required: false
+        default: '-debug=false'
+
+jobs:
+  check_and_update:
+    runs-on: ubuntu-latest
+    env:
+      DEBUG: ${{ github.event.inputs.DEBUG_ARGUMENT }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for new matrix versions
+        id: check_for_update
+        run: |
+          echo "Checking for new matrix versions"
+          make update-matrix-versions DEBUG=$DEBUG
+
+      - name: check for changes
+        id: git-check
+        run: |
+          if git diff --quiet; then
+            echo "No changes detected, exiting workflow successfully"
+            exit 0
+          fi
+          echo "changes=true" >> $GITHUB_OUTPUT
+
+      - name: Open PR for matrix version update
+        if: steps.git-check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: Update matrix test versions
+          title: Update matrix versions used for testing
+          body: Use latest supported matrix versions
+          branch: update-matrix-test-versions
+          base: main
+          delete-branch: true

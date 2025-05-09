@@ -257,3 +257,7 @@ gogci-all:
 .PHONY: gomoddownload
 gomoddownload:
 	@$(MAKE) for-all-target TARGET="moddownload"
+
+.PHONY: update-matrix-versions
+update-matrix-versions: ## Update matrix, ex: K8s cluster versions used for testing. Set DEBUG=-debug to enable debug logs.
+	go run ./tools/k8s_versions/update_k8s_versions.go $(DEBUG)
