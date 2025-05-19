@@ -24,6 +24,13 @@ data:
         disable_default_translation_rules: true
         ingest_url: https://ingest.CHANGEME.signalfx.com
         timeout: 10s
+      signalfx/histograms:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        api_url: https://api.CHANGEME.signalfx.com
+        disable_default_translation_rules: true
+        ingest_url: https://ingest.CHANGEME.signalfx.com
+        send_otlp_histograms: true
+        timeout: 10s
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -78,24 +85,6 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
-      prometheus/k8s-api-server:
-        config:
-          scrape_configs:
-          - authorization:
-              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-            job_name: api-server-metrics
-            metric_relabel_configs:
-            - action: keep
-              regex: (apiserver_request_total|etcd_db_total_size_in_bytes|apiserver_storage_objects)
-              source_labels:
-              - __name__
-            scheme: https
-            scrape_interval: 120s
-            static_configs:
-            - targets:
-              - ${KUBERNETES_SERVICE_HOST}:443
-            tls_config:
-              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -113,6 +102,23 @@ data:
             static_configs:
             - targets:
               - localhost:8889
+      prometheus/kubernetes-apiserver:
+        config:
+          scrape_configs:
+          - authorization:
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: kubernetes-apiserver
+            metric_relabel_configs:
+            - action: keep
+              regex: (apiserver_longrunning_requests|apiserver_request_duration_seconds|apiserver_request_total|apiserver_response_sizes|apiserver_storage_objects|rest_client_request_duration_seconds|rest_client_requests_total|workqueue_depth|workqueue_longest_running_processor_seconds|workqueue_queue_duration_seconds|workqueue_retries_total|workqueue_unfinished_work_seconds|)(?:_sum|_count|_bucket)?
+              source_labels:
+              - __name__
+            scheme: https
+            static_configs:
+            - targets:
+              - ${KUBERNETES_SERVICE_HOST}:443
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     service:
       extensions:
       - health_check
@@ -127,7 +133,6 @@ data:
           - resource/k8s_cluster
           receivers:
           - k8s_cluster
-          - prometheus/k8s-api-server
         metrics/collector:
           exporters:
           - signalfx
@@ -140,6 +145,15 @@ data:
           - resource/add_mode
           receivers:
           - prometheus/k8s_cluster_receiver
+        metrics/histograms:
+          exporters:
+          - signalfx/histograms
+          processors:
+          - memory_limiter
+          - batch
+          - resource
+          receivers:
+          - prometheus/kubernetes-apiserver
       telemetry:
         metrics:
           readers:
