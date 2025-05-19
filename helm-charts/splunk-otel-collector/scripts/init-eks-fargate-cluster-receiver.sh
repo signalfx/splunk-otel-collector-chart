@@ -39,6 +39,9 @@ echo "Disabling k8s_cluster receiver for this instance"
 ./yq e 'del(.service.pipelines.metrics)' /conf/relay.yaml >/splunk-messages/config.yaml
 ./yq e -i 'del(.receivers.k8s_cluster)' /splunk-messages/config.yaml
 
+echo "Disabling prometheus kubernetes-apiserver receiver for this instance"
+./yq e -i 'del(.service.pipelines.metrics/histograms)' /splunk-messages/config.yaml
+
 # set kubelet stats to not monitor ourselves (all other kubelets)
 echo "Ensuring k8s_observer-based kubeletstats receivers won't monitor own node to avoid Fargate network limitation."
 # shellcheck disable=SC2016
