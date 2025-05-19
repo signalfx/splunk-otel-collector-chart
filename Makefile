@@ -96,7 +96,15 @@ pre-commit: render ## Test the Helm chart with pre-commit
 .PHONY: unittest
 unittest: ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
-	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../test/unittests/*.yaml" . || exit 1
+	@if [ ! -d "unittests" ]; then \
+		echo "Error: 'unittests' directory does not exist."; \
+		exit 1; \
+	fi
+	@if ! ls unittests/*.yaml 1> /dev/null 2>&1; then \
+		echo "Error: No test files found in 'unittests' directory."; \
+		exit 1; \
+	fi
+	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../unittests/*.yaml" . || exit 1
 
 # Example Usage:
 #   make functionaltest
