@@ -59,7 +59,10 @@ data:
     ./yq e -i 'del(.receivers.k8s_cluster)' /splunk-messages/config.yaml
     
     echo "Disabling prometheus kubernetes-apiserver receiver for this instance"
+    ./yq e 'del(.receivers.prometheus/kubernetes-apiserver)' /conf/relay.yaml >/splunk-messages/config.yaml
+    # remove when histogram pipeline/exporter is ready for use for feature other that enableEKSApiServerMetrics
     ./yq e -i 'del(.service.pipelines.metrics/histograms)' /splunk-messages/config.yaml
+    ./yq e -i 'del(.exporters.signalfx/histograms)' /splunk-messages/config.yaml
     
     # set kubelet stats to not monitor ourselves (all other kubelets)
     echo "Ensuring k8s_observer-based kubeletstats receivers won't monitor own node to avoid Fargate network limitation."
