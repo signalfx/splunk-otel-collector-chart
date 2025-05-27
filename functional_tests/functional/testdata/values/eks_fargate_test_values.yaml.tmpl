@@ -1,0 +1,80 @@
+---
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   ingestUrl: {{ .AgentEndpoint }}
+   apiUrl: {{ .ApiURLEndpoint }}
+
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+  metricsEnabled: true
+  metricsIndex: myMetricsIndex
+
+autodetect:
+  prometheus: true
+
+logsCollection:
+  journald:
+    enabled: true
+    directory: /run/log/journal
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: {{ .OtlpEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+clusterReceiver:
+  eventsEnabled: true
+  config:
+    exporters:
+      signalfx:
+        ingest_url: {{ .K8sClusterEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_logs:
+        endpoint: {{ .LogObjectsHecEndpoint }}
+
+  k8sObjects:
+    - name: pods
+    - name: namespaces
+    - name: nodes
+    - name: events
+      mode: watch
+
+extraAttributes:
+  fromAnnotations:
+    - key: splunk.com/customField
+      tag_name: customField
+  fromLabels:
+    - key: app
+      from: pod
+    - key: app
+      from: namespace
+
+  custom:
+   - name: "cluster_name"
+     value: "ci-k8s-cluster"
+   - name: "customfield1"
+     value: "customvalue1"
+   - name: "customfield2"
+     value: "customvalue2"
+
+environment: dev
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+targetAllocator:
+  enabled: true
+
+cloudProvider: aws
+distribution: eks/fargate

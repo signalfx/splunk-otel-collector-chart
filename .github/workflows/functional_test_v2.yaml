@@ -320,3 +320,80 @@ jobs:
           KUBECONFIG: /tmp/kubeconfig
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+
+  eks-fargate-test:
+    name: Test helm install in EKS Fargate - credentials needed
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
+    env:
+      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+      KUBE_TEST_ENV: eks/fargate
+      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-west-2
+      - name: Install kubeconfig
+        run: |
+          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+        run: |
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+
+  eks-fargate-upgrade-test:
+    name: Test helm upgrade in EKS Fargate - credentials needed
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.ref == 'refs/heads/main')
+    env:
+      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+      KUBE_TEST_ENV: eks/fargate
+      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the latest published release to use as a base for the upgrade
+        run: |
+          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+          helm repo update
+          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: '**/go.sum'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-west-2
+      - name: Install kubeconfig
+        run: |
+          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+      - name: Update dependencies
+        run: |
+          make dep-update
+      - name: run functional tests
+        env:
+          HOST_ENDPOINT: 0.0.0.0
+          UPGRADE_FROM_VALUES: eks_fargate_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
+        run: |
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
