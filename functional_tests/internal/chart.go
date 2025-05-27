@@ -19,6 +19,8 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -27,7 +29,7 @@ const (
 	defaultChartPath  = "helm-charts/splunk-otel-collector"
 )
 
-func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any) {
+func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any, minReadyTime time.Duration) {
 	valuesBytes, err := os.ReadFile(valuesFile)
 	require.NoError(t, err)
 	tmpl, err := template.New("").Parse(string(valuesBytes))
@@ -80,6 +82,20 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		_, err = install.Run(loadChart(t), values)
 	}
 	require.NoError(t, err)
+
+	// Wait for pods to be ready for at least minReadyTime
+	clientset, err := getKubeClient(testKubeConfig)
+	require.NoError(t, err)
+	labelSelector := "app.kubernetes.io/instance=" + chartReleaseName
+	CheckPodsReady(t, clientset, Namespace, labelSelector, HelmActionTimeout, minReadyTime)
+}
+
+func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewForConfig(config)
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {

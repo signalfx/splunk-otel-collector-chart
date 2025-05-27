@@ -115,18 +115,21 @@ func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
-	timeout time.Duration,
+	timeout time.Duration, minReadyTime time.Duration,
 ) {
+	var readySince time.Time
 	require.Eventually(t, func() bool {
 		pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
 			LabelSelector: labelSelector,
 		})
 		require.NoError(t, err)
 		if len(pods.Items) == 0 {
+			readySince = time.Time{} // reset
 			return false
 		}
 		for _, pod := range pods.Items {
 			if pod.Status.Phase != v1.PodRunning {
+				readySince = time.Time{}
 				return false
 			}
 			ready := false
@@ -137,11 +140,15 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 				}
 			}
 			if !ready {
+				readySince = time.Time{}
 				return false
 			}
 		}
-		return true
-	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready", namespace, labelSelector)
+		if readySince.IsZero() {
+			readySince = time.Now()
+		}
+		return time.Since(readySince) >= minReadyTime
+	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready for minReadyTime=%s", namespace, labelSelector, minReadyTime)
 }
 
 func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {

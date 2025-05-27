@@ -197,7 +197,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
 		"KubeTestEnv":           kubeTestEnv,
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute)
 
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 

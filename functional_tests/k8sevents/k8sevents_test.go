@@ -148,14 +148,14 @@ func deployWorkloadAndCollector(t *testing.T) {
 		"ApiURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 		"LogURL": fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
 
 	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
 
-	internal.CheckPodsReady(t, clientset, internal.Namespace, "component=otel-k8s-cluster-receiver", 3*time.Minute)
+	internal.CheckPodsReady(t, clientset, internal.Namespace, "component=otel-k8s-cluster-receiver", 3*time.Minute, 0)
 	time.Sleep(30 * time.Second)
 
 	// Deploy the workload
@@ -165,7 +165,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, createdObjs)
 
-	internal.CheckPodsReady(t, clientset, "k8sevents-test", "app=k8sevents-test", 2*time.Minute)
+	internal.CheckPodsReady(t, clientset, "k8sevents-test", "app=k8sevents-test", 2*time.Minute, 0)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {

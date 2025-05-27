@@ -72,9 +72,9 @@ func deployIstioAndCollector(t *testing.T) {
 	require.NoError(t, err, "failed to get httpbin deployment")
 	t.Logf("Deployment %s created successfully", deployment.Name)
 
-	internal.CheckPodsReady(t, clientset, "istio-system", "app=istio-ingressgateway", 5*time.Minute)
-	internal.CheckPodsReady(t, clientset, "istio-system", "app=istiod", 2*time.Minute)
-	internal.CheckPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute)
+	internal.CheckPodsReady(t, clientset, "istio-system", "app=istio-ingressgateway", 5*time.Minute, 0)
+	internal.CheckPodsReady(t, clientset, "istio-system", "app=istiod", 2*time.Minute, 0)
+	internal.CheckPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute, 0)
 
 	// Send traffic through ingress gateways
 	sendWorkloadHTTPRequests(t)
@@ -89,7 +89,7 @@ func deployIstioAndCollector(t *testing.T) {
 		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {

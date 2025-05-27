@@ -169,7 +169,7 @@ func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
 		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"EventsURL": fmt.Sprintf("http://%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
-	})
+	}, 0)
 }
 
 // installRedisChart deploys a simple Redis server with official helm chart.
