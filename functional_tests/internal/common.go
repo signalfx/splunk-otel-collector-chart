@@ -115,20 +115,21 @@ func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
-	timeout time.Duration,
+	timeout time.Duration, minReadyTime time.Duration,
 ) {
+	var readySince time.Time
 	require.Eventually(t, func() bool {
 		pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
 			LabelSelector: labelSelector,
 		})
 		require.NoError(t, err)
 		if len(pods.Items) == 0 {
+			readySince = time.Time{} // reset
+			t.Logf("[CheckPodsReady] No pods found for selector '%s' in namespace '%s'", labelSelector, namespace)
 			return false
 		}
+		allReady := true
 		for _, pod := range pods.Items {
-			if pod.Status.Phase != v1.PodRunning {
-				return false
-			}
 			ready := false
 			for _, condition := range pod.Status.Conditions {
 				if condition.Type == v1.PodReady && condition.Status == v1.ConditionTrue {
@@ -136,12 +137,22 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 					break
 				}
 			}
-			if !ready {
-				return false
+			if pod.Status.Phase != v1.PodRunning || !ready {
+				allReady = false
 			}
+			t.Logf("[CheckPodsReady] Pod: %s | Phase: %s | Ready: %v", pod.Name, pod.Status.Phase, ready)
 		}
-		return true
-	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready", namespace, labelSelector)
+		if !allReady {
+			readySince = time.Time{}
+			return false
+		}
+		if readySince.IsZero() {
+			readySince = time.Now()
+			t.Logf("[CheckPodsReady] All pods ready at: %s", readySince.Format(time.RFC3339))
+		}
+		t.Logf("[CheckPodsReady] All pods have been ready for: %s (minReadyTime: %s)", time.Since(readySince), minReadyTime)
+		return time.Since(readySince) >= minReadyTime
+	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready for minReadyTime=%s", namespace, labelSelector, minReadyTime)
 }
 
 func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {

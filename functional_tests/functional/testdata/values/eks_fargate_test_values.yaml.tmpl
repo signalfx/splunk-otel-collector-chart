@@ -1,0 +1,14 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   ingestUrl: {{ .AgentEndpoint }}
+   apiUrl: {{ .ApiURLEndpoint }}
+
+environment: dev
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+
+cloudProvider: aws
+distribution: eks/fargate

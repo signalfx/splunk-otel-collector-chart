@@ -41,7 +41,7 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	hostname, err := os.Hostname()
 	_, filename, _, _ := runtime.Caller(2)
 	require.NoError(t, err)
-	holderIdentity := fmt.Sprintf("%s:%s:%s", hostname, filename, t.Name())
+	holderIdentity := fmt.Sprintf("%s:%s:%s:%d", hostname, filename, t.Name(), time.Now().UnixNano())
 
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{

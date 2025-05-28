@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -47,13 +48,13 @@ const (
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
+	eksFargateTestKubeEnv                  = "eks/fargate"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
 	gceTestKubeEnv                         = "gce"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
-	eksValuesDir                           = "expected_eks_values"
 	kindValuesDir                          = "expected_kind_values"
 )
 
@@ -174,6 +175,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
 	case aksTestKubeEnv:
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
+	case eksFargateTestKubeEnv:
+		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "eks_fargate_test_values.yaml.tmpl"))
 	default:
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
 	}
@@ -195,7 +198,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
 		"KubeTestEnv":           kubeTestEnv,
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute)
 
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 
@@ -486,13 +489,23 @@ func Test_Functions(t *testing.T) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
-	switch kubeTestEnv {
-	case kindTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv, gceTestKubeEnv:
+	validEnvs := []string{
+		kindTestKubeEnv,
+		autopilotTestKubeEnv,
+		aksTestKubeEnv,
+		gceTestKubeEnv,
+		eksTestKubeEnv,
+		eksFargateTestKubeEnv,
+	}
+
+	switch {
+	case func() bool {
+		return slices.Contains(validEnvs, kubeTestEnv)
+	}():
 		expectedValuesDir = kindValuesDir
-	case eksTestKubeEnv:
-		expectedValuesDir = eksValuesDir
 	default:
-		assert.Fail(t, "KUBE_TEST_ENV is set to invalid value. Must be one of [kind, eks].")
+		t.Logf("Supported environments: %s", strings.Join(validEnvs, ", "))
+		assert.Fail(t, "KUBE_TEST_ENV is set to invalid value.")
 	}
 
 	t.Run("node.js traces captured", testNodeJSTraces)

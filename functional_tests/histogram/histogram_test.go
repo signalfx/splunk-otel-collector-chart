@@ -42,7 +42,7 @@ func deployChart(t *testing.T) {
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
 }
 
 func teardown(t *testing.T) {
