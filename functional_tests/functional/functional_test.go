@@ -40,6 +40,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"slices"
+
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
@@ -485,8 +487,27 @@ func Test_Functions(t *testing.T) {
 		return
 	}
 
-	_, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
+	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
+
+	var validEnvs = []string{
+		kindTestKubeEnv,
+		autopilotTestKubeEnv,
+		aksTestKubeEnv,
+		gceTestKubeEnv,
+		eksTestKubeEnv,
+		eksFargateTestKubeEnv,
+	}
+
+	switch {
+	case func() bool {
+		return slices.Contains(validEnvs, kubeTestEnv)
+	}():
+		expectedValuesDir = kindValuesDir
+	default:
+		t.Logf("Supported environments: %s", strings.Join(validEnvs, ", "))
+		assert.Fail(t, "KUBE_TEST_ENV is set to invalid value.")
+	}
 
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
