@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -39,8 +40,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"slices"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -490,7 +489,7 @@ func Test_Functions(t *testing.T) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
 
-	var validEnvs = []string{
+	validEnvs := []string{
 		kindTestKubeEnv,
 		autopilotTestKubeEnv,
 		aksTestKubeEnv,
