@@ -36,7 +36,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.11.3
+          version: v3.18.0
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
 
       - name: Set up chart dependencies
