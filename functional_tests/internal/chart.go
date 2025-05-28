@@ -86,7 +86,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	// Wait for pods to be ready for at least minReadyTime
 	clientset, err := getKubeClient(testKubeConfig)
 	require.NoError(t, err)
-	labelSelector := "app.kubernetes.io/instance=" + chartReleaseName
+	labelSelector := "release=" + chartReleaseName
 	CheckPodsReady(t, clientset, Namespace, labelSelector, HelmActionTimeout, minReadyTime)
 }
 
