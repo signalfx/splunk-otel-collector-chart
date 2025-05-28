@@ -1,0 +1,52 @@
+name: kubeconform
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+  get-test-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: get matrix
+        id: test_matrix
+        run: |
+          echo "Getting test matrix"
+          matrix=`cat ci-matrix.json | jq '.kubeconform_tests' | jq -r 'tostring' | tr -d '\n'`
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+    outputs:
+      matrix: ${{ steps.test_matrix.outputs.matrix }}
+
+  kubeconform:
+    runs-on: ubuntu-latest
+    needs: get-test-matrix
+    strategy:
+      matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -L -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+          echo "done"
+
+      - name: Run kubeconform on rendered examples
+        run: |
+          for dir in examples/*/; do
+            base_dir="$(basename "$dir")"
+            [[ "$base_dir" == "distribution-openshift" || "$base_dir" == *operator* ]] && continue
+            cmd="kubeconform -strict -schema-location default -output pretty -verbose -kubernetes-version ${{ matrix.k8s-version }} \"$dir\"/rendered_manifests"
+            if ! eval $cmd; then
+              echo "kubeconform version: $(kubeconform -v)"
+              echo "Failed command: $cmd"
+              exit 1
+            fi
+          done
