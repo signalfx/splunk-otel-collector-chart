@@ -110,7 +110,7 @@ The following prerequisites are required to use the helm chart:
 
 - [Helm 3](https://helm.sh/docs/intro/install/)
   - Helm 3 version support may vary depending on the [supported Kubernetes version](#supported-kubernetes-distributions) you are using and the [Helm supported Kubernetes versions skew](https://helm.sh/docs/topics/version_skew/#supported-version-skew).
-  - This project is maintained using Helm v3.11.3.
+  - This project is maintained using Helm v3.18.0.
   - Please note that Helm 2 is not supported.
 - Administrator access to your [Kubernetes cluster](https://kubernetes.io/) and familiarity with your Kubernetes configuration. You must know where your log information is being collected in your Kubernetes deployment.
 
