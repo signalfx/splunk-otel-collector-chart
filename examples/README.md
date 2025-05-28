@@ -29,7 +29,7 @@ The Splunk OpenTelemetry Collector Chart can be configured to export data to
 to the following targets:
 - [Splunk Enterprise](https://www.splunk.com/en_us/software/splunk-enterprise.html)
 - [Splunk Cloud Platform](https://www.splunk.com/en_us/software/splunk-cloud-platform.html)
-- [Splunk Observability Cloud](https://www.observability.splunk.com/)
+- [Splunk Observability Cloud](https://www.splunk.com/en_us/products/observability-cloud.html)
 
 All the provided examples must include one of these two configuration sets to
 know which target to export data to.
