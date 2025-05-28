@@ -10,6 +10,13 @@ splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}
 
 agent:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500Mi
+    limits:
+      cpu: 200m
+      memory: 1Gi
   config:
     receivers:
       kubeletstats:

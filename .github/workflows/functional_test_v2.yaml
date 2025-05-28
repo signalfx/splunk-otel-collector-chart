@@ -328,7 +328,7 @@ jobs:
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-      KUBE_TEST_ENV: eks/fargate
+      KUBE_TEST_ENV: "eks/fargate"
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -363,7 +363,7 @@ jobs:
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-      KUBE_TEST_ENV: eks/fargate
+      KUBE_TEST_ENV: "eks/fargate"
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
