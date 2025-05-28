@@ -83,3 +83,6 @@ distribution: eks
 {{ else }}
 clusterName: dev-operator
 {{ end }}
+
+featureGates:
+  enableEKSApiServerMetrics: true
