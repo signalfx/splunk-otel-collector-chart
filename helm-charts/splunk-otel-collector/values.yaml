@@ -1412,3 +1412,6 @@ featureGates:
   # The feature gate enables the use of the memory_limiter processor based on the percentage.
   # It is required if the helm chart is used with another collector image from upstream.
   useMemoryLimitPercentage: false
+  # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
+  # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
+  enableEKSApiServerMetrics: false
