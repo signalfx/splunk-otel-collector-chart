@@ -7,8 +7,8 @@ go 1.24.2
 
 require (
 	github.com/docker/docker v28.1.1+incompatible
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.125.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.125.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.127.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.127.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest v0.125.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.125.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.125.0
@@ -123,7 +123,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.125.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.125.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.125.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.125.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.127.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/signalfx v0.125.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
@@ -175,7 +175,7 @@ require (
 	go.opentelemetry.io/collector/featuregate v1.33.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.125.0 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.127.0 // indirect
-	go.opentelemetry.io/collector/pdata/pprofile v0.125.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.127.0 // indirect
 	go.opentelemetry.io/collector/pipeline v0.127.0 // indirect
 	go.opentelemetry.io/collector/receiver v1.31.0 // indirect
 	go.opentelemetry.io/collector/receiver/receiverhelper v0.125.0 // indirect
