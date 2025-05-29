@@ -14,10 +14,10 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.125.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component/componenttest v0.127.0
-	go.opentelemetry.io/collector/consumer/consumertest v0.125.0
+	go.opentelemetry.io/collector/consumer/consumertest v0.127.0
 	go.opentelemetry.io/collector/pdata v1.33.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.125.0
-	go.opentelemetry.io/collector/receiver/receivertest v0.125.0
+	go.opentelemetry.io/collector/receiver/receivertest v0.127.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.17.3
 	k8s.io/api v0.32.3
@@ -164,9 +164,9 @@ require (
 	go.opentelemetry.io/collector/config/configretry v1.31.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v1.31.0 // indirect
 	go.opentelemetry.io/collector/confmap v1.31.0 // indirect
-	go.opentelemetry.io/collector/consumer v1.31.0 // indirect
-	go.opentelemetry.io/collector/consumer/consumererror v0.125.0 // indirect
-	go.opentelemetry.io/collector/consumer/xconsumer v0.125.0 // indirect
+	go.opentelemetry.io/collector/consumer v1.33.0 // indirect
+	go.opentelemetry.io/collector/consumer/consumererror v0.127.0 // indirect
+	go.opentelemetry.io/collector/consumer/xconsumer v0.127.0 // indirect
 	go.opentelemetry.io/collector/exporter v0.125.0 // indirect
 	go.opentelemetry.io/collector/extension v1.31.0 // indirect
 	go.opentelemetry.io/collector/extension/extensionauth v1.31.0 // indirect
@@ -175,11 +175,11 @@ require (
 	go.opentelemetry.io/collector/featuregate v1.33.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.125.0 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.127.0 // indirect
-	go.opentelemetry.io/collector/pdata/pprofile v0.125.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.127.0 // indirect
 	go.opentelemetry.io/collector/pipeline v0.127.0 // indirect
-	go.opentelemetry.io/collector/receiver v1.31.0 // indirect
+	go.opentelemetry.io/collector/receiver v1.33.0 // indirect
 	go.opentelemetry.io/collector/receiver/receiverhelper v0.125.0 // indirect
-	go.opentelemetry.io/collector/receiver/xreceiver v0.125.0 // indirect
+	go.opentelemetry.io/collector/receiver/xreceiver v0.127.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.125.0 // indirect
 	go.opentelemetry.io/contrib/bridges/otelzap v0.10.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0 // indirect
