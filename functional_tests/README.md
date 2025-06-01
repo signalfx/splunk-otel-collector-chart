@@ -30,8 +30,10 @@ When running tests you can use the following env vars to help with local develop
 - `SKIP_TESTS`: Skip tests; only set up and tear down the cluster.
 - `TEARDOWN_BEFORE_SETUP`: Clean up deployments before setting up.
 - `SUITE`: Specify which test suite to run (e.g., `SUITE="functional"`).
-- `UPDATE_EXPECTED_RESULTS`: Generate new golden files for test results.
-
-## Run
+- `UPDATE_EXPECTED_RESULTS`: Use this to generate new golden files (expected test results) for functional tests.
+  - To download a zip file of the updated golden files, trigger the [functional_test_v2.yaml](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/functional_test_v2.yaml)
+    workflow with the input `UPDATE_EXPECTED_RESULTS=true`. Once the workflow completes, locate the
+    zip file in the action run artifacts.
+## Run)
 
 From the root repository directory run `make functionaltest`.
