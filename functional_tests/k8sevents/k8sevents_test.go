@@ -90,7 +90,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreLogRecordsOrder(),
 		)
 		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-			internal.WriteNewExpectedLogsResult(t, expectedEventsLogsFile, &k8sEventsLogs)
+			internal.WriteUpdatedExpectedLogsResults(t, expectedEventsLogsFile, &k8sEventsLogs)
 		}
 		require.NoError(t, err)
 	})
@@ -126,7 +126,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreLogRecordsOrder(),
 		)
 		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-			internal.WriteNewExpectedLogsResult(t, expectedObjectsLogsFile, &k8sObjectsLogs)
+			internal.WriteUpdatedExpectedLogsResults(t, expectedObjectsLogsFile, &k8sObjectsLogs)
 		}
 		require.NoError(t, err)
 	})

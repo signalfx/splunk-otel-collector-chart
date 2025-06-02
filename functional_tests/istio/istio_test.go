@@ -320,6 +320,10 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		}
 	}
 
+	if selectedMetrics != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
+		internal.WriteUpdatedExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+	}
+
 	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
@@ -344,9 +348,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreMetricAttributeValue("event"),
 		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
 	)
-	if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-		internal.WriteNewExpectedMetricsResult(t, expectedMetricsFile, selectedMetrics)
-	}
 	require.NoError(t, err)
 }
 

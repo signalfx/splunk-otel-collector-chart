@@ -152,7 +152,7 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
 		if os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-			internal.WriteNewExpectedMetricsResult(t, filepath.Join(testDir, fileName), actualMetrics)
+			internal.WriteUpdatedExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
 		}
 	}
 }
