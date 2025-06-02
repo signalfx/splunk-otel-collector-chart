@@ -99,19 +99,29 @@ func ResetLogsSink(t *testing.T, lc *consumertest.LogsSink) {
 	t.Logf("Logs sink reset, current logs: %d", len(lc.AllLogs()))
 }
 
-func WriteNewExpectedTracesResult(t *testing.T, file string, trace *ptrace.Traces) {
-	require.NoError(t, os.MkdirAll("results", 0o755))
-	require.NoError(t, golden.WriteTraces(t, filepath.Join("results", filepath.Base(file)), *trace))
+var shouldUpdateExpectedResults = func() bool {
+	return os.Getenv("UPDATE_EXPECTED_RESULTS") == "true"
 }
 
-func WriteNewExpectedMetricsResult(t *testing.T, file string, metric *pmetric.Metrics) {
-	require.NoError(t, os.MkdirAll("results", 0o755))
-	require.NoError(t, golden.WriteMetrics(t, filepath.Join("results", filepath.Base(file)), *metric))
+func MaybeWriteUpdateExpectedTracesResults(t *testing.T, file string, traces *ptrace.Traces) {
+	if shouldUpdateExpectedResults() {
+		require.NoError(t, golden.WriteTraces(t, filepath.Base(file), *traces))
+		t.Logf("Wrote updated expected trace results to %s", filepath.Base(file))
+	}
 }
 
-func WriteNewExpectedLogsResult(t *testing.T, file string, log *plog.Logs) {
-	require.NoError(t, os.MkdirAll("results", 0o755))
-	require.NoError(t, golden.WriteLogs(t, filepath.Join("results", filepath.Base(file)), *log))
+func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
+	if shouldUpdateExpectedResults() {
+		require.NoError(t, golden.WriteMetrics(t, filepath.Base(file), *metrics))
+		t.Logf("Wrote updated expected metric results to %s", filepath.Base(file))
+	}
+}
+
+func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) {
+	if shouldUpdateExpectedResults() {
+		require.NoError(t, golden.WriteLogs(t, filepath.Base(file), *logs))
+		t.Logf("Wrote updated expected log results to %s", filepath.Base(file))
+	}
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
