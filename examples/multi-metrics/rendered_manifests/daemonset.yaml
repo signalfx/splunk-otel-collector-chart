@@ -114,12 +114,10 @@ spec:
                 key: splunk_platform_hec_token
 
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
@@ -147,6 +145,9 @@ spec:
           readOnly: true
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
+          readOnly: true
+        - mountPath: /hostfs/usr/lib/os-release
+          name: host-usr-osrelease
           readOnly: true
         - name: varlog
           mountPath: /var/log
@@ -192,6 +193,9 @@ spec:
       - name: host-var-run-utmp
         hostPath:
           path: /var/run/utmp
+      - name: host-usr-osrelease
+        hostPath:
+          path: /usr/lib/os-release
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

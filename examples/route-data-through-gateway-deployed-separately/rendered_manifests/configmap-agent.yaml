@@ -36,6 +36,7 @@ data:
         api_url: http://<custom-gateway-url>:6060
         correlation: null
         ingest_url: http://<custom-gateway-url>:9943
+        root_path: /hostfs
         sync_host_metadata: true
     extensions:
       health_check:

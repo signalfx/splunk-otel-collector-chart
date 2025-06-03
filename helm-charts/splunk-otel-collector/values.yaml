@@ -209,6 +209,7 @@ cloudProvider: ""
 # - "aks" (Azure Kubernetes Service)
 # - "eks" (Amazon Elastic Kubernetes Service)
 # - "eks/fargate" (Amazon Elastic Kubernetes Service with Fargate profiles )
+# - "eks/auto-mode" (Amazon Elastic Kubernetes Service with Auto Mode)
 # - "gke" (Google Kubernetes Engine / Standard mode)
 # - "gke/autopilot" (Google Kubernetes Engine / Autopilot mode)
 # - "openshift" (RedHat OpenShift)
@@ -560,6 +561,11 @@ clusterReceiver:
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
   k8sObjects: []
+
+  # hostNetwork schedules the pod with the host's network namespace.
+  # The default value depends on distribution option: true for eks/auto-mode, otherwise false
+  # Disregarded for Windows (unsupported by k8s).
+  hostNetwork:
 
   # k8s cluster receiver extra pod labels
   podLabels: {}

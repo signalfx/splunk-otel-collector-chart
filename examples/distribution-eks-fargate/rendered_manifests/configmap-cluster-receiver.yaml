@@ -25,7 +25,7 @@ data:
         timeout: 10s
     extensions:
       health_check:
-        endpoint: 0.0.0.0:13133
+        endpoint: 0.0.0.0:13134
       k8s_observer:
         auth_type: serviceAccount
         observe_nodes: true
@@ -72,8 +72,24 @@ data:
         detectors:
         - env
         - eks
-        - ec2
         - system
+        eks:
+          node_from_env_var: K8S_NODE_NAME
+          resource_attributes:
+            cloud.account.id:
+              enabled: true
+            cloud.availability_zone:
+              enabled: true
+            cloud.region:
+              enabled: true
+            host.id:
+              enabled: true
+            host.image.id:
+              enabled: true
+            host.name:
+              enabled: true
+            host.type:
+              enabled: true
         override: true
         timeout: 15s
     receivers:
@@ -97,7 +113,7 @@ data:
             scrape_interval: 10s
             static_configs:
             - targets:
-              - localhost:8889
+              - localhost:8899
       receiver_creator:
         receivers:
           kubeletstats:
@@ -157,7 +173,7 @@ data:
               exporter:
                 prometheus:
                   host: localhost
-                  port: 8889
+                  port: 8899
                   without_scope_info: true
                   without_type_suffix: true
                   without_units: true

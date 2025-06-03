@@ -55,6 +55,7 @@ scrape additional metadata. The supported options are:
 
 - `aks` - Azure AKS
 - `eks` - Amazon EKS
+- `eks/auto-mode` - Amazon EKS Auto Mode
 - `eks/fargate` - Amazon EKS with Fargate profiles
 - `gke` - Google GKE / Standard mode
 - `gke/autopilot` - Google GKE / Autopilot mode
@@ -297,6 +298,105 @@ for the Fargate distribution has two primary differences between regular `eks` t
     * The first replica's collector will monitor the second's kubelet. This is made possible by a Fargate-specific `splunk-otel-eks-fargate-kubeletstats-receiver-node`
     node label. The Collector's ClusterRole for `eks/fargate` will allow the `patch` verb on `nodes` resources for the default API groups to allow the cluster
     receiver's init container to add this node label for designated self monitoring.
+
+## EKS Auto Mode
+
+If you want to run the Splunk OpenTelemetry Collector in [Amazon EKS Auto Mode Cluster](https://docs.aws.amazon.com/eks/latest/userguide/automode.html),
+make sure to set the required `distribution` value to `eks/auto-mode`:
+
+```yaml
+distribution: eks/auto-mode
+```
+
+`EKS Auto Mode` restricts access to IMDS (Instance Metadata Service) so that only pods running in the host network namespace can access it.
+This causes the `ec2` and `eks` detectors in the `resourcedetection` processor to fail to collect attributes from the metadata server.
+
+In addition to IMDS, we have introduced a new method to the [eks detector](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#amazon-eks)
+that extracts the required attributes using the Kubernetes API server and EC2 API.
+However, this alternative method requires IAM authentication to permit EKS and EC2 API calls; example: Pod Identity.
+
+This distribution will operate similarly to the `eks` distribution but with the following distinctions:
+
+By Default and to reduce friction, the helm chart attempts to configure the cluster receiver and the agent to run in host network namespace.
+This approach eliminates the need to configure `Pod Identity`, however, if user explicitly sets `agent.hostNetwork.enabled`
+or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resourcedetection`
+processor will fail unless `Pod Identity` is enabled and configured.
+
+**Note**: If you are deploying OTEL as Gateway in the EKS Auto Mode cluster, it's required to enable and configure `Pod Identity`.
+
+### Example Setting POD Identity on EKS Auto Mode
+
+You can follow the [POD Identity documentation](https://docs.aws.amazon.com/eks/latest/userguide/pod-id-agent-setup.html) or use the following example.
+
+The Amazon EKS Pod Identity Agent is included in EKS Auto Mode compute; you do not need to install the addon.
+
+- Create IAM Policy with `EC2:DescribeInstances` permission :
+```
+export POLICY_ARN=$(aws iam create-policy \
+  --policy-name splunk-opentelemetry-collector-policy \
+  --policy-document file://splunk-opentelemetry-collector-policy.json \
+  --query 'Policy.Arn' --output text)
+```
+
+`splunk-opentelemetry-collector-policy.json`
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+- Create Pod Identity Trust IAM Role :
+```
+export POD_ROLE_ARN=$(aws iam create-role --role-name splunk-opentelemetry-collector-pod-identity-role \
+ --assume-role-policy-document file://eks-pod-identity-trust-policy.json \
+ --output text --query 'Role.Arn')
+```
+
+`eks-pod-identity-trust-policy.json`
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "pods.eks.amazonaws.com"
+            },
+            "Action": [
+                "sts:AssumeRole",
+                "sts:TagSession"
+            ]
+        }
+    ]
+}
+```
+
+- Attach Policy to Role:
+```
+aws iam attach-role-policy --role-name splunk-opentelemetry-collector-pod-identity-role \
+  --policy-arn $POLICY_ARN
+```
+
+- Create the Pod Identity Association :
+
+Make sure to set and export \$CLUSTER_NAME, \$NAMESPACE and \$SERVICEACCOUNTNAME with their appropriate values.
+````
+aws eks create-pod-identity-association \
+--cluster-name $CLUSTER_NAME \
+--namespace $NAMESPACE \
+--service-account $SERVICEACCOUNTNAME \
+--role-arn $POD_ROLE_ARN \
+--region $AWS_REGION
+````
 
 ## Control Plane metrics
 

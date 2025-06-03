@@ -523,3 +523,15 @@ Create the name of the target allocator cluster role binding to use
 {{- define "splunk-otel-collector.targetAllocatorClusterRoleBindingName" -}}
 {{- printf "%s-ta-clusterRoleBinding" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Determine if hostNetwork should be enabled.
+If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will be enabled.
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverHostNetworkEnabled" -}}
+{{- if eq (toString .Values.clusterReceiver.hostNetwork) "<nil>" }}
+  {{- eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode" }}
+{{- else }}
+  {{- .Values.clusterReceiver.hostNetwork }}
+{{- end -}}
+{{- end -}}

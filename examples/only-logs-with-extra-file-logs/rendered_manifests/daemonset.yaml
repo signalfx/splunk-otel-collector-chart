@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: b58fcf2f20eb53e8359e14e4a8be059ebd67911940a933f3f4f9eeb2ee61dde0
+        checksum/config: 881478af258b416cd4c15a051c44ea7df79a350fc7d71f05fcc65e0c02cbdbbb
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -110,12 +110,10 @@ spec:
                 key: splunk_observability_access_token
 
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
