@@ -6,7 +6,7 @@ This release includes a breaking change related to Prometheus receivers utilized
 
 [The receiver.prometheusreceiver.RemoveLegacyResourceAttributes feature gate has been promoted to beta stability and is now enabled by default](CHANGELOG.md#1260---2025-06-04--breaking-changes-).
 
-The following legacy attributes are removed:
+Legacy Prometheus attributes listed below have been deprecated and replaced with new standardized values:
 - `net.host.name` -> `server.address`
 - `net.host.port` -> `server.port`
 - `http.scheme` -> `url.scheme`
