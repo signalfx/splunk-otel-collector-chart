@@ -17,7 +17,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 
 {{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (eq (include "splunk-otel-collector.gatewayEnabled" .) "true") }}
 [WARNING] Deploying a Gateway in EKS Auto Mode requires Pod Identity to be enabled and configured, otherwise some functionalities will be missing.
-          For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-fargate-support
+          For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
 
 {{- end }}
 
