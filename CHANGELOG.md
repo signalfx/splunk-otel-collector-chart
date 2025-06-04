@@ -4,6 +4,14 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.126.0] - 2025-06-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.126.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.126.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Adds feature gate `enableEKSApiServerMetrics` to enable prometheus scraping for kubernetes-apiserver metrics from EKS clusters. ([#1831](https://github.com/signalfx/splunk-otel-collector-chart/pull/1831))
+
 ## [0.125.0] - 2025-05-05
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.125.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.125.0).
