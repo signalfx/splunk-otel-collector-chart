@@ -11,6 +11,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 ### 💡 Enhancements 💡
 
 - `clusterReceiver`: Adds feature gate `enableEKSApiServerMetrics` to enable prometheus scraping for kubernetes-apiserver metrics from EKS clusters. ([#1831](https://github.com/signalfx/splunk-otel-collector-chart/pull/1831))
+- `operator`: Bump java to v2.16.0 in helm-charts/splunk-otel-collector/values.yaml ([#1838](https://github.com/signalfx/splunk-otel-collector-chart/pull/1838))
 
 ### 🛑 Breaking changes 🛑
 
