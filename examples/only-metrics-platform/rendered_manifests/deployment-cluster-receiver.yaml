@@ -72,10 +72,12 @@ spec:
                 name: default-splunk-otel-collector
                 key: splunk_platform_hec_token
         readinessProbe:
+          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
+          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
