@@ -20,6 +20,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   `net.host.name` -> `server.address`
   `net.host.port` -> `server.port`
   `http.scheme` -> `url.scheme`
+  - If you're using Prometheus receivers with the collector agent or cluster receiver, and have alerts or dashboards based on that data, please review the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01250-to-01260).
 
 ## [0.125.0] - 2025-05-05
 
