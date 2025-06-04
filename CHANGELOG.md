@@ -4,6 +4,25 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.126.0] - 2025-06-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.126.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.126.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Adds feature gate `enableEKSApiServerMetrics` to enable prometheus scraping for kubernetes-apiserver metrics from EKS clusters. ([#1831](https://github.com/signalfx/splunk-otel-collector-chart/pull/1831))
+- `operator`: Bump java to v2.16.0 in helm-charts/splunk-otel-collector/values.yaml ([#1838](https://github.com/signalfx/splunk-otel-collector-chart/pull/1838))
+
+### 🛑 Breaking changes 🛑
+
+- `agent`/`clusterReceiver`: Upgrade `receiver.prometheusreceiver.RemoveLegacyResourceAttributes` feature gate to `beta` stability (enabled by default) ([#32814](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/32814))
+  Disable the `receiver.prometheusreceiver.RemoveLegacyResourceAttributes` feature gate to restore previous behavior. This feature gate will be removed in a future release.
+  The feature gate is used to remove the following legacy resource attributes:
+  `net.host.name` -> `server.address`
+  `net.host.port` -> `server.port`
+  `http.scheme` -> `url.scheme`
+  - If you're using Prometheus receivers with the collector agent or cluster receiver, and have alerts or dashboards based on that data, please review the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01250-to-01260).
+
 ## [0.125.0] - 2025-05-05
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.125.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.125.0).

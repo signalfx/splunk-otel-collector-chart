@@ -173,13 +173,10 @@ func performDNSQueries(t *testing.T) {
 func checkMetrics(t *testing.T, isHistogram bool, expected, actual *pmetric.Metrics, component string) error {
 	commonAttrs := map[string]string{
 		"host.name":           "kind-control-plane",
-		"http.scheme":         "http",
 		"k8s.cluster.name":    "sock",
 		"k8s.namespace.name":  "kube-system",
 		"k8s.node.name":       "kind-control-plane",
 		"k8s.pod.uid":         ".*",
-		"net.host.name":       ".*",
-		"net.host.port":       ".*",
 		"os.type":             "linux",
 		"server.address":      ".*",
 		"server.port":         ".*",

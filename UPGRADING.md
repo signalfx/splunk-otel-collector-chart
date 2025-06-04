@@ -1,5 +1,25 @@
 # Upgrade guidelines
 
+## 0.125.0 to 0.126.0
+
+This release includes a breaking change related to Prometheus receivers utilized by the `agent` and `clusterReceiver`.
+- [The receiver.prometheusreceiver.RemoveLegacyResourceAttributes feature gate has been promoted to beta stability and is now enabled by default](CHANGELOG.md#1260---2025-06-04--breaking-changes-).
+- If your alert or dashboard content does not rely on these legacy attributes, no action is needed, and you can safely ignore this breaking change.
+- Legacy Prometheus attributes listed below have been deprecated and replaced with new standardized values:
+  - `net.host.name` -> `server.address`
+  - `net.host.port` -> `server.port`
+  - `http.scheme` -> `url.scheme`
+
+### Restoring Previous Behavior
+
+You can **disable the feature gate** to restore previous behavior, for example via Helm CLI:
+
+For the `agent`: `--set agent.featureGates=-receiver.prometheusreceiver.RemoveLegacyResourceAttributes`
+
+For the `clusterReceiver`: `--set clusterReceiver.featureGates=-receiver.prometheusreceiver.RemoveLegacyResourceAttributes`
+
+**Note**: This feature gate will be removed in a future release. It’s recommended to migrate to the new attributes (server.address, server.port, url.scheme).
+
 ## 0.119.0 to 0.120.0
 
 This guide provides steps for new users, transitioning users, and those maintaining previously deployed Operator-related TLS certificates and configurations.
