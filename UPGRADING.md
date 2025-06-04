@@ -2,7 +2,7 @@
 
 ## 0.125.0 to 0.126.0
 
-This release includes a breaking change related to the agent and clusterReceiver components:
+This release includes a breaking change related to Prometheus receivers utilized by the `agent` and `clusterReceiver`:
 
 [The receiver.prometheusreceiver.RemoveLegacyResourceAttributes feature gate has been promoted to beta stability and is now enabled by default](CHANGELOG.md#1260---2025-06-04--breaking-changes-).
 
