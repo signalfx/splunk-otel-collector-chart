@@ -6,7 +6,7 @@ The values can be overridden in .Values.clusterReceiver.config
 {{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
-    endpoint: 0.0.0.0:13133
+    endpoint: 0.0.0.0:13134
 
   {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
@@ -18,7 +18,7 @@ extensions:
 
 receivers:
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" "k8s-cluster-receiver" | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "k8s-cluster-receiver" "port" "8899") | nindent 2}}
 
   k8s_cluster:
     auth_type: serviceAccount
@@ -292,7 +292,7 @@ service:
             exporter:
               prometheus:
                 host: localhost
-                port: 8889
+                port: 8899
                 without_scope_info: true
                 without_units: true
                 without_type_suffix: true
