@@ -1,0 +1,10 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+distribution: eks/auto-mode
+cloudProvider: aws
+
+featureGates:
+  enableEKSApiServerMetrics: true

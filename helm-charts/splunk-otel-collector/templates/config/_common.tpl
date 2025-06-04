@@ -559,8 +559,9 @@ Generates prometheus receiver config for internal metrics.
 Provide the component name as the input.
 */}}
 {{- define "splunk-otel-collector.prometheusInternalMetrics" -}}
-{{- $receiver := . | lower | replace "-" "_" }}
-{{- $job := . | lower }}
+{{- $receiver := .receiver | lower | replace "-" "_" }}
+{{- $job := .receiver | lower }}
+{{- $port := .port | default "8889" }}
 prometheus/{{ $receiver }}:
   config:
     scrape_configs:
@@ -576,5 +577,5 @@ prometheus/{{ $receiver }}:
         - __name__
       scrape_interval: 10s
       static_configs:
-      - targets: [localhost:8889]
+      - targets: [localhost:{{ $port }}]
 {{- end }}
