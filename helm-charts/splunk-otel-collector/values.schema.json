@@ -775,7 +775,10 @@
         },
         "hostNetwork": {
           "description": "Host network allows container to use networking stack of the host machine",
-          "type": ["null", "boolean"],
+          "type": [
+            "null",
+            "boolean"
+          ],
           "optional": true
         },
         "podLabels": {

@@ -77,7 +77,9 @@ resourcedetection:
     {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
+    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "aws" }}
+    - ec2
+    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
     - azure
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
@@ -88,27 +90,10 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  {{- else if and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (not .Values.clusterName) }}
   eks:
-    node_from_env_var: K8S_NODE_NAME
     resource_attributes:
-      {{- if (not .Values.clusterName) }}
       k8s.cluster.name:
-        enabled: true
-      {{- end }}
-      host.id:
-        enabled: true
-      cloud.region:
-        enabled: true
-      cloud.availability_zone:
-        enabled: true
-      cloud.account.id:
-        enabled: true
-      host.name:
-        enabled: true
-      host.image.id:
-        enabled: true
-      host.type:
         enabled: true
   {{- end }}
   override: true
@@ -165,7 +150,6 @@ resourcedetection/k8s_cluster_name:
         enabled: false
   {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
   eks:
-    node_from_env_var: K8S_NODE_NAME
     resource_attributes:
       k8s.cluster.name:
         enabled: true
