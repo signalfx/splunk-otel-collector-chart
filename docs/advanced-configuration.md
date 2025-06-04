@@ -318,7 +318,7 @@ However, this alternative method requires IAM authentication to permit EKS and E
 This distribution will operate similarly to the `eks` distribution but with the following distinctions:
 
 By Default and to reduce friction, the helm chart attempts to configure the cluster receiver and the agent to run in host network namespace.
-This approach eliminates the need to configure `Pod Identity`, however, if user explicitly sets `agent.hostNetwork.enabled`
+This approach eliminates the need to configure `Pod Identity`, however, if user explicitly sets `agent.hostNetwork`
 or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resourcedetection`
 processor will fail unless `Pod Identity` is enabled and configured.
 
