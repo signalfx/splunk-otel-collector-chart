@@ -43,7 +43,7 @@ data:
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
       health_check:
-        endpoint: 0.0.0.0:13133
+        endpoint: 0.0.0.0:13134
     processors:
       batch:
         send_batch_max_size: 32768
@@ -140,7 +140,7 @@ data:
             scrape_interval: 10s
             static_configs:
             - targets:
-              - localhost:8889
+              - localhost:8899
     service:
       extensions:
       - health_check
@@ -176,7 +176,7 @@ data:
               exporter:
                 prometheus:
                   host: localhost
-                  port: 8889
+                  port: 8899
                   without_scope_info: true
                   without_type_suffix: true
                   without_units: true

@@ -46,7 +46,7 @@ receivers:
   {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" "agent" | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "agent") | nindent 2}}
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   hostmetrics:

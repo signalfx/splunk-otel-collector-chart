@@ -19,7 +19,7 @@ receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" "collector" | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
 
   signalfx:
     endpoint: 0.0.0.0:9943

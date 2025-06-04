@@ -180,14 +180,14 @@ spec:
           {{- end }}
           httpGet:
             path: /
-            port: 13133
+            port: 13134
         livenessProbe:
           {{- if .Values.livenessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           {{- end }}
           httpGet:
             path: /
-            port: 13133
+            port: 13134
         resources:
           {{- toYaml $clusterReceiver.resources | nindent 10 }}
         volumeMounts:
