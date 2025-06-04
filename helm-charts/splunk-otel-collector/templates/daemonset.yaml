@@ -326,14 +326,14 @@ spec:
           {{- end }}
 
         readinessProbe:
-          {{- if hasKey .Values.readinessProbe "initialDelaySeconds" }}
+          {{- if .Values.readinessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
           {{- end }}
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          {{- if hasKey .Values.livenessProbe "initialDelaySeconds" }}
+          {{- if .Values.livenessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           {{- end }}
           httpGet:

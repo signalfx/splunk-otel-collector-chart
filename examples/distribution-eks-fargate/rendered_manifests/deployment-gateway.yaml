@@ -94,12 +94,10 @@ spec:
           containerPort: 9411
           protocol: TCP
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
