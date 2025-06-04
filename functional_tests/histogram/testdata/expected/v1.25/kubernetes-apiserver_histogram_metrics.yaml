@@ -4,9 +4,6 @@ resourceMetrics:
         - key: host.name
           value:
             stringValue: kind-control-plane
-        - key: http.scheme
-          value:
-            stringValue: https
         - key: k8s.cluster.name
           value:
             stringValue: sock
@@ -22,12 +19,6 @@ resourceMetrics:
         - key: k8s.pod.uid
           value:
             stringValue: 4b5d8d01-bba9-46ec-a9e0-42bc8b1e417b
-        - key: net.host.name
-          value:
-            stringValue: 172.18.0.2
-        - key: net.host.port
-          value:
-            stringValue: "6443"
         - key: os.type
           value:
             stringValue: linux
