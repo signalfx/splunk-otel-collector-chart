@@ -323,7 +323,7 @@ receivers:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                 insecure_skip_verify: true
               static_configs:
-                - targets: ["`endpoint`:`port`"]
+                - targets: ["`endpoint`"]
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       prometheus/kubernetes-proxy:
@@ -345,7 +345,7 @@ receivers:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
                 type: Bearer
               static_configs:
-                - targets: ["`endpoint`:`port`"]
+                - targets: ["`endpoint`"]
               {{- else }}
               static_configs:
                 - targets: ["`endpoint`:10249"]
