@@ -447,7 +447,7 @@ splunk_hec/platform_logs:
   batcher:
     enabled: true
     flush_timeout: 200ms
-    min_size_items: 2048
+    min_size: 2048
   {{- end }}
 {{- end }}
 
