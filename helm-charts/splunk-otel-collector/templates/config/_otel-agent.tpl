@@ -33,6 +33,13 @@ extensions:
 
   zpages:
 
+  headers_setter:
+    headers:
+      - action: upsert
+        key: X-SF-TOKEN
+        from_context: X-SF-TOKEN
+        default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
   {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -845,6 +852,8 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
+    auth:
+      authenticator: headers_setter
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -891,9 +900,9 @@ exporters:
     endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4318
     {{- else }}
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
-    headers:
-      "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     {{- end }}
+    auth:
+      authenticator: headers_setter
 
   {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
   signalfx/histograms:
@@ -926,6 +935,7 @@ service:
     - file_storage/persistent_queue
     {{- end }}
     - health_check
+    - headers_setter
     - k8s_observer
     - zpages
 

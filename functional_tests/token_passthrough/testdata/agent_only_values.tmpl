@@ -1,0 +1,23 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   apiUrl: {{ .ApiURL }}
+   ingestUrl: {{ .IngestURL }}
+
+clusterName: test-cluster
+
+agent:
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            include_metadata: true
+          http:
+            include_metadata: true
+    exporters:
+      otlphttp:
+        traces_endpoint: {{ .OTLPSink }}/v2/trace/otlp
+
+clusterReceiver:
+  enabled: false

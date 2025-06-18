@@ -1,0 +1,313 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "Splunk OTEL Chart Test"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "Splunk OTEL Chart Test"
+          },
+          "spans": [
+            {
+              "traceId": "c54b266ca7344ae8b86c8bd484dfcb9c",
+              "spanId": "3783ca5323d96cbd",
+              "parentSpanId": "",
+              "name": "/self-service/registration",
+              "kind": 2,
+              "startTimeUnixNano": "1728310998875861083",
+              "endTimeUnixNano": "1728310998877588686",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "OPTIONS"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "4433"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "192.168.127.1"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "34612"
+                  }
+                },
+                {
+                  "key": "user_agent.original",
+                  "value": {
+                    "stringValue": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/self-service/registration"
+                  }
+                },
+                {
+                  "key": "net.protocol.version",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "204"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "bd113d826ed49662",
+              "parentSpanId": "9eedf25becbec888",
+              "name": "sessions.ManagerHTTP.extractToken",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999185069863",
+              "endTimeUnixNano": "1728310999185089163",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "9eedf25becbec888",
+              "parentSpanId": "2ea6f81ac1fac856",
+              "name": "sessions.ManagerHTTP.FetchFromRequest",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999185068563",
+              "endTimeUnixNano": "1728310999185164963",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "6a9a0303f3439ca6",
+              "parentSpanId": "2ea6f81ac1fac856",
+              "name": "persistence.sql.GetRegistrationFlow",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999185196663",
+              "endTimeUnixNano": "1728310999185845564",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "12c544d48ff8d65e",
+              "parentSpanId": "634a592bf837f065",
+              "name": "sessions.ManagerHTTP.extractToken",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999185849064",
+              "endTimeUnixNano": "1728310999185907664",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "634a592bf837f065",
+              "parentSpanId": "2ea6f81ac1fac856",
+              "name": "sessions.ManagerHTTP.FetchFromRequest",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999185848064",
+              "endTimeUnixNano": "1728310999185916564",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "7c474730472dcbca",
+              "parentSpanId": "f0d8d10c70585b2a",
+              "name": "request.NewBuilder",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999203034391",
+              "endTimeUnixNano": "1728310999203046491",
+              "attributes": [
+                {
+                  "key": "url",
+                  "value": {
+                    "stringValue": "http://host.docker.internal:6000/webhooks/auth-registration-hook"
+                  }
+                },
+                {
+                  "key": "method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "8869729e96d3f189",
+              "parentSpanId": "f0d8d10c70585b2a",
+              "name": "request.Builder.addBody",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999203072591",
+              "endTimeUnixNano": "1728310999206977997",
+              "status": {}
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "d4a7730ae851d484",
+              "parentSpanId": "2ea6f81ac1fac856",
+              "name": "HookExecutor.PostRegistrationHook",
+              "kind": 1,
+              "startTimeUnixNano": "1728310999202864390",
+              "endTimeUnixNano": "1728311002222406374",
+              "status": {
+                "message": "POST http://host.docker.internal:6000/webhooks/auth-registration-hook giving up after 3 attempt(s): Post \"http://host.docker.internal:6000/webhooks/auth-registration-hook\": dial tcp 192.168.127.254:6000: connect: connection refused",
+                "code": 2
+              }
+            },
+            {
+              "traceId": "a5cc1f1d0d36460d4826475fd12ab9e7",
+              "spanId": "2ea6f81ac1fac856",
+              "parentSpanId": "",
+              "name": "/self-service/registration",
+              "kind": 2,
+              "startTimeUnixNano": "1728310999184709762",
+              "endTimeUnixNano": "1728311002223060675",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "4433"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "192.168.127.1"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "34614"
+                  }
+                },
+                {
+                  "key": "user_agent.original",
+                  "value": {
+                    "stringValue": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/self-service/registration"
+                  }
+                },
+                {
+                  "key": "net.protocol.version",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.read_bytes",
+                  "value": {
+                    "intValue": "433"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "302"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "500"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1728311002222590774",
+                  "name": "RegistrationFailed",
+                  "attributes": [
+                    {
+                      "key": "ClientIP",
+                      "value": {
+                        "stringValue": "192.168.127.1:34614"
+                      }
+                    },
+                    {
+                      "key": "SelfServiceFlowType",
+                      "value": {
+                        "stringValue": "browser"
+                      }
+                    },
+                    {
+                      "key": "SelfServiceMethodUsed",
+                      "value": {
+                        "stringValue": ""
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {
+                "code": 2
+              }
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.7.0"
+    }
+  ]
+}

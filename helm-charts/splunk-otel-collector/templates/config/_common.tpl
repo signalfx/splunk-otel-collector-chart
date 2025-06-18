@@ -21,8 +21,8 @@ Common config for the otel-collector otlphttp exporter
 otlphttp:
   metrics_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/datapoint/otlp
   traces_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace/otlp
-  headers:
-    "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+  auth:
+    authenticator: headers_setter
 {{- end }}
 {{- end }}
 

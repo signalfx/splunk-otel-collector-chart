@@ -839,3 +839,37 @@ helm install my-opentelemetry-ebpf --set=endpoint.address=<my-splunk-otel-collec
 ```
 
 where <my-splunk-otel-collector-gateway> is the gateway service name captured in the step 2.
+
+### OTLP Token Passthrough
+
+The collector's configurations for the agent and gateway support OTLP token passthrough.
+This allows the collector to forward the authentication token received from the client, OTEL agent or instrumented application,
+to the backend services.
+
+To enable OTLP token passthrough, use the following configuration in your values.yaml:
+
+For the agent:
+```yaml
+agent:
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            include_metadata: true
+          http:
+            include_metadata: true
+```
+
+For the gateway:
+```yaml
+gateway:
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            include_metadata: true
+          http:
+            include_metadata: true
+```

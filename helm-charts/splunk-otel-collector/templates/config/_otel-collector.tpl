@@ -15,6 +15,13 @@ extensions:
 
   zpages:
 
+  headers_setter:
+    headers:
+      - action: upsert
+        key: X-SF-TOKEN
+        from_context: X-SF-TOKEN
+        default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
 
@@ -116,8 +123,8 @@ exporters:
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
-    headers:
-      "X-SF-Token": ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    auth:
+      authenticator: headers_setter
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -180,6 +187,7 @@ service:
                 without_type_suffix: true
   extensions:
     - health_check
+    - headers_setter
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
