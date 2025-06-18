@@ -4,6 +4,27 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.127.0] - 2025-06-18
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.127.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.127.0).
+
+### ❗ Known Issues ❗
+
+- **`simpleprometheusreceiver`: Metrics from this receiver may be missing labels or exhibit unexpected label behavior**
+  An issue has been identified in this receiver where labels are not being passed and processed correctly.
+  This means Prometheus metrics may be missing expected labels or exhibit unexpected label behavior,
+  which can affect internal Collector processing as well as downstream dashboards, alerts, and metric analysis.
+  See contrib issue [#40722](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40722) for more details on this bug.
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Change the cluster receiver internal metrics ports and healthcheck port to be unique, needed to avoid conflicts when running in host network namespace. ([#1859](https://github.com/signalfx/splunk-otel-collector-chart/pull/1859))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix default config for enabled noDropLogsPipeline feature gate. ([#1866](https://github.com/signalfx/splunk-otel-collector-chart/pull/1866))
+- `agent`: Fix scrape target in prometheus receivers added for k8s controlPlaneMetrics. ([#1865](https://github.com/signalfx/splunk-otel-collector-chart/pull/1865))
+
 ## [0.126.0] - 2025-06-04
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.126.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.126.0).
