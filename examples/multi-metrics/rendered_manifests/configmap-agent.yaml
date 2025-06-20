@@ -69,6 +69,12 @@ data:
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
+      headers_setter:
+        headers:
+        - action: upsert
+          default_value: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+          from_context: X-SF-TOKEN
+          key: X-SF-TOKEN
       health_check:
         endpoint: 0.0.0.0:13133
       k8s_observer:
@@ -419,6 +425,7 @@ data:
       extensions:
       - file_storage
       - health_check
+      - headers_setter
       - k8s_observer
       - zpages
       pipelines:

@@ -1,0 +1,30 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+gateway:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            include_metadata: true
+          http:
+            include_metadata: true
+
+agent:
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            include_metadata: true
+          http:
+            include_metadata: true

@@ -7,11 +7,17 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/config/configauth"
+	"go.opentelemetry.io/collector/config/confighttp"
+	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/extension/extensiontest"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
 	"go.opentelemetry.io/collector/receiver/receivertest"
 )
@@ -82,6 +88,54 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 
 	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
 	require.NoError(t, err, "failed creating traces receiver")
+	t.Cleanup(func() {
+		require.NoError(t, rcvr.Shutdown(t.Context()))
+	})
+
+	return tc
+}
+
+type mockHost struct {
+	component.Host
+	extensions map[component.ID]component.Component
+}
+
+func (h *mockHost) GetExtensions() map[component.ID]component.Component {
+	return h.extensions
+}
+
+func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.TracesSink {
+	tc := new(consumertest.TracesSink)
+	f := otlpreceiver.NewFactory()
+	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
+	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
+	cfg.HTTP.ServerConfig.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+	cfg.HTTP.TracesURLPath = "/v2/trace/otlp"
+
+	baFactory := bearertokenauthextension.NewFactory()
+	baCfg := baFactory.CreateDefaultConfig().(*bearertokenauthextension.Config)
+	baCfg.BearerToken = configopaque.String(token)
+	baCfg.Header = "X-Sf-Token"
+	baCfg.Scheme = ""
+	baExt, err := baFactory.Create(t.Context(), extensiontest.NewNopSettings(baFactory.Type()), baCfg)
+	require.NoError(t, err)
+
+	host := &mockHost{
+		extensions: map[component.ID]component.Component{
+			component.MustNewIDWithName("bearertokenauth", "passthroughValidation"): baExt,
+		},
+	}
+
+	cfg.HTTP.ServerConfig.Auth = &confighttp.AuthConfig{
+		Authentication: configauth.Authentication{
+			AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
+		},
+	}
+
+	rcvr, err := f.CreateTraces(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, tc)
+	require.NoError(t, err)
+	require.NoError(t, rcvr.Start(t.Context(), host))
+
 	t.Cleanup(func() {
 		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})

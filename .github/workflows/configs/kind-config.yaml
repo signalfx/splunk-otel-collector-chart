@@ -36,3 +36,7 @@ nodes:
       - containerPort: 443
         hostPort: 443
         protocol: TCP
+      # This port is used for the token passthrough functional test.
+      - containerPort: 4318
+        hostPort: 43180
+        protocol: TCP
