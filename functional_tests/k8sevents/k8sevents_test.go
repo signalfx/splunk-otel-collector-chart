@@ -77,6 +77,7 @@ func Test_K8SEvents(t *testing.T) {
 		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
 		require.NoError(t, err, "failed to read expected events logs from file")
 
+		internal.MaybeUpdateExpectedLogsResults(t, expectedEventsLogsFile, &k8sEventsLogs)
 		err = plogtest.CompareLogs(expectedEventsLogs, k8sEventsLogs,
 			plogtest.IgnoreTimestamp(),
 			plogtest.IgnoreObservedTimestamp(),
@@ -89,9 +90,6 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreScopeLogsOrder(),
 			plogtest.IgnoreLogRecordsOrder(),
 		)
-		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-			internal.WriteNewExpectedLogsResult(t, expectedEventsLogsFile, &k8sEventsLogs)
-		}
 		require.NoError(t, err)
 	})
 
@@ -114,6 +112,7 @@ func Test_K8SEvents(t *testing.T) {
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
 		require.NoError(t, err, "failed to read expected objects logs from file")
 
+		internal.MaybeUpdateExpectedLogsResults(t, expectedObjectsLogsFile, &k8sObjectsLogs)
 		err = plogtest.CompareLogs(expectedObjectsLogs, k8sObjectsLogs,
 			plogtest.IgnoreTimestamp(),
 			plogtest.IgnoreObservedTimestamp(),
@@ -125,9 +124,6 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreScopeLogsOrder(),
 			plogtest.IgnoreLogRecordsOrder(),
 		)
-		if err != nil && os.Getenv("UPDATE_EXPECTED_RESULTS") == "true" {
-			internal.WriteNewExpectedLogsResult(t, expectedObjectsLogsFile, &k8sObjectsLogs)
-		}
 		require.NoError(t, err)
 	})
 }
