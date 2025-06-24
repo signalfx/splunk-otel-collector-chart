@@ -164,7 +164,7 @@ splunkObservability:
 
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
   # format that doesn't provide any correlation with traces and logs.
-  # Consider using `clusterRecevier.eventsEnabled` option instead.
+  # Consider using `clusterReceiver.eventsEnabled` option instead.
   infrastructureMonitoringEventsEnabled: false
 
   # This option just enables the shared pipeline for logs and profiling data.
