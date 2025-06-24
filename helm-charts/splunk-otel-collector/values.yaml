@@ -162,10 +162,9 @@ splunkObservability:
   tracesEnabled: true
   logsEnabled: false
 
-  # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring as data events:
-  # https://docs.splunk.com/Observability/alerts-detectors-notifications/view-data-events.html
-  # To send Kubernetes events to Splunk Observability Log Observer, configure clusterReceiver.k8sObjects
-  # and set splunkObservability.logsEnabled to true.
+  # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
+  # format that doesn't provide any correlation with traces and logs.
+  # Consider using `clusterRecevier.eventsEnabled` option instead.
   infrastructureMonitoringEventsEnabled: false
 
   # This option just enables the shared pipeline for logs and profiling data.
@@ -504,12 +503,10 @@ clusterReceiver:
   annotations: {}
   podAnnotations: {}
 
-  # This flag enables Kubernetes events collection using OpenTelemetry Kubernetes Events Receiver
+  # This flag enables collection of Kubernetes events as logs using OpenTelemetry k8s events receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
-  # This option requires `splunkObservability.logsEnabled` or `splunkPlatform.logsEnabled`to be set
-  # to `true'. Otherwise, this option will not have any effect. The receiver currently is in "Alpha"
-  # state which means that events format might change over time. Once the receiver is "Stable", it'll
-  # be enabled by default.
+  # The receiver currently is in "Alpha" state which means that events format might change over time.
+  # This option requires `splunkPlatform.logsEnabled` to be set to `true'.
   eventsEnabled: false
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
