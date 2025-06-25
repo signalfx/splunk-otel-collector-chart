@@ -1195,6 +1195,8 @@ gateway:
 service:
   # Service type
   type: ClusterIP
+  # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
+  trafficDistribution: ""
   # Service annotations
   annotations: {}
 

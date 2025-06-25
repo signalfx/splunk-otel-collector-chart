@@ -1428,6 +1428,15 @@
             "ExternalName"
           ]
         },
+        "trafficDistribution": {
+          "type": "string",
+          "enum": [
+            "",
+            "PreferClose",
+            "PreferSameZone",
+            "PreferSameNode"
+          ]
+        },
         "annotations": {
           "type": "object"
         }
