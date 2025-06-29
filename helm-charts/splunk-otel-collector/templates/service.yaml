@@ -20,6 +20,9 @@ metadata:
 {{- end }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if .Values.service.trafficDistribution }}
+  trafficDistribution: {{ .Values.service.trafficDistribution }}
+  {{- end }}
   ports:
   {{- range $key, $port := $gateway.ports }}
   {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
