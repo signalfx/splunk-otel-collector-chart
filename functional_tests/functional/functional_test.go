@@ -49,6 +49,7 @@ const (
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
 	eksFargateTestKubeEnv                  = "eks/fargate"
+	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
 	gceTestKubeEnv                         = "gce"
@@ -177,6 +178,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
 	case eksFargateTestKubeEnv:
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "eks_fargate_test_values.yaml.tmpl"))
+	case eksAutoModeTestKubeEnv:
+		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "eks_auto_mode_test_values.yaml.tmpl"))
 	default:
 		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
 	}
@@ -496,6 +499,7 @@ func Test_Functions(t *testing.T) {
 		gceTestKubeEnv,
 		eksTestKubeEnv,
 		eksFargateTestKubeEnv,
+		eksAutoModeTestKubeEnv,
 	}
 
 	switch {
