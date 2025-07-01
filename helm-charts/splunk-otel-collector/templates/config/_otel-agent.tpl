@@ -274,6 +274,17 @@ receivers:
               static_configs:
                 - targets: ["`endpoint`:9153"]
               {{- end }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(coredns_dns_request_duration_seconds|\
+                    coredns_cache_misses_total|\
+                    coredns_cache_hits_total|\
+                    coredns_cache_entries|\
+                    coredns_dns_responses_total|\
+                    coredns_dns_requests_total|\
+                    rest_client_requests_total|\
+                    rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
@@ -289,6 +300,16 @@ receivers:
             - job_name: "etcd"
               static_configs:
                 - targets: ["`endpoint`:2381"]
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(etcd_server_is_leader|\
+                    etcd_server_leader_changes_seen_total|\
+                    etcd_server_proposals_applied_total|\
+                    etcd_server_proposals_committed_total|\
+                    etcd_server_proposals_failed_total|\
+                    etcd_server_proposals_pending|\
+                    etcd_disk_wal_fsync_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
       prometheus/kube-controller-manager:
@@ -310,6 +331,14 @@ receivers:
               tls_config:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                 insecure_skip_verify: true
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(workqueue_longest_running_processor_seconds|\
+                    workqueue_unfinished_work_seconds|\
+                    workqueue_depth|\
+                    workqueue_retries_total|\
+                    workqueue_queue_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.apiserver.enabled }}
       prometheus/kubernetes-apiserver:
@@ -331,6 +360,16 @@ receivers:
                 insecure_skip_verify: true
               static_configs:
                 - targets: ["`endpoint`"]
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(apiserver_longrunning_requests|\
+                    apiserver_request_duration_seconds|\
+                    apiserver_storage_objects|\
+                    apiserver_response_sizes|\
+                    apiserver_request_total|\
+                    rest_client_requests_total|\
+                    rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       prometheus/kubernetes-proxy:
@@ -357,6 +396,14 @@ receivers:
               static_configs:
                 - targets: ["`endpoint`:10249"]
               {{- end }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(kubeproxy_sync_proxy_rules_iptables_restore_failures_total|\
+                    kubeproxy_sync_proxy_rules_service_changes_total|\
+                    kubeproxy_sync_proxy_rules_service_changes_pending|\
+                    kubeproxy_sync_proxy_rules_duration_seconds|\
+                    kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       prometheus/kubernetes-scheduler:
@@ -378,6 +425,17 @@ receivers:
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
                 type: Bearer
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  action: keep
+                  regex: "(rest_client_request_duration_seconds|\
+                    rest_client_requests_total|\
+                    scheduler_pending_pods|\
+                    scheduler_schedule_attempts_total|\
+                    scheduler_queue_incoming_pods_total|\
+                    scheduler_preemption_attempts_total|\
+                    scheduler_scheduling_algorithm_duration_seconds|\
+                    scheduler_pod_scheduling_sli_duration_seconds)(?:_sum|_count|_bucket)?"
       {{- end }}
     {{- end }}
 
