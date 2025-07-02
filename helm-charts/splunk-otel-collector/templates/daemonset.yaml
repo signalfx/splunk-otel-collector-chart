@@ -253,7 +253,7 @@ spec:
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
         {{- end }}
-        {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+        {{- if and .Values.agent.discovery.enabled }}
         - --discovery
         {{- end }}
         ports:
@@ -340,7 +340,7 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
-      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+      {{- if and .Values.agent.discovery.enabled }}
         - mountPath: /etc/otel/collector/config.d
           name: otel-discovery-properties-configmap
         {{- end }}
@@ -550,7 +550,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+      {{- if and .Values.agent.discovery.enabled }}
       - name: otel-discovery-properties-configmap
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-otel-agent
