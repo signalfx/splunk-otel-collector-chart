@@ -55,7 +55,7 @@ spec:
       containers:
       - name: otel-collector
         args:
-        - --config=C:\\conf\relay.yaml
+        - --config=/conf/relay.yaml
         ports:
         - name: fluentforward
           containerPort: 8006
@@ -139,9 +139,9 @@ spec:
             cpu: 200m
             memory: 500Mi
         volumeMounts:
-        - mountPath: C:\conf
+        - mountPath: /conf
           name: otel-configmap
-        - mountPath: "C:\\hostfs"
+        - mountPath: C:\hostfs
           name: hostfs
           readOnly: true
         - name: varlog
@@ -173,7 +173,7 @@ spec:
           type: DirectoryOrCreate
       - name: hostfs
         hostPath:
-          path: "C:\\"
+          path: C:\
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

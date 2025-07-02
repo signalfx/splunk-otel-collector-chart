@@ -249,15 +249,11 @@ spec:
         {{- else }}
         args:
         {{- end }}
-        {{- if .Values.isWindows }}
-        - --config=C:\\conf\relay.yaml
-        {{- else }}
         - --config=/conf/relay.yaml
-        {{- end }}
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
         {{- end }}
-        {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+        {{- if and .Values.agent.discovery.enabled }}
         - --discovery
         {{- end }}
         ports:
@@ -342,15 +338,15 @@ spec:
         resources:
           {{- toYaml $agent.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
+        - mountPath: /conf
           name: otel-configmap
-      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+      {{- if and .Values.agent.discovery.enabled }}
         - mountPath: /etc/otel/collector/config.d
           name: otel-discovery-properties-configmap
         {{- end }}
         {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
         {{- if .Values.isWindows }}
-        - mountPath: "C:\\hostfs"
+        - mountPath: C:\hostfs
           name: hostfs
           readOnly: true
         {{- else }}
@@ -516,7 +512,7 @@ spec:
       {{- if .Values.isWindows }}
       - name: hostfs
         hostPath:
-          path: "C:\\"
+          path: C:\
       {{- else }}
       - name: host-dev
         hostPath:
@@ -554,7 +550,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
+      {{- if and .Values.agent.discovery.enabled }}
       - name: otel-discovery-properties-configmap
         configMap:
           name: {{ template "splunk-otel-collector.fullname" . }}-otel-agent

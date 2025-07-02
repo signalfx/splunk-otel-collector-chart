@@ -69,11 +69,7 @@ spec:
       containers:
       - name: otel-collector
         args:
-        {{- if .Values.isWindows }}
-        - --config=C:\\conf\relay.yaml
-        {{- else }}
         - --config=/conf/relay.yaml
-        {{- end }}
         {{- if .Values.gateway.featureGates }}
         - --feature-gates={{ .Values.gateway.featureGates }}
         {{- end }}
@@ -163,7 +159,7 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
-        - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
+        - mountPath: /conf
           name: collector-configmap
         {{- if $gateway.extraVolumeMounts }}
         {{- toYaml $gateway.extraVolumeMounts | nindent 8 }}
