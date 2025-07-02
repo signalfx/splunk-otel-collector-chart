@@ -249,11 +249,7 @@ spec:
         {{- else }}
         args:
         {{- end }}
-        {{- if .Values.isWindows }}
-        - --config=C:\\conf\relay.yaml
-        {{- else }}
         - --config=/conf/relay.yaml
-        {{- end }}
         {{- if .Values.agent.featureGates }}
         - --feature-gates={{ .Values.agent.featureGates }}
         {{- end }}
@@ -342,7 +338,7 @@ spec:
         resources:
           {{- toYaml $agent.resources | nindent 10 }}
         volumeMounts:
-        - mountPath: {{ .Values.isWindows | ternary "C:\\conf" "/conf" }}
+        - mountPath: /conf
           name: otel-configmap
       {{- if and .Values.agent.discovery.enabled (not .Values.isWindows) }}
         - mountPath: /etc/otel/collector/config.d
@@ -350,7 +346,7 @@ spec:
         {{- end }}
         {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
         {{- if .Values.isWindows }}
-        - mountPath: "C:\\hostfs"
+        - mountPath: C:\hostfs
           name: hostfs
           readOnly: true
         {{- else }}
@@ -516,7 +512,7 @@ spec:
       {{- if .Values.isWindows }}
       - name: hostfs
         hostPath:
-          path: "C:\\"
+          path: C:\
       {{- else }}
       - name: host-dev
         hostPath:
