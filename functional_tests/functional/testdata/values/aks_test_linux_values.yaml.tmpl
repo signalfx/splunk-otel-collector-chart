@@ -1,0 +1,46 @@
+---
+splunkObservability:
+  realm:       CHANGEME
+  accessToken: CHANGEME
+  ingestUrl: {{ .AgentEndpoint }}
+  apiUrl: {{ .ApiURLEndpoint }}
+
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+
+agent:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500Mi
+    limits:
+      cpu: 200m
+      memory: 1Gi
+  config:
+    exporters:
+      otlp:
+        endpoint: {{ .OtlpEndpoint }}
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+
+clusterReceiver:
+  enabled: false
+
+clusterName: test
+environment: test
+cloudProvider: azure
+distribution: aks
+isWindows: false
+readinessProbe:
+  initialDelaySeconds: 60
+livenessProbe:
+  initialDelaySeconds: 60
+
+featureGates:
+  explicitMountServiceAccountToken: true

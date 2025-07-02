@@ -87,7 +87,7 @@ func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
 		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"OTLPSink":  fmt.Sprintf("http://%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
-	}, 0)
+	}, 0, internal.GetDefaultChartOptions())
 }
 
 func teardown(t *testing.T, kubeConfig string) {

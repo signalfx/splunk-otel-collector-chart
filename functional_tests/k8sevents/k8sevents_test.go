@@ -144,7 +144,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 		"ApiURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 		"LogURL": fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 
 	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)

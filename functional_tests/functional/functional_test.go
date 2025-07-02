@@ -169,16 +169,32 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
-	var valuesFile string
+	chartInfo := map[string]internal.ChartOptions{}
+	addChartInfo := func(fileName string, chartOption internal.ChartOptions) {
+		valuesFile, errAbs := filepath.Abs(filepath.Join(testDir, valuesDir, fileName))
+		assert.NoError(t, errAbs)
+		chartInfo[valuesFile] = chartOption
+	}
 	switch kubeTestEnv {
 	case autopilotTestKubeEnv:
-		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "autopilot_test_values.yaml.tmpl"))
+		addChartInfo("autopilot_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case aksTestKubeEnv:
-		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "aks_test_values.yaml.tmpl"))
+		addChartInfo("aks_test_win_values.yaml.tmpl", internal.ChartOptions{
+			ChartNamespace:   internal.Namespace,
+			ChartReleaseName: "aks-win",
+			ChartWait:        true,
+			ChartTimeout:     internal.HelmActionTimeout,
+		})
+		addChartInfo("aks_test_linux_values.yaml.tmpl", internal.ChartOptions{
+			ChartNamespace:   internal.Namespace,
+			ChartReleaseName: "aks-linux",
+			ChartWait:        true,
+			ChartTimeout:     internal.HelmActionTimeout,
+		})
 	case eksFargateTestKubeEnv:
-		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "eks_fargate_test_values.yaml.tmpl"))
+		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
-		valuesFile, err = filepath.Abs(filepath.Join(testDir, valuesDir, "test_values.yaml.tmpl"))
+		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
 	assert.NoError(t, err)
 
@@ -198,7 +214,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
 		"KubeTestEnv":           kubeTestEnv,
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute)
+
+	for valuesFile, chartOption := range chartInfo {
+		internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute, chartOption)
+	}
 
 	deployments := client.AppsV1().Deployments(internal.Namespace)
 

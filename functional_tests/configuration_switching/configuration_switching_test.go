@@ -55,7 +55,7 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]an
 
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, valuesFileName))
 	require.NoError(t, err)
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
