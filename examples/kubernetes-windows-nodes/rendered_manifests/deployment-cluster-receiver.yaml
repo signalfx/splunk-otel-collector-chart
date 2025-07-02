@@ -39,7 +39,7 @@ spec:
       containers:
       - name: otel-collector
         args:
-        - --config=C:\\conf\relay.yaml
+        - --config=/conf/relay.yaml
         image: quay.io/signalfx/splunk-otel-collector-windows:0.127.0
         imagePullPolicy: IfNotPresent
         env:
@@ -86,7 +86,7 @@ spec:
             cpu: 200m
             memory: 500Mi
         volumeMounts:
-        - mountPath: C:\conf
+        - mountPath: /conf
           name: collector-configmap
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
