@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: coredns-5dd5756b68-r2k65
+            stringValue: coredns-5dd5756b68-rmm4k
         - key: k8s.pod.uid
           value:
-            stringValue: 09160b16-f9ba-44af-b902-eb103c4209d0
+            stringValue: 7ead7a75-77c0-49a5-bbe8-ff18a93031d6
         - key: os.type
           value:
             stringValue: linux
@@ -40,86 +40,6 @@ resourceMetrics:
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeMetrics:
       - metrics:
-          - description: Histogram of the time (in seconds) each request took.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "69"
-                    - "2"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "71"
-                  explicitBounds:
-                    - 0.00025
-                    - 0.0025
-                    - 0.025
-                    - 0.25
-                    - 2.5
-                  startTimeUnixNano: "1000000"
-                  sum: 0.050965436999999995
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: coredns_health_request_duration_seconds
-          - description: Size of the EDNS0 UDP buffer in bytes (64K for TCP) per zone and protocol.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: proto
-                      value:
-                        stringValue: udp
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: zone
-                      value:
-                        stringValue: .
-                  bucketCounts:
-                    - "0"
-                    - "11"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "11"
-                  explicitBounds:
-                    - 0
-                    - 100
-                    - 200
-                    - 300
-                    - 400
-                    - 511
-                    - 1023
-                    - 2047
-                    - 4095
-                    - 8291
-                    - 16000
-                    - 32000
-                    - 48000
-                    - 64000
-                  startTimeUnixNano: "1000000"
-                  sum: 738
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: coredns_dns_request_size_bytes
           - description: Histogram of the time (in seconds) each request took per zone.
             histogram:
               aggregationTemporality: 2
@@ -132,13 +52,12 @@ resourceMetrics:
                       value:
                         stringValue: .
                   bucketCounts:
-                    - "6"
+                    - "8"
+                    - "8"
+                    - "1"
+                    - "0"
                     - "2"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
+                    - "2"
                     - "0"
                     - "0"
                     - "0"
@@ -149,7 +68,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "11"
+                    - "0"
+                  count: "22"
                   explicitBounds:
                     - 0.00025
                     - 0.0005
@@ -168,122 +88,13 @@ resourceMetrics:
                     - 4.096
                     - 8.192
                   startTimeUnixNano: "1000000"
-                  sum: 0.64017533
+                  sum: 0.489611337
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: coredns_dns_request_duration_seconds
-          - description: Size of the returned response in bytes.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: proto
-                      value:
-                        stringValue: udp
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: zone
-                      value:
-                        stringValue: .
-                  bucketCounts:
-                    - "0"
-                    - "2"
-                    - "9"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "11"
-                  explicitBounds:
-                    - 0
-                    - 100
-                    - 200
-                    - 300
-                    - 400
-                    - 511
-                    - 1023
-                    - 2047
-                    - 4095
-                    - 8291
-                    - 16000
-                    - 32000
-                    - 48000
-                    - 64000
-                  startTimeUnixNano: "1000000"
-                  sum: 1465
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: coredns_dns_response_size_bytes
-          - description: Histogram of the time each request took.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: rcode
-                      value:
-                        stringValue: NXDOMAIN
-                    - key: to
-                      value:
-                        stringValue: 192.168.65.254:53
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "2"
-                  explicitBounds:
-                    - 0.00025
-                    - 0.0005
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                  startTimeUnixNano: "1000000"
-                  sum: 0.6369778410000001
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: coredns_forward_request_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.120.0
+          version: v0.127.0

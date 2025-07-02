@@ -34,6 +34,10 @@ agent:
                       insecure_skip_verify: true
                     static_configs:
                       - targets: [ "`endpoint`:6443" ]
+                    metric_relabel_configs:
+                      - source_labels: [__name__]
+                        action: keep
+                        regex: "(apiserver_longrunning_requests|apiserver_request_duration_seconds|apiserver_storage_objects|apiserver_response_sizes|apiserver_request_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
   controlPlaneMetrics:
     etcd:
       enabled: true
