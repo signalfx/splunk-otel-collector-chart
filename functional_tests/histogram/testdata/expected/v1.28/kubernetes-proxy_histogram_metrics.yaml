@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-proxy-6dhjk
+            stringValue: kube-proxy-lxz55
         - key: k8s.pod.uid
           value:
-            stringValue: 2fb97a86-0423-4012-b740-a83b1665b906
+            stringValue: a79f20ea-72ee-4c3c-a158-34e7ffa05cab
         - key: os.type
           value:
             stringValue: linux
@@ -40,61 +40,14 @@ resourceMetrics:
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeMetrics:
       - metrics:
-          - description: '[ALPHA] Distribution of the remaining lifetime on the certificate used to authenticate a request.'
+          - description: '[ALPHA] In Cluster Network Programming Latency in seconds'
             histogram:
               aggregationTemporality: 2
               dataPoints:
                 - bucketCounts:
                     - "0"
                     - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 0
-                    - 1800
-                    - 3600
-                    - 7200
-                    - 21600
-                    - 43200
-                    - 86400
-                    - 172800
-                    - 345600
-                    - 604800
-                    - 2.592e+06
-                    - 7.776e+06
-                    - 1.5552e+07
-                    - 3.1104e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: apiserver_client_certificate_expiration_seconds
-          - description: '[ALPHA] SyncProxyRules latency in seconds for full resyncs'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
+                    - "2"
                     - "2"
                     - "0"
                     - "0"
@@ -104,44 +57,64 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "2"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.22046549
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: kubeproxy_sync_full_proxy_rules_duration_seconds
-          - description: '[ALPHA] Client side rate limiter latency in seconds. Broken down by verb, and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: kind-control-plane:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "4"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -155,153 +128,6 @@ resourceMetrics:
                     - "0"
                     - "0"
                   count: "4"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 5.267999999999999e-06
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_rate_limiter_duration_seconds
-          - description: Distribution of freed heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "1804"
-                    - "15102"
-                    - "7993"
-                    - "15832"
-                    - "1571"
-                    - "789"
-                    - "357"
-                    - "176"
-                    - "103"
-                    - "45"
-                    - "13"
-                    - "29"
-                  count: "43814"
-                  explicitBounds:
-                    - 8.999999999999998
-                    - 24.999999999999996
-                    - 64.99999999999999
-                    - 144.99999999999997
-                    - 320.99999999999994
-                    - 704.9999999999999
-                    - 1536.9999999999998
-                    - 3200.9999999999995
-                    - 6528.999999999999
-                    - 13568.999999999998
-                    - 27264.999999999996
-                  startTimeUnixNano: "1000000"
-                  sum: 6.494008e+06
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: go_gc_heap_frees_by_size_bytes
-          - description: '[ALPHA] In Cluster Network Programming Latency in seconds'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "1"
-                    - "1"
-                    - "1"
-                    - "2"
-                    - "0"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "6"
                   explicitBounds:
                     - 0
                     - 0.25
@@ -385,105 +211,13 @@ resourceMetrics:
                     - 270
                     - 300
                   startTimeUnixNano: "1000000"
-                  sum: 7.352520697
+                  sum: 2.392584819
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: kubeproxy_network_programming_duration_seconds
-          - description: '[ALPHA] Request size in bytes. Broken down by verb and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: kind-control-plane:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "4"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "4"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_request_size_bytes
-          - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: kind-control-plane:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "1"
-                    - "3"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "4"
-                  explicitBounds:
-                    - 0.005
-                    - 0.025
-                    - 0.1
-                    - 0.25
-                    - 0.5
-                    - 1
-                    - 2
-                    - 4
-                    - 8
-                    - 15
-                    - 30
-                    - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 0.032652641999999996
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_request_duration_seconds
           - description: '[ALPHA] SyncProxyRules latency in seconds'
             histogram:
               aggregationTemporality: 2
@@ -492,11 +226,10 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
+                    - "0"
+                    - "0"
                     - "5"
-                    - "1"
-                    - "1"
-                    - "0"
-                    - "2"
+                    - "3"
                     - "0"
                     - "0"
                     - "0"
@@ -505,7 +238,8 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "9"
+                    - "0"
+                  count: "8"
                   explicitBounds:
                     - 0.001
                     - 0.002
@@ -523,282 +257,13 @@ resourceMetrics:
                     - 8.192
                     - 16.384
                   startTimeUnixNano: "1000000"
-                  sum: 0.27947782200000004
+                  sum: 0.23489287700000003
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: kubeproxy_sync_proxy_rules_duration_seconds
-          - description: Distribution individual GC-related stop-the-world pause latencies.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "1"
-                    - "3"
-                    - "2"
-                    - "4"
-                    - "0"
-                    - "0"
-                  count: "10"
-                  explicitBounds:
-                    - 6.399999999999999e-08
-                    - 6.399999999999999e-07
-                    - 7.167999999999999e-06
-                    - 8.191999999999999e-05
-                    - 0.0009175039999999999
-                    - 0.010485759999999998
-                    - 0.11744051199999998
-                  startTimeUnixNano: "1000000"
-                  sum: 0.003856
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: go_gc_pauses_seconds
-          - description: '[ALPHA] SyncProxyRules latency in seconds for partial resyncs'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "5"
-                    - "1"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "7"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.05902067
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: kubeproxy_sync_partial_proxy_rules_duration_seconds
-          - description: '[ALPHA] Response size in bytes. Broken down by verb and host.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: host
-                      value:
-                        stringValue: kind-control-plane:6443
-                    - key: verb
-                      value:
-                        stringValue: GET
-                  bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "4"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "4"
-                  explicitBounds:
-                    - 64
-                    - 256
-                    - 512
-                    - 1024
-                    - 4096
-                    - 16384
-                    - 65536
-                    - 262144
-                    - 1.048576e+06
-                    - 4.194304e+06
-                    - 1.6777216e+07
-                  startTimeUnixNano: "1000000"
-                  sum: 10742
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_response_size_bytes
-          - description: Distribution of heap allocations by approximate size. Note that this does not include tiny objects as defined by /gc/heap/tiny/allocs:objects, only tiny blocks.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "3724"
-                    - "27433"
-                    - "16991"
-                    - "19862"
-                    - "4069"
-                    - "1982"
-                    - "828"
-                    - "352"
-                    - "190"
-                    - "96"
-                    - "36"
-                    - "44"
-                  count: "75607"
-                  explicitBounds:
-                    - 8.999999999999998
-                    - 24.999999999999996
-                    - 64.99999999999999
-                    - 144.99999999999997
-                    - 320.99999999999994
-                    - 704.9999999999999
-                    - 1536.9999999999998
-                    - 3200.9999999999995
-                    - 6528.999999999999
-                    - 13568.999999999998
-                    - 27264.999999999996
-                  startTimeUnixNano: "1000000"
-                  sum: 1.2286192e+07
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: go_gc_heap_allocs_by_size_bytes
-          - description: '[ALPHA] Latencies in seconds of data encryption key(DEK) generation operations.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 5e-06
-                    - 1e-05
-                    - 2e-05
-                    - 4e-05
-                    - 8e-05
-                    - 0.00016
-                    - 0.00032
-                    - 0.00064
-                    - 0.00128
-                    - 0.00256
-                    - 0.00512
-                    - 0.01024
-                    - 0.02048
-                    - 0.04096
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: apiserver_storage_data_key_generation_duration_seconds
-          - description: Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running.
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "487"
-                    - "34"
-                    - "18"
-                    - "46"
-                    - "37"
-                    - "4"
-                    - "0"
-                    - "0"
-                  count: "626"
-                  explicitBounds:
-                    - 6.399999999999999e-08
-                    - 6.399999999999999e-07
-                    - 7.167999999999999e-06
-                    - 8.191999999999999e-05
-                    - 0.0009175039999999999
-                    - 0.010485759999999998
-                    - 0.11744051199999998
-                  startTimeUnixNano: "1000000"
-                  sum: 0.0070444800000000005
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: go_sched_latencies_seconds
-          - description: '[ALPHA] Histogram of the number of seconds the last auth exec plugin client certificate lived before being rotated. If auth exec plugin client certificates are unused, histogram will contain no data.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  explicitBounds:
-                    - 600
-                    - 1800
-                    - 3600
-                    - 14400
-                    - 86400
-                    - 604800
-                    - 2.592e+06
-                    - 7.776e+06
-                    - 1.5552e+07
-                    - 3.1104e+07
-                    - 1.24416e+08
-                  startTimeUnixNano: "1000000"
-                  sum: 0
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: rest_client_exec_plugin_certificate_rotation_age
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.120.0
+          version: v0.127.0
