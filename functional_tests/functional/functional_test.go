@@ -536,7 +536,8 @@ func Test_Functions(t *testing.T) {
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
-	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
+	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 }
 
 func testNodeJSTraces(t *testing.T) {
@@ -1242,41 +1243,41 @@ func testAgentMetrics(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func testPrometheusAnnotationMetrics(t *testing.T) {
-	agentMetricsConsumer := globalSinks.agentMetricsConsumer
-
-	metricNames := []string{
-		"istio_agent_cert_expiry_seconds",
-		"istio_agent_endpoint_no_pod",
-		"istio_agent_go_gc_cycles_automatic_gc_cycles_total",
-		"istio_agent_go_gc_cycles_forced_gc_cycles_total",
-		"istio_agent_go_gc_cycles_total_gc_cycles_total",
-		"istio_agent_go_gc_duration_seconds_sum",
-		"istio_agent_go_gc_duration_seconds_count",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_bucket",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
-	}
-	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
-		_, podLabelPresent := attrs.Get("pod")
-		_, serviceLabelPresent := attrs.Get("service")
-		return !podLabelPresent && !serviceLabelPresent
-	})
-	// when scraping via pod monitor, the pod attribute refers to the pod the metric is scraped from.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
-		_, podLabelPresent := attrs.Get("pod")
-		_, serviceLabelPresent := attrs.Get("service")
-		return podLabelPresent && !serviceLabelPresent
-	})
-	// when scraping via service monitor, the pod attribute refers to the pod the metric is scraped from,
-	// and the servicelabel attribute is added by the serviceMonitor definition.
-	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
-		_, podLabelPresent := attrs.Get("pod")
-		_, serviceLabelPresent := attrs.Get("service")
-		return podLabelPresent && serviceLabelPresent
-	})
-}
+// func testPrometheusAnnotationMetrics(t *testing.T) {
+//	agentMetricsConsumer := globalSinks.agentMetricsConsumer
+//
+//	metricNames := []string{
+//		"istio_agent_cert_expiry_seconds",
+//		"istio_agent_endpoint_no_pod",
+//		"istio_agent_go_gc_cycles_automatic_gc_cycles_total",
+//		"istio_agent_go_gc_cycles_forced_gc_cycles_total",
+//		"istio_agent_go_gc_cycles_total_gc_cycles_total",
+//		"istio_agent_go_gc_duration_seconds_sum",
+//		"istio_agent_go_gc_duration_seconds_count",
+//		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_bucket",
+//		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
+//		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
+//	}
+//	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
+//	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
+//		_, podLabelPresent := attrs.Get("pod")
+//		_, serviceLabelPresent := attrs.Get("service")
+//		return !podLabelPresent && !serviceLabelPresent
+//	})
+//	// when scraping via pod monitor, the pod attribute refers to the pod the metric is scraped from.
+//	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
+//		_, podLabelPresent := attrs.Get("pod")
+//		_, serviceLabelPresent := attrs.Get("service")
+//		return podLabelPresent && !serviceLabelPresent
+//	})
+//	// when scraping via service monitor, the pod attribute refers to the pod the metric is scraped from,
+//	// and the servicelabel attribute is added by the serviceMonitor definition.
+//	checkMetricsAreEmitted(t, agentMetricsConsumer, metricNames, func(attrs pcommon.Map) bool {
+//		_, podLabelPresent := attrs.Get("pod")
+//		_, serviceLabelPresent := attrs.Get("service")
+//		return podLabelPresent && serviceLabelPresent
+//	})
+//}
 
 func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
