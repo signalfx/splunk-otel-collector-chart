@@ -89,7 +89,7 @@ func deployIstioAndCollector(t *testing.T) {
 		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
 		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
 	}
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0)
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {

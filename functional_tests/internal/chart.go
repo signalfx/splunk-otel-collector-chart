@@ -26,10 +26,27 @@ import (
 const (
 	HelmActionTimeout = 10 * time.Minute
 	chartReleaseName  = "sock"
+	chartLabelKey     = "helm.sh/chart-name"
 	defaultChartPath  = "helm-charts/splunk-otel-collector"
 )
 
-func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any, minReadyTime time.Duration) {
+type ChartOptions struct {
+	ChartNamespace   string
+	ChartReleaseName string
+	ChartWait        bool
+	ChartTimeout     time.Duration
+}
+
+func GetDefaultChartOptions() ChartOptions {
+	return ChartOptions{
+		ChartNamespace:   Namespace,
+		ChartReleaseName: chartReleaseName,
+		ChartWait:        true,
+		ChartTimeout:     HelmActionTimeout,
+	}
+}
+
+func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any, minReadyTime time.Duration, options ChartOptions) {
 	valuesBytes, err := os.ReadFile(valuesFile)
 	require.NoError(t, err)
 	tmpl, err := template.New("").Parse(string(valuesBytes))
@@ -43,10 +60,11 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	install := action.NewInstall(actionConfig)
-	install.Namespace = Namespace
-	install.ReleaseName = chartReleaseName
-	install.Wait = true
-	install.Timeout = HelmActionTimeout
+	install.Namespace = options.ChartNamespace
+	install.ReleaseName = options.ChartReleaseName
+	install.Wait = options.ChartWait
+	install.Timeout = options.ChartTimeout
+	install.Labels = map[string]string{chartLabelKey: chartReleaseName}
 
 	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
 	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
@@ -72,11 +90,11 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		}
 		// test the upgrade
 		upgrade := action.NewUpgrade(actionConfig)
-		upgrade.Namespace = Namespace
-		upgrade.Wait = true
-		upgrade.Timeout = HelmActionTimeout
+		upgrade.Namespace = options.ChartNamespace
+		upgrade.Wait = options.ChartWait
+		upgrade.Timeout = options.ChartTimeout
 		t.Log("Running helm upgrade")
-		_, err = upgrade.Run(chartReleaseName, loadChart(t), values)
+		_, err = upgrade.Run(options.ChartReleaseName, loadChart(t), values)
 	} else {
 		t.Log("Running helm install")
 		_, err = install.Run(loadChart(t), values)
@@ -86,8 +104,8 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	// Wait for pods to be ready for at least minReadyTime
 	clientset, err := getKubeClient(testKubeConfig)
 	require.NoError(t, err)
-	labelSelector := "release=" + chartReleaseName
-	CheckPodsReady(t, clientset, Namespace, labelSelector, HelmActionTimeout, minReadyTime)
+	labelSelector := "release=" + options.ChartReleaseName
+	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
 }
 
 func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
@@ -99,11 +117,20 @@ func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
-	uninstall := action.NewUninstall(InitHelmActionConfig(t, testKubeConfig))
+	actionConfig := InitHelmActionConfig(t, testKubeConfig)
+	client := action.NewList(actionConfig)
+	client.AllNamespaces = true
+	client.Selector = fmt.Sprintf("%s==%s", chartLabelKey, chartReleaseName)
+	releases, err := client.Run()
+	require.NoError(t, err)
+
+	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
 	uninstall.Timeout = HelmActionTimeout
-	_, _ = uninstall.Run(chartReleaseName)
+	for _, release := range releases {
+		_, _ = uninstall.Run(release.Name)
+	}
 }
 
 func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration {
