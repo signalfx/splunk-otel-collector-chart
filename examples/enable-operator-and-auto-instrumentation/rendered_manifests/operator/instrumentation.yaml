@@ -24,57 +24,55 @@ spec:
     - tracecontext
     - baggage
     - b3
-  env:
   apacheHttpd:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
     env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
   dotnet:
+    env:
+    - name: OTEL_DOTNET_AUTO_PLUGINS
+      value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-dotnet:v1.10.0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.10.0
-    env:
-      - name: OTEL_DOTNET_AUTO_PLUGINS
-        value: "Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation"
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-dotnet:v1.10.0
-      # dotnet auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
   go:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-go:v0.19.0-alpha
     image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.19.0-alpha
-    env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-go:v0.19.0-alpha
   java:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-java:v2.17.0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.0
-    env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-java:v2.17.0
-      # java auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
   nginx:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
-    env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
   nodejs:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-js:v3.1.2
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2
-    env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=splunk-otel-js:v3.1.2
-      # nodejs auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
   python:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0
     env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: splunk.zc.method=autoinstrumentation-python:0.51b0
-      # python auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317.
-      # See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-python:0.51b0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0

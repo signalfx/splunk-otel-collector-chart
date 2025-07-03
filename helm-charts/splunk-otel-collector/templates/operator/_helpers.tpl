@@ -13,9 +13,10 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
   {{- /* Check if the endpoint is overridden in the Helm values */ -}}
   {{- $endpointOverridden := and
       .Values.instrumentation
-      .Values.instrumentation.exporter
-      .Values.instrumentation.exporter.endpoint
-      (ne .Values.instrumentation.exporter.endpoint "")
+      .Values.instrumentation.spec
+      .Values.instrumentation.spec.exporter
+      .Values.instrumentation.spec.exporter.endpoint
+      (ne .Values.instrumentation.spec.exporter.endpoint "")
   -}}
 
   {{- /* Validate the configuration */ -}}
@@ -30,7 +31,106 @@ Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operato
 {{- end -}}
 
 {{/*
-Helper to define an endpoint for exporting telemetry data related to auto-instrumentation.
+Helper to build exporter spec
+- Determines the endpoint based on user-defined values or default agent/gateway settings.
+- Order of precedence: User-defined endpoint > Agent service endpoint > Agent host port endpoint > Gateway endpoint
+- exporter property is a required field and user can't disable it in the custom values.yaml.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-exporter" -}}
+  {{- $endpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
+  {{- $exporter := .Values.instrumentation.spec.exporter | default (dict) -}}
+  {{- $mergedExporter := merge $exporter (dict "endpoint" $endpoint) -}}
+exporter:
+  {{- $mergedExporter | toYaml | nindent 2 -}}
+{{- end -}}
+
+{{/*
+Helper to build propagators spec
+- It uses the with directive, which allows the user to disable it in the custom values.yaml.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-propagators" -}}
+  {{- with .Values.instrumentation.spec.propagators }}
+propagators:
+{{- toYaml . | nindent 2 }}
+  {{- end -}}
+{{- end -}}
+
+{{/* Helper to build sampler spec
+- It uses the with directive, which allows the user to disable it in the custom values.yaml.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-sampler" -}}
+  {{- with .Values.instrumentation.spec.sampler }}
+sampler:
+{{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end -}}
+
+{{/* Helper to build environment variables
+- If profiling is enabled, it adds SPLUNK_PROFILER_ENABLED and SPLUNK_PROFILER_MEMORY_ENABLED which are necessary environment variables for profiling.
+- If the exporter endpoint contains "SPLUNK_OTEL_AGENT", it sets the SPLUNK_OTEL_AGENT environment variable to the host IP of the collector.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-env" -}}
+  {{- $env := .Values.instrumentation.spec.env | default list -}}
+  {{- if .Values.splunkObservability.profilingEnabled -}}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
+      {{- $env = append $env (dict "name" "SPLUNK_PROFILER_ENABLED" "value" "true") -}}
+    {{- end }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
+      {{- $env = append $env (dict "name" "SPLUNK_PROFILER_MEMORY_ENABLED" "value" "true") -}}
+    {{- end }}
+  {{- end -}}
+  {{- if contains "SPLUNK_OTEL_AGENT" (include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" .) }}
+    {{- $env = append $env (dict "name" "SPLUNK_OTEL_AGENT" "valueFrom" (dict "fieldRef" (dict "apiVersion" "v1" "fieldPath" "status.hostIP"))) -}}
+  {{- end -}}
+  {{- with $env }}
+env:
+{{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end -}}
+
+{{/*
+Helper to build entries for instrumentation libraries
+- Iterates over the list of supported libraries.
+- Generates a YAML configuration block for each library, containing:
+  - The image name and tag.
+  - Environment variables, including special handling for 'OTEL_RESOURCE_ATTRIBUTES' and 'OTEL_EXPORTER_OTLP_ENDPOINT'.
+  - Any additional properties defined in the custom Helm values.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-libraries" -}}
+  {{- /* Store the endpoint in a variable to avoid context changes in nested loops.  */ -}}
+  {{- /* Helm template loops change the context, making direct access to variables in parent scopes unreliable. */ -}}
+  {{- $endpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
+
+  {{- $libraries := list "apacheHttpd" "dotnet" "go" "java" "nginx" "nodejs" "python" -}}
+  {{- range $lib := $libraries }}
+    {{- if and (eq (kindOf $.Values.instrumentation.spec) "map") (hasKey $.Values.instrumentation.spec $lib) -}}
+      {{- $libSpec := get $.Values.instrumentation.spec $lib }}
+
+      {{- /* Instead of including as a string, use a template function that returns proper data structure */ -}}
+      {{- $envData := dict "endpoint" $endpoint "instLibName" $lib "env" $libSpec.env "image" $libSpec.image -}}
+      {{- $envVars := include "splunk-otel-collector.operator.extract-instrumentation-env" $envData | fromYaml -}}
+
+      {{- /* Now merge the structured data instead of a string */ -}}
+      {{- $mergedLibSpec := merge (dict "env" $envVars.env) $libSpec -}}
+
+      {{- printf "\n%s:" $lib }}
+      {{- toYaml $mergedLibSpec | nindent 2 -}}
+    {{- end -}}
+  {{- end }}
+{{- end -}}
+
+{{/* Helper to build instrumentation spec */}}
+{{- define "splunk-otel-collector.operator.instrumentation-spec" -}}
+  {{- printf "%s%s%s%s%s"
+      (include "splunk-otel-collector.operator.instrumentation-exporter" .)
+      (include "splunk-otel-collector.operator.instrumentation-propagators" .)
+      (include "splunk-otel-collector.operator.instrumentation-sampler" .)
+      (include "splunk-otel-collector.operator.instrumentation-env" .)
+      (include "splunk-otel-collector.operator.instrumentation-libraries" .)
+  | indent 2 -}}
+{{- end -}}
+
+{{/* Helper to determine exporter endpoint
 - Determines the endpoint based on user-defined values or default agent/gateway settings.
 - Order of precedence: User-defined endpoint > Agent service endpoint > Agent host port endpoint > Gateway endpoint
 */}}
@@ -41,11 +141,12 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
   {{- /* Use the user-defined endpoint if specified in the Helm values */ -}}
   {{- if and
     .Values.instrumentation
-    .Values.instrumentation.exporter
-    .Values.instrumentation.exporter.endpoint
-    (ne .Values.instrumentation.exporter.endpoint "")
+    .Values.instrumentation.spec
+    .Values.instrumentation.spec.exporter
+    .Values.instrumentation.spec.exporter.endpoint
+    (ne .Values.instrumentation.spec.exporter.endpoint "")
   }}
-  {{- $endpoint = .Values.instrumentation.exporter.endpoint -}}
+    {{- $endpoint = .Values.instrumentation.spec.exporter.endpoint -}}
   {{- /* Use the agent service endpoint if the agent is enabled */ -}}
   {{- else if .Values.agent.service.enabled -}}
     {{- $endpoint = printf "http://%s-agent.%s.svc.cluster.local:4317" (include "splunk-otel-collector.fullname" .) .Release.Namespace -}}
@@ -62,46 +163,6 @@ Helper to define an endpoint for exporting telemetry data related to auto-instru
 
   {{- /* Return the determined endpoint */ -}}
   {{- printf "%s" $endpoint -}}
-{{- end -}}
-
-{{/*
-Helper to define entries for instrumentation libraries.
-- Iterates over user-defined and default configuration settings for each library.
-- Generates a YAML configuration block for each library, containing:
-  - The library name.
-  - The image repository and tag.
-  - Environment variables, including special handling for 'OTEL_RESOURCE_ATTRIBUTES' and 'OTEL_EXPORTER_OTLP_ENDPOINT'.
-*/}}
-{{- define "splunk-otel-collector.operator.instrumentation-libraries" -}}
-  {{- /* Store the endpoint in a variable to avoid context changes in nested loops.  */ -}}
-  {{- /* Helm template loops change the context, making direct access to variables in parent scopes unreliable. */ -}}
-  {{- $endpoint := include "splunk-otel-collector.operator.instrumentation-exporter-endpoint" $ -}}
-  {{- /* Define a map (versions.txt name -> Instrumentation spec name) for instrumentation library names */ -}}
-  {{- /* This is a simple workaround to accommodate one unique case that should be removed in the future */ -}}
-  {{- $instLibAliases := dict "apache-httpd" "apacheHttpd" -}}
-
-  {{- /* Iterate over each specified instrumentation library */ -}}
-  {{- if .Values.instrumentation -}}
-    {{- range $key, $value := .Values.instrumentation -}}
-      {{- /* Check for required fields to determine if it is an instrumentation library */ -}}
-      {{- if and (eq (kindOf $value) "map") $value.repository $value.tag -}}
-        {{- $instLibName := get $instLibAliases $key | default $key -}}
-
-        {{- /* Generate YAML keys for each instrumentation library */ -}}
-        {{- printf "%s:" $instLibName | indent 2 -}}
-        {{- printf "\n" -}}
-
-        {{- /* Generate YAML for the image field */ -}}
-        {{- printf "image: %s:%s" $value.repository $value.tag | indent 4 -}}
-        {{- printf "\n" -}}
-
-        {{- /* Output environment variables for the instrumentation library */ -}}
-        {{- printf "env:" | indent 4 -}}
-        {{- include "splunk-otel-collector.operator.extract-instrumentation-env" (dict "endpoint" $endpoint "instLibName" $instLibName "env" $value.env  "repository" $value.repository "tag" $value.tag) -}}
-
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -132,52 +193,46 @@ Helper for generating environment variables for each instrumentation library.
 - For OTEL_EXPORTER_OTLP_ENDPOINT, applies special case values based on the library ('dotnet', 'python', `java`), but user-supplied values will override these.
 */}}
 {{- define "splunk-otel-collector.operator.extract-instrumentation-env" }}
+  {{- println "env:" -}}
   {{- /* Initialize Splunk default Otel resource attribute; always included */ -}}
-  {{- $imageShortName := printf "%s:%s" (splitList "/" .repository | last) .tag  -}}
+  {{- $imageShortName := printf "%s" (splitList "/" .image | last) -}}
   {{- $otelResourceAttributes := printf "splunk.zc.method=%s" $imageShortName }}
+
+  {{- $customOtelExporterEndpoint := "" }}
+  {{- if or (eq .instLibName "dotnet") (eq .instLibName "java") (eq .instLibName "nodejs") (eq .instLibName "python") }}
+    {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
+  {{- end }}
 
   {{- /* Loop through user-supplied environment variables */ -}}
   {{- range $env := .env }}
     {{- if eq $env.name "OTEL_RESOURCE_ATTRIBUTES" }}
       {{- $otelResourceAttributes = printf "%s,%s" $env.value $otelResourceAttributes }}
-    {{- else }}
-      {{- printf "- name: %s" $env.name | nindent 6 -}}
-      {{- printf "  value: %s" ($env.value | quote) | nindent 6 -}}
+    {{- else if eq $env.name "OTEL_EXPORTER_OTLP_ENDPOINT" }}
+      {{- $customOtelExporterEndpoint = $env.value }}
+    {{- else -}}
+      {{- printf "- name: %s" $env.name -}}
+      {{- printf "\n" -}}
+      {{- printf "  value: %s" ($env.value | quote) -}}
+      {{- printf "\n" -}}
     {{- end }}
   {{- end }}
 
   {{- /* Output OTEL_RESOURCE_ATTRIBUTES with merged values */ -}}
-  {{- printf "- name: %s" "OTEL_RESOURCE_ATTRIBUTES" | nindent 6 -}}
-  {{- printf "  value: %s" $otelResourceAttributes | nindent 6 -}}
+  {{- printf "- name: %s" "OTEL_RESOURCE_ATTRIBUTES" -}}
   {{- printf "\n" -}}
-
-  {{- /* Handle custom or default exporter endpoint */ -}}
-  {{- $customOtelExporterEndpoint := "" }}
-  {{- if or (eq .instLibName "dotnet") (eq .instLibName "java") (eq .instLibName "nodejs") (eq .instLibName "python") }}
-    {{- $customOtelExporterEndpoint = .endpoint | replace ":4317" ":4318" }}
-  {{- end }}
-  {{- if .env }}
-    {{- range $env := .env }}
-      {{- if eq $env.name "OTEL_EXPORTER_OTLP_ENDPOINT" }}
-        {{- $customOtelExporterEndpoint = $env.value }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
+  {{- printf "  value: %s" $otelResourceAttributes -}}
+  {{- printf "\n" -}}
 
   {{- /* Output final OTEL_EXPORTER_OTLP_ENDPOINT, if applicable based on input conditions */ -}}
   {{- if $customOtelExporterEndpoint }}
     {{- /* Ensure the SPLUNK_OTEL_AGENT env var is set with per language env vars to successfully use it in env var substitution */ -}}
     {{- if contains "SPLUNK_OTEL_AGENT" $customOtelExporterEndpoint -}}
-      {{- printf "- name: SPLUNK_OTEL_AGENT\n  valueFrom:\n    fieldRef:\n      apiVersion: v1\n      fieldPath: status.hostIP" | indent 6 }}
+      {{- printf "- name: SPLUNK_OTEL_AGENT\n  valueFrom:\n    fieldRef:\n      apiVersion: v1\n      fieldPath: status.hostIP" -}}
       {{- printf "\n" -}}
     {{- end -}}
-    {{- if contains "4318" $customOtelExporterEndpoint }}
-      {{- printf "# %s auto-instrumentation uses http/proto by default, so data must be sent to 4318 instead of 4317." .instLibName | indent 6 -}}
-      {{- printf "\n" -}}
-      {{- printf "# See: https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-auto-instrumentation-injection" | indent 6 -}}
-    {{- end }}
-    {{- printf "- name: %s" "OTEL_EXPORTER_OTLP_ENDPOINT" | nindent 6 -}}
-    {{- printf "  value: %s" $customOtelExporterEndpoint | nindent 6 -}}
+    {{- printf "- name: %s" "OTEL_EXPORTER_OTLP_ENDPOINT" -}}
+    {{- printf "\n" -}}
+    {{- printf "  value: %s" $customOtelExporterEndpoint -}}
     {{- printf "\n" -}}
   {{- end }}
 {{- end }}
