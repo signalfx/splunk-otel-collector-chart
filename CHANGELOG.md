@@ -4,6 +4,23 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.128.0] - 2025-07-03
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.128.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.128.0).
+
+### ❗ Known Issues ❗
+
+- `targetAllocator`: enabling targetAllocator doesn't work in this release due to
+  [a bug in the Prometheus library](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788)
+  which will be fixed in the next release (0.129.0).
+
+### 💡 Enhancements 💡
+
+- `discovery`: Enable service discovery on Windows nodes. ([#1888](https://github.com/signalfx/splunk-otel-collector-chart/pull/1888))
+- `gateway, agent`: Add support for OTLP token passthrough in the gateway and agent. ([#1870](https://github.com/signalfx/splunk-otel-collector-chart/pull/1870))
+- `gateway`: Add trafficDistribution support to the gateway services. ([#1874](https://github.com/signalfx/splunk-otel-collector-chart/pull/1874))
+- `operator`: Bump java to v2.17.0 in helm-charts/splunk-otel-collector/values.yaml ([#1878](https://github.com/signalfx/splunk-otel-collector-chart/pull/1878))
+
 ## [0.127.0] - 2025-06-18
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.127.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.127.0).
