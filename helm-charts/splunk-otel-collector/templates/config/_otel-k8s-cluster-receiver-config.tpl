@@ -194,6 +194,14 @@ processors:
       - action: insert
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
+      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      - action: insert
+        key: cloud.platform
+        value: aws_eks
+      - action: insert
+        key: cloud.provider
+        value: aws
+      {{- end }}
 
   resource:
     attributes:

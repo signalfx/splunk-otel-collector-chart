@@ -72,12 +72,12 @@ resourcedetection:
     - env
     {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.cloudProvider" .) "gcp") }}
     - gcp
-    {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
     {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "aws" }}
+    {{- if and (eq (include "splunk-otel-collector.cloudProvider" .) "aws") (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
     - ec2
     {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
     - azure
@@ -90,7 +90,7 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (not .Values.clusterName) }}
+  {{- else if and (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") (not .Values.clusterName) }}
   eks:
     resource_attributes:
       k8s.cluster.name:

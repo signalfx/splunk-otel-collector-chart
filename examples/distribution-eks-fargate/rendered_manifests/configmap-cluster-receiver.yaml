@@ -58,6 +58,12 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
+        - action: insert
+          key: cloud.platform
+          value: aws_eks
+        - action: insert
+          key: cloud.provider
+          value: aws
       resource/add_mode:
         attributes:
         - action: insert
@@ -71,8 +77,6 @@ data:
       resourcedetection:
         detectors:
         - env
-        - eks
-        - ec2
         - system
         override: true
         timeout: 15s
