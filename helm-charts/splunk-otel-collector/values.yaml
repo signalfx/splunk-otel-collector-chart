@@ -1310,7 +1310,7 @@ instrumentation:
         value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
   go:
     repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
-    tag: v0.19.0-alpha
+    tag: v0.21.0
     # env:
     #   - name: GO_ENV_VAR
     #     value: go_value
@@ -1322,7 +1322,7 @@ instrumentation:
     #     value: apache_value
   python:
     repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
-    tag: 0.51b0
+    tag: 0.54b1
     # env:
     # - name: PYTHON_ENV_VAR
     #   value: python_value
