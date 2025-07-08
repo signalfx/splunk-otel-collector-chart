@@ -18,15 +18,9 @@ metadata:
 data:
   relay: |
     exporters:
-      signalfx:
-        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-        api_url: https://api.us0.signalfx.com
-        disable_default_translation_rules: true
-        ingest_url: https://ingest.us0.signalfx.com
-        timeout: 10s
       splunk_hec/o11y:
         disable_compression: true
-        endpoint: https://ingest.us0.signalfx.com/v1/log
+        endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
         log_data_enabled: true
         profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
@@ -89,11 +83,6 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
-      resource/add_environment:
-        attributes:
-        - action: insert
-          key: deployment.environment
-          value: CHANGEME
       resource/add_mode:
         attributes:
         - action: insert
@@ -135,8 +124,6 @@ data:
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
-        metadata_exporters:
-        - signalfx
       k8s_events:
         auth_type: serviceAccount
       prometheus/k8s_cluster_receiver:
@@ -169,33 +156,10 @@ data:
           - attributes/drop_event_attrs
           - resourcedetection
           - resource
-          - resource/add_environment
           - transform/k8sevents
           - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
-        metrics:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          - resource
-          - resource/k8s_cluster
-          receivers:
-          - k8s_cluster
-        metrics/collector:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          - resource/add_collector_k8s
-          - resourcedetection
-          - resource
-          - resource/add_mode
-          receivers:
-          - prometheus/k8s_cluster_receiver
       telemetry:
         metrics:
           readers:

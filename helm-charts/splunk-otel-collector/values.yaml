@@ -507,7 +507,7 @@ clusterReceiver:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   # The receiver currently is in "Alpha" state which means that events format might change over time.
   # This option requires `splunkPlatform.logsEnabled` to be set to `true'.
-  eventsEnabled: false
+  eventsEnabled: true
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
