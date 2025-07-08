@@ -172,8 +172,8 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 		require.NoError(t, err)
 	}
 
-	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
 	require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
+	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
 	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
