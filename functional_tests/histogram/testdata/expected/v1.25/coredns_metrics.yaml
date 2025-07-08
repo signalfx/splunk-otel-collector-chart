@@ -2,2334 +2,11 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
-          - name: coredns_cache_misses_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 10
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zones
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 31200
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_mcache_sys_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 9.023328e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_next_gc_bytes
-          - name: process_cpu_seconds_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0.21
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 6
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: type
-                      value:
-                        stringValue: denial
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zones
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-            name: coredns_cache_entries
-          - gauge:
-              dataPoints:
-                - asDouble: 47980
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_objects
-          - gauge:
-              dataPoints:
-                - asDouble: 19200
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_mcache_inuse_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 146880
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_mspan_sys_bytes
-          - name: coredns_forward_conn_cache_misses_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 2
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: proto
-                      value:
-                        stringValue: udp
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: to
-                      value:
-                        stringValue: 192.168.65.254:53
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: coredns_health_request_failures_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 4.7071232e+07
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: process_resident_memory_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 7.555424e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_alloc_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 3.121152e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_idle_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 3.11296e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_released_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 10
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_threads
-          - gauge:
-              dataPoints:
-                - asDouble: 0.011320666
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_duration_seconds
-          - gauge:
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: version
-                      value:
-                        stringValue: go1.18.2
-                  timeUnixNano: "1000000"
-            name: go_info
-          - name: coredns_panics_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 1.454608e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_buck_hash_sys_bytes
-          - name: coredns_forward_max_concurrent_rejects_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 16
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: process_open_fds
-          - gauge:
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: up
-          - gauge:
-              dataPoints:
-                - asDouble: 41
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_goroutines
-          - gauge:
-              dataPoints:
-                - asDouble: 1.543064e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_other_sys_bytes
-          - name: go_memstats_alloc_bytes_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 1.067904e+07
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: coredns_forward_healthcheck_broken_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 1.7434748913902278e+09
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_last_gc_time_seconds
-          - name: coredns_reload_failed_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: go_memstats_lookups_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 1.14688e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_stack_sys_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 170
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_samples_scraped
-          - name: coredns_forward_requests_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 4
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: to
-                      value:
-                        stringValue: 192.168.65.254:53
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: go_gc_duration_seconds_count
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asInt: "3"
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: go_gc_duration_seconds_sum
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0.001535941
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 0.00031199
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: quantile
-                      value:
-                        stringValue: "0"
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_gc_duration_seconds_quantile
-          - gauge:
-              dataPoints:
-                - asDouble: 5.361344e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_gc_sys_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: coredns_hosts_reload_timestamp_seconds
-          - gauge:
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: name
-                      value:
-                        stringValue: cache
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zone
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-            name: coredns_plugin_enabled
-          - gauge:
-              dataPoints:
-                - asDouble: 1.1370496e+07
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_sys_bytes
-          - name: go_memstats_mallocs_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 67650
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: coredns_forward_responses_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 2
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: rcode
-                      value:
-                        stringValue: NOERROR
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: to
-                      value:
-                        stringValue: 192.168.65.254:53
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: coredns_cache_hits_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 2
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: type
-                      value:
-                        stringValue: denial
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zones
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: go_memstats_frees_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 19670
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 8.249344e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_heap_inuse_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 2.1054472e+07
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_sys_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 1.74347489045e+09
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: process_start_time_seconds
-          - gauge:
-              dataPoints:
-                - asDouble: 170
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_samples_post_metric_relabeling
-          - gauge:
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: goversion
-                      value:
-                        stringValue: go1.18.2
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: revision
-                      value:
-                        stringValue: 45b0a11
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: version
-                      value:
-                        stringValue: 1.9.3
-                  timeUnixNano: "1000000"
-            name: coredns_build_info
-          - gauge:
-              dataPoints:
-                - asDouble: 7.555424e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_alloc_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 141848
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_mspan_inuse_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 1.14688e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: go_memstats_stack_inuse_bytes
-          - gauge:
-              dataPoints:
-                - asDouble: 1.048576e+06
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: process_max_fds
-          - gauge:
-              dataPoints:
-                - asDouble: 170
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_series_added
           - name: coredns_dns_requests_total
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asDouble: 5
+                - asDouble: 14
                   attributes:
                     - key: family
                       value:
@@ -2348,10 +25,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-565d847f94-pfgqh
+                        stringValue: coredns-565d847f94-bkp5d
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
                     - key: os.type
                       value:
                         stringValue: linux
@@ -2363,13 +40,13 @@ resourceMetrics:
                         stringValue: dns://:53
                     - key: server.address
                       value:
-                        stringValue: 10.244.0.4
+                        stringValue: 10.244.0.3
                     - key: server.port
                       value:
                         stringValue: "9153"
                     - key: service.instance.id
                       value:
-                        stringValue: 10.244.0.4:9153
+                        stringValue: 10.244.0.3:9153
                     - key: service.name
                       value:
                         stringValue: coredns
@@ -2384,11 +61,9 @@ resourceMetrics:
                         stringValue: .
                   timeUnixNano: "1000000"
               isMonotonic: true
-          - name: coredns_dns_responses_total
-            sum:
-              aggregationTemporality: 2
+          - gauge:
               dataPoints:
-                - asDouble: 3
+                - asDouble: 1
                   attributes:
                     - key: host.name
                       value:
@@ -2404,10 +79,292 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-565d847f94-pfgqh
+                        stringValue: coredns-565d847f94-bkp5d
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: up
+          - gauge:
+              dataPoints:
+                - asDouble: 0.006584042
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_duration_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 29
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_series_added
+          - gauge:
+              dataPoints:
+                - asDouble: 9
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server
+                      value:
+                        stringValue: dns://:53
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: type
+                      value:
+                        stringValue: denial
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                    - key: zones
+                      value:
+                        stringValue: .
+                  timeUnixNano: "1000000"
+            name: coredns_cache_entries
+          - name: coredns_cache_hits_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 6
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server
+                      value:
+                        stringValue: dns://:53
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: type
+                      value:
+                        stringValue: denial
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                    - key: zones
+                      value:
+                        stringValue: .
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: coredns_cache_misses_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 15
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server
+                      value:
+                        stringValue: dns://:53
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.3
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.3:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                    - key: zones
+                      value:
+                        stringValue: .
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: coredns_dns_responses_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 16
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-565d847f94-bkp5d
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
                     - key: os.type
                       value:
                         stringValue: linux
@@ -2422,13 +379,13 @@ resourceMetrics:
                         stringValue: dns://:53
                     - key: server.address
                       value:
-                        stringValue: 10.244.0.4
+                        stringValue: 10.244.0.3
                     - key: server.port
                       value:
                         stringValue: "9153"
                     - key: service.instance.id
                       value:
-                        stringValue: 10.244.0.4:9153
+                        stringValue: 10.244.0.3:9153
                     - key: service.name
                       value:
                         stringValue: coredns
@@ -2440,53 +397,9 @@ resourceMetrics:
                         stringValue: .
                   timeUnixNano: "1000000"
               isMonotonic: true
-          - name: coredns_local_localhost_requests_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 0
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
           - gauge:
               dataPoints:
-                - asDouble: 7.71629056e+08
+                - asDouble: 169
                   attributes:
                     - key: host.name
                       value:
@@ -2502,22 +415,22 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-565d847f94-pfgqh
+                        stringValue: coredns-565d847f94-bkp5d
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
                     - key: os.type
                       value:
                         stringValue: linux
                     - key: server.address
                       value:
-                        stringValue: 10.244.0.4
+                        stringValue: 10.244.0.3
                     - key: server.port
                       value:
                         stringValue: "9153"
                     - key: service.instance.id
                       value:
-                        stringValue: 10.244.0.4:9153
+                        stringValue: 10.244.0.3:9153
                     - key: service.name
                       value:
                         stringValue: coredns
@@ -2525,10 +438,10 @@ resourceMetrics:
                       value:
                         stringValue: http
                   timeUnixNano: "1000000"
-            name: process_virtual_memory_bytes
+            name: scrape_samples_scraped
           - gauge:
               dataPoints:
-                - asDouble: 1.8446744073709552e+19
+                - asDouble: 29
                   attributes:
                     - key: host.name
                       value:
@@ -2544,22 +457,22 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-565d847f94-pfgqh
+                        stringValue: coredns-565d847f94-bkp5d
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
+                        stringValue: 07bdc229-3db6-4d93-a149-d03cbd9a980a
                     - key: os.type
                       value:
                         stringValue: linux
                     - key: server.address
                       value:
-                        stringValue: 10.244.0.4
+                        stringValue: 10.244.0.3
                     - key: server.port
                       value:
                         stringValue: "9153"
                     - key: service.instance.id
                       value:
-                        stringValue: 10.244.0.4:9153
+                        stringValue: 10.244.0.3:9153
                     - key: service.name
                       value:
                         stringValue: coredns
@@ -2567,55 +480,5 @@ resourceMetrics:
                       value:
                         stringValue: http
                   timeUnixNano: "1000000"
-            name: process_virtual_memory_max_bytes
-          - name: coredns_cache_requests_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 13
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-565d847f94-pfgqh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 8b269075-7bde-4600-8c4e-a31911015464
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zones
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-              isMonotonic: true
+            name: scrape_samples_post_metric_relabeling
         scope: {}

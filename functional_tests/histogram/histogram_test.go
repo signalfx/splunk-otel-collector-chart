@@ -58,12 +58,36 @@ type TestInput struct {
 }
 
 var testInputs = []TestInput{
-	{"kubernetes-scheduler", "scheduler_queue_incoming_pods_total", "scheduler_scheduling_attempt_duration_seconds"},
-	{"kubernetes-proxy", "kubeproxy_sync_proxy_rules_iptables_total", "kubeproxy_sync_proxy_rules_duration_seconds"},
-	{"kubernetes-apiserver", "apiserver_request_total", "apiserver_request_duration_seconds"},
-	{"kube-controller-manager", "endpoint_slice_controller_syncs", "endpoint_slice_controller_endpoints_added_per_sync"},
-	{"coredns", "coredns_dns_requests_total", "coredns_dns_request_duration_seconds"},
-	{"etcd", "etcd_cluster_version", "etcd_debugging_lease_ttl_total"},
+	{
+		ServiceName:            "kubernetes-scheduler",
+		NonHistogramMetricName: "scheduler_queue_incoming_pods_total",
+		HistogramMetricName:    "scheduler_scheduling_algorithm_duration_seconds",
+	},
+	{
+		ServiceName:            "kubernetes-proxy",
+		NonHistogramMetricName: "kubeproxy_sync_proxy_rules_service_changes_total",
+		HistogramMetricName:    "kubeproxy_sync_proxy_rules_duration_seconds",
+	},
+	{
+		ServiceName:            "kubernetes-apiserver",
+		NonHistogramMetricName: "apiserver_request_total",
+		HistogramMetricName:    "apiserver_request_duration_seconds",
+	},
+	{
+		ServiceName:            "kube-controller-manager",
+		NonHistogramMetricName: "workqueue_retries_total",
+		HistogramMetricName:    "workqueue_queue_duration_seconds",
+	},
+	{
+		ServiceName:            "coredns",
+		NonHistogramMetricName: "coredns_dns_requests_total",
+		HistogramMetricName:    "coredns_dns_request_duration_seconds",
+	},
+	{
+		ServiceName:            "etcd",
+		NonHistogramMetricName: "etcd_server_is_leader",
+		HistogramMetricName:    "etcd_disk_wal_fsync_duration_seconds",
+	},
 }
 
 func Test_ControlPlaneMetrics(t *testing.T) {
@@ -135,10 +159,10 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 		}
 
 		assert.NotNil(tt, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
-	}, 5*time.Minute, 5*time.Second)
+	}, 3*time.Minute, 5*time.Second)
 
 	// Set GENERATE_EXPECTED to true to get a sample of the metrics for component - only for dev purposes
-	// The max datapoint count per metric can be adjusted as inpute to internal.ReduceDatapoints
+	// The max datapoint count per metric can be adjusted as input to internal.ReduceDatapoints
 	if os.Getenv("GENERATE_EXPECTED") == "true" {
 		outputDir := filepath.Join("testdata", "expected", majorMinor)
 		require.NoError(t, os.MkdirAll(outputDir, 0o755))
