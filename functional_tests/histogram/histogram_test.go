@@ -166,13 +166,14 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if os.Getenv("GENERATE_EXPECTED") == "true" {
 		outputDir := filepath.Join("testdata", "expected", majorMinor)
 		require.NoError(t, os.MkdirAll(outputDir, 0o755))
+		require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
 		internal.ReduceDatapoints(actualMetrics, 1)
 		err := golden.WriteMetrics(t, filepath.Join(outputDir, fileName), *actualMetrics)
 		require.NoError(t, err)
 	}
 
-	assert.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
 	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
+	require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
 	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
@@ -193,6 +194,9 @@ func performDNSQueries(t *testing.T) {
 }
 
 func checkMetrics(t *testing.T, isHistogram bool, expected, actual *pmetric.Metrics, component string) error {
+	require.NotNil(t, expected, "Expected metrics should not be nil")
+	require.NotNil(t, actual, "Actual metrics should not be nil")
+
 	commonAttrs := map[string]string{
 		"host.name":           "kind-control-plane",
 		"k8s.cluster.name":    "sock",
