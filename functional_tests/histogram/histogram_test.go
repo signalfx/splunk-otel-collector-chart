@@ -137,7 +137,6 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 		expected = pmetric.NewMetrics()
 	}
 	expectedMetrics := &expected
-	require.NotNil(t, expectedMetrics, "Expected metrics should not be nil")
 
 	var actualMetrics *pmetric.Metrics
 
@@ -179,7 +178,6 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 
 	require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
 	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
-	require.NotNil(t, expectedMetrics, "Expected metrics should not be nil")
 	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
