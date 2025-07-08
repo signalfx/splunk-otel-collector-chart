@@ -34,6 +34,14 @@ data:
       health_check:
         endpoint: 0.0.0.0:13134
     processors:
+      attributes/drop_event_attrs:
+        actions:
+        - action: delete
+          key: k8s.event.start_time
+        - action: delete
+          key: k8s.event.name
+        - action: delete
+          key: k8s.event.uid
       batch:
         send_batch_max_size: 32768
       k8sattributes/clusterReceiver:
@@ -103,11 +111,35 @@ data:
           statements:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
             attributes["k8s.resource.name"]], ""))
+      transform/k8sevents:
+        error_mode: ignore
+        log_statements:
+        - conditions:
+          - resource.attributes["k8s.object.kind"] == "HorizontalPodAutoscaler"
+          statements:
+          - set(resource.attributes["k8s.hpa.name"], resource.attributes["k8s.object.name"])
+          - set(resource.attributes["k8s.hpa.uid"], resource.attributes["k8s.object.uid"])
+        - conditions:
+          - resource.attributes["k8s.object.kind"] != "HorizontalPodAutoscaler"
+          statements:
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"],
+            "lower"), "name"], ".")], resource.attributes["k8s.object.name"])
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"],
+            "lower"), "uid"], ".")], resource.attributes["k8s.object.uid"])
+        - conditions:
+          - resource.attributes["k8s.object.kind"] == "Pod" and IsMatch(resource.attributes["k8s.object.fieldpath"],
+            "spec\\.containers.*")
+          statements:
+          - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"],
+            "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
+          - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+      k8s_events:
+        auth_type: serviceAccount
       k8sobjects:
         auth_type: serviceAccount
         objects:
@@ -142,6 +174,19 @@ data:
       extensions:
       - health_check
       pipelines:
+        logs:
+          exporters:
+          - splunk_hec/o11y
+          processors:
+          - memory_limiter
+          - batch
+          - attributes/drop_event_attrs
+          - resourcedetection
+          - resource
+          - transform/k8sevents
+          - k8sattributes/clusterReceiver
+          receivers:
+          - k8s_events
         logs/objects:
           exporters:
           - splunk_hec/o11y
