@@ -82,3 +82,9 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if not (eq (toString .Values.clusterReceiver.securityContext) "<nil>") }}
 [WARNING] "clusterReceiver.securityContext" parameter is deprecated. Please use "clusterReceiver.podSecurityContext" instead.
 {{ end }}
+{{- if .Values.operator.enabled }}
+{{- $instrKeys := without (keys .Values.instrumentation) "spec" }}
+{{- if gt (len $instrKeys) 0 }}
+{{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
+{{- end }}
+{{- end }}

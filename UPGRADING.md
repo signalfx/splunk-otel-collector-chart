@@ -1,5 +1,71 @@
 # Upgrade guidelines
 
+## 0.128.0 to 0.129.0
+
+This release includes a breaking change related to the operator instrumentation configuration.
+- Starting with version 0.129.0, the `operator.instrumentaion.*` configuration has been moved to `operator.instrumentation.spec.*`.
+- User can now define any spec setting supported by the [OpenTelemetry Operator](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml)
+- The helm chart defines the minimal default spec settings for the operator instrumentation, which can be overridden by the user.
+- If you used custom values under `instrumentation.spec.*` in your `values.yaml`, you will need to migrate them to the new path:
+  - `instrumentation.endpoint` -> `instrumentation.spec.exporter.endpoint`
+  - `instrumentation.propagators.*` -> `instrumentation.spec.propagators.*`
+  - `instrumentation.sampler.*` -> `instrumentation.spec.sampler.*`
+  - `instrumentation.env.*` -> `instrumentation.spec.env.*`
+    `<libname>` : name of the library you are instrumenting (`java`, `python`, `nodejs`, `dotnet`, `go`, `apache-httpd` and `nginx`).
+  - `instrumentation.<libname>.*` -> `instrumentation.spec.<libname>.*`
+    - `instrumentation.<libname>.repository` and  -> `instrumentation.<libname>.tag` -> `instrumentation.spec.java.image`
+
+**Example 1:** Migrating custom values
+
+v0.128.0 and earlier
+```yaml
+instrumentation:
+  propagators:
+    - "b3multi"
+    - "baggage"
+  env:
+    - name: "SPLUNK_ACCESS"
+      value: "my-access-token"
+  java:
+    repository: ghcr.io/personal/splunk-otel-java
+    tag: v1.27.0
+    env:
+      - name: "JAVA_TOOL_OPTIONS"
+        value: "-javaagent:/opt/splunk/splunk-otel-javaagent.jar"
+```
+
+v0.129.0 and later
+```yaml
+instrumentation:
+  spec:
+    propagators:
+      - "b3multi"
+      - "baggage"
+    env:
+      - name: "SPLUNK_ACCESS"
+        value: "my-access-token"
+    java:
+      image: ghcr.io/personal/splunk-otel-java:v1.27.0
+      env:
+        - name: "JAVA_TOOL_OPTIONS"
+          value: "-javaagent:/opt/splunk/splunk-otel-javaagent.jar"
+```
+
+**Example 2:** Adding resources limits to the java instrumentation and removing python instrumentation:
+```yaml
+instrumentation:
+  spec:
+    python:
+    java:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 200Mi
+```
+
 ## 0.125.0 to 0.126.0
 
 This release includes a breaking change related to Prometheus receivers utilized by the `agent` and `clusterReceiver`.
