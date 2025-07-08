@@ -131,7 +131,9 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if isHistogram {
 		fileName = input.ServiceName + "_histogram_metrics.yaml"
 	}
-	expected, _ := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	expected, err := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	require.NoError(t, err, "Failed to read expected metrics from %s", filepath.Join(testDir, fileName))
+	require.NotNil(t, expected, "Expected metrics should not be nil")
 	expectedMetrics := &expected
 
 	var actualMetrics *pmetric.Metrics
@@ -174,7 +176,7 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 
 	require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
 	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
-	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
+	err = checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
 	}
