@@ -134,6 +134,7 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	expected, errReadGolden := golden.ReadMetrics(filepath.Join(testDir, fileName))
 	if errReadGolden != nil && os.IsNotExist(errReadGolden) {
 		t.Logf("Metrics file %q does not exist, assuming that the expected metrics are empty", filepath.Join(testDir, fileName))
+		expected = pmetric.NewMetrics()
 	}
 	expectedMetrics := &expected
 	require.NotNil(t, expectedMetrics, "Expected metrics should not be nil")
