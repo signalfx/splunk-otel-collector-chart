@@ -477,7 +477,7 @@ Build the securityContext for Linux and Windows
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
-{{- or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) }}
+{{- or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -522,4 +522,11 @@ Create the name of the target allocator cluster role binding to use
 */}}
 {{- define "splunk-otel-collector.targetAllocatorClusterRoleBindingName" -}}
 {{- printf "%s-ta-clusterRoleBinding" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Returns true if the distribution is eks but not eks/fargate.
+*/}}
+{{- define "splunk-otel-collector.isNonFargateEKS" -}}
+{{- and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") -}}
 {{- end -}}
