@@ -89,18 +89,12 @@ receivers:
             - source_labels: [__name__]
               action: keep
               regex: "(apiserver_longrunning_requests|\
-              apiserver_request_duration_seconds|\
-              apiserver_request_total|\
-              apiserver_response_sizes|\
-              apiserver_storage_objects|\
-              rest_client_request_duration_seconds|\
-              rest_client_requests_total|\
-              workqueue_depth|\
-              workqueue_longest_running_processor_seconds|\
-              workqueue_queue_duration_seconds|\
-              workqueue_retries_total|\
-              workqueue_unfinished_work_seconds|\
-              )(?:_sum|_count|_bucket)?"
+                apiserver_request_duration_seconds|\
+                apiserver_storage_objects|\
+                apiserver_response_sizes|\
+                apiserver_request_total|\
+                rest_client_requests_total|\
+                rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
   {{- end }}
 
 processors:
