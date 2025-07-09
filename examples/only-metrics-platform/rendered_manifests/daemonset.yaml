@@ -139,6 +139,9 @@ spec:
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
           readOnly: true
+        - mountPath: /hostfs/usr/lib/os-release
+          name: host-usr-lib-osrelease
+          readOnly: true
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -165,6 +168,9 @@ spec:
       - name: host-var-run-utmp
         hostPath:
           path: /var/run/utmp
+      - name: host-usr-lib-osrelease
+        hostPath:
+          path: /usr/lib/os-release
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent
