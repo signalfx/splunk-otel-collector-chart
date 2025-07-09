@@ -131,7 +131,11 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if isHistogram {
 		fileName = input.ServiceName + "_histogram_metrics.yaml"
 	}
-	expected, _ := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	expected, errReadGolden := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	if errReadGolden != nil && os.IsNotExist(errReadGolden) {
+		t.Logf("Metrics file %q does not exist, assuming that the expected metrics are empty", filepath.Join(testDir, fileName))
+		expected = pmetric.NewMetrics()
+	}
 	expectedMetrics := &expected
 
 	var actualMetrics *pmetric.Metrics
