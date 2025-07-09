@@ -951,6 +951,9 @@ exporters:
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
+    {{- if not .Values.isWindows }}
+    root_path: /hostfs
+    {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:

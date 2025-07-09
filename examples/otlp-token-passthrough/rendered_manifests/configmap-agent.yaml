@@ -33,6 +33,7 @@ data:
         api_url: http://default-splunk-otel-collector:6060
         correlation: null
         ingest_url: http://default-splunk-otel-collector:9943
+        root_path: /hostfs
         sync_host_metadata: true
     extensions:
       headers_setter:
