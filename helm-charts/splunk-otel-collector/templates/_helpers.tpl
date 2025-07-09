@@ -530,3 +530,15 @@ Returns true if the distribution is eks but not eks/fargate.
 {{- define "splunk-otel-collector.isNonFargateEKS" -}}
 {{- and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") -}}
 {{- end -}}
+
+{{/*
+Determine if hostNetwork should be enabled.
+If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will be enabled.
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverHostNetworkEnabled" -}}
+{{- if eq (toString .Values.clusterReceiver.hostNetwork) "<nil>" }}
+  {{- eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode" }}
+{{- else }}
+  {{- .Values.clusterReceiver.hostNetwork }}
+{{- end -}}
+{{- end -}}

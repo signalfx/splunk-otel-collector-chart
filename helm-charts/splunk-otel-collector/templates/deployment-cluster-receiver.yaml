@@ -52,6 +52,10 @@ spec:
         sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
+      {{- $hostNetworkEnabled := include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" . }}
+      {{- if and (eq $hostNetworkEnabled "true") (not .Values.isWindows) }}
+      hostNetwork: {{ $hostNetworkEnabled }}
+      {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       automountServiceAccountToken: false

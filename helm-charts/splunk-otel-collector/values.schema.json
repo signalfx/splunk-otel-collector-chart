@@ -282,6 +282,7 @@
       "$comment": "Please ensure clusterName is set to the proper required/optional value when modifying this list",
       "enum": [
         "eks",
+        "eks/auto-mode",
         "eks/fargate",
         "gke",
         "gke/autopilot",
@@ -771,6 +772,14 @@
           "items": {
             "type": "object"
           }
+        },
+        "hostNetwork": {
+          "description": "Host network allows container to use networking stack of the host machine",
+          "type": [
+            "null",
+            "boolean"
+          ],
+          "optional": true
         },
         "podLabels": {
           "type": "object"

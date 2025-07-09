@@ -10,6 +10,16 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
 {{ end }}
 
+{{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (or (eq (include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" .) "false") (eq (toString .Values.agent.hostNetwork) "false")) }}
+[WARNING] Host networking is explicitly disabled. For resourcedetection to work correctly in EKS Auto Mode, ensure Pod Identity is enabled and configured or enable pod host networking.
+          For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
+{{- end }}
+
+{{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (eq (include "splunk-otel-collector.gatewayEnabled" .) "true") }}
+[WARNING] Deploying a Gateway in EKS Auto Mode requires Pod Identity to be enabled and configured, otherwise some functionalities will be missing.
+          For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
+{{- end }}
+
 {{- if .Values.splunkRealm }}
 [WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
