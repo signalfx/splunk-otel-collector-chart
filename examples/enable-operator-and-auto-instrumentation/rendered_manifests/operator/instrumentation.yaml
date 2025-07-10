@@ -38,11 +38,15 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.10.0
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
+    tag: 1.2.0
   go:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: splunk.zc.method=autoinstrumentation-go:v0.19.0-alpha
     image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.19.0-alpha
+    repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
+    tag: v0.21.0
   java:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -50,6 +54,7 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.0
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java
     resources:
       limits:
         cpu: 500m
@@ -57,11 +62,14 @@ spec:
       requests:
         cpu: 100m
         memory: 200Mi
+    tag: 1.33.6
   nginx:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+    tag: 1.0.4
   nodejs:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -69,6 +77,8 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
+    tag: 0.58.1
   python:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -76,3 +86,5 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+    tag: 0.54b1
