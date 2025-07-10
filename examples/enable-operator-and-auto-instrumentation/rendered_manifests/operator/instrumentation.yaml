@@ -65,10 +65,10 @@ spec:
   nodejs:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: splunk.zc.method=splunk-otel-js:v3.1.2
+      value: splunk.zc.method=splunk-otel-js:v3.3.0
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
-    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2
+    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.3.0
   python:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
