@@ -72,14 +72,12 @@ resourcedetection:
     - env
     {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.cloudProvider" .) "gcp") }}
     - gcp
-    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
+    {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
     - eks
     {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
     - aks
     {{- end }}
-    {{- if and (eq (include "splunk-otel-collector.cloudProvider" .) "aws") (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
-    - ec2
-    {{- else if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
+    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
     - azure
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
@@ -90,11 +88,28 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if and (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") (not .Values.clusterName) }}
+  {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
   eks:
+    node_from_env_var: K8S_NODE_NAME
     resource_attributes:
+      host.id:
+        enabled: true
+      cloud.region:
+        enabled: true
+      cloud.availability_zone:
+        enabled: true
+      cloud.account.id:
+        enabled: true
+      host.name:
+        enabled: true
+      host.image.id:
+        enabled: true
+      host.type:
+        enabled: true
+    {{- if not .Values.clusterName }}
       k8s.cluster.name:
         enabled: true
+    {{- end }}
   {{- end }}
   override: true
   timeout: 15s
@@ -108,7 +123,7 @@ resourcedetection/k8s_cluster_name:
   detectors:
     {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
     - gcp
-    {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
     {{- end }}
   {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
@@ -148,8 +163,9 @@ resourcedetection/k8s_cluster_name:
         enabled: false
       gcp.gce.instance.hostname:
         enabled: false
-  {{- else if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+  {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
   eks:
+    node_from_env_var: K8S_NODE_NAME
     resource_attributes:
       k8s.cluster.name:
         enabled: true
