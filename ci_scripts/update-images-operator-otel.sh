@@ -113,7 +113,7 @@ emit_output "NEED_UPDATE"
 awk '
   !p && !/# Auto-instrumentation Libraries \(Start\)/ && !/# Auto-instrumentation Libraries \(End\)/ { print $0; next }
   /# Auto-instrumentation Libraries \(Start\)/ {p=1; print $0; next}
-  /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "  %s\n", line; print $0; next}
+  /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "    %s\n", line; print $0; next}
 ' "$VALUES_FILE_PATH" > "${VALUES_FILE_PATH}.updated"
 
 # Replace the original values.yaml with the updated version
