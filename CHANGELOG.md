@@ -4,6 +4,36 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.129.0] - 2025-07-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.129.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.129.0).
+
+### 🛑 Breaking changes 🛑
+
+- `operator`: Operator instrumentation configuration is now defined under `instrumentation.spec`. This change enables full customization of the instrumentation spec, with all user-provided instrumentation fields merged into the default spec. ([#1873](https://github.com/signalfx/splunk-otel-collector-chart/pull/1873))
+  - The configuration structure for operator auto-instrumentation has changed. All settings must now be defined under `instrumentation.spec`.
+  - Any configuration directly under `instrumentation.*` (outside of `spec`) will cause an error during helm operations.
+  - If you use `.Values.operator.enabled=true` and have overrides for `instrumentation` settings, please review the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290)
+  
+- `agent`: Updates agent config for k8s control plane component's prometheus receivers to filter and keep only a limited set of metrics. ([#1887](https://github.com/signalfx/splunk-otel-collector-chart/pull/1887))
+  - This change is only relevant for users who have enabled the useControlPlaneMetricsHistogramData featuregate in their Helm chart configuration.
+  
+- `clusterReceiver`: Updates scrape config for EKS apiserver prometheus receiver. The change reflects metrics used in out-of-the-box dashboards in Splunk Observability. ([#1893](https://github.com/signalfx/splunk-otel-collector-chart/pull/1893))
+  - This change is only relevant for users who have enabled the `enableEKSApiServerMetrics` featuregate in their Helm chart configuration.
+  
+
+### 💡 Enhancements 💡
+
+- `other`: Add support for EKS Auto Mode (Part 1, hostnetwork). ([#1899](https://github.com/signalfx/splunk-otel-collector-chart/pull/1899))
+- `other`: Remove EC2 detector and expand EKS detector which, in addition to IMDS, supports fetching attributes through API (Part 2 - POD Identity) . ([#1903](https://github.com/signalfx/splunk-otel-collector-chart/pull/1903))
+  For more information, see the [EKS Auto Mode documentation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode)
+  
+- `clusterReceiver`: Enable k8s events in the clusterReceiver by default when exporting logs is enabled. ([#1895](https://github.com/signalfx/splunk-otel-collector-chart/pull/1895))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix Signalfx exporter metadata and add necessary mount for bottlerocket OS ([#1898](https://github.com/signalfx/splunk-otel-collector-chart/pull/1898))
+
 ## [0.128.0] - 2025-07-08
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.128.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.128.0).
