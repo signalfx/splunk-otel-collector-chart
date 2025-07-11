@@ -19,3 +19,11 @@ bin/
 # dotnet related files created when opening the repository in VSCode (if dotnet related extensions are installed)
 functional_tests/functional/testdata/dotnet/obj
 chart.sln
+
+.*.venv
+
+# CRD schemas generated for kubeconform
+generated-crd-schemas/
+
+# Kubeconform download artifact
+kubeconform.tar.gz

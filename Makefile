@@ -269,3 +269,7 @@ gomoddownload:
 .PHONY: update-matrix-versions
 update-matrix-versions: ## Update matrix, ex: K8s cluster versions used for testing. Set DEBUG=-debug to enable debug logs.
 	go run ./tools/k8s_versions/update_k8s_versions.go $(DEBUG)
+
+.PHONY: kubeconform
+kubeconform: ## Run kubeconform validation on all rendered manifests
+	./ci_scripts/kubeconform-all.sh

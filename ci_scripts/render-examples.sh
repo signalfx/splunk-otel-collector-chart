@@ -49,8 +49,15 @@ render_task() {
     exit 1
   fi
 
-  # Redact data that has a unique value per run such as certificate data for the operator webhook
-  redact_files "${rendered_manifests_dir}" "**webhook.yaml"
+  # Redact cert/key fields in webhook.yaml while preserving yaml structure
+  find "${rendered_manifests_dir}" -type f -name "*webhook.yaml" | while read -r webhook_file; do
+    yq -i '
+      (.. | select(has("caBundle"))) .caBundle |= "[REDACTED CABUNDLE]" |
+      (.. | select(has("data")) | .data | select(has("tls.crt"))) ."tls.crt" |= "[REDACTED CERTIFICATE]" |
+      (.. | select(has("data")) | .data | select(has("tls.key"))) ."tls.key" |= "[REDACTED PRIVATE KEY]" |
+      (.. | select(has("data")) | .data | select(has("ca.crt"))) ."ca.crt" |= "[REDACTED CA CERTIFICATE]"
+    ' "$webhook_file"
+  done
 
   # Move the chart renders
   cp -rp "${rendered_manifests_dir}/splunk-otel-collector/templates/"* "$rendered_manifests_dir"
