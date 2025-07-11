@@ -1309,16 +1309,24 @@ instrumentation:
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
+      tag: 1.2.0
     go:
       image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.19.0-alpha
       # env:
       #   - name: GO_ENV_VAR
       #     value: go_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
+      tag: v0.21.0
     java:
       image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.0
       # env:
       #   - name: JAVA_ENV_VAR
       #     value: java_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java
+      tag: 1.33.6
     nginx:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
       # env:
@@ -1331,16 +1339,28 @@ instrumentation:
       #   requests:
       #     cpu: 100m
       #     memory: 200Mi
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+      tag: 1.0.4
     nodejs:
       image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
+      tag: 0.58.1
     python:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0
       # env:
       #   - name: PYTHON_ENV_VAR
       #     value: python_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+      tag: 0.54b1
+    apache-httpd:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+      tag: 1.0.4
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.
