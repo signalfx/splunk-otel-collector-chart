@@ -1305,20 +1305,25 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.10.0
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.2.0
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
     go:
-      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.19.0-alpha
+      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.21.0
       # env:
       #   - name: GO_ENV_VAR
       #     value: go_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.0
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.33.6
       # env:
       #   - name: JAVA_ENV_VAR
       #     value: java_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java
     nginx:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
       # env:
@@ -1331,16 +1336,25 @@ instrumentation:
       #   requests:
       #     cpu: 100m
       #     memory: 200Mi
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.58.1
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
     python:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.54b1
       # env:
       #   - name: PYTHON_ENV_VAR
       #     value: python_value
+    
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+    apache-httpd:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.
