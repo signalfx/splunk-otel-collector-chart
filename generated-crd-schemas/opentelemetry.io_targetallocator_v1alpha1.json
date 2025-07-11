@@ -1809,6 +1809,8 @@
           "type": "object"
         },
         "collectorNotReadyGracePeriod": {
+          "default": "30s",
+          "format": "duration",
           "type": "string"
         },
         "env": {
@@ -3773,6 +3775,7 @@
           "additionalProperties": false
         },
         "replicas": {
+          "default": 1,
           "format": "int32",
           "type": "integer"
         },
