@@ -48,6 +48,7 @@ const (
 	signalFxReceiverK8sClusterReceiverPort = 19443
 	kindTestKubeEnv                        = "kind"
 	eksTestKubeEnv                         = "eks"
+	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
 	eksFargateTestKubeEnv                  = "eks/fargate"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
@@ -191,6 +192,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			ChartWait:        true,
 			ChartTimeout:     internal.HelmActionTimeout,
 		})
+	case eksAutoModeTestKubeEnv:
+		addChartInfo("eks_auto_mode_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksFargateTestKubeEnv:
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
@@ -514,6 +517,7 @@ func Test_Functions(t *testing.T) {
 		aksTestKubeEnv,
 		gceTestKubeEnv,
 		eksTestKubeEnv,
+		eksAutoModeTestKubeEnv,
 		eksFargateTestKubeEnv,
 	}
 
