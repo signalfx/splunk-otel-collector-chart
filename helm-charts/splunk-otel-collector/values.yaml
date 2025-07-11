@@ -1310,7 +1310,7 @@ instrumentation:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
     go:
-      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.19.0-alpha
+      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.21.0
       # env:
       #   - name: GO_ENV_VAR
       #     value: go_value
@@ -1337,10 +1337,12 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.51b0
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.54b1
       # env:
       #   - name: PYTHON_ENV_VAR
       #     value: python_value
+    apache-httpd:
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.
