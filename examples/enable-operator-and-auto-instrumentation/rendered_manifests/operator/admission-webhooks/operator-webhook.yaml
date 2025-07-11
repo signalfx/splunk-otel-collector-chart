@@ -22,7 +22,7 @@ webhooks:
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -31,22 +31,22 @@ webhooks:
     failurePolicy: Fail
     name: minstrumentation.kb.io
     rules:
-    - apiGroups:
-        - opentelemetry.io
-      apiVersions:
-        - v1alpha1
-      operations:
-        - CREATE
-        - UPDATE
-      resources:
-        - instrumentations
-      scope: Namespaced
+      - apiGroups:
+          - opentelemetry.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - instrumentations
+        scope: Namespaced
     sideEffects: None
     timeoutSeconds: 10
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -70,7 +70,7 @@ webhooks:
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -108,31 +108,31 @@ webhooks:
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
         path: /validate-opentelemetry-io-v1alpha1-instrumentation
         port: 443
-    failurePolicy:  Fail
+    failurePolicy: Fail
     name: vinstrumentationcreateupdate.kb.io
     rules:
-    - apiGroups:
-        - opentelemetry.io
-      apiVersions:
-        - v1alpha1
-      operations:
-        - CREATE
-        - UPDATE
-      resources:
-        - instrumentations
-      scope: Namespaced
+      - apiGroups:
+          - opentelemetry.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - instrumentations
+        scope: Namespaced
     sideEffects: None
     timeoutSeconds: 10
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -155,7 +155,7 @@ webhooks:
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -179,7 +179,7 @@ webhooks:
   - admissionReviewVersions:
       - v1
     clientConfig:
-    [SENSITIVE DATA REDACTED]
+      caBundle: '[REDACTED CABUNDLE]'
       service:
         name: default-operator-webhook
         namespace: default
@@ -219,6 +219,6 @@ metadata:
   name: default-operator-controller-manager-service-cert
   namespace: default
 data:
-    [SENSITIVE DATA REDACTED]
-    [SENSITIVE DATA REDACTED]
-    [SENSITIVE DATA REDACTED]
+  tls.crt: '[REDACTED CERTIFICATE]'
+  tls.key: '[REDACTED PRIVATE KEY]'
+  ca.crt: '[REDACTED CA CERTIFICATE]'

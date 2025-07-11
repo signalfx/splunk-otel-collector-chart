@@ -40,13 +40,4 @@ jobs:
 
       - name: Run kubeconform on rendered examples
         run: |
-          for dir in examples/*/; do
-            base_dir="$(basename "$dir")"
-            [[ "$base_dir" == "distribution-openshift" || "$base_dir" == *operator* ]] && continue
-            cmd="kubeconform -strict -schema-location default -output pretty -verbose -kubernetes-version ${{ matrix.k8s-version }} \"$dir\"/rendered_manifests"
-            if ! eval $cmd; then
-              echo "kubeconform version: $(kubeconform -v)"
-              echo "Failed command: $cmd"
-              exit 1
-            fi
-          done
+          make kubeconform K8S_VERSION="${{ matrix.k8s_version }}"
