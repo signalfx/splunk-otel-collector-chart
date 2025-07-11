@@ -532,6 +532,15 @@ Returns true if the distribution is eks but not eks/fargate.
 {{- end -}}
 
 {{/*
+Identifies K8s clutser running on AWS but they are not EKS.
+Returns true if the cloud provider is aws and distribution is not set.
+example: Vanilla K8s on AWS EC2
+*/}}
+{{- define "splunk-otel-collector.isNonEKSonAWS" -}}
+{{- and (eq (include "splunk-otel-collector.cloudProvider" .) "aws") (eq (include "splunk-otel-collector.distribution" .) "") -}}
+{{- end -}}
+
+{{/*
 Determine if hostNetwork should be enabled.
 If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will be enabled.
 */}}
