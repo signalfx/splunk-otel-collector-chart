@@ -85,6 +85,17 @@ jobs:
           make render
           make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
+      - name: Set up Python
+        if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate CRD Schemas for kubeconform
+        if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        run: |
+          make generate-crd-schemas
+
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v7

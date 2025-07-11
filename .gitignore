@@ -22,8 +22,8 @@ chart.sln
 
 .*.venv
 
-# CRD schemas generated for kubeconform
-generated-crd-schemas/
+# ignore script for kubeconform
+generated-crd-schemas/openapi2jsonschema.py
 
 # Kubeconform download artifact
 kubeconform.tar.gz
