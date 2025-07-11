@@ -60,46 +60,49 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
     NEED_UPDATE="${NEED_UPDATE:-0}"  # Sets NEED_UPDATE to its current value or 0 if not set
     if [[ "$IMAGE_KEY" =~ ^autoinstrumentation-.* ]]; then
         # Upstream Operator Values
-        setd "INST_LIB_NAME" "${IMAGE_KEY#autoinstrumentation-}"
+        setd "INST_LIB_NAME_RAW" "${IMAGE_KEY#autoinstrumentation-}"
+        # Map upstream names to expected instrumentation key names
+        case "${INST_LIB_NAME_RAW}" in
+            apache-httpd)
+                INST_LIB_NAME="apacheHttpd"
+                ;;
+            *)
+                INST_LIB_NAME="${INST_LIB_NAME_RAW}"
+                ;;
+        esac
+        setd "IMAGE_LOCAL_PATH" "${INST_LIB_NAME}.image"
+        setd "IMAGE_LOCAL" "$(yq eval ".${IMAGE_LOCAL_PATH}" "${TEMP_VALUES_FILE}")"
+        # Splunk instrumentation libraries are updated in a different workflow.
+        if [[ "${IMAGE_LOCAL}" == *"splunk"* ]]; then
+            debug "Skipping updating ${IMAGE_LOCAL_PATH}"
+            continue
+        fi
         setd "TAG_UPSTREAM" "${VERSION}"
-
         # Find the proper docker repository for the instrumentation library by scraping the main.go file of the operator
-        INST_LIB_REPO=$(grep "auto-instrumentation-${INST_LIB_NAME}-image" "$TEMP_MAIN_FILE" | grep -o 'ghcr.io/[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*/autoinstrumentation-[a-zA-Z0-9_-]*' | sort | uniq )
+        INST_LIB_REPO=$(grep "auto-instrumentation-${INST_LIB_NAME_RAW}-image" "$TEMP_MAIN_FILE" | grep -o 'ghcr.io/[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*/autoinstrumentation-[a-zA-Z0-9_-]*' | sort | uniq )
         if [ -n "$INST_LIB_REPO" ]; then
             # Set the REPOSITORY_UPSTREAM variable
             setd "REPOSITORY_UPSTREAM" "$INST_LIB_REPO"
             debug "Set REPOSITORY_UPSTREAM to ${INST_LIB_REPO}"
         else
-            echo "Failed to find repository for ${INST_LIB_NAME}"
+            echo "Failed to find repository for ${INST_LIB_NAME_RAW}"
             exit 1
         fi
-
-        setd "REPOSITORY_LOCAL_PATH" "${INST_LIB_NAME}.repository"
-        setd "REPOSITORY_LOCAL" "$(yq eval ".${REPOSITORY_LOCAL_PATH}" "${TEMP_VALUES_FILE}")"
-
-        if [[ -z "${REPOSITORY_LOCAL}" || "${REPOSITORY_LOCAL}" != *"splunk"* ]]; then
-          yq eval -i ".${REPOSITORY_LOCAL_PATH} = \"${REPOSITORY_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
-
-          setd "TAG_LOCAL_PATH" "${INST_LIB_NAME}.tag"
-          setd "TAG_LOCAL" "$(yq eval ".${TAG_LOCAL_PATH}" "${TEMP_VALUES_FILE}")"
-          if [[ -z "${TAG_LOCAL}" || "${TAG_LOCAL}" == "null" || "${TAG_LOCAL}" != "$TAG_UPSTREAM" ]]; then
-            IMAGE="${REPOSITORY_UPSTREAM}:${TAG_UPSTREAM}"
+        IMAGE_UPSTREAM="${REPOSITORY_UPSTREAM}:${TAG_UPSTREAM}"
+        # Only update if the current image does not match the upstream value
+        if [[ -z "${IMAGE_LOCAL}" || "${IMAGE_LOCAL}" != "${IMAGE_UPSTREAM}" ]]; then
             # Skopeo validates the existence of the Docker images no matter the current host architecture used
-            if skopeo inspect --retry-times 3 --raw "docker://$IMAGE" &>/dev/null; then
-                echo "Image $IMAGE exists."
-                echo "Upserting value for ${REPOSITORY_LOCAL}:${TAG_UPSTREAM}"
-                yq eval -i ".${TAG_LOCAL_PATH} = \"${TAG_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
+            if skopeo inspect --retry-times 3 --raw "docker://${IMAGE_UPSTREAM}" &>/dev/null; then
+                echo "Image ${IMAGE_UPSTREAM} exists."
+                echo "Upserting value for ${IMAGE_LOCAL_PATH}: ${IMAGE_UPSTREAM}"
+                yq eval -i ".${IMAGE_LOCAL_PATH} = \"${IMAGE_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
                 setd "NEED_UPDATE" 1
             else
-                echo "Failed to find Docker image $IMAGE. Check image repository and tag."
+                echo "Failed to find Docker image ${IMAGE_UPSTREAM}. Check image repository and tag."
                 exit 1
             fi
-          else
-            debug "Retaining existing value for ${REPOSITORY_LOCAL}:${TAG_LOCAL}"
-          fi
         else
-          # Splunk instrumentation libraries are updated in a different workflow.
-          debug "Skipping updating ${REPOSITORY_LOCAL}:${TAG_LOCAL}"
+            debug "Retaining existing value for ${IMAGE_LOCAL_PATH}: ${IMAGE_LOCAL}"
         fi
     fi
 done < "${TEMP_VERSIONS}"
@@ -113,7 +116,7 @@ emit_output "NEED_UPDATE"
 awk '
   !p && !/# Auto-instrumentation Libraries \(Start\)/ && !/# Auto-instrumentation Libraries \(End\)/ { print $0; next }
   /# Auto-instrumentation Libraries \(Start\)/ {p=1; print $0; next}
-  /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "  %s\n", line; print $0; next}
+  /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "    %s\n", line; print $0; next}
 ' "$VALUES_FILE_PATH" > "${VALUES_FILE_PATH}.updated"
 
 # Replace the original values.yaml with the updated version
