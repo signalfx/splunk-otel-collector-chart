@@ -40,4 +40,4 @@ jobs:
 
       - name: Run kubeconform on rendered examples
         run: |
-          ./ci_scripts/kubeconform-all.sh "${{ matrix.k8s_version }}"
+          make kubeconform K8S_VERSION="${{ matrix.k8s_version }}"

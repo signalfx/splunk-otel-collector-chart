@@ -272,7 +272,7 @@ update-matrix-versions: ## Update matrix, ex: K8s cluster versions used for test
 
 .PHONY: kubeconform
 kubeconform: ## Run kubeconform validation on all rendered manifests
-	./ci_scripts/kubeconform-all.sh
+	./ci_scripts/kubeconform-all.sh $(K8S_VERSION)
 
 .PHONY: generate-crd-schemas
 generate-crd-schemas: ## Generate JSON schemas from operator CRDs for kubeconform
