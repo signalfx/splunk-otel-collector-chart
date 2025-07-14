@@ -151,7 +151,7 @@ func deployWorkloadAndCollector(t *testing.T) {
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
 
-	internal.CheckPodsReady(t, clientset, internal.Namespace, "component=otel-k8s-cluster-receiver", 3*time.Minute, 0)
+	internal.CheckPodsReady(t, clientset, internal.DefaultNamespace, "component=otel-k8s-cluster-receiver", 3*time.Minute, 0)
 	time.Sleep(30 * time.Second)
 
 	// Deploy the workload

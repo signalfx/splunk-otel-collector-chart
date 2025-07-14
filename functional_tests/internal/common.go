@@ -29,7 +29,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-var Namespace = "default"
+var DefaultNamespace = "default"
 
 const waitTimeout = 3 * time.Minute
 

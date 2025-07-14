@@ -18,16 +18,17 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
-	HelmActionTimeout = 10 * time.Minute
-	chartReleaseName  = "sock"
-	chartLabelKey     = "helm.sh/chart-name"
-	defaultChartPath  = "helm-charts/splunk-otel-collector"
+	HelmActionTimeout       = 15 * time.Minute
+	DefaultChartReleaseName = "sock"
+	chartLabelKey           = "helm.sh/chart-name"
+	defaultChartPath        = "helm-charts/splunk-otel-collector"
 )
 
 type ChartOptions struct {
@@ -39,8 +40,8 @@ type ChartOptions struct {
 
 func GetDefaultChartOptions() ChartOptions {
 	return ChartOptions{
-		ChartNamespace:   Namespace,
-		ChartReleaseName: chartReleaseName,
+		ChartNamespace:   DefaultNamespace,
+		ChartReleaseName: DefaultChartReleaseName,
 		ChartWait:        true,
 		ChartTimeout:     HelmActionTimeout,
 	}
@@ -64,7 +65,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	install.ReleaseName = options.ChartReleaseName
 	install.Wait = options.ChartWait
 	install.Timeout = options.ChartTimeout
-	install.Labels = map[string]string{chartLabelKey: chartReleaseName}
+	install.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 
 	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
 	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
@@ -116,29 +117,54 @@ func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
+func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName, namespace string) {
+	secretName := releaseName + "-operator-controller-manager-service-cert"
+	t.Logf("Attempting to delete secret: %s in namespace: %s", secretName, namespace)
+	_, getErr := clientset.CoreV1().Secrets(namespace).Get(t.Context(), secretName, v1.GetOptions{})
+	if getErr == nil {
+		deleteErr := clientset.CoreV1().Secrets(namespace).Delete(t.Context(), secretName, v1.DeleteOptions{})
+		require.NoError(t, deleteErr)
+		t.Logf("Deleted webhook secret: %s (namespace: %s)", secretName, namespace)
+	} else {
+		t.Logf("Secret %s not found in namespace: %s, nothing to delete", secretName, namespace)
+	}
+}
+
 func ChartUninstall(t *testing.T, testKubeConfig string) {
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	client := action.NewList(actionConfig)
 	client.AllNamespaces = true
-	client.Selector = fmt.Sprintf("%s==%s", chartLabelKey, chartReleaseName)
+	client.Selector = fmt.Sprintf("%s==%s", chartLabelKey, DefaultChartReleaseName)
+	client.StateMask = action.ListAll // Include releases in all states
 	releases, err := client.Run()
 	require.NoError(t, err)
+	clientset, err := getKubeClient(testKubeConfig)
+	require.NoError(t, err)
+
+	if len(releases) == 0 {
+		t.Log("No Helm releases found for uninstall.")
+		// try to delete the cert secret for the default release name/namespace
+		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
+		return
+	}
 
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
 	uninstall.Wait = true
 	uninstall.Timeout = HelmActionTimeout
 	for _, release := range releases {
+		t.Logf("Uninstalling release: %s (namespace: %s)", release.Name, release.Namespace)
 		_, _ = uninstall.Run(release.Name)
+		deleteCertSecret(t, clientset, release.Name, release.Namespace)
 	}
 }
 
 func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration {
 	actionConfig := new(action.Configuration)
 	cf := genericclioptions.NewConfigFlags(true)
-	cf.Namespace = &Namespace
+	cf.Namespace = &DefaultNamespace
 	cf.KubeConfig = &kubeConfig
-	require.NoError(t, actionConfig.Init(cf, Namespace, os.Getenv("HELM_DRIVER"), t.Logf))
+	require.NoError(t, actionConfig.Init(cf, DefaultNamespace, os.Getenv("HELM_DRIVER"), t.Logf))
 	return actionConfig
 }
 
