@@ -2,6 +2,16 @@ name: Splunk Platform Functional Test
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      KUBERNETES_DEBUG_INFO:
+        description: 'KUBERNETES_DEBUG_INFO: Set this to true to collect the debug info of the k8s cluster and upload this info as a Github workflow artifact.'
+        required: false
+        default: false
+        type: choice
+        options:
+          - false
+          - true
 
 env:
   GO_VERSION: 1.24.4
@@ -44,7 +54,7 @@ jobs:
       SPLUNK_VERSION: ${{ matrix.splunk_version }}
       MINIKUBE_VERSION: latest
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
-
+      KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
 
     steps:
       - name: Checkout
@@ -108,10 +118,27 @@ jobs:
           sleep 60
 
       - name: Run Splunk Integration Tests
+        id: run-functional-tests
         run: |
           export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
           cd test
           go test -v -tags splunk_integration
+
+      - name: Collect Kubernetes Cluster debug info on failure
+        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
+        id: collect-debug-info
+        run: |
+          echo "Functional tests failed. Collecting debug info for current state of the Kubernetes cluster..."
+          cd tools
+          ./splunk_kubernetes_debug_info.sh
+
+      - name: Upload Kubernetes Cluster debug info
+        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-debug-info-${{ matrix.k8s-minikube-version }}-${{ matrix.container_runtime }}-splunk-${{ matrix.splunk_version }}
+          path: tools/splunk_kubernetes_debug_info_*
+          retention-days: 5
 
       - name: Print splunk-otel-collector logs
         if: always()
