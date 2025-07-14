@@ -374,28 +374,46 @@ update_version() {
     local current_tag=$(get_current_tag "$yaml_file_path" "$yq_query_string")
     echo "Updating tag from $current_tag to $latest_tag"
 
-    # Get the line number of the tag from yq, which doesn't account for initial empty/comment lines.
-    local line_num_yq=$(yq eval "$yq_query_string | line" "$yaml_file_path")
-
-    # Adjust the line number to account for initial empty/comment lines.
-    local initial_empty_or_comment_lines=$(awk 'NF && !/^#/ {print NR; exit}' "$yaml_file_path")
-    local adjusted_line_num=$line_num_yq
-
-    if [ "$initial_empty_or_comment_lines" -gt 1 ]; then
-        adjusted_line_num=$((line_num_yq + initial_empty_or_comment_lines))
-    fi
-
     # Temporary file for safely updating the YAML.
     local temp_file="/tmp/temp_file.yaml"
-    echo "Adjusted line number: $adjusted_line_num"
 
-    # Update the YAML file in-place with error checking. Uses awk to substitute only the specified line.
-    if awk -v LINE_NUM="$adjusted_line_num" -v CURRENT_TAG="$current_tag" -v LATEST_TAG="$latest_tag" '
-        NR == LINE_NUM {
-            sub(/:[[:space:]]*[^[:space:]]+$/, ": " LATEST_TAG)
+    # TODO: use yq to update the tag after adapting the yq formatting requirements in values.yaml
+    # This is a workaround to avoid reformatting the entire YAML file.
+    # We match the last segment of the yq query as the key, and the current value, then replace the tag part.
+    local key_name=$(basename "$yq_query_string" | sed 's/\..*//')
+    if awk -v KEY="$key_name" -v CURRENT_TAG="$current_tag" -v LATEST_TAG="$latest_tag" '
+        {
+            # Match lines with the key (e.g., image: or tag:) and the current tag value
+            key_regex = "[[:space:]]*" KEY ":"
+            if ($0 ~ key_regex && $0 ~ CURRENT_TAG) {
+                print "[DEBUG] Updating line: " $0 > "/dev/stderr"
+                line = $0
+                last_colon = 0
+                for (i = length(line); i > 0; i--) {
+                    if (substr(line, i, 1) == ":") { last_colon = i; break; }
+                }
+                if (last_colon > 0) {
+                    if (KEY == "tag" && match(line, /^[[:space:]]*tag:[ ]*[^ ]/)) {
+                        # Find how many spaces after colon
+                        space_start = last_colon + 1
+                        space_count = 0
+                        while (substr(line, space_start + space_count, 1) == " ") { space_count++ }
+                        new_line = substr(line, 1, last_colon) substr(line, last_colon+1, space_count) LATEST_TAG
+                    } else {
+                        new_line = substr(line, 1, last_colon) LATEST_TAG
+                    }
+                    print new_line
+                } else {
+                    print line
+                }
+                next
+            }
+            print
         }
-        { print }' "$yaml_file_path" > "$temp_file"; then
+    ' "$yaml_file_path" > "$temp_file"; then
         mv "$temp_file" "$yaml_file_path"
+        echo "show git diff"
+        git diff "$yaml_file_path"
         echo "Tag updated to $latest_tag"
     else
         echo "Error updating the tag."

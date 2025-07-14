@@ -83,7 +83,7 @@ jobs:
         run: |
           make update-operator-crds DEBUG_MODE=$DEBUG_MODE
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION }}. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using `operatorcrds.install` option." ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Set up Python
         if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
