@@ -240,9 +240,9 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		internal.WaitForTerminatingPods(t, clientset, internal.Namespace)
+		internal.WaitForTerminatingPods(t, clientset, internal.DefaultNamespace)
 		internal.ResetLogsSink(t, logsObjectsConsumer)
-		pods := listPodsInNamespace(t, internal.Namespace)
+		pods := listPodsInNamespace(t, internal.DefaultNamespace)
 		assert.Len(t, pods.Items, 1)
 		assert.True(t, strings.HasPrefix(pods.Items[0].Name, "sock-splunk-otel-collector-agent"))
 		internal.CheckNoEventsReceived(t, logsObjectsConsumer)
@@ -254,9 +254,9 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 			"LogObjectsHecEndpoint":  logsObjectsHecEndpoint,
 		}
 		deployChartsAndApps(t, valuesFileName, replacements)
-		internal.WaitForTerminatingPods(t, clientset, internal.Namespace)
+		internal.WaitForTerminatingPods(t, clientset, internal.DefaultNamespace)
 		internal.ResetLogsSink(t, logsObjectsConsumer)
-		pods := listPodsInNamespace(t, internal.Namespace)
+		pods := listPodsInNamespace(t, internal.DefaultNamespace)
 		assert.Len(t, pods.Items, 2)
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-agent"))
 		assert.True(t, checkPodExists(pods, "sock-splunk-otel-collector-k8s-cluster-receiver"))

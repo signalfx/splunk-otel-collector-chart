@@ -100,7 +100,7 @@ func assertRedisEntities(t *testing.T, sink *consumertest.LogsSink) {
 	entityAttrsVal, ok := lrAttrs.Get("otel.entity.attributes")
 	assert.True(t, ok)
 	entityAttrs := entityAttrsVal.Map()
-	assertAttr(t, entityAttrs, "k8s.namespace.name", internal.Namespace)
+	assertAttr(t, entityAttrs, "k8s.namespace.name", internal.DefaultNamespace)
 	assertAttr(t, entityAttrs, "k8s.pod.name", "test-redis-master-0")
 	assertAttr(t, entityAttrs, "discovery.status", "successful")
 }
@@ -187,7 +187,7 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 	require.NoError(t, err)
 	actionConfig.RegistryClient = rc
 	install := action.NewInstall(actionConfig)
-	install.Namespace = internal.Namespace
+	install.Namespace = internal.DefaultNamespace
 	install.ReleaseName = redisReleaseName
 	install.RepoURL = redisChartRepo
 	install.Wait = true

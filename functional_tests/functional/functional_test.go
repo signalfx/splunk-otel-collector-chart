@@ -166,7 +166,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(t.Context(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
@@ -181,13 +181,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("autopilot_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case aksTestKubeEnv:
 		addChartInfo("aks_test_win_values.yaml.tmpl", internal.ChartOptions{
-			ChartNamespace:   internal.Namespace,
+			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-win",
 			ChartWait:        true,
 			ChartTimeout:     internal.HelmActionTimeout,
 		})
 		addChartInfo("aks_test_linux_values.yaml.tmpl", internal.ChartOptions{
-			ChartNamespace:   internal.Namespace,
+			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-linux",
 			ChartWait:        true,
 			ChartTimeout:     internal.HelmActionTimeout,
@@ -222,7 +222,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute, chartOption)
 	}
 
-	deployments := client.AppsV1().Deployments(internal.Namespace)
+	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
 	// NodeJS test app
 	stream, err = os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
@@ -295,7 +295,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	service, _, err := decode(stream, nil, nil)
 	require.NoError(t, err)
-	_, err = client.CoreV1().Services(internal.Namespace).Create(t.Context(), service.(*corev1.Service),
+	_, err = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), service.(*corev1.Service),
 		metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -310,7 +310,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.Namespace).Create(t.Context(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
@@ -388,7 +388,7 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	extensionsClient, err := clientset.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	waitTime := int64(0)
-	deployments := client.AppsV1().Deployments(internal.Namespace)
+	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 	require.NoError(t, err)
 	_ = deployments.Delete(ctx, "nodejs-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
@@ -405,7 +405,7 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services(internal.Namespace).Delete(ctx, "prometheus-annotation-service",
+	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
 		metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
