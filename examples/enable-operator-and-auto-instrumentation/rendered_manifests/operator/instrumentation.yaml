@@ -46,10 +46,10 @@ spec:
   java:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: splunk.zc.method=splunk-otel-java:v2.17.0
+      value: splunk.zc.method=splunk-otel-java:v2.17.1
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.0
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.17.1
     resources:
       limits:
         cpu: 500m
