@@ -267,6 +267,8 @@ distribution: gke
 ```
 ## EKS Auto Mode
 
+*Available starting with Splunk OpenTelemetry Collector chart version v0.129.0.*
+
 If you want to run the Splunk OpenTelemetry Collector in [Amazon EKS Auto Mode Cluster](https://docs.aws.amazon.com/eks/latest/userguide/automode.html),
 make sure to set the required `distribution` value to `eks/auto-mode`:
 
