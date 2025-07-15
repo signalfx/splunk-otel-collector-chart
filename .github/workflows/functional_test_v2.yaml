@@ -441,7 +441,6 @@ jobs:
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
-  TODO: Enable this once v0.129 is released
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
     if: |
