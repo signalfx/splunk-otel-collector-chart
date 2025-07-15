@@ -1,0 +1,9 @@
+cloudProvider: aws
+distribution: eks/auto-mode
+environment: dev
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+serviceAccount:
+  name: splunk-otel-collector

@@ -478,7 +478,7 @@ jobs:
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: aws_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_VALUES: eks_auto_mode_upgrade_from_previous_release_values.yaml
           UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
