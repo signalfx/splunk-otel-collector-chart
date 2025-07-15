@@ -196,7 +196,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
-      - uses: 'google-github-actions/auth@v2.1.8'
+      - uses: 'google-github-actions/auth@v2.1.10'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
@@ -238,7 +238,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
-      - uses: 'google-github-actions/auth@v2.1.8'
+      - uses: 'google-github-actions/auth@v2.1.10'
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
