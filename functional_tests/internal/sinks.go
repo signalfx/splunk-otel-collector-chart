@@ -95,6 +95,7 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 		ServerConfig: confighttp.ServerConfig{
 			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
 		},
+		TracesURLPath: "/v1/traces",
 	})
 
 	rcvr, err := f.CreateTraces(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, tc)
@@ -172,13 +173,15 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
 		NetAddr: confignet.AddrConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Transport: "tcp",
 		},
 	})
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
 			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
 		},
+		LogsURLPath: "/v1/logs",
 	})
 
 	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, ls)
