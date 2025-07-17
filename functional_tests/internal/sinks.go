@@ -14,8 +14,11 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config/configauth"
+	"go.opentelemetry.io/collector/config/configgrpc"
 	"go.opentelemetry.io/collector/config/confighttp"
+	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/config/configopaque"
+	"go.opentelemetry.io/collector/config/configoptional"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/extension/extensiontest"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
@@ -80,8 +83,20 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 	tc := new(consumertest.TracesSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
-	cfg.HTTP.ServerConfig.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+
+	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+		NetAddr: confignet.AddrConfig{
+			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Transport: "tcp",
+		},
+	})
+
+	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+		ServerConfig: confighttp.ServerConfig{
+			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+		},
+		TracesURLPath: "/v1/traces",
+	})
 
 	rcvr, err := f.CreateTraces(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, tc)
 	require.NoError(t, err)
@@ -108,9 +123,12 @@ func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.Trac
 	tc := new(consumertest.TracesSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
-	cfg.HTTP.ServerConfig.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
-	cfg.HTTP.TracesURLPath = "/v2/trace/otlp"
+	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+		NetAddr: confignet.AddrConfig{
+			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Transport: "tcp",
+		},
+	})
 
 	baFactory := bearertokenauthextension.NewFactory()
 	baCfg := baFactory.CreateDefaultConfig().(*bearertokenauthextension.Config)
@@ -126,11 +144,17 @@ func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.Trac
 		},
 	}
 
-	cfg.HTTP.ServerConfig.Auth = &confighttp.AuthConfig{
-		Authentication: configauth.Authentication{
-			AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
+	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+		ServerConfig: confighttp.ServerConfig{
+			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+			Auth: configoptional.Some(confighttp.AuthConfig{
+				Config: configauth.Config{
+					AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
+				},
+			}),
 		},
-	}
+		TracesURLPath: "/v2/trace/otlp",
+	})
 
 	rcvr, err := f.CreateTraces(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, tc)
 	require.NoError(t, err)
@@ -147,8 +171,18 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	ls := new(consumertest.LogsSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC.NetAddr.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort)
-	cfg.HTTP.ServerConfig.Endpoint = fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort)
+	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+		NetAddr: confignet.AddrConfig{
+			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Transport: "tcp",
+		},
+	})
+	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+		ServerConfig: confighttp.ServerConfig{
+			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+		},
+		LogsURLPath: "/v1/logs",
+	})
 
 	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, ls)
 	require.NoError(t, err)
