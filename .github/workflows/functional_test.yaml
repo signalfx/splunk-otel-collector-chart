@@ -141,7 +141,7 @@ jobs:
           retention-days: 5
 
       - name: Print splunk-otel-collector logs
-        if: always()
+        if: always() && steps.run-functional-tests.outcome == 'failure'
         run: |
           # Echo logs for the collector (agent,cluster-receiver,gateway) for visibility
           pods=$(kubectl get pods -l app=splunk-otel-collector -o jsonpath='{.items[*].metadata.name}')
