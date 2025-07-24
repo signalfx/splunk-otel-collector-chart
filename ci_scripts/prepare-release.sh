@@ -62,6 +62,12 @@ if [[ "$APP_VERSION_OVERRIDDEN" = true ]]; then
     LATEST_APP_VERSION=$APP_VERSION
     debug "Using override collector app version value $LATEST_APP_VERSION"
 fi
+
+if [[ -z "$LATEST_APP_VERSION" || "$LATEST_APP_VERSION" == "null" || ! "$LATEST_APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "[ERROR] LATEST_APP_VERSION $LATEST_APP_VERSION is invalid. Aborting release."
+    exit 1
+fi
+
 LATEST_CHART_VERSION_PATCH=$(get_major_version "v$LATEST_APP_VERSION")
 LATEST_CHART_VERSION_MINOR=$(get_minor_version "v$LATEST_APP_VERSION")
 
