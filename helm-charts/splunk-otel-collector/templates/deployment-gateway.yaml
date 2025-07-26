@@ -44,7 +44,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- if .Values.featureGates.explicitMountServiceAccountToken }}} }
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       automountServiceAccountToken: false
       {{- end }}
       nodeSelector:
