@@ -96,7 +96,7 @@ func assertRedisEntities(t *testing.T, sink *consumertest.LogsSink) {
 	assert.True(t, ok)
 	idAttrs := idAttrsVal.Map()
 	assertAttr(t, idAttrs, "service.type", "redis")
-	assertAttr(t, idAttrs, "service.name", "redis")
+	assertAttr(t, idAttrs, "service.name", "test-redis")
 	entityAttrsVal, ok := lrAttrs.Get("otel.entity.attributes")
 	assert.True(t, ok)
 	entityAttrs := entityAttrsVal.Map()
