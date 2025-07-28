@@ -7,21 +7,22 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.134.0
+    helm.sh/chart: splunk-otel-collector-0.132.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.134.0"
+    app.kubernetes.io/version: "0.132.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.134.0
+    chart: splunk-otel-collector-0.132.0
     release: default
+    heritage: Helm
 data:
   relay: |
     exporters:
       splunk_hec/platform_logs:
         disable_compression: true
-        endpoint: CHANGEME
+        endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
-        index: CHANGEME
+        index: main
         max_idle_conns: 200
         max_idle_conns_per_host: 200
         profiling_data_enabled: false
@@ -37,16 +38,16 @@ data:
         source: kubernetes
         sourcetype: kube:events
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.134.0
+        splunk_app_version: 0.132.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_metrics:
         disable_compression: true
-        endpoint: CHANGEME
+        endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
-        index: CHANGEME
+        index: metrics
         max_idle_conns: 200
         max_idle_conns_per_host: 200
         retry_on_failure:
@@ -60,7 +61,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.134.0
+        splunk_app_version: 0.132.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -185,6 +186,11 @@ data:
         - action: insert
           key: receiver
           value: k8scluster
+      resource/metrics:
+        attributes:
+        - action: insert
+          key: com.splunk.sourcetype
+          value: metrics
       resourcedetection:
         detectors:
         - env
@@ -260,6 +266,7 @@ data:
           - batch
           - resource
           - k8sattributes/metrics
+          - resource/metrics
           - resource/k8s_cluster
           receivers:
           - k8s_cluster
@@ -274,6 +281,7 @@ data:
           - resource
           - resource/add_mode
           - k8sattributes/metrics
+          - resource/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:
