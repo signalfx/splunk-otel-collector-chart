@@ -1,0 +1,79 @@
+suite: splunk-otel-collector.gatewayService
+values:
+  - ./values/basic.yaml
+  # Add a minimal values file if needed for specific overrides
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - service.yaml
+
+tests:
+  - it: should not render gateway service when gateway.enabled is false
+    set:
+      gateway:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render gateway service with default config
+    set:
+      gateway:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - notExists:
+          path: spec.trafficDistribution
+
+  - it: should render gateway service with correct type and annotations
+    set:
+      gateway:
+        enabled: true
+        service:
+          type: NodePort
+          annotations:
+            foo: bar
+            bar: baz
+          trafficDistribution: PreferSameZone
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: NodePort
+      - equal:
+          path: metadata.annotations.foo
+          value: bar
+      - equal:
+          path: metadata.annotations.bar
+          value: baz
+      - equal:
+          path: spec.trafficDistribution
+          value: PreferSameZone
+
+  - it: should render gateway service using deprecated service config
+    set:
+      gateway:
+        enabled: true
+      service:
+        type: LoadBalancer
+        annotations:
+          deprecated: true
+        trafficDistribution: "PreferSameZone"
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: metadata.annotations.deprecated
+          value: true
+      - equal:
+          path: spec.trafficDistribution
+          value: PreferSameZone

@@ -1,0 +1,63 @@
+suite: splunk-otel-collector.agentService
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - service-agent.yaml
+
+tests:
+  - it: should not render agent service when agent.service.enabled is false
+    set:
+      agent:
+        service:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render agent service with default config
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+
+  - it: should render agent service with custom type and annotations
+    set:
+      agent:
+        service:
+          type: NodePort
+          annotations:
+            foo: bar
+            bar: baz
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: NodePort
+      - equal:
+          path: metadata.annotations.foo
+          value: bar
+      - equal:
+          path: metadata.annotations.bar
+          value: baz
+
+  - it: should render agent service using deprecated service config
+    set:
+      service:
+        type: NodePort
+        annotations:
+          deprecated: true
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: NodePort
+      - equal:
+          path: metadata.annotations.deprecated
+          value: true
