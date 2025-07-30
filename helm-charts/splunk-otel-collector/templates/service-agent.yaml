@@ -1,4 +1,5 @@
 {{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
+{{- $svc := (include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.agent.service) | fromYaml) }}
 {{- if .Values.agent.service.enabled }}
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
@@ -17,12 +18,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-collector-agent
-{{- with .Values.service.annotations }}
+{{- with  $svc.annotations }}
   annotations:
 {{ toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $svc.type }}
   ports:
   {{- range $key, $port := $agent.ports }}
   {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}

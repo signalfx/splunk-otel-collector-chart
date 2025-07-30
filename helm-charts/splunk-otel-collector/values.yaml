@@ -423,6 +423,10 @@ agent:
     # create a service for the agents with a local internalTrafficPolicy
     # so that agent pods can be discovered via dns etc
     enabled: true
+    # Service type
+    type: ClusterIP
+    # Service annotations
+    annotations: {}
 
   # hostNetwork schedules the pod with the host's network namespace.
   # Disabling this value will affect monitoring of some control plane
@@ -1156,6 +1160,15 @@ gateway:
       # Memory limit value is used as a source for default memory_limiter configuration
       memory: 8Gi
 
+  # Gateway service configuration - enabled when `gateway.enabled` is set to `true`.
+  service:
+    # Service type
+    type: ClusterIP
+    # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
+    trafficDistribution: ""
+    # Service annotations
+    annotations: {}
+
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
@@ -1193,18 +1206,11 @@ gateway:
   config: {}
 
 ################################################################################
-# OpenTelemetry service config, used for otel collector deployment.
-# Disabled by default
+# DEPRECATED: OpenTelemetry service config, used for otel collector deployment.
+# This config is deprecated and will be removed in a future release.
+# Please use `agent.service` and `gateway.service` for configuring the agent and gateway services, respectively.
 ################################################################################
-
-# opentelemetry collector service created only if collector.enabled = true
-service:
-  # Service type
-  type: ClusterIP
-  # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
-  trafficDistribution: ""
-  # Service annotations
-  annotations: {}
+service: {}
 
 ################################################################################
 # Notice: Operator related features should be considered to have an alpha
