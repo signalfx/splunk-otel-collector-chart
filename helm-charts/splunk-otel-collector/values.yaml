@@ -1412,8 +1412,8 @@ featureGates:
   # and target allocator deployments.
   # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
-  # Use a specific metrics pipeline to report control plane metrics as histograms.
-  useControlPlaneMetricsHistogramData: false
+  # Use a specific metrics pipeline to report control plane metrics as histograms. Enabled by default.
+  useControlPlaneMetricsHistogramData: true
   # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
   # rolled over during high load.
   fixMissedLogsDuringLogRotation: false
@@ -1422,4 +1422,4 @@ featureGates:
   useMemoryLimitPercentage: false
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
-  enableEKSApiServerMetrics: false
+  enableEKSApiServerMetrics: true
