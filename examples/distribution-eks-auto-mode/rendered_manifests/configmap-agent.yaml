@@ -35,6 +35,11 @@ data:
         ingest_url: http://default-splunk-otel-collector:9943
         root_path: /hostfs
         sync_host_metadata: true
+      signalfx/histograms:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        api_url: https://api.CHANGEME.signalfx.com
+        ingest_url: https://ingest.CHANGEME.signalfx.com
+        send_otlp_histograms: true
     extensions:
       headers_setter:
         headers:
@@ -226,7 +231,101 @@ data:
             - targets:
               - localhost:8889
       receiver_creator:
-        receivers: null
+        receivers:
+          prometheus/coredns:
+            config:
+              config:
+                scrape_configs:
+                - job_name: coredns
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:9153'
+            rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+          prometheus/kube-controller-manager:
+            config:
+              config:
+                scrape_configs:
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
+                  job_name: kube-controller-manager
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (workqueue_longest_running_processor_seconds|workqueue_unfinished_work_seconds|workqueue_depth|workqueue_retries_total|workqueue_queue_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  scheme: https
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:10257'
+                  tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                    insecure_skip_verify: true
+            rule: type == "pod" && (labels["k8s-app"] == "kube-controller-manager" ||
+              labels["component"] == "kube-controller-manager")
+          prometheus/kubernetes-apiserver:
+            config:
+              config:
+                scrape_configs:
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
+                  job_name: kubernetes-apiserver
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (apiserver_longrunning_requests|apiserver_request_duration_seconds|apiserver_storage_objects|apiserver_response_sizes|apiserver_request_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  scheme: https
+                  static_configs:
+                  - targets:
+                    - '`endpoint`'
+                  tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                    insecure_skip_verify: true
+            rule: type == "port" && port == 443 && (pod.labels["k8s-app"] == "kube-apiserver"
+              || pod.labels["component"] == "kube-apiserver")
+          prometheus/kubernetes-proxy:
+            config:
+              config:
+                scrape_configs:
+                - job_name: kubernetes-proxy
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total|kubeproxy_sync_proxy_rules_service_changes_total|kubeproxy_sync_proxy_rules_service_changes_pending|kubeproxy_sync_proxy_rules_duration_seconds|kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:10249'
+            rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+          prometheus/kubernetes-scheduler:
+            config:
+              config:
+                scrape_configs:
+                - authorization:
+                    credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                    type: Bearer
+                  job_name: kubernetes-scheduler
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (rest_client_request_duration_seconds|rest_client_requests_total|scheduler_pending_pods|scheduler_schedule_attempts_total|scheduler_queue_incoming_pods_total|scheduler_preemption_attempts_total|scheduler_scheduling_algorithm_duration_seconds|scheduler_pod_scheduling_sli_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  scheme: https
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:10259'
+                  tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                    insecure_skip_verify: true
+            rule: type == "pod" && (labels["k8s-app"] == "kube-scheduler" || labels["component"]
+              == "kube-scheduler")
         watch_observers:
         - k8s_observer
       signalfx:
@@ -262,7 +361,6 @@ data:
           - hostmetrics
           - kubeletstats
           - otlp
-          - receiver_creator
           - signalfx
         metrics/agent:
           exporters:
@@ -276,6 +374,17 @@ data:
           - resource/add_mode
           receivers:
           - prometheus/agent
+        metrics/histograms:
+          exporters:
+          - signalfx/histograms
+          processors:
+          - memory_limiter
+          - batch
+          - resource/add_agent_k8s
+          - resourcedetection
+          - resource
+          receivers:
+          - receiver_creator
         traces:
           exporters:
           - otlp
