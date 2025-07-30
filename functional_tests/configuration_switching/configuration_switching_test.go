@@ -449,7 +449,7 @@ func getMetricsIndexAndSourceType(metrics []pmetric.Metrics) ([]string, []string
 		m := metrics[i]
 		if value, ok := m.ResourceMetrics().At(0).Resource().Attributes().Get("com.splunk.sourcetype"); ok {
 			sourcetype := value.AsString()
-			// check if index is already in the list
+			// check if sourcetype is already in the list
 			if !contains(sourcetypes, sourcetype) {
 				sourcetypes = append(sourcetypes, sourcetype)
 			}
