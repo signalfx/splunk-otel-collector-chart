@@ -1,0 +1,8 @@
+clusterName: CHANGEME
+splunkPlatform:
+  token: CHANGEME
+  endpoint: http://localhost:8088/services/collector
+  sourcetype: "logs"
+  sourcetypeMetrics: "metrics"
+  metricsEnabled: true
+  metricsIndex: "metrics"
