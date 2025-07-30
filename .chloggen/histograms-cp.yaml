@@ -1,4 +1,4 @@
-change_type: enhancement
+change_type: breaking
 component: agent, clusterReceiver
 note: "Changed the default value of the 'useControlPlaneMetricsHistogramData' and 'enableEKSApiServerMetrics' feature gates. These feature gates now default to true and only affect Kubernetes control plane metrics collection."
 issues: [1944]
