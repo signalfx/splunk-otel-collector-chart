@@ -18,7 +18,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
     - This change only affects clusterReceiver deployments running in EKS (including vanilla, Fargate, or Auto Mode) clusters.
     - To disable this feature, set `featureGates.enableEKSApiServerMetrics` to false.
   - Please review your configuration if you relied on the previous default of false for these feature gates.
-  
 
 ## [0.130.0] - 2025-07-26
 
