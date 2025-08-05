@@ -4,6 +4,22 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.131.0] - 2025-08-05
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.131.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.131.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver`: Changed the default value of the 'useControlPlaneMetricsHistogramData' and 'enableEKSApiServerMetrics' feature gates. These feature gates now default to true and only affect Kubernetes control plane metrics collection. ([#1944](https://github.com/signalfx/splunk-otel-collector-chart/pull/1944))
+  - Enabling 'featureGates.useControlPlaneMetricsHistogramData' switches the agent's control plane metrics collection from the legacy `smartagent/*` receivers to `prometheus/*` receivers for k8s control plane components (apiserver, controller-manager, scheduler, etcd, kube-proxy, coredns).
+    - This change also enables sending histogram metrics from the above-listed k8s components as OTLP histograms to Splunk Observability.
+    - To disable this feature, set `featureGates.useControlPlaneMetricsHistogramData` to false.
+  - The 'featureGates.enableEKSApiServerMetrics', now set to true, controls whether EKS API server metrics are collected and sent to Splunk Observability, including OTLP histograms.
+    - This change only affects clusterReceiver deployments running in EKS (including vanilla, Fargate, or Auto Mode) clusters.
+    - To disable this feature, set `featureGates.enableEKSApiServerMetrics` to false.
+  - Please review your configuration if you relied on the previous default of false for these feature gates.
+  
+
 ## [0.130.0] - 2025-07-26
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.130.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.130.0).
