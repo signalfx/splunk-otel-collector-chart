@@ -18,9 +18,6 @@ agent:
       cpu: 200m
       memory: 1Gi
   config:
-    receivers:
-      kubeletstats:
-        insecure_skip_verify: true
     exporters:
       otlp:
         endpoint: {{ .OtlpEndpoint }}
