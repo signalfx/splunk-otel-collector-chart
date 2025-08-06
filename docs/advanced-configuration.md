@@ -65,19 +65,13 @@ This value can be omitted if none of the values apply.
 
 ## AKS KubeletStats Receiver
 
-In contrast to other Kubernetes distributions, `AKS` does not create the kubelet's
+In contrast to other Kubernetes distributions, earlier `AKS` versions do not create the kubelet's
 self-signed certificate using the Certificate Authority that issues the kube-apiserver certificate,
 located at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`.
 Instead, it utilizes `/etc/kubernetes/certs/kubeletserver.crt` and includes only the node name in
-the Subject Alternative Name of its certificate.
+the Subject Alternative Name of its certificate. The latest versions of AKS address this issue.
 
-When `distribution` is set to `aks`, the chart automatically sets the custom `ca_file`
-option to `/hostfs/etc/kubernetes/certs/kubeletserver.crt` and uses the node name in
-its endpoint.
-This only applies to `AKS` non-Windows nodes; windows k8s nodes don't support hostnetwork, which is needed for
-the node name to revolve to its IP address.
-
-For custom setups (e.g., custom certificates, Windows nodes, or Linux nodes with virtual network using custom DNS),
+For earlier versions or custom setups (e.g., custom certificates, Windows nodes, or Linux nodes with virtual network using custom DNS),
 adjust `ca_file` and use the node IP instead.
 ```yaml
 agent:
