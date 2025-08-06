@@ -1337,7 +1337,7 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.54b1
+      image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.5.0
       # env:
       #   - name: PYTHON_ENV_VAR
       #     value: python_value
