@@ -377,7 +377,11 @@ resource/metrics:
   attributes:
     # Insert the sourcetype value from values.yaml if it has not already been set through annotations.
     - key: com.splunk.sourcetype
+      {{- if .Values.splunkPlatform.sourcetypeMetrics }}
+      value: "{{.Values.splunkPlatform.sourcetypeMetrics }}"
+      {{- else }}
       value: "{{.Values.splunkPlatform.sourcetype }}"
+      {{- end }}
       action: insert
 {{- end }}
 
