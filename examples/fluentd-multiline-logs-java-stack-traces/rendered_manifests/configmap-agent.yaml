@@ -18,22 +18,24 @@ metadata:
 data:
   relay: |
     exporters:
-      otlphttp:
+      otlp:
         auth:
           authenticator: headers_setter
-        metrics_endpoint: https://ingest.CHANGEME.signalfx.com/v2/datapoint/otlp
-        traces_endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace/otlp
+        endpoint: default-splunk-otel-collector:4317
+        tls:
+          insecure: true
       otlphttp/entities:
         auth:
           authenticator: headers_setter
-        logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
+        endpoint: http://default-splunk-otel-collector:4318
       signalfx:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-        api_url: https://api.CHANGEME.signalfx.com
+        api_url: http://default-splunk-otel-collector:6060
         correlation: null
-        ingest_url: https://ingest.CHANGEME.signalfx.com
+        ingest_url: http://default-splunk-otel-collector:9943
         root_path: /hostfs
         sync_host_metadata: true
+<<<<<<< HEAD
       signalfx/histograms:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         api_url: https://api.CHANGEME.signalfx.com
@@ -45,6 +47,8 @@ data:
         log_data_enabled: true
         profiling_data_enabled: false
         token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+=======
+>>>>>>> b7920d8f ([chore] fixes)
     extensions:
       headers_setter:
         headers:
@@ -62,13 +66,6 @@ data:
       batch:
         metadata_keys:
         - X-SF-Token
-      filter/logs:
-        logs:
-          exclude:
-            match_type: strict
-            resource_attributes:
-            - key: splunk.com/exclude
-              value: "true"
       groupbyattrs/logs:
         keys:
         - com.splunk.source
@@ -108,6 +105,7 @@ data:
           - container.image.tag
         filter:
           node_from_env_var: K8S_NODE_NAME
+        passthrough: true
         pod_association:
         - sources:
           - from: resource_attribute
@@ -150,15 +148,6 @@ data:
         - action: insert
           key: otelcol.service.mode
           value: agent
-      resource/logs:
-        attributes:
-        - action: upsert
-          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
-          key: com.splunk.sourcetype
-        - action: delete
-          key: k8s.pod.annotations.splunk.com/sourcetype
-        - action: delete
-          key: splunk.com/exclude
       resourcedetection:
         detectors:
         - env
@@ -342,16 +331,14 @@ data:
       pipelines:
         logs:
           exporters:
-          - splunk_hec/o11y
+          - otlp
           processors:
           - memory_limiter
           - groupbyattrs/logs
           - k8sattributes
-          - filter/logs
           - batch
           - resourcedetection
           - resource
-          - resource/logs
           receivers:
           - fluentforward
           - otlp
@@ -367,7 +354,7 @@ data:
           - nop
         metrics:
           exporters:
-          - signalfx
+          - otlp
           processors:
           - memory_limiter
           - batch
@@ -403,7 +390,7 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - otlphttp
+          - otlp
           - signalfx
           processors:
           - memory_limiter

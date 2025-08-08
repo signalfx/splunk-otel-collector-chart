@@ -1113,7 +1113,7 @@ securityContextConstraintsOverwrite: {}
 gateway:
   # Defines if collector deployment is enabled
   # Recommended for large k8s clusters, disabled by default.
-  enabled: false
+  enabled: true
 
   # Number of collector replicas
   replicaCount: 3
@@ -1167,7 +1167,8 @@ gateway:
     # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
     trafficDistribution: ""
     # Service annotations
-    annotations: {}
+    annotations:
+      notdeprecated: "true"
 
   # Scheduling configurations
   nodeSelector: {}
@@ -1204,13 +1205,6 @@ gateway:
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.
   config: {}
-
-################################################################################
-# DEPRECATED: OpenTelemetry service config, used for otel collector deployment.
-# This config is deprecated and will be removed in a future release.
-# Please use `agent.service` and `gateway.service` for configuring the agent and gateway services, respectively.
-################################################################################
-service: {}
 
 ################################################################################
 # Notice: Operator related features should be considered to have an alpha
@@ -1427,5 +1421,10 @@ featureGates:
   # It is required if the helm chart is used with another collector image from upstream.
   useMemoryLimitPercentage: false
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
+<<<<<<< HEAD
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   enableEKSApiServerMetrics: true
+=======
+  # NOTE - OTLP histograms are sent as histog∂rams to Splunk Observability for this feature.
+  enableEKSApiServerMetrics: false
+>>>>>>> b7920d8f ([chore] fixes)

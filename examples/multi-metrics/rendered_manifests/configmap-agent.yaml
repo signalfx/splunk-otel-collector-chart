@@ -18,6 +18,7 @@ metadata:
 data:
   relay: |
     exporters:
+<<<<<<< HEAD
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: CHANGEME
@@ -39,10 +40,16 @@ data:
         splunk_app_name: splunk-otel-collector
         splunk_app_version: 0.131.0
         timeout: 10s
+=======
+      otlp:
+        auth:
+          authenticator: headers_setter
+        endpoint: default-splunk-otel-collector:4317
+>>>>>>> b7920d8f ([chore] fixes)
         tls:
-          insecure_skip_verify: false
-        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+          insecure: true
       splunk_hec/platform_metrics:
+<<<<<<< HEAD
         disable_compression: true
         endpoint: CHANGEME
         idle_conn_timeout: 10s
@@ -65,6 +72,8 @@ data:
         tls:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+=======
+>>>>>>> b7920d8f ([chore] fixes)
         use_multi_metric_format: true
     extensions:
       file_storage:
@@ -85,13 +94,6 @@ data:
       batch:
         metadata_keys:
         - X-SF-Token
-      filter/logs:
-        logs:
-          exclude:
-            match_type: strict
-            resource_attributes:
-            - key: splunk.com/exclude
-              value: "true"
       k8sattributes:
         extract:
           annotations:
@@ -121,6 +123,7 @@ data:
           - container.image.tag
         filter:
           node_from_env_var: K8S_NODE_NAME
+        passthrough: true
         pod_association:
         - sources:
           - from: resource_attribute
@@ -196,15 +199,6 @@ data:
         - action: insert
           key: otelcol.service.mode
           value: agent
-      resource/logs:
-        attributes:
-        - action: upsert
-          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
-          key: com.splunk.sourcetype
-        - action: delete
-          key: k8s.pod.annotations.splunk.com/sourcetype
-        - action: delete
-          key: splunk.com/exclude
       resourcedetection:
         detectors:
         - env
@@ -387,22 +381,20 @@ data:
       pipelines:
         logs:
           exporters:
-          - splunk_hec/platform_logs
+          - otlp
           processors:
           - memory_limiter
           - k8sattributes
-          - filter/logs
           - batch
           - resourcedetection
           - resource
-          - resource/logs
           receivers:
           - filelog
           - fluentforward
           - otlp
         metrics:
           exporters:
-          - splunk_hec/platform_metrics
+          - otlp
           processors:
           - memory_limiter
           - batch
@@ -416,7 +408,7 @@ data:
           - signalfx
         metrics/agent:
           exporters:
-          - splunk_hec/platform_metrics
+          - otlp
           processors:
           - memory_limiter
           - batch

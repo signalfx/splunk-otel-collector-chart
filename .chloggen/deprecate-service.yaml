@@ -4,7 +4,7 @@ component: chart
 note: "Deprecated root-level 'service' config in favor of 'agent.service' and 'gateway.service'."
 issues: [1943]
 subtext: |
-  - The root-level 'service' parameter is now deprecated and will be removed in a future release.
+  - The 'service' config is now deprecated and will be removed in a future release.
   - Please use 'agent.service' and 'gateway.service' for configuring services for the agent and gateway, respectively.
   - Helm chart gives preference to the old config for backward compatibility for now. Users are encouraged to migrate to the new config.
   - A warning is shown in NOTES.txt if the deprecated config is used.

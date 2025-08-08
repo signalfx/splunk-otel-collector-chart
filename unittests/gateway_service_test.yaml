@@ -1,7 +1,6 @@
 suite: splunk-otel-collector.gatewayService
 values:
   - ./values/basic.yaml
-  # Add a minimal values file if needed for specific overrides
 release:
   name: test-release
   namespace: test-ns
@@ -63,7 +62,7 @@ tests:
       service:
         type: LoadBalancer
         annotations:
-          deprecated: true
+          deprecated: "true"
         trafficDistribution: "PreferSameZone"
     asserts:
       - isKind:
@@ -73,7 +72,7 @@ tests:
           value: LoadBalancer
       - equal:
           path: metadata.annotations.deprecated
-          value: true
+          value: "true"
       - equal:
           path: spec.trafficDistribution
           value: PreferSameZone
