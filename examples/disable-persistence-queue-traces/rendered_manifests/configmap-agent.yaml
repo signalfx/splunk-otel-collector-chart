@@ -18,7 +18,6 @@ metadata:
 data:
   relay: |
     exporters:
-<<<<<<< HEAD
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: CHANGEME
@@ -68,18 +67,23 @@ data:
         tls:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
-=======
-      otlp:
-        auth:
-          authenticator: headers_setter
-        endpoint: default-splunk-otel-collector:4317
-        tls:
-          insecure: true
->>>>>>> b7920d8f ([chore] fixes)
       splunk_hec/platform_traces:
+        disable_compression: true
+        endpoint: CHANGEME
+        idle_conn_timeout: 10s
+        index: ""
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
         sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 1000
           storage: null
-<<<<<<< HEAD
         source: kubernetes
         splunk_app_name: splunk-otel-collector
         splunk_app_version: 0.131.0
@@ -87,8 +91,6 @@ data:
         tls:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
-=======
->>>>>>> b7920d8f ([chore] fixes)
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
@@ -111,6 +113,13 @@ data:
       batch:
         metadata_keys:
         - X-SF-Token
+      filter/logs:
+        logs:
+          exclude:
+            match_type: strict
+            resource_attributes:
+            - key: splunk.com/exclude
+              value: "true"
       k8sattributes:
         extract:
           annotations:
@@ -140,7 +149,6 @@ data:
           - container.image.tag
         filter:
           node_from_env_var: K8S_NODE_NAME
-        passthrough: true
         pod_association:
         - sources:
           - from: resource_attribute
@@ -216,6 +224,15 @@ data:
         - action: insert
           key: otelcol.service.mode
           value: agent
+      resource/logs:
+        attributes:
+        - action: upsert
+          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          key: com.splunk.sourcetype
+        - action: delete
+          key: k8s.pod.annotations.splunk.com/sourcetype
+        - action: delete
+          key: splunk.com/exclude
       resourcedetection:
         detectors:
         - env
@@ -407,20 +424,22 @@ data:
       pipelines:
         logs:
           exporters:
-          - otlp
+          - splunk_hec/platform_logs
           processors:
           - memory_limiter
           - k8sattributes
+          - filter/logs
           - batch
           - resourcedetection
           - resource
+          - resource/logs
           receivers:
           - filelog
           - fluentforward
           - otlp
         metrics:
           exporters:
-          - otlp
+          - splunk_hec/platform_metrics
           processors:
           - memory_limiter
           - batch
@@ -434,7 +453,7 @@ data:
           - signalfx
         metrics/agent:
           exporters:
-          - otlp
+          - splunk_hec/platform_metrics
           processors:
           - memory_limiter
           - batch
@@ -447,7 +466,7 @@ data:
           - prometheus/agent
         traces:
           exporters:
-          - otlp
+          - splunk_hec/platform_traces
           processors:
           - memory_limiter
           - k8sattributes

@@ -17,8 +17,6 @@ metadata:
     release: default
     heritage: Helm
     app.kubernetes.io/component: otel-collector
-  annotations:
-    notdeprecated: "true"
 spec:
   type: ClusterIP
   ports:
