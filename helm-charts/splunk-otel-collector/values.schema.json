@@ -608,6 +608,20 @@
           "properties": {
             "enabled": {
               "type": "boolean"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "ClusterIP",
+                "NodePort",
+                "LoadBalancer",
+                "ExternalName"
+              ],
+              "description": "Service type for the agent service. Defaults to ClusterIP."
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Annotations for the agent service."
             }
           }
         },
@@ -1358,6 +1372,35 @@
             }
           }
         },
+        "service": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "ClusterIP",
+                "NodePort",
+                "LoadBalancer",
+                "ExternalName"
+              ],
+              "description": "Service type for the gateway service. Defaults to ClusterIP."
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Annotations for the gateway service."
+            },
+            "trafficDistribution": {
+              "type": "string",
+              "enum": [
+                "",
+                "PreferClose",
+                "PreferSameZone",
+                "PreferSameNode"
+              ]
+            }
+          }
+        },
         "nodeSelector": {
           "type": "object"
         },
@@ -1424,8 +1467,9 @@
       "deprecated": true
     },
     "service": {
-      "description": "Splunk OpenTelemetry collector service configuration.",
+      "description": "[DEPRECATED] OpenTelemetry collector service configuration. Please use agent.service and gateway.service instead.",
       "type": "object",
+      "deprecated": true,
       "additionalProperties": false,
       "properties": {
         "type": {
