@@ -10,6 +10,10 @@ gateway:
     limits:
       cpu: 2
       memory: 4Gi
+  service:
+    annotations:
+      gateway: "test-value"
+
 agent:
   enabled: false
 clusterReceiver:

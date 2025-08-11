@@ -55,24 +55,30 @@ tests:
           path: spec.trafficDistribution
           value: PreferSameZone
 
-  - it: should render gateway service using deprecated service config
+  - it: should ignore gateway service config when deprecated service config is present (even if incomplete)
     set:
       gateway:
         enabled: true
+        service:
+          type: NodePort
+          annotations:
+            gateway: "true"
       service:
-        type: LoadBalancer
+        type: ClusterIP
         annotations:
           deprecated: "true"
-        trafficDistribution: "PreferSameZone"
+        trafficDistribution: "PreferClose"
     asserts:
       - isKind:
           of: Service
       - equal:
-          path: spec.type
-          value: LoadBalancer
-      - equal:
           path: metadata.annotations.deprecated
           value: "true"
+      - notExists:
+          path: metadata.annotations.gateway  # gateway annotations are completely ignored
+      - equal:
+          path: spec.type
+          value: ClusterIP
       - equal:
           path: spec.trafficDistribution
-          value: PreferSameZone
+          value: PreferClose

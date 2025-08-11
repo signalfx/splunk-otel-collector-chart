@@ -4,7 +4,7 @@ component: chart
 note: "Deprecated root-level 'service' config in favor of 'agent.service' and 'gateway.service'."
 issues: [1943]
 subtext: |
-  - The 'service' config is now deprecated and will be removed in a future release.
+  - The 'service' config is now deprecated and will be completely removed in a future release. The default `.Values.service` is not set anymore.
   - Please use 'agent.service' and 'gateway.service' for configuring services for the agent and gateway, respectively.
-  - Helm chart gives preference to the old config for backward compatibility for now. Users are encouraged to migrate to the new config.
+  - When the deprecated 'service' config is present, it completely overrides the component-specific service config for backward compatibility. Make sure to set all fields if passing `.Values.service`.
   - A warning is shown in NOTES.txt if the deprecated config is used.
