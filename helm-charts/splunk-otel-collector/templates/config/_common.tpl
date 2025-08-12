@@ -277,10 +277,13 @@ k8sattributes/metrics:
   pod_association:
     - sources:
       - from: resource_attribute
-        name: k8s.node.name
+        name: k8s.pod.uid
     - sources:
       - from: resource_attribute
-        name: k8s.pod.uid
+        name: k8s.namespace.name
+    - sources:
+      - from: resource_attribute
+        name: k8s.node.name
     - sources:
       - from: resource_attribute
         name: k8s.pod.ip
