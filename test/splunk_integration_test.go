@@ -29,6 +29,7 @@ func Test_Functions(t *testing.T) {
 	t.Run("verify log ingestion by using annotations", testVerifyLogsIngestionUsingAnnotations)
 	t.Run("custom metadata fields annotations", testVerifyCustomMetadataFieldsAnnotations)
 	t.Run("metric namespace annotations", testVerifyMetricNamespaceAnnotations)
+	t.Run("metric pod annotations", testVerifyMetricPodAnnotations)
 }
 
 func testVerifyLogsIngestionUsingAnnotations(t *testing.T) {
@@ -137,6 +138,51 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 	}
 }
 
+func testVerifyMetricPodAnnotations(t *testing.T) {
+	podName := "pod-metrics-index"
+	namespace := "default"
+	defaultIndex := "ci_metrics"
+	defaultSourcetype := "httpevent"
+	annotationIndex := "test_metrics"
+	annotationSourcetype := "annotation_sourcetype"
+
+	client := createK8sClient(t)
+
+	tests := []struct {
+		name                      string
+		annotationIndexValue      string
+		annotationSourcetypeValue string
+	}{
+		{"default index and default sourcetype", "", ""},
+		{"annotation index and default sourcetype", annotationIndex, ""},
+		{"default index and annotation sourcetype", "", annotationSourcetype},
+		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			addPodAnnotation(t, client, podName, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue)
+			time.Sleep(20 * time.Second)
+
+			index := defaultIndex
+			if tt.annotationIndexValue != "" {
+				index = tt.annotationIndexValue
+			}
+			sourcetype := defaultSourcetype
+			if tt.annotationSourcetypeValue != "" {
+				sourcetype = tt.annotationSourcetypeValue
+			}
+			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.container.name\"=" + podName
+			fmt.Println("Search Query: ", searchQuery)
+			startTime := "-15s@s"
+			events := CheckEventsFromSplunk(searchQuery, startTime)
+			fmt.Println(" =========>  Events received: ", len(events))
+			assert.Greater(t, len(events), 1)
+
+			removeAllPodsAnnotations(t, client, podName, namespace)
+		})
+	}
+}
+
 func createK8sClient(t *testing.T) *kubernetes.Clientset {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
@@ -157,6 +203,16 @@ func removeAllNamespaceAnnotations(t *testing.T, clientset *kubernetes.Clientset
 	fmt.Printf("All annotations removed from namespace_name %s\n", namespace_name)
 }
 
+func removeAllPodsAnnotations(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string) {
+	pod, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), pod_name, metav1.GetOptions{})
+	require.NoError(t, err)
+	pod.Annotations = make(map[string]string)
+
+	_, err = clientset.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
+	require.NoError(t, err)
+	fmt.Printf("All annotations removed from pod_name %s\n", pod_name)
+}
+
 func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, namespace_name string, annotationIndex string, annotationSourcetype string) {
 	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace_name, metav1.GetOptions{})
 	require.NoError(t, err)
@@ -173,4 +229,26 @@ func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, names
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 	fmt.Printf("Annotation added to namespace_name %s\n", namespace_name)
+}
+
+func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string, annotationIndex string, annotationSourcetype string) {
+	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("app=%s", pod_name),
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, pods.Items, "No pods found with label app=%s", pod_name)
+	pod := &pods.Items[0]
+	if pod.Annotations == nil {
+		pod.Annotations = make(map[string]string)
+	}
+	if annotationIndex != "" {
+		pod.Annotations["splunk.com/metricsIndex"] = annotationIndex
+	}
+	if annotationSourcetype != "" {
+		pod.Annotations["splunk.com/sourcetype"] = annotationSourcetype
+	}
+
+	_, err = clientset.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
+	require.NoError(t, err)
+	fmt.Printf("Annotation added to pod_name %s\n", pod_name)
 }
