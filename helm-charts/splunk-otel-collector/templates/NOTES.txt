@@ -24,6 +24,10 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
+{{- if not (eq (toString .Values.service) "<nil>") }}
+[WARNING] The ".Values.service" config is deprecated. Please use ".Values.agent.service" and ".Values.gateway.service" for configuring services for the agent and gateway, respectively.
+          This field will be removed in a future release.
+{{ end }}
 {{- if .Values.splunkAccessToken }}
 [WARNING] "splunkAccessToken" parameter is deprecated, please use "splunkObservability.accessToken" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360

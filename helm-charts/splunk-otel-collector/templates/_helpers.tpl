@@ -551,3 +551,16 @@ If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will 
   {{- .Values.clusterReceiver.hostNetwork }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Helper to get the effective service config for a component (e.g., gateway, agent).
+  If .Values.service is not an empty map, use it for backward compatibility.
+  Otherwise, use the nested service config (e.g., .Values.gateway.service).
+  Usage: {{ include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.gateway.service) | fromYaml }}
+*/}}
+{{- define "splunk-otel-collector.getServiceConfig" -}}
+{{- $svc := .svc -}}
+{{- $values := .context.Values }}
+{{- $useOldService := and (hasKey $values "service") (gt (len $values.service) 0) }}
+{{- toYaml (ternary $values.service $svc $useOldService) -}}
+{{- end -}}
