@@ -34,7 +34,7 @@ jobs:
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check for Version Updates
         id: check_for_update
