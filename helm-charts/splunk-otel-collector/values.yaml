@@ -565,6 +565,9 @@ clusterReceiver:
 
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
+  # This option can be useful when IMDS access is blocked for some reason. Running in the host network helps
+  # bypass this restriction and ensures that the pod can access the VM metadata API to get the necessary information
+  # for correlation with cloud infrastructure in Splunk Observability.
   # Disregarded for Windows (unsupported by k8s).
   hostNetwork:
 
