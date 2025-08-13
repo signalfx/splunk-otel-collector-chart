@@ -171,7 +171,7 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 			if tt.annotationSourcetypeValue != "" {
 				sourcetype = tt.annotationSourcetypeValue
 			}
-			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.container.name\"=" + podName
+			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
 			startTime := "-15s@s"
 			events := CheckEventsFromSplunk(searchQuery, startTime)
@@ -232,9 +232,7 @@ func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, names
 }
 
 func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string, annotationIndex string, annotationSourcetype string) {
-	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("app=%s", pod_name),
-	})
+	pod, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), pod_name, metav1.GetOptions{})
 	require.NoError(t, err)
 	require.NotEmpty(t, pods.Items, "No pods found with label app=%s", pod_name)
 	pod := &pods.Items[0]
