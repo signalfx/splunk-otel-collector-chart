@@ -234,8 +234,6 @@ func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, names
 func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string, annotationIndex string, annotationSourcetype string) {
 	pod, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), pod_name, metav1.GetOptions{})
 	require.NoError(t, err)
-	require.NotEmpty(t, pods.Items, "No pods found with label app=%s", pod_name)
-	pod := &pods.Items[0]
 	if pod.Annotations == nil {
 		pod.Annotations = make(map[string]string)
 	}
