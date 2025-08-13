@@ -177,26 +177,22 @@ spec:
         - name: FREQ
           value: "0.1"
 ---
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Pod
 metadata:
   name: pod-metrics-index
   namespace: default
+  labels:
+    app: pod-metrics-index
 spec:
-  parallelism: 1
-  template:
-    metadata:
-      labels:
-        app: pod-metrics-index
-    spec:
-      restartPolicy: Never
-      containers:
-        - name: pod-metrics-index
-          image: docker.io/rock1017/log-generator:2.2.6
-          env:
-            - name: MESSAGE_COUNT
-              value: "10"
-            - name: SIZE
-              value: "256"
-            - name: FREQ
-              value: "1"
+  containers:
+    - name: pod-metrics-index
+      image: docker.io/rock1017/log-generator:2.2.6
+      env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
+  restartPolicy: Never
