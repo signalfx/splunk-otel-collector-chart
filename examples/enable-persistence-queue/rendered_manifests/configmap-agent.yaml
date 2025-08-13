@@ -185,18 +185,13 @@ data:
         pod_association:
         - sources:
           - from: resource_attribute
-            name: k8s.node.name
-        - sources:
-          - from: resource_attribute
             name: k8s.pod.uid
         - sources:
           - from: resource_attribute
-            name: k8s.pod.ip
+            name: k8s.namespace.name
         - sources:
           - from: resource_attribute
-            name: ip
-        - sources:
-          - from: connection
+            name: k8s.node.name
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
