@@ -3,10 +3,10 @@
 
 module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 
-go 1.24.2
+go 1.24.6
 
 require (
-	github.com/docker/docker v28.3.2+incompatible
+	github.com/docker/docker v28.3.3+incompatible
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.130.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.130.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.130.0
@@ -118,7 +118,7 @@ require (
 	github.com/moby/spdystream v0.5.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/mostynb/go-grpc-compression v1.2.3 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
