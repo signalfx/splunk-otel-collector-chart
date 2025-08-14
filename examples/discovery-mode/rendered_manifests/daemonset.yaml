@@ -130,10 +130,12 @@ spec:
                 name: redis-secret
 
         readinessProbe:
+          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
+          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
