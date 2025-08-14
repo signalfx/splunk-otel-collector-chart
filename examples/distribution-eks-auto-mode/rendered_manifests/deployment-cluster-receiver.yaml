@@ -73,12 +73,10 @@ spec:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13134
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13134

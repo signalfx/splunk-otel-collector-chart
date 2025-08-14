@@ -1227,6 +1227,8 @@ operatorcrds:
 
 operator:
   enabled: false
+  manager:
+    ignoreMissingCollectorCRDs: true
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
   # a race condition with helm.
   # See: https://github.com/open-telemetry/opentelemetry-helm-charts/issues/677
@@ -1242,11 +1244,6 @@ operator:
       certPeriodDays: 3650
     certManager:
       enabled: false
-  # Collector deployment via the operator is not supported at this time.
-  # The collector image repository is specified here to meet operator subchart constraints.
-  manager:
-    collectorImage:
-      repository: quay.io/signalfx/splunk-otel-collector
 
 # The default Splunk Instrumentation object deployed when operator.enabled=true.
 # For more details see:
