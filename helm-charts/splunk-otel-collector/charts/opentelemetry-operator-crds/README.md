@@ -6,7 +6,6 @@ This approach is inspired by the [opentelemetry-kube-stack chart](https://github
 
 > [!NOTE]
 > The splunk-otel-collector chart only supports and tests functionality related to the auto-instrumentation that requires the Instrumentation CRD.
-> Other CRDs, such as OpenTelemetryCollector, OpAMPBridge and TargetAllocator, are included solely to allow the Operator to start up and are not currently supported or tested.
 
 # Upgrade Notes
 
@@ -17,10 +16,7 @@ Helm does NOT automatically update CRDs during helm upgrades.
 The CRDs in this chart are fetched from the [opentelemetry-operator repository](https://github.com/open-telemetry/opentelemetry-operator/tree/main). The OPERATOR_APP_VERSION corresponds to the opentelemetry-operator tag/appVersion bundled in the splunk-otel-collector chart.
 ```
 # CRDs are sourced from the tag matching our operator version
-wget https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v${OPERATOR_APP_VERSION}/config/crd/bases/opentelemetry.io_opentelemetrycollectors.yaml
-wget https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v${OPERATOR_APP_VERSION}/config/crd/bases/opentelemetry.io_opampbridges.yaml
 wget https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v${OPERATOR_APP_VERSION}/config/crd/bases/opentelemetry.io_instrumentations.yaml
-wget https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v${OPERATOR_APP_VERSION}/config/crd/bases/opentelemetry.io_targetallocators.yaml
 ```
 
 ## Manual CRD Update Process
