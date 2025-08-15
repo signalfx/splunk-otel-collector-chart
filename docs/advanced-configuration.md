@@ -689,7 +689,15 @@ Manage Splunk OTel Collector Logging with these supported annotations.
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `false` (default: false), set `splunk.com/exclude` annotation to `true` on pod and/or namespace to exclude its logs from ingested.
   * If `logsCollection.containers.useSplunkIncludeAnnotation` is `true` (default: false), set `splunk.com/include` annotation to `true` on pod and/or namespace to only include its logs from ingested. All other logs will be ignored.
 * For logs, use `splunk.com/sourcetype` annotation on pod to overwrite `sourcetype` field. If not set, it is dynamically generated to be `kube:container:CONTAINER_NAME`.
-* For metrics, use the `splunk.com/sourcetype` annotation on the namespace to override the sourcetype field. If not set, it defaults to `httpevent`.
+* For metrics, use the `splunk.com/sourcetypeMetrics` annotation on the namespace to override the `sourcetypeMetrics` field. If not set, it defaults to `httpevent`.
+
+The sourcetype for metrics is selected based on the following precedence:
+
+1. The value of the `splunk.com/sourcetypeMetrics` annotation on the namespace, if present.
+2. The value of the `splunk.com/sourcetype` annotation on the namespace, if present, applies to all data types.
+3. The value of `.Values.splunkPlatform.sourcetypeMetrics` in the Helm values, if specified, is used for metrics.
+4. If only `.Values.splunkPlatform.sourcetype` is set, it applies to all data types.
+5. If none of the above are set, the default `sourcetype` is `httpevent`.
 
 ### Performance of native OpenTelemetry logs collection
 

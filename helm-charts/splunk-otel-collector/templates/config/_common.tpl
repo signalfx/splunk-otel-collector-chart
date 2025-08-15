@@ -277,18 +277,13 @@ k8sattributes/metrics:
   pod_association:
     - sources:
       - from: resource_attribute
-        name: k8s.node.name
-    - sources:
-      - from: resource_attribute
         name: k8s.pod.uid
     - sources:
       - from: resource_attribute
-        name: k8s.pod.ip
+        name: k8s.namespace.name
     - sources:
       - from: resource_attribute
-        name: ip
-    - sources:
-      - from: connection
+        name: k8s.node.name
   extract:
     metadata: []
     annotations:
@@ -296,6 +291,12 @@ k8sattributes/metrics:
         tag_name: com.splunk.sourcetype
         from: namespace
       - key: splunk.com/sourcetype
+        tag_name: com.splunk.sourcetype
+        from: pod
+      - key: splunk.com/sourcetypeMetrics
+        tag_name: com.splunk.sourcetype
+        from: namespace
+      - key: splunk.com/sourcetypeMetrics
         tag_name: com.splunk.sourcetype
         from: pod
       - key: splunk.com/metricsIndex
@@ -377,7 +378,11 @@ resource/metrics:
   attributes:
     # Insert the sourcetype value from values.yaml if it has not already been set through annotations.
     - key: com.splunk.sourcetype
+      {{- if .Values.splunkPlatform.sourcetypeMetrics }}
+      value: {{.Values.splunkPlatform.sourcetypeMetrics | quote }}
+      {{- else }}
       value: "{{.Values.splunkPlatform.sourcetype }}"
+      {{- end }}
       action: insert
 {{- end }}
 
