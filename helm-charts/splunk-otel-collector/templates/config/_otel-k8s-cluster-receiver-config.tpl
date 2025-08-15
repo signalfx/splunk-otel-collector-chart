@@ -24,6 +24,9 @@ receivers:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     metadata_exporters: [signalfx]
+    resource_attributes:
+          k8s.container.status.last_terminated_reason:
+            enabled: true
     {{- end }}
     {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
     distribution: openshift
