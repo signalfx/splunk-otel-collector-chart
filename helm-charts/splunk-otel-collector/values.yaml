@@ -160,6 +160,7 @@ splunkObservability:
   # Options to disable or enable particular telemetry data types.
   metricsEnabled: true
   tracesEnabled: true
+  # Deprecated: [v0.131.0] this setting will be removed in 2 versions. It allows sending logs to Log Observer, which is EoS.
   logsEnabled: false
 
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
