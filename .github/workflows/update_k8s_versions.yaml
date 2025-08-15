@@ -18,7 +18,7 @@ jobs:
       DEBUG: ${{ github.event.inputs.DEBUG_ARGUMENT }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check for new matrix versions
         id: check_for_update
