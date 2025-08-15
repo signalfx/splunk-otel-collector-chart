@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.131.1] - 2025-08-15
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.131.2](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.131.2).
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Deprecated root-level 'service' config in favor of 'agent.service' and 'gateway.service'. ([#1943](https://github.com/signalfx/splunk-otel-collector-chart/pull/1943))
+  - The 'service' config is now deprecated and will be completely removed in a future release. The default `.Values.service` is not set anymore.
+  - Please use 'agent.service' and 'gateway.service' for configuring services for the agent and gateway, respectively.
+  - When the deprecated 'service' config is present, it completely overrides the component-specific service config for backward compatibility. Make sure to set all fields if passing `.Values.service`.
+  - A warning is shown in NOTES.txt if the deprecated config is used.
+  
+
 ## [0.131.0] - 2025-08-06
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.131.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.131.0).
