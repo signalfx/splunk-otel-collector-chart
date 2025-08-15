@@ -74,12 +74,10 @@ spec:
           - name: HTTPS_PROXY
             value: 192.168.0.10
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13134
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13134

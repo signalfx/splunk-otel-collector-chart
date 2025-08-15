@@ -120,12 +120,10 @@ spec:
                 key: splunk_observability_access_token
 
         readinessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          initialDelaySeconds: 0
           httpGet:
             path: /
             port: 13133
