@@ -15,7 +15,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   - Please use 'agent.service' and 'gateway.service' for configuring services for the agent and gateway, respectively.
   - When the deprecated 'service' config is present, it completely overrides the component-specific service config for backward compatibility. Make sure to set all fields if passing `.Values.service`.
   - A warning is shown in NOTES.txt if the deprecated config is used.
-  
 
 ## [0.131.0] - 2025-08-06
 
