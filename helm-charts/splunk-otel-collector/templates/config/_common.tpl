@@ -230,25 +230,6 @@ k8sattributes:
 {{- end }}
 {{- define "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" -}}
 k8sattributes/clusterReceiver:
-  pod_association:
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.namespace.name
-    - sources:
-      - from: resource_attribute
-        name: k8s.node.name
-  extract:
-    metadata:
-      - k8s.namespace.name
-      - k8s.node.name
-      - k8s.pod.name
-      - k8s.pod.uid
-      - container.id
-      - container.image.name
-      - container.image.tag
     {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true"}}
     annotations:
       - key: splunk.com/sourcetype

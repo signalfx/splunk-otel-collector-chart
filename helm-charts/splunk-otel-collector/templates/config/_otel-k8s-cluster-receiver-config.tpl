@@ -393,7 +393,6 @@ service:
         - resource/add_environment
         {{- end }}
         - transform/k8sevents
-        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -416,7 +415,6 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
         - splunk_hec/o11y

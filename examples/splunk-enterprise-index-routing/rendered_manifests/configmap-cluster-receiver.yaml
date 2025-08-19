@@ -58,38 +58,19 @@ data:
       batch:
         send_batch_max_size: 32768
       k8sattributes/clusterReceiver:
-        extract:
-          annotations:
-          - from: namespace
-            key: splunk.com/sourcetype
-            tag_name: com.splunk.sourcetype
-          - from: pod
-            key: splunk.com/sourcetype
-            tag_name: com.splunk.sourcetype
-          - from: namespace
-            key: splunk.com/index
-            tag_name: com.splunk.index
-          - from: pod
-            key: splunk.com/index
-            tag_name: com.splunk.index
-          metadata:
-          - k8s.namespace.name
-          - k8s.node.name
-          - k8s.pod.name
-          - k8s.pod.uid
-          - container.id
-          - container.image.name
-          - container.image.tag
-        pod_association:
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
-        - sources:
-          - from: resource_attribute
-            name: k8s.namespace.name
-        - sources:
-          - from: resource_attribute
-            name: k8s.node.name
+        annotations:
+        - from: namespace
+          key: splunk.com/sourcetype
+          tag_name: com.splunk.sourcetype
+        - from: pod
+          key: splunk.com/sourcetype
+          tag_name: com.splunk.sourcetype
+        - from: namespace
+          key: splunk.com/index
+          tag_name: com.splunk.index
+        - from: pod
+          key: splunk.com/index
+          tag_name: com.splunk.index
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
@@ -189,7 +170,6 @@ data:
           - resourcedetection
           - resource
           - transform/k8sevents
-          - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
       telemetry:
