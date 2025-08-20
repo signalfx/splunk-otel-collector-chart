@@ -4,7 +4,7 @@
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}
-{{- if and $agent.enabled (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+{{- if and $agent.enabled (ne .Values.distribution "eks/fargate") }}
 apiVersion: v1
 kind: Service
 metadata:

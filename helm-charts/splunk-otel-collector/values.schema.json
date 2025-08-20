@@ -271,11 +271,6 @@
         ""
       ]
     },
-    "provider": {
-      "description": "[DEPRECATED] Cloud provider where the collector is running",
-      "type": "string",
-      "deprecated": true
-    },
     "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
@@ -291,11 +286,6 @@
         " ",
         ""
       ]
-    },
-    "distro": {
-      "description": "[DEPRECATED] Kubernetes distribution where the collector is running",
-      "type": "string",
-      "deprecated": true
     },
     "environment": {
       "description": "Parameter that will be added to all the telemetry data (traces/logs/metrics) as an attribute.",

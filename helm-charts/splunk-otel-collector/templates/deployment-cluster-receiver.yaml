@@ -6,10 +6,10 @@ eks/fargate distributions use a two-replica StatefulSet instead of a single node
 The first replica monitors all fargate node kubelets (except its own) via k8s_observer and kubeletstats receiver.
 The second replica monitors the first replica's kubelet and the cluster.
 */}}
-kind: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} StatefulSet {{- else }} Deployment {{- end }}
+kind: {{- if eq .Values.distribution "eks/fargate" }} StatefulSet {{- else }} Deployment {{- end }}
 metadata:
   {{- /* StatefulSet names must be truncated or the `statefulset.kubernetes.io/pod-name` label value will be too long */}}
-  name: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} {{ template "splunk-otel-collector.clusterReceiverTruncatedName" . }} {{- else }} {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver {{- end }}
+  name: {{- if eq .Values.distribution "eks/fargate" }} {{ template "splunk-otel-collector.clusterReceiverTruncatedName" . }} {{- else }} {{ template "splunk-otel-collector.fullname" . }}-k8s-cluster-receiver {{- end }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
@@ -24,8 +24,8 @@ metadata:
     {{- toYaml $clusterReceiver.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }} 2 {{- else }} 1 {{- end }}
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  replicas: {{- if eq .Values.distribution "eks/fargate" }} 2 {{- else }} 1 {{- end }}
+  {{- if eq .Values.distribution "eks/fargate" }}
   serviceName: {{ template "splunk-otel-collector.clusterReceiverServiceName" . }}
   podManagementPolicy: Parallel
   {{- end }}
@@ -70,7 +70,7 @@ spec:
       tolerations:
         {{ toYaml $clusterReceiver.tolerations | nindent 8 }}
       {{- end }}
-      {{- if or $clusterReceiver.affinity (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+      {{- if or $clusterReceiver.affinity (eq .Values.distribution "eks/fargate") }}
       affinity:
         {{- $clusterReceiverPodAntiAffinity := `
         podAntiAffinity:
@@ -90,7 +90,7 @@ spec:
       securityContext:
         {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $podSecurityContext) | nindent 8 }}
       {{- end }}
-      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      {{- if eq .Values.distribution "eks/fargate" }}
       initContainers:
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
@@ -116,7 +116,7 @@ spec:
       containers:
       - name: otel-collector
         args:
-        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+        {{- if eq .Values.distribution "eks/fargate" }}
         - --config=/splunk-messages/config.yaml
         {{- else }}
         - --config=/conf/relay.yaml
@@ -205,7 +205,7 @@ spec:
         {{- end }}
         - mountPath: /conf
           name: collector-configmap
-        {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+        {{- if eq .Values.distribution "eks/fargate" }}
         - mountPath: /splunk-messages
           name: messages
         {{- end }}
@@ -250,7 +250,7 @@ spec:
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
       {{- end }}
-      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      {{- if eq .Values.distribution "eks/fargate" }}
       - name: init-eks-fargate-cluster-receiver-script
         configMap:
           name: {{ template "splunk-otel-collector.clusterReceiverNodeDiscovererScript" . }}
