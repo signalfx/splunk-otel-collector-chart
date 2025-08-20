@@ -173,7 +173,7 @@ Get Splunk ingest URL
 */}}
 {{- define "splunk-otel-collector.o11yIngestUrl" -}}
 {{- $realm := .Values.splunkObservability.realm }}
-{{- .Values.splunkObservability.ingestUrl | default .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
+{{- .Values.splunkObservability.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
@@ -181,7 +181,7 @@ Get Splunk API URL.
 */}}
 {{- define "splunk-otel-collector.o11yApiUrl" -}}
 {{- $realm := .Values.splunkObservability.realm }}
-{{- .Values.splunkObservability.apiUrl | default .Values.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
+{{- .Values.splunkObservability.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
