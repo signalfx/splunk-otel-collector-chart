@@ -50,33 +50,21 @@ Whether to send data to Splunk Observability endpoint
 Whether metrics enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yMetricsEnabled" -}}
-{{- if eq (toString .Values.metricsEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.metricsEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.metricsEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*
 Whether traces enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yTracesEnabled" -}}
-{{- if eq (toString .Values.tracesEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.tracesEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.tracesEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*
 Whether logs enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yLogsEnabled" -}}
-{{- if eq (toString .Values.logsEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.logsEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.logsEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*

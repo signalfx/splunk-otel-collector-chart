@@ -19,18 +19,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [WARNING] The ".Values.service" config is deprecated. Please use ".Values.agent.service" and ".Values.gateway.service" for configuring services for the agent and gateway, respectively.
           This field will be removed in a future release.
 {{ end }}
-{{- if not (eq (toString .Values.metricsEnabled) "<nil>") }}
-[WARNING] "metricsEnabled" parameter is deprecated, please use "splunkObservability.metricsEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
-{{ end }}
-{{- if not (eq (toString .Values.tracesEnabled) "<nil>") }}
-[WARNING] "tracesEnabled" parameter is deprecated, please use "splunkObservability.tracesEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
-{{ end }}
-{{- if not (eq (toString .Values.logsEnabled) "<nil>") }}
-[WARNING] "logsEnabled" parameter is deprecated, please use "splunkObservability.logsEnabled" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
-{{ end }}
 {{- if not (eq (toString .Values.distro) "<nil>") }}
 [WARNING] "distro" parameter is deprecated, please use "distribution" instead.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380

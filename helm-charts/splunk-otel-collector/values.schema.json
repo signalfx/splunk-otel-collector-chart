@@ -1495,21 +1495,6 @@
         }
       }
     },
-    "metricsEnabled": {
-      "description": "[DEPRECATED] Send Metrics to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
-    },
-    "tracesEnabled": {
-      "description": "[DEPRECATED] Send Traces to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
-    },
-    "logsEnabled": {
-      "description": "[DEPRECATED] Send Logs to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
-    },
     "operatorcrds": {
       "description": "Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
       "type": "object",
