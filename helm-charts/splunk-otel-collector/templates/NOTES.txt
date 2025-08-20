@@ -102,3 +102,8 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
 {{- end }}
 {{- end }}
+{{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
+[WARNING] "splunkObservability.logsEnabled" parameter is deprecated. Logs cannot be sent directly to Splunk Observability anymore.
+          Use `splunkPlatform.logsEnabled` to send logs to Splunk Platform and enable Log Observer Connect.
+          See https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform for more details.
+{{ end }}
