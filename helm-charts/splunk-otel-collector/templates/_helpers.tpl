@@ -43,7 +43,7 @@ Whether to send data to Splunk Platform endpoint
 Whether to send data to Splunk Observability endpoint
 */}}
 {{- define "splunk-otel-collector.splunkO11yEnabled" -}}
-{{- not (eq (include "splunk-otel-collector.o11yRealm" .) "") }}
+{{- not (eq .Values.splunkObservability.realm "") }}
 {{- end -}}
 
 {{/*
@@ -169,18 +169,10 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
-Get Splunk Observability Realm.
-*/}}
-{{- define "splunk-otel-collector.o11yRealm" -}}
-{{- .Values.splunkObservability.realm | default .Values.splunkRealm | default "" }}
-{{- end -}}
-
-
-{{/*
 Get Splunk ingest URL
 */}}
 {{- define "splunk-otel-collector.o11yIngestUrl" -}}
-{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
+{{- $realm := .Values.splunkObservability.realm }}
 {{- .Values.splunkObservability.ingestUrl | default .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
 {{- end -}}
 
@@ -188,15 +180,8 @@ Get Splunk ingest URL
 Get Splunk API URL.
 */}}
 {{- define "splunk-otel-collector.o11yApiUrl" -}}
-{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
+{{- $realm := .Values.splunkObservability.realm }}
 {{- .Values.splunkObservability.apiUrl | default .Values.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
-{{- end -}}
-
-{{/*
-Get Splunk Observability Access Token.
-*/}}
-{{- define "splunk-otel-collector.o11yAccessToken" -}}
-{{- .Values.splunkObservability.accessToken | default .Values.splunkAccessToken | default "" -}}
 {{- end -}}
 
 {{/*

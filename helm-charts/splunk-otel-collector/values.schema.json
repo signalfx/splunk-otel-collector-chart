@@ -1495,16 +1495,6 @@
         }
       }
     },
-    "splunkRealm": {
-      "description": "[DEPRECATED] Splunk Observability Realm",
-      "type": "string",
-      "deprecated": true
-    },
-    "splunkAccessToken": {
-      "description": "[DEPRECATED] Splunk Observability Access Token",
-      "type": "string",
-      "deprecated": true
-    },
     "ingestUrl": {
       "description": "[DEPRECATED] Splunk Observability ingest URL.",
       "type": "string",
@@ -1638,16 +1628,6 @@
                   "minLength": 1
                 }
               }
-            }
-          }
-        },
-        {
-          "properties": {
-            "splunkRealm": {
-              "description": "[DEPRECATED] Splunk Observability Realm",
-              "type": "string",
-              "deprecated": true,
-              "minLength": 1
             }
           }
         }
