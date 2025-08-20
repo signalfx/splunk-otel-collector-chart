@@ -885,13 +885,14 @@ agent:
 
 ## Using edge processor with OTel
 
-The [Edge Processor solution](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-ebpf) is a data processing tool that can be used to enrich and filter your logs using SPL2.
+The [Edge Processor solution](https://help.splunk.com/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors) is a data processing tool that can be used to enrich and filter your logs using SPL2.
 
-Edge processor can be used to send data to various destinations, such as Splunk cloud or an Amazon S3 bucket. You can read more about [destinations here](https://help.splunk.com/en/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors/9.3.2411/send-data-out-from-edge-processors/how-the-destination-for-edge-processor-works).
+Edge processor can be used to send data to various destinations, such as Splunk cloud or an Amazon S3 bucket. You can read more about [destinations here](https://help.splunk.com/en/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors/10.0.2503/send-data-out-from-edge-processors/how-the-destination-for-edge-processor-works).
 
 To configure a basic HEC destination you can use a basic configuration like this:
 
 ```yaml
+splunkPlatform:
   endpoint: "http://x.x.x.x:8088/services/collector"
   token: "xxxxxx"
   insecureSkipVerify: true
