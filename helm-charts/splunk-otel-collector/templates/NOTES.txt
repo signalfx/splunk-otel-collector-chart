@@ -1,13 +1,8 @@
-{{/* Current jsonschema doesn't enforce below requirement while `splunkRealm` not provided as (an undesired) default value. */}}
-{{- if and (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "false") (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "false") -}}
-{{ fail "[ERROR] Please set at least one of required `splunkObservability.realm` or `splunkPlatform.endpoint` and corresponding token values to specify the platform(s) to send data." }}
-{{- end -}}
-
 {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Platform endpoint "{{ .Values.splunkPlatform.endpoint }}".
 {{ end }}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
-Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ include "splunk-otel-collector.o11yRealm" . }}.
+Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ .Values.splunkObservability.realm }}.
 {{ end }}
 
 {{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (or (eq (include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" .) "false") (eq (toString .Values.agent.hostNetwork) "false")) }}
@@ -20,17 +15,9 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
 {{- end }}
 
-{{- if .Values.splunkRealm }}
-[WARNING] "splunkRealm" parameter is deprecated, please use "splunkObservability.realm" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
-{{ end }}
 {{- if not (eq (toString .Values.service) "<nil>") }}
 [WARNING] The ".Values.service" config is deprecated. Please use ".Values.agent.service" and ".Values.gateway.service" for configuring services for the agent and gateway, respectively.
           This field will be removed in a future release.
-{{ end }}
-{{- if .Values.splunkAccessToken }}
-[WARNING] "splunkAccessToken" parameter is deprecated, please use "splunkObservability.accessToken" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0353-to-0360
 {{ end }}
 {{- if .Values.ingestUrl }}
 [WARNING] "ingestUrl" parameter is deprecated, please use "splunkObservability.ingestUrl" instead.
