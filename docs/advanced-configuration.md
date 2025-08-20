@@ -889,7 +889,7 @@ The [Edge Processor solution](https://help.splunk.com/splunk-cloud-platform/proc
 
 Edge processor can be used to send data to various destinations, such as Splunk cloud or an Amazon S3 bucket. You can read more about [destinations here](https://help.splunk.com/en/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors/10.0.2503/send-data-out-from-edge-processors/how-the-destination-for-edge-processor-works).
 
-To configure a basic HEC destination you can use a basic configuration like this:
+To configure a HEC Edge processor destination you can use a basic configuration like this:
 
 ```yaml
 splunkPlatform:
