@@ -281,15 +281,11 @@ k8sattributes/metrics:
     - sources:
       - from: resource_attribute
         name: k8s.namespace.name
-    - sources:
       - from: resource_attribute
-        name: k8s.node.name
+        name: k8s.pod.name
     - sources:
       - from: resource_attribute
         name: k8s.pod.ip
-    - sources:
-      - from: resource_attribute
-        name: ip
     - sources:
       - from: connection
   extract:
