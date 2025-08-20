@@ -889,7 +889,7 @@ The [Edge Processor solution](https://github.com/open-telemetry/opentelemetry-he
 
 Edge processor can be used to send data to various destinations, such as Splunk cloud or an Amazon S3 bucket. You can read more about [destinations here](https://help.splunk.com/en/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors/9.3.2411/send-data-out-from-edge-processors/how-the-destination-for-edge-processor-works).
 
-To configure a basic HEC destination you can use a basic configuration like this:
+To configure a HEC Edge processor destination you can use a basic configuration like this:
 
 ```yaml
   endpoint: "http://x.x.x.x:8088/services/collector"
