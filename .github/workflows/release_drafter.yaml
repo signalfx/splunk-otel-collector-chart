@@ -33,7 +33,7 @@ jobs:
       APP_VERSION: ${{ github.event.inputs.APP_VERSION }}
       DEBUG: ${{ github.event.inputs.DEBUG }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install tools
         run: make install-tools
