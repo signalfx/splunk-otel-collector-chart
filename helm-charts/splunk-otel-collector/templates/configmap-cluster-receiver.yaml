@@ -1,4 +1,3 @@
-{{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
 {{ if eq (include "splunk-otel-collector.clusterReceiverEnabled" . ) "true" }}
 apiVersion: v1
 kind: ConfigMap
@@ -13,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.clusterReceiverConfig" . | fromYaml }}
-    {{- $clusterReceiver.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $defaultConfig := include "splunk-otel-collector.clusterReceiverConfig" . | fromYaml }}
+    {{- .Values.clusterReceiver.config | mustMergeOverwrite $defaultConfig | toYaml | nindent 4 }}
 {{- end }}
