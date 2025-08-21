@@ -12,7 +12,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 - `chart`: Remove support of deprecated `distro` and `provider` root-level values.yaml options. ([#1989](https://github.com/signalfx/splunk-otel-collector-chart/pull/1989))
   Use `distribution` instead of `distro` and `cloudProvider` instead of `provider`.
-- `chart`: Remove support of deprecated `splunkRealm`, `splunkAccessToken`, `ingestUrl`, `apiUrl`, `metricsEnabled`, `tracesEnabled`, and `logsEnabled` root-level values.yaml options. ([#1985](https://github.com/signalfx/splunk-otel-collector-chart/pull/1985),[#1987](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1987))
+- `chart`: Remove support of deprecated `splunkRealm`, `splunkAccessToken`, `ingestUrl`, `apiUrl`, `metricsEnabled`, `tracesEnabled`, and `logsEnabled` root-level values.yaml options. ([#1985](https://github.com/signalfx/splunk-otel-collector-chart/pull/1985), [#1987](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1987), [#1988](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1988))
   These parameters were deprecated in favor of the structured `splunkObservability` configuration.
   Users must migrate to using:
   - `splunkObservability.realm` instead of `splunkRealm`
@@ -22,7 +22,9 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   - `splunkObservability.metricsEnabled` instead of `metricsEnabled`
   - `splunkObservability.tracesEnabled` instead of `tracesEnabled`
   - `splunkObservability.logsEnabled` instead of `logsEnabled`
-
+- `chart`: Remove support of deprecated `otelAgent`, `otelCollector`, and `otelK8sClusterReceiver` configuration sections ([#1990](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1990))
+  Use `agent` instead of `otelAgent`, `gateway` instead of `otelCollector`, and `clusterReceiver` instead of `otelK8sClusterReceiver`.
+  See migration guide: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
 
 ### 🚩 Deprecations 🚩
 
@@ -30,7 +32,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Logs cannot be sent directly to Splunk Observability anymore.
   Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
   See the following documentation for more details: https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform
-
 
 ### 💡 Enhancements 💡
 
