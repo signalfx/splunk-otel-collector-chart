@@ -1,4 +1,3 @@
-{{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
 {{- if eq (include "splunk-otel-collector.clusterReceiverEnabled" .) "true" }}
 apiVersion: apps/v1
 {{- /*
@@ -19,9 +18,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-k8s-cluster-receiver
-  {{- if $clusterReceiver.annotations }}
+  {{- if .Values.clusterReceiver.annotations }}
   annotations:
-    {{- toYaml $clusterReceiver.annotations | nindent 4 }}
+    {{- toYaml .Values.clusterReceiver.annotations | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{- if eq .Values.distribution "eks/fargate" }} 2 {{- else }} 1 {{- end }}
@@ -40,13 +39,13 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-k8s-cluster-receiver
         release: {{ .Release.Name }}
-        {{- if $clusterReceiver.podLabels }}
-        {{- toYaml $clusterReceiver.podLabels | nindent 8 }}
+        {{- if .Values.clusterReceiver.podLabels }}
+        {{- toYaml .Values.clusterReceiver.podLabels | nindent 8 }}
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-cluster-receiver.yaml") . | sha256sum }}
-        {{- if $clusterReceiver.podAnnotations }}
-        {{- toYaml $clusterReceiver.podAnnotations | nindent 8 }}
+        {{- if .Values.clusterReceiver.podAnnotations }}
+        {{- toYaml .Values.clusterReceiver.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -61,16 +60,16 @@ spec:
       automountServiceAccountToken: false
       {{- end }}
       nodeSelector:
-        {{- if $clusterReceiver.nodeSelector }}
-        {{ toYaml $clusterReceiver.nodeSelector | nindent 8 }}
+        {{- if .Values.clusterReceiver.nodeSelector }}
+        {{ toYaml .Values.clusterReceiver.nodeSelector | nindent 8 }}
         {{- else }}
           kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
-      {{- if $clusterReceiver.tolerations }}
+      {{- if .Values.clusterReceiver.tolerations }}
       tolerations:
-        {{ toYaml $clusterReceiver.tolerations | nindent 8 }}
+        {{ toYaml .Values.clusterReceiver.tolerations | nindent 8 }}
       {{- end }}
-      {{- if or $clusterReceiver.affinity (eq .Values.distribution "eks/fargate") }}
+      {{- if or .Values.clusterReceiver.affinity (eq .Values.distribution "eks/fargate") }}
       affinity:
         {{- $clusterReceiverPodAntiAffinity := `
         podAntiAffinity:
@@ -83,9 +82,9 @@ spec:
                       - otel-k8s-cluster-receiver
               topologyKey: kubernetes.io/hostname
         ` }}
-        {{- $clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
+        {{- .Values.clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
-      {{- $podSecurityContext := $clusterReceiver.podSecurityContext | default $clusterReceiver.securityContext }}
+      {{- $podSecurityContext := .Values.clusterReceiver.podSecurityContext | default .Values.clusterReceiver.securityContext }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $podSecurityContext) | nindent 8 }}
@@ -133,10 +132,10 @@ spec:
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" $clusterReceiver.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.clusterReceiver.resources.limits.memory | int64 }}"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" $clusterReceiver.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.clusterReceiver.resources.limits.memory | int64 }}"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
@@ -173,7 +172,7 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_platform_hec_token
           {{- end }}
-          {{- with $clusterReceiver.extraEnvs }}
+          {{- with .Values.clusterReceiver.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
         readinessProbe:
@@ -191,7 +190,7 @@ spec:
             path: /
             port: 13134
         resources:
-          {{- toYaml $clusterReceiver.resources | nindent 10 }}
+          {{- toYaml .Values.clusterReceiver.resources | nindent 10 }}
         volumeMounts:
         {{- if .Values.featureGates.explicitMountServiceAccountToken }}
         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
@@ -212,10 +211,10 @@ spec:
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
-        {{- if $clusterReceiver.extraVolumeMounts }}
-        {{- toYaml $clusterReceiver.extraVolumeMounts | nindent 8 }}
+        {{- if .Values.clusterReceiver.extraVolumeMounts }}
+        {{- toYaml .Values.clusterReceiver.extraVolumeMounts | nindent 8 }}
         {{- end }}
-      terminationGracePeriodSeconds: {{ $clusterReceiver.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.clusterReceiver.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       - name: serviceaccount-token
@@ -261,10 +260,10 @@ spec:
       - name: messages
         emptyDir: {}
       {{- end }}
-      {{- if $clusterReceiver.extraVolumes }}
-      {{- toYaml $clusterReceiver.extraVolumes | nindent 6 }}
+      {{- if .Values.clusterReceiver.extraVolumes }}
+      {{- toYaml .Values.clusterReceiver.extraVolumes | nindent 6 }}
       {{- end }}
-      {{- if $clusterReceiver.priorityClassName }}
-      priorityClassName: {{ $clusterReceiver.priorityClassName }}
+      {{- if .Values.clusterReceiver.priorityClassName }}
+      priorityClassName: {{ .Values.clusterReceiver.priorityClassName }}
       {{- end }}
 {{- end }}

@@ -1,6 +1,4 @@
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{ if $gatewayEnabled }}
+{{ if .Values.gateway.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,12 +12,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-collector
-  {{- if $gateway.annotations }}
+  {{- if .Values.gateway.annotations }}
   annotations:
-    {{- toYaml $gateway.annotations | nindent 4 }}
+    {{- toYaml .Values.gateway.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ $gateway.replicaCount }}
+  replicas: {{ .Values.gateway.replicaCount }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
@@ -31,13 +29,13 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector
         release: {{ .Release.Name }}
-        {{- if $gateway.podLabels }}
-        {{- toYaml $gateway.podLabels | nindent 8 }}
+        {{- if .Values.gateway.podLabels }}
+        {{- toYaml .Values.gateway.podLabels | nindent 8 }}
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-gateway.yaml") . | sha256sum }}
-        {{- if $gateway.podAnnotations }}
-        {{- toYaml $gateway.podAnnotations | nindent 8 }}
+        {{- if .Values.gateway.podAnnotations }}
+        {{- toYaml .Values.gateway.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -48,20 +46,20 @@ spec:
       automountServiceAccountToken: false
       {{- end }}
       nodeSelector:
-        {{- if $gateway.nodeSelector }}
-        {{ toYaml $gateway.nodeSelector | nindent 8 }}
+        {{- if .Values.gateway.nodeSelector }}
+        {{ toYaml .Values.gateway.nodeSelector | nindent 8 }}
         {{- else }}
           kubernetes.io/os: {{ .Values.isWindows | ternary "windows" "linux" }}
         {{- end }}
-      {{- if $gateway.tolerations }}
+      {{- if .Values.gateway.tolerations }}
       tolerations:
-        {{ toYaml $gateway.tolerations | nindent 8 }}
+        {{ toYaml .Values.gateway.tolerations | nindent 8 }}
       {{- end }}
-      {{- if $gateway.affinity }}
+      {{- if .Values.gateway.affinity }}
       affinity:
-        {{- toYaml $gateway.affinity | nindent 8 }}
+        {{- toYaml .Values.gateway.affinity | nindent 8 }}
       {{- end }}
-      {{- $podSecurityContext := $gateway.podSecurityContext | default $gateway.securityContext }}
+      {{- $podSecurityContext := .Values.gateway.podSecurityContext | default .Values.gateway.securityContext }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $podSecurityContext) | nindent 8 }}
@@ -82,10 +80,10 @@ spec:
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" $gateway.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.gateway.resources.limits.memory | int64 }}"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" $gateway.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.gateway.resources.limits.memory | int64 }}"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
@@ -122,11 +120,11 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_platform_hec_token
           {{- end }}
-          {{- with $gateway.extraEnvs }}
+          {{- with .Values.gateway.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
         ports:
-        {{- range $key, $port := $gateway.ports }}
+        {{- range $key, $port := .Values.gateway.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) (and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
@@ -147,7 +145,7 @@ spec:
             path: /
             port: 13133
         resources:
-          {{- toYaml $gateway.resources | nindent 10 }}
+          {{- toYaml .Values.gateway.resources | nindent 10 }}
         volumeMounts:
         {{- if .Values.featureGates.explicitMountServiceAccountToken }}
         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
@@ -161,10 +159,10 @@ spec:
         {{- end }}
         - mountPath: /conf
           name: collector-configmap
-        {{- if $gateway.extraVolumeMounts }}
-        {{- toYaml $gateway.extraVolumeMounts | nindent 8 }}
+        {{- if .Values.gateway.extraVolumeMounts }}
+        {{- toYaml .Values.gateway.extraVolumeMounts | nindent 8 }}
         {{- end }}
-      terminationGracePeriodSeconds: {{ $gateway.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.gateway.terminationGracePeriodSeconds }}
       volumes:
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       - name: serviceaccount-token
@@ -196,10 +194,10 @@ spec:
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
       {{- end }}
-      {{- if $gateway.extraVolumes }}
-      {{- toYaml $gateway.extraVolumes | nindent 6 }}
+      {{- if .Values.gateway.extraVolumes }}
+      {{- toYaml .Values.gateway.extraVolumes | nindent 6 }}
       {{- end }}
-      {{- if $gateway.priorityClassName }}
-      priorityClassName: {{ $gateway.priorityClassName }}
+      {{- if .Values.gateway.priorityClassName }}
+      priorityClassName: {{ .Values.gateway.priorityClassName }}
       {{- end }}
 {{- end }}

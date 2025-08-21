@@ -3,7 +3,6 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
-{{ $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) -}}
 extensions:
   health_check:
     endpoint: 0.0.0.0:13134
@@ -33,7 +32,7 @@ receivers:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
-  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -125,7 +124,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
-  {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
   transform/k8sevents:
@@ -167,7 +166,7 @@ processors:
   {{- end }}
 
   {{- if or
-    (and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+    (and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
     (and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
   }}
   {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
@@ -267,7 +266,7 @@ exporters:
 
   {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
-  {{- if $clusterReceiver.eventsEnabled }}
+  {{- if .Values.clusterReceiver.eventsEnabled }}
     sourcetype: kube:events
   {{- end }}
   {{- end }}
@@ -380,7 +379,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
     logs:
       receivers:
         - k8s_events

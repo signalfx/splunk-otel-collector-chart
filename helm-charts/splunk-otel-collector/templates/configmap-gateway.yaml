@@ -1,6 +1,4 @@
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{ if $gatewayEnabled }}
+{{ if .Values.gateway.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,6 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.gatewayConfig" . | fromYaml }}
-    {{- $gateway.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $defaultConfig := include "splunk-otel-collector.gatewayConfig" . | fromYaml }}
+    {{- .Values.gateway.config | mustMergeOverwrite $defaultConfig | toYaml | nindent 4 }}
 {{- end }}

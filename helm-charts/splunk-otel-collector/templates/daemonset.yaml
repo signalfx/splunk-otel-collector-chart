@@ -1,8 +1,7 @@
-{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}
-{{- if and $agent.enabled (ne .Values.distribution "eks/fargate") }}
+{{- if and .Values.agent.enabled (ne .Values.distribution "eks/fargate") }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -18,9 +17,9 @@ metadata:
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
     engine: fluentd
     {{- end }}
-  {{- if $agent.annotations }}
+  {{- if .Values.agent.annotations }}
   annotations:
-    {{- toYaml $agent.annotations | nindent 4 }}
+    {{- toYaml .Values.agent.annotations | nindent 4 }}
   {{- end }}
 spec:
   updateStrategy:
@@ -41,14 +40,14 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector-agent
         release: {{ .Release.Name }}
-        {{- if $agent.podLabels }}
-        {{- toYaml $agent.podLabels | nindent 8 }}
+        {{- if .Values.agent.podLabels }}
+        {{- toYaml .Values.agent.podLabels | nindent 8 }}
         {{- end }}
       annotations:
         checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-agent.yaml") .) | sha256sum }}
         kubectl.kubernetes.io/default-container: otel-collector
-        {{- if $agent.podAnnotations }}
-        {{- toYaml $agent.podAnnotations | nindent 8 }}
+        {{- if .Values.agent.podAnnotations }}
+        {{- toYaml .Values.agent.podAnnotations | nindent 8 }}
         {{- end }}
         {{- if .Values.autodetect.istio }}
         sidecar.istio.io/inject: "false"
@@ -78,7 +77,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not $agent.skipInitContainers) }}
+      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) }}
       initContainers:
         {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
         - name: prepare-fluentd-config
@@ -97,7 +96,7 @@ spec:
             - name: LOG_FORMAT_TYPE
               value: "{{ .Values.fluentd.config.containers.logFormatType }}"
           resources:
-            {{- toYaml $agent.resources | nindent 12 }}
+            {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:
             - name: varlogdest
               mountPath: {{ .Values.fluentd.config.containers.pathDest }}
@@ -134,7 +133,7 @@ spec:
           - name: JOURNALD_LOG_CAPTURE_REGEX
             value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
           resources:
-            {{- toYaml $agent.resources | nindent 12 }}
+            {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:
             - name: checkpoint
               mountPath: /var/addon/splunk/otel_pos
@@ -143,44 +142,44 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
         {{- end }}
-        {{- if and $agent.securityContext.runAsUser $agent.securityContext.runAsGroup }}
+        {{- if and .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
           command: ['sh', '-c', '
           mkdir -p {{ .Values.logsCollection.checkpointPath }};
-          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.logsCollection.checkpointPath }};
+          chown -Rv {{ .Values.agent.securityContext.runAsUser | default 999 }}:{{ .Values.agent.securityContext.runAsGroup | default 999 }} {{ .Values.logsCollection.checkpointPath }};
           chmod -v g+rwxs {{ .Values.logsCollection.checkpointPath }};
           {{ if .Values.logsCollection.containers.enabled -}}
           if [ -d "/var/lib/docker/containers" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/lib/docker/containers;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx /var/lib/docker/containers;
           fi;
           if [ -d "/var/log/crio/pods" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/crio/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx /var/log/crio/pods;
           fi;
           if [ -d "/var/log/pods" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx /var/log/pods;
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx /var/log/pods;
           fi;
           {{- end }}
           {{- if .Values.logsCollection.journald.enabled }}
           if [ -d "{{ .Values.logsCollection.journald.directory }}" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
           fi;
           {{- end }}
           {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
           mkdir -p {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
-          chown -Rv {{ $agent.securityContext.runAsUser | default 999 }}:{{ $agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
+          chown -Rv {{ .Values.agent.securityContext.runAsUser | default 999 }}:{{ .Values.agent.securityContext.runAsGroup | default 999 }} {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
           chmod -v g+rwxs {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
-          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ $agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
+          setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent;
           {{- end }}']
           securityContext:
             runAsUser: 0
           resources:
-            {{- toYaml $agent.resources | nindent 12 }}
+            {{- toYaml .Values.agent.resources | nindent 12 }}
           volumeMounts:
             - name: checkpoint
               mountPath: {{ .Values.logsCollection.checkpointPath }}
@@ -257,7 +256,7 @@ spec:
         - --discovery
         {{- end }}
         ports:
-        {{- range $key, $port := $agent.ports }}
+        {{- range $key, $port := .Values.agent.ports }}
         {{- if eq true (and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for)) (and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for)) (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for)) (and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for)) }}
         - name: {{ $key }}
           {{- omit $port "enabled_for" | toYaml | trim | nindent 10 }}
@@ -265,17 +264,17 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or $agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+        {{- if or .Values.agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
         securityContext:
-          {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $agent.securityContext "setRunAsUser" true) | nindent 10 }}
+          {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" .Values.agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" $agent.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.agent.resources.limits.memory | int64 }}"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" $agent.resources.limits.memory | int64 }}"
+            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.agent.resources.limits.memory | int64 }}"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
@@ -317,7 +316,7 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_platform_hec_token
           {{- end }}
-          {{- with $agent.extraEnvs }}
+          {{- with .Values.agent.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}
 
@@ -336,7 +335,7 @@ spec:
             path: /
             port: 13133
         resources:
-          {{- toYaml $agent.resources | nindent 10 }}
+          {{- toYaml .Values.agent.resources | nindent 10 }}
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
@@ -424,8 +423,8 @@ spec:
           name: serviceaccount-token
           readOnly: true
         {{- end }}
-        {{- if $agent.extraVolumeMounts }}
-        {{- toYaml $agent.extraVolumeMounts | nindent 8 }}
+        {{- if .Values.agent.extraVolumeMounts }}
+        {{- toYaml .Values.agent.extraVolumeMounts | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
@@ -568,8 +567,8 @@ spec:
             - key: discovery.properties
               path: properties.discovery.yaml
       {{- end }}
-      {{- if $agent.extraVolumes }}
-      {{- toYaml $agent.extraVolumes | nindent 6 }}
+      {{- if .Values.agent.extraVolumes }}
+      {{- toYaml .Values.agent.extraVolumes | nindent 6 }}
       {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}

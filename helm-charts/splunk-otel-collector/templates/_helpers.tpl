@@ -291,18 +291,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{/*
-Helper that returns "agent" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelAgent".
-*/}}
-{{- define "splunk-otel-collector.agent" -}}
-{{- if eq (toString .Values.otelAgent) "<nil>" }}
-{{- .Values.agent | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelAgent | mustMergeOverwrite (deepCopy .Values.agent) | toYaml }}
-{{- end }}
-{{- end -}}
-
-{{/*
 The apiVersion for podDisruptionBudget policies.
 */}}
 {{- define "splunk-otel-collector.PDB-apiVersion" -}}
@@ -318,38 +306,6 @@ The name of the gateway service.
 */}}
 {{- define "splunk-otel-collector.gatewayServiceName" -}}
 {{  (include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
-{{- end -}}
-
-{{/*
-Whether the gateway is enabled, either through network explorer, or through its own flag.
-*/}}
-{{- define "splunk-otel-collector.gatewayEnabled" -}}
-{{- $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{- $gateway.enabled }}
-{{- end -}}
-
-{{/*
-Helper that returns "gateway" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelCollector".
-*/}}
-{{- define "splunk-otel-collector.gateway" -}}
-{{- if eq (toString .Values.otelCollector) "<nil>" }}
-{{- .Values.gateway | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelCollector | mustMergeOverwrite (deepCopy .Values.gateway) | toYaml }}
-{{- end }}
-{{- end -}}
-
-{{/*
-Helper that returns "clusterReceiver" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelK8sClusterReceiver".
-*/}}
-{{- define "splunk-otel-collector.clusterReceiver" -}}
-{{- if eq (toString .Values.otelK8sClusterReceiver) "<nil>" }}
-{{- .Values.clusterReceiver | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelK8sClusterReceiver | mustMergeOverwrite (deepCopy .Values.clusterReceiver) | toYaml }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -377,11 +333,10 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 "o11yInfraMonEventsEnabled" helper defines whether Observability Infrastructure monitoring events are enabled
 */}}
 {{- define "splunk-otel-collector.o11yInfraMonEventsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- if eq (toString $clusterReceiver.k8sEventsEnabled) "<nil>" }}
+{{- if eq (toString .Values.clusterReceiver.k8sEventsEnabled) "<nil>" }}
 {{- .Values.splunkObservability.infrastructureMonitoringEventsEnabled }}
 {{- else }}
-{{- $clusterReceiver.k8sEventsEnabled }}
+{{- .Values.clusterReceiver.k8sEventsEnabled }}
 {{- end }}
 {{- end -}}
 
@@ -390,16 +345,14 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 Whether object collection by k8s object receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- gt (len $clusterReceiver.k8sObjects) 0 }}
+{{- gt (len .Values.clusterReceiver.k8sObjects) 0 }}
 {{- end -}}
 
 {{/*
 Whether object collection by k8s object receiver or/and event collection by k8s event receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsOrEventsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- or $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
+{{- or .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
 {{- end -}}
 
 
@@ -407,8 +360,7 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 Whether clusterReceiver should be enabled
 */}}
 {{- define "splunk-otel-collector.clusterReceiverEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
+{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
 {{- end -}}
 
 
