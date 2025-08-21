@@ -223,11 +223,8 @@ k8sattributes:
         tag_name: com.splunk.index
         from: pod
       {{- include "splunk-otel-collector.addExtraAnnotations" . | nindent 6 }}
-    {{- if or .Values.extraAttributes.podLabels .Values.extraAttributes.fromLabels }}
+    {{- if .Values.extraAttributes.fromLabels }}
     labels:
-      {{- range .Values.extraAttributes.podLabels }}
-      - key: {{ . }}
-      {{- end }}
       {{- include "splunk-otel-collector.addExtraLabels" . | nindent 6 }}
     {{- end }}
 {{- end }}
@@ -342,11 +339,6 @@ resource/logs:
     - key: label_app
       from_attribute: k8s.pod.labels.app
       action: upsert
-    {{- range $_, $label := .Values.extraAttributes.podLabels }}
-    - key: {{ printf "label_%s" $label }}
-      from_attribute: {{ printf "k8s.pod.labels.%s" $label }}
-      action: upsert
-    {{- end }}
     {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
     - key: k8s.container.name
       action: delete
@@ -360,10 +352,6 @@ resource/logs:
       action: delete
     - key: k8s.pod.labels.app
       action: delete
-    {{- range $_, $label := .Values.extraAttributes.podLabels }}
-    - key: {{ printf "k8s.pod.labels.%s" $label }}
-      action: delete
-    {{- end }}
     {{- end }}
     {{- end }}
 {{- end }}
