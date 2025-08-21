@@ -4,6 +4,39 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.132.0] - 2025-08-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.132.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.132.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Remove support of deprecated `distro` and `provider` root-level values.yaml options. ([#1989](https://github.com/signalfx/splunk-otel-collector-chart/pull/1989))
+  Use `distribution` instead of `distro` and `cloudProvider` instead of `provider`.
+- `chart`: Remove support of deprecated `splunkRealm`, `splunkAccessToken`, `ingestUrl`, `apiUrl`, `metricsEnabled`, `tracesEnabled`, and `logsEnabled` root-level values.yaml options. ([#1985](https://github.com/signalfx/splunk-otel-collector-chart/pull/1985),[#1987](https://github.com/signalfx/splunk-otel-collector-chart/pull/#1987))
+  These parameters were deprecated in favor of the structured `splunkObservability` configuration.
+  Users must migrate to using:
+  - `splunkObservability.realm` instead of `splunkRealm`
+  - `splunkObservability.accessToken` instead of `splunkAccessToken`
+  - `splunkObservability.ingestUrl` instead of `ingestUrl`
+  - `splunkObservability.apiUrl` instead of `apiUrl`
+  - `splunkObservability.metricsEnabled` instead of `metricsEnabled`
+  - `splunkObservability.tracesEnabled` instead of `tracesEnabled`
+  - `splunkObservability.logsEnabled` instead of `logsEnabled`
+  
+
+### 🚩 Deprecations 🚩
+
+- `agent`: Mark `splunkObservability.logsEnabled` as deprecated. ([#1984](https://github.com/signalfx/splunk-otel-collector-chart/pull/1984))
+  Logs cannot be sent directly to Splunk Observability anymore.
+  Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
+  See the following documentation for more details: https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform
+  
+
+### 💡 Enhancements 💡
+
+- `operator`: Drop requirement to install all CRDs except instrumentations. ([#1969](https://github.com/signalfx/splunk-otel-collector-chart/pull/1969))
+- `operator`: Upgrade the operator subchart version to 0.92.5 ([#1973](https://github.com/signalfx/splunk-otel-collector-chart/pull/1973))
+
 ## [0.131.1] - 2025-08-15
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.131.2](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.131.2).
