@@ -681,11 +681,6 @@
         }
       }
     },
-    "otelAgent": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector agent configuration.",
-      "type": "object",
-      "deprecated": true
-    },
     "clusterReceiver": {
       "description": "Splunk OpenTelemetry Collector cluster receiver configuration.",
       "type": "object",
@@ -813,11 +808,6 @@
           "type": "object"
         }
       }
-    },
-    "otelK8sClusterReceiver": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector cluster receiver configuration.",
-      "type": "object",
-      "deprecated": true
     },
     "logsCollection": {
       "description": "Native OpenTelemetry logs collection configuration.",
@@ -1450,11 +1440,6 @@
           "type": "object"
         }
       }
-    },
-    "otelCollector": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector gateway deployment configuration.",
-      "type": "object",
-      "deprecated": true
     },
     "service": {
       "description": "[DEPRECATED] OpenTelemetry collector service configuration. Please use agent.service and gateway.service instead.",

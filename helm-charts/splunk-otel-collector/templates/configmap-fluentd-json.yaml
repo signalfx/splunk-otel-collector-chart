@@ -1,5 +1,4 @@
-{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
-{{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") $agent.enabled (eq .Values.logsEngine "fluentd") }}
+{{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.agent.enabled (eq .Values.logsEngine "fluentd") }}
 {{/*
 Fluentd config parts applied only to clusters with docker runtime.
 */}}
