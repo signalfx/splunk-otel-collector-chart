@@ -883,7 +883,7 @@ agent:
            storage: null
 ```
 
-## Using edge processor with OTel
+## Using Edge Processor
 
 The [Edge Processor solution](https://help.splunk.com/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors) is a data processing tool that can be used to enrich and filter your logs using SPL2.
 
@@ -893,9 +893,8 @@ To configure a HEC Edge processor destination you can use a basic configuration 
 
 ```yaml
 splunkPlatform:
-  endpoint: "http://x.x.x.x:8088/services/collector"
+  endpoint: "https://x.x.x.x:8088/services/collector"
   token: "xxxxxx"
-  insecureSkipVerify: true
 ```
 
 Remember that the endpoint will be the instance where you configured the edge processor, and the token will be the token created in Splunk for more information you can check [here](https://docs.splunk.com/Documentation/SplunkCloud/latest/EdgeProcessor/HECSource).
