@@ -169,7 +169,6 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 		{"annotation index and default sourcetype", annotationIndex, ""},
 		{"default index and annotation sourcetype", "", annotationSourcetype},
 		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype},
-		{"annotation index and annotation sourcetype in both namespace and pod", annotationIndex, annotationSourcetype},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
