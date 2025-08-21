@@ -162,6 +162,11 @@ splunkObservability:
   # Options to disable or enable particular telemetry data types.
   metricsEnabled: true
   tracesEnabled: true
+
+  # Deprecated: [v0.132.0] this setting will be removed in 2 versions
+  # Logs cannot be sent directly to Splunk Observability anymore.
+  # Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
+  # See https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform
   logsEnabled: false
 
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
@@ -425,6 +430,10 @@ agent:
     # create a service for the agents with a local internalTrafficPolicy
     # so that agent pods can be discovered via dns etc
     enabled: true
+    # Service type
+    type: ClusterIP
+    # Service annotations
+    annotations: {}
 
   # hostNetwork schedules the pod with the host's network namespace.
   # Disabling this value will affect monitoring of some control plane
@@ -563,6 +572,9 @@ clusterReceiver:
 
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
+  # This option can be useful when IMDS access is blocked for some reason. Running in the host network helps
+  # bypass this restriction and ensures that the pod can access the VM metadata API to get the necessary information
+  # for correlation with cloud infrastructure in Splunk Observability.
   # Disregarded for Windows (unsupported by k8s).
   hostNetwork:
 
@@ -1158,6 +1170,15 @@ gateway:
       # Memory limit value is used as a source for default memory_limiter configuration
       memory: 8Gi
 
+  # Gateway service configuration - enabled when `gateway.enabled` is set to `true`.
+  service:
+    # Service type
+    type: ClusterIP
+    # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
+    trafficDistribution: ""
+    # Service annotations
+    annotations: {}
+
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
@@ -1195,20 +1216,6 @@ gateway:
   config: {}
 
 ################################################################################
-# OpenTelemetry service config, used for otel collector deployment.
-# Disabled by default
-################################################################################
-
-# opentelemetry collector service created only if collector.enabled = true
-service:
-  # Service type
-  type: ClusterIP
-  # Traffic distribution strategy for the service.  Only available for Kubernetes >= 1.33.
-  trafficDistribution: ""
-  # Service annotations
-  annotations: {}
-
-################################################################################
 # Notice: Operator related features should be considered to have an alpha
 # maturity level and be experimental. There may be breaking changes or Operator
 # features may be replaced entirely with a better alternative in the future.
@@ -1227,6 +1234,8 @@ operatorcrds:
 
 operator:
   enabled: false
+  manager:
+    ignoreMissingCollectorCRDs: true
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
   # a race condition with helm.
   # See: https://github.com/open-telemetry/opentelemetry-helm-charts/issues/677
@@ -1242,11 +1251,6 @@ operator:
       certPeriodDays: 3650
     certManager:
       enabled: false
-  # Collector deployment via the operator is not supported at this time.
-  # The collector image repository is specified here to meet operator subchart constraints.
-  manager:
-    collectorImage:
-      repository: quay.io/signalfx/splunk-otel-collector
 
 # The default Splunk Instrumentation object deployed when operator.enabled=true.
 # For more details see:

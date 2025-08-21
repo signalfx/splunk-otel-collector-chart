@@ -15,6 +15,16 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: namespace-pod-metric-annotation
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: namespace-metric-annotation
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: ns-w-exclude
   annotations:
     splunk.com/index: ns-anno
@@ -176,3 +186,43 @@ spec:
           value: "256"
         - name: FREQ
           value: "0.1"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-for-metric-annotation
+  namespace: namespace-pod-metric-annotation
+  labels:
+    app: pod-for-metric-annotation
+spec:
+  containers:
+    - name: pod-for-metric-annotation
+      image: docker.io/rock1017/log-generator:2.2.6
+      env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-for-namespace-metric-annotation
+  namespace: namespace-metric-annotation
+  labels:
+    app: pod-for-namespace-metric-annotation
+spec:
+  containers:
+    - name: pod-for-namespace-metric-annotation
+      image: docker.io/rock1017/log-generator:2.2.6
+      env:
+        - name: MESSAGE_COUNT
+          value: "10"
+        - name: SIZE
+          value: "256"
+        - name: FREQ
+          value: "1"
+  restartPolicy: Never

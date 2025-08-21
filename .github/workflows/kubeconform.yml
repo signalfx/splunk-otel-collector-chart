@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: get matrix
         id: test_matrix
@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install kubeconform
         run: |

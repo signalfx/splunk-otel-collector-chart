@@ -1,6 +1,5 @@
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
-{{ if $gatewayEnabled }}
+{{- $svc := (include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.gateway.service) | fromYaml) }}
+{{ if and .Values.gateway.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,17 +13,17 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-collector
-{{- with .Values.service.annotations }}
+{{- with $svc.annotations }}
   annotations:
 {{ toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-  type: {{ .Values.service.type }}
-  {{- if .Values.service.trafficDistribution }}
-  trafficDistribution: {{ .Values.service.trafficDistribution }}
+  type: {{ $svc.type }}
+  {{- if $svc.trafficDistribution }}
+  trafficDistribution: {{ $svc.trafficDistribution }}
   {{- end }}
   ports:
-  {{- range $key, $port := $gateway.ports }}
+  {{- range $key, $port := .Values.gateway.ports }}
   {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
   {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
   {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}

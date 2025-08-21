@@ -46,6 +46,12 @@ data:
               homePath: $SPLUNK_DB/test_metrics/db
               maxTotalDataSizeMB: 512000
               thawedPath: $SPLUNK_DB/test_metrics/thaweddb
+            test_metrics_annotation:
+              coldPath: $SPLUNK_DB/test_metrics_annotation/colddb
+              datatype: metric
+              homePath: $SPLUNK_DB/test_metrics_annotation/db
+              maxTotalDataSizeMB: 512000
+              thawedPath: $SPLUNK_DB/test_metrics_annotation/thaweddb
 ---
 apiVersion: v1
 kind: Pod

@@ -6,9 +6,9 @@ metadata:
   name: "default-operator-metrics"
   namespace: default
   labels:
-    helm.sh/chart: operator-0.91.0
+    helm.sh/chart: operator-0.92.5
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.127.0"
+    app.kubernetes.io/version: "0.129.1"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default
@@ -59,9 +59,9 @@ metadata:
   name: "default-operator-webhook"
   namespace: default
   labels:
-    helm.sh/chart: operator-0.91.0
+    helm.sh/chart: operator-0.92.5
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.127.0"
+    app.kubernetes.io/version: "0.129.1"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default

@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
-{{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
+{{- if eq .Values.distribution "openshift" }}
 - apiGroups:
   - quota.openshift.io
   resources:
@@ -86,7 +86,7 @@ rules:
   - get
   - list
   - watch
-{{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+{{- if eq .Values.distribution "eks/fargate" }}
 - apiGroups:
     - ""
   resources:
@@ -94,7 +94,7 @@ rules:
   verbs:
     - patch
 {{- end }}
-{{- if hasPrefix "eks" (include "splunk-otel-collector.distribution" .) }}
+{{- if hasPrefix "eks" .Values.distribution }}
 - apiGroups:
   - ""
   resources:
