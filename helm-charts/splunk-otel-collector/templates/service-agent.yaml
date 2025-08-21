@@ -1,10 +1,9 @@
-{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
 {{- $svc := (include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.agent.service) | fromYaml) }}
 {{- if .Values.agent.service.enabled }}
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}
-{{- if and $agent.enabled (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+{{- if and .Values.agent.enabled (ne .Values.distribution "eks/fargate") }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,7 +24,7 @@ metadata:
 spec:
   type: {{ $svc.type }}
   ports:
-  {{- range $key, $port := $agent.ports }}
+  {{- range $key, $port := .Values.agent.ports }}
   {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
   {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
   {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}

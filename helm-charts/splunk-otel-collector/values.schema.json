@@ -271,11 +271,6 @@
         ""
       ]
     },
-    "provider": {
-      "description": "[DEPRECATED] Cloud provider where the collector is running",
-      "type": "string",
-      "deprecated": true
-    },
     "distribution": {
       "description": "Kubernetes distribution where the collector is running",
       "type": "string",
@@ -291,11 +286,6 @@
         " ",
         ""
       ]
-    },
-    "distro": {
-      "description": "[DEPRECATED] Kubernetes distribution where the collector is running",
-      "type": "string",
-      "deprecated": true
     },
     "environment": {
       "description": "Parameter that will be added to all the telemetry data (traces/logs/metrics) as an attribute.",
@@ -691,11 +681,6 @@
         }
       }
     },
-    "otelAgent": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector agent configuration.",
-      "type": "object",
-      "deprecated": true
-    },
     "clusterReceiver": {
       "description": "Splunk OpenTelemetry Collector cluster receiver configuration.",
       "type": "object",
@@ -823,11 +808,6 @@
           "type": "object"
         }
       }
-    },
-    "otelK8sClusterReceiver": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector cluster receiver configuration.",
-      "type": "object",
-      "deprecated": true
     },
     "logsCollection": {
       "description": "Native OpenTelemetry logs collection configuration.",
@@ -1461,11 +1441,6 @@
         }
       }
     },
-    "otelCollector": {
-      "description": "[DEPRECATED] Splunk OpenTelemetry Collector gateway deployment configuration.",
-      "type": "object",
-      "deprecated": true
-    },
     "service": {
       "description": "[DEPRECATED] OpenTelemetry collector service configuration. Please use agent.service and gateway.service instead.",
       "type": "object",
@@ -1494,41 +1469,6 @@
           "type": "object"
         }
       }
-    },
-    "splunkRealm": {
-      "description": "[DEPRECATED] Splunk Observability Realm",
-      "type": "string",
-      "deprecated": true
-    },
-    "splunkAccessToken": {
-      "description": "[DEPRECATED] Splunk Observability Access Token",
-      "type": "string",
-      "deprecated": true
-    },
-    "ingestUrl": {
-      "description": "[DEPRECATED] Splunk Observability ingest URL.",
-      "type": "string",
-      "deprecated": true
-    },
-    "apiUrl": {
-      "description": "[DEPRECATED] Splunk Observability API URL.",
-      "type": "string",
-      "deprecated": true
-    },
-    "metricsEnabled": {
-      "description": "[DEPRECATED] Send Metrics to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
-    },
-    "tracesEnabled": {
-      "description": "[DEPRECATED] Send Traces to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
-    },
-    "logsEnabled": {
-      "description": "[DEPRECATED] Send Logs to Splunk Observability",
-      "type": "boolean",
-      "deprecated": true
     },
     "operatorcrds": {
       "description": "Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
@@ -1638,16 +1578,6 @@
                   "minLength": 1
                 }
               }
-            }
-          }
-        },
-        {
-          "properties": {
-            "splunkRealm": {
-              "description": "[DEPRECATED] Splunk Observability Realm",
-              "type": "string",
-              "deprecated": true,
-              "minLength": 1
             }
           }
         }

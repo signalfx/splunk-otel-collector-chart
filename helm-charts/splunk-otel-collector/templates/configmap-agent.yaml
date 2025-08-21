@@ -1,8 +1,7 @@
-{{ $agent := fromYaml (include "splunk-otel-collector.agent" .) }}
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}
-{{- if and $agent.enabled (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+{{- if and .Values.agent.enabled (ne .Values.distribution "eks/fargate") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,12 +15,12 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   relay: |
-    {{- $config := include "splunk-otel-collector.agentConfig" . | fromYaml }}
-    {{- $agent.config | mustMergeOverwrite $config | toYaml | nindent 4 }}
+    {{- $defaultConfig := include "splunk-otel-collector.agentConfig" . | fromYaml }}
+    {{- .Values.agent.config | mustMergeOverwrite $defaultConfig | toYaml | nindent 4 }}
 {{- if .Values.agent.discovery.enabled }}
   discovery.properties: |
     splunk.discovery:
     {{- $properties := include "splunk-otel-collector.agentDiscoveryProperties" . | fromYaml }}
-    {{- $agent.discovery.properties | mustMergeOverwrite $properties | toYaml | nindent 6 }}
+    {{- .Values.agent.discovery.properties | mustMergeOverwrite $properties | toYaml | nindent 6 }}
 {{- end }}
 {{- end }}

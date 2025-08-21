@@ -70,20 +70,20 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.cloudProvider" .) "gcp") }}
+    {{- if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
     - gcp
     {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
     - eks
-    {{- else if eq (include "splunk-otel-collector.distribution" .) "aks" }}
+    {{- else if eq .Values.distribution "aks" }}
     - aks
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.cloudProvider" .) "azure" }}
+    {{- if eq .Values.cloudProvider "azure" }}
     - azure
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
     - system
-  {{- if and (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (not .Values.clusterName) }}
+  {{- if and (hasPrefix "gke" .Values.distribution) (not .Values.clusterName) }}
   gcp:
     resource_attributes:
       k8s.cluster.name:
@@ -121,12 +121,12 @@ Common config for adding k8s.cluster.name using the resourcedetection processor
 {{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
 resourcedetection/k8s_cluster_name:
   detectors:
-    {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+    {{- if hasPrefix "gke" .Values.distribution }}
     - gcp
     {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
     {{- end }}
-  {{- if hasPrefix "gke" (include "splunk-otel-collector.distribution" .) }}
+  {{- if hasPrefix "gke" .Values.distribution }}
   gcp:
     resource_attributes:
       k8s.cluster.name:

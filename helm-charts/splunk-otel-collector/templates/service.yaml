@@ -1,7 +1,5 @@
-{{ $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{ $gatewayEnabled := eq (include "splunk-otel-collector.gatewayEnabled" .) "true" }}
 {{- $svc := (include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.gateway.service) | fromYaml) }}
-{{ if and $gatewayEnabled }}
+{{ if and .Values.gateway.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,7 +23,7 @@ spec:
   trafficDistribution: {{ $svc.trafficDistribution }}
   {{- end }}
   ports:
-  {{- range $key, $port := $gateway.ports }}
+  {{- range $key, $port := .Values.gateway.ports }}
   {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
   {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
   {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}

@@ -43,40 +43,28 @@ Whether to send data to Splunk Platform endpoint
 Whether to send data to Splunk Observability endpoint
 */}}
 {{- define "splunk-otel-collector.splunkO11yEnabled" -}}
-{{- not (eq (include "splunk-otel-collector.o11yRealm" .) "") }}
+{{- not (eq .Values.splunkObservability.realm "") }}
 {{- end -}}
 
 {{/*
 Whether metrics enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yMetricsEnabled" -}}
-{{- if eq (toString .Values.metricsEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.metricsEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.metricsEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*
 Whether traces enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yTracesEnabled" -}}
-{{- if eq (toString .Values.tracesEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.tracesEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.tracesEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*
 Whether logs enabled for Splunk Observability, backward compatible.
 */}}
 {{- define "splunk-otel-collector.o11yLogsEnabled" -}}
-{{- if eq (toString .Values.logsEnabled) "<nil>" }}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.splunkObservability.logsEnabled }}
-{{- else }}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.logsEnabled }}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -169,34 +157,19 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
-Get Splunk Observability Realm.
-*/}}
-{{- define "splunk-otel-collector.o11yRealm" -}}
-{{- .Values.splunkObservability.realm | default .Values.splunkRealm | default "" }}
-{{- end -}}
-
-
-{{/*
 Get Splunk ingest URL
 */}}
 {{- define "splunk-otel-collector.o11yIngestUrl" -}}
-{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
-{{- .Values.splunkObservability.ingestUrl | default .Values.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
+{{- $realm := .Values.splunkObservability.realm }}
+{{- .Values.splunkObservability.ingestUrl | default (printf "https://ingest.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
 Get Splunk API URL.
 */}}
 {{- define "splunk-otel-collector.o11yApiUrl" -}}
-{{- $realm := (include "splunk-otel-collector.o11yRealm" .) }}
-{{- .Values.splunkObservability.apiUrl | default .Values.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
-{{- end -}}
-
-{{/*
-Get Splunk Observability Access Token.
-*/}}
-{{- define "splunk-otel-collector.o11yAccessToken" -}}
-{{- .Values.splunkObservability.accessToken | default .Values.splunkAccessToken | default "" -}}
+{{- $realm := .Values.splunkObservability.realm }}
+{{- .Values.splunkObservability.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
 {{- end -}}
 
 {{/*
@@ -318,32 +291,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{/*
-cloudProvider helper to support backward compatibility with the deprecated name.
-*/}}
-{{- define "splunk-otel-collector.cloudProvider" -}}
-{{- .Values.cloudProvider | default .Values.provider | default "" -}}
-{{- end -}}
-
-{{/*
-distribution helper to support backward compatibility with the deprecated name.
-*/}}
-{{- define "splunk-otel-collector.distribution" -}}
-{{- .Values.distribution | default .Values.distro | default "" -}}
-{{- end -}}
-
-{{/*
-Helper that returns "agent" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelAgent".
-*/}}
-{{- define "splunk-otel-collector.agent" -}}
-{{- if eq (toString .Values.otelAgent) "<nil>" }}
-{{- .Values.agent | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelAgent | mustMergeOverwrite (deepCopy .Values.agent) | toYaml }}
-{{- end }}
-{{- end -}}
-
-{{/*
 The apiVersion for podDisruptionBudget policies.
 */}}
 {{- define "splunk-otel-collector.PDB-apiVersion" -}}
@@ -359,38 +306,6 @@ The name of the gateway service.
 */}}
 {{- define "splunk-otel-collector.gatewayServiceName" -}}
 {{  (include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" }}
-{{- end -}}
-
-{{/*
-Whether the gateway is enabled, either through network explorer, or through its own flag.
-*/}}
-{{- define "splunk-otel-collector.gatewayEnabled" -}}
-{{- $gateway := fromYaml (include "splunk-otel-collector.gateway" .) }}
-{{- $gateway.enabled }}
-{{- end -}}
-
-{{/*
-Helper that returns "gateway" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelCollector".
-*/}}
-{{- define "splunk-otel-collector.gateway" -}}
-{{- if eq (toString .Values.otelCollector) "<nil>" }}
-{{- .Values.gateway | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelCollector | mustMergeOverwrite (deepCopy .Values.gateway) | toYaml }}
-{{- end }}
-{{- end -}}
-
-{{/*
-Helper that returns "clusterReceiver" parameter group yaml taking care of backward
-compatibility with the old config group name: "otelK8sClusterReceiver".
-*/}}
-{{- define "splunk-otel-collector.clusterReceiver" -}}
-{{- if eq (toString .Values.otelK8sClusterReceiver) "<nil>" }}
-{{- .Values.clusterReceiver | toYaml }}
-{{- else }}
-{{- deepCopy .Values.otelK8sClusterReceiver | mustMergeOverwrite (deepCopy .Values.clusterReceiver) | toYaml }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -418,11 +333,10 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 "o11yInfraMonEventsEnabled" helper defines whether Observability Infrastructure monitoring events are enabled
 */}}
 {{- define "splunk-otel-collector.o11yInfraMonEventsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- if eq (toString $clusterReceiver.k8sEventsEnabled) "<nil>" }}
+{{- if eq (toString .Values.clusterReceiver.k8sEventsEnabled) "<nil>" }}
 {{- .Values.splunkObservability.infrastructureMonitoringEventsEnabled }}
 {{- else }}
-{{- $clusterReceiver.k8sEventsEnabled }}
+{{- .Values.clusterReceiver.k8sEventsEnabled }}
 {{- end }}
 {{- end -}}
 
@@ -431,16 +345,14 @@ compatibility with the old config group name: "otelK8sClusterReceiver".
 Whether object collection by k8s object receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- gt (len $clusterReceiver.k8sObjects) 0 }}
+{{- gt (len .Values.clusterReceiver.k8sObjects) 0 }}
 {{- end -}}
 
 {{/*
 Whether object collection by k8s object receiver or/and event collection by k8s event receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsOrEventsEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- or $clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
+{{- or .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
 {{- end -}}
 
 
@@ -448,8 +360,7 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 Whether clusterReceiver should be enabled
 */}}
 {{- define "splunk-otel-collector.clusterReceiverEnabled" -}}
-{{- $clusterReceiver := fromYaml (include "splunk-otel-collector.clusterReceiver" .) }}
-{{- and $clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
+{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
 {{- end -}}
 
 
@@ -477,7 +388,7 @@ Build the securityContext for Linux and Windows
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
-{{- or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -528,7 +439,7 @@ Create the name of the target allocator cluster role binding to use
 Returns true if the distribution is eks but not eks/fargate.
 */}}
 {{- define "splunk-otel-collector.isNonFargateEKS" -}}
-{{- and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") -}}
+{{- and (hasPrefix "eks" .Values.distribution) (ne .Values.distribution "eks/fargate") -}}
 {{- end -}}
 
 {{/*
@@ -537,7 +448,7 @@ Returns true if the cloud provider is aws and distribution is not set.
 example: Vanilla K8s on AWS EC2
 */}}
 {{- define "splunk-otel-collector.isNonEKSonAWS" -}}
-{{- and (eq (include "splunk-otel-collector.cloudProvider" .) "aws") (eq (include "splunk-otel-collector.distribution" .) "") -}}
+{{- and (eq .Values.cloudProvider "aws") (eq .Values.distribution "") -}}
 {{- end -}}
 
 {{/*
@@ -546,7 +457,7 @@ If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will 
 */}}
 {{- define "splunk-otel-collector.clusterReceiverHostNetworkEnabled" -}}
 {{- if eq (toString .Values.clusterReceiver.hostNetwork) "<nil>" }}
-  {{- eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode" }}
+  {{- eq .Values.distribution "eks/auto-mode" }}
 {{- else }}
   {{- .Values.clusterReceiver.hostNetwork }}
 {{- end -}}
