@@ -291,20 +291,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{/*
-cloudProvider helper to support backward compatibility with the deprecated name.
-*/}}
-{{- define "splunk-otel-collector.cloudProvider" -}}
-{{- .Values.cloudProvider | default .Values.provider | default "" -}}
-{{- end -}}
-
-{{/*
-distribution helper to support backward compatibility with the deprecated name.
-*/}}
-{{- define "splunk-otel-collector.distribution" -}}
-{{- .Values.distribution | default .Values.distro | default "" -}}
-{{- end -}}
-
-{{/*
 Helper that returns "agent" parameter group yaml taking care of backward
 compatibility with the old config group name: "otelAgent".
 */}}
@@ -450,7 +436,7 @@ Build the securityContext for Linux and Windows
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
-{{- or (hasPrefix "gke" (include "splunk-otel-collector.distribution" .)) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -501,7 +487,7 @@ Create the name of the target allocator cluster role binding to use
 Returns true if the distribution is eks but not eks/fargate.
 */}}
 {{- define "splunk-otel-collector.isNonFargateEKS" -}}
-{{- and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) (ne (include "splunk-otel-collector.distribution" .) "eks/fargate") -}}
+{{- and (hasPrefix "eks" .Values.distribution) (ne .Values.distribution "eks/fargate") -}}
 {{- end -}}
 
 {{/*
@@ -510,7 +496,7 @@ Returns true if the cloud provider is aws and distribution is not set.
 example: Vanilla K8s on AWS EC2
 */}}
 {{- define "splunk-otel-collector.isNonEKSonAWS" -}}
-{{- and (eq (include "splunk-otel-collector.cloudProvider" .) "aws") (eq (include "splunk-otel-collector.distribution" .) "") -}}
+{{- and (eq .Values.cloudProvider "aws") (eq .Values.distribution "") -}}
 {{- end -}}
 
 {{/*
@@ -519,7 +505,7 @@ If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will 
 */}}
 {{- define "splunk-otel-collector.clusterReceiverHostNetworkEnabled" -}}
 {{- if eq (toString .Values.clusterReceiver.hostNetwork) "<nil>" }}
-  {{- eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode" }}
+  {{- eq .Values.distribution "eks/auto-mode" }}
 {{- else }}
   {{- .Values.clusterReceiver.hostNetwork }}
 {{- end -}}

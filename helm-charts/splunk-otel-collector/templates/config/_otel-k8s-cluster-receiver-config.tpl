@@ -8,7 +8,7 @@ extensions:
   health_check:
     endpoint: 0.0.0.0:13134
 
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  {{- if eq .Values.distribution "eks/fargate" }}
   # k8s_observer w/ pod and node detection for eks/fargate deployment
   k8s_observer:
     auth_type: serviceAccount
@@ -25,7 +25,7 @@ receivers:
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     metadata_exporters: [signalfx]
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.distribution" .) "openshift" }}
+    {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
     {{- end }}
   {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -51,7 +51,7 @@ receivers:
     - reason: FailedCreate
       involvedObjectKind: Job
   {{- end }}
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  {{- if eq .Values.distribution "eks/fargate" }}
   # dynamically created kubeletstats receiver to report all Fargate "node" kubelet stats
   # with exception of collector "node's" own since Fargate forbids connection.
   receiver_creator:
@@ -72,7 +72,7 @@ receivers:
       - k8s_observer
   {{- end }}
 
-  {{- if and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) .Values.featureGates.enableEKSApiServerMetrics }}
+  {{- if and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics }}
   prometheus/kubernetes-apiserver:
     config:
       scrape_configs:
@@ -188,7 +188,7 @@ processors:
       - action: insert
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
-      {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+      {{- if eq .Values.distribution "eks/fargate" }}
       - action: insert
         key: cloud.platform
         value: aws_eks
@@ -246,7 +246,7 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
-    {{- if not (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+    {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
   {{- end }}
@@ -272,13 +272,13 @@ exporters:
   {{- end }}
   {{- end }}
 
-  {{- if and (and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  {{- if and (and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/histograms:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     timeout: 10s
-    {{- if not (eq (include "splunk-otel-collector.distribution" .) "eks/fargate") }}
+    {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
     send_otlp_histograms: true
@@ -298,7 +298,7 @@ service:
                 without_scope_info: true
                 without_units: true
                 without_type_suffix: true
-  {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+  {{- if eq .Values.distribution "eks/fargate" }}
   extensions: [health_check, k8s_observer]
   {{- else }}
   extensions: [health_check]
@@ -330,7 +330,7 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
 
-    {{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+    {{- if eq .Values.distribution "eks/fargate" }}
     metrics/eks:
       receivers: [receiver_creator]
       processors:
@@ -443,7 +443,7 @@ service:
         - signalfx
     {{- end }}
 
-    {{- if and (and (hasPrefix "eks" (include "splunk-otel-collector.distribution" .)) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+    {{- if and (and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
     metrics/histograms:
       receivers:
         - prometheus/kubernetes-apiserver

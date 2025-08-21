@@ -1,4 +1,4 @@
-{{- if eq (include "splunk-otel-collector.distribution" .) "eks/fargate" }}
+{{- if eq .Values.distribution "eks/fargate" }}
 ---
 apiVersion: v1
 kind: Service

@@ -5,12 +5,12 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Observability realm {{ .Values.splunkObservability.realm }}.
 {{ end }}
 
-{{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (or (eq (include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" .) "false") (eq (toString .Values.agent.hostNetwork) "false")) }}
+{{- if and (eq .Values.distribution "eks/auto-mode") (or (eq (include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" .) "false") (eq (toString .Values.agent.hostNetwork) "false")) }}
 [WARNING] Host networking is explicitly disabled. For resourcedetection to work correctly in EKS Auto Mode, ensure Pod Identity is enabled and configured or enable pod host networking.
           For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
 {{- end }}
 
-{{- if and (eq (include "splunk-otel-collector.distribution" .) "eks/auto-mode") (eq (include "splunk-otel-collector.gatewayEnabled" .) "true") }}
+{{- if and (eq .Values.distribution "eks/auto-mode") (eq (include "splunk-otel-collector.gatewayEnabled" .) "true") }}
 [WARNING] Deploying a Gateway in EKS Auto Mode requires Pod Identity to be enabled and configured, otherwise some functionalities will be missing.
           For more information about deploying Splunk Opentelemetry in EKS Auto Mode cluster, see guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#eks-auto-mode
 {{- end }}
@@ -18,14 +18,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if not (eq (toString .Values.service) "<nil>") }}
 [WARNING] The ".Values.service" config is deprecated. Please use ".Values.agent.service" and ".Values.gateway.service" for configuring services for the agent and gateway, respectively.
           This field will be removed in a future release.
-{{ end }}
-{{- if not (eq (toString .Values.distro) "<nil>") }}
-[WARNING] "distro" parameter is deprecated, please use "distribution" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
-{{ end }}
-{{- if not (eq (toString .Values.provider) "<nil>") }}
-[WARNING] "provider" parameter is deprecated, please use "cloudProvider" instead.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0371-to-0380
 {{ end }}
 {{- if not (eq (toString .Values.extraAttributes.podLabels) "<nil>") }}
 [WARNING] ".Values.extraAttributes.podLabels" parameter is deprecated, please use ".Values.extraAttributes.fromLabels" instead.
