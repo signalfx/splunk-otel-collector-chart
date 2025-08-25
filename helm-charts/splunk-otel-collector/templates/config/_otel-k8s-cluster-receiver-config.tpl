@@ -148,6 +148,7 @@ processors:
   transform/k8sobjects:
     error_mode: ignore
     log_statements:
+      - set(log.attributes["body"], log.body)
       - conditions:
           - log.body["object.kind"] == "Event" and log.body["object.involvedObject.kind"] == "Pod"
         statements:
