@@ -9,10 +9,42 @@ resourceSpans:
             stringValue: opentelemetry
         - key: telemetry.sdk.version
           value:
-            stringValue: 1.33.1
+            stringValue: 1.35.0
+        - key: process.runtime.description
+          value:
+            stringValue: 3.13.1 (main, Jan 24 2025, 21:33:38) [GCC 14.2.0]
+        - key: process.runtime.name
+          value:
+            stringValue: cpython
+        - key: process.runtime.version
+          value:
+            stringValue: 3.13.1
+        - key: process.pid
+          value:
+            intValue: "25"
+        - key: process.executable.name
+          value:
+            stringValue: /usr/local/bin/python3
+        - key: process.executable.path
+          value:
+            stringValue: /usr/local/bin
+        - key: process.command
+          value:
+            stringValue: web.py
+        - key: process.command_line
+          value:
+            stringValue: web.py
+        - key: process.command_args
+          value:
+            arrayValue:
+              values:
+                - stringValue: web.py
+        - key: process.parent_pid
+          value:
+            intValue: "1"
         - key: splunk.zc.method
           value:
-            stringValue: autoinstrumentation-python:0.54b1
+            stringValue: splunk-otel-instrumentation-python:v2.6.0
         - key: k8s.container.name
           value:
             stringValue: python-test
@@ -40,12 +72,21 @@ resourceSpans:
         - key: service.version
           value:
             stringValue: latest
+        - key: telemetry.distro.name
+          value:
+            stringValue: splunk-opentelemetry
+        - key: telemetry.distro.version
+          value:
+            stringValue: 2.5.0
         - key: service.name
           value:
             stringValue: python-test
+        - key: host.arch
+          value:
+            stringValue: aarch64
         - key: telemetry.auto.version
           value:
-            stringValue: 0.54b1
+            stringValue: 0.56b0
         - key: k8s.pod.ip
           value:
             stringValue: 10.244.0.12
@@ -265,7 +306,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "51656"
+                  intValue: "34162"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
