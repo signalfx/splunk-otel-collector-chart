@@ -149,10 +149,10 @@ processors:
     error_mode: ignore
     log_statements:
       - conditions:
-          - resource.attributes["k8s.object.kind"] == "Event" and resource.attributes["k8s.object.involvedObject.kind"] == "Pod"
+          - resource.attributes["object.kind"] == "Event" and resource.attributes["object.involvedObject.kind"] == "Pod"
         statements:
-          - set(resource.attributes["k8s.pod.name"], resource.attributes["k8s.object.involvedObject.name"])
-          - set(resource.attributes["k8s.namespace.name"], resource.attributes["k8s.object.involvedObject.namespace"])
+          - set(resource.attributes["k8s.pod.name"], resource.attributes["object.involvedObject.name"])
+          - set(resource.attributes["k8s.namespace.name"], resource.attributes["object.involvedObject.namespace"])
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
