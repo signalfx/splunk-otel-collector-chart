@@ -231,20 +231,21 @@ k8sattributes:
 {{- define "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" -}}
 k8sattributes/clusterReceiver:
     {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true"}}
-    annotations:
-      - key: splunk.com/sourcetype
-        tag_name: com.splunk.sourcetype
-        from: namespace
-      - key: splunk.com/sourcetype
-        tag_name: com.splunk.sourcetype
-        from: pod
-      - key: splunk.com/index
-        tag_name: com.splunk.index
-        from: namespace
-      - key: splunk.com/index
-        tag_name: com.splunk.index
-        from: pod
-    {{- end}}
+    extract:
+      annotations:
+        - key: splunk.com/sourcetype
+          tag_name: com.splunk.sourcetype
+          from: namespace
+        - key: splunk.com/sourcetype
+          tag_name: com.splunk.sourcetype
+          from: pod
+        - key: splunk.com/index
+          tag_name: com.splunk.index
+          from: namespace
+        - key: splunk.com/index
+          tag_name: com.splunk.index
+          from: pod
+      {{- end}}
 {{- end }}
 
 {{/*

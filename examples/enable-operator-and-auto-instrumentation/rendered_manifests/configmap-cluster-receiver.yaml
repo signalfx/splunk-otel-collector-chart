@@ -152,6 +152,7 @@ data:
           - resource
           - resource/add_environment
           - transform/k8sevents
+          - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
         metrics:

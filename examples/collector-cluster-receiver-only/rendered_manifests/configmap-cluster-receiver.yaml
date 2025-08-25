@@ -165,6 +165,7 @@ data:
           - resourcedetection
           - resource
           - transform/k8sevents
+          - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
         logs/objects:
@@ -176,6 +177,7 @@ data:
           - resourcedetection
           - resource
           - transform/add_sourcetype
+          - k8sattributes/clusterReceiver
           receivers:
           - k8sobjects
         metrics:

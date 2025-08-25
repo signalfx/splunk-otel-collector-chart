@@ -138,6 +138,7 @@ data:
           - resourcedetection
           - resource
           - transform/k8sevents
+          - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
       telemetry:
