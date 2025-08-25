@@ -145,7 +145,13 @@ processors:
         statements:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
-
+  transform/k8sobjects:
+    log_statements:
+      - conditions:
+          - log.attributes["body.object.kind"] == "Event" and log.attributes["body.object.involvedObject.kind"] == "Pod"
+        statements:
+          - set(resource.attributes["k8s.pod.name"], log.attributes["body.object.involvedObject.name"])
+          - set(resource.attributes["k8s.namespace.name"], log.attributes["body.object.involvedObject.namespace"])
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
@@ -416,6 +422,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        - transform/k8sobjects
         - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
