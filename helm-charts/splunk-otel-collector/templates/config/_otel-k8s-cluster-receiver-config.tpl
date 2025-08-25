@@ -24,8 +24,8 @@ receivers:
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     metadata_exporters: [signalfx]
     resource_attributes:
-          k8s.container.status.last_terminated_reason:
-            enabled: true
+      k8s.container.status.last_terminated_reason:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
