@@ -693,11 +693,13 @@ Manage Splunk OTel Collector Logging with these supported annotations.
 
 The sourcetype for metrics is selected based on the following precedence:
 
-1. The value of the `splunk.com/sourcetypeMetrics` annotation on the namespace, if present.
-2. The value of the `splunk.com/sourcetype` annotation on the namespace, if present, applies to all data types.
-3. The value of `.Values.splunkPlatform.sourcetypeMetrics` in the Helm values, if specified, is used for metrics.
-4. If only `.Values.splunkPlatform.sourcetype` is set, it applies to all data types.
-5. If none of the above are set, the default `sourcetype` is `httpevent`.
+1. The value of the `splunk.com/sourcetypeMetrics` annotation on the pod, if present.
+2. The value of the `splunk.com/sourcetype` annotation on the pod, if present, applies to all data types.
+3. The value of the `splunk.com/sourcetypeMetrics` annotation on the namespace, if present.
+4. The value of the `splunk.com/sourcetype` annotation on the namespace, if present, applies to all data types.
+5. The value of `.Values.splunkPlatform.sourcetypeMetrics` in the Helm values, if specified, is used for metrics.
+6. If only `.Values.splunkPlatform.sourcetype` is set, it applies to all data types.
+7. If none of the above are set, the default `sourcetype` is `httpevent`.
 
 ### Performance of native OpenTelemetry logs collection
 
