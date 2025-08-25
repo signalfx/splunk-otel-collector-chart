@@ -146,9 +146,9 @@ processors:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
   transform/k8sobjects:
-    error_mode: ignore
     log_statements:
-      - set(log.attributes["body"], log.body)
+      - statements:
+        - set(log.attributes["body"], log.body)
       - conditions:
           - log.body["object.kind"] == "Event" and log.body["object.involvedObject.kind"] == "Pod"
         statements:
