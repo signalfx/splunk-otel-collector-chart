@@ -151,8 +151,8 @@ processors:
       - conditions:
           - resource.attributes["k8s.object.kind"] == "Event" and resource.attributes["k8s.object.involvedObject.kind"] == "Pod"
         statements:
-          - set(resource.attributes["k8s.pod.name"], resource.attributes["involvedObject.name"])
-          - set(resource.attributes["k8s.namespace.name"], resource.attributes["involvedObject.namespace"])
+          - set(resource.attributes["k8s.pod.name"], resource.attributes["k8s.object.involvedObject.name"])
+          - set(resource.attributes["k8s.namespace.name"], resource.attributes["k8s.object.involvedObject.namespace"])
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
