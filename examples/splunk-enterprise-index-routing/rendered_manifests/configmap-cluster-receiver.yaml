@@ -58,19 +58,20 @@ data:
       batch:
         send_batch_max_size: 32768
       k8sattributes/clusterReceiver:
-        annotations:
-        - from: namespace
-          key: splunk.com/sourcetype
-          tag_name: com.splunk.sourcetype
-        - from: pod
-          key: splunk.com/sourcetype
-          tag_name: com.splunk.sourcetype
-        - from: namespace
-          key: splunk.com/index
-          tag_name: com.splunk.index
-        - from: pod
-          key: splunk.com/index
-          tag_name: com.splunk.index
+        extract:
+          annotations:
+          - from: namespace
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: pod
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
