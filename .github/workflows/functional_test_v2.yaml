@@ -200,7 +200,7 @@ jobs:
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.2.0
+      - uses: google-github-actions/setup-gcloud@v3.0.0
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
       - uses: google-github-actions/get-gke-credentials@v2.3.4
@@ -242,7 +242,7 @@ jobs:
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2.2.0
+      - uses: google-github-actions/setup-gcloud@v3.0.0
         with:
           project_id: ${{ secrets.GKE_PROJECT }}
       - uses: google-github-actions/get-gke-credentials@v2.3.4
