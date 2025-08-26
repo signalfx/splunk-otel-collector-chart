@@ -21,7 +21,7 @@ require (
 	go.opentelemetry.io/collector/config/confighttp v0.132.0
 	go.opentelemetry.io/collector/config/confignet v1.38.0
 	go.opentelemetry.io/collector/config/configopaque v1.38.0
-	go.opentelemetry.io/collector/config/configoptional v0.132.0
+	go.opentelemetry.io/collector/config/configoptional v0.133.0
 	go.opentelemetry.io/collector/consumer/consumertest v0.132.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.132.0
 	go.opentelemetry.io/collector/pdata v1.38.0
@@ -155,7 +155,8 @@ require (
 	go.opentelemetry.io/collector/config/configmiddleware v0.132.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v1.38.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v1.38.0 // indirect
-	go.opentelemetry.io/collector/confmap v1.38.0 // indirect
+	go.opentelemetry.io/collector/confmap v1.39.0 // indirect
+	go.opentelemetry.io/collector/confmap/xconfmap v0.133.0 // indirect
 	go.opentelemetry.io/collector/consumer v1.38.0 // indirect
 	go.opentelemetry.io/collector/consumer/consumererror v0.132.0 // indirect
 	go.opentelemetry.io/collector/consumer/xconsumer v0.132.0 // indirect
@@ -164,7 +165,7 @@ require (
 	go.opentelemetry.io/collector/extension/extensionauth v1.38.0 // indirect
 	go.opentelemetry.io/collector/extension/extensionmiddleware v0.132.0 // indirect
 	go.opentelemetry.io/collector/extension/xextension v0.130.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.38.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.39.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.132.0 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.132.0 // indirect
 	go.opentelemetry.io/collector/pdata/pprofile v0.132.0 // indirect
