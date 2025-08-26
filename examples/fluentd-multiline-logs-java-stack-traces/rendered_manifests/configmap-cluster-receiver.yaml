@@ -132,6 +132,9 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+        resource_attributes:
+          k8s.container.status.last_terminated_reason:
+            enabled: true
       k8s_events:
         auth_type: serviceAccount
       prometheus/k8s_cluster_receiver:
