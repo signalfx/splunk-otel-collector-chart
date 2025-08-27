@@ -1542,6 +1542,39 @@
       "description": "Helm Chart Feature Gates.",
       "type": "object",
       "additionalProperties": true
+    },
+    "extraManifests": {
+      "description": "Additional manifests to deploy with the chart. Can be an array of manifests or an object where keys are ignored and values are manifests.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      ]
     }
   },
   "allOf": [

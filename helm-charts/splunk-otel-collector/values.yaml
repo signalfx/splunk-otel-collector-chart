@@ -1427,3 +1427,41 @@ featureGates:
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   enableEKSApiServerMetrics: true
+
+################################################################################
+# Extra Manifests
+# Extra manifests to deploy. Can be of type dict or list.
+# If dict, keys are ignored and only values are used.
+# Items contained within extraManifests can be defined as dict or string and are passed through tpl.
+################################################################################
+extraManifests:
+  # - apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #     name: extra-config
+  #   data:
+  #     extra-data: "value"
+  #
+  # can be defined as a string, useful for templating field names
+  # - |
+  #   apiVersion: v1
+  #   kind: Secret
+  #   type: Opaque
+  #   metadata:
+  #     name: super-secret
+  #     labels:
+  #       {{- range $key, $value := .Values.agent.podLabels }}
+  #       {{ $key }}: {{ $value }}
+  #       {{- end }}
+  #   data:
+  #     plaintext: Zm9vYmFy
+  #     templated: '{{ print "foobar" | upper | b64enc }}'
+  #
+  # or as a dict, useful for when you want to merge multiple values files.
+  # extraDict:
+  #   apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #     name: extra-config-as-dict
+  #   data:
+  #     extra-data: "value"
