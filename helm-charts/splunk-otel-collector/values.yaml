@@ -1313,6 +1313,10 @@ instrumentation:
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+        - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
+          value: true
+        - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
+          value: false
     go:
       image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.21.0
       # env:
@@ -1320,9 +1324,11 @@ instrumentation:
       #     value: go_value
     java:
       image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.19.0
-      # env:
-      #   - name: JAVA_ENV_VAR
-      #     value: java_value
+      env:
+        - name: OTEL_RESOURCE_DISABLED_KEYS
+          value: process.executable.path,process.command_args
+        - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
+          value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider
     nginx:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
       # env:

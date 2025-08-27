@@ -264,7 +264,56 @@ spec:
 - A container cannot be instrumented with multiple languages.
 - The `instrumentation.opentelemetry.io/container-names` annotation will be disregarded if a language container name annotation is set.
 
-### 4. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
+### 4. Resource Attributes
+
+By default, instrumentation libraries add resource attributes to the generated spans and metrics. Additionally,
+the collector's default configuration enriches spans and metrics with critical resource attributes.
+This can cause the number of attributes to exceed the 36-dimension limit imposed by the backend, resulting in metrics being dropped.
+Starting with v0.133.0, the chart disables many of the instrumentation library resource attributes to help mitigate this issue.
+
+- Java:
+By default, we only enable the following resource providers:
+  - `io.opentelemetry.instrumentation.resources.ContainerResourceProvider`
+  - `io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider`
+  - `io.opentelemetry.instrumentation.resources.ProcessResourceProvider`
+  And exclude the following attributes: `process.executable.path`, `process.command_args`
+
+
+  For additional resource providers, please refer to the [Java Resource Providers documentation](https://opentelemetry.io/docs/languages/java/configuration/#resourceprovider)
+
+- .NET:
+By default we only enable the following resource provider:
+  - `Container` "OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED"
+
+  For additional resource providers, please refer to the [Dotnet Resource Providers documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#resource-detectors)
+
+Example: adding `PROCESSRUNTIME` resource provider to both Java and .NET
+
+Add the following to your `values.yaml`:
+```yaml
+instrumentation:
+  spec:
+    dotnet:
+      env:
+        - name: OTEL_DOTNET_AUTO_PLUGINS
+          value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+        - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
+          value: true
+        - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
+          value: false
+        - name: OTEL_DOTNET_AUTO_PROCESSRUNTIME_RESOURCE_DETECTOR_ENABLED
+          value: true
+    java:
+      env:
+        - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
+          value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider,io.opentelemetry.instrumentation.resources.ProcessRuntimeResourceProvider
+
+```
+
+Note: If you are pointing your instrumented application directly to the backend (bypassing the collector), or to the Gateway, you may need to enable additional resource providers to ensure that the necessary resource attributes are included in the telemetry data.
+For Gateway, you can explicitly add a resoucedetection processor to the spans and metrics pipelines, otherwise you can enable instrumentation library specific resource providers.
+
+### 5. Check out the results at [Splunk Observability APM](https://app.us1.signalfx.com/#/apm)
 
 The trace and metrics data should populate the APM dashboard.To better
 visualize this example as a whole, we have also included an image

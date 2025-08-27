@@ -708,6 +708,8 @@ func testJavaTraces(t *testing.T) {
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("host.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.description"),
 		ptracetest.IgnoreResourceAttributeValue("process.pid"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
@@ -771,17 +773,14 @@ func testDotNetTraces(t *testing.T) {
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("os.description"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
+		ptracetest.IgnoreResourceAttributeValue("host.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
 		ptracetest.IgnoreResourceAttributeValue("container.id"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("os.build_id"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
