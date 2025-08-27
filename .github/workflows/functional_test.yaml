@@ -87,6 +87,8 @@ jobs:
             sleep 1;
           done
           echo "Kubernetes $(kubectl version --short | grep -E 'Client|Server')" && echo "Container Runtime for Node: $(kubectl get node -o=jsonpath='{.items[0].metadata.name}'): $(kubectl get node -o=jsonpath='{.items[0].status.nodeInfo.containerRuntimeVersion}')"
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Splunk
         run: |
