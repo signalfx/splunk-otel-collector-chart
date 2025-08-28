@@ -219,16 +219,19 @@ data:
             config:
               config:
                 scrape_configs:
-                - job_name: coredns
+                - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                  job_name: coredns
                   metric_relabel_configs:
                   - action: keep
                     regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scheme: https
                   static_configs:
                   - targets:
                     - '`endpoint`:9154'
                   tls_config:
+                    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
                     insecure_skip_verify: true
             rule: type == "pod" && namespace == "openshift-dns" && name contains "dns"
           prometheus/kube-controller-manager:

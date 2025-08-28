@@ -266,8 +266,11 @@ receivers:
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
                 - targets: ["`endpoint`:9154"]
+              scheme: https
               tls_config:
                 insecure_skip_verify: true
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
               {{- else }}
               static_configs:
                 - targets: ["`endpoint`:9153"]
