@@ -677,6 +677,9 @@ receivers:
         {{- if hasKey . "combineWith" }}
         combine_with: {{ .combineWith | quote }}
         {{- end }}
+        {{- if hasKey . "maxNumOfLinesToCombine" }}
+        max_batch_size: {{ .maxNumOfLinesToCombine }}
+        {{- end }}
       {{- end }}
       {{- end }}
       # Clean up log record
