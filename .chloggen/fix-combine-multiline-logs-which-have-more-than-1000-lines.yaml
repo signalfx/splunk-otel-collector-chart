@@ -4,7 +4,8 @@ change_type: bug_fix
 component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: |
-  Allow to specify max number of lines which will be combined in log entry for multiline log configuration.
+  Introducing: `logsCollection.containers.multilineConfigs.maxNumOfLinesToCombine`.
+  This new field allows to specify max number of lines which will be combined in log entry for multiline log configuration.
   In some cases, multiline logs with more than 1000 lines were split into multiple events.
 # One or more tracking issues related to the change
 issues: [2012]
