@@ -76,6 +76,9 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+        resource_attributes:
+          k8s.container.status.last_terminated_reason:
+            enabled: true
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
