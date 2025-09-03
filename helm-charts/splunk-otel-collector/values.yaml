@@ -1382,6 +1382,7 @@ targetAllocator:
     annotations: {}
   config:
     allocation_strategy: per-node
+    collector_not_ready_grace_period: 15m
     collector_selector:
       matchlabels:
         component: otel-collector-agent
