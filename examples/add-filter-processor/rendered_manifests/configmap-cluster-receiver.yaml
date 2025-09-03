@@ -105,6 +105,12 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/add_sourcetype:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
+            attributes["k8s.resource.name"]], ""))
       transform/k8sevents:
         error_mode: ignore
         log_statements:
@@ -137,6 +143,27 @@ data:
             enabled: true
       k8s_events:
         auth_type: serviceAccount
+      k8sobjects:
+        auth_type: serviceAccount
+        objects:
+        - mode: watch
+          name: cronjobs
+        - mode: watch
+          name: daemonsets
+        - mode: watch
+          name: deployments
+        - mode: watch
+          name: jobs
+        - mode: watch
+          name: namespaces
+        - mode: watch
+          name: nodes
+        - mode: watch
+          name: pods
+        - mode: watch
+          name: replicasets
+        - mode: watch
+          name: statefulsets
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -171,6 +198,18 @@ data:
           - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
+        logs/objects:
+          exporters:
+          - splunk_hec/o11y
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          - resource
+          - transform/add_sourcetype
+          - k8sattributes/clusterReceiver
+          receivers:
+          - k8sobjects
         metrics:
           exporters:
           - signalfx
