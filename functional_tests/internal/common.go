@@ -156,7 +156,7 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 			if !ready {
 				podLogOpts := v1.PodLogOptions{}
 				req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-				podLogs, err := req.Stream()
+				podLogs, err := req.Stream(t.Context())
 				if err != nil {
 					t.Log(err.Error())
 				}
