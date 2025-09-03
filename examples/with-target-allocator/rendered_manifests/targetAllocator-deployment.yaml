@@ -20,7 +20,7 @@ spec:
       serviceAccountName: default-splunk-otel-collector-ta
       containers:
         - name: targetallocator
-          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.122.0
+          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.120.0
           ports:
             - containerPort: 8080
               name: http-port
