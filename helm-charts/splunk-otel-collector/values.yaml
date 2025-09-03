@@ -1382,7 +1382,6 @@ targetAllocator:
     annotations: {}
   config:
     allocation_strategy: per-node
-    collector_namespace: default
     collector_selector:
       matchlabels:
         component: otel-collector-agent

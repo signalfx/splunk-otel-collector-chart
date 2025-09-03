@@ -12,5 +12,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   targetallocator.yaml: |
+    collector_namespace: {{ .Release.Namespace }}
     {{- .Values.targetAllocator.config | toYaml | nindent 4 }}
 {{- end }}
