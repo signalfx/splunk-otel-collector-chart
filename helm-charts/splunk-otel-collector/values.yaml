@@ -628,6 +628,8 @@ logsCollection:
     # By the time of reconstructing a multiline log the following information is available to
     # identify source of the logs: namespace, pod and container names. At least one source
     # identifier has to be specified in for each multiline config.
+    # At some cases it may turn out that default number of lines to combine (1000) is not enough
+    # for some multiline logs. In that case maxNumOfLinesToCombine can be used to increase that limit.
     # The following example shows how to setup multiline log processing for logs having subsequent
     # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
     # scheduled to run in "default" namespace with a java container called "server", and the
@@ -651,6 +653,7 @@ logsCollection:
     #       value: server
     #     firstEntryRegex: ^[^\s].*
     #     combineWith: ""
+    #     maxNumOfLinesToCombine: 1000
     multilineConfigs: []
     # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
     # All other logs will be ignored.
@@ -1313,6 +1316,10 @@ instrumentation:
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+        - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
+          value: true
+        - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
+          value: false
     go:
       image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.21.0
       # env:
@@ -1320,9 +1327,11 @@ instrumentation:
       #     value: go_value
     java:
       image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.19.0
-      # env:
-      #   - name: JAVA_ENV_VAR
-      #     value: java_value
+      env:
+        - name: OTEL_RESOURCE_DISABLED_KEYS
+          value: process.executable.path,process.command_args
+        - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
+          value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider
     nginx:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
       # env:

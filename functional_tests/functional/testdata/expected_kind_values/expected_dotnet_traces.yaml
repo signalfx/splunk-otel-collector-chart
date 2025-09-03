@@ -3,49 +3,16 @@ resourceSpans:
       attributes:
         - key: splunk.distro.version
           value:
-            stringValue: 1.8.0
+            stringValue: 1.11.0
         - key: telemetry.distro.name
           value:
             stringValue: splunk-otel-dotnet
         - key: telemetry.distro.version
           value:
-            stringValue: 1.8.0
-        - key: os.type
-          value:
-            stringValue: linux
-        - key: os.description
-          value:
-            stringValue: Alpine Linux v3.19
-        - key: os.build_id
-          value:
-            stringValue: 6.10.14-linuxkit
-        - key: os.name
-          value:
-            stringValue: Alpine Linux
-        - key: os.version
-          value:
-            stringValue: 3.19.1
-        - key: host.name
-          value:
-            stringValue: kind-control-plane
-        - key: process.owner
-          value:
-            stringValue: root
-        - key: process.pid
-          value:
-            intValue: "1"
-        - key: process.runtime.description
-          value:
-            stringValue: .NET 8.0.3
-        - key: process.runtime.name
-          value:
-            stringValue: .NET
-        - key: process.runtime.version
-          value:
-            stringValue: 8.0.3
+            stringValue: 1.11.0
         - key: container.id
           value:
-            stringValue: 2cddc8bca4ee39b99dbceddfb87c2816bc255d62105fd0684b8441c1ba1bb032
+            stringValue: 26ba5c190297e48efb5009d2d614b4e5d4cf2875e44f611feacdd28ba0f030fb
         - key: telemetry.sdk.name
           value:
             stringValue: opentelemetry
@@ -54,13 +21,13 @@ resourceSpans:
             stringValue: dotnet
         - key: telemetry.sdk.version
           value:
-            stringValue: 1.9.0
+            stringValue: 1.12.0
         - key: service.name
           value:
             stringValue: dotnet-test
         - key: splunk.zc.method
           value:
-            stringValue: splunk-otel-dotnet:v1.8.0
+            stringValue: splunk-otel-dotnet:v1.11.0
         - key: k8s.container.name
           value:
             stringValue: dotnet-test
@@ -72,25 +39,28 @@ resourceSpans:
             stringValue: default
         - key: k8s.node.name
           value:
-            stringValue: kind-control-plane
+            stringValue: kind-worker
         - key: k8s.pod.name
           value:
-            stringValue: dotnet-test-5479c475fc-xfq6h
+            stringValue: dotnet-test-58b59bb4c9-72n97
         - key: k8s.replicaset.name
           value:
-            stringValue: dotnet-test-5479c475fc
+            stringValue: dotnet-test-58b59bb4c9
         - key: service.instance.id
           value:
-            stringValue: default.dotnet-test-5479c475fc-xfq6h.dotnet-test
+            stringValue: default.dotnet-test-58b59bb4c9-72n97.dotnet-test
+        - key: service.namespace
+          value:
+            stringValue: default
         - key: service.version
           value:
             stringValue: latest
         - key: k8s.pod.ip
           value:
-            stringValue: 10.244.0.35
+            stringValue: 10.244.1.24
         - key: k8s.pod.uid
           value:
-            stringValue: 6063a76c-a33f-4bc4-9f45-5d4634d5ee2f
+            stringValue: 71a2fd3d-3713-48a7-8518-3a456d59462c
         - key: k8s.pod.labels.app
           value:
             stringValue: dotnet-test
@@ -100,6 +70,12 @@ resourceSpans:
         - key: container.image.tag
           value:
             stringValue: latest
+        - key: host.name
+          value:
+            stringValue: kind-worker
+        - key: os.type
+          value:
+            stringValue: linux
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
@@ -115,9 +91,6 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-        - key: service.namespace
-          value:
-            stringValue: default
     schemaUrl: https://opentelemetry.io/schemas/1.6.1
     scopeSpans:
       - scope:
@@ -148,15 +121,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397260127721500"
+            endTimeUnixNano: "1756263518185834600"
             flags: 769
             kind: 2
             name: GET /
-            parentSpanId: ""
-            spanId: 68d682aca4683031
-            startTimeUnixNano: "1736397260126572600"
+            spanId: ed98b71876a6620e
+            startTimeUnixNano: "1756263518184786200"
             status: {}
-            traceId: 7793d37e4f80ad6044f69b76d5a1f133
+            traceId: 8943f3bfe020f7fc90cb75e48e468148
           - attributes:
               - key: server.address
                 value:
@@ -182,15 +154,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397261137453200"
+            endTimeUnixNano: "1756263519203979500"
             flags: 769
             kind: 2
             name: GET /
-            parentSpanId: ""
-            spanId: 711fa6975e0e8f44
-            startTimeUnixNano: "1736397261135556000"
+            spanId: b77b248e4f68ddaa
+            startTimeUnixNano: "1756263519197578500"
             status: {}
-            traceId: 0d313e324befe48cc88f09e5e5bf3d25
+            traceId: aef2400785b7e38e3c5dd355b1f2a789
           - attributes:
               - key: server.address
                 value:
@@ -216,15 +187,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397262168718400"
+            endTimeUnixNano: "1756263520212698700"
             flags: 769
             kind: 2
             name: GET /
-            parentSpanId: ""
-            spanId: bf3f028b17c95f10
-            startTimeUnixNano: "1736397262149689400"
+            spanId: 01216717730be35d
+            startTimeUnixNano: "1756263520209770500"
             status: {}
-            traceId: 21ad12bd014be61ac8c2d7d5dbc16a6f
+            traceId: 5d443c98db88dc3bc137f60bf8b40a18
           - attributes:
               - key: server.address
                 value:
@@ -250,15 +220,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397263171261500"
+            endTimeUnixNano: "1756263521222550700"
             flags: 769
             kind: 2
             name: GET /
-            parentSpanId: ""
-            spanId: 4e61e74903f07f0d
-            startTimeUnixNano: "1736397263170709600"
+            spanId: 4e0636ce9f29e22e
+            startTimeUnixNano: "1756263521221326800"
             status: {}
-            traceId: fb2460a9f91bf865f0e14ccd42c1faf4
+            traceId: 7898348db47aa40781f22f3230a2fcdf
           - attributes:
               - key: server.address
                 value:
@@ -284,15 +253,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397264178789800"
+            endTimeUnixNano: "1756263522229494000"
             flags: 769
             kind: 2
             name: GET /
-            parentSpanId: ""
-            spanId: d9019541eb6268d3
-            startTimeUnixNano: "1736397264177741000"
+            spanId: 13603caa5974fae3
+            startTimeUnixNano: "1756263522228498000"
             status: {}
-            traceId: d4a76f55aa09c0f484537f8c71db770a
+            traceId: bdb4ac9f84274b36a9e8cd96851104d5
       - scope:
           name: System.Net.Http
         spans:
@@ -315,15 +283,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397260128340800"
+            endTimeUnixNano: "1756263518187854600"
             flags: 257
             kind: 3
             name: GET
-            parentSpanId: ""
-            spanId: d12a4bf91e087496
-            startTimeUnixNano: "1736397260125453400"
+            spanId: b1081fdd01a6b665
+            startTimeUnixNano: "1756263518183111000"
             status: {}
-            traceId: 7793d37e4f80ad6044f69b76d5a1f133
+            traceId: 8943f3bfe020f7fc90cb75e48e468148
           - attributes:
               - key: http.request.method
                 value:
@@ -343,15 +310,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397261137033900"
+            endTimeUnixNano: "1756263519203099800"
             flags: 257
             kind: 3
             name: GET
-            parentSpanId: ""
-            spanId: 4855c9c1b7ee6d95
-            startTimeUnixNano: "1736397261132354800"
+            spanId: ecc09d65f680dcb6
+            startTimeUnixNano: "1756263519192604200"
             status: {}
-            traceId: 0d313e324befe48cc88f09e5e5bf3d25
+            traceId: aef2400785b7e38e3c5dd355b1f2a789
           - attributes:
               - key: http.request.method
                 value:
@@ -371,15 +337,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397262158260200"
+            endTimeUnixNano: "1756263520212945200"
             flags: 257
             kind: 3
             name: GET
-            parentSpanId: ""
-            spanId: 5d82ea96efad0603
-            startTimeUnixNano: "1736397262142078100"
+            spanId: 469801348fd05674
+            startTimeUnixNano: "1756263520208154300"
             status: {}
-            traceId: 21ad12bd014be61ac8c2d7d5dbc16a6f
+            traceId: 5d443c98db88dc3bc137f60bf8b40a18
           - attributes:
               - key: http.request.method
                 value:
@@ -399,15 +364,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397263171362000"
+            endTimeUnixNano: "1756263521222644500"
             flags: 257
             kind: 3
             name: GET
-            parentSpanId: ""
-            spanId: 6c513a95d5051993
-            startTimeUnixNano: "1736397263169900600"
+            spanId: 0d313f409f2fa0b8
+            startTimeUnixNano: "1756263521220294500"
             status: {}
-            traceId: fb2460a9f91bf865f0e14ccd42c1faf4
+            traceId: 7898348db47aa40781f22f3230a2fcdf
           - attributes:
               - key: http.request.method
                 value:
@@ -427,12 +391,11 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1736397264179404000"
+            endTimeUnixNano: "1756263522230094300"
             flags: 257
             kind: 3
             name: GET
-            parentSpanId: ""
-            spanId: 805d744cc1048960
-            startTimeUnixNano: "1736397264173926600"
+            spanId: 0a1b951165d84044
+            startTimeUnixNano: "1756263522226217300"
             status: {}
-            traceId: d4a76f55aa09c0f484537f8c71db770a
+            traceId: bdb4ac9f84274b36a9e8cd96851104d5
