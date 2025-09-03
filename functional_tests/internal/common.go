@@ -4,7 +4,9 @@
 package internal
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -151,6 +153,23 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 				allReady = false
 			}
 			t.Logf("[CheckPodsReady] Pod: %s | Phase: %s | Ready: %v", pod.Name, pod.Status.Phase, ready)
+			if !ready {
+				podLogOpts := v1.PodLogOptions{}
+				req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
+				podLogs, err := req.Stream()
+				if err != nil {
+					t.Log(err.Error())
+				}
+				defer podLogs.Close()
+
+				buf := new(bytes.Buffer)
+				_, err = io.Copy(buf, podLogs)
+				if err != nil {
+					t.Logf("[CheckPodsReady] Failed to copy logs: %s", err.Error())
+				}
+				str := buf.String()
+				t.Logf("[CheckPodsReady] Logs from pod not ready: %s", str)
+			}
 		}
 		if !allReady {
 			readySince = time.Time{}
