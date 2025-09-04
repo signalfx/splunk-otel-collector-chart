@@ -120,7 +120,7 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			addNamespaceAnnotation(t, client, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue)
+			addNamespaceAnnotation(t, client, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue, "")
 			index := defaultIndex
 			if tt.annotationIndexValue != "" {
 				index = tt.annotationIndexValue
@@ -130,7 +130,7 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 				sourcetype = tt.annotationSourcetypeValue
 			}
 			if tt.usePodAnnotations {
-				addPodAnnotation(t, client, podName, namespace, podAnnotationIndex, podAnnotationSourcetype)
+				addPodAnnotation(t, client, podName, namespace, podAnnotationIndex, podAnnotationSourcetype, "")
 				index = podAnnotationIndex
 				sourcetype = podAnnotationSourcetype
 			}
@@ -157,22 +157,25 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 	defaultSourcetype := "httpevent"
 	annotationIndex := "test_metrics"
 	annotationSourcetype := "annotation_sourcetype"
+	annotationMetricSourcetype := "annotation_metric_sourcetype"
 
 	client := createK8sClient(t)
 
 	tests := []struct {
-		name                      string
-		annotationIndexValue      string
-		annotationSourcetypeValue string
+		name                            string
+		annotationIndexValue            string
+		annotationSourcetypeValue       string
+		annotationMetricSourcetypeValue string
 	}{
-		{"default index and default sourcetype", "", ""},
-		{"annotation index and default sourcetype", annotationIndex, ""},
-		{"default index and annotation sourcetype", "", annotationSourcetype},
-		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype},
+		{"default index and default sourcetype", "", "", ""},
+		{"annotation index and default sourcetype", annotationIndex, "", ""},
+		{"default index and annotation sourcetype", "", annotationSourcetype, ""},
+		{"default index, annotation sourcetype and annotation metric sourcetype", "", annotationSourcetype, annotationMetricSourcetype},
+		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype, ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			addPodAnnotation(t, client, podName, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue)
+			addPodAnnotation(t, client, podName, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue, tt.annotationMetricSourcetypeValue)
 			time.Sleep(20 * time.Second)
 			index := defaultIndex
 			if tt.annotationIndexValue != "" {
@@ -181,6 +184,9 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 			sourcetype := defaultSourcetype
 			if tt.annotationSourcetypeValue != "" {
 				sourcetype = tt.annotationSourcetypeValue
+			}
+			if tt.annotationMetricSourcetypeValue != "" {
+				sourcetype = tt.annotationMetricSourcetypeValue
 			}
 			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
@@ -224,7 +230,7 @@ func removeAllPodsAnnotations(t *testing.T, clientset *kubernetes.Clientset, pod
 	fmt.Printf("All annotations removed from pod_name %s\n", pod_name)
 }
 
-func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, namespace_name string, annotationIndex string, annotationSourcetype string) {
+func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, namespace_name string, annotationIndex string, annotationSourcetype string, annotationSourcetypeMetrics string) {
 	ns, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace_name, metav1.GetOptions{})
 	require.NoError(t, err)
 	if ns.Annotations == nil {
@@ -236,13 +242,16 @@ func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, names
 	if annotationSourcetype != "" {
 		ns.Annotations["splunk.com/sourcetype"] = annotationSourcetype
 	}
+	if annotationSourcetypeMetrics != "" {
+		ns.Annotations["splunk.com/sourcetypeMetrics"] = annotationSourcetypeMetrics
+	}
 
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
 	require.NoError(t, err)
 	fmt.Printf("Annotation added to namespace_name %s\n", namespace_name)
 }
 
-func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string, annotationIndex string, annotationSourcetype string) {
+func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name string, namespace string, annotationIndex string, annotationSourcetype string, annotationSourcetypeMetrics string) {
 	pod, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), pod_name, metav1.GetOptions{})
 	require.NoError(t, err)
 	if pod.Annotations == nil {
@@ -254,7 +263,9 @@ func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name st
 	if annotationSourcetype != "" {
 		pod.Annotations["splunk.com/sourcetype"] = annotationSourcetype
 	}
-
+	if annotationSourcetypeMetrics != "" {
+		pod.Annotations["splunk.com/sourcetypeMetrics"] = annotationSourcetypeMetrics
+	}
 	_, err = clientset.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
 	require.NoError(t, err)
 	fmt.Printf("Annotation added to pod_name %s\n", pod_name)

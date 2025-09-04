@@ -7,7 +7,12 @@ splunkPlatform:
   metricsIndex: {{ .MetricsIndex }}
   index: {{ .LogsIndex }}
   {{ if .NonDefaultSourcetype }}
+  {{ if .Sourcetype }}
   sourcetype: {{ .Sourcetype }}
+  {{ end }}
+  {{ if .SourcetypeMetrics }}
+  sourcetypeMetrics: {{ .SourcetypeMetrics }}
+  {{ end }}
   {{ end }}
 
 agent:

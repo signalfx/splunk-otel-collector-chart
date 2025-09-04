@@ -57,6 +57,12 @@ data:
             key: splunk.com/sourcetype
             tag_name: com.splunk.sourcetype
           - from: namespace
+            key: splunk.com/sourcetypeMetrics
+            tag_name: com.splunk.sourcetype
+          - from: pod
+            key: splunk.com/sourcetypeMetrics
+            tag_name: com.splunk.sourcetype
+          - from: namespace
             key: splunk.com/metricsIndex
             tag_name: com.splunk.index
           - from: pod
