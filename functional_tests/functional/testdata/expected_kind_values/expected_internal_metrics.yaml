@@ -65,7 +65,7 @@ resourceMetrics:
                         stringValue: http
                   timeUnixNano: "1000000"
             name: otelcol_fileconsumer_open_files
-          - name: otelcol_otelsvc_k8s_namespace_deleted
+          - name: otelcol_receiver_failed_log_records
             sum:
               aggregationTemporality: 2
               dataPoints:
@@ -130,7 +130,7 @@ resourceMetrics:
                         stringValue: http
                   timeUnixNano: "1000000"
               isMonotonic: true
-          - name: otelcol_otelsvc_k8s_namespace_updated
+          - name: otelcol_receiver_failed_metric_points
             sum:
               aggregationTemporality: 2
               dataPoints:
@@ -6246,7 +6246,7 @@ resourceMetrics:
                         stringValue: http
                   timeUnixNano: "1000000"
             name: scrape_duration_seconds
-          - name: otelcol_otelsvc_k8s_pod_deleted
+          - name: otelcol_receiver_failed_spans
             sum:
               aggregationTemporality: 2
               dataPoints:
