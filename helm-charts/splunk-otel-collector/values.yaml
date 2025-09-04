@@ -1379,7 +1379,7 @@ certmanager:
 
 targetAllocator:
   enabled: false
-  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.105.0
+  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
   serviceAccount:
     # Specifies whether a ServiceAccount should be created
     create: true
@@ -1391,6 +1391,8 @@ targetAllocator:
     annotations: {}
   config:
     allocation_strategy: per-node
+    # Optional: Namespace where the collector pods are running. Defaults to the release namespace,
+    collector_namespace: ""
     collector_selector:
       matchlabels:
         component: otel-collector-agent
