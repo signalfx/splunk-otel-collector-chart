@@ -386,6 +386,7 @@ service:
     logs:
       receivers:
         - k8s_events
+        - k8sobjects
       processors:
         - memory_limiter
         - batch

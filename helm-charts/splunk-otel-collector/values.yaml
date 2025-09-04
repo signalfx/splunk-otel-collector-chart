@@ -566,7 +566,25 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  k8sObjects: []
+  k8sObjects:
+    - name: cronjobs
+      mode: watch
+    - name: daemonsets
+      mode: watch
+    - name: deployments
+      mode: watch
+    - name: jobs
+      mode: watch
+    - name: namespaces
+      mode: watch
+    - name: nodes
+      mode: watch
+    - name: pods
+      mode: watch
+    - name: replicasets
+      mode: watch
+    - name: statefulsets
+      mode: watch
 
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
