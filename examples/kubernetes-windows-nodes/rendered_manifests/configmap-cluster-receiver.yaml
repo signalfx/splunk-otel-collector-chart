@@ -198,6 +198,7 @@ data:
           - k8sattributes/clusterReceiver
           receivers:
           - k8s_events
+          - k8sobjects
         logs/objects:
           exporters:
           - splunk_hec/o11y
