@@ -1079,6 +1079,9 @@ func testK8sObjects(t *testing.T) {
 	assert.True(t, foundCustomField2)
 }
 
+// TODO: Evaluate usefulness of this test.
+// This test is currently skipped because of a mismatch between received metric
+// count in the metric sink and the golden file. This test has been skipped since v0.92.0.
 func testAgentMetrics(t *testing.T) {
 	agentMetricsConsumer := globalSinks.agentMetricsConsumer
 
