@@ -1382,6 +1382,8 @@ targetAllocator:
     annotations: {}
   config:
     allocation_strategy: per-node
+    # Optional: Namespace where the collector pods are running. Defaults to the release namespace,
+    collector_namespace: ""
     collector_selector:
       matchlabels:
         component: otel-collector-agent

@@ -12,6 +12,9 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   targetallocator.yaml: |
-    collector_namespace: {{ .Release.Namespace }}
-    {{- .Values.targetAllocator.config | toYaml | nindent 4 }}
+    {{- $config := .Values.targetAllocator.config }}
+    {{- if not $config.collector_namespace }}
+    {{- $_ := set $config "collector_namespace" (include "splunk-otel-collector.namespace" .) }}
+    {{- end }}
+    {{- $config | toYaml | nindent 4 }}
 {{- end }}

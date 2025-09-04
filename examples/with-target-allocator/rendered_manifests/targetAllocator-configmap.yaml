@@ -17,8 +17,8 @@ metadata:
     heritage: Helm
 data:
   targetallocator.yaml: |
-    collector_namespace: default
     allocation_strategy: per-node
+    collector_namespace: default
     collector_selector:
       matchlabels:
         component: otel-collector-agent
