@@ -1258,14 +1258,13 @@ func testAgentMetrics(t *testing.T) {
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, true)
+	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
 	}
 	require.NotNil(t, selectedKubeletstatsMetrics)
 
-	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -1365,10 +1364,7 @@ func selectMetricSet(t *testing.T, expected pmetric.Metrics, metricName string, 
 			t.Log("Didn't find correct set, continuing")
 			continue
 		}
-		if ignoreLen && m.MetricCount() == 8 {
-			return &m
-		}
-		if (ignoreLen && m.MetricCount() != 29) || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
 			return &m
 		} else {
 			t.Logf("Failed length check. metric sink resource length: %d, expected resource length: %d, metric sink metric count: %d, expected metric count: %d", m.ResourceMetrics().Len(), expected.ResourceMetrics().Len(), m.MetricCount(), expected.MetricCount())
