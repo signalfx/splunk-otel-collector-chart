@@ -1104,7 +1104,7 @@ func generateRequiredTelemetry(t *testing.T) {
 		Spec: corev1.PodSpec{
 			RestartPolicy: corev1.RestartPolicyNever,
 			Containers: []corev1.Container{
-				corev1.Container{
+				{
 					Name:    "main",
 					Image:   "python:3.11",
 					Command: []string{"python"},
