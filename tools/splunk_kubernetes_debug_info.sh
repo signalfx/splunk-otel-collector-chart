@@ -315,6 +315,8 @@ echo "Script end time: $script_end_time"
 echo "Script end time: $script_end_time" >> "$output_file"
 
 mv /home/runner/work/splunk-otel-collector-chart/splunk-otel-collector-chart/functional_tests/functional/expected_kubeletstats_metrics.yaml "$temp_dir/expected_kubeletstats_metrics.yaml"
+mv /home/runner/work/splunk-otel-collector-chart/splunk-otel-collector-chart/functional_tests/functional/expected_internal_metrics.yaml "$temp_dir/expected_internal_metrics.yaml"
+
 
 # Create a ZIP archive of all the collected YAML files
 output_zip="splunk_kubernetes_debug_info_$(date +%Y%m%d_%H%M%S).zip"

@@ -490,6 +490,7 @@ func Test_Functions(t *testing.T) {
 
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
