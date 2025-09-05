@@ -1079,11 +1079,60 @@ func testK8sObjects(t *testing.T) {
 	assert.True(t, foundCustomField2)
 }
 
+func generateRequiredTelemetry(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	assert.True(t, setKubeConfig)
+
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	testNamespace := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "test-namespace",
+		},
+	}
+
+	_, err = client.CoreV1().Namespaces().Create(t.Context(), testNamespace, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	testPod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "test-pod",
+		},
+		Spec: corev1.PodSpec{
+			RestartPolicy: corev1.RestartPolicyNever,
+			Containers: []corev1.Container{
+				corev1.Container{
+					Name:    "main",
+					Image:   "python:3.11",
+					Command: []string{"python"},
+					Args:    []string{"-c", "print('hello world')"},
+				},
+			},
+		},
+	}
+	_, err = client.CoreV1().Pods(testNamespace.Name).Create(t.Context(), testPod, metav1.CreateOptions{})
+	require.NoError(t, err)
+	err = client.CoreV1().Pods(testNamespace.Name).Delete(t.Context(), testPod.Name, metav1.DeleteOptions{})
+	require.NoError(t, err)
+
+	testNamespace.Labels = map[string]string{}
+	testNamespace.Labels["testLabel"] = "true"
+	_, err = client.CoreV1().Namespaces().Update(t.Context(), testNamespace, metav1.UpdateOptions{})
+	require.NoError(t, err)
+	err = client.CoreV1().Namespaces().Delete(t.Context(), testNamespace.Name, metav1.DeleteOptions{})
+	require.NoError(t, err)
+}
+
 // TODO: Evaluate usefulness of this test.
 // This test is currently skipped because of a mismatch between received metric
 // count in the metric sink and the golden file. This test has been skipped since v0.92.0.
 func testAgentMetrics(t *testing.T) {
 	agentMetricsConsumer := globalSinks.agentMetricsConsumer
+
+	generateRequiredTelemetry(t)
 
 	metricNames := []string{
 		"container.filesystem.available",
@@ -1103,8 +1152,11 @@ func testAgentMetrics(t *testing.T) {
 		"otelcol_exporter_queue_size",
 		"otelcol_exporter_sent_metric_points",
 		"otelcol_otelsvc_k8s_namespace_added",
+		"otelcol_otelsvc_k8s_namespace_deleted",
+		"otelcol_otelsvc_k8s_namespace_updated",
 		"otelcol_otelsvc_k8s_pod_added",
 		"otelcol_otelsvc_k8s_pod_table_size",
+		"otelcol_otelsvc_k8s_pod_deleted",
 		"otelcol_otelsvc_k8s_pod_updated",
 		"otelcol_process_cpu_seconds",
 		"otelcol_process_memory_rss",
