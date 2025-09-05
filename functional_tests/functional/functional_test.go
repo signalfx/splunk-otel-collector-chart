@@ -1365,6 +1365,9 @@ func selectMetricSet(t *testing.T, expected pmetric.Metrics, metricName string, 
 			t.Log("Didn't find correct set, continuing")
 			continue
 		}
+		if ignoreLen && m.MetricCount() == 8 {
+			return &m
+		}
 		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
 			return &m
 		} else {
