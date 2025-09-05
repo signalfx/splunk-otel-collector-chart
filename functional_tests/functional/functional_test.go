@@ -1258,7 +1258,7 @@ func testAgentMetrics(t *testing.T) {
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
+	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, true)
 	if selectedKubeletstatsMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
