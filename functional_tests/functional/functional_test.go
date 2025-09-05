@@ -1209,6 +1209,7 @@ func testAgentMetrics(t *testing.T) {
 	}
 	require.NotNil(t, selectedKubeletstatsMetrics)
 
+	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
