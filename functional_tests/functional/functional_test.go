@@ -1147,7 +1147,7 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, true)
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1202,14 +1202,13 @@ func testAgentMetrics(t *testing.T) {
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, true)
+	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
 	}
 	require.NotNil(t, selectedKubeletstatsMetrics)
 
-	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
