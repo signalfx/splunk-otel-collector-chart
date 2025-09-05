@@ -1368,7 +1368,7 @@ func selectMetricSet(t *testing.T, expected pmetric.Metrics, metricName string, 
 		if ignoreLen && m.MetricCount() == 8 {
 			return &m
 		}
-		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+		if (ignoreLen && m.MetricCount() != 29) || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
 			return &m
 		} else {
 			t.Logf("Failed length check. metric sink resource length: %d, expected resource length: %d, metric sink metric count: %d, expected metric count: %d", m.ResourceMetrics().Len(), expected.ResourceMetrics().Len(), m.MetricCount(), expected.MetricCount())
