@@ -1310,6 +1310,7 @@ func testAgentMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricsOrder(),
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreDatapointAttributesOrder(),
 	)
 	assert.NoError(t, err)
 }
