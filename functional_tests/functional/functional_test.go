@@ -490,7 +490,6 @@ func Test_Functions(t *testing.T) {
 
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
@@ -1207,6 +1206,8 @@ func testAgentMetrics(t *testing.T) {
 	}
 	require.NotNil(t, selectedInternalMetrics)
 
+	t.Logf("Checking internal metrics")
+
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedInternalMetricsFile, selectedInternalMetrics)
 	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
 		pmetrictest.IgnoreTimestamp(),
@@ -1252,6 +1253,8 @@ func testAgentMetrics(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
+	t.Logf("Passed check for internal metrics, now checking kubeletstats")
+
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
@@ -1262,6 +1265,7 @@ func testAgentMetrics(t *testing.T) {
 	}
 	require.NotNil(t, selectedKubeletstatsMetrics)
 
+	os.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
 	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
 		pmetrictest.IgnoreTimestamp(),
