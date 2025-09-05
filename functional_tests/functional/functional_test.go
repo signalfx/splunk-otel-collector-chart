@@ -1139,6 +1139,7 @@ func testAgentMetrics(t *testing.T) {
 		"container.filesystem.capacity",
 		"container.filesystem.usage",
 		"container.memory.usage",
+		"container.memory.working_set",
 		"container_cpu_utilization",
 		"k8s.pod.network.errors",
 		"k8s.pod.network.io",
