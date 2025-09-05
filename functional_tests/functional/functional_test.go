@@ -1200,7 +1200,7 @@ func testAgentMetrics(t *testing.T) {
 
 	replaceWithStar := func(string) string { return "*" }
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
+	selectedInternalMetrics := selectMetricSet(t, expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
 	if selectedInternalMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1255,7 +1255,7 @@ func testAgentMetrics(t *testing.T) {
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
+	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
 	if selectedKubeletstatsMetrics == nil {
 		t.Skip("No metric batch identified with the right metric count, exiting")
 		return
@@ -1341,7 +1341,7 @@ func testAgentMetrics(t *testing.T) {
 //	})
 //}
 
-func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
+func selectMetricSet(t *testing.T, expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricSink.AllMetrics()[h]
 		foundCorrectSet := false
@@ -1358,10 +1358,15 @@ func selectMetricSet(expected pmetric.Metrics, metricName string, metricSink *co
 			}
 		}
 		if !foundCorrectSet {
+			t.Log("Didn't find correct set, continuing")
 			continue
 		}
 		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
 			return &m
+		} else {
+			t.Logf("Failed length check. metric sink resource length: %d, expected resource length: %d, metric sink metric count: %d, expected metric count: %d", m.ResourceMetrics().Len(), expected.ResourceMetrics().Len(), m.MetricCount(), expected.MetricCount())
+			t.Logf("Metric sink all metric count: %d", len(metricSink.AllMetrics()))
+			t.Logf("Metric sink current index: %d", h)
 		}
 	}
 	return nil
