@@ -15,7 +15,6 @@ metadata:
     component: otel-collector-agent
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-collector-agent
 {{- with  $svc.annotations }}
   annotations:

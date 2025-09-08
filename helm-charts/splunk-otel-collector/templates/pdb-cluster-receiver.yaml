@@ -10,7 +10,6 @@ metadata:
     component: otel-k8s-cluster-receiver
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-k8s-cluster-receiver
 spec:
   selector:

@@ -13,7 +13,6 @@ metadata:
     component: otel-collector-agent
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
     {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
     engine: fluentd
     {{- end }}

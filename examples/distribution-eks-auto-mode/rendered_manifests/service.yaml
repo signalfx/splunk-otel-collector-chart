@@ -15,7 +15,6 @@ metadata:
     component: otel-collector
     chart: splunk-otel-collector-0.134.0
     release: default
-    heritage: Helm
     app.kubernetes.io/component: otel-collector
 spec:
   type: ClusterIP
