@@ -9,7 +9,10 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      pdata:
+      otelcol:
         patterns:
-          - "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/*"
-          - "go.opentelemetry.io/collector/pdata/*"
+          - "go.opentelemetry.io/collector*"
+          - "github.com/open-telemetry/opentelemetry-collector-contrib/*"
+      otel:
+        patterns:
+          - "go.opentelemetry.io/otel*"
