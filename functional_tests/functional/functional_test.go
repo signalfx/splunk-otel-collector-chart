@@ -1079,6 +1079,12 @@ func testK8sObjects(t *testing.T) {
 	assert.True(t, foundCustomField2)
 }
 
+// Internal telemetry metrics are only sent when an event occurs. Due to cluster
+// setup and potentially different events occurring on the cluster before the
+// test runs, different internal telemetry metrics will be sent. This method
+// is used to ensure some events occur that would only take place occasionally
+// before. This led to test flakiness as sometimes metrics are expected but the
+// event hasn't taken place, or vice versa.
 func generateRequiredTelemetry(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	assert.True(t, setKubeConfig)
