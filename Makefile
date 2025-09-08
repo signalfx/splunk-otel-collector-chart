@@ -20,8 +20,6 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 CHLOGGEN ?= $(LOCALBIN)/chloggen
 
-CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
-
 FIND_MOD_ARGS=-type f -name "go.mod"
 TO_MOD_DIR=dirname {} \; | sort | egrep  '^./'
 ALL_MODS := $(shell find . $(FIND_MOD_ARGS) -exec $(TO_MOD_DIR))
@@ -58,13 +56,9 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 	if ! (helm repo list | grep -q open-telemetry) ; then \
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
 	fi ;\
-	if ! (helm repo list | grep -q jetstack) ; then \
-		helm repo add jetstack https://charts.jetstack.io || exit 1; \
-	fi ;\
-	helm repo update open-telemetry jetstack || exit 1; \
+	helm repo update open-telemetry || exit 1; \
 	DEP_OK=true ;\
 	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then DEP_OK=false ; fi ;\
-	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then DEP_OK=false ; fi ;\
 	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
 	if [ -f "$$LOCK_FILE" ] ; then \
 		echo "Removing Chart.lock file post-update..."; \
@@ -161,32 +155,6 @@ chlog-release-notes: ## Prints out the current release notes to stdout or RELEAS
 	else \
 		awk "\$$0 ~ /$$VER_PATTERN/{flag=1; next} /^## \[/{flag=0} flag && NF" CHANGELOG.md; \
 	fi
-
-##@ Cert Manager
-# Tasks related to deploying and managing Cert Manager
-
-.PHONY: cert-manager
-cert-manager: cmctl ## Installs cert-manager in the current Kubernetes cluster and verifies API access with cmctl
-	# Consider using cmctl to install the cert-manager once install command is not experimental
-	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/${CERTMANAGER_VERSION}/cert-manager.yaml
-	$(CMCTL) check api --wait=5m
-
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-CMCTL = $(shell pwd)/bin/cmctl
-.PHONY: cmctl
-cmctl: ## Downloads and installs cmctl, the CLI for cert-manager, to your local system
-	@{ \
-	set -e ;\
-	if (`pwd`/bin/cmctl version | grep ${CERTMANAGER_VERSION}) > /dev/null 2>&1 ; then \
-		exit 0; \
-	fi ;\
-	TMP_DIR=$$(mktemp -d) ;\
-	curl -L -o $$TMP_DIR/cmctl.tar.gz https://github.com/jetstack/cert-manager/releases/download/$(CERTMANAGER_VERSION)/cmctl-`go env GOOS`-`go env GOARCH`.tar.gz ;\
-	tar xzf $$TMP_DIR/cmctl.tar.gz -C $$TMP_DIR ;\
-	[ -d bin ] || mkdir bin ;\
-	mv $$TMP_DIR/cmctl $(CMCTL) ;\
-	rm -rf $$TMP_DIR ;\
-	}
 
 ##@ CI Scripts
 # Tasks related to continous integration

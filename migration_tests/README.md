@@ -16,7 +16,6 @@ You can recreate the execution of the step on your machine with the following se
    export K8S_VERSION=v1.28.0
    kind create cluster --kubeconfig=$KUBECONFIG --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION --name=migration-tests
    kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-   make cert-manager
    ```
 1. Deploy a collector as a service that can act as a log sink for HEC traffic, alongside with a deployment that outputs logs every second:
    ```
