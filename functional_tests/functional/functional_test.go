@@ -1432,7 +1432,7 @@ func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNa
 		t.Logf("Metrics found: %d, metrics still missing: %d\n%s\n", foundCount, missingCount, strings.Join(stillMissing, ","))
 		return missingCount == 0
 	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
-		"failed to receive all metrics %d minutes", timeoutMinutes)
+		"failed to receive all metrics in %d minutes", timeoutMinutes)
 }
 
 func maskScopeVersion(traces ptrace.Traces) {
