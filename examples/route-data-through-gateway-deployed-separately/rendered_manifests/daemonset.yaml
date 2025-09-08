@@ -15,7 +15,6 @@ metadata:
     component: otel-collector-agent
     chart: splunk-otel-collector-0.134.0
     release: default
-    heritage: Helm
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -32,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: e1627ca8ce4d67f17d717cae208dc74d97fb38b0bbaf8296d584cb2a415cee64
+        checksum/config: 3a7e3593d7942b2dfa62ee76f47c99a059113b6036a813322aaeedefdb3d53f2
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true

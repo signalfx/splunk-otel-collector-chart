@@ -9,7 +9,6 @@ metadata:
     app: {{ template "splunk-otel-collector.name" . }}
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 data:
   script: |
   {{- (.Files.Get "scripts/init-eks-fargate-cluster-receiver.sh") | nindent 4 }}

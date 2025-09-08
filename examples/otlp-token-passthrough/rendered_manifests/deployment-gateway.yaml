@@ -15,7 +15,6 @@ metadata:
     component: otel-collector
     chart: splunk-otel-collector-0.134.0
     release: default
-    heritage: Helm
     app.kubernetes.io/component: otel-collector
 spec:
   replicas: 1
@@ -31,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 34fcf67e761179be797dd503ddf0610c20d0c104e3156e9641c5180a825267e1
+        checksum/config: 9c54f0959fa7cbd06b8b763f58f7379cae0bc0fc596815ba713b64fc795712e7
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:

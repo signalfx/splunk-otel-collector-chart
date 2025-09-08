@@ -11,7 +11,6 @@ metadata:
     component: otel-operator
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
     app.kubernetes.io/component: otel-operator
 {{- if .Values.operator.crds.create }}
   annotations:

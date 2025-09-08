@@ -13,7 +13,6 @@ metadata:
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.134.0
     release: default
-    heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

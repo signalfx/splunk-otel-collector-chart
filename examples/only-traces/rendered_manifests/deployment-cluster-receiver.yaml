@@ -15,7 +15,6 @@ metadata:
     component: otel-k8s-cluster-receiver
     chart: splunk-otel-collector-0.134.0
     release: default
-    heritage: Helm
     app.kubernetes.io/component: otel-k8s-cluster-receiver
 spec:
   replicas: 1
@@ -31,7 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 16e1ecbaa1254c8a2835fab54f6557a3cc0bf38d55948a7a471e349017531b10
+        checksum/config: 46b6c502512d56c6f154447f0d96f41476b3a331c673e5d571d0d3031bdcb16e
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
