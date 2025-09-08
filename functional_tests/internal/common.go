@@ -165,6 +165,26 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 	}, timeout, 5*time.Second, "Pods in namespace %s with label %s are not ready for minReadyTime=%s", namespace, labelSelector, minReadyTime)
 }
 
+func CreatePod(t *testing.T, clientset *kubernetes.Clientset, name string, namespace string, podConfig *v1.Pod) {
+	_, err := clientset.CoreV1().Pods(namespace).Create(t.Context(), podConfig, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	require.Eventually(t, func() bool {
+		_, err = clientset.CoreV1().Pods(namespace).Get(t.Context(), name, metav1.GetOptions{})
+		return err == nil
+	}, 1*time.Minute, 5*time.Second, "pod %s is not available", name)
+}
+
+func DeletePod(t *testing.T, clientset *kubernetes.Clientset, name string, namespace string) {
+	err := clientset.CoreV1().Pods(namespace).Delete(t.Context(), name, metav1.DeleteOptions{})
+	require.NoError(t, err)
+
+	require.Eventually(t, func() bool {
+		_, err = clientset.CoreV1().Pods(namespace).Get(t.Context(), name, metav1.GetOptions{})
+		return err != nil
+	}, 1*time.Minute, 5*time.Second, "pod %s is still available", name)
+}
+
 func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -178,6 +198,16 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
 		return err == nil
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
+}
+
+func DeleteNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
+	err := clientset.CoreV1().Namespaces().Delete(t.Context(), name, metav1.DeleteOptions{})
+	require.NoError(t, err)
+
+	require.Eventually(t, func() bool {
+		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
+		return err != nil
+	}, 1*time.Minute, 5*time.Second, "namespace %s is still available", name)
 }
 
 func LabelNamespace(t *testing.T, clientset *kubernetes.Clientset, name, key, value string) {
