@@ -1094,16 +1094,10 @@ func generateRequiredTelemetry(t *testing.T) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
-	testNamespace := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-namespace",
-		},
-	}
+	testNamespaceName := "test-namespace"
+	internal.CreateNamespace(t, client, testNamespaceName)
 
-	_, err = client.CoreV1().Namespaces().Create(t.Context(), testNamespace, metav1.CreateOptions{})
-	require.NoError(t, err)
-
-	testPod := &corev1.Pod{
+	testPodConfig := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-pod",
 		},
@@ -1119,17 +1113,10 @@ func generateRequiredTelemetry(t *testing.T) {
 			},
 		},
 	}
-	_, err = client.CoreV1().Pods(testNamespace.Name).Create(t.Context(), testPod, metav1.CreateOptions{})
-	require.NoError(t, err)
-	err = client.CoreV1().Pods(testNamespace.Name).Delete(t.Context(), testPod.Name, metav1.DeleteOptions{})
-	require.NoError(t, err)
-
-	testNamespace.Labels = map[string]string{}
-	testNamespace.Labels["testLabel"] = "true"
-	_, err = client.CoreV1().Namespaces().Update(t.Context(), testNamespace, metav1.UpdateOptions{})
-	require.NoError(t, err)
-	err = client.CoreV1().Namespaces().Delete(t.Context(), testNamespace.Name, metav1.DeleteOptions{})
-	require.NoError(t, err)
+	internal.CreatePod(t, client, testPodConfig.Name, testNamespaceName, testPodConfig)
+	internal.DeletePod(t, client, testPodConfig.Name, testNamespaceName)
+	internal.LabelNamespace(t, client, testNamespaceName, "testLabel", "true")
+	internal.DeleteNamespace(t, client, testNamespaceName)
 }
 
 func testAgentMetrics(t *testing.T) {
