@@ -8,3 +8,8 @@ updates:
     directory: "/functional_tests"
     schedule:
       interval: "weekly"
+    groups:
+      pdata:
+        patterns:
+          - "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/*"
+          - "go.opentelemetry.io/collector/pdata/*"
