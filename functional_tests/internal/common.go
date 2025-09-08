@@ -170,7 +170,7 @@ func CreatePod(t *testing.T, clientset *kubernetes.Clientset, name string, names
 	require.NoError(t, err)
 
 	require.Eventually(t, func() bool {
-		_, err = clientset.CoreV1().Pods().Get(t.Context(), name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Pods(namespace).Get(t.Context(), name, metav1.GetOptions{})
 		return err == nil
 	}, 1*time.Minute, 5*time.Second, "pod %s is not available", name)
 }
