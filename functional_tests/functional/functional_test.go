@@ -1198,122 +1198,16 @@ func testAgentMetrics(t *testing.T) {
 	expectedInternalMetrics, err := golden.ReadMetrics(expectedInternalMetricsFile)
 	require.NoError(t, err)
 
-	replaceWithStar := func(string) string { return "*" }
-
-	selectedInternalMetrics := selectMetricSet(t, expectedInternalMetrics, "otelcol_process_runtime_total_alloc_bytes", agentMetricsConsumer, false)
-	if selectedInternalMetrics == nil {
-		t.Skip("No metric batch identified with the right metric count, exiting")
-		return
-	}
+	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, agentMetricsConsumer, metricNames)
 	require.NotNil(t, selectedInternalMetrics)
-
-	t.Logf("Checking internal metrics")
-
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedInternalMetricsFile, selectedInternalMetrics)
-	err = pmetrictest.CompareMetrics(expectedInternalMetrics, *selectedInternalMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
-	)
-	assert.NoError(t, err)
-
-	t.Logf("Passed check for internal metrics, now checking kubeletstats")
 
 	expectedKubeletStatsMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_kubeletstats_metrics.yaml")
 	expectedKubeletStatsMetrics, err := golden.ReadMetrics(expectedKubeletStatsMetricsFile)
 	require.NoError(t, err)
-	selectedKubeletstatsMetrics := selectMetricSet(t, expectedKubeletStatsMetrics, "container.memory.usage", agentMetricsConsumer, false)
-	if selectedKubeletstatsMetrics == nil {
-		t.Skip("No metric batch identified with the right metric count, exiting")
-		return
-	}
+	selectedKubeletstatsMetrics := selectMetricSet(expectedKubeletStatsMetrics, agentMetricsConsumer, metricNames)
 	require.NotNil(t, selectedKubeletstatsMetrics)
-
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedKubeletStatsMetricsFile, selectedKubeletstatsMetrics)
-	err = pmetrictest.CompareMetrics(expectedKubeletStatsMetrics, *selectedKubeletstatsMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.container.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
-		pmetrictest.ChangeResourceAttributeValue("k8s.container.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.node.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreDatapointAttributesOrder(),
-	)
-	assert.NoError(t, err)
 }
 
 // func testPrometheusAnnotationMetrics(t *testing.T) {
@@ -1352,32 +1246,59 @@ func testAgentMetrics(t *testing.T) {
 //	})
 //}
 
-func selectMetricSet(t *testing.T, expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
+func selectMetricSet(expected pmetric.Metrics, metricSink *consumertest.MetricsSink, metricNames []string) *pmetric.Metrics {
+	replaceWithStar := func(string) string { return "*" }
+
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricSink.AllMetrics()[h]
-		foundCorrectSet := false
-	OUTER:
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-					metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-					if metricToConsider.Name() == metricName {
-						foundCorrectSet = true
-						break OUTER
-					}
-				}
-			}
-		}
-		if !foundCorrectSet {
-			t.Log("Didn't find correct set, continuing")
-			continue
-		}
-		if ignoreLen || m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+		err := pmetrictest.CompareMetrics(expected, m,
+			pmetrictest.IgnoreTimestamp(),
+			pmetrictest.IgnoreStartTimestamp(),
+			pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+			pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
+			pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
+			pmetrictest.IgnoreMetricValues(),
+			pmetrictest.ChangeResourceAttributeValue("k8s.container.name", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
+			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
+			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
+			pmetrictest.IgnoreScopeVersion(),
+			pmetrictest.IgnoreResourceMetricsOrder(),
+			pmetrictest.IgnoreMetricsOrder(),
+			pmetrictest.IgnoreScopeMetricsOrder(),
+			pmetrictest.IgnoreMetricDataPointsOrder(),
+			pmetrictest.IgnoreDatapointAttributesOrder(),
+			pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
+		)
+		if err == nil {
 			return &m
-		} else {
-			t.Logf("Failed length check. metric sink resource length: %d, expected resource length: %d, metric sink metric count: %d, expected metric count: %d", m.ResourceMetrics().Len(), expected.ResourceMetrics().Len(), m.MetricCount(), expected.MetricCount())
-			t.Logf("Metric sink all metric count: %d", len(metricSink.AllMetrics()))
-			t.Logf("Metric sink current index: %d", h)
 		}
 	}
 	return nil
