@@ -20,5 +20,30 @@ spec:
         - image: quay.io/splunko11ytest/python_test:latest
           name: python-test
           imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo "Installed OpenTelemetry packages:"
+              pip list | grep opentelemetry || echo "No opentelemetry packages found"
+
+              if ! python3 -c "import opentelemetry.instrumentation.flask" 2>/dev/null; then
+                echo "Flask instrumentation not found, installing..."
+                pip install --target /usr/local/lib/python3.13/site-packages \
+                  --no-deps \
+                  --disable-pip-version-check \
+                  --root-user-action=ignore \
+                  opentelemetry-instrumentation-flask==0.46b0 \
+                  opentelemetry-instrumentation-wsgi==0.46b0 \
+                  opentelemetry-util-http==0.46b0
+                if [ $? -eq 0 ]; then
+                  echo "Flask instrumentation installed successfully"
+                else
+                  echo "Failed to install Flask instrumentation"
+                fi
+              else
+                echo "Flask instrumentation is already available"
+              fi
+
+              exec /start.sh
       nodeSelector:
         kubernetes.io/os: "linux"
