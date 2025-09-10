@@ -373,7 +373,7 @@ resource/metrics:
       {{- if .Values.splunkPlatform.metricsSourcetype }}
       value: {{.Values.splunkPlatform.metricsSourcetype | quote }}
       {{- else }}
-      value: "{{.Values.splunkPlatform.sourcetype }}"
+      value: {{.Values.splunkPlatform.sourcetype | quote }}
       {{- end }}
       action: insert
 {{- end }}
