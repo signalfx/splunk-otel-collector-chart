@@ -10,5 +10,5 @@ issues: [1941]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  - Users can override the metrics sourcetype for Splunk Platform using the `splunk.com/sourcetypeMetrics` annotation or the `.Values.splunkPlatform.sourcetypeMetrics` Helm value.
+  - Users can override the metrics sourcetype for Splunk Platform using the `splunk.com/metricsSourcetype` annotation or the `.Values.splunkPlatform.metricsSourcetype` Helm value.
   - See `advanced-configuration.md` for detailed precedence and usage notes.

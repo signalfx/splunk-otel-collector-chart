@@ -294,10 +294,10 @@ k8sattributes/metrics:
       - key: splunk.com/sourcetype
         tag_name: com.splunk.sourcetype
         from: pod
-      - key: splunk.com/sourcetypeMetrics
+      - key: splunk.com/metricsSourcetype
         tag_name: com.splunk.sourcetype
         from: namespace
-      - key: splunk.com/sourcetypeMetrics
+      - key: splunk.com/metricsSourcetype
         tag_name: com.splunk.sourcetype
         from: pod
       - key: splunk.com/metricsIndex
@@ -370,8 +370,8 @@ resource/metrics:
   attributes:
     # Insert the sourcetype value from values.yaml if it has not already been set through annotations.
     - key: com.splunk.sourcetype
-      {{- if .Values.splunkPlatform.sourcetypeMetrics }}
-      value: {{.Values.splunkPlatform.sourcetypeMetrics | quote }}
+      {{- if .Values.splunkPlatform.metricsSourcetype }}
+      value: {{.Values.splunkPlatform.metricsSourcetype | quote }}
       {{- else }}
       value: "{{.Values.splunkPlatform.sourcetype }}"
       {{- end }}

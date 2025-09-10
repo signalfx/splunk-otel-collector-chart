@@ -243,7 +243,7 @@ func addNamespaceAnnotation(t *testing.T, clientset *kubernetes.Clientset, names
 		ns.Annotations["splunk.com/sourcetype"] = annotationSourcetype
 	}
 	if annotationSourcetypeMetrics != "" {
-		ns.Annotations["splunk.com/sourcetypeMetrics"] = annotationSourcetypeMetrics
+		ns.Annotations["splunk.com/metricsSourcetype"] = annotationSourcetypeMetrics
 	}
 
 	_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), ns, metav1.UpdateOptions{})
@@ -264,7 +264,7 @@ func addPodAnnotation(t *testing.T, clientset *kubernetes.Clientset, pod_name st
 		pod.Annotations["splunk.com/sourcetype"] = annotationSourcetype
 	}
 	if annotationSourcetypeMetrics != "" {
-		pod.Annotations["splunk.com/sourcetypeMetrics"] = annotationSourcetypeMetrics
+		pod.Annotations["splunk.com/metricsSourcetype"] = annotationSourcetypeMetrics
 	}
 	_, err = clientset.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
 	require.NoError(t, err)
