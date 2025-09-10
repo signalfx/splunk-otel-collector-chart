@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 37df2e87e4da68d5ee36dd4a2d4623fc4b79e695c84739f5691eae418bac2d9a
+        checksum/config: d1d38ad6c500e74f17cfd03710931b3c9f72f3d80b4385c18ecf7d8c6b28cbaa
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -52,16 +52,11 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
-      initContainers:
       containers:
       - name: otel-collector
         args:
         - --config=/conf/relay.yaml
         ports:
-        - name: fluentforward
-          containerPort: 8006
-          hostPort: 8006
-          protocol: TCP
         - name: jaeger-grpc
           containerPort: 14250
           hostPort: 14250
@@ -87,8 +82,6 @@ spec:
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.134.0
         imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 0
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             value: "500"
@@ -160,14 +153,6 @@ spec:
         - mountPath: /hostfs/usr/lib/os-release
           name: host-usr-lib-osrelease
           readOnly: true
-        - name: varlog
-          mountPath: /var/log
-          readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: checkpoint
-          mountPath: /var/addon/splunk/otel_pos
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -176,16 +161,6 @@ spec:
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: checkpoint
-        hostPath:
-          path: /var/addon/splunk/otel_pos
-          type: DirectoryOrCreate
       - name: host-dev
         hostPath:
           path: /dev

@@ -1,5 +1,14 @@
 # Upgrade guidelines
 
+## 0.134.0 to 0.135.0
+
+This release includes a breaking change removing the `splunkObservability.logsEnabled` option.
+
+- Logs cannot be sent directly to Splunk Observability anymore.
+Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
+See the following documentation for more details: https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform
+
+
 ## 0.128.0 to 0.129.0
 
 This release includes a breaking change related to the operator instrumentation configuration.

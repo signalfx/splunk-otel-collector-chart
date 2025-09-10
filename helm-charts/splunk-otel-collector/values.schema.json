@@ -204,10 +204,6 @@
           "description": "Send Traces to Splunk Observability",
           "type": "boolean"
         },
-        "logsEnabled": {
-          "description": "Send Logs to Splunk Observability",
-          "type": "boolean"
-        },
         "profilingEnabled": {
           "description": "Whether profiling data is enabled for Splunk Observability",
           "type": "boolean"
@@ -228,13 +224,6 @@
         {
           "properties": {
             "tracesEnabled": {
-              "const": true
-            }
-          }
-        },
-        {
-          "properties": {
-            "logsEnabled": {
               "const": true
             }
           }
