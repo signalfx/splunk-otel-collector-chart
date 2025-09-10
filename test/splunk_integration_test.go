@@ -170,6 +170,7 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 		{"default index and default sourcetype", "", "", ""},
 		{"annotation index and default sourcetype", annotationIndex, "", ""},
 		{"default index and annotation sourcetype", "", annotationSourcetype, ""},
+		{"default index, default sourcetype and annotation metric sourcetype", "", "", annotationMetricSourcetype},
 		{"default index, annotation sourcetype and annotation metric sourcetype", "", annotationSourcetype, annotationMetricSourcetype},
 		{"annotation index and annotation sourcetype", annotationIndex, annotationSourcetype, ""},
 	}
