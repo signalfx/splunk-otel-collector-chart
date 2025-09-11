@@ -63,14 +63,8 @@ however, only the Splunk distributions are in scope for official Splunk support 
 This distribution currently supports:
 
 - [Splunk APM](https://www.splunk.com/en_us/products/apm-application-performance-monitoring.html) via the
-  [`sapm`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/sapmexporter).
-  The [`otlphttp`
-  exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter)
-  can be used with a [custom
-  configuration](https://github.com/signalfx/splunk-otel-collector/blob/main/cmd/otelcol/config/collector/otlp_config_linux.yaml).
-  More information available
-  [here](https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-opentelemetry-collector.html).
+  [`otlphttp`
+  exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter).
 - [Splunk Infrastructure
   Monitoring](https://www.splunk.com/en_us/products/infrastructure-monitoring.html)
   via the [`signalfx`
@@ -82,7 +76,6 @@ This distribution currently supports:
   Enterprise](https://www.splunk.com/en_us/products/splunk-enterprise.html) via
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
-  - Interested in sending logs to Splunk Cloud via OTLP for improved backpressure handling and performance? [Sign up for the preview](https://voc.splunk.com/preview/otlp) today!
 
 **Fluentd logs engine is now deprecated and will reach End Of Support in October 2025.** Migrating to the native OTEL logs engine before this date is strongly recommended.
 
