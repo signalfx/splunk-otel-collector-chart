@@ -2,7 +2,7 @@
 
 ## 0.134.0 to 0.135.0
 
-This release includes a breaking change removing the `splunkObservability.logsEnabled` option.
+This release includes the breaking change of removing the `splunkObservability.logsEnabled` option.
 
 - Logs cannot be sent directly to Splunk Observability anymore.
 Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
