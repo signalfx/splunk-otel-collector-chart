@@ -4,6 +4,12 @@ splunkObservability:
   accessToken: CHANGEME
   metricsEnabled: true
   tracesEnabled: true
+
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
 agent:
   config:
     receivers:

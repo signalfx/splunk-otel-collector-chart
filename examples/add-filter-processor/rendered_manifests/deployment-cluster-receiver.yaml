@@ -30,7 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 44daefd0999e5c593ad294e1105d373639a1491dd163dd95e689a3a3f4c54eae
+        checksum/config: a88d6b5073cc560860c5c571fcd4f413b427fb721ce6bed7c7ad4ffde9d95b12
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -70,6 +70,11 @@ spec:
               secretKeyRef:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: default-splunk-otel-collector
+                key: splunk_platform_hec_token
         readinessProbe:
           httpGet:
             path: /

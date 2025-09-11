@@ -19,6 +19,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+  - name: fluentforward
+    port: 8006
+    targetPort: fluentforward
+    protocol: TCP
   - name: jaeger-grpc
     port: 14250
     targetPort: jaeger-grpc

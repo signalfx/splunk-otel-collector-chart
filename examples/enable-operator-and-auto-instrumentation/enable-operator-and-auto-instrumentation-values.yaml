@@ -6,6 +6,11 @@ splunkObservability:
 clusterName: CHANGEME
 environment: CHANGEME
 
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
 operatorcrds:
   install: true
 operator:

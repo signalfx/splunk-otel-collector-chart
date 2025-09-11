@@ -5,6 +5,11 @@ splunkObservability:
   metricsEnabled: true
   tracesEnabled: true
 
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
 agent:
   config:
     processors:
@@ -16,6 +21,22 @@ agent:
             resource_attributes:
               - key: k8s.container.name
                 value: '^(containerXName|containerYName)$'
+      # Exclude logs from pods named 'podNameX'
+      filter/exclude_logs_from_pod:
+        logs:
+          exclude:
+            match_type: regexp
+            resource_attributes:
+              - key: k8s.pod.name
+                value: '^(podNameX)$'
+      # Exclude logs from nodes named 'nodeNameX'
+      filter/exclude_logs_from_node:
+        logs:
+          exclude:
+            match_type: regexp
+            resource_attributes:
+              - key: k8s.node.name
+                value: '^(nodeNameX)$'
       # Exclude spans from traces for services housed in containers named 'containerXName' or 'containerYName'
       filter/exclude_spans_from_traces_from_container:
         spans:
@@ -24,8 +45,14 @@ agent:
             attributes:
               - key: k8s.container.name
                 value: '^(containerXName|containerYName)$'
-      # Exclude all telemetry data (metrics, traces) from a namespace named 'namespaceX'
+      # Exclude all telemetry data (metrics, logs, traces) from a namespace named 'namespaceX'
       filter/exclude_all_telemetry_data_from_namespace:
+        logs:
+          exclude:
+            match_type: regexp
+            resource_attributes:
+              - key: k8s.namespace.name
+                value: '^(namespaceX)$'
         metrics:
           exclude:
             match_type: regexp
@@ -43,15 +70,17 @@ agent:
             resource_attributes:
               - key: k8s.cluster.name
                 value: '^(clusterX)$'
-    # Define the data processing pipelines for metrics, and traces
+    # Define the data processing pipelines for logs, metrics, and traces
     service:
       pipelines:
-        metrics:
+        logs:
           processors:
             - memory_limiter
             - k8sattributes
+            - filter/logs
             - batch
             - resourcedetection
             - resource
-            - filter/exclude_metrics_from_container
-            - filter/exclude_metrics_from_cluster
+            - resource/logs
+            - filter/exclude_logs_from_pod
+            - filter/exclude_logs_from_node
