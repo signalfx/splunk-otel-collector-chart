@@ -253,16 +253,6 @@ exporters:
     {{- end}}
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
-  splunk_hec/o11y:
-    endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
-    log_data_enabled: true
-    profiling_data_enabled: false
-    # Temporary disable compression until 0.68.0 to workaround a compression bug
-    disable_compression: true
-  {{- end }}
-
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
@@ -398,9 +388,6 @@ service:
         - transform/k8sevents
         - k8sattributes/clusterReceiver
       exporters:
-        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
-        - splunk_hec/o11y
-        {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
@@ -421,9 +408,6 @@ service:
         {{- end }}
         - k8sattributes/clusterReceiver
       exporters:
-        {{- if (eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true") }}
-        - splunk_hec/o11y
-        {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}

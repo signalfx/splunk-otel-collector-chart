@@ -106,18 +106,18 @@ environment: production
 
 By default only metrics and traces are sent to Splunk Observability destination,
 and only logs are sent to Splunk Platform destination. It's possible to enable
-or disable any kind of telemetry for a specific destination. For example, with
-the following configuration Splunk OTel Collector will send all collected
-telemetry data to Splunk Observability and Splunk Platform assuming they are
-both properly configured.
+or disable metrics and traces for both destinations, but logs can only be sent to
+Splunk Platform. For example, with the following configuration Splunk OTel Collector
+will send all collected telemetry data to Splunk Platform and metrics and traces to
+Splunk Observability, assuming they are both properly configured.
 
 ```yaml
 splunkObservability:
   metricsEnabled: true
   tracesEnabled: true
-  logsEnabled: true
 splunkPlatform:
   metricsEnabled: true
+  tracesEnabled: true
   logsEnabled: true
 ```
 

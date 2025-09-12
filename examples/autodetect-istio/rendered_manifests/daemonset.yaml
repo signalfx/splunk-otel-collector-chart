@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: d572fd78dd7f899691cb54af70743e081df7ba9a28a81f4e0c99e591f34a4dbd
+        checksum/config: 441391e6ca684642d8fec3c704f5d4aa5e0b85f64b4a9b81853191dbc5d3a1cc
         kubectl.kubernetes.io/default-container: otel-collector
         sidecar.istio.io/inject: "false"
     spec:
@@ -124,6 +124,11 @@ spec:
               secretKeyRef:
                 name: default-splunk-otel-collector
                 key: splunk_observability_access_token
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: default-splunk-otel-collector
+                key: splunk_platform_hec_token
 
         readinessProbe:
           httpGet:

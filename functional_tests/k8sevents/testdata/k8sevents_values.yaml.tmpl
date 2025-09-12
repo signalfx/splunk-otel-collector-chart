@@ -1,14 +1,7 @@
-splunkObservability:
-   realm:       CHANGEME
-   accessToken: CHANGEME
-   apiUrl: {{ .ApiURL }}
-   logsEnabled: true
-   metricsEnabled: false
-   tracesEnabled: false
-
 splunkPlatform:
   endpoint: {{ .LogURL }}
   token: "00000000-0000-0000-0000-0000000000000"
+  logsEnabled: true
 
 agent:
   enabled: false

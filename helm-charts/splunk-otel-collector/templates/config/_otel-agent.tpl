@@ -917,11 +917,11 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
   {{- include "splunk-otel-collector.otlpHttpExporter" . | nindent 2 }}
   {{- end }}
-  {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
-    log_data_enabled: {{ .Values.splunkObservability.logsEnabled }}
+    log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
@@ -1045,7 +1045,7 @@ service:
         {{- if .Values.gateway.enabled }}
         - otlp
         {{- else }}
-        {{- if (eq (include "splunk-otel-collector.o11yLogsOrProfilingEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
@@ -1084,9 +1084,6 @@ service:
         {{- else }}
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
-        {{- end }}
-        {{- if eq (include "splunk-otel-collector.o11yLogsEnabled" .) "true" }}
-        - splunk_hec/o11y
         {{- end }}
         {{- end }}
         {{- end }}

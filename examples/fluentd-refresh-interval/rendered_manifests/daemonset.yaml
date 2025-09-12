@@ -32,7 +32,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 5811b1f3233cf0f1c3b482486eeb299d0a2447ea0fc58d3d2ae3b2ff78167ada
+        checksum/config: 765f3d362c0c4047c83d4e8a73730ca52e4efed975d16c44a5c0e1d945b096fc
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -130,28 +130,12 @@ spec:
           containerPort: 8006
           hostPort: 8006
           protocol: TCP
-        - name: jaeger-grpc
-          containerPort: 14250
-          hostPort: 14250
-          protocol: TCP
-        - name: jaeger-thrift
-          containerPort: 14268
-          hostPort: 14268
-          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317
           protocol: TCP
         - name: otlp-http
           containerPort: 4318
-          protocol: TCP
-        - name: signalfx
-          containerPort: 9943
-          hostPort: 9943
-          protocol: TCP
-        - name: zipkin
-          containerPort: 9411
-          hostPort: 9411
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.134.0
         imagePullPolicy: IfNotPresent
@@ -184,11 +168,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
             valueFrom:
               secretKeyRef:
                 name: default-splunk-otel-collector
-                key: splunk_observability_access_token
+                key: splunk_platform_hec_token
 
         readinessProbe:
           httpGet:
@@ -205,27 +189,6 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
-        - mountPath: /hostfs/dev
-          name: host-dev
-          readOnly: true
-        - mountPath: /hostfs/etc
-          name: host-etc
-          readOnly: true
-        - mountPath: /hostfs/proc
-          name: host-proc
-          readOnly: true
-        - mountPath: /hostfs/run/udev/data
-          name: host-run-udev-data
-          readOnly: true
-        - mountPath: /hostfs/sys
-          name: host-sys
-          readOnly: true
-        - mountPath: /hostfs/var/run/utmp
-          name: host-var-run-utmp
-          readOnly: true
-        - mountPath: /hostfs/usr/lib/os-release
-          name: host-usr-lib-osrelease
-          readOnly: true
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -256,27 +219,6 @@ spec:
           name: default-splunk-otel-collector-fluentd-json
       - name: tmp
         emptyDir: {}
-      - name: host-dev
-        hostPath:
-          path: /dev
-      - name: host-etc
-        hostPath:
-          path: /etc
-      - name: host-proc
-        hostPath:
-          path: /proc
-      - name: host-run-udev-data
-        hostPath:
-          path: /run/udev/data
-      - name: host-sys
-        hostPath:
-          path: /sys
-      - name: host-var-run-utmp
-        hostPath:
-          path: /var/run/utmp
-      - name: host-usr-lib-osrelease
-        hostPath:
-          path: /usr/lib/os-release
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

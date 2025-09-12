@@ -1,10 +1,8 @@
 clusterName: CHANGEME
-splunkObservability:
-  realm: CHANGEME
-  accessToken: CHANGEME
-  metricsEnabled: false
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
   logsEnabled: true
-  tracesEnabled: false
 
 logsEngine: otel
 agent:
