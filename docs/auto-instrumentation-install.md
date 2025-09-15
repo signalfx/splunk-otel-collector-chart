@@ -468,13 +468,13 @@ _Please note, helm will not update or delete these CRDs after initial install as
 
 #### Alternative Approach: Manual CRD Deployment
 
-If you prefer to manage CRDs deployment manually, apply the CRDs using the command below before installing the Helm chart:
+If you prefer to manage CRDs deployment manually, apply the CRD using the command below before installing the Helm chart:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
 
-You can also use below helm template command to get the CRDs yaml from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
+You can also use below helm template command to get the CRD yaml from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
 
 ```bash
 helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
