@@ -458,6 +458,7 @@ provides best effort support with issues related to native OpenTelemetry instrum
 ### CRD Management
 
 When deploying the operator, the required Custom Resource Definitions (CRDs) must be deployed beforehand.
+Currently, only the Instrumentation CRD is required for a successful deployment.
 
 #### Recommended Approach: Automated CRD Deployment
 
@@ -467,15 +468,13 @@ _Please note, helm will not update or delete these CRDs after initial install as
 
 #### Alternative Approach: Manual CRD Deployment
 
-If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
+If you prefer to manage CRDs deployment manually, apply the CRDs using the command below before installing the Helm chart:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
-curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
 curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
 
-You can also use below helm template command to get the CRD yamls from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
+You can also use below helm template command to get the CRDs yaml from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
 
 ```bash
 helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
@@ -494,8 +493,6 @@ Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practi
 When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following commands:
 
 ```bash
-kubectl delete crd opentelemetrycollectors.opentelemetry.io
-kubectl delete crd opampbridges.opentelemetry.io
 kubectl delete crd instrumentations.opentelemetry.io
 ```
 You can use below combination of helm and kubectl command to delete CRDs.
