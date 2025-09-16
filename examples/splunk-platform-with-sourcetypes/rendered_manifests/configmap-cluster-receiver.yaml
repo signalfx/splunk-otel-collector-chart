@@ -19,7 +19,7 @@ data:
     exporters:
       splunk_hec/platform_logs:
         disable_compression: true
-        endpoint: CHANGEME
+        endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
         index: main
         max_idle_conns: 200
@@ -44,9 +44,9 @@ data:
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_metrics:
         disable_compression: true
-        endpoint: CHANGEME
+        endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
-        index: CHANGEME
+        index: metrics
         max_idle_conns: 200
         max_idle_conns_per_host: 200
         retry_on_failure:
@@ -185,6 +185,11 @@ data:
         - action: insert
           key: receiver
           value: k8scluster
+      resource/metrics:
+        attributes:
+        - action: insert
+          key: com.splunk.sourcetype
+          value: metrics
       resourcedetection:
         detectors:
         - env
@@ -260,6 +265,7 @@ data:
           - batch
           - resource
           - k8sattributes/metrics
+          - resource/metrics
           - resource/k8s_cluster
           receivers:
           - k8s_cluster
@@ -274,6 +280,7 @@ data:
           - resource
           - resource/add_mode
           - k8sattributes/metrics
+          - resource/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:
