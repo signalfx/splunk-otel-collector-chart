@@ -277,3 +277,72 @@ kubeconform: ## Run kubeconform validation on all rendered manifests
 .PHONY: generate-crd-schemas
 generate-crd-schemas: ## Generate JSON schemas from operator CRDs for kubeconform
 	ci_scripts/generate-crd-schemas.sh
+
+##@ Kind Cluster Management
+# Tasks for managing Kind clusters for local functional testing
+
+# Configuration for Kind cluster management
+KUBECONFIG_TEST ?= /tmp/kube-config-splunk-otel-collector-chart-functional-testing
+KIND_CLUSTER_NAME ?= kind
+K8S_VERSION ?= v1.33.2
+
+.PHONY: kind-setup
+kind-setup: ## Create kind cluster for functional testing
+	@echo "Creating kind cluster for functional testing..."
+	@if kind get clusters | grep -q "^$(KIND_CLUSTER_NAME)$$"; then \
+		echo "Kind cluster '$(KIND_CLUSTER_NAME)' already exists. Use 'make kind-delete' to remove it first."; \
+		exit 1; \
+	fi
+	kind create cluster \
+		--kubeconfig=$(KUBECONFIG_TEST) \
+		--config=./.github/workflows/configs/kind-config.yaml \
+		--image=kindest/node:$(K8S_VERSION) \
+		--name=$(KIND_CLUSTER_NAME)
+	@echo "Kind cluster '$(KIND_CLUSTER_NAME)' created successfully"
+	@echo "Setting up cluster dependencies..."
+	@echo "Approving kubelet TLS server certificates..."
+	kubectl --kubeconfig=$(KUBECONFIG_TEST) get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs -r kubectl --kubeconfig=$(KUBECONFIG_TEST) certificate approve
+	@echo "Updating helm dependencies..."
+	$(MAKE) dep-update
+	@echo "=== Kind cluster setup complete ==="
+	@echo "Cluster name: $(KIND_CLUSTER_NAME)"
+	@echo "KUBECONFIG is set to: $(KUBECONFIG_TEST)"
+	@echo "To use this cluster, run: export KUBECONFIG=$(KUBECONFIG_TEST)"
+
+.PHONY: kind-delete
+kind-delete: ## Delete kind cluster and remove kubeconfig
+	@echo "Deleting kind cluster..."
+	@if kind get clusters | grep -q "^$(KIND_CLUSTER_NAME)$$"; then \
+		kind delete cluster --name=$(KIND_CLUSTER_NAME); \
+		echo "Kind cluster '$(KIND_CLUSTER_NAME)' deleted successfully"; \
+	else \
+		echo "Kind cluster '$(KIND_CLUSTER_NAME)' does not exist"; \
+	fi
+	@if [ -f "$(KUBECONFIG_TEST)" ]; then \
+		rm -f "$(KUBECONFIG_TEST)"; \
+		echo "Removed kubeconfig file: $(KUBECONFIG_TEST)"; \
+	fi
+	@echo "=== Kind cluster cleanup complete ==="
+
+.PHONY: functionaltest-local
+functionaltest-local: ## Run functional tests using local kind cluster (automatically sets up and tears down cluster)
+	@echo "Running functional tests with automated kind cluster management..."
+	@echo "=== Setting up kind cluster ==="
+	$(MAKE) kind-setup
+	@echo ""
+	@echo "=== Running functional tests ==="
+	@echo "Using kind cluster: $(KIND_CLUSTER_NAME)"
+	@echo "Using kubeconfig: $(KUBECONFIG_TEST)"
+	@echo "UPDATE_EXPECTED_RESULTS is enabled to update golden files"
+	@-KUBECONFIG=$(KUBECONFIG_TEST) KUBE_TEST_ENV=kind K8S_VERSION=$(K8S_VERSION) $(MAKE) functionaltest SUITE=$(or $(SUITE),functional); \
+	TEST_EXIT_CODE=$$?; \
+	echo ""; \
+	echo "=== Cleaning up kind cluster ==="; \
+	$(MAKE) kind-delete; \
+	echo ""; \
+	if [ $$TEST_EXIT_CODE -eq 0 ]; then \
+		echo "✅ Functional tests completed successfully"; \
+	else \
+		echo "❌ Functional tests failed (exit code: $$TEST_EXIT_CODE)"; \
+	fi; \
+	exit $$TEST_EXIT_CODE
