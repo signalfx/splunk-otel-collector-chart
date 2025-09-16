@@ -23,7 +23,7 @@ Create and manage the kind cluster:
 # Create kind cluster (includes TLS cert approval and helm dependencies)
 make kind-setup
 
-# Run functional tests 
+# Run functional tests
 KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing make functionaltest SUITE=functional
 
 # Clean up when done
@@ -50,7 +50,7 @@ kind create cluster \
 # Approve TLS certificates
 kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
 
-# Update helm dependencies 
+# Update helm dependencies
 make dep-update
 
 # Run functional tests (Kubernetes will pull images automatically)
