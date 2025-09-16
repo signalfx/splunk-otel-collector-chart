@@ -15,6 +15,10 @@
     "global": {
       "type": "object"
     },
+    "k8sVersion": {
+      "description": "Required for EKS Add-on compatibility. Not used by the chart.",
+      "type": "string"
+    },
     "nameOverride": {
       "description": "Override name of the chart used in Kubernetes object names.",
       "type": "string"
