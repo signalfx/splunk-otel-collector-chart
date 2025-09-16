@@ -1,23 +1,82 @@
 # Functional tests
 
 ## Setup
-Run the following commands prior to running the test locally:
 
+### Option 1: Make cmd
+
+Use make command that handles cluster creation, testing, and cleanup:
+
+```bash
+# Run functional tests with automatic cluster management
+# This will create cluster, run tests with golden file updates, and clean up
+make functionaltest-local
+
+# Run specific test suite
+make functionaltest-local SUITE=histogram
 ```
+
+### Option 2: Manual Cluster Management
+
+Create and manage the kind cluster:
+
+```bash
+# Create kind cluster (includes TLS cert approval and helm dependencies)
+make kind-setup
+
+# Run functional tests
+KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing make functionaltest SUITE=functional
+
+# Clean up when done
+make kind-delete
+```
+
+### Option 3: Raw Commands
+
+If you prefer to run commands directly:
+
+```bash
+# Set up environment variables
 export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
 export KUBE_TEST_ENV=kind
-export K8S_VERSION=v1.29.0
-kind create cluster --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing --config=.github/workflows/configs/kind-config.yaml --image=kindest/node:$K8S_VERSION
+export K8S_VERSION=v1.33.2
+
+# Create kind cluster with functional test configuration
+kind create cluster \
+  --kubeconfig=/tmp/kube-config-splunk-otel-collector-chart-functional-testing \
+  --config=.github/workflows/configs/kind-config.yaml \
+  --image=kindest/node:$K8S_VERSION \
+  --name=kind
+
+# Approve TLS certificates
 kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+
+# Update helm dependencies
 make dep-update
+
+# Run functional tests (Kubernetes will pull images automatically)
+make functionaltest SUITE=functional
+
+# Clean up when done
+kind delete cluster --name=kind
+```
+
+## Optional: Pre-load Test Images
+
+If you want to pre-load images for faster test execution:
+
+```bash
+# Load application test images
 kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
 kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
+kind load docker-image quay.io/splunko11ytest/python_test:latest --name kind
+
+# Load auto-instrumentation images (get the latest version from values.yaml) -
 # On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
-kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.8.0 --name kind
-kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.1.2 --name kind
-kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v1.30.0 --name kind
-kind load docker-image ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.50b0 --name kind
+kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.11.0 --name kind
+kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.3.0 --name kind
+kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.19.0 --name kind
+kind load docker-image quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0 --name kind
 ```
 
 ## Config switches
@@ -35,6 +94,18 @@ When running tests you can use the following env vars to help with local develop
     be used with the dispatch trigger and input `UPDATE_EXPECTED_RESULTS=true` to generate new results and upload
     them as a github workflow run artifact.
 
-## Run
+## Run Tests
 
-From the root repository directory run `make functionaltest`.
+```bash
+# Run all functional tests (make sure KUBECONFIG is set)
+make functionaltest
+
+# Run specific test suite
+make functionaltest SUITE=histogram
+
+# Run with specific environment variables
+KUBE_TEST_ENV=kind K8S_VERSION=v1.33.2 make functionaltest SUITE=functional
+
+# Update golden files (expected test results)
+UPDATE_EXPECTED_RESULTS=true make functionaltest SUITE=functional
+```
