@@ -1,0 +1,5 @@
+version: ${CHART_VERSION}
+
+# Remove dependencies to comply with EKS Add-on requirements. EKS addon doesn't support CRDs or
+# helm hooks, so we need to remove subcharts and disable operator auto-instrumentation features.
+dependencies: []
