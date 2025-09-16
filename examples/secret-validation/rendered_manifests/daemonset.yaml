@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: fcb476d97ea3e47d402d36ac1026ad1a545e28d04b2dc748ca4ac6eb7df1ba04
+        checksum/config: 36cdbb5b555d02f2baf4f52f4fd64dd7fe2ef7ba02d22b37c7c8cb3d0a6f2a22
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -102,11 +102,11 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
             valueFrom:
               secretKeyRef:
                 name: splunk-otel-collector
-                key: splunk_observability_access_token
+                key: splunk_platform_hec_token
 
         readinessProbe:
           httpGet:

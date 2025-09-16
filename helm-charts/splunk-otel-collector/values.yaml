@@ -163,12 +163,6 @@ splunkObservability:
   metricsEnabled: true
   tracesEnabled: true
 
-  # Deprecated: [v0.132.0] this setting will be removed in 2 versions
-  # Logs cannot be sent directly to Splunk Observability anymore.
-  # Configure `splunkPlatform` to send logs to Splunk Platform and enable Log Observer Connect to view the logs in Splunk Observability.
-  # See https://help.splunk.com/en/splunk-observability-cloud/manage-data/view-splunk-platform-logs/accomplish-logs-pipeline-rules-in-splunk-platform
-  logsEnabled: false
-
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
   # format that doesn't provide any correlation with traces and logs.
   # Consider using `clusterReceiver.eventsEnabled` option instead.
@@ -523,8 +517,8 @@ clusterReceiver:
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  # This option requires `splunkObservability.logsEnabled` or `splunkPlatform.logsEnabled`to be set
-  # to `true'. Otherwise, this option will not have any effect. The receiver currently is in "Beta"
+  # This option requires `splunkPlatform.logsEnabled`to be set to `true'.
+  # Otherwise, this option will not have any effect. The receiver currently is in "Beta"
   # state which means that objects format might change over time. Once the receiver is "Stable", it'll
   # be enabled by default.
 

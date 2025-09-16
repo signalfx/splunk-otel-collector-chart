@@ -3,8 +3,13 @@ splunkObservability:
   realm: CHANGEME
   accessToken: CHANGEME
   metricsEnabled: true
-  logsEnabled: true
   tracesEnabled: true
+
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
 agent:
   config:
     receivers:
