@@ -62,9 +62,6 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
-      - name: Deploy cert-manager
-        run: |
-          make cert-manager
       - name: Deploy collector as deployment
         run: kubectl apply -f migration_tests/collector_deployment.yaml
       - name: Deploy SCK
