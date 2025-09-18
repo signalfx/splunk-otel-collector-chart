@@ -1,0 +1,291 @@
+---
+# Source: splunk-otel-collector/templates/configmap-cluster-receiver.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-otel-k8s-cluster-receiver
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.134.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.134.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.134.0
+    release: default
+data:
+  relay: |
+    exporters:
+      splunk_hec/platform_logs:
+        disable_compression: true
+        endpoint: http://localhost:8088/services/collector
+        idle_conn_timeout: 10s
+        index: main
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 1000
+        source: kubernetes
+        sourcetype: kube:events
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.134.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+      splunk_hec/platform_metrics:
+        disable_compression: true
+        endpoint: http://localhost:8088/services/collector
+        idle_conn_timeout: 10s
+        index: index
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 1000
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.134.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13134
+    processors:
+      attributes/drop_event_attrs:
+        actions:
+        - action: delete
+          key: k8s.event.start_time
+        - action: delete
+          key: k8s.event.name
+        - action: delete
+          key: k8s.event.uid
+      batch:
+        send_batch_max_size: 32768
+      k8sattributes/clusterReceiver:
+        extract:
+          annotations:
+          - from: namespace
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: pod
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          metadata:
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - container.id
+          - container.image.name
+          - container.image.tag
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.namespace.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.node.name
+      k8sattributes/metrics:
+        extract:
+          annotations:
+          - from: namespace
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: pod
+            key: splunk.com/sourcetype
+            tag_name: com.splunk.sourcetype
+          - from: namespace
+            key: splunk.com/metricsSourcetype
+            tag_name: com.splunk.sourcetype
+          - from: pod
+            key: splunk.com/metricsSourcetype
+            tag_name: com.splunk.sourcetype
+          - from: namespace
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/metricsIndex
+            tag_name: com.splunk.index
+          metadata: []
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.namespace.name
+          - from: resource_attribute
+            name: k8s.pod.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: connection
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+      resource:
+        attributes:
+        - action: insert
+          key: metric_source
+          value: kubernetes
+        - action: upsert
+          key: k8s.cluster.name
+          value: CHANGEME
+      resource/add_collector_k8s:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: clusterReceiver
+      resource/k8s_cluster:
+        attributes:
+        - action: insert
+          key: receiver
+          value: k8scluster
+      resourcedetection:
+        detectors:
+        - env
+        - system
+        override: true
+        timeout: 15s
+      transform/k8sevents:
+        error_mode: ignore
+        log_statements:
+        - conditions:
+          - resource.attributes["k8s.object.kind"] == "HorizontalPodAutoscaler"
+          statements:
+          - set(resource.attributes["k8s.hpa.name"], resource.attributes["k8s.object.name"])
+          - set(resource.attributes["k8s.hpa.uid"], resource.attributes["k8s.object.uid"])
+        - conditions:
+          - resource.attributes["k8s.object.kind"] != "HorizontalPodAutoscaler"
+          statements:
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"],
+            "lower"), "name"], ".")], resource.attributes["k8s.object.name"])
+          - set(resource.attributes[Concat(["k8s", ConvertCase(resource.attributes["k8s.object.kind"],
+            "lower"), "uid"], ".")], resource.attributes["k8s.object.uid"])
+        - conditions:
+          - resource.attributes["k8s.object.kind"] == "Pod" and IsMatch(resource.attributes["k8s.object.fieldpath"],
+            "spec\\.containers.*")
+          statements:
+          - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"],
+            "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
+          - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
+    receivers:
+      k8s_cluster:
+        auth_type: serviceAccount
+      k8s_events:
+        auth_type: serviceAccount
+      prometheus/k8s_cluster_receiver:
+        config:
+          scrape_configs:
+          - job_name: otel-k8s-cluster-receiver
+            metric_relabel_configs:
+            - action: drop
+              regex: promhttp_metric_handler_errors.*
+              source_labels:
+              - __name__
+            - action: drop
+              regex: otelcol_processor_batch_.*
+              source_labels:
+              - __name__
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - localhost:8899
+    service:
+      extensions:
+      - health_check
+      pipelines:
+        logs:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - memory_limiter
+          - batch
+          - attributes/drop_event_attrs
+          - resourcedetection
+          - resource
+          - transform/k8sevents
+          - k8sattributes/clusterReceiver
+          receivers:
+          - k8s_events
+        metrics:
+          exporters:
+          - splunk_hec/platform_metrics
+          processors:
+          - memory_limiter
+          - batch
+          - resource
+          - k8sattributes/metrics
+          - resource/k8s_cluster
+          receivers:
+          - k8s_cluster
+        metrics/collector:
+          exporters:
+          - splunk_hec/platform_metrics
+          processors:
+          - memory_limiter
+          - batch
+          - resource/add_collector_k8s
+          - resourcedetection
+          - resource
+          - resource/add_mode
+          - k8sattributes/metrics
+          receivers:
+          - prometheus/k8s_cluster_receiver
+      telemetry:
+        metrics:
+          readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: localhost
+                  port: 8899
+                  without_scope_info: true
+                  without_type_suffix: true
+                  without_units: true
+        resource:
+          service.name: otel-k8s-cluster-receiver
