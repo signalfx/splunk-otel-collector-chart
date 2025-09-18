@@ -895,6 +895,7 @@ To configure a HEC Edge processor destination you can use a basic configuration 
 splunkPlatform:
   endpoint: "https://x.x.x.x:8088/services/collector"
   token: "xxxxxx"
+  insecureSkipVerify: true
 ```
 
 Remember that the endpoint will be the instance where you configured the edge processor, and the token will be the token created in Splunk for more information you can check [here](https://docs.splunk.com/Documentation/SplunkCloud/latest/EdgeProcessor/HECSource).
