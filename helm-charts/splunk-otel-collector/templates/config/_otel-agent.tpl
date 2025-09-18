@@ -899,8 +899,10 @@ processors:
         key: destination_canonical_revision
   {{- end }}
 
-# By default only SAPM exporter enabled. It will be pointed to collector deployment if enabled,
-# Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting.
+# If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
+# to the gateway deployment.
+# Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
+# using the otlphttp exporter.
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
