@@ -1129,7 +1129,7 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        {{- if or (not .Values.featureGates.useControlPlaneMetricsHistogramData) .Values.autodetect.prometheus }}
         - receiver_creator
         {{- end }}
         - signalfx
