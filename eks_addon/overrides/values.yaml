@@ -1,0 +1,24 @@
+# EKS Add-on requires minimal configuration for the Helm chart to be rendered correctly.
+# splunkObservability.realm and splunkObservability.accessToken must be set by the user or
+# set to empty strings if splunkPlatform is used instead.
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+# Default values for running in AWS EKS
+cloudProvider: aws
+distribution: eks
+
+# Only ECR repositories can be used for EKS Add-on images.
+image:
+  otelcol:
+    repository: ${ECR_OTELCOL_REPO}
+  fluentd:
+    repository: ${ECR_FLUENTD_REPO}
+    tag: ${ECR_FLUENTD_REPO_TAG}
+  initPatchLogDirs:
+    repository: public.ecr.aws/docker/library/almalinux
+    tag: "9"
+  validateSecret:
+    repository: public.ecr.aws/docker/library/almalinux
+    tag: "9"
