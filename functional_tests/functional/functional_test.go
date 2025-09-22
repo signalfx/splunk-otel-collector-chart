@@ -1171,7 +1171,16 @@ func testAgentMetrics(t *testing.T) {
 	expectedInternalMetrics, err := golden.ReadMetrics(expectedInternalMetricsFile)
 	require.NoError(t, err)
 
-	selectedInternalMetrics := selectMetricSet(expectedInternalMetrics, agentMetricsConsumer, metricNames)
+	var selectedInternalMetrics *pmetric.Metrics
+	require.Eventually(t, func() bool {
+		result := selectMetricSet(expectedInternalMetrics, agentMetricsConsumer, metricNames)
+		if result != nil {
+			selectedInternalMetrics = result
+			return true
+		}
+		return false
+	}, 30*time.Second, 2*time.Second, "Failed to find matching metrics set")
+
 	require.NotNil(t, selectedInternalMetrics)
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedInternalMetricsFile, selectedInternalMetrics)
 
