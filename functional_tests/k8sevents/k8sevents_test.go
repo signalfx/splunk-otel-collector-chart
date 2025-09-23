@@ -69,9 +69,7 @@ func Test_K8SEvents(t *testing.T) {
 		})
 
 		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.name")
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.tag")
+		removeFlakyLogRecordAttr(k8sEventsLogs, "k8s.container.name")
 
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"
 		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
@@ -100,13 +98,6 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes when the test name which runs k8s client changes
-
-		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.tag")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.node.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.uid")
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
