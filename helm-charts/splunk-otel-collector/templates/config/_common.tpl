@@ -456,12 +456,12 @@ splunk_hec/platform_logs:
     storage: file_storage/persistent_queue
     {{- end }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
-  {{- if .Values.featureGates.noDropLogsPipeline }}
-  batcher:
-    enabled: true
-    flush_timeout: 200ms
-    min_size: 2048
-  {{- end }}
+    {{- if .Values.featureGates.noDropLogsPipeline }}
+    batch:
+      flush_timeout: 200ms
+      min_size: 2048
+      sizer: items
+    {{- end }}
 {{- end }}
 
 {{/*
