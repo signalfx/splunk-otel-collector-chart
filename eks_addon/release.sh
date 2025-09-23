@@ -75,10 +75,23 @@ copy_docker_image_to_ecr() {
   local dest="${ECR_OTELCOL_REPO}:${CHART_APPVERSION}"
 
   echo "⏳ Copying otelcol image from ${src} to ${dest} ..."
-  docker pull ${src}
-  docker tag ${src} ${dest}
-  ${DRY_RUN_PREFIX} docker push ${dest}
-  echo "✅ Successfully copied otelcol image: ${src} → ${dest}"
+
+  # Get supported Linux architectures from the source manifest and copy each to ECR
+  local arch_digests=$(docker manifest inspect "${src}" | jq -c '.manifests[] | select(.platform.os == "linux")')
+  echo "${arch_digests}" | while read -r manifest; do
+    local arch=$(echo "${manifest}" | jq -r '.platform.architecture')
+    local digest=$(echo "${manifest}" | jq -r '.digest')
+    local src_digest="${src_repo}@${digest}"
+    local dest_arch="${dest}-${arch}"
+    ${DRY_RUN_PREFIX} docker pull "${src_digest}"
+    ${DRY_RUN_PREFIX} docker tag "${src_digest}" "${dest_arch}"
+    ${DRY_RUN_PREFIX} docker push "${dest_arch}"
+    ${DRY_RUN_PREFIX} docker manifest create "${dest}" "${dest_arch}" --amend
+    ${DRY_RUN_PREFIX} docker manifest annotate "${dest}" "${dest_arch}" --os linux --arch "${arch}"
+  done
+
+  ${DRY_RUN_PREFIX} docker manifest push ${dest}
+  echo "✅ Successfully copied multi-arch image: ${src} → ${dest}"
 }
 
 # Function to modify the Helm chart to meet EKS Add-on requirements
