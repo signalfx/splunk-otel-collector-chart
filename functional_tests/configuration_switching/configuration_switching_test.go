@@ -295,7 +295,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 
 func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	attributesList := [4]string{"k8s.node.name", "k8s.pod.name", "k8s.pod.uid", "k8s.namespace.name"}
-	objectAttributesList := [4]string{"spec.nodeName", "metadata.name", "metadata.uid", "metadata.namespace"}
+	objectAttributesList := [3]string{"object.metadata.name", "object.metadata.uid", "object.metadata.namespace"}
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
