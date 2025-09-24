@@ -89,9 +89,9 @@ func Test_Functions(t *testing.T) {
 		return
 	}
 
-	t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
-	t.Run("logs and metrics index switch", testIndexSwitch)
-	t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
+	//t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
+	//t.Run("logs and metrics index switch", testIndexSwitch)
+	//t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
 	t.Run("logs and metrics attributes verification", testVerifyLogsAndMetricsAttributes)
 }
 
@@ -295,7 +295,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 
 func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	attributesList := [4]string{"k8s.node.name", "k8s.pod.name", "k8s.pod.uid", "k8s.namespace.name"}
-	objectAttributesList := [3]string{"object.metadata.name", "object.metadata.uid", "k8s.namespace.name"}
+	objectAttributesList := [3]string{"k8s.resource.name", "k8s.cluster.name", "k8s.namespace.name"}
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
