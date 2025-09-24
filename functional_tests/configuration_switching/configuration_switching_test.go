@@ -89,9 +89,9 @@ func Test_Functions(t *testing.T) {
 		return
 	}
 
-	//t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
-	//t.Run("logs and metrics index switch", testIndexSwitch)
-	//t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
+	t.Run("agent logs and metrics enabled or disabled", testAgentLogsAndMetrics)
+	t.Run("logs and metrics index switch", testIndexSwitch)
+	t.Run("cluster receiver enabled or disabled", testClusterReceiverEnabledOrDisabled)
 	t.Run("logs and metrics attributes verification", testVerifyLogsAndMetricsAttributes)
 }
 

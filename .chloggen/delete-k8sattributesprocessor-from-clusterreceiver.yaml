@@ -10,7 +10,9 @@ issues: [2075]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  - The use of `k8sattributesprocessor` in `clusterReceiver` led to incorrect attribute mapping for events.
+  - The use of `k8sattributesprocessor` in `clusterReceiver` led to incorrect attribute mapping for objects and events.
   - All object kinds were being enriched with k8s.pod.* attributes, regardless of their actual type.
   - For objects of kind `Pod`, the same `k8s.pod.name` value was incorrectly assigned to every pod.
   - The `k8sattributesprocessor` has now been removed. Events will only include basic attributes, which may cause issues if downstream systems depended on the enriched attributes previously provided.
+  - Events originating from the `k8s_events` receiver will no longer include `container.id` and `container.image.tag` attributes.
+  - Events originating from `k8sobjects` receiver will no longer have any `k8s.*` attributes except `k8s.namespace.name` (when applicable) and `k8s.resource.name`.
