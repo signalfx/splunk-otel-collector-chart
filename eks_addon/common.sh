@@ -6,7 +6,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CHART_DIR="$SCRIPT_DIR/../helm-charts/splunk-otel-collector"
-ORIG_CHART_DIR="$SCRIPT_DIR/../helm-charts/splunk-otel-collector"
 BUILD_DIR="${SCRIPT_DIR}/build"
 EKS_CHART_OVERRIDES_DIR="${SCRIPT_DIR}/overrides"
 EKS_CHART_DIR="${BUILD_DIR}/splunk-otel-collector"
@@ -29,7 +28,7 @@ prepare_chart() {
   # Copy chart to a temporary build directory
   rm -rf "${BUILD_DIR}"
   mkdir -p "${BUILD_DIR}"
-  cp -R "${ORIG_CHART_DIR}" "${BUILD_DIR}/"
+  cp -R "${CHART_DIR}" "${BUILD_DIR}/"
 
   echo "⏳ Removing subcharts ..."
   rm -rf "${EKS_CHART_DIR}/charts"
@@ -52,7 +51,7 @@ EOF" > "${tmp_file}"
     fi
   done
 
-  echo "⏳ Moving values.schema.json to aws_mp_configuration_schema.json and removing unsupported properties ..."
+  echo "⏳ Moving values.schema.json to aws_mp_configuration_schema.json and removing disabled properties ..."
   cp "${EKS_CHART_DIR}/values.schema.json" "${EKS_CHART_DIR}/aws_mp_configuration_schema.json"
   disabled_properties=(
     "enabled"
@@ -69,5 +68,5 @@ EOF" > "${tmp_file}"
       yq e "del(.properties.\"${prop}\")" -i "${EKS_CHART_DIR}/aws_mp_configuration_schema.json"
   done
 
-  echo "✅ Successfully prepared chart for for EKS Add-on at ${EKS_CHART_DIR}"
+  echo "✅ Successfully prepared chart for EKS Add-on at ${EKS_CHART_DIR}"
 }

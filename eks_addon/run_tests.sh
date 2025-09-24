@@ -1,5 +1,4 @@
 #!/bin/bash
-# Tests the Splunk OpenTelemetry Collector EKS Add-on for compliance with AWS requirements.
 # This script prepares the chart build and runs tests to verify it meets EKS addon requirements.
 
 # Enable bash strict mode
@@ -13,19 +12,17 @@ if [[ -z "${K8S_VERSION}" ]]; then
   exit 1
 fi
 
-# EKS Add-on specific test functions
 test_helm_lint() {
-  echo "⏳ Running helm lint on ${EKS_CHART_DIR} ..."
+  echo "⏳ Running test_helm_lint ..."
   
   if ! helm lint "${EKS_CHART_DIR}"; then
     echo "❌ Helm lint test failed"
     return 1
   fi
-  echo "✅ Helm lint test passed"
 }
 
 test_helm_template() {
-  echo "⏳ Running helm template test with Kubernetes ${K8S_VERSION} ..."
+  echo "⏳ Running test_helm_template ..."
   if ! helm template splunk-otel-collector "${EKS_CHART_DIR}" \
      --kube-version "${K8S_VERSION}" \
      --namespace splunk-otel-collector \
@@ -35,11 +32,10 @@ test_helm_template() {
     echo "❌ Helm template test failed"
     return 1
   fi
-  echo "✅ Helm template test passed"
 }
 
 test_schema_validation() {
-  echo "⏳ Checking aws_mp_configuration_schema.json ..."
+  echo "⏳ Running test_schema_validation ..."
   
   local schema_file="${EKS_CHART_DIR}/aws_mp_configuration_schema.json"
 
@@ -52,12 +48,10 @@ test_schema_validation() {
     echo "❌ Schema validation test failed: aws_mp_configuration_schema.json is not valid JSON"
     return 1
   fi
-  
-  echo "✅ Schema validation test passed"
 }
 
 test_images() {
-  echo "⏳ Verifying images ..."
+  echo "⏳ Running test_images ..."
   
   # Find all repository entries in the values file
   local image_repos=$(yq e '.image | .. | select(has("repository")) | .repository' "${EKS_CHART_DIR}/values.yaml" | sort -u)
@@ -78,12 +72,10 @@ test_images() {
   # - Check if the image exists in ECR
   # - Check if the image is publicly accessible
   # - Check if the image supports required Linux architectures (e.g., amd64, arm64)
-
-  echo "✅ Image verification passed"
 }
 
 test_release_properties() {
-  echo "⏳ Checking for forbidden Release properties in templates ..."
+  echo "⏳ Running test_release_properties ..."
   local forbidden_release_refs=$(grep -r "Release\." --include="*.yaml" --include="*.tpl" "${EKS_CHART_DIR}/templates" | 
                               grep -v "Release\.Name" | 
                               grep -v "Release\.Namespace")
@@ -93,7 +85,6 @@ test_release_properties() {
     echo "${forbidden_release_refs}"
     return 1
   fi  
-  echo "✅ No forbidden Release properties found in templates"
 }
 
 prepare_chart
@@ -104,4 +95,4 @@ test_schema_validation
 test_images
 test_release_properties
 
-echo "🎉 All tests passed!"
+echo "✅ All tests passed!"
