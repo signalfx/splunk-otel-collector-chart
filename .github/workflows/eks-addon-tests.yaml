@@ -24,9 +24,11 @@ jobs:
 
       - name: Install jq and yq
         run: |
-          export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update
-          sudo apt-get install -y jq yq
+          sudo apt-get install -y jq
+          # Install mikefarah/yq instead of yq from apt-get, as the latter is outdated and has different syntax
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
       - name: Run EKS Add-on tests
         env:
