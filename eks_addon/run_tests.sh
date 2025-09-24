@@ -14,7 +14,7 @@ fi
 
 test_helm_lint() {
   echo "⏳ Running test_helm_lint ..."
-  
+
   if ! helm lint "${EKS_CHART_DIR}"; then
     echo "❌ Helm lint test failed"
     return 1
@@ -36,14 +36,14 @@ test_helm_template() {
 
 test_schema_validation() {
   echo "⏳ Running test_schema_validation ..."
-  
+
   local schema_file="${EKS_CHART_DIR}/aws_mp_configuration_schema.json"
 
   if [[ ! -f "${schema_file}" ]]; then
     echo "❌ Schema validation test failed: aws_mp_configuration_schema.json not found"
     return 1
   fi
-  
+
   if ! jq empty "${schema_file}" 2>/dev/null; then
     echo "❌ Schema validation test failed: aws_mp_configuration_schema.json is not valid JSON"
     return 1
@@ -52,14 +52,14 @@ test_schema_validation() {
 
 test_images() {
   echo "⏳ Running test_images ..."
-  
+
   # Find all repository entries in the values file
   local image_repos=$(yq e '.image | .. | select(has("repository")) | .repository' "${EKS_CHART_DIR}/values.yaml" | sort -u)
   if [[ -z "${image_repos}" ]]; then
     echo "❌ Image verification failed: No image repositories found in values.yaml"
     return 1
   fi
-  
+
   # Check each repository to ensure it's hosted on ECR
   echo "${image_repos}" | while read -r repo; do
     if ! [[ "${repo}" == *".dkr.ecr."*".amazonaws.com/"* || "${repo}" == "public.ecr.aws/"* ]]; then
@@ -76,20 +76,19 @@ test_images() {
 
 test_release_properties() {
   echo "⏳ Running test_release_properties ..."
-  local forbidden_release_refs=$(grep -r "Release\." --include="*.yaml" --include="*.tpl" "${EKS_CHART_DIR}/templates" | 
-                              grep -v "Release\.Name" | 
+  local forbidden_release_refs=$(grep -r "Release\." --include="*.yaml" --include="*.tpl" "${EKS_CHART_DIR}/templates" |
+                              grep -v "Release\.Name" |
                               grep -v "Release\.Namespace")
-  
   if [[ -n "${forbidden_release_refs}" ]]; then
     echo "❌ Found forbidden Release properties in templates:"
     echo "${forbidden_release_refs}"
     return 1
-  fi  
+  fi
 }
 
 prepare_chart
 
-test_helm_lint 
+test_helm_lint
 test_helm_template
 test_schema_validation
 test_images

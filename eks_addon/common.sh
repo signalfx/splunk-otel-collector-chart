@@ -24,7 +24,7 @@ ECR_HELM_REPO="${ECR_HELM_NAMESPACE}/splunk-otel-collector"
 # Function to prepare the chart for building or testing
 prepare_chart() {
   echo "⏳ Preparing chart for building/testing..."
-  
+
   # Copy chart to a temporary build directory
   rm -rf "${BUILD_DIR}"
   mkdir -p "${BUILD_DIR}"
