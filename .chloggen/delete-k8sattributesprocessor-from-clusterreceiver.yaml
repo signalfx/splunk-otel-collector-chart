@@ -1,0 +1,19 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: breaking
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: clusterReceiver
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Remove the `k8sattributesprocessor` from the `clusterReceiver` logs pipeline to fix incorrect enrichment of Kubernetes object and event data.
+# One or more tracking issues related to the change
+issues: [2075]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  - The `k8sattributesprocessor` was previously misconfigured in the `clusterReceiver` pipeline, resulting in all Kubernetes objects and events being enriched with pod metadata, even when it was not appropriate.
+  - This led to incorrect and non-deterministic `k8s.pod.*` attributes being added to objects and events, such as enriching non-pod objects with pod fields.
+  - After this change:
+    - Events from the `k8s_events` receiver will no longer include `container.id`, `container.image.name`, and `container.image.tag` attributes.
+    - Events from the `k8sobjects` receiver will no longer have any `k8s.pod.*` or `container.*` attributes except `k8s.namespace.name` (when applicable) and `k8s.resource.name`
+  - This restores correct and predictable enrichment, and eliminates misleading data.
+  - If your downstream systems or dashboards depend on the removed attributes, please update them accordingly.

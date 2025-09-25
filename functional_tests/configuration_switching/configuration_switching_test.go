@@ -295,6 +295,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 
 func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	attributesList := [4]string{"k8s.node.name", "k8s.pod.name", "k8s.pod.uid", "k8s.namespace.name"}
+	objectAttributesList := [3]string{"k8s.resource.name", "k8s.cluster.name", "k8s.namespace.name"}
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
@@ -315,7 +316,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 		internal.WaitForLogs(t, 5, logsObjectsConsumer)
 		t.Logf("===> >>>> Logs: %v", len(logsObjectsConsumer.AllLogs()))
 
-		for _, attr := range attributesList {
+		for _, attr := range objectAttributesList {
 			t.Log("Checking attribute: ", attr)
 			attrValues, notFoundCounter := getLogsAttributes(logsObjectsConsumer.AllLogs(), attr)
 			assert.GreaterOrEqual(t, len(attrValues), 1)
