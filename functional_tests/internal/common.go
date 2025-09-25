@@ -290,7 +290,7 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 				continue
 			}
 
-			if ignoreLen || (expected.ResourceMetrics().Len() > 0 && m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
+			if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
 				selectedMetrics = &m
 				t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
 				return true
