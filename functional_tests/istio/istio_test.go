@@ -24,7 +24,6 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pmetric"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -299,7 +298,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 
 	internal.WaitForMetrics(t, 2, metricsSink)
 
-	selectedMetrics := selectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen, 5*time.Minute, 30*time.Second)
+	selectedMetrics := internal.SelectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen, 5*time.Minute, 30*time.Second)
 	if selectedMetrics == nil {
 		t.Error("No metric batch identified with the right metric count, exiting")
 		return
@@ -345,33 +344,3 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	require.NoError(t, err)
 }
 
-func selectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, metricName string, metricSink *consumertest.MetricsSink, ignoreLen bool, timeout time.Duration, interval time.Duration) *pmetric.Metrics {
-	var selectedMetrics *pmetric.Metrics
-	require.Eventuallyf(t, func() bool {
-		for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
-			m := metricSink.AllMetrics()[h]
-			foundCorrectSet := false
-		OUTER:
-			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						if metricToConsider.Name() == metricName {
-							foundCorrectSet = true
-							break OUTER
-						}
-					}
-				}
-			}
-			if !foundCorrectSet {
-				continue
-			}
-			if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
-				selectedMetrics = &m
-				return true
-			}
-		}
-		return false
-	}, timeout, interval, "Failed to find the expected metric %s within the timeout period", metricName)
-	return selectedMetrics
-}
