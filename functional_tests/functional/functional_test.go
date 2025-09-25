@@ -1108,7 +1108,7 @@ func testAgentMetrics(t *testing.T) {
 	generateRequiredTelemetry(t)
 
 	t.Run("internal metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_otelsvc_k8s_namespace_deleted")
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_otelsvc_k8s_pod_updated")
 	})
 
 	t.Run("kubeletstats metrics", func(t *testing.T) {
