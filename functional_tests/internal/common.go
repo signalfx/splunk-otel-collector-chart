@@ -267,13 +267,13 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 // SelectMetricSetWithTimeout finds a metrics payload containing a target metric with Eventually timeout
 func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool, timeout time.Duration, interval time.Duration) *pmetric.Metrics {
 	var selectedMetrics *pmetric.Metrics
-	
+
 	require.Eventuallyf(t, func() bool {
 		for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 			m := metricSink.AllMetrics()[h]
 			foundTargetMetric := false
-			
-			OUTER:
+
+		OUTER:
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
 				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
@@ -285,11 +285,11 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 					}
 				}
 			}
-			
+
 			if !foundTargetMetric {
 				continue
 			}
-			
+
 			if ignoreLen || (expected.ResourceMetrics().Len() > 0 && m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
 				selectedMetrics = &m
 				t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
@@ -298,8 +298,7 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 		}
 		t.Logf("Waiting for target metric '%s'...", targetMetric)
 		return false
-		
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
-	
+
 	return selectedMetrics
 }

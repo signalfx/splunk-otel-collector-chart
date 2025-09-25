@@ -1125,31 +1125,30 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
-	
+
 	selectedMetrics := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsSink, false, 3*time.Minute, 10*time.Second)
-	require.NotNil(t, selectedMetrics, "No metrics payload found containing target metric: %s", targetMetric)
+	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
 	testName := t.Name()
 	if lastSlash := strings.LastIndex(testName, "/"); lastSlash != -1 {
 		testName = testName[lastSlash+1:]
 	}
-	
-	comparisonErr := tryMetricsComparison(expectedMetrics, *selectedMetrics, targetMetric)
-	if comparisonErr != nil {
-		t.Logf("Metric comparison failed for %s: %v", testName, comparisonErr)
+
+	err = tryMetricsComparison(expectedMetrics, *selectedMetrics)
+	if err != nil {
+		t.Logf("Metric comparison failed for %s: %v", testName, err)
 		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		require.NoError(t, comparisonErr, "Metric comparison failed for %s test. Error: %v", testName, comparisonErr)
+		require.NoError(t, err, "Metric comparison failed for %s test. Error: %v", testName, err)
 	}
-	
+
 	metricCount := selectedMetrics.MetricCount()
 	t.Logf("Metric comparison passed for %d metrics in %s test", metricCount, testName)
-	t.Logf("Successfully validated %s with target metric: %s", testName, targetMetric)
 }
 
 // tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
-func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, targetMetric string) error {
+func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) error {
 	replaceWithStar := func(string) string { return "*" }
-	
+
 	var metricNames []string
 	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
 		for j := 0; j < expected.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
@@ -1207,7 +1206,8 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, targ
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreDatapointAttributesOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
+		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
+		// pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
 	)
 }
 

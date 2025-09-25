@@ -343,4 +343,3 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	)
 	require.NoError(t, err)
 }
-

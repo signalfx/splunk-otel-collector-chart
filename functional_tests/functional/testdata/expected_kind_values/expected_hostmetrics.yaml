@@ -2,9 +2,702 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
+          - name: system.disk.operations
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "10"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: loop0
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: loop0
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "13151"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "56934"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "12584"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda1
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "56915"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda1
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "127"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda14
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda14
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "201"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda15
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda15
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "191"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda16
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "18"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sda16
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "384"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sdb
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "10"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sdb
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "323"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sdb1
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "10"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: sdb1
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: system.disk.operations.total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "26971"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "113888"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - name: system.disk.io.total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "1915251712"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: direction
+                      value:
+                        stringValue: read
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "19492604928"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: direction
+                      value:
+                        stringValue: write
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+              isMonotonic: true
           - gauge:
               dataPoints:
-                - asInt: "288210944"
+                - asInt: "184"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+            name: disk_ops.total
+          - gauge:
+              dataPoints:
+                - asInt: "205635584"
                   attributes:
                     - key: cluster_name
                       value:
@@ -34,7 +727,7 @@ resourceMetrics:
                       value:
                         stringValue: buffered
                   timeUnixNano: "1000000"
-                - asInt: "5168857088"
+                - asInt: "9783480320"
                   attributes:
                     - key: cluster_name
                       value:
@@ -64,7 +757,7 @@ resourceMetrics:
                       value:
                         stringValue: cached
                   timeUnixNano: "1000000"
-                - asInt: "401645568"
+                - asInt: "4222656512"
                   attributes:
                     - key: cluster_name
                       value:
@@ -94,7 +787,7 @@ resourceMetrics:
                       value:
                         stringValue: free
                   timeUnixNano: "1000000"
-                - asInt: "714878976"
+                - asInt: "560476160"
                   attributes:
                     - key: cluster_name
                       value:
@@ -124,7 +817,7 @@ resourceMetrics:
                       value:
                         stringValue: slab_reclaimable
                   timeUnixNano: "1000000"
-                - asInt: "106602496"
+                - asInt: "158277632"
                   attributes:
                     - key: cluster_name
                       value:
@@ -154,7 +847,7 @@ resourceMetrics:
                       value:
                         stringValue: slab_unreclaimable
                   timeUnixNano: "1000000"
-                - asInt: "2359037952"
+                - asInt: "2560806912"
                   attributes:
                     - key: cluster_name
                       value:
@@ -187,7 +880,7 @@ resourceMetrics:
             name: system.memory.usage
           - gauge:
               dataPoints:
-                - asInt: "8217751552"
+                - asInt: "16772579328"
                   attributes:
                     - key: cluster_name
                       value:
@@ -217,7 +910,7 @@ resourceMetrics:
             name: memory.total
           - gauge:
               dataPoints:
-                - asDouble: 28.706610769047497
+                - asDouble: 15.26781815677575
                   attributes:
                     - key: cluster_name
                       value:
@@ -247,99 +940,7 @@ resourceMetrics:
             name: memory.utilization
           - gauge:
               dataPoints:
-                - asDouble: 2.264841909290621
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-            name: cpu.utilization
-          - gauge:
-              dataPoints:
-                - asInt: "12"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-            name: cpu.num_processors
-          - name: cpu.idle
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asInt: "475678"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 1.26
+                - asDouble: 0.3
                   attributes:
                     - key: cluster_name
                       value:
@@ -369,7 +970,7 @@ resourceMetrics:
             name: system.cpu.load_average.15m
           - gauge:
               dataPoints:
-                - asDouble: 3.51
+                - asDouble: 0.71
                   attributes:
                     - key: cluster_name
                       value:
@@ -399,7 +1000,7 @@ resourceMetrics:
             name: system.cpu.load_average.1m
           - gauge:
               dataPoints:
-                - asDouble: 2.58
+                - asDouble: 0.67
                   attributes:
                     - key: cluster_name
                       value:
@@ -562,369 +1163,6 @@ resourceMetrics:
                         stringValue: linux
                   timeUnixNano: "1000000"
               isMonotonic: true
-          - name: system.disk.operations
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asInt: "31813"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vda
-                    - key: direction
-                      value:
-                        stringValue: read
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "36262"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vda
-                    - key: direction
-                      value:
-                        stringValue: write
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "31742"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vda1
-                    - key: direction
-                      value:
-                        stringValue: read
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "36262"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vda1
-                    - key: direction
-                      value:
-                        stringValue: write
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "3074"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vdb
-                    - key: direction
-                      value:
-                        stringValue: read
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: vdb
-                    - key: direction
-                      value:
-                        stringValue: write
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: system.disk.operations.total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asInt: "66629"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: direction
-                      value:
-                        stringValue: read
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "72524"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: direction
-                      value:
-                        stringValue: write
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - name: system.disk.io.total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asInt: "2147260416"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: direction
-                      value:
-                        stringValue: read
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "8797192192"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: direction
-                      value:
-                        stringValue: write
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asInt: "308"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-            name: disk_ops.total
           - name: system.network.errors
             sum:
               aggregationTemporality: 2
@@ -945,72 +1183,6 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: erspan0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: erspan0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
                         stringValue: eth0
                     - key: direction
                       value:
@@ -1045,402 +1217,6 @@ resourceMetrics:
                     - key: device
                       value:
                         stringValue: eth0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gre0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gre0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gretap0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gretap0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6_vti0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6_vti0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6gre0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6gre0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6tnl0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6tnl0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip_vti0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip_vti0
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1539,7 +1315,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: sit0
+                        stringValue: veth08807d37
                     - key: direction
                       value:
                         stringValue: receive
@@ -1572,7 +1348,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: sit0
+                        stringValue: veth08807d37
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1605,7 +1381,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: tunl0
+                        stringValue: veth0f8b1476
                     - key: direction
                       value:
                         stringValue: receive
@@ -1638,7 +1414,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: tunl0
+                        stringValue: veth0f8b1476
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1671,7 +1447,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth0edf8c46
+                        stringValue: veth0f9cdb8d
                     - key: direction
                       value:
                         stringValue: receive
@@ -1704,7 +1480,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth0edf8c46
+                        stringValue: veth0f9cdb8d
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1737,7 +1513,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth270eabf8
+                        stringValue: veth26e58c16
                     - key: direction
                       value:
                         stringValue: receive
@@ -1770,7 +1546,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth270eabf8
+                        stringValue: veth26e58c16
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1803,7 +1579,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth3e4b0ba0
+                        stringValue: veth336eaf19
                     - key: direction
                       value:
                         stringValue: receive
@@ -1836,7 +1612,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth3e4b0ba0
+                        stringValue: veth336eaf19
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1869,7 +1645,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth6526e788
+                        stringValue: veth5746baa1
                     - key: direction
                       value:
                         stringValue: receive
@@ -1902,7 +1678,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth6526e788
+                        stringValue: veth5746baa1
                     - key: direction
                       value:
                         stringValue: transmit
@@ -1935,7 +1711,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth70e037fa
+                        stringValue: veth67bce6b3
                     - key: direction
                       value:
                         stringValue: receive
@@ -1968,7 +1744,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth70e037fa
+                        stringValue: veth67bce6b3
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2001,7 +1777,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth77d7b202
+                        stringValue: veth7656997d
                     - key: direction
                       value:
                         stringValue: receive
@@ -2034,7 +1810,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth77d7b202
+                        stringValue: veth7656997d
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2067,7 +1843,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth8ce4ce33
+                        stringValue: veth76b39790
                     - key: direction
                       value:
                         stringValue: receive
@@ -2100,7 +1876,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth8ce4ce33
+                        stringValue: veth76b39790
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2133,7 +1909,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth97dcef2f
+                        stringValue: veth85f3f89a
                     - key: direction
                       value:
                         stringValue: receive
@@ -2166,7 +1942,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth97dcef2f
+                        stringValue: veth85f3f89a
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2199,7 +1975,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethb3812261
+                        stringValue: veth8c728432
                     - key: direction
                       value:
                         stringValue: receive
@@ -2232,7 +2008,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethb3812261
+                        stringValue: veth8c728432
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2265,7 +2041,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc376e9bd
+                        stringValue: veth918b6a2e
                     - key: direction
                       value:
                         stringValue: receive
@@ -2298,7 +2074,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc376e9bd
+                        stringValue: veth918b6a2e
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2331,7 +2107,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc6a49677
+                        stringValue: vethba13dbb1
                     - key: direction
                       value:
                         stringValue: receive
@@ -2364,7 +2140,271 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc6a49677
+                        stringValue: vethba13dbb1
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbb0d330c
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbb0d330c
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbe30d2da
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbe30d2da
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethd01a22f2
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethd01a22f2
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethf846d732
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethf846d732
                     - key: direction
                       value:
                         stringValue: transmit
@@ -2386,73 +2426,7 @@ resourceMetrics:
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: erspan0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: erspan0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "680555359"
+                - asInt: "758558512"
                   attributes:
                     - key: cluster_name
                       value:
@@ -2485,7 +2459,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "37142093"
+                - asInt: "19510881"
                   attributes:
                     - key: cluster_name
                       value:
@@ -2518,403 +2492,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gre0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gre0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gretap0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: gretap0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6_vti0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6_vti0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6gre0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6gre0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6tnl0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip6tnl0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip_vti0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: ip_vti0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "47249833"
+                - asInt: "36573755"
                   attributes:
                     - key: cluster_name
                       value:
@@ -2947,7 +2525,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "47249833"
+                - asInt: "36573755"
                   attributes:
                     - key: cluster_name
                       value:
@@ -2980,7 +2558,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "0"
+                - asInt: "796"
                   attributes:
                     - key: cluster_name
                       value:
@@ -2996,601 +2574,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: sit0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: sit0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: tunl0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: tunl0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "183899"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth0edf8c46
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "18986"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth0edf8c46
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "145230"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth270eabf8
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "554873"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth270eabf8
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "164908"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth3e4b0ba0
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "143847"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth3e4b0ba0
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "170610"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth6526e788
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "147552"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth6526e788
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "233413"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth70e037fa
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "16264"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth70e037fa
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "7087050"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth77d7b202
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "3552816"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth77d7b202
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "105039"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth8ce4ce33
-                    - key: direction
-                      value:
-                        stringValue: receive
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "375306"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth8ce4ce33
-                    - key: direction
-                      value:
-                        stringValue: transmit
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                  timeUnixNano: "1000000"
-                - asInt: "936"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: deployment.environment
-                      value:
-                        stringValue: dev
-                    - key: device
-                      value:
-                        stringValue: veth97dcef2f
+                        stringValue: veth08807d37
                     - key: direction
                       value:
                         stringValue: receive
@@ -3623,7 +2607,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: veth97dcef2f
+                        stringValue: veth08807d37
                     - key: direction
                       value:
                         stringValue: transmit
@@ -3640,7 +2624,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "352532"
+                - asInt: "76724"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3656,7 +2640,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethb3812261
+                        stringValue: veth0f8b1476
                     - key: direction
                       value:
                         stringValue: receive
@@ -3673,7 +2657,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "32928"
+                - asInt: "350758"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3689,7 +2673,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethb3812261
+                        stringValue: veth0f8b1476
                     - key: direction
                       value:
                         stringValue: transmit
@@ -3706,7 +2690,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "9313"
+                - asInt: "796"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3722,7 +2706,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc376e9bd
+                        stringValue: veth0f9cdb8d
                     - key: direction
                       value:
                         stringValue: receive
@@ -3739,7 +2723,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "14586"
+                - asInt: "446"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3755,7 +2739,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc376e9bd
+                        stringValue: veth0f9cdb8d
                     - key: direction
                       value:
                         stringValue: transmit
@@ -3772,7 +2756,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "212268"
+                - asInt: "3031428"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3788,7 +2772,7 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc6a49677
+                        stringValue: veth26e58c16
                     - key: direction
                       value:
                         stringValue: receive
@@ -3805,7 +2789,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "24976"
+                - asInt: "2569645"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3821,7 +2805,865 @@ resourceMetrics:
                         stringValue: dev
                     - key: device
                       value:
-                        stringValue: vethc6a49677
+                        stringValue: veth26e58c16
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "796"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth336eaf19
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "446"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth336eaf19
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "93256"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth5746baa1
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "9874"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth5746baa1
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "49133"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth67bce6b3
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "80717"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth67bce6b3
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "55845"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth7656997d
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "9418"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth7656997d
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "152397"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth76b39790
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "14382"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth76b39790
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "57920"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth85f3f89a
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "487995"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth85f3f89a
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "50786"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth8c728432
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "9163"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth8c728432
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "796"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth918b6a2e
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "446"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: veth918b6a2e
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "7185"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethba13dbb1
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "10994"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethba13dbb1
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "47402"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbb0d330c
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "79479"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbb0d330c
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "61359"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbe30d2da
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "9122"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethbe30d2da
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "796"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethd01a22f2
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "446"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethd01a22f2
+                    - key: direction
+                      value:
+                        stringValue: transmit
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "796"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethf846d732
+                    - key: direction
+                      value:
+                        stringValue: receive
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asInt: "446"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: device
+                      value:
+                        stringValue: vethf846d732
                     - key: direction
                       value:
                         stringValue: transmit
@@ -3843,7 +3685,7 @@ resourceMetrics:
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asInt: "159677"
+                - asInt: "127874"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3873,7 +3715,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "148271"
+                - asInt: "100514"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3908,7 +3750,7 @@ resourceMetrics:
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asInt: "736470390"
+                - asInt: "798820478"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3938,7 +3780,7 @@ resourceMetrics:
                       value:
                         stringValue: linux
                   timeUnixNano: "1000000"
-                - asInt: "89274506"
+                - asInt: "59718859"
                   attributes:
                     - key: cluster_name
                       value:
@@ -3973,7 +3815,99 @@ resourceMetrics:
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asInt: "825744896"
+                - asInt: "858539337"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 4.9728029704320775
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+            name: cpu.utilization
+          - gauge:
+              dataPoints:
+                - asInt: "4"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+            name: cpu.num_processors
+          - name: cpu.idle
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asInt: "182651"
                   attributes:
                     - key: cluster_name
                       value:
