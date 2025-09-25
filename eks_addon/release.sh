@@ -7,17 +7,16 @@
 #
 # Note: This script requires OKTA_AWS_ROLE_ARN to be set in the environment.
 
-# Enable bash strict mode to fail fast
-set -euo pipefail
-
 # Check required tools
 for tool in "okta-aws-login" "aws" "yq" "helm" "docker"; do
   command -v "${tool}" &>/dev/null || { echo "❌ Required command '${tool}' is not installed or not in PATH"; exit 1; }
 done
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${SCRIPT_DIR}/common.sh"
+
 # Parse command line arguments
 DRY_RUN_PREFIX=""
-CHART_VERSION=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)
@@ -35,20 +34,6 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CHART_DIR="$SCRIPT_DIR/../helm-charts/splunk-otel-collector"
-if [[ -z "$CHART_VERSION" ]]; then
-  CHART_VERSION=$(yq e ".version" "${CHART_DIR}/Chart.yaml")
-fi
-CHART_APPVERSION=$(yq e ".appVersion" "${CHART_DIR}/Chart.yaml")
-ECR_REGION="us-east-1"
-ECR_REGISTRY="709825985650.dkr.ecr.${ECR_REGION}.amazonaws.com"
-ECR_OTELCOL_REPO="${ECR_REGISTRY}/splunk/images/splunk-otel-collector"
-ECR_FLUENTD_REPO="${ECR_REGISTRY}/splunk/docker.io/splunk/fluentd-hec"
-ECR_FLUENTD_REPO_TAG="1.3.3-linux"
-ECR_HELM_NAMESPACE="${ECR_REGISTRY}/splunk/charts"
-ECR_HELM_REPO="${ECR_HELM_NAMESPACE}/splunk-otel-collector"
 
 aws_okta_auth() {
   echo "🌐 Authenticating with Okta (browser will open)..."
@@ -94,53 +79,7 @@ copy_docker_image_to_ecr() {
   echo "✅ Successfully copied multi-arch image: ${src} → ${dest}"
 }
 
-# Function to modify the Helm chart to meet EKS Add-on requirements
-modify_helm_chart() {
-  local chart_dir="$1"
-  local overrides_dir="${SCRIPT_DIR}/overrides"
-
-  echo "⏳ Removing subcharts ..."
-  rm -rf "${chart_dir}/charts"
-
-  echo "⏳ Modifying Helm chart in ${chart_dir} using overrides from ${overrides_dir} ..."
-  for override in "${overrides_dir}"/*.yaml; do
-    if [[ -f "${override}" ]]; then
-      local override_basename=$(basename "${override}")
-      local target_file="${chart_dir}/${override_basename}"
-
-      # Process environment variables
-      local tmp_file="/tmp/${override_basename}.expanded"
-      eval "cat <<EOF
-$(cat "${override}")
-EOF" > "${tmp_file}"
-
-      # Merge override with the corresponding file in the chart
-      yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' -i "${target_file}" "${tmp_file}"
-      rm -f "${tmp_file}"
-    fi
-  done
-
-  echo "⏳ Moving values.schema.json to aws_mp_configuration_schema.json and removing unsupported properties ..."
-  cp "${tmp_chart_dir}/values.schema.json" "${tmp_chart_dir}/aws_mp_configuration_schema.json"
-  disabled_properties=(
-    "enabled"
-    "operatorcrds"
-    "operator-crds"
-    "operator"
-    "opentelemetry-operator"
-    "instrumentation"
-    "certmanager"
-    "cert-manager"
-    "targetAllocator"
-  )
-  for prop in "${disabled_properties[@]}"; do
-      yq e "del(.properties.\"${prop}\")" -i "${tmp_chart_dir}/aws_mp_configuration_schema.json"
-  done
-
-  echo "✅ Successfully modified the Helm chart for EKS Add-on compliance"
-}
-
-package_and_push_helm_chart() {
+push_chart() {
   local ecr_chart_release="oci://${ECR_HELM_REPO}:${CHART_VERSION}"
 
   # Check if chart already exists in the registry
@@ -149,22 +88,9 @@ package_and_push_helm_chart() {
     return 1
   fi
 
-  # Copy chart to a temporary build directory
-  local build_dir="${SCRIPT_DIR}/build"
-  rm -rf "${build_dir}"
-  mkdir -p "${build_dir}"
-  cp -R "${CHART_DIR}" "${build_dir}/"
-
-  local tmp_chart_dir="${build_dir}/splunk-otel-collector"
-  modify_helm_chart "${tmp_chart_dir}"
-
   echo "⏳ Packaging and pushing Helm chart ${ecr_chart_release} ..."
-
-  # Package the chart
-  helm package "${tmp_chart_dir}" -d "${build_dir}"
-  local package_file="${build_dir}/splunk-otel-collector-${CHART_VERSION}.tgz"
-
-  # Push the chart from the build location
+  helm package "${EKS_CHART_DIR}" -d "${BUILD_DIR}"
+  local package_file="${BUILD_DIR}/splunk-otel-collector-${CHART_VERSION}.tgz"
   ${DRY_RUN_PREFIX} helm push ${package_file} oci://${ECR_HELM_NAMESPACE}
 
   echo "✅ Successfully pushed Helm chart to ${ecr_chart_release}"
@@ -182,5 +108,6 @@ print_summary() {
 
 aws_okta_auth
 copy_docker_image_to_ecr
-package_and_push_helm_chart
+prepare_chart
+push_chart
 print_summary
