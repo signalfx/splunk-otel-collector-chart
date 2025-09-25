@@ -1218,7 +1218,7 @@ service:
         - resource
       exporters: [otlphttp/entities]
 
-    {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true")}}
+    {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     metrics/histograms:
       receivers:
        - receiver_creator
