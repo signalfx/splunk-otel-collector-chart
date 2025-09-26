@@ -48,12 +48,72 @@ debug "$TEMP_MAIN_FILE"
 VERSIONS_URL="https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v$APP_VERSION/versions.txt"
 debug "Fetching: $VERSIONS_URL"
 curl -s "$VERSIONS_URL" > "$TEMP_VERSIONS"
-debug "Values from Operator OpenTelemetry versions.txt file containing image tags"
+debug "Values from OpenTelemetry Operator versions.txt file containing image tags:"
 debug "$TEMP_VERSIONS"
 
 # ---- Extract Subsection for Update ----
 # Extract the content between "# Auto-instrumentation Libraries (Start)" and "# Auto-instrumentation Libraries (End)"
 awk '/# Auto-instrumentation Libraries \(Start\)/,/# Auto-instrumentation Libraries \(End\)/' "$VALUES_FILE_PATH" | grep -v "# Auto-instrumentation Libraries " > "$TEMP_VALUES_FILE"
+
+# ---- Repository Mapping Function ----
+# Function to determine repository for each instrumentation library with validation
+get_repository_for_instrumentation() {
+    local lib_name="$1"
+    local base_repo="ghcr.io/open-telemetry/opentelemetry-operator"
+    local repository=""
+
+    if [[ -z "$lib_name" ]]; then
+        echo "Error: No library name provided to get_repository_for_instrumentation" >&2
+        exit 1
+    fi
+
+    case "${lib_name}" in
+        nginx)
+            repository="${base_repo}/autoinstrumentation-apache-httpd"
+            ;;
+        go)
+            repository="ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go"
+            ;;
+        java|nodejs|python|dotnet|apache-httpd)
+            repository="${base_repo}/autoinstrumentation-${lib_name}"
+            ;;
+        *)
+            echo "Error: Unknown instrumentation library '${lib_name}'. Please update get_repository_for_instrumentation function." >&2
+            echo "Available keys in versions.txt:" >&2
+            grep "^autoinstrumentation-" "${TEMP_VERSIONS}" | cut -d'=' -f1 >&2
+            exit 1
+            ;;
+    esac
+
+    if ! validate_repository_exists "$repository"; then
+        echo "Error: Repository validation failed for '${repository}' (library: ${lib_name})" >&2
+        echo "Please verify the repository mapping is correct." >&2
+        exit 1
+    fi
+
+    echo "$repository"
+}
+
+# ---- Repository Validation Function ----
+# Generic validation that the repository exists and is accessible
+validate_repository_exists() {
+    local repo="$1"
+
+    # Basic format validation - should contain registry and at least one path component
+    if [[ ! "$repo" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.+ ]]; then
+        debug "Repository format validation failed: $repo (expected format: registry.domain/path)" >&2
+        return 1
+    fi
+
+    # Try to get repository metadata (without downloading the full image)
+    if ! skopeo list-tags --retry-times 2 "docker://${repo}" &>/dev/null; then
+        debug "Repository accessibility check failed: $repo" >&2
+        return 1
+    fi
+
+    debug "Repository validation passed: $repo" >&2
+    return 0
+}
 
 # ---- Update Image Information ----
 while IFS='=' read -r IMAGE_KEY VERSION; do
@@ -78,16 +138,9 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
             continue
         fi
         setd "TAG_UPSTREAM" "${VERSION}"
-        # Find the proper docker repository for the instrumentation library by scraping the main.go file of the operator
-        INST_LIB_REPO=$(grep "auto-instrumentation-${INST_LIB_NAME_RAW}-image" "$TEMP_MAIN_FILE" | grep -o 'ghcr.io/[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*/autoinstrumentation-[a-zA-Z0-9_-]*' | sort | uniq )
-        if [ -n "$INST_LIB_REPO" ]; then
-            # Set the REPOSITORY_UPSTREAM variable
-            setd "REPOSITORY_UPSTREAM" "$INST_LIB_REPO"
-            debug "Set REPOSITORY_UPSTREAM to ${INST_LIB_REPO}"
-        else
-            echo "Failed to find repository for ${INST_LIB_NAME_RAW}"
-            exit 1
-        fi
+
+        REPOSITORY_UPSTREAM=$(get_repository_for_instrumentation "${INST_LIB_NAME_RAW}")
+        debug "Set REPOSITORY_UPSTREAM to ${REPOSITORY_UPSTREAM}"
         IMAGE_UPSTREAM="${REPOSITORY_UPSTREAM}:${TAG_UPSTREAM}"
         # Only update if the current image does not match the upstream value
         if [[ -z "${IMAGE_LOCAL}" || "${IMAGE_LOCAL}" != "${IMAGE_UPSTREAM}" ]]; then
@@ -95,7 +148,10 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
             if skopeo inspect --retry-times 3 --raw "docker://${IMAGE_UPSTREAM}" &>/dev/null; then
                 echo "Image ${IMAGE_UPSTREAM} exists."
                 echo "Upserting value for ${IMAGE_LOCAL_PATH}: ${IMAGE_UPSTREAM}"
-                yq eval -i ".${IMAGE_LOCAL_PATH} = \"${IMAGE_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
+                # Use 2-space indentation here so that when this subsection is merged back into values.yaml
+                # (with 4 spaces added by awk for proper nesting under 'instrumentation:'), the overall
+                # indentation matches the main file's structure.
+                yq eval --indent 2 -i ".${IMAGE_LOCAL_PATH} = \"${IMAGE_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
                 setd "NEED_UPDATE" 1
             else
                 echo "Failed to find Docker image ${IMAGE_UPSTREAM}. Check image repository and tag."
@@ -110,17 +166,23 @@ done < "${TEMP_VERSIONS}"
 # Emit the NEED_UPDATE variable to either GitHub output or stdout
 emit_output "NEED_UPDATE"
 
-# Merge the updated subsection back into values.yaml
-# This approach specifically updates only the subsection between the start and end tokens.
-# By doing so, we avoid reformatting the entire file, thus preserving the original structure and comments.
-awk '
-  !p && !/# Auto-instrumentation Libraries \(Start\)/ && !/# Auto-instrumentation Libraries \(End\)/ { print $0; next }
-  /# Auto-instrumentation Libraries \(Start\)/ {p=1; print $0; next}
-  /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "    %s\n", line; print $0; next}
-' "$VALUES_FILE_PATH" > "${VALUES_FILE_PATH}.updated"
+if [[ "${NEED_UPDATE}" == "1" ]]; then
+    echo "Merging updated subsection back into values.yaml"
+    # Merge the updated subsection back into values.yaml
+    # This approach specifically updates only the subsection between the start and end tokens.
+    # By doing so, we avoid reformatting the entire file, thus preserving the original structure and comments.
+    # We add 4 spaces to each line from temp file to maintain proper nesting under instrumentation:
+    awk '
+      !p && !/# Auto-instrumentation Libraries \(Start\)/ && !/# Auto-instrumentation Libraries \(End\)/ { print $0; next }
+      /# Auto-instrumentation Libraries \(Start\)/ {p=1; print $0; next}
+      /# Auto-instrumentation Libraries \(End\)/ {p=0; while((getline line < "'$TEMP_VALUES_FILE'") > 0) printf "    %s\n", line; print $0; next}
+    ' "$VALUES_FILE_PATH" > "${VALUES_FILE_PATH}.updated"
 
-# Replace the original values.yaml with the updated version
-mv "${VALUES_FILE_PATH}.updated" "$VALUES_FILE_PATH"
+    # Replace the original values.yaml with the updated version
+    mv "${VALUES_FILE_PATH}.updated" "$VALUES_FILE_PATH"
+else
+    echo "No updates needed, preserving original values.yaml"
+fi
 # Cleanup temporary files
 rm "$TEMP_MAIN_FILE" "$TEMP_VERSIONS" "$TEMP_VALUES_FILE"
 
