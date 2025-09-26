@@ -148,6 +148,9 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
             if skopeo inspect --retry-times 3 --raw "docker://${IMAGE_UPSTREAM}" &>/dev/null; then
                 echo "Image ${IMAGE_UPSTREAM} exists."
                 echo "Upserting value for ${IMAGE_LOCAL_PATH}: ${IMAGE_UPSTREAM}"
+                # Use 2-space indentation here so that when this subsection is merged back into values.yaml
+                # (with 4 spaces added by awk for proper nesting under 'instrumentation:'), the overall
+                # indentation matches the main file's structure.
                 yq eval --indent 2 -i ".${IMAGE_LOCAL_PATH} = \"${IMAGE_UPSTREAM}\"" "${TEMP_VALUES_FILE}"
                 setd "NEED_UPDATE" 1
             else
