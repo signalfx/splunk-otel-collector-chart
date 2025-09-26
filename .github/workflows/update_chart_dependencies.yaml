@@ -98,8 +98,7 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
-        run: |
-          make pre-commit || true
+        run: make pre-commit || true
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
