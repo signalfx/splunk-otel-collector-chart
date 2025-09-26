@@ -3321,6 +3321,15 @@
           ],
           "type": "string"
         },
+        "networkPolicy": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "type": "object",
+          "additionalProperties": false
+        },
         "nodeSelector": {
           "additionalProperties": {
             "type": "string"
@@ -3336,6 +3345,12 @@
                 },
                 "enableMetrics": {
                   "type": "boolean"
+                },
+                "extraLabels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
                 }
               },
               "type": "object",
@@ -5379,9 +5394,6 @@
           "x-kubernetes-list-type": "atomic"
         }
       },
-      "required": [
-        "managementState"
-      ],
       "type": "object",
       "additionalProperties": false
     },
