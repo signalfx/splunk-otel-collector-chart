@@ -61,12 +61,12 @@ get_repository_for_instrumentation() {
     local lib_name="$1"
     local base_repo="ghcr.io/open-telemetry/opentelemetry-operator"
     local repository=""
-    
+
     if [[ -z "$lib_name" ]]; then
         echo "Error: No library name provided to get_repository_for_instrumentation" >&2
         exit 1
     fi
-    
+
     case "${lib_name}" in
         nginx)
             repository="${base_repo}/autoinstrumentation-apache-httpd"
@@ -84,13 +84,13 @@ get_repository_for_instrumentation() {
             exit 1
             ;;
     esac
-    
+
     if ! validate_repository_exists "$repository"; then
         echo "Error: Repository validation failed for '${repository}' (library: ${lib_name})" >&2
         echo "Please verify the repository mapping is correct." >&2
         exit 1
     fi
-    
+
     echo "$repository"
 }
 
@@ -98,19 +98,19 @@ get_repository_for_instrumentation() {
 # Generic validation that the repository exists and is accessible
 validate_repository_exists() {
     local repo="$1"
-    
+
     # Basic format validation - should contain registry and at least one path component
     if [[ ! "$repo" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.+ ]]; then
         debug "Repository format validation failed: $repo (expected format: registry.domain/path)" >&2
         return 1
     fi
-    
+
     # Try to get repository metadata (without downloading the full image)
     if ! skopeo list-tags --retry-times 2 "docker://${repo}" &>/dev/null; then
         debug "Repository accessibility check failed: $repo" >&2
         return 1
     fi
-    
+
     debug "Repository validation passed: $repo" >&2
     return 0
 }
@@ -138,7 +138,7 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
             continue
         fi
         setd "TAG_UPSTREAM" "${VERSION}"
-        
+
         REPOSITORY_UPSTREAM=$(get_repository_for_instrumentation "${INST_LIB_NAME_RAW}")
         debug "Set REPOSITORY_UPSTREAM to ${REPOSITORY_UPSTREAM}"
         IMAGE_UPSTREAM="${REPOSITORY_UPSTREAM}:${TAG_UPSTREAM}"
