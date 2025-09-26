@@ -47,6 +47,10 @@ jobs:
         run: make chlog-release-notes OUTPUT=file
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
 
+      - name: Run pre-commit to fix formatting
+        if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
+        run: make pre-commit || true
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:

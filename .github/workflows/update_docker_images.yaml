@@ -84,6 +84,10 @@ jobs:
           make render
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_TAG }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
+      - name: Run pre-commit to fix formatting
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
+        run: make pre-commit || true
+
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
         uses: peter-evans/create-pull-request@v7
