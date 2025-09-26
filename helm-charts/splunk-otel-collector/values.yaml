@@ -1,6 +1,5 @@
 # Configurable parameters and default values for splunk-otel-collector.
-# This is a YAML-formatted file.
-# Declared variables will be passed into templates.
+# EKS Add-on has slightly different default values, the overrides can be found in eks_addon/overrides/values.yaml
 
 # nameOverride replaces the name of the chart, when this is used to construct
 # Kubernetes object names.
@@ -1225,10 +1224,13 @@ gateway:
 
 # Specify whether the chart should install CRDs automatically.
 # Related Documentation: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#crd-management
+# Not available in EKS Add-on.
 operatorcrds:
   # Set to true to install CRDs automatically, or false to manage them manually.
   install: false
 
+# OpenTelemetry Operator configuration. Used for auto-instrumentation of applications.
+# Not available in EKS Add-on.
 operator:
   enabled: false
   manager:
@@ -1254,6 +1256,7 @@ operator:
 # - Splunk Documentation: https://docs.splunk.com/observability/en/gdi/opentelemetry/automatic-discovery/k8s/k8s-backend.html#optional-configure-the-instrumentation
 # - OpenTelemetry Documentation: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 # - For all the supported properties spec, see the operator CRDS: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml
+# Not available in EKS Add-on.
 instrumentation:
   spec:
     # default spec configuration
@@ -1357,6 +1360,7 @@ instrumentation:
 # to install cert-manager separately.
 # The cert-manager is a CNCF application deployed as a subchart and used for supporting operators that require TLS certificates.
 # Full list of Helm value configurations: https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values
+# Not available in EKS Add-on.
 certmanager:
   enabled: false
   installCRDs: true
@@ -1371,6 +1375,7 @@ certmanager:
 # It discovers scraping configurations from ServiceMonitor and PodMonitor CRDs and
 # assigns them to collectors.
 # Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+# Not available in EKS Add-on.
 ################################################################################
 
 targetAllocator:
