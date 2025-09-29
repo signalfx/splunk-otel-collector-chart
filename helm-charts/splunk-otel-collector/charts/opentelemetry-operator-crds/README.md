@@ -15,7 +15,8 @@ Helm does NOT automatically update CRDs during helm upgrades.
 
 The CRDs in this chart are fetched from the [opentelemetry-operator repository](https://github.com/open-telemetry/opentelemetry-operator/tree/main). The OPERATOR_APP_VERSION corresponds to the opentelemetry-operator tag/appVersion bundled in the splunk-otel-collector chart.
 ```
-# CRDs are sourced from the tag matching our operator version
+# Only the Instrumentation CRD is sourced from the tag matching our operator version
+# Other CRDs (opentelemetrycollectors, opampbridges, targetallocators) are not included in the subchart. If needed, these should be installed separately.
 wget https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/v${OPERATOR_APP_VERSION}/config/crd/bases/opentelemetry.io_instrumentations.yaml
 ```
 

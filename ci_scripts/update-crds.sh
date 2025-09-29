@@ -62,6 +62,8 @@ bump_patch_version() {
 update_crds() {
     local latest_version
     latest_version=$(get_operator_app_version)
+    # Clean up any whitespace/newlines that might have been captured
+    latest_version=$(echo "$latest_version" | tr -d '\n\r' | xargs)
     setd "LATEST_VERSION" "$latest_version"
     echo "OpenTelemetry operator app version: $latest_version"
 
@@ -73,7 +75,18 @@ update_crds() {
     }
 
     mkdir -p "${CRD_DIR}"
-    cp ${TEMP_DIR}/opentelemetry-operator/config/crd/bases/*.yaml "${CRD_DIR}/" 2>/dev/null
+
+    # Only copy the instrumentation CRD - we've decided to bundle only this one
+    # Other CRDs (opampbridges, opentelemetrycollectors, targetallocators) are not needed
+    local instrumentation_crd="${TEMP_DIR}/opentelemetry-operator/config/crd/bases/opentelemetry.io_instrumentations.yaml"
+
+    if [[ -f "$instrumentation_crd" ]]; then
+        echo "Copying instrumentation CRD..."
+        cp "$instrumentation_crd" "${CRD_DIR}/"
+    else
+        echo "Error: Instrumentation CRD not found in operator repository"
+        exit 1
+    fi
 
     if git diff --quiet -- "${CRD_DIR}"; then
         echo "No CRD updates detected. CRDs are already up to date."
