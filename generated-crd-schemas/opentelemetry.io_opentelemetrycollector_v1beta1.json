@@ -3805,6 +3805,15 @@
           ],
           "type": "string"
         },
+        "networkPolicy": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "type": "object",
+          "additionalProperties": false
+        },
         "nodeSelector": {
           "additionalProperties": {
             "type": "string"
@@ -3820,6 +3829,12 @@
                 },
                 "enableMetrics": {
                   "type": "boolean"
+                },
+                "extraLabels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
                 }
               },
               "type": "object",
@@ -4293,6 +4308,9 @@
           "additionalProperties": false
         },
         "serviceAccount": {
+          "type": "string"
+        },
+        "serviceName": {
           "type": "string"
         },
         "shareProcessNamespace": {
@@ -4988,6 +5006,11 @@
               "format": "duration",
               "type": "string"
             },
+            "collectorTargetReloadInterval": {
+              "default": "30s",
+              "format": "duration",
+              "type": "string"
+            },
             "enabled": {
               "type": "boolean"
             },
@@ -5125,6 +5148,12 @@
                     },
                     "enableMetrics": {
                       "type": "boolean"
+                    },
+                    "extraLabels": {
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "type": "object"
                     }
                   },
                   "type": "object",
@@ -7480,8 +7509,7 @@
         }
       },
       "required": [
-        "config",
-        "managementState"
+        "config"
       ],
       "type": "object",
       "x-kubernetes-validations": [
