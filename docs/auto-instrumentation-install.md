@@ -470,8 +470,6 @@ _Please note, helm will not update or delete these CRDs after initial install as
 If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opentelemetrycollectors.yaml | kubectl apply -f -
-curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_opampbridges.yaml | kubectl apply -f -
 curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
 
@@ -494,8 +492,6 @@ Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practi
 When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following commands:
 
 ```bash
-kubectl delete crd opentelemetrycollectors.opentelemetry.io
-kubectl delete crd opampbridges.opentelemetry.io
 kubectl delete crd instrumentations.opentelemetry.io
 ```
 You can use below combination of helm and kubectl command to delete CRDs.

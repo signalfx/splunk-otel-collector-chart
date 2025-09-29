@@ -84,19 +84,27 @@ setd() {
 debug() {
     if [[ $DEBUG_MODE -eq 1 ]]; then
         local var_name="$1"
-        local var_value="${!var_name}"  # Indirect reference to get the value
-        if [[ -f "$var_value" ]]; then
-            # Prints out the supplied file path and the content of the file
-            echo "[DEBUG] $var_name: Content of file $var_value:"
-            cat "$var_value"
+
+        # Check if the input is a valid bash variable name (letters, numbers, underscore, starting with letter/underscore)
+        if [[ "$var_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            # It's a variable name, try indirect expansion
+            local var_value="${!var_name}"  # Indirect reference to get the value
+            if [[ -f "$var_value" ]]; then
+                # Prints out the supplied file path and the content of the file
+                echo "[DEBUG] $var_name: Content of file $var_value:"
+                cat "$var_value"
+            else
+              if [[ -z "$var_value" ]]; then
+                  # Prints out the supplied string's value
+                  echo "[DEBUG] $var_name"
+              else
+                  # Prints out the supplied variable name and value
+                  echo "[DEBUG] $var_name: $var_value"
+              fi
+            fi
         else
-          if [[ -z "$var_value" ]]; then
-              # Prints out the supplied string's value
-              echo "[DEBUG] $var_name"
-          else
-              # Prints out the supplied variable name and value
-              echo "[DEBUG] $var_name: $var_value"
-          fi
+            # It's a literal string, just print it
+            echo "[DEBUG] $var_name"
         fi
     fi
 }
