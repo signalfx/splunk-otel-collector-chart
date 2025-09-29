@@ -91,20 +91,20 @@ debug() {
             local var_value="${!var_name}"  # Indirect reference to get the value
             if [[ -f "$var_value" ]]; then
                 # Prints out the supplied file path and the content of the file
-                echo "[DEBUG] $var_name: Content of file $var_value:"
-                cat "$var_value"
+                echo "[DEBUG] $var_name: Content of file $var_value:" >&2
+                cat "$var_value" >&2
             else
               if [[ -z "$var_value" ]]; then
                   # Prints out the supplied string's value
-                  echo "[DEBUG] $var_name"
+                  echo "[DEBUG] $var_name" >&2
               else
                   # Prints out the supplied variable name and value
-                  echo "[DEBUG] $var_name: $var_value"
+                  echo "[DEBUG] $var_name: $var_value" >&2
               fi
             fi
         else
             # It's a literal string, just print it
-            echo "[DEBUG] $var_name"
+            echo "[DEBUG] $var_name" >&2
         fi
     fi
 }

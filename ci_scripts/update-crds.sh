@@ -62,6 +62,8 @@ bump_patch_version() {
 update_crds() {
     local latest_version
     latest_version=$(get_operator_app_version)
+    # Clean up any whitespace/newlines that might have been captured
+    latest_version=$(echo "$latest_version" | tr -d '\n\r' | xargs)
     setd "LATEST_VERSION" "$latest_version"
     echo "OpenTelemetry operator app version: $latest_version"
 
