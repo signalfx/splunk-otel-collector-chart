@@ -247,19 +247,6 @@ func compareAttributes(attr1, attr2 pcommon.Map) bool {
 	return true
 }
 
-func removeFlakyLogRecordAttr(logs plog.Logs, attributeName string) {
-	for i := 0; i < logs.ResourceLogs().Len(); i++ {
-		resourceLogs := logs.ResourceLogs().At(i)
-		for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
-			scopeLogs := resourceLogs.ScopeLogs().At(j)
-			for k := 0; k < scopeLogs.LogRecords().Len(); k++ {
-				logRecord := scopeLogs.LogRecords().At(k)
-				logRecord.Attributes().Remove(attributeName)
-			}
-		}
-	}
-}
-
 func updateLogRecordBody(logs plog.Logs, path []string, newValue string) plog.Logs {
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
 		resourceLogs := logs.ResourceLogs().At(i)
