@@ -68,9 +68,6 @@ func Test_K8SEvents(t *testing.T) {
 			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
 
-		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
-		removeFlakyLogRecordAttr(k8sEventsLogs, "k8s.container.name")
-
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"
 		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
 		require.NoError(t, err, "failed to read expected events logs from file")
