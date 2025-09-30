@@ -1320,7 +1320,7 @@ instrumentation:
         - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
           value: false
     go:
-      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.21.0
+      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.22.1
       # env:
       #   - name: GO_ENV_VAR
       #     value: go_value
@@ -1349,7 +1349,7 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.54b1
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.58b0
       # env:
       #   - name: PYTHON_ENV_VAR
       #     value: python_value
