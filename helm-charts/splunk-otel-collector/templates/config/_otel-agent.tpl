@@ -952,9 +952,11 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
-    {{- if and (not .Values.isWindows) (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
+    {{- if not .Values.isWindows }}
     root_path: /hostfs
+    {{- end }}
     {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
