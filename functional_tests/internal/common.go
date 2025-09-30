@@ -5,6 +5,7 @@ package internal
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -27,6 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/remotecommand"
 )
 
 var DefaultNamespace = "default"
@@ -122,6 +126,78 @@ func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) 
 		require.NoError(t, golden.WriteLogs(t, filepath.Base(file), *logs))
 		t.Logf("Wrote updated expected log results to %s", filepath.Base(file))
 	}
+}
+
+// CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod using `cat`,
+// since our collector container images do not include the `tar` utility.
+func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
+	namespace, podName, containerName, localFilePath, remoteFilePath string,
+) {
+	localFile, err := os.Open(localFilePath)
+	require.NoError(t, err, "failed to open local file %s", localFilePath)
+
+	defer localFile.Close()
+
+	req := clientset.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespace).
+		SubResource("exec").
+		VersionedParams(&v1.PodExecOptions{
+			Container: containerName,
+			Command:   []string{"sh", "-c", "cat > " + remoteFilePath},
+			Stdin:     true,
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	require.NoError(t, err, "failed to create SPDY executor")
+
+	err = exec.StreamWithContext(t.Context(), remotecommand.StreamOptions{
+		Stdin:  localFile,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+		Tty:    false,
+	})
+	require.NoError(t, err, "failed to stream file %s to pod", localFilePath)
+}
+
+func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, containerName string, tailLines int64) string {
+	podLogOptions := v1.PodLogOptions{
+		Container: containerName,
+		Follow:    false,
+		TailLines: &tailLines,
+	}
+
+	podLogsRequest := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOptions)
+	stream, err := podLogsRequest.Stream(t.Context())
+	require.NoError(t, err, "error streaming logs from pod %s in namespace %s", podName, namespace)
+	defer stream.Close()
+
+	var sb strings.Builder
+	buf := make([]byte, 4096)
+	for {
+		numBytes, readErr := stream.Read(buf)
+		if numBytes > 0 {
+			sb.Write(buf[:numBytes])
+		}
+		if readErr == io.EOF {
+			break
+		}
+		require.NoError(t, readErr, "error reading stream from pod %s in namespace %s", podName, namespace)
+		time.Sleep(100 * time.Millisecond)
+	}
+	return sb.String()
+}
+
+func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string) *v1.PodList {
+	pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	require.NoError(t, err, "failed to list pods in namespace %s with label selector %s", namespace, labelSelector)
+	return pods
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,
