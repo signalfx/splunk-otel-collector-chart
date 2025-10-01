@@ -159,6 +159,24 @@ metadata:
   name: otel-demo
   namespace: istio-workloads
 `)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+`)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: httpbin
+`)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: httpbin
+`)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
