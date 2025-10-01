@@ -168,13 +168,6 @@ processors:
           - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:", attributes["k8s.resource.name"]], ""))
   {{- end }}
 
-  {{- if or
-    (and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
-    (and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
-  }}
-  {{- include "splunk-otel-collector.k8sClusterReceiverAttributesProcessor" . | nindent 2 }}
-  {{- end }}
-
   # Resource attributes specific to the collector itself.
   resource/add_collector_k8s:
     attributes:
@@ -386,7 +379,6 @@ service:
         - resource/add_environment
         {{- end }}
         - transform/k8sevents
-        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
@@ -406,7 +398,6 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-        - k8sattributes/clusterReceiver
       exporters:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs

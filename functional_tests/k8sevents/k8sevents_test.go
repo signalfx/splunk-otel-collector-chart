@@ -68,11 +68,6 @@ func Test_K8SEvents(t *testing.T) {
 			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
 		})
 
-		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.id")
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.name")
-		removeFlakyLogRecordAttr(k8sEventsLogs, "container.image.tag")
-
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"
 		expectedEventsLogs, err := golden.ReadLogs(expectedEventsLogsFile)
 		require.NoError(t, err, "failed to read expected events logs from file")
@@ -100,13 +95,6 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "creationTimestamp"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes when the test name which runs k8s client changes
-
-		// the following attributes are added by the k8sattributes processor which might not be ready when the test runs
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "container.image.tag")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.node.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.name")
-		removeFlakyLogRecordAttr(k8sObjectsLogs, "k8s.pod.uid")
 
 		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
@@ -257,19 +245,6 @@ func compareAttributes(attr1, attr2 pcommon.Map) bool {
 		}
 	}
 	return true
-}
-
-func removeFlakyLogRecordAttr(logs plog.Logs, attributeName string) {
-	for i := 0; i < logs.ResourceLogs().Len(); i++ {
-		resourceLogs := logs.ResourceLogs().At(i)
-		for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
-			scopeLogs := resourceLogs.ScopeLogs().At(j)
-			for k := 0; k < scopeLogs.LogRecords().Len(); k++ {
-				logRecord := scopeLogs.LogRecords().At(k)
-				logRecord.Attributes().Remove(attributeName)
-			}
-		}
-	}
 }
 
 func updateLogRecordBody(logs plog.Logs, path []string, newValue string) plog.Logs {
