@@ -1,0 +1,14 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: otel-demo
+  namespace: istio-workloads
+spec:
+  tracing:
+    - providers:
+        - name: otel-tracing
+      randomSamplingPercentage: 100.00
+      customTags:
+        "my-attribute":
+          literal:
+            value: "default-value"

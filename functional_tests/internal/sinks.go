@@ -146,7 +146,7 @@ func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.Trac
 
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+			Endpoint: fmt.Sprintf("0.0.0.0:%d", SignalFxReceiverPort),
 			Auth: configoptional.Some(confighttp.AuthConfig{
 				Config: configauth.Config{
 					AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),

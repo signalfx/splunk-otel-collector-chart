@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"io"
 	"net"
 	"net/http"
@@ -34,6 +35,13 @@ import (
 
 const istioVersion = "1.27.1"
 
+type request struct {
+	url    string
+	host   string
+	header string
+	path   string
+}
+
 // Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
 // SKIP_SETUP: if set to true, the test will skip setup
@@ -50,10 +58,15 @@ func deployIstioAndCollector(t *testing.T) {
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
+	runCommand(t, "kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null ||   kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml")
 
 	// Install Istio
 	istioctlPath := downloadIstio(t)
 	runCommand(t, fmt.Sprintf("%s install -y", istioctlPath))
+
+	traceOperatorPath, err := filepath.Abs(filepath.Join("./", "testdata", "traceoperator.yaml"))
+	require.NoError(t, err)
+	runCommand(t, fmt.Sprintf("%s install -y -f %s", istioctlPath, traceOperatorPath))
 
 	// Patch ingress gateway to work in kind cluster
 	patchResource(t, clientset, "istio-system", "istio-ingressgateway", "deployments", `{"spec":{"template":{"spec":{"containers":[{"name":"istio-proxy","ports":[{"containerPort":8080,"hostPort":80},{"containerPort":8443,"hostPort":443}]}]}}}}`)
@@ -61,6 +74,7 @@ func deployIstioAndCollector(t *testing.T) {
 
 	internal.CreateNamespace(t, clientset, "istio-workloads")
 	internal.LabelNamespace(t, clientset, "istio-workloads", "istio-injection", "enabled")
+	internal.LabelNamespace(t, clientset, "default", "istio-injection", "enabled")
 
 	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 	require.NoError(t, err)
@@ -76,7 +90,12 @@ func deployIstioAndCollector(t *testing.T) {
 	internal.CheckPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute, 0)
 
 	// Send traffic through ingress gateways
-	sendWorkloadHTTPRequests(t)
+	requests := []request{
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
+		{"http://httpbin.example.com/status/404", "httpbin.example.com", "httpbin.example.com:80", "/status/404"},
+		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
+	}
+	sendWorkloadHTTPRequests(t, requests)
 
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -97,6 +116,12 @@ func deployIstioAndCollector(t *testing.T) {
 		}
 		teardown(t, k8sClient, istioctlPath)
 	})
+
+	// Run after starting collector to make sure traces are generated
+	//_, err = k8stest.CreateObjects(k8sClient, "testdata/testkindloadbalancer")
+	//require.NoError(t, err)
+	//
+	//internal.CheckPodsReady(t, clientset, "default", "app=http-echo", 5*time.Minute, 0)
 }
 
 func teardown(t *testing.T, k8sClient *k8stest.K8sClient, istioctlPath string) {
@@ -218,10 +243,8 @@ func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path 
 	t.Logf("Response for %s: %s", path, string(body))
 }
 
-func sendWorkloadHTTPRequests(t *testing.T) {
+func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 	resolveHost := "127.0.0.1"
-	// resolveHost := hostEndpoint(t)
-	resolveHeader := "httpbin.example.com:80"
 
 	dialContext := func(ctx context.Context, network, addr string) (net.Conn, error) {
 		if addr == "httpbin.example.com:80" {
@@ -239,23 +262,14 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 		Transport: transport,
 	}
 
-	requests := []struct {
-		url    string
-		host   string
-		header string
-		path   string
-	}{
-		{"http://httpbin.example.com/status/200", "httpbin.example.com", resolveHeader, "/status/200"},
-		{"http://httpbin.example.com/status/404", "httpbin.example.com", resolveHeader, "/status/404"},
-		{"http://httpbin.example.com/delay/1", "httpbin.example.com", resolveHeader, "/delay/0"},
-	}
-
 	for _, req := range requests {
 		sendHTTPRequest(t, client, req.url, req.host, req.header, req.path)
 	}
 }
 
 func Test_IstioMetrics(t *testing.T) {
+	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
+
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -342,4 +356,176 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
 	)
 	require.NoError(t, err)
+}
+
+func generateIstioTraces(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+
+	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(config)
+	require.NoError(t, err)
+
+	service, err := clientset.CoreV1().Services("default").Get(t.Context(), "foo-service", metav1.GetOptions{})
+	require.NoError(t, err)
+	require.NotEmpty(t, service.Status.LoadBalancer.Ingress)
+	fooServiceIP := service.Status.LoadBalancer.Ingress[0].IP
+
+	for i := 0; i < 10; i++ {
+		runCommand(t, fmt.Sprintf("curl %s:5678", fooServiceIP))
+	}
+}
+
+func Test_IstioTraces(t *testing.T) {
+	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
+	//t.Setenv("SKIP_TEARDOWN", "true")
+	//t.Setenv("SKIP_SETUP", "true")
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+		require.NoError(t, err)
+		istioctlPath := downloadIstio(t)
+		teardown(t, k8sClient, istioctlPath)
+	}
+
+	// create an API server
+	tracesSink := internal.SetupOTLPTracesSinkWithToken(t, "CHANGEME")
+
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployIstioAndCollector(t)
+	}
+
+	if os.Getenv("SKIP_TESTS") == "true" {
+		t.Log("Skipping tests as SKIP_TESTS is set to true")
+		return
+	}
+
+	//t.Run("istiod traces captured", func(t *testing.T) {
+	//	testIstioTraces(t, "testdata/expected_istio_traces.yaml", tracesSink)
+	//})
+	t.Run("test istio traces: httpbin traces captured", func(t *testing.T) {
+		testIstioHTTPBinTraces(t, "testdata/expected_istio_httpbin_traces.yaml", tracesSink)
+	})
+}
+
+func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink *consumertest.TracesSink) {
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+	require.NotEmpty(t, expectedTraces)
+
+	// Send traffic through ingress gateways
+	requests := []request{
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
+		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
+	}
+	sendWorkloadHTTPRequests(t, requests)
+
+	overwritten := false
+
+	require.Eventually(t, func() bool {
+		foundTraces := false
+		for _, receivedTraces := range tracesSink.AllTraces() {
+
+			if !overwritten {
+				//t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
+				internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
+				overwritten = true
+			}
+
+			err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
+				ptracetest.IgnoreResourceSpansOrder(),
+				ptracetest.IgnoreSpansOrder(),
+				ptracetest.IgnoreEndTimestamp(),
+				ptracetest.IgnoreTraceID(),
+				ptracetest.IgnoreSpanID(),
+				ptracetest.IgnoreStartTimestamp(),
+				ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+				ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+				ptracetest.IgnoreSpanAttributeValue("node_id"),
+				//ptracetest.IgnoreSpanAttributeValue("http.status_code"),
+				//ptracetest.IgnoreSpanAttributeValue("http.url"),
+				ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+				ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+			)
+
+			t.Logf("Comparison error: %v", err)
+
+			if err == nil {
+				foundTraces = true
+				break
+			}
+		}
+
+		//if !foundTraces {
+		//	sendWorkloadHTTPRequests(t, requests)
+		//}
+		return foundTraces
+	}, 30*time.Second, 1*time.Second, "Expected traces not found")
+}
+
+func testIstioTraces(t *testing.T, expectedTracesFile string, tracesSink *consumertest.TracesSink) {
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+	require.NotEmpty(t, expectedTraces)
+
+	for _, receivedTraces := range tracesSink.AllTraces() {
+		err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
+			ptracetest.IgnoreResourceSpansOrder(),
+			ptracetest.IgnoreEndTimestamp(),
+			ptracetest.IgnoreTraceID(),
+			ptracetest.IgnoreSpanID(),
+			ptracetest.IgnoreSpansOrder(),
+			ptracetest.IgnoreStartTimestamp(),
+			ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+			ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+			ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+			ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+		)
+		if err == nil {
+			break
+		}
+	}
+
+	require.NoError(t, err)
+
+	//generateIstioTraces(t)
+
+	//require.Eventually(t, func() bool {
+	//	foundTraces := false
+	//	for _, receivedTraces := range tracesSink.AllTraces() {
+	//		//if receivedTraces.ResourceSpans().Len() > 0 && receivedTraces.ResourceSpans().At(0).ScopeSpans().Len() > 0 {
+	//		//	//val, found := receivedTraces.ResourceSpans().At(0).Resource().Attributes().Get("k8s.node.name")
+	//		//	val, found := receivedTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0).Attributes().Get("component")
+	//		//	if !found || val.Str() != "proxy" {
+	//		//		t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
+	//		//		internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
+	//		//		return true
+	//		//	}
+	//		//	return false
+	//		//}
+	//
+	//		err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
+	//			ptracetest.IgnoreResourceSpansOrder(),
+	//			ptracetest.IgnoreEndTimestamp(),
+	//			ptracetest.IgnoreTraceID(),
+	//			ptracetest.IgnoreSpanID(),
+	//			ptracetest.IgnoreSpansOrder(),
+	//			ptracetest.IgnoreStartTimestamp(),
+	//			ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+	//			ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+	//			ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+	//			ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+	//		)
+	//		if err == nil {
+	//			foundTraces = true
+	//			break
+	//		}
+	//	}
+	//	return foundTraces
+	//}, 5*time.Minute, 1*time.Second, "Expected traces not found")
 }
