@@ -5,6 +5,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,9 +20,11 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.uber.org/multierr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -162,6 +165,40 @@ func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.C
 		Tty:    false,
 	})
 	require.NoError(t, err, "failed to stream file %s to pod", localFilePath)
+}
+
+// CopyFileFromPod streams the contents of a remote file inside a Kubernetes pod to a local file using `cat`,
+// since our collector container images do not include the `tar` utility.
+func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
+	namespace, podName, containerName, podFilePath, localFilePath string,
+) {
+	req := clientset.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespace).
+		SubResource("exec").
+		VersionedParams(&v1.PodExecOptions{
+			Command:   []string{"cat", podFilePath},
+			Container: containerName,
+			Stdin:     false,
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	require.NoError(t, err, "failed to create SPDY executor")
+
+	localFile, err := os.Create(localFilePath)
+	require.NoError(t, err, "failed to create local file %s", localFilePath)
+	defer localFile.Close()
+
+	err = exec.StreamWithContext(t.Context(), remotecommand.StreamOptions{
+		Stdout: localFile,
+		Stderr: os.Stderr, // Direct stderr to local stderr for debugging
+		Tty:    false,
+	})
+	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
 }
 
 func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, containerName string, tailLines int64) string {
@@ -377,4 +414,27 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
 
 	return selectedMetrics
+}
+
+// CompareResource Copied from util.go in pdatatest to compare ONLY resource attributes,
+// avoiding comparison of metrics scope attributes, schema, values etc... as done by CompareResourceMetrics.
+func CompareResource(expected, actual pcommon.Resource) error {
+	return multierr.Combine(
+		CompareAttributes(expected.Attributes(), actual.Attributes()),
+		CompareDroppedAttributesCount(expected.DroppedAttributesCount(), actual.DroppedAttributesCount()),
+	)
+}
+
+func CompareAttributes(expected, actual pcommon.Map) error {
+	if !expected.Equal(actual) {
+		return fmt.Errorf("attributes don't match expected: %v, actual: %v", expected.AsRaw(), actual.AsRaw())
+	}
+	return nil
+}
+
+func CompareDroppedAttributesCount(expected, actual uint32) error {
+	if expected != actual {
+		return fmt.Errorf("dropped attributes count doesn't match expected: %d, actual: %d", expected, actual)
+	}
+	return nil
 }

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -39,6 +38,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
@@ -57,6 +57,9 @@ const (
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
 	kindValuesDir                          = "expected_kind_values"
+	eksValuesDir                           = "expected_eks_values"
+	agentLabelSelector                     = "component=otel-collector-agent"
+	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -488,19 +491,17 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 func Test_Functions(t *testing.T) {
 	setupSinks(t)
 
-	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
 	internal.AcquireLeaseForTest(t, testKubeConfig)
+
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		teardown(t.Context(), t, testKubeConfig)
 	}
 
-	// deploy the chart and applications.
-	if os.Getenv("SKIP_SETUP") == "true" {
-		t.Log("Skipping setup as SKIP_SETUP is set to true")
-	} else {
+	if os.Getenv("SKIP_SETUP") != "true" {
 		deployChartsAndApps(t, testKubeConfig)
+	} else {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {
@@ -508,29 +509,20 @@ func Test_Functions(t *testing.T) {
 		return
 	}
 
-	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
-	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
+	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
 
-	validEnvs := []string{
-		kindTestKubeEnv,
-		autopilotTestKubeEnv,
-		aksTestKubeEnv,
-		gceTestKubeEnv,
-		eksTestKubeEnv,
-		eksAutoModeTestKubeEnv,
-		eksFargateTestKubeEnv,
-	}
-
-	switch {
-	case func() bool {
-		return slices.Contains(validEnvs, kubeTestEnv)
-	}():
+	if kubeTestEnv == kindTestKubeEnv {
 		expectedValuesDir = kindValuesDir
-	default:
-		t.Logf("Supported environments: %s", strings.Join(validEnvs, ", "))
-		assert.Fail(t, "KUBE_TEST_ENV is set to invalid value.")
+		runLocalClusterTests(t)
+	} else {
+		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
 
+// runLocalClusterTests runs tests that are expected to pass on local clusters like kind, minikube, etc.
+// These tests are not ready to run in hosted clusters as we don't have the setup to send data to sinks.
+// Eventually, we can update the tests to export to a file and run them in hosted clusters, example: testResourceAttributes
+func runLocalClusterTests(t *testing.T) {
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
@@ -542,6 +534,84 @@ func Test_Functions(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+}
+
+// runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
+// The test is specific to cloud provider data, example: resource attributes validation.
+func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	switch kubeTestEnv {
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv:
+		expectedValuesDir = eksValuesDir
+		t.Run("agent resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, "agent")
+		})
+		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
+		})
+	default:
+		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
+	}
+}
+
+func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
+	var labelSelector, expectedResourceAttributesFile string
+
+	switch collectorType {
+	case "agent":
+		labelSelector = agentLabelSelector
+		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_agent.yaml")
+	case "cluster_receiver":
+		labelSelector = clusterReceiverLabelSelector
+		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver.yaml")
+	default:
+		require.Failf(t, "failed to run validateResourceAttributes", "collectorType must be either 'agent' or 'cluster_receiver' but got %s", collectorType)
+	}
+
+	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
+
+	podName := pods.Items[0].Name
+
+	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
+	require.NoError(t, err)
+
+	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", "/tmp/metrics.json", tmpFile.Name())
+
+	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name())
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile)
+
+	err = internal.CompareResource(expectedResourceAttributes.ResourceMetrics().At(0).Resource(), actualResourceAttributes.ResourceMetrics().At(0).Resource())
+	if err != nil {
+		t.Logf("Resource Attributes comparison failed for %s test: %v", collectorType, err)
+		internal.MaybeUpdateExpectedMetricsResults(t, expectedResourceAttributesFile, &actualResourceAttributes)
+		require.NoError(t, err, "Resource Attributes comparison failed for %s test: %v", collectorType, err)
+	}
+
+	t.Cleanup(func() {
+		require.NoError(t, os.Remove(tmpFile.Name()))
+	})
+}
+
+func readAndNormalizeMetrics(t *testing.T, filePath string) pmetric.Metrics {
+	metrics, err := golden.ReadMetrics(filePath)
+	require.NoError(t, err)
+	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
+	attrs.Range(func(k string, _ pcommon.Value) bool {
+		attrs.PutStr(k, "abcd")
+		return true
+	})
+	return metrics
+}
+
+func requireEnv(t *testing.T, key string) string {
+	value, set := os.LookupEnv(key)
+	require.True(t, set, "the environment variable %s must be set", key)
+	return value
 }
 
 func testNodeJSTraces(t *testing.T) {

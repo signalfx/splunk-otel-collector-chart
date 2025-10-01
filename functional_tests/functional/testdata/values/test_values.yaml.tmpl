@@ -21,6 +21,10 @@ logsCollection:
 agent:
   config:
     exporters:
+      {{ if (eq .KubeTestEnv "eks") }}
+      file:
+        path: /tmp/metrics.json
+      {{ end }}
       otlp:
         endpoint: {{ .OtlpEndpoint }}
         tls:
@@ -29,6 +33,11 @@ agent:
         endpoint: {{ .MetricHecEndpoint }}
     service:
       pipelines:
+        {{ if (eq .KubeTestEnv "eks") }}
+        metrics/agent:
+          exporters:
+            - file
+        {{ end }}
         traces:
           exporters:
             - otlp
@@ -36,12 +45,23 @@ clusterReceiver:
   eventsEnabled: true
   config:
     exporters:
+      {{ if (eq .KubeTestEnv "eks") }}
+      file:
+        path: /tmp/metrics.json
+      {{ end }}
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
           insecure: true
       splunk_hec/platform_logs:
         endpoint: {{ .LogObjectsHecEndpoint }}
+    {{ if (eq .KubeTestEnv "eks") }}
+    service:
+      pipelines:
+        metrics/collector:
+          exporters:
+            - file
+    {{ end }}
 
   k8sObjects:
     - name: pods
