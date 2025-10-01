@@ -58,7 +58,7 @@ func deployIstioAndCollector(t *testing.T) {
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
-	runCommand(t, "kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml")
+	runCommand(t, "kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml")
 
 	// Install Istio
 	istioctlPath := downloadIstio(t)
