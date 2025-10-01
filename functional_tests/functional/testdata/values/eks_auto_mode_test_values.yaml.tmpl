@@ -24,6 +24,8 @@ logsCollection:
 agent:
   config:
     exporters:
+      file:
+        path: /tmp/metrics.json
       otlp:
         endpoint: {{ .OtlpEndpoint }}
         tls:
@@ -35,16 +37,26 @@ agent:
         traces:
           exporters:
             - otlp
+        metrics/agent:
+          exporters:
+            - file
 clusterReceiver:
   eventsEnabled: true
   config:
     exporters:
+      file:
+        path: /tmp/metrics.json
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
           insecure: true
       splunk_hec/platform_logs:
         endpoint: {{ .LogObjectsHecEndpoint }}
+    service:
+      pipelines:
+        metrics/collector:
+          exporters:
+            - file
 
   k8sObjects:
     - name: pods
