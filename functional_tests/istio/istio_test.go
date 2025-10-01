@@ -145,6 +145,13 @@ kind: Namespace
 metadata:
   name: istio-workloads
 `)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: v1
+kind: HTTPRoute
+metadata:
+  name: httpbin
+  namespace: istio-system
+`)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
