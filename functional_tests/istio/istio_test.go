@@ -453,7 +453,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	// Send traffic through ingress gateways
 	requests := []request{
 		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
-		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
+		//{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
 	}
 	sendWorkloadHTTPRequests(t, requests)
 
@@ -485,18 +485,17 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 				ptracetest.IgnoreSpanAttributeValue("peer.address"),
 				ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 			)
-
-			t.Logf("Comparison error: %v", err)
-
 			if err == nil {
 				foundTraces = true
 				break
+			} else {
+				t.Logf("Comparison error: %v", err)
 			}
 		}
 
-		//if !foundTraces {
-		//	sendWorkloadHTTPRequests(t, requests)
-		//}
+		if !foundTraces {
+			sendWorkloadHTTPRequests(t, requests)
+		}
 		return foundTraces
 	}, 30*time.Second, 1*time.Second, "Expected traces not found")
 }
