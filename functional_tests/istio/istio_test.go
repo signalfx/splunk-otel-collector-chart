@@ -152,6 +152,13 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: otel-demo
+  namespace: istio-workloads
+`)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
