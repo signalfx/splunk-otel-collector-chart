@@ -146,7 +146,7 @@ metadata:
   name: istio-workloads
 `)
 	internal.DeleteObject(t, k8sClient, `
-apiVersion: v1
+apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: httpbin
@@ -159,24 +159,24 @@ metadata:
   name: otel-demo
   namespace: istio-workloads
 `)
-	internal.DeleteObject(t, k8sClient, `
-apiVersion: v1
-kind: Service
-metadata:
-  name: httpbin
-`)
-	internal.DeleteObject(t, k8sClient, `
-apiVersion: v1
-kind: Deployment
-metadata:
-  name: httpbin
-`)
-	internal.DeleteObject(t, k8sClient, `
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: httpbin
-`)
+	//	internal.DeleteObject(t, k8sClient, `
+	//apiVersion: v1
+	//kind: Service
+	//metadata:
+	//  name: httpbin
+	//`)
+	//	internal.DeleteObject(t, k8sClient, `
+	//apiVersion: v1
+	//kind: Deployment
+	//metadata:
+	//  name: httpbin
+	//`)
+	//	internal.DeleteObject(t, k8sClient, `
+	//apiVersion: v1
+	//kind: ServiceAccount
+	//metadata:
+	//  name: httpbin
+	//`)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
@@ -482,6 +482,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 				// ptracetest.IgnoreSpanAttributeValue("http.status_code"),
 				// ptracetest.IgnoreSpanAttributeValue("http.url"),
 				ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+				ptracetest.IgnoreSpanAttributeValue("peer.address"),
 				ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 			)
 
