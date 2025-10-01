@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"io"
 	"net"
 	"net/http"
@@ -22,6 +21,7 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
@@ -379,8 +379,8 @@ func generateIstioTraces(t *testing.T) {
 
 func Test_IstioTraces(t *testing.T) {
 	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
-	//t.Setenv("SKIP_TEARDOWN", "true")
-	//t.Setenv("SKIP_SETUP", "true")
+	// t.Setenv("SKIP_TEARDOWN", "true")
+	// t.Setenv("SKIP_SETUP", "true")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -432,7 +432,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 		for _, receivedTraces := range tracesSink.AllTraces() {
 
 			if !overwritten {
-				//t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
+				// t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 				internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
 				overwritten = true
 			}
@@ -447,8 +447,8 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 				ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
 				ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
 				ptracetest.IgnoreSpanAttributeValue("node_id"),
-				//ptracetest.IgnoreSpanAttributeValue("http.status_code"),
-				//ptracetest.IgnoreSpanAttributeValue("http.url"),
+				// ptracetest.IgnoreSpanAttributeValue("http.status_code"),
+				// ptracetest.IgnoreSpanAttributeValue("http.url"),
 				ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
 				ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
 			)
@@ -493,7 +493,7 @@ func testIstioTraces(t *testing.T, expectedTracesFile string, tracesSink *consum
 
 	require.NoError(t, err)
 
-	//generateIstioTraces(t)
+	// generateIstioTraces(t)
 
 	//require.Eventually(t, func() bool {
 	//	foundTraces := false
