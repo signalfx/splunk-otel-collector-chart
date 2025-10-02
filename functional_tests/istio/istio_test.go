@@ -416,8 +416,8 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 
 			// Multiple resource spans are created intermittently in testing.
 			// In an attempt to reduce flakiness the expected data just has a single
-			// resource span, the comparison here is to ensure at least one of the
-			// received resource spans matches what's expected.
+			// resource span, so the comparison here is just to ensure that at least
+			// one of the received resource spans matches what's expected.
 			for i := 0; i < receivedTraces.ResourceSpans().Len(); i++ {
 				receivedResourceSpans := receivedTraces.ResourceSpans().At(i)
 				tempTraces := ptrace.NewTraces()
