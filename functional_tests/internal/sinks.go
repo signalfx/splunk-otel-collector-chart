@@ -168,7 +168,7 @@ func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort i
 }
 
 func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.TracesSink {
-	SetupOTLPTracesSinkWithTokenAndPorts(t, token, OTLPGRPCReceiverPort, OTLPHTTPReceiverPort)
+	return SetupOTLPTracesSinkWithTokenAndPorts(t, token, OTLPGRPCReceiverPort, OTLPHTTPReceiverPort)
 }
 
 func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
