@@ -256,7 +256,6 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 }
 
 func Test_IstioMetrics(t *testing.T) {
-	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
