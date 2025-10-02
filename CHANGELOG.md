@@ -4,6 +4,31 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.136.0] - 2025-10-02
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.136.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.136.1).
+
+### 🛑 Breaking changes 🛑
+
+- `clusterReceiver`: Remove the `k8sattributesprocessor` from the `clusterReceiver` logs pipeline to fix incorrect enrichment of Kubernetes object and event data. ([#2075](https://github.com/signalfx/splunk-otel-collector-chart/pull/2075))
+  - The `k8sattributesprocessor` was previously misconfigured in the `clusterReceiver` pipeline, resulting in all Kubernetes objects and events being enriched with pod metadata, even when it was not appropriate.
+  - This led to incorrect and non-deterministic `k8s.pod.*` attributes being added to objects and events, such as enriching non-pod objects with pod fields.
+  - After this change:
+    - Events from the `k8s_events` receiver will no longer include `container.id`, `container.image.name`, and `container.image.tag` attributes.
+    - Events from the `k8sobjects` receiver will no longer have any `k8s.pod.*` or `container.*` attributes except `k8s.namespace.name` (when applicable) and `k8s.resource.name`
+  - This restores correct and predictable enrichment, and eliminates misleading data.
+  - If your downstream systems or dashboards depend on the removed attributes, please update them accordingly.
+  
+
+### 💡 Enhancements 💡
+
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.5. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using  option. ([#2091](https://github.com/signalfx/splunk-otel-collector-chart/pull/2091))
+- `operator`: Bump operator to 0.95.3 in helm-charts/splunk-otel-collector/Chart.yaml ([#2091](https://github.com/signalfx/splunk-otel-collector-chart/pull/2091))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Skip os-release mount for GKE ([#2089](https://github.com/signalfx/splunk-otel-collector-chart/pull/2089))
+
 ## [0.135.0] - 2025-09-25
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.135.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.135.0).
