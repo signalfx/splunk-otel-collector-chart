@@ -25,6 +25,7 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -140,6 +141,13 @@ metadata:
   namespace: istio-system
 `)
 	internal.DeleteObject(t, k8sClient, `
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: otel-demo
+  namespace: istio-workloads
+`)
+	internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -151,13 +159,6 @@ kind: HTTPRoute
 metadata:
   name: httpbin
   namespace: istio-system
-`)
-	internal.DeleteObject(t, k8sClient, `
-apiVersion: telemetry.istio.io/v1
-kind: Telemetry
-metadata:
-  name: otel-demo
-  namespace: istio-workloads
 `)
 	//	internal.DeleteObject(t, k8sClient, `
 	//apiVersion: v1
@@ -451,7 +452,6 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	// Send traffic through ingress gateways
 	requests := []request{
 		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
-		//{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
 	}
 	sendWorkloadHTTPRequests(t, requests)
 
@@ -460,28 +460,38 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 		for _, receivedTraces := range tracesSink.AllTraces() {
 			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
 
-			err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
-				ptracetest.IgnoreResourceSpansOrder(),
-				ptracetest.IgnoreSpansOrder(),
-				ptracetest.IgnoreEndTimestamp(),
-				ptracetest.IgnoreTraceID(),
-				ptracetest.IgnoreSpanID(),
-				ptracetest.IgnoreStartTimestamp(),
-				ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-				ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-				ptracetest.IgnoreSpanAttributeValue("node_id"),
-				// ptracetest.IgnoreSpanAttributeValue("http.status_code"),
-				// ptracetest.IgnoreSpanAttributeValue("http.url"),
-				ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
-				ptracetest.IgnoreSpanAttributeValue("peer.address"),
-				ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-			)
-			if err == nil {
-				foundTraces = true
-				break
-			} else {
-				t.Logf("Comparison error: %v", err)
+			// Multiple resource spans are created intermittently in testing.
+			// In an attempt to reduce flakiness the expected data just has a single
+			// resource span, the comparison here is to ensure at least one of the
+			// received resource spans matches what's expected.
+			for i := 0; i < receivedTraces.ResourceSpans().Len(); i++ {
+				receivedResourceSpans := receivedTraces.ResourceSpans().At(i)
+				tempTraces := ptrace.NewTraces()
+				tempResourceSpans := tempTraces.ResourceSpans().AppendEmpty()
+				receivedResourceSpans.CopyTo(tempResourceSpans)
+
+				err = ptracetest.CompareTraces(expectedTraces, tempTraces,
+					ptracetest.IgnoreResourceSpansOrder(),
+					ptracetest.IgnoreSpansOrder(),
+					ptracetest.IgnoreStartTimestamp(),
+					ptracetest.IgnoreEndTimestamp(),
+					ptracetest.IgnoreTraceID(),
+					ptracetest.IgnoreSpanID(),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+					ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+					ptracetest.IgnoreSpanAttributeValue("node_id"),
+					ptracetest.IgnoreSpanAttributeValue("peer.address"),
+				)
+				if err == nil {
+					foundTraces = true
+					break
+				} else {
+					t.Logf("Comparison error: %v", err)
+				}
 			}
+
 		}
 
 		if !foundTraces {
