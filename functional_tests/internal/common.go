@@ -314,7 +314,12 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 
 func DeleteNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	err := clientset.CoreV1().Namespaces().Delete(t.Context(), name, metav1.DeleteOptions{})
-	require.NoError(t, err)
+	if err != nil {
+		// If an object that's being deleted is not found, it's considered successful deletion.
+		// Some tests delete all resources on setup to ensure a clean running environment,
+		// so it's a valid case to attempt to delete an object that doesn't exist.
+		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
+	}
 
 	require.Eventually(t, func() bool {
 		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})

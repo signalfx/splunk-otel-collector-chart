@@ -153,7 +153,7 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
-	internal.DeleteNamespace(t, clientset, "istio-worklodas")
+	internal.DeleteNamespace(t, clientset, "istio-workloads")
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	internal.ChartUninstall(t, testKubeConfig)
