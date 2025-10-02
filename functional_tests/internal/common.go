@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -112,22 +111,22 @@ var shouldUpdateExpectedResults = func() bool {
 
 func MaybeWriteUpdateExpectedTracesResults(t *testing.T, file string, traces *ptrace.Traces) {
 	if shouldUpdateExpectedResults() {
-		require.NoError(t, golden.WriteTraces(t, filepath.Base(file), *traces))
-		t.Logf("Wrote updated expected trace results to %s", filepath.Base(file))
+		require.NoError(t, golden.WriteTraces(t, file, *traces))
+		t.Logf("Wrote updated expected trace results to %s", file)
 	}
 }
 
 func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
 	if shouldUpdateExpectedResults() {
-		require.NoError(t, golden.WriteMetrics(t, filepath.Base(file), *metrics))
-		t.Logf("Wrote updated expected metric results to %s", filepath.Base(file))
+		require.NoError(t, golden.WriteMetrics(t, file, *metrics))
+		t.Logf("Wrote updated expected metric results to %s", file)
 	}
 }
 
 func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) {
 	if shouldUpdateExpectedResults() {
-		require.NoError(t, golden.WriteLogs(t, filepath.Base(file), *logs))
-		t.Logf("Wrote updated expected log results to %s", filepath.Base(file))
+		require.NoError(t, golden.WriteLogs(t, file, *logs))
+		t.Logf("Wrote updated expected log results to %s", file)
 	}
 }
 
