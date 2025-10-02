@@ -140,13 +140,13 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
-	internal.DeleteObject(t, k8sClient, `
-apiVersion: telemetry.istio.io/v1
-kind: Telemetry
-metadata:
-  name: otel-demo
-  namespace: istio-workloads
-`)
+	//	internal.DeleteObject(t, k8sClient, `
+	//apiVersion: telemetry.istio.io/v1
+	//kind: Telemetry
+	//metadata:
+	//  name: otel-demo
+	//  namespace: istio-workloads
+	//`)
 	internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
@@ -160,24 +160,6 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
-	//	internal.DeleteObject(t, k8sClient, `
-	//apiVersion: v1
-	//kind: Service
-	//metadata:
-	//  name: httpbin
-	//`)
-	//	internal.DeleteObject(t, k8sClient, `
-	//apiVersion: v1
-	//kind: Deployment
-	//metadata:
-	//  name: httpbin
-	//`)
-	//	internal.DeleteObject(t, k8sClient, `
-	//apiVersion: v1
-	//kind: ServiceAccount
-	//metadata:
-	//  name: httpbin
-	//`)
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
@@ -409,9 +391,6 @@ func generateIstioTraces(t *testing.T) {
 }
 
 func Test_IstioTraces(t *testing.T) {
-	// t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
-	// t.Setenv("SKIP_TEARDOWN", "true")
-	// t.Setenv("SKIP_SETUP", "true")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -422,7 +401,6 @@ func Test_IstioTraces(t *testing.T) {
 		teardown(t, k8sClient, istioctlPath)
 	}
 
-	// create an API server
 	tracesSink := internal.SetupOTLPTracesSinkWithTokenAndPorts(t, "CHANGEME", internal.OTLPGRPCReceiverPort, internal.SignalFxReceiverPort)
 
 	if os.Getenv("SKIP_SETUP") == "true" {
@@ -436,9 +414,6 @@ func Test_IstioTraces(t *testing.T) {
 		return
 	}
 
-	//t.Run("istiod traces captured", func(t *testing.T) {
-	//	testIstioTraces(t, "testdata/expected_istio_traces.yaml", tracesSink)
-	//})
 	t.Run("test istio traces: httpbin traces captured", func(t *testing.T) {
 		testIstioHTTPBinTraces(t, "testdata/expected_istio_httpbin_traces.yaml", tracesSink)
 	})
@@ -499,66 +474,4 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 		}
 		return foundTraces
 	}, 30*time.Second, 1*time.Second, "Expected traces not found")
-}
-
-func testIstioTraces(t *testing.T, expectedTracesFile string, tracesSink *consumertest.TracesSink) {
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	require.NotEmpty(t, expectedTraces)
-
-	for _, receivedTraces := range tracesSink.AllTraces() {
-		err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
-			ptracetest.IgnoreResourceSpansOrder(),
-			ptracetest.IgnoreEndTimestamp(),
-			ptracetest.IgnoreTraceID(),
-			ptracetest.IgnoreSpanID(),
-			ptracetest.IgnoreSpansOrder(),
-			ptracetest.IgnoreStartTimestamp(),
-			ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-			ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-			ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-			ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
-		)
-		if err == nil {
-			break
-		}
-	}
-
-	require.NoError(t, err)
-
-	// generateIstioTraces(t)
-
-	//require.Eventually(t, func() bool {
-	//	foundTraces := false
-	//	for _, receivedTraces := range tracesSink.AllTraces() {
-	//		//if receivedTraces.ResourceSpans().Len() > 0 && receivedTraces.ResourceSpans().At(0).ScopeSpans().Len() > 0 {
-	//		//	//val, found := receivedTraces.ResourceSpans().At(0).Resource().Attributes().Get("k8s.node.name")
-	//		//	val, found := receivedTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0).Attributes().Get("component")
-	//		//	if !found || val.Str() != "proxy" {
-	//		//		t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
-	//		//		internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
-	//		//		return true
-	//		//	}
-	//		//	return false
-	//		//}
-	//
-	//		err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
-	//			ptracetest.IgnoreResourceSpansOrder(),
-	//			ptracetest.IgnoreEndTimestamp(),
-	//			ptracetest.IgnoreTraceID(),
-	//			ptracetest.IgnoreSpanID(),
-	//			ptracetest.IgnoreSpansOrder(),
-	//			ptracetest.IgnoreStartTimestamp(),
-	//			ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-	//			ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-	//			ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-	//			ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
-	//		)
-	//		if err == nil {
-	//			foundTraces = true
-	//			break
-	//		}
-	//	}
-	//	return foundTraces
-	//}, 5*time.Minute, 1*time.Second, "Expected traces not found")
 }
