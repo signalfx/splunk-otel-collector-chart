@@ -160,14 +160,14 @@ metadata:
 	// called from t.Cleanup. This should be fine since other tests will most likely not rely on
 	// the istio-workloads namespace being deleted.
 	if t.Context().Err() != nil {
-		internal.DeleteNamespace(t, clientset, "istio-workloads")
-	} else {
 		internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
 metadata:
   name: istio-workloads
 `)
+	} else {
+		internal.DeleteNamespace(t, clientset, "istio-workloads")
 	}
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
