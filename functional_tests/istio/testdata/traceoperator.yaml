@@ -11,8 +11,5 @@ spec:
           http:
             path: "/v1/traces"
             timeout: 5s
-            headers:
-              - name: "custom-header"
-                value: "custom value"
           resource_detectors:
             environment: {}
