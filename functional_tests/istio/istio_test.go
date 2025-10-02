@@ -300,10 +300,6 @@ func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 }
 
 func Test_IstioMetrics(t *testing.T) {
-	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
-
-	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
-
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -412,7 +408,7 @@ func generateIstioTraces(t *testing.T) {
 }
 
 func Test_IstioTraces(t *testing.T) {
-	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
+	// t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
 	// t.Setenv("SKIP_TEARDOWN", "true")
 	// t.Setenv("SKIP_SETUP", "true")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
