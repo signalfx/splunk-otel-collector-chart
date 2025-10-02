@@ -18,7 +18,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
     - Events from the `k8sobjects` receiver will no longer have any `k8s.pod.*` or `container.*` attributes except `k8s.namespace.name` (when applicable) and `k8s.resource.name`
   - This restores correct and predictable enrichment, and eliminates misleading data.
   - If your downstream systems or dashboards depend on the removed attributes, please update them accordingly.
-  
+
 
 ### 💡 Enhancements 💡
 
