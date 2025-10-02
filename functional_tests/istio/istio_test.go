@@ -32,7 +32,7 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-const istioVersion = "1.24.2"
+const istioVersion = "1.27.1"
 
 // Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
