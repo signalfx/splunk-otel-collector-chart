@@ -153,7 +153,22 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
-	internal.DeleteNamespace(t, clientset, "istio-workloads")
+	// This is a bit of a hacky workaround to address test flakiness. internal.DeleteObject runs
+	// asynchronously, so a following test may be started before the namespace is actually deleted.
+	// The solution is to wait for the namespace to be deleted when possible. We can't wait for
+	// the namespace to be deleted if the test context is cancelled, which is the case when
+	// called from t.Cleanup. This should be fine since other tests will most likely not rely on
+	// the istio-workloads namespace being deleted.
+	if t.Context().Err() != nil {
+		internal.DeleteNamespace(t, clientset, "istio-workloads")
+	} else {
+		internal.DeleteObject(t, k8sClient, `
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-workloads
+`)
+	}
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
 	internal.ChartUninstall(t, testKubeConfig)
