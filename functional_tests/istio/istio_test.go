@@ -393,6 +393,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
 	}
 	sendWorkloadHTTPRequests(t, requests)
+	internal.WaitForTraces(t, 1, tracesSink)
 
 	require.Eventually(t, func() bool {
 		foundTraces := false
