@@ -115,11 +115,23 @@ func deployIstioAndCollector(t *testing.T) {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		teardown(t, k8sClient, istioctlPath)
+		teardown(t)
 	})
 }
 
-func teardown(t *testing.T, k8sClient *k8stest.K8sClient, istioctlPath string) {
+func teardown(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	istioctlPath := downloadIstio(t)
+
+	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+	require.NoError(t, err)
+
+	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(config)
+	require.NoError(t, err)
+
 	internal.DeleteObject(t, k8sClient, `
 apiVersion: networking.istio.io/v1
 kind: Gateway
@@ -135,21 +147,15 @@ metadata:
   namespace: istio-system
 `)
 	internal.DeleteObject(t, k8sClient, `
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: istio-workloads
-`)
-	internal.DeleteObject(t, k8sClient, `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: httpbin
   namespace: istio-system
 `)
+	internal.DeleteNamespace(t, clientset, "istio-worklodas")
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
-	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
 	internal.ChartUninstall(t, testKubeConfig)
 }
 
@@ -272,12 +278,7 @@ func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 func Test_IstioMetrics(t *testing.T) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-		require.NoError(t, err)
-		istioctlPath := downloadIstio(t)
-		teardown(t, k8sClient, istioctlPath)
+		teardown(t)
 	}
 
 	// create an API server
@@ -361,12 +362,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 func Test_IstioTraces(t *testing.T) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-		require.NoError(t, err)
-		istioctlPath := downloadIstio(t)
-		teardown(t, k8sClient, istioctlPath)
+		teardown(t)
 	}
 
 	tracesSink := internal.SetupOTLPTracesSinkWithTokenAndPorts(t, "CHANGEME", internal.OTLPGRPCReceiverPort, internal.SignalFxReceiverPort)
