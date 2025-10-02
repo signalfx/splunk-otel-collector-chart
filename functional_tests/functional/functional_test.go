@@ -1249,6 +1249,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
 		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("service.version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
