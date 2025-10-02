@@ -302,6 +302,8 @@ func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 func Test_IstioMetrics(t *testing.T) {
 	t.Setenv("KUBECONFIG", "/tmp/kube-config-splunk-otel-collector-chart-functional-testing")
 
+	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
+
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
 		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
@@ -457,17 +459,10 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	}
 	sendWorkloadHTTPRequests(t, requests)
 
-	overwritten := false
-
 	require.Eventually(t, func() bool {
 		foundTraces := false
 		for _, receivedTraces := range tracesSink.AllTraces() {
-
-			if !overwritten {
-				// t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
-				internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
-				overwritten = true
-			}
+			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
 
 			err = ptracetest.CompareTraces(expectedTraces, receivedTraces,
 				ptracetest.IgnoreResourceSpansOrder(),

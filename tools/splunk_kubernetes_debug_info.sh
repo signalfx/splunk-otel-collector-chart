@@ -318,6 +318,18 @@ echo "Script end time: $script_end_time" >> "$output_file"
 output_zip="splunk_kubernetes_debug_info_$(date +%Y%m%d_%H%M%S).zip"
 echo "Creating ZIP archive: $output_zip"
 
+echo "Trying to ls istio dir to see contents"
+ls ../functional_tests/istio/testdata
+
+echo "Copying golden files to temp directory"
+
+
+cp ../functional_tests/istio/testdata/expected_istiod.yaml $temp_dir/
+cp ../functional_tests/istio/testdata/expected_istioingress.yaml $temp_dir/
+
+
+
+
 # Find and delete empty files before creating the ZIP archive
 find "$temp_dir" -type f -empty -delete
 
