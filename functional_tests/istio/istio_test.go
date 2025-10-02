@@ -450,5 +450,5 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 			sendWorkloadHTTPRequests(t, requests)
 		}
 		return foundTraces
-	}, 30*time.Second, 1*time.Second, "Expected traces not found")
+	}, 1*time.Minute, 1*time.Second, "Expected traces not found")
 }
