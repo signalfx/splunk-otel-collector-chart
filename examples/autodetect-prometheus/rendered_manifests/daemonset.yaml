@@ -31,9 +31,8 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 798611f89ad97ca202d92c64abfac455462e0ef656ba7ebe18db93ff2ea7df77
+        checksum/config: d398ccc3560a7bdbcb3013a872f875c44ec788d56d8f864002f77cdf6546feef
         kubectl.kubernetes.io/default-container: otel-collector
-        sidecar.istio.io/inject: "false"
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -63,14 +62,6 @@ spec:
           containerPort: 8006
           hostPort: 8006
           protocol: TCP
-        - name: jaeger-grpc
-          containerPort: 14250
-          hostPort: 14250
-          protocol: TCP
-        - name: jaeger-thrift
-          containerPort: 14268
-          hostPort: 14268
-          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317
@@ -81,10 +72,6 @@ spec:
         - name: signalfx
           containerPort: 9943
           hostPort: 9943
-          protocol: TCP
-        - name: zipkin
-          containerPort: 9411
-          hostPort: 9411
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.135.0
         imagePullPolicy: IfNotPresent
@@ -119,11 +106,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: default-splunk-otel-collector
-                key: splunk_observability_access_token
           - name: SPLUNK_PLATFORM_HEC_TOKEN
             valueFrom:
               secretKeyRef:

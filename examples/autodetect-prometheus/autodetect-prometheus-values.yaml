@@ -1,0 +1,9 @@
+clusterName: CHANGEME
+splunkPlatform:
+  token: CHANGEME
+  metricsEnabled: true
+  metricsIndex: "index"
+  endpoint: http://localhost:8088/services/collector
+
+autodetect:
+  prometheus: true
