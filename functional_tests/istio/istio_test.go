@@ -117,12 +117,6 @@ func deployIstioAndCollector(t *testing.T) {
 		}
 		teardown(t, k8sClient, istioctlPath)
 	})
-
-	// Run after starting collector to make sure traces are generated
-	//_, err = k8stest.CreateObjects(k8sClient, "testdata/testkindloadbalancer")
-	//require.NoError(t, err)
-	//
-	//internal.CheckPodsReady(t, clientset, "default", "app=http-echo", 5*time.Minute, 0)
 }
 
 func teardown(t *testing.T, k8sClient *k8stest.K8sClient, istioctlPath string) {
@@ -140,13 +134,6 @@ metadata:
   name: httpbin
   namespace: istio-system
 `)
-	//	internal.DeleteObject(t, k8sClient, `
-	//apiVersion: telemetry.istio.io/v1
-	//kind: Telemetry
-	//metadata:
-	//  name: otel-demo
-	//  namespace: istio-workloads
-	//`)
 	internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
@@ -371,25 +358,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	require.NoError(t, err)
 }
 
-func generateIstioTraces(t *testing.T) {
-	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-
-	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	clientset, err := kubernetes.NewForConfig(config)
-	require.NoError(t, err)
-
-	service, err := clientset.CoreV1().Services("default").Get(t.Context(), "foo-service", metav1.GetOptions{})
-	require.NoError(t, err)
-	require.NotEmpty(t, service.Status.LoadBalancer.Ingress)
-	fooServiceIP := service.Status.LoadBalancer.Ingress[0].IP
-
-	for i := 0; i < 10; i++ {
-		runCommand(t, fmt.Sprintf("curl %s:5678", fooServiceIP))
-	}
-}
-
 func Test_IstioTraces(t *testing.T) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
@@ -462,11 +430,9 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 				if err == nil {
 					foundTraces = true
 					break
-				} else {
-					t.Logf("Comparison error: %v", err)
 				}
+				t.Logf("Comparison error: %v", err)
 			}
-
 		}
 
 		if !foundTraces {
