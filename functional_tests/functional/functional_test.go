@@ -971,6 +971,10 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			break
 		}
 	}
+	t.Logf("Number of metric batches: %d", len(metricsConsumer.AllMetrics()))
+	for i, m := range metricsConsumer.AllMetrics() {
+		t.Logf("Batch %d: %+v", i, m)
+	}
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
