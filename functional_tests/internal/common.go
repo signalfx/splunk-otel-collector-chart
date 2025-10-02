@@ -119,8 +119,8 @@ func MaybeWriteUpdateExpectedTracesResults(t *testing.T, file string, traces *pt
 
 func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
 	if shouldUpdateExpectedResults() {
-		require.NoError(t, golden.WriteMetrics(t, filepath.Base(file), *metrics))
-		t.Logf("Wrote updated expected metric results to %s", filepath.Base(file))
+		require.NoError(t, golden.WriteMetrics(t, file, *metrics))
+		t.Logf("Wrote updated expected metric results to %s", file)
 	}
 }
 
