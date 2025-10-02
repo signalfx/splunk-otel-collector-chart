@@ -422,7 +422,7 @@ func Test_IstioTraces(t *testing.T) {
 	}
 
 	// create an API server
-	tracesSink := internal.SetupOTLPTracesSinkWithToken(t, "CHANGEME")
+	tracesSink := internal.SetupOTLPTracesSinkWithTokenAndPorts(t, "CHANGEME", internal.OTLPGRPCReceiverPort, internal.SignalFxReceiverPort)
 
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
