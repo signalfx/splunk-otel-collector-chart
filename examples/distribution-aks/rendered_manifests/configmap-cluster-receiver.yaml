@@ -112,10 +112,10 @@ data:
           - signalfx
           processors:
           - memory_limiter
+          - transform/k8shpascaletargetref
           - batch
           - resource
           - resource/k8s_cluster
-          - transform/k8shpascaletargetref
           receivers:
           - k8s_cluster
         metrics/collector:

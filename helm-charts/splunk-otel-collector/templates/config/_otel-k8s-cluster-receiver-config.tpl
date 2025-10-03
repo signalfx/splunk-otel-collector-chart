@@ -155,7 +155,7 @@ processors:
         statements:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
-    
+
   transform/k8shpascaletargetref:
     error_mode: ignore
     metric_statements:
@@ -314,6 +314,7 @@ service:
       receivers: [k8s_cluster]
       processors:
         - memory_limiter
+        - transform/k8shpascaletargetref
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
@@ -326,7 +327,7 @@ service:
         {{- end }}
         {{- end }}
         - resource/k8s_cluster
-        - transform/k8shpascaletargetref
+
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
