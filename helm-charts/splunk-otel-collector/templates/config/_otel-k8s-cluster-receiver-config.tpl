@@ -156,17 +156,6 @@ processors:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
 
-  transform/k8shpascaletargetref:
-    error_mode: ignore
-    metric_statements:
-      - context: resource
-        statements:
-        - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
-          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
-        - set(attributes["k8s.statefulSet.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
-          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
-        - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
-          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
@@ -178,6 +167,18 @@ processors:
       - key: k8s.event.uid
         action: delete
   {{- end }}
+
+  transform/k8shpascaletargetref:
+    error_mode: ignore
+    metric_statements:
+      - context: resource
+        statements:
+        - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+        - set(attributes["k8s.statefulSet.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+        - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   transform/add_sourcetype:
