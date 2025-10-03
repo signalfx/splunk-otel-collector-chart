@@ -1349,26 +1349,11 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-<<<<<<< HEAD
-<<<<<<< HEAD
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.58b0
-=======
-      image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.6.0
->>>>>>> 56f322eb (Use splunk-otel-python for python auto-instrumentation)
-      # env:
-      #   - name: PYTHON_ENV_VAR
-      #     value: python_value
-=======
       image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
-<<<<<<< HEAD
-          value: "container"
->>>>>>> 46b6a414 (use latest image)
-=======
           value: ""
 
->>>>>>> f77f5f03 (add changelog)
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.

@@ -12,15 +12,7 @@ resourceSpans:
             stringValue: 1.36.0
         - key: splunk.zc.method
           value:
-<<<<<<< HEAD
-<<<<<<< HEAD
-            stringValue: autoinstrumentation-python:0.58b0
-=======
-            stringValue: splunk-otel-instrumentation-python:v2.6.0
->>>>>>> 56f322eb (Use splunk-otel-python for python auto-instrumentation)
-=======
             stringValue: splunk-otel-instrumentation-python:v2.7.0
->>>>>>> 46b6a414 (use latest image)
         - key: k8s.container.name
           value:
             stringValue: python-test
@@ -59,15 +51,7 @@ resourceSpans:
             stringValue: python-test
         - key: telemetry.auto.version
           value:
-<<<<<<< HEAD
-<<<<<<< HEAD
             stringValue: 0.58b0
-=======
-            stringValue: 0.56b0
->>>>>>> 56f322eb (Use splunk-otel-python for python auto-instrumentation)
-=======
-            stringValue: 0.57b0
->>>>>>> 46b6a414 (use latest image)
         - key: k8s.pod.ip
           value:
             stringValue: 10.244.0.15
