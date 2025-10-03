@@ -158,6 +158,7 @@ data:
           - resource
           - k8sattributes/metrics
           - resource/k8s_cluster
+          - transform/k8shpascaletargetref
           receivers:
           - k8s_cluster
         metrics/collector:

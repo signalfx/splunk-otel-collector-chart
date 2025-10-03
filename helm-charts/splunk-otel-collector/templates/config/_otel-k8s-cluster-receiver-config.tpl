@@ -26,6 +26,13 @@ receivers:
     resource_attributes:
       k8s.container.status.last_terminated_reason:
         enabled: true
+      # Enable HPA attributes
+      k8s.hpa.scaletargetref.apiversion:
+        enabled: true
+      k8s.hpa.scaletargetref.kind:
+        enabled: true
+      k8s.hpa.scaletargetref.name:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
@@ -148,6 +155,18 @@ processors:
         statements:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
+    
+  transform/k8shpascaletargetref:
+    error_mode: ignore
+    metric_statements:
+      - context: resource
+        statements:
+        - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+        - set(attributes["k8s.statefulSet.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+        - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
@@ -307,6 +326,7 @@ service:
         {{- end }}
         {{- end }}
         - resource/k8s_cluster
+        - transform/k8shpascaletargetref
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

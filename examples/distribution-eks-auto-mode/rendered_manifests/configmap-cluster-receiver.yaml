@@ -116,6 +116,12 @@ data:
         resource_attributes:
           k8s.container.status.last_terminated_reason:
             enabled: true
+          k8s.hpa.scaletargetref.apiversion:
+            enabled: true
+          k8s.hpa.scaletargetref.kind:
+            enabled: true
+          k8s.hpa.scaletargetref.name:
+            enabled: true
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -163,6 +169,7 @@ data:
           - resourcedetection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
+          - transform/k8shpascaletargetref
           receivers:
           - k8s_cluster
         metrics/collector:
