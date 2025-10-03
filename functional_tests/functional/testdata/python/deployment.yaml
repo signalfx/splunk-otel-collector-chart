@@ -19,6 +19,6 @@ spec:
       containers:
         - image: quay.io/splunko11ytest/python_test:latest
           name: python-test
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
       nodeSelector:
         kubernetes.io/os: "linux"
