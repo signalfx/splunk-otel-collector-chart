@@ -136,6 +136,7 @@ spec:
           protocol: TCP
         - name: otlp-http
           containerPort: 4318
+          hostPort: 4318
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.136.1
         imagePullPolicy: IfNotPresent

@@ -365,6 +365,7 @@ agent:
       enabled_for: [traces, metrics, logs, profiling]
     otlp-http:
       containerPort: 4318
+      hostPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
     zipkin:
