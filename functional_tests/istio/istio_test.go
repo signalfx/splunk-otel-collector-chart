@@ -21,9 +21,11 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -33,6 +35,13 @@ import (
 )
 
 const istioVersion = "1.27.1"
+
+type request struct {
+	url    string
+	host   string
+	header string
+	path   string
+}
 
 // Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
@@ -50,10 +59,15 @@ func deployIstioAndCollector(t *testing.T) {
 	require.NoError(t, err)
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
+	runCommand(t, "kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml")
 
 	// Install Istio
 	istioctlPath := downloadIstio(t)
 	runCommand(t, fmt.Sprintf("%s install -y", istioctlPath))
+
+	traceOperatorPath, err := filepath.Abs(filepath.Join("./", "testdata", "traceoperator.yaml"))
+	require.NoError(t, err)
+	runCommand(t, fmt.Sprintf("%s install -y -f %s", istioctlPath, traceOperatorPath))
 
 	// Patch ingress gateway to work in kind cluster
 	patchResource(t, clientset, "istio-system", "istio-ingressgateway", "deployments", `{"spec":{"template":{"spec":{"containers":[{"name":"istio-proxy","ports":[{"containerPort":8080,"hostPort":80},{"containerPort":8443,"hostPort":443}]}]}}}}`)
@@ -61,6 +75,7 @@ func deployIstioAndCollector(t *testing.T) {
 
 	internal.CreateNamespace(t, clientset, "istio-workloads")
 	internal.LabelNamespace(t, clientset, "istio-workloads", "istio-injection", "enabled")
+	internal.LabelNamespace(t, clientset, "default", "istio-injection", "enabled")
 
 	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
 	require.NoError(t, err)
@@ -76,7 +91,12 @@ func deployIstioAndCollector(t *testing.T) {
 	internal.CheckPodsReady(t, clientset, "istio-workloads", "app=httpbin", 3*time.Minute, 0)
 
 	// Send traffic through ingress gateways
-	sendWorkloadHTTPRequests(t)
+	requests := []request{
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
+		{"http://httpbin.example.com/status/404", "httpbin.example.com", "httpbin.example.com:80", "/status/404"},
+		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
+	}
+	sendWorkloadHTTPRequests(t, requests)
 
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", "istio_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -95,11 +115,23 @@ func deployIstioAndCollector(t *testing.T) {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		teardown(t, k8sClient, istioctlPath)
+		teardown(t)
 	})
 }
 
-func teardown(t *testing.T, k8sClient *k8stest.K8sClient, istioctlPath string) {
+func teardown(t *testing.T) {
+	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+	istioctlPath := downloadIstio(t)
+
+	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
+	require.NoError(t, err)
+
+	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(config)
+	require.NoError(t, err)
+
 	internal.DeleteObject(t, k8sClient, `
 apiVersion: networking.istio.io/v1
 kind: Gateway
@@ -115,14 +147,30 @@ metadata:
   namespace: istio-system
 `)
 	internal.DeleteObject(t, k8sClient, `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin
+  namespace: istio-system
+`)
+	// This is a bit of a hacky workaround to address test flakiness. internal.DeleteObject runs
+	// asynchronously, so a following test may be started before the namespace is actually deleted.
+	// The solution is to wait for the namespace to be deleted when possible. We can't wait for
+	// the namespace to be deleted if the test context is cancelled, which is the case when
+	// called from t.Cleanup. This should be fine since other tests will most likely not rely on
+	// the istio-workloads namespace being deleted.
+	if t.Context().Err() != nil {
+		internal.DeleteObject(t, k8sClient, `
 apiVersion: v1
 kind: Namespace
 metadata:
   name: istio-workloads
 `)
+	} else {
+		internal.DeleteNamespace(t, clientset, "istio-workloads")
+	}
 	runCommand(t, fmt.Sprintf("%s uninstall --purge -y", istioctlPath))
 
-	testKubeConfig, _ := os.LookupEnv("KUBECONFIG")
 	internal.ChartUninstall(t, testKubeConfig)
 }
 
@@ -218,10 +266,8 @@ func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path 
 	t.Logf("Response for %s: %s", path, string(body))
 }
 
-func sendWorkloadHTTPRequests(t *testing.T) {
+func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 	resolveHost := "127.0.0.1"
-	// resolveHost := hostEndpoint(t)
-	resolveHeader := "httpbin.example.com:80"
 
 	dialContext := func(ctx context.Context, network, addr string) (net.Conn, error) {
 		if addr == "httpbin.example.com:80" {
@@ -239,17 +285,6 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 		Transport: transport,
 	}
 
-	requests := []struct {
-		url    string
-		host   string
-		header string
-		path   string
-	}{
-		{"http://httpbin.example.com/status/200", "httpbin.example.com", resolveHeader, "/status/200"},
-		{"http://httpbin.example.com/status/404", "httpbin.example.com", resolveHeader, "/status/404"},
-		{"http://httpbin.example.com/delay/1", "httpbin.example.com", resolveHeader, "/delay/0"},
-	}
-
 	for _, req := range requests {
 		sendHTTPRequest(t, client, req.url, req.host, req.header, req.path)
 	}
@@ -258,12 +293,7 @@ func sendWorkloadHTTPRequests(t *testing.T) {
 func Test_IstioMetrics(t *testing.T) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-		require.NoError(t, err)
-		istioctlPath := downloadIstio(t)
-		teardown(t, k8sClient, istioctlPath)
+		teardown(t)
 	}
 
 	// create an API server
@@ -342,4 +372,83 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
 	)
 	require.NoError(t, err)
+}
+
+func Test_IstioTraces(t *testing.T) {
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
+		teardown(t)
+	}
+
+	tracesSink := internal.SetupOTLPTracesSinkWithTokenAndPorts(t, "CHANGEME", internal.OTLPGRPCReceiverPort, internal.SignalFxReceiverPort)
+
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping setup as SKIP_SETUP is set to true")
+	} else {
+		deployIstioAndCollector(t)
+	}
+
+	if os.Getenv("SKIP_TESTS") == "true" {
+		t.Log("Skipping tests as SKIP_TESTS is set to true")
+		return
+	}
+
+	t.Run("test istio traces: httpbin traces captured", func(t *testing.T) {
+		testIstioHTTPBinTraces(t, "testdata/expected_istio_httpbin_traces.yaml", tracesSink)
+	})
+}
+
+func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink *consumertest.TracesSink) {
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+	require.NotEmpty(t, expectedTraces)
+
+	// Send traffic through ingress gateways
+	requests := []request{
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
+	}
+	sendWorkloadHTTPRequests(t, requests)
+
+	require.Eventually(t, func() bool {
+		foundTraces := false
+		for _, receivedTraces := range tracesSink.AllTraces() {
+			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
+
+			// Multiple resource spans are created intermittently in testing.
+			// In an attempt to reduce flakiness the expected data just has a single
+			// resource span, so the comparison here is just to ensure that at least
+			// one of the received resource spans matches what's expected.
+			for i := 0; i < receivedTraces.ResourceSpans().Len(); i++ {
+				receivedResourceSpans := receivedTraces.ResourceSpans().At(i)
+				tempTraces := ptrace.NewTraces()
+				tempResourceSpans := tempTraces.ResourceSpans().AppendEmpty()
+				receivedResourceSpans.CopyTo(tempResourceSpans)
+
+				err = ptracetest.CompareTraces(expectedTraces, tempTraces,
+					ptracetest.IgnoreResourceSpansOrder(),
+					ptracetest.IgnoreSpansOrder(),
+					ptracetest.IgnoreStartTimestamp(),
+					ptracetest.IgnoreEndTimestamp(),
+					ptracetest.IgnoreTraceID(),
+					ptracetest.IgnoreSpanID(),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+					ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+					ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+					ptracetest.IgnoreSpanAttributeValue("node_id"),
+					ptracetest.IgnoreSpanAttributeValue("peer.address"),
+				)
+				if err == nil {
+					foundTraces = true
+					break
+				}
+				t.Logf("Comparison error: %v", err)
+			}
+		}
+
+		if !foundTraces {
+			sendWorkloadHTTPRequests(t, requests)
+		}
+		return foundTraces
+	}, 1*time.Minute, 1*time.Second, "Expected traces not found")
 }
