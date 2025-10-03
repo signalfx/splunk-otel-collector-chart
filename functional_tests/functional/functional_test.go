@@ -1271,6 +1271,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
 		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
 		pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
+		pmetrictest.ChangeResourceAttributeValue("telemetry.auto.version", replaceWithStar),
 		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),
