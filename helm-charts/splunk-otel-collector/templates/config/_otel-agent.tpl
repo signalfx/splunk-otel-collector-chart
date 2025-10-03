@@ -952,9 +952,11 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
     root_path: /hostfs
+    {{- end }}
     {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
@@ -1218,7 +1220,7 @@ service:
         - resource
       exporters: [otlphttp/entities]
 
-    {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     metrics/histograms:
       receivers:
        - receiver_creator
