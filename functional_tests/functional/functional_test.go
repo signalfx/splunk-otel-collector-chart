@@ -733,6 +733,7 @@ func testPythonTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
 		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
 		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),

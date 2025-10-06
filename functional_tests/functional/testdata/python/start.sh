@@ -3,7 +3,6 @@
 python3 web.py &
 pypid=$!
 
-
 loop=0
 
 function stop()
