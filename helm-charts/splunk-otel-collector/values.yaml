@@ -230,14 +230,14 @@ distribution: ""
 # Set autodetect.prometheus=true if you want the otel-collector agent to scrape
 # prometheus metrics from pods that have prometheus-style annotations like
 # "prometheus.io/scrape".
-# Set autodetect.istio=true in istio environment.
+# Set autodetect.istio=true in Istio environment.
 ################################################################################
 
 autodetect:
   prometheus: false
-  # This option is recommended for istio environments. It does the following things:
-  # - Enables scraping istio control plane metrics from Promethes endpoints.
-  # - Add a `service.name` resource attribute to logs with the same value as istio generates for
+  # This option is recommended for Istio environments. It does the following things:
+  # - Enables scraping Istio control plane metrics from Promethes endpoints.
+  # - Add a `service.name` resource attribute to logs with the same value as Istio generates for
   #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
 
