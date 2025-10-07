@@ -30,10 +30,10 @@ spec:
         app: splunk-otel-collector
         component: otel-collector-agent
         release: default
+        sidecar.istio.io/inject: "false"
       annotations:
         checksum/config: d2d16cc55113029807342c5b68b2d04773bafd92ce2f3c0c0df99eb6638c3dea
         kubectl.kubernetes.io/default-container: otel-collector
-        sidecar.istio.io/inject: "false"
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet

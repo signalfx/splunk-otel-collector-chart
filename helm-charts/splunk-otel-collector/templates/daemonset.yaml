@@ -39,6 +39,9 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector-agent
         release: {{ .Release.Name }}
+        {{- if .Values.autodetect.istio }}
+        sidecar.istio.io/inject: "false"
+        {{- end }}
         {{- if .Values.agent.podLabels }}
         {{- toYaml .Values.agent.podLabels | nindent 8 }}
         {{- end }}
@@ -47,9 +50,6 @@ spec:
         kubectl.kubernetes.io/default-container: otel-collector
         {{- if .Values.agent.podAnnotations }}
         {{- toYaml .Values.agent.podAnnotations | nindent 8 }}
-        {{- end }}
-        {{- if .Values.autodetect.istio }}
-        sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
       {{- if and (.Values.agent.hostNetwork) (not .Values.isWindows) }}
