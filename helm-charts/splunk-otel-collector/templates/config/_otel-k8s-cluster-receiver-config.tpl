@@ -26,6 +26,9 @@ receivers:
     resource_attributes:
       k8s.container.status.last_terminated_reason:
         enabled: true
+    metrics:
+      k8s.node.condition:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
