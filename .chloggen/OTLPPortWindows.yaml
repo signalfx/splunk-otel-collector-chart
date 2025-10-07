@@ -9,4 +9,6 @@ issues: [2102]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: |
+  This change is effective only for Windows nodes, where the port binding was previously missing.
+  For Linux nodes, the hostNetwork setting already ensures the port is bound, so no change in behavior should occur for default chart config.
