@@ -1136,10 +1136,7 @@ service:
                 (not .Values.featureGates.useControlPlaneMetricsHistogramData)
                 (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
               )
-              (and
-                (or .Values.autodetect.istio .Values.autodetect.prometheus)
-                (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "false")
-              )
+              (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "false")
         }}
         - receiver_creator
         {{- end }}
