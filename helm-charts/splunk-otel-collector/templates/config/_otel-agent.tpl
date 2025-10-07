@@ -96,7 +96,7 @@ receivers:
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         {{- else }}
-        # Enable prometheus scraping for istio pods only
+        # Enable prometheus scraping for Istio pods only
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
         {{- end }}
         config:
@@ -876,8 +876,8 @@ processors:
   {{- end }}
 
   {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-  # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
-  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios or make use of the canonical service and revision labels,
+  # This processor is used to remove excessive Istio attributes to avoid running into the dimensions limit.
+  # This configuration assumes single cluster Istio deployment. If you run Istio in multi-cluster scenarios or make use of the canonical service and revision labels,
   # you may need to adjust this configuration.
   attributes/istio:
     include:
