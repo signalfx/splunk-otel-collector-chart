@@ -928,6 +928,13 @@ exporters:
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
   {{- end }}
+  {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+  otlphttp/secureapp:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": secureapp
+  {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
@@ -978,6 +985,19 @@ exporters:
   {{- end }}
   {{- end }}
 
+{{- if and
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+  (eq (include "splunk-otel-collector.secureAppEnabled" .) "true")
+}}
+connectors:
+  routing/logs:
+    default_pipelines: [logs]
+    table:
+      - context: log
+        condition: instrumentation_scope.name == "secureapp"
+        pipelines: [logs/secureapp]
+{{- end }}
+
 service:
   telemetry:
     resource:
@@ -1009,7 +1029,30 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
+    {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+    # secure application events
+    logs/secureapp:
+      receivers:
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+        - routing/logs
+        {{- else }}
+        - otlp
+        {{- end }}
+      processors: [memory_limiter, batch]
+      exporters:
+        {{- if .Values.gateway.enabled }}
+        - otlp
+        {{- else }}
+        - otlphttp/secureapp
+        {{- end }}
+    {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+    logs/split:
+      receivers: [otlp]
+      exporters: [routing/logs]
+    {{- end }}
+    # default logs + profiling data pipeline
     logs:
       receivers:
         {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -1018,7 +1061,11 @@ service:
         {{- end }}
         - fluentforward
         {{- end }}
+        {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+        - routing/logs
+        {{- else }}
         - otlp
+        {{- end }}
       processors:
         - memory_limiter
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
