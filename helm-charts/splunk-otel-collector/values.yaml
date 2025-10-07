@@ -236,7 +236,7 @@ distribution: ""
 autodetect:
   prometheus: false
   # This option is recommended for Istio environments. It does the following things:
-  # - Enables scraping Istio control plane metrics from Promethes endpoints.
+  # - Enables scraping Istio control plane metrics from Prometheus endpoints.
   # - Add a `service.name` resource attribute to logs with the same value as Istio generates for
   #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
