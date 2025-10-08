@@ -77,6 +77,7 @@ spec:
           protocol: TCP
         - name: otlp-http
           containerPort: 4318
+          hostPort: 4318
           protocol: TCP
         - name: signalfx
           containerPort: 9943

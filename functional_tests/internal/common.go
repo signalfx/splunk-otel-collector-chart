@@ -5,7 +5,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -19,11 +18,9 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.uber.org/multierr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -418,27 +415,4 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
 
 	return selectedMetrics
-}
-
-// CompareResource Copied from util.go in pdatatest to compare ONLY resource attributes,
-// avoiding comparison of metrics scope attributes, schema, values etc... as done by CompareResourceMetrics.
-func CompareResource(expected, actual pcommon.Resource) error {
-	return multierr.Combine(
-		CompareAttributes(expected.Attributes(), actual.Attributes()),
-		CompareDroppedAttributesCount(expected.DroppedAttributesCount(), actual.DroppedAttributesCount()),
-	)
-}
-
-func CompareAttributes(expected, actual pcommon.Map) error {
-	if !expected.Equal(actual) {
-		return fmt.Errorf("attributes don't match expected: %v, actual: %v", expected.AsRaw(), actual.AsRaw())
-	}
-	return nil
-}
-
-func CompareDroppedAttributesCount(expected, actual uint32) error {
-	if expected != actual {
-		return fmt.Errorf("dropped attributes count doesn't match expected: %d, actual: %d", expected, actual)
-	}
-	return nil
 }

@@ -230,14 +230,14 @@ distribution: ""
 # Set autodetect.prometheus=true if you want the otel-collector agent to scrape
 # prometheus metrics from pods that have prometheus-style annotations like
 # "prometheus.io/scrape".
-# Set autodetect.istio=true in istio environment.
+# Set autodetect.istio=true in Istio environment.
 ################################################################################
 
 autodetect:
   prometheus: false
-  # This option is recommended for istio environments. It does the following things:
-  # - Enables scraping istio control plane metrics from Promethes endpoints.
-  # - Add a `service.name` resource attribute to logs with the same value as istio generates for
+  # This option is recommended for Istio environments. It does the following things:
+  # - Enables scraping Istio control plane metrics from Prometheus endpoints.
+  # - Add a `service.name` resource attribute to logs with the same value as Istio generates for
   #   traces to enable correlation between logs and traces usign this attribute.
   istio: false
 
@@ -365,6 +365,7 @@ agent:
       enabled_for: [traces, metrics, logs, profiling]
     otlp-http:
       containerPort: 4318
+      hostPort: 4318
       protocol: TCP
       enabled_for: [metrics, traces, logs, profiling]
     zipkin:
@@ -1349,10 +1350,11 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.58b0
-      # env:
-      #   - name: PYTHON_ENV_VAR
-      #     value: python_value
+      image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+      env:
+        - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
+          value: ""
+
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.

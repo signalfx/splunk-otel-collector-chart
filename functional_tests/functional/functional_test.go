@@ -58,6 +58,7 @@ const (
 	manifestsDir                           = "manifests"
 	kindValuesDir                          = "expected_kind_values"
 	eksValuesDir                           = "expected_eks_values"
+	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 )
@@ -546,7 +547,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	require.NoError(t, err)
 	switch kubeTestEnv {
 	case eksTestKubeEnv, eksAutoModeTestKubeEnv:
-		expectedValuesDir = eksValuesDir
+		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
 		})
@@ -556,6 +557,13 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
 	}
+}
+
+func selectExpectedValuesDir(kubeTestEnv string) string {
+	if kubeTestEnv == eksAutoModeTestKubeEnv {
+		return eksAutoModeValuesDir
+	}
+	return eksValuesDir
 }
 
 func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
@@ -582,26 +590,26 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", "/tmp/metrics.json", tmpFile.Name())
 
-	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name())
-	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile)
+	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 
-	err = internal.CompareResource(expectedResourceAttributes.ResourceMetrics().At(0).Resource(), actualResourceAttributes.ResourceMetrics().At(0).Resource())
-	if err != nil {
-		t.Logf("Resource Attributes comparison failed for %s test: %v", collectorType, err)
-		internal.MaybeUpdateExpectedMetricsResults(t, expectedResourceAttributesFile, &actualResourceAttributes)
-		require.NoError(t, err, "Resource Attributes comparison failed for %s test: %v", collectorType, err)
-	}
+	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, formatResourceAttributesString(expectedResourceAttributes), formatResourceAttributesString(actualResourceAttributes))
 
 	t.Cleanup(func() {
 		require.NoError(t, os.Remove(tmpFile.Name()))
 	})
 }
 
-func readAndNormalizeMetrics(t *testing.T, filePath string) pmetric.Metrics {
+func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
 	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
 	attrs.Range(func(k string, _ pcommon.Value) bool {
+		for _, skipKey := range skipKeys {
+			if k == skipKey {
+				return true
+			}
+		}
 		attrs.PutStr(k, "abcd")
 		return true
 	})
@@ -733,6 +741,7 @@ func testPythonTraces(t *testing.T) {
 		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
 		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
 		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
 		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
 		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
 		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
@@ -1446,4 +1455,13 @@ func maskSpanParentID(traces ptrace.Traces) {
 			}
 		}
 	}
+}
+
+func formatResourceAttributesString(attributesMap pcommon.Map) string {
+	var attrsStr strings.Builder
+	attributesMap.Range(func(k string, v pcommon.Value) bool {
+		attrsStr.WriteString(k + "=" + v.Str() + ";")
+		return true
+	})
+	return attrsStr.String()
 }

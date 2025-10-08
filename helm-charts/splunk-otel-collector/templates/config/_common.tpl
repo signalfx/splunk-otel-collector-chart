@@ -354,7 +354,7 @@ transform/istio_service_name:
       statements:
         - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"] != nil
         - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"] == nil and attributes["k8s.pod.name"] != nil
-        # Name of the object owning the pod is taken from "k8s.pod.name" attribute by striping the pod suffix according
+        # Name of the object owning the pod is taken from "k8s.pod.name" attribute by stripping the pod suffix according
         # to the k8s name generation rules (we don't want to put pressure on the k8s API server to get the owner name):
         # https://github.com/kubernetes/apimachinery/blob/ff522ab81c745a9ac5f7eeb7852fac134194a3b6/pkg/util/rand/rand.go#L92-L127
         - replace_pattern(cache["owner_name"], "^(.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$$", "$$1") where attributes["service.name"] == nil and cache["owner_name"] != nil
