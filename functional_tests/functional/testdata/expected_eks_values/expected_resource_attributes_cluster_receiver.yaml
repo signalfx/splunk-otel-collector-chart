@@ -40,6 +40,9 @@ resourceMetrics:
         - key: k8s.cluster.name
           value:
             stringValue: rotel-eks
+        - key: k8s.kubelet.version
+          value:
+            stringValue: abcd
         - key: k8s.namespace.name
           value:
             stringValue: abcd
