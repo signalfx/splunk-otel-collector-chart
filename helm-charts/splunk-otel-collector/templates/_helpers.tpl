@@ -110,13 +110,6 @@ Whether logs enabled for any destination.
 {{- end -}}
 
 {{/*
-Whether SecureApp is enabled (boolean flag).
-*/}}
-{{- define "splunk-otel-collector.secureAppEnabled" -}}
-{{- .Values.splunkObservability.secureAppEnabled -}}
-{{- end -}}
-
-{{/*
 Whether profiling data is enabled (applicable to Splunk Observability only).
 */}}
 {{- define "splunk-otel-collector.profilingEnabled" -}}

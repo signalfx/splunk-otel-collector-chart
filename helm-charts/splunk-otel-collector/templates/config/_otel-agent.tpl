@@ -928,7 +928,7 @@ exporters:
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
   {{- end }}
-  {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+  {{- if .Values.splunkObservability.secureAppEnabled }}
   otlphttp/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
@@ -987,7 +987,7 @@ exporters:
 
 {{- if and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
-  (eq (include "splunk-otel-collector.secureAppEnabled" .) "true")
+  (.Values.splunkObservability.secureAppEnabled)
 }}
 connectors:
   routing/logs:
@@ -1029,7 +1029,7 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
-    {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+    {{- if .Values.splunkObservability.secureAppEnabled }}
     # secure application events
     logs/secureapp:
       receivers:
@@ -1047,7 +1047,7 @@ service:
         {{- end }}
     {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-    {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+    {{- if .Values.splunkObservability.secureAppEnabled }}
     logs/split:
       receivers: [otlp]
       exporters: [routing/logs]
@@ -1061,7 +1061,7 @@ service:
         {{- end }}
         - fluentforward
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.secureAppEnabled" .) "true") }}
+        {{- if .Values.splunkObservability.secureAppEnabled }}
         - routing/logs
         {{- else }}
         - otlp
