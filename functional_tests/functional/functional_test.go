@@ -982,9 +982,9 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			break
 		}
 	}
+	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
-	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 }
 
 func testAgentLogs(t *testing.T) {
