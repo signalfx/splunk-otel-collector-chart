@@ -17,11 +17,6 @@ metadata:
 data:
   relay: |
     exporters:
-      otlphttp/secureapp:
-        headers:
-          X-SF-TOKEN: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-          X-Splunk-Instrumentation-Library: secureapp
-        logs_endpoint: https://ingest..signalfx.com/v3/event
       splunk_hec/platform_metrics:
         disable_compression: true
         endpoint: CHANGEME
@@ -256,14 +251,6 @@ data:
       - k8s_observer
       - zpages
       pipelines:
-        logs/secureapp:
-          exporters:
-          - otlphttp/secureapp
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - otlp
         metrics:
           exporters:
           - splunk_hec/platform_metrics

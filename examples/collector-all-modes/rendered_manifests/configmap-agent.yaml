@@ -317,14 +317,6 @@ data:
           - resource
           receivers:
           - nop
-        logs/secureapp:
-          exporters:
-          - otlp
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - otlp
         metrics:
           exporters:
           - otlp

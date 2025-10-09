@@ -16,21 +16,7 @@ metadata:
     release: default
 data:
   relay: |
-    connectors:
-      routing/logs:
-        default_pipelines:
-        - logs
-        table:
-        - condition: instrumentation_scope.name == "secureapp"
-          context: log
-          pipelines:
-          - logs/secureapp
     exporters:
-      otlphttp/secureapp:
-        headers:
-          X-SF-TOKEN: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-          X-Splunk-Instrumentation-Library: secureapp
-        logs_endpoint: https://ingest..signalfx.com/v3/event
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: CHANGEME
@@ -454,19 +440,6 @@ data:
           receivers:
           - filelog
           - fluentforward
-          - routing/logs
-        logs/secureapp:
-          exporters:
-          - otlphttp/secureapp
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - routing/logs
-        logs/split:
-          exporters:
-          - routing/logs
-          receivers:
           - otlp
         metrics:
           exporters:

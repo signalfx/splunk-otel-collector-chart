@@ -16,15 +16,6 @@ metadata:
     release: default
 data:
   relay: |
-    connectors:
-      routing/logs:
-        default_pipelines:
-        - logs
-        table:
-        - condition: instrumentation_scope.name == "secureapp"
-          context: log
-          pipelines:
-          - logs/secureapp
     exporters:
       otlphttp:
         auth:
@@ -34,11 +25,6 @@ data:
       otlphttp/entities:
         auth:
           authenticator: headers_setter
-        logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
-      otlphttp/secureapp:
-        headers:
-          X-SF-TOKEN: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-          X-Splunk-Instrumentation-Library: secureapp
         logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
       signalfx:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
@@ -539,7 +525,7 @@ data:
           receivers:
           - filelog
           - fluentforward
-          - routing/logs
+          - otlp
         logs/entities:
           exporters:
           - otlphttp/entities
@@ -550,19 +536,6 @@ data:
           - resource
           receivers:
           - nop
-        logs/secureapp:
-          exporters:
-          - otlphttp/secureapp
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - routing/logs
-        logs/split:
-          exporters:
-          - routing/logs
-          receivers:
-          - otlp
         metrics:
           exporters:
           - signalfx
