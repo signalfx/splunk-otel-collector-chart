@@ -26,6 +26,13 @@ receivers:
     resource_attributes:
       k8s.container.status.last_terminated_reason:
         enabled: true
+      # Enable HPA attributes
+      k8s.hpa.scaletargetref.apiversion:
+        enabled: true
+      k8s.hpa.scaletargetref.kind:
+        enabled: true
+      k8s.hpa.scaletargetref.name:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
@@ -149,6 +156,7 @@ processors:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
 
+
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
     actions:
@@ -159,6 +167,18 @@ processors:
       - key: k8s.event.uid
         action: delete
   {{- end }}
+
+  transform/k8shpascaletargetref:
+    error_mode: ignore
+    metric_statements:
+      - context: resource
+        statements:
+        - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+        - set(attributes["k8s.statefulSet.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+        - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+          where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
   transform/add_sourcetype:
@@ -295,6 +315,7 @@ service:
       receivers: [k8s_cluster]
       processors:
         - memory_limiter
+        - transform/k8shpascaletargetref
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
@@ -307,6 +328,7 @@ service:
         {{- end }}
         {{- end }}
         - resource/k8s_cluster
+
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
