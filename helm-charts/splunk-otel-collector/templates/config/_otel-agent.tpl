@@ -1211,7 +1211,7 @@ service:
 
     {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
     logs/entities:
-      # Receivers are added dinamically if discovery mode is enabled
+      # Receivers are added dynamically if discovery mode is enabled
       receivers: [nop]
       processors:
         - memory_limiter
