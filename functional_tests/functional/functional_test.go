@@ -1020,7 +1020,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		if err == nil {
 			selectedMetrics = &m
 		}
-
 	}
 
 	/*
