@@ -980,11 +980,22 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		if err == nil {
 			selectedMetrics = &m
 			break
+		} else {
+			// Debug: print why comparison failed
+			t.Logf("CompareMetrics failed for batch %d: %v", h, err)
+			t.Logf("Actual metrics batch %d: %+v", h, m)
 		}
 	}
-	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+
+	// Debug: print if no batch matched
+	if selectedMetrics == nil {
+		t.Logf("No metrics batch matched expected metrics. Total batches: %d", len(metricsConsumer.AllMetrics()))
+		t.Logf("Expected metrics: %+v", expectedMetrics)
+	}
+
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
+	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 }
 
 func testAgentLogs(t *testing.T) {
