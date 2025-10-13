@@ -931,12 +931,56 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
-	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
+	// List of expected metric names
+	var metricNames []string
+	for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
+		rm := expectedMetrics.ResourceMetrics().At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			sm := rm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				metricNames = append(metricNames, sm.Metrics().At(k).Name())
+			}
+		}
+	}
 	replaceWithStar := func(string) string { return "*" }
 
 	var selectedMetrics *pmetric.Metrics
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricsConsumer.AllMetrics()[h]
+
+		// Get actual metric names in this batch
+		var actualMetricNames []string
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			rm := m.ResourceMetrics().At(i)
+			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+				sm := rm.ScopeMetrics().At(j)
+				for k := 0; k < sm.Metrics().Len(); k++ {
+					actualMetricNames = append(actualMetricNames, sm.Metrics().At(k).Name())
+				}
+			}
+		}
+
+		// Only compare batches that have exactly the expected metrics (no extras, no missing)
+		if len(actualMetricNames) != len(metricNames) {
+			continue
+		}
+		matches := true
+		for _, name := range metricNames {
+			found := false
+			for _, actual := range actualMetricNames {
+				if actual == name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				matches = false
+				break
+			}
+		}
+		if !matches {
+			continue
+		}
 
 		err = pmetrictest.CompareMetrics(expectedMetrics, m,
 			pmetrictest.IgnoreTimestamp(),
