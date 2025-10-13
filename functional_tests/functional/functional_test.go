@@ -932,18 +932,17 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	// Collect expected metric names
-	/*	var metricNames []string
-		for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
-			rm := expectedMetrics.ResourceMetrics().At(i)
-			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-				sm := rm.ScopeMetrics().At(j)
-				for k := 0; k < sm.Metrics().Len(); k++ {
-					metricNames = append(metricNames, sm.Metrics().At(k).Name())
-				}
+	var metricNames []string
+	for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
+		rm := expectedMetrics.ResourceMetrics().At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			sm := rm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				metricNames = append(metricNames, sm.Metrics().At(k).Name())
 			}
 		}
-	*/
-	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
+	}
+	// metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
 
 	replaceWithStar := func(string) string { return "*" }
 
@@ -1022,33 +1021,30 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			selectedMetrics = &m
 		}
 
-		// Debug: print why comparison failed
-		t.Logf("CompareMetrics failed for batch %d: %v", h, err)
-		t.Logf("Actual metrics batch %d: %+v", h, m)
-
 	}
 
-	// Debug: print if no batch matched
-	if selectedMetrics == nil {
-		t.Logf("No metrics batch matched expected metrics. Total batches: %d", len(metricsConsumer.AllMetrics()))
-		t.Logf("Expected metrics: %+v", expectedMetrics)
-	}
+	/*
+		// Debug: print if no batch matched
+		if selectedMetrics == nil {
+			t.Logf("No metrics batch matched expected metrics. Total batches: %d", len(metricsConsumer.AllMetrics()))
+			t.Logf("Expected metrics: %+v", expectedMetrics)
+		}
 
-	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
-		m := metricsConsumer.AllMetrics()[h]
-		t.Logf("Batch %d metric names:", h)
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			rm := m.ResourceMetrics().At(i)
-			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-				sm := rm.ScopeMetrics().At(j)
-				for k := 0; k < sm.Metrics().Len(); k++ {
-					metric := sm.Metrics().At(k)
-					t.Logf("  %s", metric.Name())
+		for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
+			m := metricsConsumer.AllMetrics()[h]
+			t.Logf("Batch %d metric names:", h)
+			for i := 0; i < m.ResourceMetrics().Len(); i++ {
+				rm := m.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					sm := rm.ScopeMetrics().At(j)
+					for k := 0; k < sm.Metrics().Len(); k++ {
+						metric := sm.Metrics().At(k)
+						t.Logf("  %s", metric.Name())
+					}
 				}
 			}
 		}
-	}
-
+	*/
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
