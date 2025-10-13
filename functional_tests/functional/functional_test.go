@@ -993,6 +993,21 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		t.Logf("Expected metrics: %+v", expectedMetrics)
 	}
 
+	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
+		m := metricsConsumer.AllMetrics()[h]
+		t.Logf("Batch %d metric names:", h)
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			rm := m.ResourceMetrics().At(i)
+			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+				sm := rm.ScopeMetrics().At(j)
+				for k := 0; k < sm.Metrics().Len(); k++ {
+					metric := sm.Metrics().At(k)
+					t.Logf("  %s", metric.Name())
+				}
+			}
+		}
+	}
+
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
