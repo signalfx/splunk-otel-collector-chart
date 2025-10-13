@@ -979,12 +979,13 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		)
 		if err == nil {
 			selectedMetrics = &m
-			break
-		} else {
-			// Debug: print why comparison failed
-			t.Logf("CompareMetrics failed for batch %d: %v", h, err)
-			t.Logf("Actual metrics batch %d: %+v", h, m)
+
 		}
+
+		// Debug: print why comparison failed
+		t.Logf("CompareMetrics failed for batch %d: %v", h, err)
+		t.Logf("Actual metrics batch %d: %+v", h, m)
+
 	}
 
 	// Debug: print if no batch matched
