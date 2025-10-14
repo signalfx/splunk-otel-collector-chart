@@ -391,11 +391,6 @@ agent:
       hostPort: 8006
       protocol: TCP
       enabled_for: [logs]
-    signalfx:
-      containerPort: 9943
-      hostPort: 9943
-      protocol: TCP
-      enabled_for: [metrics]
 
   resources:
     limits:

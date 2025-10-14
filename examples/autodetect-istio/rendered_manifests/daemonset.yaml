@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: d2d16cc55113029807342c5b68b2d04773bafd92ce2f3c0c0df99eb6638c3dea
+        checksum/config: 959f34502ac83987fb441218d3c7cb25b3e057184e22f5a18c990db321f19713
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -78,10 +78,6 @@ spec:
         - name: otlp-http
           containerPort: 4318
           hostPort: 4318
-          protocol: TCP
-        - name: signalfx
-          containerPort: 9943
-          hostPort: 9943
           protocol: TCP
         - name: zipkin
           containerPort: 9411
