@@ -949,33 +949,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricsConsumer.AllMetrics()[h]
 
-		// Build a set for quick lookup
-		actualMetricSet := make(map[string]struct{})
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			rm := m.ResourceMetrics().At(i)
-			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-				sm := rm.ScopeMetrics().At(j)
-				for k := 0; k < sm.Metrics().Len(); k++ {
-					actualMetricSet[sm.Metrics().At(k).Name()] = struct{}{}
-				}
-			}
-		}
-
-		// Skip batches with extra/missing metrics
-		if len(actualMetricSet) != len(metricNames) {
-			continue
-		}
-		allMatch := true
-		for _, name := range metricNames {
-			if _, ok := actualMetricSet[name]; !ok {
-				allMatch = false
-				break
-			}
-		}
-		if !allMatch {
-			continue
-		}
-
 		err = pmetrictest.CompareMetrics(expectedMetrics, m,
 			pmetrictest.IgnoreTimestamp(),
 			pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
