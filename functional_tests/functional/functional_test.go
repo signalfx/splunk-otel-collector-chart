@@ -953,6 +953,8 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
 			pmetrictest.IgnoreMetricValues(metricNames...),
 			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
 			pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
@@ -968,6 +970,8 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
 			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
 			pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.kubelet.version", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.container.status.last_terminated_reason", replaceWithStar),
 			pmetrictest.IgnoreScopeVersion(),
 			pmetrictest.IgnoreResourceMetricsOrder(),
 			pmetrictest.IgnoreMetricsOrder(),
@@ -980,6 +984,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			break
 		}
 	}
+
 	require.NotNil(t, selectedMetrics)
 	require.NoError(t, err)
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
