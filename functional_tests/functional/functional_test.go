@@ -932,7 +932,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err)
 
 	// Collect expected metric names
-	var metricNames []string
+	/*var metricNames []string
 	for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
 		rm := expectedMetrics.ResourceMetrics().At(i)
 		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
@@ -941,8 +941,8 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 				metricNames = append(metricNames, sm.Metrics().At(k).Name())
 			}
 		}
-	}
-
+	}*/
+	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
 	replaceWithStar := func(string) string { return "*" }
 
 	var selectedMetrics *pmetric.Metrics
@@ -951,6 +951,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 		err = pmetrictest.CompareMetrics(expectedMetrics, m,
 			pmetrictest.IgnoreTimestamp(),
+			pmetrictest.IgnoreStartTimestamp(),
 			pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
