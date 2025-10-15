@@ -173,7 +173,6 @@ data:
             - targets:
               - localhost:8889
       signalfx:
-        access_token_passthrough: true
         endpoint: 0.0.0.0:9943
       zipkin:
         endpoint: 0.0.0.0:9411
