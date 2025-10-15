@@ -183,7 +183,7 @@ Create the patch-log-dirs image name.
 Create the validateSecret image name.
 */}}
 {{- define "splunk-otel-collector.image.validateSecret" -}}
-{{- printf "%s:%s" .Values.image.initPatchLogDirs.repository .Values.image.initPatchLogDirs.tag | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.image.validateSecret.repository .Values.image.validateSecret.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{/*
