@@ -95,6 +95,17 @@ data:
               enabled: true
         override: true
         timeout: 15s
+      transform/k8shpascaletargetref:
+        error_mode: ignore
+        metric_statements:
+        - context: resource
+          statements:
+          - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+          - set(attributes["k8s.statefulSet.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+          - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
@@ -102,6 +113,12 @@ data:
         - signalfx
         resource_attributes:
           k8s.container.status.last_terminated_reason:
+            enabled: true
+          k8s.hpa.scaletargetref.apiversion:
+            enabled: true
+          k8s.hpa.scaletargetref.kind:
+            enabled: true
+          k8s.hpa.scaletargetref.name:
             enabled: true
           k8s.kubelet.version:
             enabled: true
@@ -149,6 +166,7 @@ data:
           processors:
           - memory_limiter
           - batch
+          - transform/k8shpascaletargetref
           - resource
           - resource/k8s_cluster
           receivers:
