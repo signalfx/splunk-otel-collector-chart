@@ -75,7 +75,7 @@ kind load docker-image quay.io/splunko11ytest/python_test:latest --name kind
 # On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:
 kind load docker-image ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.11.0 --name kind
 kind load docker-image ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.3.0 --name kind
-kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.19.0 --name kind
+kind load docker-image ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.20.1 --name kind
 kind load docker-image quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0 --name kind
 ```
 

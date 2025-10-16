@@ -755,11 +755,11 @@ prometheus metrics from pods that have generic prometheus-style annotations:
 - `prometheus.io/path`: path to scrape the metrics from, default `/metrics`;
 - `prometheus.io/port`: port to scrape the metrics from, default `9090`.
 
-Set `autodetect.istio=true`, if the otel-collector agent in running in Istio
+Set `autodetect.istio=true`, if the otel-collector agent is running in an Istio
 environment, to make sure that all traces, metrics and logs reported by Istio
-collected in a unified manner.
+are collected in a unified manner.
 
-For example to enable both Prometheus and Istio telemetry add the following
+For example, to enable both Prometheus and Istio telemetry, add the following
 lines to your `values.yaml` file:
 
 ```yaml

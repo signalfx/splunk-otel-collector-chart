@@ -5,7 +5,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -19,11 +18,9 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.uber.org/multierr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -314,7 +311,12 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 
 func DeleteNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	err := clientset.CoreV1().Namespaces().Delete(t.Context(), name, metav1.DeleteOptions{})
-	require.NoError(t, err)
+	if err != nil {
+		// If an object that's being deleted is not found, it's considered successful deletion.
+		// Some tests delete all resources on setup to ensure a clean running environment,
+		// so it's a valid case to attempt to delete an object that doesn't exist.
+		require.True(t, meta.IsNoMatchError(err) || strings.Contains(err.Error(), "not found"), "failed to delete object, err: %w", err)
+	}
 
 	require.Eventually(t, func() bool {
 		_, err = clientset.CoreV1().Namespaces().Get(t.Context(), name, metav1.GetOptions{})
@@ -413,27 +415,4 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
 
 	return selectedMetrics
-}
-
-// CompareResource Copied from util.go in pdatatest to compare ONLY resource attributes,
-// avoiding comparison of metrics scope attributes, schema, values etc... as done by CompareResourceMetrics.
-func CompareResource(expected, actual pcommon.Resource) error {
-	return multierr.Combine(
-		CompareAttributes(expected.Attributes(), actual.Attributes()),
-		CompareDroppedAttributesCount(expected.DroppedAttributesCount(), actual.DroppedAttributesCount()),
-	)
-}
-
-func CompareAttributes(expected, actual pcommon.Map) error {
-	if !expected.Equal(actual) {
-		return fmt.Errorf("attributes don't match expected: %v, actual: %v", expected.AsRaw(), actual.AsRaw())
-	}
-	return nil
-}
-
-func CompareDroppedAttributesCount(expected, actual uint32) error {
-	if expected != actual {
-		return fmt.Errorf("dropped attributes count doesn't match expected: %d, actual: %d", expected, actual)
-	}
-	return nil
 }

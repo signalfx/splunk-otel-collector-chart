@@ -96,7 +96,7 @@ receivers:
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         {{- else }}
-        # Enable prometheus scraping for istio pods only
+        # Enable prometheus scraping for Istio pods only
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
         {{- end }}
         config:
@@ -876,8 +876,8 @@ processors:
   {{- end }}
 
   {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-  # This processor is used to remove excessive istio attributes to avoid running into the dimensions limit.
-  # This configuration assumes single cluster istio deployment. If you run istio in multi-cluster scenarios or make use of the canonical service and revision labels,
+  # This processor is used to remove excessive Istio attributes to avoid running into the dimensions limit.
+  # This configuration assumes single cluster Istio deployment. If you run Istio in multi-cluster scenarios or make use of the canonical service and revision labels,
   # you may need to adjust this configuration.
   attributes/istio:
     include:
@@ -928,6 +928,13 @@ exporters:
     # Temporary disable compression until 0.68.0 to workaround a compression bug
     disable_compression: true
   {{- end }}
+  {{- if .Values.splunkObservability.secureAppEnabled }}
+  otlphttp/secureapp:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": secureapp
+  {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
   {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
@@ -952,9 +959,11 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
     root_path: /hostfs
+    {{- end }}
     {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
@@ -975,6 +984,19 @@ exporters:
     send_otlp_histograms: true
   {{- end }}
   {{- end }}
+
+{{- if and
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+  (.Values.splunkObservability.secureAppEnabled)
+}}
+connectors:
+  routing/logs:
+    default_pipelines: [logs]
+    table:
+      - context: log
+        condition: instrumentation_scope.name == "secureapp"
+        pipelines: [logs/secureapp]
+{{- end }}
 
 service:
   telemetry:
@@ -1007,7 +1029,30 @@ service:
   # The default pipelines should to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
+    {{- if .Values.splunkObservability.secureAppEnabled }}
+    # secure application events
+    logs/secureapp:
+      receivers:
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+        - routing/logs
+        {{- else }}
+        - otlp
+        {{- end }}
+      processors: [memory_limiter, batch]
+      exporters:
+        {{- if .Values.gateway.enabled }}
+        - otlp
+        {{- else }}
+        - otlphttp/secureapp
+        {{- end }}
+    {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+    {{- if .Values.splunkObservability.secureAppEnabled }}
+    logs/split:
+      receivers: [otlp]
+      exporters: [routing/logs]
+    {{- end }}
+    # default logs + profiling data pipeline
     logs:
       receivers:
         {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -1016,7 +1061,11 @@ service:
         {{- end }}
         - fluentforward
         {{- end }}
+        {{- if .Values.splunkObservability.secureAppEnabled }}
+        - routing/logs
+        {{- else }}
         - otlp
+        {{- end }}
       processors:
         - memory_limiter
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
@@ -1209,7 +1258,7 @@ service:
 
     {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
     logs/entities:
-      # Receivers are added dinamically if discovery mode is enabled
+      # Receivers are added dynamically if discovery mode is enabled
       receivers: [nop]
       processors:
         - memory_limiter
@@ -1218,7 +1267,7 @@ service:
         - resource
       exporters: [otlphttp/entities]
 
-    {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     metrics/histograms:
       receivers:
        - receiver_creator

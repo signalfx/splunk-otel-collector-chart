@@ -119,13 +119,13 @@ func (h *mockHost) GetExtensions() map[component.ID]component.Component {
 	return h.extensions
 }
 
-func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.TracesSink {
+func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort int, httpPort int) *consumertest.TracesSink {
 	tc := new(consumertest.TracesSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
 		NetAddr: confignet.AddrConfig{
-			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
+			Endpoint:  fmt.Sprintf("0.0.0.0:%d", grpcPort),
 			Transport: "tcp",
 		},
 	})
@@ -146,7 +146,7 @@ func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.Trac
 
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+			Endpoint: fmt.Sprintf("0.0.0.0:%d", httpPort),
 			Auth: configoptional.Some(confighttp.AuthConfig{
 				Config: configauth.Config{
 					AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
@@ -165,6 +165,10 @@ func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.Trac
 	})
 
 	return tc
+}
+
+func SetupOTLPTracesSinkWithToken(t *testing.T, token string) *consumertest.TracesSink {
+	return SetupOTLPTracesSinkWithTokenAndPorts(t, token, OTLPGRPCReceiverPort, OTLPHTTPReceiverPort)
 }
 
 func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {

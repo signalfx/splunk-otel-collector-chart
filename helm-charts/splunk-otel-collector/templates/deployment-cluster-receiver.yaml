@@ -38,6 +38,9 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-k8s-cluster-receiver
         release: {{ .Release.Name }}
+        {{- if .Values.autodetect.istio }}
+        sidecar.istio.io/inject: "false"
+        {{- end }}
         {{- if .Values.clusterReceiver.podLabels }}
         {{- toYaml .Values.clusterReceiver.podLabels | nindent 8 }}
         {{- end }}
@@ -45,9 +48,6 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-cluster-receiver.yaml") . | sha256sum }}
         {{- if .Values.clusterReceiver.podAnnotations }}
         {{- toYaml .Values.clusterReceiver.podAnnotations | nindent 8 }}
-        {{- end }}
-        {{- if .Values.autodetect.istio }}
-        sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
       {{- $hostNetworkEnabled := include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" . }}
