@@ -3891,15 +3891,15 @@ resourceMetrics:
                     - key: k8s.node.uid
                       value:
                         stringValue: 12c32fcb-a6e7-4bab-b7c9-1cd2e7f3d50c
+                    - key: k8s.kubelet.version
+                      value:
+                        stringValue: abcd
                     - key: metric_source
                       value:
                         stringValue: kubernetes
                     - key: receiver
                       value:
                         stringValue: k8scluster
-                    - key: k8s.kubelet.version
-                      value:
-                        stringValue: abcd
                   timeUnixNano: "1000000"
             name: k8s.node.condition_ready
         scope: {}
