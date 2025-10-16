@@ -26,6 +26,12 @@ receivers:
     resource_attributes:
       k8s.container.status.last_terminated_reason:
         enabled: true
+      k8s.hpa.scaletargetref.apiversion:
+        enabled: true
+      k8s.hpa.scaletargetref.kind:
+        enabled: true
+      k8s.hpa.scaletargetref.name:
+        enabled: true
       k8s.kubelet.version:
         enabled: true
     {{- end }}
@@ -120,6 +126,18 @@ processors:
   {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
+
+  transform/k8shpascaletargetref:
+    error_mode: ignore
+    metric_statements:
+    - context: resource
+      statements:
+      - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+        where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+      - set(attributes["k8s.statefulset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+        where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+      - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+        where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
@@ -298,6 +316,7 @@ service:
       processors:
         - memory_limiter
         - batch
+        - transform/k8shpascaletargetref
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
