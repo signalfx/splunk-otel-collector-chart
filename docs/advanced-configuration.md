@@ -998,11 +998,7 @@ agent:
   config:
     receivers:
       signalfx:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
+        include_metadata: true
 ```
 
 For the gateway:
@@ -1011,9 +1007,5 @@ gateway:
   config:
     receivers:
       signalfx:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
+        include_metadata: true
 ```
