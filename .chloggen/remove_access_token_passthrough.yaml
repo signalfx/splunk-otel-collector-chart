@@ -1,14 +1,12 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: breaking
+change_type: enchancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: gateway
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Remove `access_token_passthrough` from the gateway configuration since it has been removed from `signalfx` receiver
+note: Replace `access_token_passthrough` with `include_metadata` in the gateway configuration. This change follows the removal of `access_token_passthrough` from the `signalfx` receiver and maintains the previous functionality of forwarding the access token.
 # One or more tracking issues related to the change
 issues: [2122]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext: |
-  Note: As `access_token_passthrough` option is no longer supported, to achieve similar behavior use
-  `include_metadata` in the `signalfx` receiver to pass the token [example usage](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#token-passthrough)
+subtext:

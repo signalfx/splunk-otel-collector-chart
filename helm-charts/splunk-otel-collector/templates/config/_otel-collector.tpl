@@ -30,6 +30,7 @@ receivers:
 
   signalfx:
     endpoint: 0.0.0.0:9943
+    include_metadata: true
 
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
