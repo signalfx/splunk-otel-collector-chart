@@ -1180,7 +1180,13 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        {{- if or
+              (and
+                (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+                (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+              )
+              (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "false")
+        }}
         - receiver_creator
         {{- end }}
         - signalfx
