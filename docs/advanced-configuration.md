@@ -989,4 +989,3 @@ gateway:
           http:
             include_metadata: true
 ```
-
