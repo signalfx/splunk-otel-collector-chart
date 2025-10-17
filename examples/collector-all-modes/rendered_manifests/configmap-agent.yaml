@@ -296,8 +296,6 @@ data:
               == "kube-scheduler")
         watch_observers:
         - k8s_observer
-      signalfx:
-        endpoint: 0.0.0.0:9943
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -329,7 +327,6 @@ data:
           - hostmetrics
           - kubeletstats
           - otlp
-          - signalfx
         metrics/agent:
           exporters:
           - signalfx

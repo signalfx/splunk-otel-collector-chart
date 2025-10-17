@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: e4e66510482874b16a34417a916267bddc6182e6e2eab81a9981834cc5c11d6c
+        checksum/config: ad3b1565363e202363c9b2a89a72dd55927d48f2c748872df2f5d303ade76f2b
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -77,10 +77,6 @@ spec:
         - name: otlp-http
           containerPort: 4318
           hostPort: 4318
-          protocol: TCP
-        - name: signalfx
-          containerPort: 9943
-          hostPort: 9943
           protocol: TCP
         - name: zipkin
           containerPort: 9411

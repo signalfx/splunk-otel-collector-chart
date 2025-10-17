@@ -31,10 +31,6 @@ spec:
     port: 4318
     targetPort: otlp-http
     protocol: TCP
-  - name: signalfx
-    port: 9943
-    targetPort: signalfx
-    protocol: TCP
   selector:
     app: splunk-otel-collector
     component: otel-collector-agent
