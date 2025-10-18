@@ -98,6 +98,8 @@ data:
             enabled: true
           k8s.kubelet.version:
             enabled: true
+          k8s.pod.qos_class:
+            enabled: true
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
