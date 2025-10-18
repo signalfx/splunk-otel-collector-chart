@@ -955,7 +955,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
 			pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.qos_class", metricNames...),
 			pmetrictest.IgnoreMetricValues(metricNames...),
 			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
 			pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
