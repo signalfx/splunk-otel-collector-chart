@@ -474,9 +474,6 @@ receivers:
       k8s.node.cpu.usage:
         enabled: false
     {{- end }}
-
-  signalfx:
-    endpoint: 0.0.0.0:9943
   {{- end }}
 
   {{- if .Values.targetAllocator.enabled  }}
@@ -1183,7 +1180,6 @@ service:
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
-        - signalfx
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
         {{- end }}
