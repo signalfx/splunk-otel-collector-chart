@@ -93,7 +93,7 @@ receivers:
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         {{- else }}
         # Enable prometheus scraping for Istio pods only
-        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*")
         {{- end }}
         config:
           {{- if .Values.featureGates.useLightPrometheusReceiver }}
