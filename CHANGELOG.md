@@ -4,6 +4,45 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.137.0] - 2025-10-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.137.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.137.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent`: Remove `signalfx` receiver from the default agent configuration ([#2120](https://github.com/signalfx/splunk-otel-collector-chart/pull/2120))
+  This change affects the metrics pipeline only. Data should be sent to the agent in the OTLP format instead of SignalFx.
+
+
+### 💡 Enhancements 💡
+
+- `agent`: Bind the OTLP HTTP port 4318 to the host network ([#2102](https://github.com/signalfx/splunk-otel-collector-chart/pull/2102))
+  This change is effective only for Windows nodes, where the port binding was previously missing.
+  For Linux nodes, the hostNetwork setting already ensures the port is bound, so no change in behavior should occur for default chart config.
+
+- `agent`: Configuration changes to support Secure Application features in Splunk Observability Cloud ([#2106](https://github.com/signalfx/splunk-otel-collector-chart/pull/2106))
+- `chart`: Move deprecated Istio pod annotation to pod label ([#2108](https://github.com/signalfx/splunk-otel-collector-chart/pull/2108))
+  The `sidecar.istio.io/inject` [annotation](https://istio.io/latest/docs/reference/config/annotations/#SidecarInject)
+  has been deprecated in favor of the [label](https://istio.io/latest/docs/reference/config/labels/#SidecarInject)
+  with the same name.
+
+- `clusterReceiver`: Enable additional attributes (k8s.kubelet.version) for k8s cluster receiver ([#2103](https://github.com/signalfx/splunk-otel-collector-chart/pull/2103))
+- `clusterReceiver`: Added k8s.hpa.scaletargetref.{api_version,kind,name} resource attributes, plus transform logic mapping HPA scaleTargetRef to workload (replicaset/statefulset/deployment) names in the Kubernetes cluster receiver configuration ([#2126](https://github.com/signalfx/splunk-otel-collector-chart/pull/2126))
+- `gateway`: Replace `access_token_passthrough` with `include_metadata` in the gateway configuration. This change follows the removal of `access_token_passthrough` from the `signalfx` receiver and maintains the previous functionality of forwarding the access token. ([#2122](https://github.com/signalfx/splunk-otel-collector-chart/pull/2122))
+- `gateway`: Configuration changes to support Secure Application features in Splunk Observability Cloud ([#2128](https://github.com/signalfx/splunk-otel-collector-chart/pull/2128))
+- `operator`: Use [splunk-otel-instrumentation-python](quay.io/signalfx/splunk-otel-instrumentation-python) image for auto-instrumentation of Python applications with the operator. ([#1965](https://github.com/signalfx/splunk-otel-collector-chart/pull/1965))
+  - To use a different image for Python auto-instrumentation, set the configuration option `instrumentation.python.image`.
+
+- `operator`: Bump java to v2.20.1 in helm-charts/splunk-otel-collector/values.yaml ([#2070](https://github.com/signalfx/splunk-otel-collector-chart/pull/2070))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix agent configuration when metrics are disabled for Splunk O11y Cloud ([#2083](https://github.com/signalfx/splunk-otel-collector-chart/pull/2083))
+  Some functionality should not be configured for the agent when metrics are disabled,
+  as it causes the agent to crash on startup.
+
+- `chart`: Fix creation of validateSecret image name to use correct image configuration values ([#2123](https://github.com/signalfx/splunk-otel-collector-chart/pull/2123))
+
 ## [0.136.0] - 2025-10-02
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.136.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.136.1).
