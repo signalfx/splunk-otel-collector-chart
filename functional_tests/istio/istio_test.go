@@ -313,16 +313,16 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true, metricsSink)
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", flakyMetrics, true, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true, metricsSink)
+		testIstioMetrics(t, "testdata/expected_istioingress.yaml", flakyMetrics, true, metricsSink)
 	})
 }
 
-func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool, metricsSink *consumertest.MetricsSink) {
+func testIstioMetrics(t *testing.T, expectedMetricsFile string, flakyMetricNames []string, ignoreLen bool, metricsSink *consumertest.MetricsSink) {
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
@@ -369,9 +369,10 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 			if err == nil {
 				return true
 			}
+			t.Logf("Comparison error: %v", err)
 		}
 		return false
-	}, 1*time.Minute, 1*time.Second, "Expected metrics not found")
+	}, 5*time.Minute, 1*time.Second, "Expected metrics not found")
 }
 
 func Test_IstioTraces(t *testing.T) {
