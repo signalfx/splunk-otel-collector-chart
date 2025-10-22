@@ -349,6 +349,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		}
 	}
 
+	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
 		pmetrictest.IgnoreTimestamp(),

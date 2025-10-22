@@ -314,6 +314,14 @@ script_end_time=$(date +"%Y-%m-%d %H:%M:%S")
 echo "Script end time: $script_end_time"
 echo "Script end time: $script_end_time" >> "$output_file"
 
+echo "Trying to ls istio dir to see contents"
+ls ../functional_tests/istio/testdata
+
+echo "Copying golden files to temp directory"
+
+cp ../functional_tests/istio/testdata/expected_istiod.yaml $temp_dir/
+cp ../functional_tests/istio/testdata/expected_istioingress.yaml $temp_dir/
+
 # Create a ZIP archive of all the collected YAML files
 output_zip="splunk_kubernetes_debug_info_$(date +%Y%m%d_%H%M%S).zip"
 echo "Creating ZIP archive: $output_zip"
