@@ -962,7 +962,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
 	)
 	if err != nil {
-		t.Logf("K8s cluster receiver metrics comparison failed: %v", err)
 		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
 	}
