@@ -30,7 +30,7 @@ receivers:
 
   signalfx:
     endpoint: 0.0.0.0:9943
-    access_token_passthrough: true
+    include_metadata: true
 
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
@@ -125,6 +125,13 @@ exporters:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
       authenticator: headers_setter
+  {{- if .Values.splunkObservability.secureAppEnabled }}
+  otlphttp/secureapp:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": secureapp
+  {{- end }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -158,7 +165,7 @@ exporters:
   {{- end }}
 
 {{- if and
-  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled))
   (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
 }}
 connectors:
@@ -169,6 +176,11 @@ connectors:
       - context: log
         condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true
         pipelines: [logs/entities]
+      {{- if .Values.splunkObservability.secureAppEnabled }}
+      - context: log
+        condition: instrumentation_scope.name == "secureapp"
+        pipelines: [logs/secureapp]
+      {{- end }}
 {{- end }}
 
 service:
@@ -276,15 +288,23 @@ service:
     # entity events
     logs/entities:
       receivers:
-        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true")  (.Values.splunkObservability.secureAppEnabled) }}
         - routing/logs
         {{- else }}
         - otlp
         {{- end }}
       processors: [memory_limiter, batch]
       exporters: [otlphttp/entities]
+    {{- if .Values.splunkObservability.secureAppEnabled }}
+    # secureapp events
+    logs/secureapp:
+      receivers:
+        - routing/logs
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/secureapp]
     {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
+    {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     logs/split:
       receivers: [otlp]

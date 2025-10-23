@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.136.0
+    helm.sh/chart: splunk-otel-collector-0.137.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.136.1"
+    app.kubernetes.io/version: "0.137.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.136.0
+    chart: splunk-otel-collector-0.137.0
     release: default
 data:
   relay: |
@@ -299,8 +299,6 @@ data:
               == "kube-scheduler")
         watch_observers:
         - k8s_observer
-      signalfx:
-        endpoint: 0.0.0.0:9943
     service:
       extensions:
       - health_check
@@ -330,7 +328,6 @@ data:
           - hostmetrics
           - kubeletstats
           - otlp
-          - signalfx
         metrics/agent:
           exporters:
           - signalfx
