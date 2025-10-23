@@ -972,6 +972,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
 			pmetrictest.ChangeResourceAttributeValue("k8s.kubelet.version", replaceWithStar),
 			pmetrictest.ChangeResourceAttributeValue("k8s.container.status.last_terminated_reason", replaceWithStar),
+			pmetrictest.ChangeResourceAttributeValue("k8s.pod.qos_class", replaceWithStar),
 			pmetrictest.IgnoreScopeVersion(),
 			pmetrictest.IgnoreResourceMetricsOrder(),
 			pmetrictest.IgnoreMetricsOrder(),
