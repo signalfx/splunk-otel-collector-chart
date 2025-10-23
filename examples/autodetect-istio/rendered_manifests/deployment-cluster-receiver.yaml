@@ -31,7 +31,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: 456e57d981c41c70b5aaea1c305bfbb524f05a2a1663585aa4ca8ee0140b632c
+        checksum/config: a5e897ac237e570c12b50511a026194548ed9765e0b8038608349dcb3468fed9
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
