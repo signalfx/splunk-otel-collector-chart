@@ -8,6 +8,24 @@ repos:
       entry: make render
       language: system
       pass_filenames: false
+    - id: go-fmt
+      name: Go Format
+      entry: make gofmt-all
+      language: system
+      files: '\.go$'
+      pass_filenames: false
+    - id: go-lint
+      name: Go Lint
+      entry: make golint-all
+      language: system
+      files: '\.go$'
+      pass_filenames: false
+    - id: go-mod-tidy
+      name: Go Mod Tidy
+      entry: make tidy-all
+      language: system
+      files: '(\.go$|go\.mod$|go\.sum$)'
+      pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
