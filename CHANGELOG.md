@@ -12,7 +12,21 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 - `agent`: Remove `signalfx` receiver from the default agent configuration ([#2120](https://github.com/signalfx/splunk-otel-collector-chart/pull/2120))
   This change affects the metrics pipeline only. Data should be sent to the agent in the OTLP format instead of SignalFx.
-
+  If the `signalfx` receiver is still needed, the following section can be added to your `values.yaml` file:
+  ```
+  agent:
+    config:
+      receivers:
+        signalfx:
+          endpoint: 0.0.0.0:9943
+    ports:
+      signalfx:
+        containerPort: 9943
+        hostPort: 9943
+        protocol: TCP
+        enabled_for: [metrics]
+  ```
+  Please note that the `signalfx` receiver will eventually be deprecated and removed.
 
 ### 💡 Enhancements 💡
 
