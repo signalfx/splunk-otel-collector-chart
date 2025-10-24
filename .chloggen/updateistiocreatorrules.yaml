@@ -10,5 +10,6 @@ issues: [2132]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The detection rules have been updated to be less restrictive. Metrics will now be scraped from istiod,
-  Istio gateways, and Istio sidecars (`istio-proxy` containers.)
+  This change may impact billing, as the detection rules have been updated to be less restrictive.
+  Metrics will now be scraped from istiod, Istio gateways, and Istio sidecars (`istio-proxy` containers.)
+  Metrics were previously only being scraped from istiod.
