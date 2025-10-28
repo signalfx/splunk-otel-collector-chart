@@ -158,12 +158,6 @@ Get Splunk API URL.
 {{- .Values.splunkObservability.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
 {{- end -}}
 
-{{/*
-Create the fluentd image name.
-*/}}
-{{- define "splunk-otel-collector.image.fluentd" -}}
-{{- printf "%s:%s" .Values.image.fluentd.repository .Values.image.fluentd.tag | trimSuffix ":" -}}
-{{- end -}}
 
 {{/*
 Create the opentelemetry collector image name.

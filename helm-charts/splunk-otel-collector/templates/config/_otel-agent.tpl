@@ -4,7 +4,7 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
     {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
@@ -40,10 +40,6 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
-  {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-  fluentforward:
-    endpoint: 0.0.0.0:8006
-  {{- end }}
 
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode
@@ -487,7 +483,7 @@ receivers:
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
     {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
@@ -761,19 +757,6 @@ processors:
   {{- end }}
   {{- end }}
 
-  {{- if eq .Values.logsEngine "fluentd" }}
-  # Move flat fluentd logs attributes to resource attributes
-  groupbyattrs/logs:
-    keys:
-     - com.splunk.source
-     - com.splunk.sourcetype
-     - container.id
-     - fluent.tag
-     - k8s.container.name
-     - k8s.namespace.name
-     - k8s.pod.name
-     - k8s.pod.uid
-  {{- end }}
 
   {{- if not .Values.gateway.enabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
@@ -1010,7 +993,7 @@ service:
                 without_units: true
                 without_type_suffix: true
   extensions:
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+    {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
     - file_storage
     {{- end }}
     {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
@@ -1052,11 +1035,8 @@ service:
     # default logs + profiling data pipeline
     logs:
       receivers:
-        {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-        {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.containers.enabled }}
         - filelog
-        {{- end }}
-        - fluentforward
         {{- end }}
         {{- if .Values.splunkObservability.secureAppEnabled }}
         - routing/logs
@@ -1065,9 +1045,6 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
-        - groupbyattrs/logs
-        {{- end }}
         - k8sattributes
         {{- if not .Values.gateway.enabled }}
         - filter/logs
@@ -1101,7 +1078,7 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if and (eq .Values.logsEngine "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
+    {{- if or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled }}
     logs/host:
       receivers:
         {{- if .Values.logsCollection.extraFileLogs }}

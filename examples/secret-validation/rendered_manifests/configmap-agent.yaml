@@ -262,8 +262,6 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       otlp:
         protocols:
           grpc:
@@ -308,7 +306,6 @@ data:
           - resource/logs
           receivers:
           - filelog
-          - fluentforward
           - otlp
       telemetry:
         metrics:

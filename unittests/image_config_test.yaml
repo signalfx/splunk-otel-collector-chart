@@ -7,7 +7,6 @@ templates:
   - "configmap-agent.yaml"
   - "configmap-gateway.yaml"
   - "configmap-cluster-receiver.yaml"
-  - "configmap-fluentd.yaml"
 values:
   - ./values/basic.yaml
 release:
@@ -53,24 +52,6 @@ tests:
           path: spec.template.spec.containers[0].image
           value: "custom-cluster-repo:3.4.5"
 
-  - it: should use correct fluentd image configuration in agent daemonset
-    template: daemonset.yaml
-    set:
-      logsEngine: fluentd
-      splunkPlatform:
-        endpoint: "https://splunk.example.com"
-        token: "test-token"
-      image:
-        fluentd:
-          repository: custom-fluentd-repo
-          tag: "4.5.6"
-    asserts:
-      - matchRegex:
-          path: spec.template.spec.initContainers[?(@.name=="prepare-fluentd-config")].image
-          pattern: "^custom-fluentd-repo:4.5.6$"
-      - matchRegex:
-          path: spec.template.spec.containers[?(@.name=="fluentd")].image
-          pattern: "^custom-fluentd-repo:4.5.6$"
 
   - it: should use correct initPatchLogDirs image configuration in agent daemonset
     template: daemonset.yaml
