@@ -290,8 +290,6 @@ data:
           host.name: EXPR(env("K8S_NODE_NAME"))
         start_at: beginning
         storage: file_storage
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       otlp:
         protocols:
           grpc:
@@ -336,7 +334,6 @@ data:
           - resource/logs
           receivers:
           - filelog
-          - fluentforward
           - otlp
         logs/host:
           exporters:

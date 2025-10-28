@@ -13,9 +13,6 @@ distribution: eks
 image:
   otelcol:
     repository: ${ECR_OTELCOL_REPO}
-  fluentd:
-    repository: ${ECR_FLUENTD_REPO}
-    tag: ${ECR_FLUENTD_REPO_TAG}
   initPatchLogDirs:
     repository: public.ecr.aws/docker/library/almalinux
     tag: "9"

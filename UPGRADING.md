@@ -1,5 +1,42 @@
 # Upgrade guidelines
 
+## 0.137.0 to 0.138.0
+
+### Fluentd sidecar has been removed
+
+The legacy fluentd sidecar container and related configuration options have been removed from the chart.
+All users should now use the native OpenTelemetry logs collection, which is the default and provides
+better performance and resource efficiency.
+
+If you still need to use fluentd for log collection, you can run it as a separate deployment using the
+[official fluentd helm chart](https://github.com/fluent/helm-charts) and forward logs to the Splunk
+OpenTelemetry Collector using the fluentforward receiver.
+
+#### Running fluentd separately with fluentforward
+
+1. **Enable the fluentforward receiver and port in the collector:**
+
+```yaml
+agent:
+  ports:
+    fluentforward:
+      containerPort: 8006
+      hostPort: 8006
+      protocol: TCP
+      enabled_for: [logs]
+  config:
+    receivers:
+      fluentforward:
+        endpoint: 0.0.0.0:8006
+    service:
+      pipelines:
+        logs:
+          receivers: [fluentforward, otlp]
+```
+
+2. **Deploy fluentd separately** using the [fluentd helm chart](https://github.com/fluent/helm-charts) and
+configure it to forward logs to the node IP on port 8006 (the collector agent listens on hostPort).
+
 ## 0.134.0 to 0.135.0
 
 This release includes the breaking change of removing the `splunkObservability.logsEnabled` option.

@@ -352,8 +352,6 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       hostmetrics:
         collection_interval: 10s
         root_path: /hostfs
@@ -437,7 +435,6 @@ data:
           - resource/logs
           receivers:
           - filelog
-          - fluentforward
           - otlp
         metrics:
           exporters:

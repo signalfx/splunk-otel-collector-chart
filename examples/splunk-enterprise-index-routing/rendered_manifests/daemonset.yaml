@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: e24a6d31c84923cface7f50c4a134a62b0865306db441d3e75b25357e755f986
+        checksum/config: 1b5fa744d4129658f5da94e14bbd54f67158f310379978772306b71109097eb5
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -58,10 +58,6 @@ spec:
         args:
         - --config=/conf/relay.yaml
         ports:
-        - name: fluentforward
-          containerPort: 8006
-          hostPort: 8006
-          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317
