@@ -17,7 +17,6 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   official fluentd helm chart and forward logs to the collector using the fluentforward receiver.
   See the [upgrade guide](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01370-to-01380)
   for detailed instructions.
-  
 
 ## [0.137.0] - 2025-10-21
 
