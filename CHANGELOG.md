@@ -4,6 +4,23 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.138.0] - 2025-10-29
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.138.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.138.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Remove fluentd sidecar container and related configuration options ([#2138](https://github.com/signalfx/splunk-otel-collector-chart/pull/2138))
+  The legacy fluentd sidecar container has been removed from the chart. All users should now use the native
+  OpenTelemetry logs collection, which is the default and provides better performance and resource efficiency.
+  
+  If you still need to use fluentd for log collection, you can run it as a separate deployment using the
+  official fluentd helm chart and forward logs to the collector using the fluentforward receiver.
+  
+  See the [upgrade guide](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01370-to-01380)
+  for detailed instructions.
+  
+
 ## [0.137.0] - 2025-10-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.137.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.137.0).
