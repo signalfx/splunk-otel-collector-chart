@@ -3,7 +3,7 @@
 
 module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 
-go 1.24.6
+go 1.24.9
 
 require (
 	github.com/docker/docker v28.4.0+incompatible
