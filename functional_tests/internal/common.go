@@ -378,7 +378,7 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	}
 }
 
-// SelectMetricSet find a metrics payload containing a target metric without any re-checking logic.
+// SelectMetricSet finds a metrics payload containing a target metric without any re-checking logic.
 func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
 	var selectedMetrics *pmetric.Metrics
 
