@@ -483,8 +483,9 @@ data:
                 : 9090`'
               metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
                 : "/metrics"`'
-            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev"
-              in labels
+            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev"
+              in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot"
+              or name matches "istio.*")
         watch_observers:
         - k8s_observer
       zipkin:

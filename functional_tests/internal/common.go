@@ -378,40 +378,48 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	}
 }
 
+// SelectMetricSet finds a metrics payload containing a target metric without any re-checking logic.
+func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
+	var selectedMetrics *pmetric.Metrics
+
+	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
+		m := metricSink.AllMetrics()[h]
+		foundTargetMetric := false
+
+	OUTER:
+		for i := 0; i < m.ResourceMetrics().Len(); i++ {
+			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+					metric := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+					if metric.Name() == targetMetric {
+						foundTargetMetric = true
+						break OUTER
+					}
+				}
+			}
+		}
+
+		if !foundTargetMetric {
+			continue
+		}
+
+		if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
+			selectedMetrics = &m
+			t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
+			break
+		}
+	}
+
+	return selectedMetrics
+}
+
 // SelectMetricSetWithTimeout finds a metrics payload containing a target metric with Eventually timeout
 func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool, timeout time.Duration, interval time.Duration) *pmetric.Metrics {
 	var selectedMetrics *pmetric.Metrics
 
 	require.Eventuallyf(t, func() bool {
-		for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
-			m := metricSink.AllMetrics()[h]
-			foundTargetMetric := false
-
-		OUTER:
-			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-						metric := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						if metric.Name() == targetMetric {
-							foundTargetMetric = true
-							break OUTER
-						}
-					}
-				}
-			}
-
-			if !foundTargetMetric {
-				continue
-			}
-
-			if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
-				selectedMetrics = &m
-				t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
-				return true
-			}
-		}
-		t.Logf("Waiting for target metric '%s'...", targetMetric)
-		return false
+		selectedMetrics = SelectMetricSet(t, expected, targetMetric, metricSink, ignoreLen)
+		return selectedMetrics != nil
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
 
 	return selectedMetrics
