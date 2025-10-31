@@ -34,7 +34,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if not (eq (toString .Values.clusterReceiver.securityContext) "<nil>") }}
 [WARNING] "clusterReceiver.securityContext" parameter is deprecated. Please use "clusterReceiver.podSecurityContext" instead.
 {{ end }}
-{{- if not (eq (toString .Values.logsEngine) "<nil>") }}
+{{- if .Values.logsEngine }}
 [WARNING] "logsEngine" parameter is deprecated and will be removed in a future release. Only native OpenTelemetry logs collection is supported.
           You can safely remove this parameter from your values.yaml.
 {{ end }}
