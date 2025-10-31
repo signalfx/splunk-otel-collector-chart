@@ -183,7 +183,7 @@ splunkObservability:
 # The fluentd option has been removed.
 ################################################################################
 
-logsEngine: otel
+logsEngine: ""
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
@@ -573,7 +573,6 @@ clusterReceiver:
 
 #################################################################
 # Native OpenTelemetry logs collection
-# Applicable only if "logsEngine: otel" (set by default).
 # Receiver Documentation: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
 # OpenTelemetry Logging Documentation: https://opentelemetry.io/docs/specs/otel/logs
 #################################################################
