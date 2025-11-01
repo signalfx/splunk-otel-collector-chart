@@ -1014,7 +1014,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.20.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.21.1
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
