@@ -1000,7 +1000,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.11.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.12.0-beta.1
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
