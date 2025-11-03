@@ -183,7 +183,7 @@ splunkObservability:
 # The fluentd option has been removed.
 ################################################################################
 
-# logsEngine: otel
+logsEngine: otel
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
@@ -542,7 +542,11 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  k8sObjects: []
+  k8sObjects:
+    - name: pods
+      mode: pull
+      interval: 6h
+
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
   # This option can be useful when IMDS access is blocked for some reason. Running in the host network helps
