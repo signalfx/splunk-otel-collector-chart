@@ -3,7 +3,7 @@ change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: clusterReceiver
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: "Added k8s.pod.qos_class, and removed k8s.container.status.last_terminated_reason and k8s.hpa.scaletargetref.apiversion resource attribute from the Kubernetes Cluster Receiver. Also added pods k8sobjects to be pulled every 6h"
+note: "Added k8s.pod.qos_class"
 # One or more tracking issues related to the change
 issues: [2144]
 # (Optional) One or more lines of additional information to render under the primary note.
