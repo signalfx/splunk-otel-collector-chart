@@ -111,9 +111,6 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
-        metrics:
-          k8s.node.condition:
-            enabled: true
         resource_attributes:
           k8s.hpa.scaletargetref.kind:
             enabled: true
