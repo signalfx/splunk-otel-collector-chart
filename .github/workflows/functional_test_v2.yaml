@@ -266,7 +266,6 @@ jobs:
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: aks
-      SKIP_TESTS: "true"
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
