@@ -26,10 +26,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-operator-8b694f79-wtbqq
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a09a7a20-2188-44c1-90b8-6901be1c99d9
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -59,10 +62,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -92,10 +98,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -125,10 +134,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-gtkd8
+                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-4b5nn
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
                     - key: k8s.pod.uid
                       value:
-                        stringValue: bf4f8d2d-7014-4b0a-ab60-11fe49807f92
+                        stringValue: c6ae5664-cd6e-4d72-8110-976ea59a8bbb
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -158,10 +170,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -191,10 +206,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
+                        stringValue: coredns-674b8bbfcf-gf6jl
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -225,9 +243,12 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: etcd-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: d825b0a2-399c-4d70-bd47-73bc520f7b97
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -257,10 +278,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -291,9 +315,12 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 996db496-c1c2-4138-ac95-378419a59e3a
+                        stringValue: 3c7a30be-e0a1-4030-b6e6-8a1cbc2e6bd1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -324,9 +351,12 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 7eb4e50e-a67b-48bf-9374-cc098b3f16cc
+                        stringValue: 9cbff581-baf9-45d1-bfa6-c08904003c09
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -356,10 +386,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kube-proxy-wcqrh
+                        stringValue: kube-proxy-2z9gm
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 7993a892-5c58-4f7f-bbaf-6d3b6bedc2aa
+                        stringValue: 7fa90e07-c69d-4d9a-82e8-2c01d53a6a00
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -390,9 +423,12 @@ resourceMetrics:
                     - key: k8s.pod.name
                       value:
                         stringValue: kube-scheduler-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 2951e617-8270-4c2a-9439-cf186dd33533
+                        stringValue: 6dbb5288-5bfc-4ab5-9bc7-f0ef0c3b236b
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -422,10 +458,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: local-path-provisioner-7dc846544d-tqcxz
+                        stringValue: local-path-provisioner-7dc846544d-7lrt6
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 6ae50df0-fcca-4f9e-bec8-094d33ecf03e
+                        stringValue: cb91b260-e01e-49bf-b79c-9a34a6e81833
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -443,7 +482,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 009baf90af35d318ed52824d02137b7579b89c4415e462186742b1849fb8b12b
+                        stringValue: 03ba5dba62022f54b6d1f7b23612416984fcec554209aeeb7c5dfdb783f9a415
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/etcd
@@ -473,142 +512,7 @@ resourceMetrics:
                         stringValue: etcd-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: d825b0a2-399c-4d70-bd47-73bc520f7b97
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asDouble: 0.1
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 0382489a92637411a915d36e072daaac3f476a67faf0c2e1426ddc67261091d6
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asDouble: 0.1
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 10ee45ee5cd5d3fff3df1be5d6f6a66d33dc8e368d3bb98e5706caaaf3aff5c2
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/kube-scheduler-amd64
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.33.2
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: kube-scheduler
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: kube-scheduler-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 2951e617-8270-4c2a-9439-cf186dd33533
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asDouble: 0.1
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 2241d68ee8d621698d8b91c4fff0121597c47553a7d6f4b87640acabff0d0d90
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -623,7 +527,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: b5c707cdd7fffeebba5c5c3234ac69476ce80b3c75bbde2f7a6d776766d20278
+                        stringValue: 0b5dd2921842a640edead4fe867a709551d482f1ca2b4e4ded69fc5406633bf9
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-apiserver-amd64
@@ -653,52 +557,7 @@ resourceMetrics:
                         stringValue: kube-apiserver-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 996db496-c1c2-4138-ac95-378419a59e3a
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asDouble: 0.2
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: 3c7a30be-e0a1-4030-b6e6-8a1cbc2e6bd1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -713,13 +572,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
+                        stringValue: 263b96d3db9b508ebacfa8de4d9f2dcdcafae14845f96640f3f1f24d3f366b39
                     - key: container.image.name
                       value:
-                        stringValue: docker.io/kindest/kindnetd
+                        stringValue: registry.k8s.io/coredns/coredns
                     - key: container.image.tag
                       value:
-                        stringValue: v20250512-df8de77b
+                        stringValue: v1.12.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -731,7 +590,7 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: kindnet-cni
+                        stringValue: coredns
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -740,10 +599,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: coredns-674b8bbfcf-gf6jl
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -758,52 +617,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asDouble: 0.2
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: e6d7d8a93c81b130be13e5b4e25ff638bb3917db71e8ceed721a2219e3497dfc
+                        stringValue: 5e40ca657032afdf9675b2ec1524d60e88a6afe00fb674128a7d4f253268c046
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-controller-manager-amd64
@@ -833,7 +647,7 @@ resourceMetrics:
                         stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 7eb4e50e-a67b-48bf-9374-cc098b3f16cc
+                        stringValue: 9cbff581-baf9-45d1-bfa6-c08904003c09
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -841,113 +655,20 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
-            name: k8s.container.cpu_request
-          - gauge:
-              dataPoints:
-                - asInt: "178257920"
+                - asDouble: 0.2
                   attributes:
                     - key: cluster_name
                       value:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 0382489a92637411a915d36e072daaac3f476a67faf0c2e1426ddc67261091d6
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "178257920"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 2241d68ee8d621698d8b91c4fff0121597c47553a7d6f4b87640acabff0d0d90
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "524288000"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
                     - key: container.image.name
                       value:
                         stringValue: quay.io/signalfx/splunk-otel-collector
                     - key: container.image.tag
                       value:
-                        stringValue: 0.134.0
+                        stringValue: 0.138.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -968,10 +689,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -979,14 +700,104 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
-                - asInt: "52428800"
+                - asDouble: 0.1
                   attributes:
                     - key: cluster_name
                       value:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
+                        stringValue: 6c9abb5b81b3cb30c1a8c9311e299e4e72ecd8ef5243ab74b762899277136bb0
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asDouble: 0.2
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asDouble: 0.1
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
                     - key: container.image.name
                       value:
                         stringValue: docker.io/kindest/kindnetd
@@ -1013,10 +824,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: kindnet-rl62g
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1024,425 +835,14 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
-                - asInt: "524288000"
+                - asDouble: 0.1
                   attributes:
                     - key: cluster_name
                       value:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-            name: k8s.container.memory_limit
-          - gauge:
-              dataPoints:
-                - asInt: "104857600"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 009baf90af35d318ed52824d02137b7579b89c4415e462186742b1849fb8b12b
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/etcd
-                    - key: container.image.tag
-                      value:
-                        stringValue: 3.5.21-0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: etcd
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: d825b0a2-399c-4d70-bd47-73bc520f7b97
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "73400320"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 0382489a92637411a915d36e072daaac3f476a67faf0c2e1426ddc67261091d6
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "73400320"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 2241d68ee8d621698d8b91c4fff0121597c47553a7d6f4b87640acabff0d0d90
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "524288000"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "52428800"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
-                    - key: container.image.name
-                      value:
-                        stringValue: docker.io/kindest/kindnetd
-                    - key: container.image.tag
-                      value:
-                        stringValue: v20250512-df8de77b
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: kindnet-cni
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: kindnet-9c5vl
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "524288000"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-            name: k8s.container.memory_request
-          - gauge:
-              dataPoints:
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 009baf90af35d318ed52824d02137b7579b89c4415e462186742b1849fb8b12b
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/etcd
-                    - key: container.image.tag
-                      value:
-                        stringValue: 3.5.21-0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: etcd
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: d825b0a2-399c-4d70-bd47-73bc520f7b97
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 0382489a92637411a915d36e072daaac3f476a67faf0c2e1426ddc67261091d6
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 10ee45ee5cd5d3fff3df1be5d6f6a66d33dc8e368d3bb98e5706caaaf3aff5c2
+                        stringValue: ec346344cc9ad1f655e06442c287709d153c898cf31aa216c5b3620ccb8d069e
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-scheduler-amd64
@@ -1472,7 +872,7 @@ resourceMetrics:
                         stringValue: kube-scheduler-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 2951e617-8270-4c2a-9439-cf186dd33533
+                        stringValue: 6dbb5288-5bfc-4ab5-9bc7-f0ef0c3b236b
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1480,6 +880,9 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
+            name: k8s.container.cpu_request
+          - gauge:
+              dataPoints:
                 - asInt: "1"
                   attributes:
                     - key: cluster_name
@@ -1487,13 +890,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 2241d68ee8d621698d8b91c4fff0121597c47553a7d6f4b87640acabff0d0d90
+                        stringValue: 03ba5dba62022f54b6d1f7b23612416984fcec554209aeeb7c5dfdb783f9a415
                     - key: container.image.name
                       value:
-                        stringValue: registry.k8s.io/coredns/coredns
+                        stringValue: registry.k8s.io/etcd
                     - key: container.image.tag
                       value:
-                        stringValue: v1.12.0
+                        stringValue: 3.5.21-0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -1505,7 +908,7 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: coredns
+                        stringValue: etcd
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -1514,10 +917,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
+                        stringValue: etcd-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1532,187 +935,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 60993d8365dd8877630abca86b11d8c20b9ed27e24d5344bb6b33ac68f8ac54f
-                    - key: container.image.name
-                      value:
-                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
-                    - key: container.image.tag
-                      value:
-                        stringValue: v0.132.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: targetallocator
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-gtkd8
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: bf4f8d2d-7014-4b0a-ab60-11fe49807f92
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 884fcb142aa2d2c85d0320097eb546dbfaab6c521558084278096a465700617b
-                    - key: container.image.name
-                      value:
-                        stringValue: docker.io/kindest/local-path-provisioner
-                    - key: container.image.tag
-                      value:
-                        stringValue: v20250214-acbabc1a
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: local-path-provisioner
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: local-path-storage
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: local-path-provisioner-7dc846544d-tqcxz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 6ae50df0-fcca-4f9e-bec8-094d33ecf03e
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 89bbcf8245f343b79346fa769f47f03d5d93ed802180222bc16524d16a05c59c
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/kube-proxy-amd64
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.33.2
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: kube-proxy
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: kube-proxy-wcqrh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 7993a892-5c58-4f7f-bbaf-6d3b6bedc2aa
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 9f3ca62c4381a16ca11b3e81a18a94baa9820e2a0a53e99c75b15b1a63caaf39
-                    - key: container.image.name
-                      value:
-                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.129.1
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: manager
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-operator-8b694f79-wtbqq
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a09a7a20-2188-44c1-90b8-6901be1c99d9
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: b5c707cdd7fffeebba5c5c3234ac69476ce80b3c75bbde2f7a6d776766d20278
+                        stringValue: 0b5dd2921842a640edead4fe867a709551d482f1ca2b4e4ded69fc5406633bf9
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-apiserver-amd64
@@ -1742,7 +965,7 @@ resourceMetrics:
                         stringValue: kube-apiserver-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 996db496-c1c2-4138-ac95-378419a59e3a
+                        stringValue: 3c7a30be-e0a1-4030-b6e6-8a1cbc2e6bd1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1757,13 +980,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
+                        stringValue: 263b96d3db9b508ebacfa8de4d9f2dcdcafae14845f96640f3f1f24d3f366b39
                     - key: container.image.name
                       value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
+                        stringValue: registry.k8s.io/coredns/coredns
                     - key: container.image.tag
                       value:
-                        stringValue: 0.134.0
+                        stringValue: v1.12.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -1775,19 +998,19 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: otel-collector
+                        stringValue: coredns
                     - key: k8s.namespace.name
                       value:
-                        stringValue: default
+                        stringValue: kube-system
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
+                        stringValue: coredns-674b8bbfcf-gf6jl
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1802,7 +1025,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d0651113965fc37363d6d50ecbcbeac6fa4b8ddd7ad42c1261109f2968a30825
+                        stringValue: 4519c1740c6eed61b2f5d0f271173f9651a03923d96098c83282d2a64c76c426
                     - key: container.image.name
                       value:
                         stringValue: quay.io/brancz/kube-rbac-proxy
@@ -1829,10 +1052,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-operator-8b694f79-wtbqq
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a09a7a20-2188-44c1-90b8-6901be1c99d9
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1847,13 +1070,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
+                        stringValue: 58587d920306feaf5992d60ff1344292ab4593d9b4712235040c224945c5ee4b
                     - key: container.image.name
                       value:
-                        stringValue: docker.io/kindest/kindnetd
+                        stringValue: docker.io/kindest/local-path-provisioner
                     - key: container.image.tag
                       value:
-                        stringValue: v20250512-df8de77b
+                        stringValue: v20250214-acbabc1a
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -1865,19 +1088,19 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: kindnet-cni
+                        stringValue: local-path-provisioner
                     - key: k8s.namespace.name
                       value:
-                        stringValue: kube-system
+                        stringValue: local-path-storage
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: local-path-provisioner-7dc846544d-7lrt6
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: cb91b260-e01e-49bf-b79c-9a34a6e81833
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1892,52 +1115,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "1"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: e6d7d8a93c81b130be13e5b4e25ff638bb3917db71e8ceed721a2219e3497dfc
+                        stringValue: 5e40ca657032afdf9675b2ec1524d60e88a6afe00fb674128a7d4f253268c046
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-controller-manager-amd64
@@ -1967,7 +1145,367 @@ resourceMetrics:
                         stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 7eb4e50e-a67b-48bf-9374-cc098b3f16cc
+                        stringValue: 9cbff581-baf9-45d1-bfa6-c08904003c09
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 6c9abb5b81b3cb30c1a8c9311e299e4e72ecd8ef5243ab74b762899277136bb0
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 743b015d869c4a20f00976d11ba5fca0c15044616755b54ea02127de90387d31
+                    - key: container.image.name
+                      value:
+                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
+                    - key: container.image.tag
+                      value:
+                        stringValue: v0.132.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: targetallocator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-4b5nn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: c6ae5664-cd6e-4d72-8110-976ea59a8bbb
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: ac11ef23720250aeb09924628430ea308562a3037543463f5d328ab7555d9b43
+                    - key: container.image.name
+                      value:
+                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.134.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: manager
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: afb5a28f24dbde0c15dc5edd5747c8187cc203789ff9b8829759e626ba5404b8
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/kube-proxy-amd64
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.33.2
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-proxy
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-2z9gm
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 7fa90e07-c69d-4d9a-82e8-2c01d53a6a00
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
+                    - key: container.image.name
+                      value:
+                        stringValue: docker.io/kindest/kindnetd
+                    - key: container.image.tag
+                      value:
+                        stringValue: v20250512-df8de77b
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kindnet-cni
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: ec346344cc9ad1f655e06442c287709d153c898cf31aa216c5b3620ccb8d069e
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/kube-scheduler-amd64
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.33.2
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-scheduler
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-scheduler-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6dbb5288-5bfc-4ab5-9bc7-f0ef0c3b236b
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -1985,7 +1523,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 009baf90af35d318ed52824d02137b7579b89c4415e462186742b1849fb8b12b
+                        stringValue: 03ba5dba62022f54b6d1f7b23612416984fcec554209aeeb7c5dfdb783f9a415
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/etcd
@@ -2015,7 +1553,7 @@ resourceMetrics:
                         stringValue: etcd-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: d825b0a2-399c-4d70-bd47-73bc520f7b97
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2030,322 +1568,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: 0382489a92637411a915d36e072daaac3f476a67faf0c2e1426ddc67261091d6
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-tv8rz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: cb61bae5-8ef1-41c5-98c8-f7ccb9b607f8
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 10ee45ee5cd5d3fff3df1be5d6f6a66d33dc8e368d3bb98e5706caaaf3aff5c2
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/kube-scheduler-amd64
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.33.2
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: kube-scheduler
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: kube-scheduler-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 2951e617-8270-4c2a-9439-cf186dd33533
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 2241d68ee8d621698d8b91c4fff0121597c47553a7d6f4b87640acabff0d0d90
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/coredns/coredns
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.12.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: coredns
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-674b8bbfcf-b2qxl
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 5750b02e-c48d-4d74-a3a5-1d20dd65309c
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 60993d8365dd8877630abca86b11d8c20b9ed27e24d5344bb6b33ac68f8ac54f
-                    - key: container.image.name
-                      value:
-                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
-                    - key: container.image.tag
-                      value:
-                        stringValue: v0.132.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: targetallocator
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-gtkd8
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: bf4f8d2d-7014-4b0a-ab60-11fe49807f92
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 884fcb142aa2d2c85d0320097eb546dbfaab6c521558084278096a465700617b
-                    - key: container.image.name
-                      value:
-                        stringValue: docker.io/kindest/local-path-provisioner
-                    - key: container.image.tag
-                      value:
-                        stringValue: v20250214-acbabc1a
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: local-path-provisioner
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: local-path-storage
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: local-path-provisioner-7dc846544d-tqcxz
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 6ae50df0-fcca-4f9e-bec8-094d33ecf03e
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 89bbcf8245f343b79346fa769f47f03d5d93ed802180222bc16524d16a05c59c
-                    - key: container.image.name
-                      value:
-                        stringValue: registry.k8s.io/kube-proxy-amd64
-                    - key: container.image.tag
-                      value:
-                        stringValue: v1.33.2
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: kube-proxy
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: kube-proxy-wcqrh
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 7993a892-5c58-4f7f-bbaf-6d3b6bedc2aa
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: 9f3ca62c4381a16ca11b3e81a18a94baa9820e2a0a53e99c75b15b1a63caaf39
-                    - key: container.image.name
-                      value:
-                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.129.1
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: manager
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-operator-8b694f79-wtbqq
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a09a7a20-2188-44c1-90b8-6901be1c99d9
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: b5c707cdd7fffeebba5c5c3234ac69476ce80b3c75bbde2f7a6d776766d20278
+                        stringValue: 0b5dd2921842a640edead4fe867a709551d482f1ca2b4e4ded69fc5406633bf9
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-apiserver-amd64
@@ -2375,7 +1598,7 @@ resourceMetrics:
                         stringValue: kube-apiserver-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 996db496-c1c2-4138-ac95-378419a59e3a
+                        stringValue: 3c7a30be-e0a1-4030-b6e6-8a1cbc2e6bd1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2390,13 +1613,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
+                        stringValue: 263b96d3db9b508ebacfa8de4d9f2dcdcafae14845f96640f3f1f24d3f366b39
                     - key: container.image.name
                       value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
+                        stringValue: registry.k8s.io/coredns/coredns
                     - key: container.image.tag
                       value:
-                        stringValue: 0.134.0
+                        stringValue: v1.12.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -2408,19 +1631,19 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: otel-collector
+                        stringValue: coredns
                     - key: k8s.namespace.name
                       value:
-                        stringValue: default
+                        stringValue: kube-system
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
+                        stringValue: coredns-674b8bbfcf-gf6jl
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2435,7 +1658,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d0651113965fc37363d6d50ecbcbeac6fa4b8ddd7ad42c1261109f2968a30825
+                        stringValue: 4519c1740c6eed61b2f5d0f271173f9651a03923d96098c83282d2a64c76c426
                     - key: container.image.name
                       value:
                         stringValue: quay.io/brancz/kube-rbac-proxy
@@ -2462,10 +1685,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-operator-8b694f79-wtbqq
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a09a7a20-2188-44c1-90b8-6901be1c99d9
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2480,13 +1703,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
+                        stringValue: 58587d920306feaf5992d60ff1344292ab4593d9b4712235040c224945c5ee4b
                     - key: container.image.name
                       value:
-                        stringValue: docker.io/kindest/kindnetd
+                        stringValue: docker.io/kindest/local-path-provisioner
                     - key: container.image.tag
                       value:
-                        stringValue: v20250512-df8de77b
+                        stringValue: v20250214-acbabc1a
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -2498,19 +1721,19 @@ resourceMetrics:
                         stringValue: dev-operator
                     - key: k8s.container.name
                       value:
-                        stringValue: kindnet-cni
+                        stringValue: local-path-provisioner
                     - key: k8s.namespace.name
                       value:
-                        stringValue: kube-system
+                        stringValue: local-path-storage
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: local-path-provisioner-7dc846544d-7lrt6
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: cb91b260-e01e-49bf-b79c-9a34a6e81833
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2525,52 +1748,7 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
-                    - key: container.image.name
-                      value:
-                        stringValue: quay.io/signalfx/splunk-otel-collector
-                    - key: container.image.tag
-                      value:
-                        stringValue: 0.134.0
-                    - key: customfield1
-                      value:
-                        stringValue: customvalue1
-                    - key: customfield2
-                      value:
-                        stringValue: customvalue2
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: dev-operator
-                    - key: k8s.container.name
-                      value:
-                        stringValue: otel-collector
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: default
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
-                    - key: metric_source
-                      value:
-                        stringValue: kubernetes
-                    - key: receiver
-                      value:
-                        stringValue: k8scluster
-                  timeUnixNano: "1000000"
-                - asInt: "0"
-                  attributes:
-                    - key: cluster_name
-                      value:
-                        stringValue: ci-k8s-cluster
-                    - key: container.id
-                      value:
-                        stringValue: e6d7d8a93c81b130be13e5b4e25ff638bb3917db71e8ceed721a2219e3497dfc
+                        stringValue: 5e40ca657032afdf9675b2ec1524d60e88a6afe00fb674128a7d4f253268c046
                     - key: container.image.name
                       value:
                         stringValue: registry.k8s.io/kube-controller-manager-amd64
@@ -2600,7 +1778,7 @@ resourceMetrics:
                         stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 7eb4e50e-a67b-48bf-9374-cc098b3f16cc
+                        stringValue: 9cbff581-baf9-45d1-bfa6-c08904003c09
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2608,23 +1786,20 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
-            name: k8s.container.restarts
-          - gauge:
-              dataPoints:
-                - asDouble: 0.2
+                - asInt: "0"
                   attributes:
                     - key: cluster_name
                       value:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: c9fb4484900273ba93aae91b791f8e46113b7e7629e67fa64fee4d4535415dc6
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
                     - key: container.image.name
                       value:
                         stringValue: quay.io/signalfx/splunk-otel-collector
                     - key: container.image.tag
                       value:
-                        stringValue: 0.134.0
+                        stringValue: 0.138.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -2645,10 +1820,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-agent-9g79c
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 9703b931-192a-4e6b-9b79-4e4bf962b6b2
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2656,14 +1831,239 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
-                - asDouble: 0.1
+                - asInt: "0"
                   attributes:
                     - key: cluster_name
                       value:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: d11a0eea3d9949414fb4806fb36211a6c93c27a60b783effd3215b3da2036fe3
+                        stringValue: 6c9abb5b81b3cb30c1a8c9311e299e4e72ecd8ef5243ab74b762899277136bb0
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 743b015d869c4a20f00976d11ba5fca0c15044616755b54ea02127de90387d31
+                    - key: container.image.name
+                      value:
+                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
+                    - key: container.image.tag
+                      value:
+                        stringValue: v0.132.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: targetallocator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-4b5nn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: c6ae5664-cd6e-4d72-8110-976ea59a8bbb
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: ac11ef23720250aeb09924628430ea308562a3037543463f5d328ab7555d9b43
+                    - key: container.image.name
+                      value:
+                        stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.134.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: manager
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: afb5a28f24dbde0c15dc5edd5747c8187cc203789ff9b8829759e626ba5404b8
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/kube-proxy-amd64
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.33.2
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-proxy
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-2z9gm
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 7fa90e07-c69d-4d9a-82e8-2c01d53a6a00
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
                     - key: container.image.name
                       value:
                         stringValue: docker.io/kindest/kindnetd
@@ -2690,10 +2090,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: kindnet-9c5vl
+                        stringValue: kindnet-rl62g
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 0635ce8e-1dfd-4e69-82da-e27dd77f848a
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2701,6 +2101,54 @@ resourceMetrics:
                       value:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: ec346344cc9ad1f655e06442c287709d153c898cf31aa216c5b3620ccb8d069e
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/kube-scheduler-amd64
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.33.2
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-scheduler
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-scheduler-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6dbb5288-5bfc-4ab5-9bc7-f0ef0c3b236b
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.container.restarts
+          - gauge:
+              dataPoints:
                 - asDouble: 0.2
                   attributes:
                     - key: cluster_name
@@ -2708,13 +2156,13 @@ resourceMetrics:
                         stringValue: ci-k8s-cluster
                     - key: container.id
                       value:
-                        stringValue: de288fe03042220cb18a5d7ce10b47c0c24990f2f67dafd3ad11e0f0b5ead710
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
                     - key: container.image.name
                       value:
                         stringValue: quay.io/signalfx/splunk-otel-collector
                     - key: container.image.tag
                       value:
-                        stringValue: 0.134.0
+                        stringValue: 0.138.0
                     - key: customfield1
                       value:
                         stringValue: customvalue1
@@ -2735,10 +2183,100 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6x48sw
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
                     - key: k8s.pod.uid
                       value:
-                        stringValue: 21b1cc42-02e2-4d68-b548-97762273aee3
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asDouble: 0.2
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asDouble: 0.1
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
+                    - key: container.image.name
+                      value:
+                        stringValue: docker.io/kindest/kindnetd
+                    - key: container.image.tag
+                      value:
+                        stringValue: v20250512-df8de77b
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kindnet-cni
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2747,6 +2285,507 @@ resourceMetrics:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
             name: k8s.container.cpu_limit
+          - gauge:
+              dataPoints:
+                - asInt: "178257920"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 263b96d3db9b508ebacfa8de4d9f2dcdcafae14845f96640f3f1f24d3f366b39
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-gf6jl
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "524288000"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "178257920"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 6c9abb5b81b3cb30c1a8c9311e299e4e72ecd8ef5243ab74b762899277136bb0
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "524288000"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "52428800"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
+                    - key: container.image.name
+                      value:
+                        stringValue: docker.io/kindest/kindnetd
+                    - key: container.image.tag
+                      value:
+                        stringValue: v20250512-df8de77b
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kindnet-cni
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.container.memory_limit
+          - gauge:
+              dataPoints:
+                - asInt: "104857600"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 03ba5dba62022f54b6d1f7b23612416984fcec554209aeeb7c5dfdb783f9a415
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/etcd
+                    - key: container.image.tag
+                      value:
+                        stringValue: 3.5.21-0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: etcd
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: etcd-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "73400320"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 263b96d3db9b508ebacfa8de4d9f2dcdcafae14845f96640f3f1f24d3f366b39
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-gf6jl
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "524288000"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 668208280d3c5b02d3f898925d5412b0e573bfe7422b3cfd1bacd4f40d52b22a
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "73400320"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 6c9abb5b81b3cb30c1a8c9311e299e4e72ecd8ef5243ab74b762899277136bb0
+                    - key: container.image.name
+                      value:
+                        stringValue: registry.k8s.io/coredns/coredns
+                    - key: container.image.tag
+                      value:
+                        stringValue: v1.12.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "524288000"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 72893d6fd24e1ccd358193e4ab2df551800ef8e015fe9a6dc73168dea8ec8dcd
+                    - key: container.image.name
+                      value:
+                        stringValue: quay.io/signalfx/splunk-otel-collector
+                    - key: container.image.tag
+                      value:
+                        stringValue: 0.138.0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "52428800"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e0a0c90383c64fa9c39c3249da13673824b523af98a2ee1ba5a7b800ce944342
+                    - key: container.image.name
+                      value:
+                        stringValue: docker.io/kindest/kindnetd
+                    - key: container.image.tag
+                      value:
+                        stringValue: v20250512-df8de77b
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kindnet-cni
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.container.memory_request
           - gauge:
               dataPoints:
                 - asInt: "1"
@@ -2768,7 +2807,7 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.namespace.uid
                       value:
-                        stringValue: 4a0f8d9c-9cb2-4b51-86cd-6f0d0b30f3c1
+                        stringValue: 79f6eef1-18e9-4f2e-a62a-dc39aecbd0ec
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2795,7 +2834,7 @@ resourceMetrics:
                         stringValue: kube-node-lease
                     - key: k8s.namespace.uid
                       value:
-                        stringValue: d6c44e5d-d1ac-4337-a8f5-b44f1e31c9e7
+                        stringValue: d5b6b034-ddd0-4032-b727-4db3a2c85b9e
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2822,7 +2861,7 @@ resourceMetrics:
                         stringValue: kube-public
                     - key: k8s.namespace.uid
                       value:
-                        stringValue: a5a15d1c-595e-4885-84ae-9717e4bc958b
+                        stringValue: 574c5e3d-3ed8-4c8e-89eb-788dba28f9d9
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2849,7 +2888,7 @@ resourceMetrics:
                         stringValue: kube-system
                     - key: k8s.namespace.uid
                       value:
-                        stringValue: 3040320f-5313-4e08-819d-061433beb18f
+                        stringValue: 306e8271-7da0-49ac-8b3e-b7114fe8185f
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2876,7 +2915,7 @@ resourceMetrics:
                         stringValue: local-path-storage
                     - key: k8s.namespace.uid
                       value:
-                        stringValue: 10d339ef-f507-419a-ad4a-cc6b7d94d083
+                        stringValue: 970f3354-2ad7-4578-9b8c-83d98596b968
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -2906,7 +2945,7 @@ resourceMetrics:
                         stringValue: coredns
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 4e7dfb9d-d07e-4102-8e13-95f1a9f83f88
+                        stringValue: 8af8dae6-31bf-4478-8f8a-65c23bc13a78
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -2936,7 +2975,7 @@ resourceMetrics:
                         stringValue: local-path-provisioner
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 9b7b6dcf-04ee-40bb-9ccf-29687bf958e3
+                        stringValue: 401a5fc4-23f0-482d-a13a-a3035c6c876c
                     - key: k8s.namespace.name
                       value:
                         stringValue: local-path-storage
@@ -2966,7 +3005,7 @@ resourceMetrics:
                         stringValue: sock-operator
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: f8831c8d-e68d-43b9-9519-e0b17c7ed653
+                        stringValue: 94340136-5566-4d41-b6a0-54f4f991471d
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -2996,7 +3035,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 9d2cb6dd-e885-4d3e-86c1-514fc1054e1a
+                        stringValue: 4e27fffe-149d-456a-9776-c68c48713b64
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3026,7 +3065,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-ta
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 877b0877-9103-4f3f-9ffd-3ff1cd2c4ffa
+                        stringValue: 00ded45a-67b6-479b-84ca-ec6ae980fd1d
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3059,7 +3098,7 @@ resourceMetrics:
                         stringValue: coredns
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 4e7dfb9d-d07e-4102-8e13-95f1a9f83f88
+                        stringValue: 8af8dae6-31bf-4478-8f8a-65c23bc13a78
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3089,7 +3128,7 @@ resourceMetrics:
                         stringValue: local-path-provisioner
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 9b7b6dcf-04ee-40bb-9ccf-29687bf958e3
+                        stringValue: 401a5fc4-23f0-482d-a13a-a3035c6c876c
                     - key: k8s.namespace.name
                       value:
                         stringValue: local-path-storage
@@ -3119,7 +3158,7 @@ resourceMetrics:
                         stringValue: sock-operator
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: f8831c8d-e68d-43b9-9519-e0b17c7ed653
+                        stringValue: 94340136-5566-4d41-b6a0-54f4f991471d
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3149,7 +3188,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 9d2cb6dd-e885-4d3e-86c1-514fc1054e1a
+                        stringValue: 4e27fffe-149d-456a-9776-c68c48713b64
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3179,7 +3218,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-ta
                     - key: k8s.deployment.uid
                       value:
-                        stringValue: 877b0877-9103-4f3f-9ffd-3ff1cd2c4ffa
+                        stringValue: 00ded45a-67b6-479b-84ca-ec6ae980fd1d
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3212,10 +3251,10 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.replicaset.name
                       value:
-                        stringValue: sock-operator-8b694f79
+                        stringValue: sock-operator-6d5cd7c8cb
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: db071c7d-9748-4bcd-8525-c17666cc28e2
+                        stringValue: 56623bdb-a048-41f2-8264-5964dd86f1bf
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3242,10 +3281,10 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.replicaset.name
                       value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: dc37de96-7f53-4994-8978-de114b24bbfd
+                        stringValue: 0667f09f-a3f5-4c9e-bcb5-9f039d175382
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3275,7 +3314,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: 84fea3c4-e8b1-4ce1-a1a3-169cbaa1543b
+                        stringValue: 6a1a2e57-374c-443b-b02a-d0417f0204c1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3305,7 +3344,7 @@ resourceMetrics:
                         stringValue: coredns-674b8bbfcf
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: f9a3caf6-80b7-4e05-b367-238fd473a8c2
+                        stringValue: 4acc03e7-b54a-4ba5-8a7e-da9f67d2f39a
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3335,7 +3374,7 @@ resourceMetrics:
                         stringValue: local-path-provisioner-7dc846544d
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: 076a6217-e5fa-4c5f-be5e-9ef88f183756
+                        stringValue: 48f27808-8c18-4a92-93ce-75ba8811ebf8
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3365,10 +3404,10 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.replicaset.name
                       value:
-                        stringValue: sock-operator-8b694f79
+                        stringValue: sock-operator-6d5cd7c8cb
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: db071c7d-9748-4bcd-8525-c17666cc28e2
+                        stringValue: 56623bdb-a048-41f2-8264-5964dd86f1bf
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3395,10 +3434,10 @@ resourceMetrics:
                         stringValue: default
                     - key: k8s.replicaset.name
                       value:
-                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-75b69f59d6
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: dc37de96-7f53-4994-8978-de114b24bbfd
+                        stringValue: 0667f09f-a3f5-4c9e-bcb5-9f039d175382
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3428,7 +3467,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: 84fea3c4-e8b1-4ce1-a1a3-169cbaa1543b
+                        stringValue: 6a1a2e57-374c-443b-b02a-d0417f0204c1
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3458,7 +3497,7 @@ resourceMetrics:
                         stringValue: coredns-674b8bbfcf
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: f9a3caf6-80b7-4e05-b367-238fd473a8c2
+                        stringValue: 4acc03e7-b54a-4ba5-8a7e-da9f67d2f39a
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3488,7 +3527,7 @@ resourceMetrics:
                         stringValue: local-path-provisioner-7dc846544d
                     - key: k8s.replicaset.uid
                       value:
-                        stringValue: 076a6217-e5fa-4c5f-be5e-9ef88f183756
+                        stringValue: 48f27808-8c18-4a92-93ce-75ba8811ebf8
                     - key: metric_source
                       value:
                         stringValue: kubernetes
@@ -3518,7 +3557,7 @@ resourceMetrics:
                         stringValue: kindnet
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: ee25d211-0be0-46f3-93e9-15b46206c055
+                        stringValue: de05eb86-b2f8-44c9-8607-c3deca99ff7c
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3548,7 +3587,7 @@ resourceMetrics:
                         stringValue: kube-proxy
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: bcb9f210-2735-4549-b5f7-d7685cf2a51f
+                        stringValue: 072fb9c5-4a40-4310-92b9-047b79c8ad15
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3578,7 +3617,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-agent
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: 0b5f625e-d722-4012-a05b-5074f61d59f6
+                        stringValue: 1a87fd7c-7d2f-4cef-98d7-78b356b050c3
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3611,7 +3650,7 @@ resourceMetrics:
                         stringValue: kindnet
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: ee25d211-0be0-46f3-93e9-15b46206c055
+                        stringValue: de05eb86-b2f8-44c9-8607-c3deca99ff7c
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3641,7 +3680,7 @@ resourceMetrics:
                         stringValue: kube-proxy
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: bcb9f210-2735-4549-b5f7-d7685cf2a51f
+                        stringValue: 072fb9c5-4a40-4310-92b9-047b79c8ad15
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3671,7 +3710,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-agent
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: 0b5f625e-d722-4012-a05b-5074f61d59f6
+                        stringValue: 1a87fd7c-7d2f-4cef-98d7-78b356b050c3
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3704,7 +3743,7 @@ resourceMetrics:
                         stringValue: kindnet
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: ee25d211-0be0-46f3-93e9-15b46206c055
+                        stringValue: de05eb86-b2f8-44c9-8607-c3deca99ff7c
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3734,7 +3773,7 @@ resourceMetrics:
                         stringValue: kube-proxy
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: bcb9f210-2735-4549-b5f7-d7685cf2a51f
+                        stringValue: 072fb9c5-4a40-4310-92b9-047b79c8ad15
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3764,7 +3803,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-agent
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: 0b5f625e-d722-4012-a05b-5074f61d59f6
+                        stringValue: 1a87fd7c-7d2f-4cef-98d7-78b356b050c3
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3797,7 +3836,7 @@ resourceMetrics:
                         stringValue: kindnet
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: ee25d211-0be0-46f3-93e9-15b46206c055
+                        stringValue: de05eb86-b2f8-44c9-8607-c3deca99ff7c
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3827,7 +3866,7 @@ resourceMetrics:
                         stringValue: kube-proxy
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: bcb9f210-2735-4549-b5f7-d7685cf2a51f
+                        stringValue: 072fb9c5-4a40-4310-92b9-047b79c8ad15
                     - key: k8s.namespace.name
                       value:
                         stringValue: kube-system
@@ -3857,7 +3896,7 @@ resourceMetrics:
                         stringValue: sock-splunk-otel-collector-agent
                     - key: k8s.daemonset.uid
                       value:
-                        stringValue: 0b5f625e-d722-4012-a05b-5074f61d59f6
+                        stringValue: 1a87fd7c-7d2f-4cef-98d7-78b356b050c3
                     - key: k8s.namespace.name
                       value:
                         stringValue: default
@@ -3885,15 +3924,15 @@ resourceMetrics:
                     - key: k8s.cluster.name
                       value:
                         stringValue: dev-operator
+                    - key: k8s.kubelet.version
+                      value:
+                        stringValue: v1.33.2
                     - key: k8s.node.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.node.uid
                       value:
-                        stringValue: 12c32fcb-a6e7-4bab-b7c9-1cd2e7f3d50c
-                    - key: k8s.kubelet.version
-                      value:
-                        stringValue: abcd
+                        stringValue: 70636db7-4842-4bcc-b3ba-7f2f3a7a3270
                     - key: metric_source
                       value:
                         stringValue: kubernetes
