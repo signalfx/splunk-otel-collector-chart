@@ -147,6 +147,8 @@ data:
         metadata_exporters:
         - signalfx
         metrics:
+          k8s.container.status.reason:
+            enabled: true
           k8s.node.condition:
             enabled: true
         resource_attributes:
