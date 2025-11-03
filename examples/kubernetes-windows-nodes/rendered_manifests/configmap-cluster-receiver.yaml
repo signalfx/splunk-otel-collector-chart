@@ -161,24 +161,9 @@ data:
       k8sobjects:
         auth_type: serviceAccount
         objects:
-        - mode: watch
-          name: cronjobs
-        - mode: watch
-          name: daemonsets
-        - mode: watch
-          name: deployments
-        - mode: watch
-          name: jobs
-        - mode: watch
-          name: namespaces
-        - mode: watch
-          name: nodes
-        - mode: watch
+        - interval: 6h
+          mode: pull
           name: pods
-        - mode: watch
-          name: replicasets
-        - mode: watch
-          name: statefulsets
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
