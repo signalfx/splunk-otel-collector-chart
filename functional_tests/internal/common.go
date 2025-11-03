@@ -172,7 +172,7 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 	if strings.HasPrefix(podFilePath, "/") {
 		command = []string{"cat", podFilePath}
 	} else {
-		command = []string{"powershell", "-command", "type", podFilePath}
+		command = []string{"cmd.exe", "/c", "type", podFilePath}
 	}
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
