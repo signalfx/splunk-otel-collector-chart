@@ -1,0 +1,16 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: clusterReceiver
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Enable a container, pod, and a node metric by default to clusterReceiver config.
+# One or more tracking issues related to the change
+issues: [2143]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  Enable the following metrics by default in K8s cluster receiver configuration:
+    * `k8s.container.status.reason`
+    * `k8s.pod.status_reason`
+    * `k8s.node.condition`
