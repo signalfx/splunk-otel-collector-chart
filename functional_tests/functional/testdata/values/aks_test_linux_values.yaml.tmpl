@@ -19,6 +19,8 @@ agent:
       memory: 1Gi
   config:
     exporters:
+      file:
+        path: /tmp/metrics.json
       otlp:
         endpoint: {{ .OtlpEndpoint }}
         tls:
@@ -28,6 +30,9 @@ agent:
         traces:
           exporters:
             - otlp
+        metrics/agent:
+          exporters:
+            - file
 
 clusterReceiver:
   enabled: false

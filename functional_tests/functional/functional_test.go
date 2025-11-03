@@ -59,8 +59,11 @@ const (
 	kindValuesDir                          = "expected_kind_values"
 	eksValuesDir                           = "expected_eks_values"
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
+	aksValuesDir                           = "expected_aks_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
+	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	winPodMetricsPath                      = "C:\\metrics.json"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -546,7 +549,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -560,10 +563,14 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 }
 
 func selectExpectedValuesDir(kubeTestEnv string) string {
-	if kubeTestEnv == eksAutoModeTestKubeEnv {
+	switch kubeTestEnv {
+	case eksAutoModeTestKubeEnv:
 		return eksAutoModeValuesDir
+	case aksTestKubeEnv:
+		return aksValuesDir
+	default:
+		return eksValuesDir
 	}
-	return eksValuesDir
 }
 
 func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
@@ -584,11 +591,15 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
+	podPathFile := linuxPodMetricsPath
+	if pods.Items[0].Labels["osType"] == "windows" {
+		podPathFile = winPodMetricsPath
+	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
 	require.NoError(t, err)
 
-	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", "/tmp/metrics.json", tmpFile.Name())
+	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
 	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
