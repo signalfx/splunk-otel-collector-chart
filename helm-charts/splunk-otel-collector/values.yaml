@@ -542,7 +542,7 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  k8sObjects: 
+  k8sObjects:
     - name: cronjobs
       mode: watch
     - name: daemonsets
