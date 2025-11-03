@@ -475,6 +475,477 @@ resourceMetrics:
             name: k8s.pod.phase
           - gauge:
               dataPoints:
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-operator-6d5cd7c8cb-wll6f
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9d0b7902-6782-4989-a8e1-1e29fe6ad1e4
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-m5gj4
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: bc760fc8-f7c2-4549-a2bd-964c67e83df2
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-7d88fcfb98lhr9z
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 420e03b9-61d9-47b1-9bcb-7458b06df546
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-ta-6bfb4d46cb-4b5nn
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: c6ae5664-cd6e-4d72-8110-976ea59a8bbb
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-7hstf
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: b0ff1eea-3676-4cfc-b6e3-974c28686f38
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-674b8bbfcf-gf6jl
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 0d53081a-f5fe-4bb8-bed0-84b972c3ac25
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: etcd-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 17712ef2-19f5-44ff-a26b-2bb7aa693421
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-rl62g
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Guaranteed
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 1063477e-6943-49e7-abb5-b4d4393e4b92
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 3c7a30be-e0a1-4030-b6e6-8a1cbc2e6bd1
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9cbff581-baf9-45d1-bfa6-c08904003c09
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-2z9gm
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 7fa90e07-c69d-4d9a-82e8-2c01d53a6a00
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-scheduler-kind-control-plane
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: Burstable
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6dbb5288-5bfc-4ab5-9bc7-f0ef0c3b236b
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+                - asInt: "2"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: local-path-storage
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: local-path-provisioner-7dc846544d-7lrt6
+                    - key: k8s.pod.qos_class
+                      value:
+                        stringValue: BestEffort
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: cb91b260-e01e-49bf-b79c-9a34a6e81833
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.node.condition
+          - gauge:
+              dataPoints:
                 - asDouble: 0.1
                   attributes:
                     - key: cluster_name
