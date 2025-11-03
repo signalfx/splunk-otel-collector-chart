@@ -141,6 +141,13 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+        metrics:
+          k8s.container.status.reason:
+            enabled: true
+          k8s.node.condition:
+            enabled: true
+          k8s.pod.status_reason:
+            enabled: true
         resource_attributes:
           k8s.container.status.last_terminated_reason:
             enabled: true
