@@ -391,7 +391,7 @@ func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string
 			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 					metric := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-					if metric.Name() == targetMetric {
+					if metric.Name() == targetMetric && (m.ResourceMetrics().Len() == 23 || m.MetricCount() == 23) {
 						foundTargetMetric = true
 						break OUTER
 					}

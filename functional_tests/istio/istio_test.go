@@ -375,6 +375,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 
 		selectedMetrics := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen)
 		if selectedMetrics != nil {
+			t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		}
 		return false
