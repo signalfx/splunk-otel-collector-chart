@@ -32,6 +32,9 @@ receivers:
         enabled: true
       k8s.pod.qos_class:
         enabled: true
+    metrics:
+      k8s.node.condition:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
