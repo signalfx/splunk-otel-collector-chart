@@ -125,7 +125,7 @@ receivers:
                     envoy_cluster_upstream_cx_active|\
                     envoy_cluster_upstream_cx_close_notify|\
                     envoy_cluster_upstream_cx_connect_attempts_exceeded|\
-                    envoy_cluster_upstream_cx_connect_ms_sum|\
+                    envoy_cluster_upstream_cx_connect_ms|\
                     envoy_cluster_upstream_cx_connect_timeout|\
                     envoy_cluster_upstream_cx_destroy_local_with_active_rq|\
                     envoy_cluster_upstream_cx_http1_total|\
