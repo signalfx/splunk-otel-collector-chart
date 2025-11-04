@@ -10127,4 +10127,37 @@ resourceMetrics:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
             name: k8s.node.condition_ready
+          - gauge:
+              dataPoints:
+                - asInt: "1"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.kubelet.version
+                      value:
+                        stringValue: v1.33.2
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.node.uid
+                      value:
+                        stringValue: f7d18d12-3d2e-4fae-87ca-b324a0e33f2e
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.pod.status_reason
         scope: {}
