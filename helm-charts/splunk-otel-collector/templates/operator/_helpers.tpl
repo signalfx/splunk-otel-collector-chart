@@ -45,6 +45,18 @@ exporter:
 {{- end -}}
 
 {{/*
+Helper to build defaults spec block
+- It uses the with directive, which allows the user to disable it in the custom values.yaml.
+*/}}
+{{- define "splunk-otel-collector.operator.instrumentation-defaults" -}}
+  {{- with .Values.instrumentation.spec.defaults -}}
+defaults:
+{{- toYaml . | nindent 2 -}}
+{{- printf "\n" -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
 Helper to build propagators spec
 - It uses the with directive, which allows the user to disable it in the custom values.yaml.
 */}}
@@ -121,7 +133,8 @@ Helper to build entries for instrumentation libraries
 
 {{/* Helper to build instrumentation spec */}}
 {{- define "splunk-otel-collector.operator.instrumentation-spec" -}}
-  {{- printf "%s%s%s%s%s"
+  {{- printf "%s%s%s%s%s%s"
+      (include "splunk-otel-collector.operator.instrumentation-defaults" .)
       (include "splunk-otel-collector.operator.instrumentation-exporter" .)
       (include "splunk-otel-collector.operator.instrumentation-propagators" .)
       (include "splunk-otel-collector.operator.instrumentation-sampler" .)

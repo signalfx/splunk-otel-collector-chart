@@ -13,6 +13,8 @@ operator:
   enabled: true
 instrumentation:
   spec:
+    defaults:
+      useLabelsForResourceAttributes: true
     sampler:
       type: traceidratio
       argument: "0.95"
