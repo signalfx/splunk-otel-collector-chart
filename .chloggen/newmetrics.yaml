@@ -9,4 +9,8 @@ issues: [2151]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: |
+  Enable the following metrics by default in K8s cluster receiver configuration:
+  * [k8s.container.status.reason](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason): this metric get containers in `CrashLoopBackOff`, `ImagePullBackOff` state, for example, using k8s.container.status.reason attribute.
+  * [k8s.node.condition](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8snodecondition): this metrics gets Nodes in `MemoryPressure`, for example,  with condition attribute
+  * [k8s.pod.status_reason](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8spodstatus_reason): this metric helps detect Pods in status `Evicted`, for example
