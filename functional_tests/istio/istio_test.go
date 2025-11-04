@@ -369,9 +369,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 				pmetrictest.IgnoreMetricAttributeValue("event"),
 				pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
 			)
-			if err == nil {
-				return true
-			}
 			t.Logf("Comparison error: %v", err)
 		}
 
