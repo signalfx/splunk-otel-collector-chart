@@ -39,9 +39,9 @@ receivers:
     metrics:
       k8s.container.status.reason:
         enabled: true
-      k8s.pod.status_reason:
-        enabled: true
       k8s.node.condition:
+        enabled: true
+      k8s.pod.status_reason:
         enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
