@@ -340,8 +340,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		}
 	}
 
-	time.Sleep(5 * time.Minute)
-
 	require.Eventually(t, func() bool {
 		for _, receivedMetrics := range metricsSink.AllMetrics() {
 			if flakyMetricNames != nil {
@@ -374,7 +372,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 
 		selectedMetrics := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen)
 		if selectedMetrics != nil {
-			t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		}
 		return false
