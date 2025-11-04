@@ -50,6 +50,7 @@ const (
 	eksTestKubeEnv                         = "eks"
 	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
 	eksFargateTestKubeEnv                  = "eks/fargate"
+	gkeTestKubeEnv                         = "gke"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
 	gceTestKubeEnv                         = "gce"
@@ -60,6 +61,7 @@ const (
 	eksValuesDir                           = "expected_eks_values"
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
 	aksValuesDir                           = "expected_aks_values"
+	gkeValuesDir                           = "expected_gke_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
@@ -203,6 +205,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("eks_auto_mode_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksFargateTestKubeEnv:
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case gkeTestKubeEnv:
+		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -549,7 +553,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -568,6 +572,8 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 		return eksAutoModeValuesDir
 	case aksTestKubeEnv:
 		return aksValuesDir
+	case gkeTestKubeEnv:
+		return gkeValuesDir
 	default:
 		return eksValuesDir
 	}
