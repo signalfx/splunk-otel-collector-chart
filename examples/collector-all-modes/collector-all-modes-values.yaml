@@ -1,7 +1,9 @@
-clusterName: CHANGEME
+clusterName: akhi-splunk-otel-collector
 splunkObservability:
-  realm: CHANGEME
-  accessToken: CHANGEME
+  realm: "lab0"
+  accessToken: c7fckTLjATKG-Uo4dS1bSQ
+  apiUrl: https://app.lab0.signalfx.com
+  ingestUrl: https://ingest.lab0.signalfx.com
 
 agent:
   enabled: true
