@@ -313,7 +313,7 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes",
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_services",
 			flakyMetrics, true, metricsSink)
 	})
 
