@@ -53,6 +53,13 @@ func CheckReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespac
 
 		logs := GetPodLogs(t, clientset, namespace, pod.Name, containerName, 500)
 
+		// Debug: count total error lines and lines mentioning the receiver
+		totalLines := len(strings.Split(logs, "\n"))
+		errorCount := strings.Count(strings.ToLower(logs), "\terror\t")
+		receiverMentions := strings.Count(strings.ToLower(logs), strings.ToLower(receiverComponentName))
+		t.Logf("Log stats: %d total lines, %d error-level logs, %d mentions of %s",
+			totalLines, errorCount, receiverMentions, receiverComponentName)
+
 		errorLines := findMatchingLogLines(logs, receiverComponentName)
 
 		if len(errorLines) > 0 {
