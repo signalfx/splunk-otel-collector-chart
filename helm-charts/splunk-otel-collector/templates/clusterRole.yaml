@@ -119,6 +119,7 @@ rules:
   - nodes/pods
   verbs:
   - get
+  - list
 {{- end }}
 {{- with .Values.rbac.customRules }}
 {{ toYaml . }}
