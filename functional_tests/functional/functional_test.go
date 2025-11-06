@@ -544,7 +544,7 @@ func runLocalClusterTests(t *testing.T) {
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 
 	// Test receiver health - verify no RBAC or connection errors
-	t.Run("receiver health check", func(t *testing.T) {
+	t.Run("receiver error logs checks", func(t *testing.T) {
 		testKubeConfig := requireEnv(t, "KUBECONFIG")
 		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 		require.NoError(t, err)
@@ -575,13 +575,13 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
 		})
 
-		// t.Run("receiver health check", func(t *testing.T) {
-		// 	internal.AssertNoReceiverErrors(t, client, internal.DefaultNamespace,
-		// 		agentLabelSelector,
-		// 		clusterReceiverLabelSelector)
-		// })
+		t.Run("receiver error log checks", func(t *testing.T) {
+			internal.AssertNoReceiverErrors(t, client, internal.DefaultNamespace,
+				agentLabelSelector,
+				clusterReceiverLabelSelector)
+		})
 	case autopilotTestKubeEnv:
-		t.Run("GKE Autopilot receiver health check", func(t *testing.T) {
+		t.Run("receiver error log checks", func(t *testing.T) {
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
