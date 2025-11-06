@@ -175,7 +175,7 @@ data:
       kubeletstats:
         auth_type: none
         collection_interval: 10s
-        endpoint: ${K8S_NODE_IP}:10255
+        endpoint: ${K8S_NODE_IP}:10250
         extra_metadata_labels:
         - container.id
         metric_groups:
