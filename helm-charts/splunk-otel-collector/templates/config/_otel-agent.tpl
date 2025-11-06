@@ -521,7 +521,7 @@ receivers:
     # GKE Autopilot doesn't allow using the secure kubelet endpoint,
     # use the read-only endpoint instead.
     auth_type: none
-    endpoint: ${K8S_NODE_IP}:10250
+    endpoint: ${K8S_NODE_IP}:10255
     {{- else }}
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
