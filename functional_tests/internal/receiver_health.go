@@ -89,6 +89,7 @@ func CheckK8sClusterReceiverHealth(t *testing.T, clientset *kubernetes.Clientset
 
 func findMatchingLogLines(logs string, receiverComponentName string) []string {
 	lines := strings.Split(logs, "\n")
+	lowerReceiverName := strings.ToLower(receiverComponentName)
 
 	type logEntry struct {
 		firstLine string
@@ -104,7 +105,7 @@ func findMatchingLogLines(logs string, receiverComponentName string) []string {
 		lowerLine := strings.ToLower(line)
 
 		// Match error-level logs containing the receiver name
-		if strings.Contains(lowerLine, "\terror\t") && strings.Contains(lowerLine, strings.ToLower(receiverComponentName)) {
+		if strings.Contains(lowerLine, "\terror\t") && strings.Contains(lowerLine, lowerReceiverName) {
 			// Strip timestamp to deduplicate
 			parts := strings.SplitN(line, "\t", 2)
 			var messageKey string
