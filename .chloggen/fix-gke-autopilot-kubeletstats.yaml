@@ -11,5 +11,5 @@ issues: [2159]
 # Use pipe (|) for multiline entries.
 subtext: |
   - GKE Autopilot clusters running k8s 1.32+ disable the insecure kubelet read-only port (10255) by default.
-  - The receiver in GKE Autopilot now uses the secure kubelet endpoint (port 10250) with serviceAccount authentication
+  - The receiver in GKE Autopilot now uses the secure kubelet endpoint (port 10250) with serviceAccount authentication.
   - Add RBAC permissions to ClusterRole for restricted nodes/pods endpoint in GKE Autopilot
