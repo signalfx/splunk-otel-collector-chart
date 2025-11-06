@@ -9,6 +9,9 @@ tests:
       - hasDocuments:
           count: 1
       - equal:
+          path: spec.defaults.useLabelsForResourceAttributes
+          value: true
+      - equal:
           path: spec.exporter.endpoint
           value: http://RELEASE-NAME-splunk-otel-collector-agent.NAMESPACE.svc.cluster.local:4317
       - contains:

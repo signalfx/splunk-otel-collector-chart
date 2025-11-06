@@ -951,7 +951,11 @@ operator:
 # Not available in EKS Add-on.
 instrumentation:
   spec:
-    # default spec configuration
+    # Optional "defaults" parameter for configuring default instrumentation behavior across all libraries.
+    # See: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md#instrumentationspecdefaults
+    defaults: {}
+      # useLabelsForResourceAttributes: true  # If enabled, Kubernetes labels will be used as resource attributes
+
     exporter:
       # Optional "endpoint" parameter for exporting data to a specific target.
       # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint
