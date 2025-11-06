@@ -13,13 +13,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-var (
-	kubeletstatsReceiverName = "kubeletstatsreceiver"
-	k8sClusterReceiverName   = "k8sclusterreceiver"
-)
-
-// CheckReceiverHealth checks that receivers are working without RBAC or connection errors
-func CheckReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string, receiverComponentName string) {
+// CheckComponentHealth checks that an OpenTelemetry component is not logging errors
+func CheckComponentHealth(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string, componentName string) {
 	t.Helper()
 
 	pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
@@ -28,7 +23,7 @@ func CheckReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespac
 	require.NoError(t, err, "failed to list pods with selector %s", labelSelector)
 	require.NotEmpty(t, pods.Items, "no pods found with selector %s", labelSelector)
 
-	t.Logf("Checking receiver health for %d pod(s) with selector: %s", len(pods.Items), labelSelector)
+	t.Logf("Checking component health for %d pod(s) with selector: %s", len(pods.Items), labelSelector)
 
 	for _, pod := range pods.Items {
 		if pod.Status.Phase != "Running" {
@@ -53,14 +48,14 @@ func CheckReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespac
 
 		logs := GetPodLogs(t, clientset, namespace, pod.Name, containerName, 500)
 
-		// Debug: count total error lines and lines mentioning the receiver
+		// Debug: count total error lines and lines mentioning the component
 		totalLines := len(strings.Split(logs, "\n"))
 		errorCount := strings.Count(strings.ToLower(logs), "\terror\t")
-		receiverMentions := strings.Count(strings.ToLower(logs), strings.ToLower(receiverComponentName))
+		componentMentions := strings.Count(strings.ToLower(logs), strings.ToLower(componentName))
 		t.Logf("Log stats: %d total lines, %d error-level logs, %d mentions of %s",
-			totalLines, errorCount, receiverMentions, receiverComponentName)
+			totalLines, errorCount, componentMentions, componentName)
 
-		errorLines := findMatchingLogLines(logs, receiverComponentName)
+		errorLines := findMatchingLogLines(logs, componentName)
 
 		if len(errorLines) > 0 {
 			displayLines := errorLines
@@ -69,27 +64,17 @@ func CheckReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespac
 				displayLines = errorLines[:20]
 				suffix = fmt.Sprintf("\n... (%d more unique error lines)", len(errorLines)-20)
 			}
-			t.Errorf("Found %s receiver errors in pod %s:\n%s%s",
-				receiverComponentName, pod.Name, strings.Join(displayLines, "\n"), suffix)
+			t.Errorf("Found %s component errors in pod %s:\n%s%s",
+				componentName, pod.Name, strings.Join(displayLines, "\n"), suffix)
 		} else {
-			t.Logf("No %s receiver errors found in pod %s", receiverComponentName, pod.Name)
+			t.Logf("No %s component errors found in pod %s", componentName, pod.Name)
 		}
 	}
 }
 
-func CheckKubeletstatsReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespace, agentLabelSelector string) {
-	t.Helper()
-	CheckReceiverHealth(t, clientset, namespace, agentLabelSelector, kubeletstatsReceiverName)
-}
-
-func CheckK8sClusterReceiverHealth(t *testing.T, clientset *kubernetes.Clientset, namespace, clusterReceiverLabelSelector string) {
-	t.Helper()
-	CheckReceiverHealth(t, clientset, namespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
-}
-
-func findMatchingLogLines(logs string, receiverComponentName string) []string {
+func findMatchingLogLines(logs string, componentName string) []string {
 	lines := strings.Split(logs, "\n")
-	lowerReceiverName := strings.ToLower(receiverComponentName)
+	lowerComponentName := strings.ToLower(componentName)
 
 	type logEntry struct {
 		firstLine string
@@ -104,8 +89,8 @@ func findMatchingLogLines(logs string, receiverComponentName string) []string {
 
 		lowerLine := strings.ToLower(line)
 
-		// Match error-level logs containing the receiver name
-		if strings.Contains(lowerLine, "\terror\t") && strings.Contains(lowerLine, lowerReceiverName) {
+		// Match error-level logs containing the component name
+		if strings.Contains(lowerLine, "\terror\t") && strings.Contains(lowerLine, lowerComponentName) {
 			// Strip timestamp to deduplicate
 			parts := strings.SplitN(line, "\t", 2)
 			var messageKey string
@@ -136,16 +121,4 @@ func findMatchingLogLines(logs string, receiverComponentName string) []string {
 	}
 
 	return uniqueErrorLines
-}
-
-func AssertNoReceiverErrors(t *testing.T, clientset *kubernetes.Clientset, namespace, agentLabelSelector, clusterReceiverLabelSelector string) {
-	t.Helper()
-
-	t.Run("kubeletstats receiver health", func(t *testing.T) {
-		CheckKubeletstatsReceiverHealth(t, clientset, namespace, agentLabelSelector)
-	})
-
-	t.Run("k8s_cluster receiver health", func(t *testing.T) {
-		CheckK8sClusterReceiverHealth(t, clientset, namespace, clusterReceiverLabelSelector)
-	})
 }
