@@ -542,6 +542,19 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+
+	// Test receiver health - verify no RBAC or connection errors
+	t.Run("receiver health check", func(t *testing.T) {
+		testKubeConfig := requireEnv(t, "KUBECONFIG")
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		require.NoError(t, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+
+		internal.AssertNoReceiverErrors(t, client, internal.DefaultNamespace,
+			agentLabelSelector,
+			clusterReceiverLabelSelector)
+	})
 }
 
 // runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
@@ -560,6 +573,21 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		})
 		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
+		})
+
+		// t.Run("receiver health check", func(t *testing.T) {
+		// 	internal.AssertNoReceiverErrors(t, client, internal.DefaultNamespace,
+		// 		agentLabelSelector,
+		// 		clusterReceiverLabelSelector)
+		// })
+	case autopilotTestKubeEnv:
+		t.Run("GKE Autopilot receiver health check", func(t *testing.T) {
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
+
+			internal.AssertNoReceiverErrors(t, client, internal.DefaultNamespace,
+				agentLabelSelector,
+				clusterReceiverLabelSelector)
 		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
