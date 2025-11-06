@@ -9,7 +9,7 @@ issues: [2157]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext: | 
+subtext: |
   The following attributes have been disabled to reduce cardinality:
   - k8s.container.status.last_terminated_reason
   - k8s.hpa.scaletargetref.apiversion
