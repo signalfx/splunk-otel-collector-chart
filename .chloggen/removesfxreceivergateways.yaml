@@ -9,4 +9,12 @@ issues: [2155]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: |
+  The `signalfx` receiver is on the path towards deprecation and removal.
+  The breaking changes are as follows:
+  - No metrics being sent to the gateway's `signalfx` receiver will sent to Splunk Platform anymore.
+  - For metrics being sent to the gateway's `signalfx` receiver, resource and data point attributes will no longer be
+  modified by the gateway. The metrics will be forwarded as-is.
+  - All metrics and logs being sent to the gateway's `signalfx` receiver will no longer be subject to the
+  memory limiter and batch processors. Please ensure any required memory limiting or batching is configured
+  on the sending side (e.g. the agent).
