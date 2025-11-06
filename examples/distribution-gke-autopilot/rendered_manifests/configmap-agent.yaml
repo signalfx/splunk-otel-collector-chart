@@ -173,9 +173,9 @@ data:
           thrift_http:
             endpoint: 0.0.0.0:14268
       kubeletstats:
-        auth_type: serviceAccount
+        auth_type: none
         collection_interval: 10s
-        endpoint: ${K8S_NODE_IP}:10250
+        endpoint: ${K8S_NODE_IP}:10255
         extra_metadata_labels:
         - container.id
         metric_groups:
