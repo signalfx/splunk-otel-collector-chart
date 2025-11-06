@@ -5,6 +5,7 @@ package internal
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -119,6 +120,8 @@ func findMatchingLogLines(logs string, componentName string) []string {
 			uniqueErrorLines = append(uniqueErrorLines, entry.firstLine)
 		}
 	}
+
+	sort.Strings(uniqueErrorLines)
 
 	return uniqueErrorLines
 }
