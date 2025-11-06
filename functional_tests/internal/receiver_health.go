@@ -89,8 +89,12 @@ func CheckK8sClusterReceiverHealth(t *testing.T, clientset *kubernetes.Clientset
 
 func findMatchingLogLines(logs string, receiverComponentName string) []string {
 	lines := strings.Split(logs, "\n")
-	seenLines := make(map[string]bool)
-	uniqueErrorLines := []string{}
+
+	type logEntry struct {
+		firstLine string
+		count     int
+	}
+	seenMessages := make(map[string]*logEntry)
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -101,10 +105,32 @@ func findMatchingLogLines(logs string, receiverComponentName string) []string {
 
 		// Match error-level logs containing the receiver name
 		if strings.Contains(lowerLine, "\terror\t") && strings.Contains(lowerLine, strings.ToLower(receiverComponentName)) {
-			if !seenLines[line] {
-				seenLines[line] = true
-				uniqueErrorLines = append(uniqueErrorLines, line)
+			// Strip timestamp to deduplicate
+			parts := strings.SplitN(line, "\t", 2)
+			var messageKey string
+			if len(parts) == 2 {
+				messageKey = parts[1]
+			} else {
+				messageKey = line
 			}
+
+			if entry, exists := seenMessages[messageKey]; exists {
+				entry.count++
+			} else {
+				seenMessages[messageKey] = &logEntry{
+					firstLine: line,
+					count:     1,
+				}
+			}
+		}
+	}
+
+	uniqueErrorLines := []string{}
+	for _, entry := range seenMessages {
+		if entry.count > 1 {
+			uniqueErrorLines = append(uniqueErrorLines, fmt.Sprintf("%s (repeated %d times)", entry.firstLine, entry.count))
+		} else {
+			uniqueErrorLines = append(uniqueErrorLines, entry.firstLine)
 		}
 	}
 
