@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 30c9012718b8d44044f694a98dfa3679924a6ea422276b1ab4706edb0a1decee
+        checksum/config: 7b9eedd992798273a9cdbeb617852d5473a4f51699aa1348e2d895ae4741e1f8
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -43,7 +43,10 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "8192"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:

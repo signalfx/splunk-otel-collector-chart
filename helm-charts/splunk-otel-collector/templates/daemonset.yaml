@@ -163,10 +163,16 @@ spec:
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ .Values.agent.resources.limits.memory }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ .Values.agent.resources.limits.memory }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
