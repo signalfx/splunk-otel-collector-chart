@@ -112,6 +112,15 @@ rules:
   - get
   - list
   - watch
+{{- if eq .Values.distribution "gke/autopilot" }}
+- apiGroups:
+  - ""
+  resources:
+  - nodes/pods
+  verbs:
+  - get
+  - list
+{{- end }}
 {{- with .Values.rbac.customRules }}
 {{ toYaml . }}
 {{- end }}
