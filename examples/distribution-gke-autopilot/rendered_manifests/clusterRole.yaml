@@ -89,3 +89,10 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/pods
+  verbs:
+  - get
+  - list
