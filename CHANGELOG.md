@@ -4,6 +4,57 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.138.1] - 2025-11-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.138.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.138.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Update Istio autodetect rules. The detection logic has been expanded to identify Istio components more reliably. ([#2132](https://github.com/signalfx/splunk-otel-collector-chart/pull/2132))
+  This change may impact billing, as the detection rules have been updated to be less restrictive.
+  Metrics will now be scraped from istiod, Istio gateways, and Istio sidecars (`istio-proxy` containers.)
+  Metrics were previously only being scraped from istiod.
+  
+- `agent`: Filter incoming metrics from Prometheus receiver when Istio autodetection is enabled. ([#2141](https://github.com/signalfx/splunk-otel-collector-chart/pull/2141))
+  The `prometheus` receiver is now being used when `autodetect.istio: true` instead of `prometheus_simple`.
+  The reason for this change is that the `prometheus` receiver supports filtering metrics being scraped by
+  the receiver. Filtering has been introduced to only scrape metrics that are included in default content.
+  
+- `clusterReceiver`: Disabling attributes not needed for k8s cluster receiver metrics ([#2157](https://github.com/signalfx/splunk-otel-collector-chart/pull/2157))
+  The following attributes have been disabled to reduce cardinality:
+  - k8s.container.status.last_terminated_reason
+  - k8s.hpa.scaletargetref.apiversion
+  
+- `clusterReceiver`: Enable k8sobjects for pods, in pull mode at 6h frequency ([#2147](https://github.com/signalfx/splunk-otel-collector-chart/pull/2147))
+- `clusterReceiver`: Added k8s.pod.qos_class ([#2144](https://github.com/signalfx/splunk-otel-collector-chart/pull/2144))
+- `clusterReceiver`: Enable metrics (k8s.container.status.reason, k8s.pod.status_reason, k8s.node.condition) for cluster receiver ([#2151](https://github.com/signalfx/splunk-otel-collector-chart/pull/2151))
+  Enable the following metrics by default in K8s cluster receiver configuration:
+  * [k8s.container.status.reason](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason): this metric gets containers in `CrashLoopBackOff`, `ImagePullBackOff` state, for example, using k8s.container.status.reason attribute.
+  * [k8s.node.condition](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8snodecondition): this metrics gets Nodes in `MemoryPressure`, for example, with condition attribute
+  * [k8s.pod.status_reason](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8spodstatus_reason): this metric helps detect Pods in status `Evicted`, for example
+  
+- `operator`: Add support for `instrumentation.spec.defaults` field in Helm values to configure default instrumentation behavior. ([#2152](https://github.com/signalfx/splunk-otel-collector-chart/pull/2152))
+  Users can now configure the `defaults.useLabelsForResourceAttributes` option via Helm values, allowing
+  Kubernetes labels (e.g., `app.kubernetes.io/name`, `app.kubernetes.io/version`) to be used as resource attributes
+  in auto-instrumented applications. Read more [here](https://github.com/open-telemetry/opentelemetry-operator/blob/v0.138.0/README.md#configure-resource-attributes-with-labels).
+  
+  Example usage:
+  ```yaml
+  instrumentation:
+    spec:
+      defaults:
+        useLabelsForResourceAttributes: true
+  ```
+  
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix kubeletstats receiver failing on GKE Autopilot clusters running Kubernetes 1.32+ ([#2159](https://github.com/signalfx/splunk-otel-collector-chart/pull/2159))
+  - GKE Autopilot clusters running k8s 1.32+ disable the insecure kubelet read-only port (10255) by default.
+  - The receiver in GKE Autopilot now uses the secure kubelet endpoint (port 10250) with serviceAccount authentication.
+  - Add RBAC permissions to ClusterRole for restricted nodes/pods endpoint in GKE Autopilot
+  
+
 ## [0.138.0] - 2025-10-29
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.138.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.138.0).
