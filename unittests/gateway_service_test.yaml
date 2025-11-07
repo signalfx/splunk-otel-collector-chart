@@ -26,7 +26,7 @@ tests:
       - equal:
           path: spec.type
           value: ClusterIP
-      - notExists:
+      - isNull:
           path: spec.trafficDistribution
 
   - it: should render gateway service with correct type and annotations
@@ -74,7 +74,7 @@ tests:
       - equal:
           path: metadata.annotations.deprecated
           value: "true"
-      - notExists:
+      - isNull:
           path: metadata.annotations.gateway  # gateway annotations are completely ignored
       - equal:
           path: spec.type

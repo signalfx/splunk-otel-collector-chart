@@ -79,10 +79,16 @@ spec:
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.gateway.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.gateway.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
