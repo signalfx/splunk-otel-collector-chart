@@ -64,6 +64,12 @@ data:
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.signalfx.com
+      http_forwarder/signalfx:
+        egress:
+          endpoint: https://ingest.CHANGEME.signalfx.com
+        ingress:
+          endpoint: 0.0.0.0:9943
+          include_metadata: true
       zpages: null
     processors:
       batch:
@@ -190,9 +196,6 @@ data:
             static_configs:
             - targets:
               - localhost:8889
-      signalfx:
-        endpoint: 0.0.0.0:9943
-        include_metadata: true
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -201,6 +204,7 @@ data:
       - headers_setter
       - zpages
       - http_forwarder
+      - http_forwarder/signalfx
       pipelines:
         logs:
           exporters: null
@@ -228,14 +232,6 @@ data:
           - batch
           receivers:
           - routing/logs
-        logs/signalfx-events:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - signalfx
         logs/split:
           exporters:
           - routing/logs
@@ -250,7 +246,6 @@ data:
           - resource/add_cluster_name
           receivers:
           - otlp
-          - signalfx
         metrics/collector:
           exporters:
           - signalfx

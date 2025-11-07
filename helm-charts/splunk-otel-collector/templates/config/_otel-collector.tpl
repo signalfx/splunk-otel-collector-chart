@@ -10,6 +10,12 @@ extensions:
   http_forwarder:
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+  http_forwarder/signalfx:
+    ingress:
+      endpoint: 0.0.0.0:9943
+      include_metadata: true
+    egress:
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
   {{- end }}
 
 
@@ -27,10 +33,6 @@ receivers:
 
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
-
-  signalfx:
-    endpoint: 0.0.0.0:9943
-    include_metadata: true
 
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
@@ -204,6 +206,9 @@ service:
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
     {{- end }}
+    {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+    - http_forwarder/signalfx
+    {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
   # In order to disable a default pipeline just set it to `null` in gateway.config overrides.
@@ -241,7 +246,7 @@ service:
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # default metrics pipeline
     metrics:
-      receivers: [otlp, signalfx]
+      receivers: [otlp]
       processors:
         - memory_limiter
         - batch
@@ -274,14 +279,6 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
         - splunk_hec/platform_metrics
         {{- end }}
-    {{- end }}
-
-    {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
-    # logs pipeline for receiving and exporting SignalFx events
-    logs/signalfx-events:
-      receivers: [signalfx]
-      processors: [memory_limiter, batch]
-      exporters: [signalfx]
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
