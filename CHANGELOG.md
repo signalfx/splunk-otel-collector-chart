@@ -4,6 +4,16 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.139.0] - 2025-11-13
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.139.2](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.139.2).
+
+### ❗ Known Issues ❗
+
+The Splunk OpenTelemetry Collector for Kubernetes, in its current configuration, cannot be reliably installed on Windows worker nodes.
+This is due to a known issue in [Splunk OpenTelemetry Collector v0.139.2](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.139.2), as Windows Docker images aren't available at [quay.io](https://quay.io/repository/signalfx/splunk-otel-collector) yet.
+This is actively being investigated.
+
 ## [0.138.1] - 2025-11-07
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.138.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.138.0).
