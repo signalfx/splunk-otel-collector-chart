@@ -286,6 +286,24 @@ jobs:
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
           admin: false
           use-kubelogin: true
+      - name: Print pod status
+        run: |
+          echo "--- Pod Status (All Namespaces) ---"
+          kubectl get pods -A -o wide
+          echo "------------------------------------"
+      - name: Print pod logs
+        run: |
+          echo "--- Pod Logs (All Namespaces, last 50 lines) ---"
+          # Get all pod names and their namespaces, then iterate to fetch logs
+          kubectl get pods -A -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.namespace}{"\n"}{end}' | while read -r pod namespace; do
+            echo "--- Logs for pod: $pod in namespace: $namespace ---"
+            # Attempt to get logs, limiting to last 50 lines. Handle multi-container pods by trying all containers.
+            # If a pod has multiple containers, this will print logs for each.
+            # The '|| true' prevents the step from failing if a pod's logs can't be retrieved (e.g., pod is pending).
+            kubectl logs "$pod" -n "$namespace" --tail=50 --all-containers || true
+            echo "---------------------------------------------------"
+          done
+          echo "---------------------------------------------------"
       - name: Update dependencies
         run: |
           make dep-update
