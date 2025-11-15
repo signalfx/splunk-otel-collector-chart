@@ -53,10 +53,10 @@ spec:
     - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
       value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: splunk.zc.method=splunk-otel-java:v2.20.1
+      value: splunk.zc.method=splunk-otel-java:v2.21.1
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
-    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.20.1
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.21.1
     resources:
       limits:
         cpu: 500m
