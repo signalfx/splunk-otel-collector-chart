@@ -10,7 +10,8 @@ issues: [2155]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The `signalfx` receiver is on the path towards deprecation and removal.
+  The `signalfx` receiver is on the path towards deprecation and removal. Please send metrics to the gateway's OTLP
+  receiver instead.
   The breaking changes are as follows:
   - No metrics being sent to the gateway's `signalfx` receiver will be sent to Splunk Platform anymore.
   - For metrics being sent to the gateway's `signalfx` receiver, resource and data point attributes will no longer be
