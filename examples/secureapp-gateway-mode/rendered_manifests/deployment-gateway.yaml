@@ -43,7 +43,10 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "8192"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
