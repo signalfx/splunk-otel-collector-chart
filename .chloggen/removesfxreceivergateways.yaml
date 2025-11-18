@@ -12,7 +12,7 @@ issues: [2155]
 subtext: |
   The `signalfx` receiver is on the path towards deprecation and removal.
   The breaking changes are as follows:
-  - No metrics being sent to the gateway's `signalfx` receiver will sent to Splunk Platform anymore.
+  - No metrics being sent to the gateway's `signalfx` receiver will be sent to Splunk Platform anymore.
   - For metrics being sent to the gateway's `signalfx` receiver, resource and data point attributes will no longer be
   modified by the gateway. The metrics will be forwarded as-is.
   - All metrics and logs being sent to the gateway's `signalfx` receiver will no longer be subject to the
