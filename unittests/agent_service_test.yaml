@@ -61,3 +61,67 @@ tests:
       - equal:
           path: metadata.annotations.deprecated
           value: true
+
+  - it: should not render agent service when all ports are nulled
+    set:
+      agent:
+        service:
+          enabled: true
+        ports:
+          otlp: null
+          otlp-http: null
+          zipkin: null
+          jaeger-thrift: null
+          jaeger-grpc: null
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render agent service when logs-only and no log-enabled ports
+    set:
+      splunkPlatform:
+        endpoint: http://splunk:8088
+        token: fake-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+      splunkObservability:
+        realm: ""
+      agent:
+        service:
+          enabled: true
+        ports:
+          otlp: null
+          otlp-http: null
+
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render agent service with only enabled ports for logs-only
+    set:
+      splunkPlatform:
+        endpoint: http://splunk:8088
+        token: fake-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+      splunkObservability:
+        realm: ""
+      agent:
+        service:
+          enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.ports
+          value:
+            - name: otlp
+              port: 4317
+              targetPort: otlp
+              protocol: TCP
+            - name: otlp-http
+              port: 4318
+              targetPort: otlp-http
+              protocol: TCP
