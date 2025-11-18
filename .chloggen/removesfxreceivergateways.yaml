@@ -18,13 +18,3 @@ subtext: |
   - All metrics and logs being sent to the gateway's `signalfx` receiver will no longer be subject to the
   memory limiter and batch processors. Please ensure any required memory limiting or batching is configured
   on the sending side (e.g. the agent).
-  To temporarily enable the `signalfx` receiver in the gateway, you can add the following configuration to your
-  `values.yaml` file:
-  ```
-  gateway:
-    config:
-      receivers:
-        signalfx:
-          endpoint: 0.0.0.0:9943
-          include_metadata: true
-  ```

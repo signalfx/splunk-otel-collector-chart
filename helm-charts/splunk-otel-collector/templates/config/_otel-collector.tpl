@@ -205,8 +205,6 @@ service:
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
-    {{- end }}
-    {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
     - http_forwarder/signalfx
     {{- end }}
 
