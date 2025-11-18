@@ -5,7 +5,7 @@ component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: Fix failed agent service creation when no ports are exposed. The agent k8s service is now only created when there are ports to expose
 # One or more tracking issues related to the change
-issues: []
+issues: [2166]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
