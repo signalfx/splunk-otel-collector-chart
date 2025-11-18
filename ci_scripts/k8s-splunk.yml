@@ -7,6 +7,11 @@ data:
   default.yml: |
     splunk:
       conf:
+        server:
+          content:
+            diskUsage:
+              # Reduce minimum free space from 5000MB to 1000MB
+              minFreeSpace: 1000
         indexes:
           directory: /opt/splunk/etc/apps/search/local
           content:
