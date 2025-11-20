@@ -126,41 +126,7 @@ splunkPlatform:
 Splunk OpenTelemetry Collector for Kubernetes supports collection of metrics,
 traces and logs (using OTel native logs collection only) from Windows nodes.
 
-All windows images are available in a separate `quay.io` repository:
-`quay.io/signalfx/splunk-otel-collector-windows` with two release tracking tags
-available: `latest` (Server 2019) and `latest-2022` (Server 2022). Version tags
-follow the convention of `<appVersion>` (2019) and `<appVersion>-2022` (2022).
-The digests for each release are detailed at
-https://github.com/signalfx/splunk-otel-collector/releases.
-
-Use the following values.yaml configuration to install the helm chart on Windows
-worker nodes:
-
-```yaml
-isWindows: true
-image:
-  otelcol:
-    repository: quay.io/signalfx/splunk-otel-collector-windows
-    tag: <appVersion>-2022
-logsEngine: otel
-readinessProbe:
-  initialDelaySeconds: 60
-livenessProbe:
-  initialDelaySeconds: 60
-```
-
-If you have both Windows and Linux worker nodes in your Kubernetes cluster, you
-need to install the helm chart twice. One of the installations with default
-configuration `isWindows: false` will be applied on Linux nodes. Another
-installation with values.yaml configuration that provided above will be applied
-on Windows nodes. And it's important to disable `clusterReceiver` on one of the
-installations to avoid cluster-wide metrics duplication, add the following line
-to values.yaml of one of the installations:
-
-```yaml
-clusterReceiver:
-  enabled: false
-```
+The `quay.io/signalfx/splunk-otel-collector` image is a multi-arch image supporting Windows 2019 and Windows 2022 Windows image flavors.
 
 ## Discovery Mode
 
