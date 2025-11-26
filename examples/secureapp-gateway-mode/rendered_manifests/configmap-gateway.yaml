@@ -228,14 +228,6 @@ data:
           - batch
           receivers:
           - routing/logs
-        logs/signalfx-events:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - signalfx
         logs/split:
           exporters:
           - routing/logs
