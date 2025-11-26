@@ -184,8 +184,10 @@ data:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
+            include_metadata: true
           http:
             endpoint: 0.0.0.0:4318
+            include_metadata: true
       prometheus/collector:
         config:
           scrape_configs:
