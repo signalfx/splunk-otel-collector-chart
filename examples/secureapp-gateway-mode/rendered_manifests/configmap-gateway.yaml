@@ -241,7 +241,6 @@ data:
           - resource/add_cluster_name
           receivers:
           - otlp
-          - signalfx
         metrics/collector:
           exporters:
           - signalfx
