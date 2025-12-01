@@ -37,6 +37,15 @@ data:
         ingest_url: http://<custom-gateway-url>:9943
         root_path: /hostfs
         sync_host_metadata: true
+      signalfx/drop_metrics:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        api_url: https://api.CHANGEME.signalfx.com
+        correlation: null
+        exclude_metrics:
+        - metric_name: '**'
+        ingest_url: https://ingest.CHANGEME.signalfx.com
+        root_path: /hostfs
+        sync_host_metadata: true
       signalfx/histograms:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         api_url: https://api.CHANGEME.signalfx.com
