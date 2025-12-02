@@ -12,5 +12,5 @@ issues: [2172]
 subtext: |
   Previously, metrics were being sent via SignalFx exporter to SignalFx receiver. This change removes
   the SignalFx receiver from the gateway's metric pipelines. The SignalFx receiver is on the path towards
-  deprecation. The SignalFx exporter remains in the agent's pipeline even when the gateway is enabled, but
+  deprecation. The SignalFx exporter remains in the agent's `metrics` pipeline even when the gateway is enabled, but
   its only purpose is to sync host metadata, it does not send any metrics.
