@@ -1319,7 +1319,7 @@ service:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         - signalfx
         {{- end }}
-        {{- if eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true" }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}
