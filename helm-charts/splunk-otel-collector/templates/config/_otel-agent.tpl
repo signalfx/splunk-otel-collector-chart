@@ -1026,24 +1026,19 @@ exporters:
     {{- end }}
     {{- end }}
 
-  signalfx/drop_metrics:
+  {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  signalfx/host_metadata:
     correlation:
-    {{- if .Values.gateway.enabled }}
-    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
-    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
-    {{- else }}
-    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    {{- end }}
+    # Ingest URL is unused in this configuration, but must be set when api_url is set.
+    realm: {{ include "splunk-otel-collector.fullname" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
     root_path: /hostfs
     {{- end }}
-    {{- end }}
     exclude_metrics:
       - metric_name: "**"
+  {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
@@ -1286,6 +1281,11 @@ service:
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+        # The signalfx exporter is only being used to sync host metadata when gateway is enabled.
+        # The otlp exporter sends the metric data.
+        - signalfx/host_metadata
+        {{- end }}
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -1316,11 +1316,6 @@ service:
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp
-        {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
-        # Only use the signalfx exporter to sync host metadata when gateway is enabled.
-        # The OTLP exporter sends the metric data.
-        - signalfx/drop_metrics
-        {{- end }}
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         - signalfx
