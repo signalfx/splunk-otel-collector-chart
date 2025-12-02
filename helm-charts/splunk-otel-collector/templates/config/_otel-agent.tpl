@@ -1029,7 +1029,6 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    # Ingest URL is unused in this configuration, but must be set when api_url is set.
     realm: {{ include "splunk-otel-collector.fullname" . }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
