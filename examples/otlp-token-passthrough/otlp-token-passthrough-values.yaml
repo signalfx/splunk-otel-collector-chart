@@ -10,14 +10,6 @@ gateway:
     limits:
       cpu: 2
       memory: 4Gi
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
 
 agent:
   config:
