@@ -1,5 +1,5 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: enhancement
+change_type: breaking
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: gateway
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
@@ -12,3 +12,15 @@ issues: [2171]
 subtext: |
   This is part of an effort to remove the `signalfx` receiver from the default gateway configuration. This change
   will allow access tokens to be passed from agents to the gateway through the OTLP receiver.
+  To revert this change to previous behavior, please add the following to your `values.yaml` file:
+  ```
+  gateway:
+    config:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              include_metadata: false
+            http:
+              include_metadata: false
+  ```
