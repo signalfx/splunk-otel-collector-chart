@@ -192,14 +192,6 @@ data:
           - batch
           receivers:
           - otlp
-        logs/signalfx-events:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - signalfx
         metrics:
           exporters:
           - signalfx
