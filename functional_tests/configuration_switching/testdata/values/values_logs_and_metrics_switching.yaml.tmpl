@@ -13,4 +13,8 @@ agent:
       splunk_hec/platform_metrics:
         endpoint: {{ .MetricHecEndpoint }}
 {{ end }}
+
+clusterReceiver:
+  k8sObjects: []
+
 clusterName: dev-operator

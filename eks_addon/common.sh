@@ -16,8 +16,6 @@ CHART_APPVERSION=$(yq e ".appVersion" "${CHART_DIR}/Chart.yaml")
 ECR_REGION="us-east-1"
 ECR_REGISTRY="709825985650.dkr.ecr.${ECR_REGION}.amazonaws.com"
 ECR_OTELCOL_REPO="${ECR_REGISTRY}/splunk/images/splunk-otel-collector"
-ECR_FLUENTD_REPO="${ECR_REGISTRY}/splunk/docker.io/splunk/fluentd-hec"
-ECR_FLUENTD_REPO_TAG="1.3.3-linux"
 ECR_HELM_NAMESPACE="${ECR_REGISTRY}/splunk/charts"
 ECR_HELM_REPO="${ECR_HELM_NAMESPACE}/splunk-otel-collector"
 

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.137.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.137.0"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.137.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -57,7 +57,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.137.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -334,8 +334,6 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       hostmetrics:
         collection_interval: 10s
         root_path: /hostfs
@@ -522,7 +520,6 @@ data:
           - filter/exclude_logs_from_node
           receivers:
           - filelog
-          - fluentforward
           - otlp
         logs/entities:
           exporters:

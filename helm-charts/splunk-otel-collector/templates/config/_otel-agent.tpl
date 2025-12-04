@@ -4,7 +4,7 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
     {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
@@ -40,10 +40,6 @@ extensions:
 
 receivers:
   {{- include "splunk-otel-collector.otelReceivers" . | nindent 2 }}
-  {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-  fluentforward:
-    endpoint: 0.0.0.0:8006
-  {{- end }}
 
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode
@@ -90,14 +86,14 @@ receivers:
       {{- if .Values.featureGates.useLightPrometheusReceiver }}
       lightprometheus:
       {{- else }}
-      prometheus_simple:
+      prometheus/istio:
       {{- end }}
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
         {{- else }}
         # Enable prometheus scraping for Istio pods only
-        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && "istio.io/rev" in labels
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*")
         {{- end }}
         config:
           {{- if .Values.featureGates.useLightPrometheusReceiver }}
@@ -108,8 +104,87 @@ receivers:
             service.instance.id:
               enabled: false
           {{- else }}
-          metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-          endpoint: '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`'
+          config:
+            scrape_configs:
+              - job_name: 'istio'
+                metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
+                scrape_interval: 10s
+                static_configs:
+                  - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`']
+                metric_relabel_configs:
+                  - source_labels: [__name__]
+                    action: keep
+                    regex: "(envoy_cluster_lb_healthy_panic|\
+                    envoy_cluster_manager_warming_clusters|\
+                    envoy_cluster_membership_healthy|\
+                    envoy_cluster_membership_total|\
+                    envoy_cluster_ssl_handshake|\
+                    envoy_cluster_ssl_session_reused|\
+                    envoy_cluster_ssl_versions_TLSv1_2|\
+                    envoy_cluster_ssl_versions_TLSv1_3|\
+                    envoy_cluster_upstream_cx_active|\
+                    envoy_cluster_upstream_cx_close_notify|\
+                    envoy_cluster_upstream_cx_connect_attempts_exceeded|\
+                    envoy_cluster_upstream_cx_connect_ms|\
+                    envoy_cluster_upstream_cx_connect_timeout|\
+                    envoy_cluster_upstream_cx_destroy_local_with_active_rq|\
+                    envoy_cluster_upstream_cx_http1_total|\
+                    envoy_cluster_upstream_cx_http2_total|\
+                    envoy_cluster_upstream_cx_idle_timeout|\
+                    envoy_cluster_upstream_cx_max_requests|\
+                    envoy_cluster_upstream_cx_none_healthy|\
+                    envoy_cluster_upstream_cx_pool_overflow|\
+                    envoy_cluster_upstream_cx_protocol_error|\
+                    envoy_cluster_upstream_cx_total|\
+                    envoy_cluster_upstream_rq_4xx|\
+                    envoy_cluster_upstream_rq_5xx|\
+                    envoy_cluster_upstream_rq_active|\
+                    envoy_cluster_upstream_rq_cancelled|\
+                    envoy_cluster_upstream_rq_completed|\
+                    envoy_cluster_upstream_rq_pending_active|\
+                    envoy_cluster_upstream_rq_retry|\
+                    envoy_cluster_upstream_rq_retry_limit_exceeded|\
+                    envoy_cluster_upstream_rq_timeout|\
+                    envoy_cluster_upstream_rq_tx_reset|\
+                    envoy_cluster_upstream_rq_time|\
+                    envoy_cluster_upstream_rq_xx|\
+                    envoy_listener_downstream_cx_total|\
+                    envoy_listener_ssl_versions_TLSv1_2|\
+                    envoy_listener_ssl_versions_TLSv1_3|\
+                    envoy_server_live|\
+                    envoy_server_memory_allocated|\
+                    envoy_server_memory_heap_size|\
+                    envoy_server_total_connections|\
+                    envoy_server_uptime|\
+                    istio_mesh_connections_from_logs|\
+                    istio_monitor_pods_without_sidecars|\
+                    istio_request_bytes|\
+                    istio_request_duration_milliseconds|\
+                    istio_request_messages_total|\
+                    istio_requests_total|\
+                    istio_response_messages_total|\
+                    istio_tcp_connections_closed_total|\
+                    istio_tcp_connections_opened_total|\
+                    istio_tcp_received_bytes_total|\
+                    istio_tcp_response_bytes_total|\
+                    pilot_conflict_inbound_listener|\
+                    pilot_eds_no_instances|\
+                    pilot_k8s_cfg_events|\
+                    pilot_k8s_endpoints_pending_pod|\
+                    pilot_k8s_endpoints_with_no_pods|\
+                    pilot_no_ip|\
+                    pilot_proxy_convergence_time|\
+                    pilot_proxy_queue_time|\
+                    pilot_services|\
+                    pilot_xds_cds_reject|\
+                    pilot_xds_eds_reject|\
+                    pilot_xds_expired_nonce|\
+                    pilot_xds_lds_reject|\
+                    pilot_xds_push_context_errors|\
+                    pilot_xds_push_time|\
+                    pilot_xds_rds_reject|\
+                    pilot_xds_send_time|\
+                    pilot_xds_write_timeout)(?:_sum|_count|_bucket)?"
           {{- end }}
       {{- end }}
 
@@ -442,15 +517,8 @@ receivers:
 
   kubeletstats:
     collection_interval: 10s
-    {{- if eq .Values.distribution "gke/autopilot" }}
-    # GKE Autopilot doesn't allow using the secure kubelet endpoint,
-    # use the read-only endpoint instead.
-    auth_type: none
-    endpoint: ${K8S_NODE_IP}:10255
-    {{- else }}
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
-    {{- end }}
     metric_groups:
       - container
       - pod
@@ -487,7 +555,7 @@ receivers:
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+  {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   {{- if .Values.logsCollection.containers.enabled }}
   filelog:
     {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
@@ -761,19 +829,6 @@ processors:
   {{- end }}
   {{- end }}
 
-  {{- if eq .Values.logsEngine "fluentd" }}
-  # Move flat fluentd logs attributes to resource attributes
-  groupbyattrs/logs:
-    keys:
-     - com.splunk.source
-     - com.splunk.sourcetype
-     - container.id
-     - fluent.tag
-     - k8s.container.name
-     - k8s.namespace.name
-     - k8s.pod.name
-     - k8s.pod.uid
-  {{- end }}
 
   {{- if not .Values.gateway.enabled }}
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
@@ -1010,7 +1065,7 @@ service:
                 without_units: true
                 without_type_suffix: true
   extensions:
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "otel") }}
+    {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
     - file_storage
     {{- end }}
     {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
@@ -1052,11 +1107,8 @@ service:
     # default logs + profiling data pipeline
     logs:
       receivers:
-        {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-        {{- if and (eq .Values.logsEngine "otel") .Values.logsCollection.containers.enabled }}
+        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.containers.enabled }}
         - filelog
-        {{- end }}
-        - fluentforward
         {{- end }}
         {{- if .Values.splunkObservability.secureAppEnabled }}
         - routing/logs
@@ -1065,9 +1117,6 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
-        - groupbyattrs/logs
-        {{- end }}
         - k8sattributes
         {{- if not .Values.gateway.enabled }}
         - filter/logs
@@ -1101,7 +1150,7 @@ service:
         {{- end }}
         {{- end }}
 
-    {{- if and (eq .Values.logsEngine "otel") (or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled) }}
+    {{- if or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled }}
     logs/host:
       receivers:
         {{- if .Values.logsCollection.extraFileLogs }}

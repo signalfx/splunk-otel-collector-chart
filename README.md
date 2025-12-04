@@ -77,8 +77,6 @@ This distribution currently supports:
   the [`splunk_hec`
   exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/splunkhecexporter).
 
-**Fluentd logs engine is now deprecated and will reach End Of Support in October 2025.** Migrating to the native OTEL logs engine before this date is strongly recommended.
-
 ## Supported Kubernetes distributions
 
 The Helm chart works with default configurations of the main Kubernetes distributions. Use actively supported versions:

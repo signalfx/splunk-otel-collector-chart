@@ -245,16 +245,11 @@
       ]
     },
     "logsEngine": {
-      "description": "Logs collection engine",
+      "description": "Logs collection engine (deprecated, only otel is supported)",
       "type": "string",
       "enum": [
-        "fluentd",
         "otel"
       ]
-    },
-    "migrateLogsCheckpoints": {
-      "description": "Migrating Fluentd's position file to Otel checkpoints",
-      "type": "boolean"
     },
     "cloudProvider": {
       "description": "Cloud provider where the collector is running",
@@ -885,177 +880,6 @@
         }
       }
     },
-    "fluentd": {
-      "description": "Fluentd sidecar configuration for logs collection.",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "resources": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "limits": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "type": [
-                    "string",
-                    "integer"
-                  ]
-                },
-                "memory": {
-                  "type": "string"
-                }
-              }
-            },
-            "requests": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "type": [
-                    "string",
-                    "integer"
-                  ]
-                },
-                "memory": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "securityContext": {
-          "type": "object"
-        },
-        "extraEnvs": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "config": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "containers": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "path": {
-                  "type": "string"
-                },
-                "pathDest": {
-                  "type": "string"
-                },
-                "logFormatType": {
-                  "type": "string"
-                },
-                "criTimeFormat": {
-                  "type": "string"
-                }
-              }
-            },
-            "journalLogPath": {
-              "type": "string"
-            },
-            "buffer": {
-              "type": "object"
-            },
-            "logLevel": {
-              "type": "string",
-              "enum": [
-                "trace",
-                "debug",
-                "info",
-                "warn",
-                "error"
-              ]
-            },
-            "path": {
-              "type": "string"
-            },
-            "excludePath": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "posFilePrefix": {
-              "type": "string"
-            },
-            "refreshInterval": {
-              "type": "integer"
-            },
-            "enableStatWatcher": {
-              "type": "boolean"
-            },
-            "customFilters": {
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "tag": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string"
-                    },
-                    "body": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            },
-            "logs": {
-              "type": "object",
-              "patternProperties": {
-                ".*": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "from": {
-                      "type": "object"
-                    },
-                    "timestampExtraction": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "regexp": {
-                          "type": "string"
-                        },
-                        "format": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "multiline": {
-                      "type": "object",
-                      "additionalItems": false,
-                      "properties": {
-                        "firstline": {
-                          "type": "string"
-                        },
-                        "flushInterval": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "sourcetype": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "image": {
       "description": "Docker image configuration.",
       "type": "object",
@@ -1065,26 +889,6 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
-        },
-        "fluentd": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "repository": {
-              "type": "string"
-            },
-            "tag": {
-              "type": "string"
-            },
-            "pullPolicy": {
-              "type": "string",
-              "enum": [
-                "IfNotPresent",
-                "Always",
-                "Never"
-              ]
-            }
           }
         },
         "otelcol": {

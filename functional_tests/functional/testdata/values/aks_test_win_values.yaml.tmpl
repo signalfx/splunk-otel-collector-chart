@@ -10,6 +10,8 @@ splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}
 
 agent:
+  podLabels:
+    osType: "windows"
   resources:
     requests:
       cpu: 100m
@@ -23,12 +25,19 @@ agent:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
+      file:
+        path: C:\metrics.json
     service:
       pipelines:
         traces:
           exporters:
             - otlp
+        metrics/agent:
+          exporters:
+            - file
 clusterReceiver:
+  podLabels:
+    osType: "windows"
   eventsEnabled: true
   config:
     exporters:
@@ -36,6 +45,13 @@ clusterReceiver:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
           insecure: true
+      file:
+        path: C:\metrics.json
+    service:
+      pipelines:
+        metrics/collector:
+          exporters:
+            - file
 
   k8sObjects:
     - name: pods

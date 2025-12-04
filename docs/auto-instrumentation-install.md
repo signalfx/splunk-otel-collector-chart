@@ -66,7 +66,8 @@ these frameworks often have pre-built instrumentation capabilities already avail
       - **Examples**
         - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
         - [trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
-        - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml).
+        - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
+        - [enable useLabelsForResourceAttributes](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-use-labels-for-resource-attributes.yaml).
 
 ```bash
 helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector

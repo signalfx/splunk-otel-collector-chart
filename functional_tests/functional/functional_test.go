@@ -50,6 +50,7 @@ const (
 	eksTestKubeEnv                         = "eks"
 	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
 	eksFargateTestKubeEnv                  = "eks/fargate"
+	gkeTestKubeEnv                         = "gke"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
 	gceTestKubeEnv                         = "gce"
@@ -59,8 +60,12 @@ const (
 	kindValuesDir                          = "expected_kind_values"
 	eksValuesDir                           = "expected_eks_values"
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
+	aksValuesDir                           = "expected_aks_values"
+	gkeValuesDir                           = "expected_gke_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
+	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	winPodMetricsPath                      = "C:\\metrics.json"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -68,6 +73,12 @@ var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 var globalSinks *sinks
 
 var expectedValuesDir string
+
+// Component names for health checks
+const (
+	kubeletstatsReceiverName = "kubeletstatsreceiver"
+	k8sClusterReceiverName   = "k8sclusterreceiver"
+)
 
 type sinks struct {
 	logsConsumer                      *consumertest.LogsSink
@@ -200,6 +211,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("eks_auto_mode_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksFargateTestKubeEnv:
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case gkeTestKubeEnv:
+		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -535,6 +548,18 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+
+	// Test component health - verify no RBAC or connection errors
+	t.Run("component error logs checks", func(t *testing.T) {
+		testKubeConfig := requireEnv(t, "KUBECONFIG")
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		require.NoError(t, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+	})
 }
 
 // runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
@@ -546,7 +571,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -554,16 +579,35 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
 		})
+
+		t.Run("component error logs checks", func(t *testing.T) {
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+		})
+	case autopilotTestKubeEnv:
+		t.Run("component error logs checks", func(t *testing.T) {
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
+
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
 	}
 }
 
 func selectExpectedValuesDir(kubeTestEnv string) string {
-	if kubeTestEnv == eksAutoModeTestKubeEnv {
+	switch kubeTestEnv {
+	case eksAutoModeTestKubeEnv:
 		return eksAutoModeValuesDir
+	case aksTestKubeEnv:
+		return aksValuesDir
+	case gkeTestKubeEnv:
+		return gkeValuesDir
+	default:
+		return eksValuesDir
 	}
-	return eksValuesDir
 }
 
 func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
@@ -584,11 +628,15 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
+	podPathFile := linuxPodMetricsPath
+	if pods.Items[0].Labels["osType"] == "windows" {
+		podPathFile = winPodMetricsPath
+	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
 	require.NoError(t, err)
 
-	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", "/tmp/metrics.json", tmpFile.Name())
+	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
 	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()

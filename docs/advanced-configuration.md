@@ -365,15 +365,15 @@ make sure to set the required `distribution` value to `eks/fargate`:
 distribution: eks/fargate
 ```
 
-**NOTE:** Fluentd and Native OTel logs collection are not yet automatically configured in EKS with Fargate profiles
+**NOTE:** Native OTel logs collection is not yet automatically configured in EKS with Fargate profiles
 
 This distribution will operate similarly to the `eks` distribution but with the following distinctions:
 
 1. The Collector agent daemonset is not applied since Fargate doesn't support daemonsets. Any desired Collector instances
-running as agents must be configured manually as sidecar containers in your custom deployments. This includes any application
-logging services like Fluentd. We recommend setting the `gateway.enabled` to `true` and configuring your instrumented
-applications to report metrics, traces, and logs to the gateway's `<installed-chart-name>-splunk-otel-collector` service address.
-Any desired agent instances that would run as a daemonset should instead run as sidecar containers in your pods.
+running as agents must be configured manually as sidecar containers in your custom deployments. We recommend setting the
+`gateway.enabled` to `true` and configuring your instrumented applications to report metrics, traces, and logs to the
+gateway's `<installed-chart-name>-splunk-otel-collector` service address. Any desired agent instances that would run as
+a daemonset should instead run as sidecar containers in your pods.
 
 2. Since Fargate nodes use a VM boundary to prevent access to host-based resources used by other pods, pods are not able to reach their own kubelet. The cluster receiver
 for the Fargate distribution has two primary differences between regular `eks` to work around this limitation:
@@ -573,36 +573,10 @@ For this particular issue, the solution may vary depending on the Kubernetes clu
 
 ## Logs collection
 
-The helm chart utilizes OpenTelemetry Collector for Kubernetes logs collection, but it also provides an option to use
-[fluentd](https://docs.fluentd.org/) which will be deployed as a sidecar. Logs collected with fluentd are sent through
-Splunk OTel Collector agent which does all the necessary metadata enrichment. The fluentd was initially introduced
-before the native OpenTelemetry logs collection was available. It will be deprecated and removed at some point in future.
+The helm chart utilizes the native OpenTelemetry Collector for Kubernetes logs collection. The OpenTelemetry logs
+collection is multi-threaded and provides high throughput with efficient resource usage.
 
-Use the following configuration to switch between Fluentd and OpenTelemetry logs collection:
-
-```yaml
-logsEngine: <fluentd|otel>
-```
-
-### Difference between Fluentd and OpenTelemetry logs collection
-
-#### Emitted logs
-
-There is almost no difference in the logs emitted by default by the two engines. The only difference is that
-Fluentd logs have an additional attribute called `fluent.tag`, which has a value similar to the `source` HEC field.
-
-#### Performance and resource usage
-
-Fluend logs collection requires an additional sidecar container responsible for collecting logs and sending them to the
-OTel collector container for further enrichment. No sidecar containers are required for the OpenTelemetry logs collection.
-OpenTelemetry logs collection is multi-threaded, so it can handle more logs per second without additional configuration.
-Our internal benchmarks show that OpenTelemetry logs collection provides higher throughput with less resource usage.
-
-#### Configuration
-
-Fluentd logs collection is configured using the `fluentd.config` section in values.yaml. OpenTelemetry logs
-collection is configured using the `logsCollection` section in values.yaml. The configuration options are
-different between the two engines, but they provide similar functionality.
+Logs collection is configured using the `logsCollection` section in values.yaml.
 
 ### Add log files from Kubernetes host machines/volumes
 

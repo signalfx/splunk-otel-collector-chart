@@ -13,9 +13,6 @@ metadata:
     component: otel-collector-agent
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
-    {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
-    engine: fluentd
-    {{- end }}
   {{- if .Values.agent.annotations }}
   annotations:
     {{- toYaml .Values.agent.annotations | nindent 4 }}
@@ -46,7 +43,7 @@ spec:
         {{- toYaml .Values.agent.podLabels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ print (include (print $.Template.BasePath "/configmap-fluentd.yaml") .) (include (print $.Template.BasePath "/configmap-agent.yaml") .) | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-agent.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: otel-collector
         {{- if .Values.agent.podAnnotations }}
         {{- toYaml .Values.agent.podAnnotations | nindent 8 }}
@@ -78,69 +75,6 @@ spec:
       {{- end }}
       {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) }}
       initContainers:
-        {{- if and (eq .Values.logsEngine "fluentd") (not (eq .Values.distribution "gke/autopilot")) }}
-        - name: prepare-fluentd-config
-          image: {{ template "splunk-otel-collector.image.fluentd" . }}
-          imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
-          command: [ "sh", "-c"]
-          securityContext:
-            runAsUser: 0
-          args:
-            - cp /fluentd/etc/common/* /fluentd/etc/;
-              {{- /* Update fluentd configs if docker engine is configured or discovered from existing log files. */}}
-              if [ "${LOG_FORMAT_TYPE}" == "json" ] || [ "$(ls {{ .Values.fluentd.config.containers.pathDest }}/*/*json.log 2>/dev/null | wc -l)" != "0" ]; then
-                  cp /fluentd/etc/json/* /fluentd/etc/;
-              fi;
-          env:
-            - name: LOG_FORMAT_TYPE
-              value: "{{ .Values.fluentd.config.containers.logFormatType }}"
-          resources:
-            {{- toYaml .Values.agent.resources | nindent 12 }}
-          volumeMounts:
-            - name: varlogdest
-              mountPath: {{ .Values.fluentd.config.containers.pathDest }}
-              readOnly: true
-            - name: fluentd-config
-              mountPath: /fluentd/etc
-            - name: fluentd-config-common
-              mountPath: /fluentd/etc/common
-            - name: fluentd-config-json
-              mountPath: /fluentd/etc/json
-        {{- else }}
-        {{- if and (not (eq .Values.distribution "gke/autopilot")) (.Values.migrateLogsCheckpoints) }}
-        - name: migrate-checkpoint
-          image: {{ template "splunk-otel-collector.image.otelcol" . }}
-          imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-          command: ["/migratecheckpoint"]
-          securityContext:
-            runAsUser: 0
-          env:
-          - name: CONTAINER_LOG_PATH_FLUENTD
-            value: "{{ .Values.fluentd.config.posFilePrefix }}-containers.log.pos"
-          - name: CONTAINER_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
-          - name: CUSTOM_LOG_PATH_FLUENTD
-            value: "{{ .Values.fluentd.config.posFilePrefix }}-*.pos"
-          - name: CUSTOM_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_filelog_"
-          - name: CUSTOM_LOG_CAPTURE_REGEX
-            value: '{{ regexReplaceAll "(\\W)" .Values.fluentd.config.posFilePrefix "\\${1}" }}\-(?P<name>[\w0-9-_]+)\.pos'
-          - name: JOURNALD_LOG_PATH_FLUENTD
-            value: "/var/log/splunkd-fluentd-journald-*.pos.json"
-          - name: JOURNALD_LOG_PATH_OTEL
-            value: "/var/addon/splunk/otel_pos/receiver_journald_"
-          - name: JOURNALD_LOG_CAPTURE_REGEX
-            value: '\/splunkd\-fluentd\-journald\-(?P<name>[\w0-9-_]+)\.pos\.json'
-          resources:
-            {{- toYaml .Values.agent.resources | nindent 12 }}
-          volumeMounts:
-            - name: checkpoint
-              mountPath: /var/addon/splunk/otel_pos
-            - name: varlog
-              mountPath: /var/log
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
-        {{- end }}
         {{- if and .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
@@ -197,49 +131,8 @@ spec:
               mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
             {{- end }}
         {{- end }}
-        {{- end }}
       {{- end }}
       containers:
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq .Values.logsEngine "fluentd") }}
-      - name: fluentd
-        image: {{ template "splunk-otel-collector.image.fluentd" . }}
-        imagePullPolicy: {{ .Values.image.fluentd.pullPolicy }}
-        {{- if .Values.fluentd.securityContext }}
-        securityContext:
-          {{ toYaml .Values.fluentd.securityContext | nindent 10 }}
-        {{- end }}
-        env:
-          - name: K8S_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: MY_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: MY_POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          {{- with .Values.fluentd.extraEnvs }}
-          {{- . | toYaml | nindent 10 }}
-          {{- end }}
-        resources:
-          {{- toYaml .Values.fluentd.resources | nindent 10 }}
-        volumeMounts:
-        - name: varlog
-          mountPath: {{ .Values.fluentd.config.containers.path }}
-        - name: varlogdest
-          mountPath: {{ .Values.fluentd.config.containers.pathDest }}
-          readOnly: true
-        - name: journallogpath
-          mountPath: {{ .Values.fluentd.config.journalLogPath | quote }}
-          readOnly: true
-        - name: fluentd-config
-          mountPath: /fluentd/etc
-        - name: tmp
-          mountPath: /tmp
-      {{- end }}
       - name: otel-collector
         {{- if (eq .Values.distribution "gke/autopilot") }}
         command:
@@ -263,17 +156,23 @@ spec:
         {{- end }}
         image: {{ template "splunk-otel-collector.image.otelcol" . }}
         imagePullPolicy: {{ .Values.image.otelcol.pullPolicy }}
-        {{- if or .Values.agent.securityContext (and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel")) }}
+        {{- if or .Values.agent.securityContext (eq (include "splunk-otel-collector.logsEnabled" $) "true") }}
         securityContext:
           {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" .Values.agent.securityContext "setRunAsUser" true) | nindent 10 }}
         {{- end }}
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.agent.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.agent.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:
@@ -383,7 +282,7 @@ spec:
           mountPath: /otel/etc/etcd
           readOnly: true
         {{- end }}
-        {{- if and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (eq .Values.logsEngine "otel") }}
+        {{- if eq (include "splunk-otel-collector.logsEnabled" $) "true" }}
         {{- if .Values.isWindows }}
         - name: varlog
           mountPath: C:\var\log
@@ -450,33 +349,6 @@ spec:
         emptyDir:
           sizeLimit: 25Mi
       {{- if (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-      {{- if eq .Values.logsEngine "fluentd" }}
-      - name: varlog
-        hostPath:
-          path: {{ .Values.fluentd.config.containers.path }}
-      - name: varlogdest
-        hostPath:
-          path: {{ .Values.fluentd.config.containers.pathDest }}
-      - name: journallogpath
-        hostPath:
-          path: {{ .Values.fluentd.config.journalLogPath | quote }}
-      - name: fluentd-config
-      {{- if (not (eq .Values.distribution "gke/autopilot")) }}
-        emptyDir: {}
-      - name: fluentd-config-common
-      {{- end }}
-        configMap:
-          name: {{ template "splunk-otel-collector.fullname" . }}-fluentd
-      - name: fluentd-config-cri
-        configMap:
-          name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-cri
-      - name: fluentd-config-json
-        configMap:
-          name: {{ template "splunk-otel-collector.fullname" . }}-fluentd-json
-      - name: tmp
-        emptyDir: {}
-      {{- end}}
-      {{- if eq .Values.logsEngine "otel" }}
       {{- if .Values.isWindows }}
       - name: varlog
         hostPath:
@@ -508,9 +380,8 @@ spec:
       - name: journaldlogs
         hostPath:
           path: {{.Values.logsCollection.journald.directory}}
-      {{- end}}
-      {{- end}}
-      {{- end}}
+      {{- end }}
+      {{- end }}
       {{- if eq (include "splunk-otel-collector.metricsEnabled" $) "true" }}
       {{- if .Values.isWindows }}
       - name: hostfs

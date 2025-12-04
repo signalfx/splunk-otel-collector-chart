@@ -103,7 +103,6 @@ print_summary() {
   echo "  - ${ECR_HELM_REPO}:${CHART_VERSION}"
   echo "  Container Images:"
   echo "  - ${ECR_OTELCOL_REPO}:${CHART_APPVERSION}"
-  echo "  - ${ECR_FLUENTD_REPO}:${ECR_FLUENTD_REPO_TAG}"
 }
 
 aws_okta_auth

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.137.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.137.0"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.137.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -43,7 +43,7 @@ data:
         source: kubernetes
         sourcetype: kube:events
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.137.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -108,6 +108,12 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/add_sourcetype:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
+            attributes["k8s.resource.name"]], ""))
       transform/k8sevents:
         error_mode: ignore
         log_statements:
@@ -146,19 +152,30 @@ data:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+        metrics:
+          k8s.container.status.reason:
+            enabled: true
+          k8s.node.condition:
+            enabled: true
+          k8s.pod.status_reason:
+            enabled: true
         resource_attributes:
-          k8s.container.status.last_terminated_reason:
-            enabled: true
-          k8s.hpa.scaletargetref.apiversion:
-            enabled: true
           k8s.hpa.scaletargetref.kind:
             enabled: true
           k8s.hpa.scaletargetref.name:
             enabled: true
           k8s.kubelet.version:
             enabled: true
+          k8s.pod.qos_class:
+            enabled: true
       k8s_events:
         auth_type: serviceAccount
+      k8sobjects:
+        auth_type: serviceAccount
+        objects:
+        - interval: 6h
+          mode: pull
+          name: pods
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -193,6 +210,18 @@ data:
           - transform/k8sevents
           receivers:
           - k8s_events
+        logs/objects:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          - resource
+          - transform/add_sourcetype
+          - resource/add_environment
+          receivers:
+          - k8sobjects
         metrics:
           exporters:
           - signalfx
