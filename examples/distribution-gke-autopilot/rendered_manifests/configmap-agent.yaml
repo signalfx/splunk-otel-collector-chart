@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.138.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.138.0"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.138.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -173,9 +173,9 @@ data:
           thrift_http:
             endpoint: 0.0.0.0:14268
       kubeletstats:
-        auth_type: none
+        auth_type: serviceAccount
         collection_interval: 10s
-        endpoint: ${K8S_NODE_IP}:10255
+        endpoint: ${K8S_NODE_IP}:10250
         extra_metadata_labels:
         - container.id
         metric_groups:

@@ -380,7 +380,6 @@ agent:
       cpu: 200m
       # This value is being used as a source for default memory_limiter processor configurations
       memory: 500Mi
-
   # To collect container logs and journald logs, it will run the agent as a root user.
   # To run it as non root user, uncomment below `securityContext` options.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
@@ -471,7 +470,6 @@ clusterReceiver:
     limits:
       cpu: 200m
       memory: 500Mi
-
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
