@@ -276,14 +276,6 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
-    # logs pipeline for receiving and exporting SignalFx events
-    logs/signalfx-events:
-      receivers: [signalfx]
-      processors: [memory_limiter, batch]
-      exporters: [signalfx]
-    {{- end }}
-
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     # entity events
     logs/entities:
