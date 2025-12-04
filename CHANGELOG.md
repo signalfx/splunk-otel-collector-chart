@@ -4,6 +4,14 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.140.0] - 2025-11-21
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.140.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.140.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix failed agent service creation when no ports are exposed. The agent k8s service is now only created when there are ports to expose ([#2166](https://github.com/signalfx/splunk-otel-collector-chart/pull/2166))
+
 ## [0.138.1] - 2025-11-07
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.138.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.138.0).

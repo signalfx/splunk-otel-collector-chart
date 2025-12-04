@@ -4,6 +4,23 @@
 Fargate doesn't support daemonsets so never use for that platform
 */}}
 {{- if and .Values.agent.enabled (ne .Values.distribution "eks/fargate") }}
+{{/*
+Build list of ports to expose
+*/}}
+{{- $ports := list }}
+{{- range $key, $port := .Values.agent.ports }}
+  {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
+  {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
+  {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}
+  {{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
+  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
+    {{- $ports = append $ports (dict "name" $key "port" $port.containerPort "targetPort" $key "protocol" $port.protocol) }}
+  {{- end }}
+{{- end }}
+{{/*
+Only create service if there are ports to expose
+*/}}
+{{- if $ports }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -23,22 +40,17 @@ metadata:
 spec:
   type: {{ $svc.type }}
   ports:
-  {{- range $key, $port := .Values.agent.ports }}
-  {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
-  {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
-  {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}
-  {{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
-  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
-  - name: {{ $key }}
-    port: {{ $port.containerPort }}
-    targetPort: {{ $key }}
-    protocol: {{ $port.protocol }}
-  {{- end }}
+  {{- range $ports }}
+  - name: {{ .name }}
+    port: {{ .port }}
+    targetPort: {{ .targetPort }}
+    protocol: {{ .protocol }}
   {{- end }}
   selector:
     app: {{ template "splunk-otel-collector.name" . }}
     component: otel-collector-agent
     release: {{ .Release.Name }}
   internalTrafficPolicy: Local
+{{- end }}
 {{- end }}
 {{- end }}
