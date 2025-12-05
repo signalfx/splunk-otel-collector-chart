@@ -933,12 +933,11 @@ where <my-splunk-otel-collector-gateway> is the gateway service name captured in
 ### OTLP Token Passthrough
 
 The collector's configurations for the agent and gateway support OTLP token passthrough.
+This functionality is disabled by default for the agent, and enabled by default for the gateway.
 This allows the collector to forward the authentication token received from the client, OTEL agent or instrumented application,
 to the backend services.
 
-To enable OTLP token passthrough, use the following configuration in your values.yaml:
-
-For the agent:
+To enable OTLP token passthrough for the agent, use the following configuration in your values.yaml:
 ```yaml
 agent:
   config:
@@ -951,7 +950,7 @@ agent:
             include_metadata: true
 ```
 
-For the gateway:
+To disable OTLP token passthrough in the gateway:
 ```yaml
 gateway:
   config:
@@ -959,7 +958,7 @@ gateway:
       otlp:
         protocols:
           grpc:
-            include_metadata: true
+            include_metadata: false
           http:
-            include_metadata: true
+            include_metadata: false
 ```
