@@ -14,7 +14,7 @@ on:
           - true
 
 env:
-  GO_VERSION: 1.24.9
+  GO_VERSION: 1.24.11
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: get matrix
         id: test_matrix
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: k8s-debug-info-${{ matrix.k8s-minikube-version }}-${{ matrix.container_runtime }}-splunk-${{ matrix.splunk_version }}
           path: tools/splunk_kubernetes_debug_info_*

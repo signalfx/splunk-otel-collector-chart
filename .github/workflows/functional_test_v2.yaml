@@ -24,7 +24,7 @@ on:
           - true
 
 env:
-  GO_VERSION: 1.24.9
+  GO_VERSION: 1.24.11
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: get matrix
         id: test_matrix
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -90,14 +90,14 @@ jobs:
           ./splunk_kubernetes_debug_info.sh
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: tools/splunk_kubernetes_debug_info_*
           retention-days: 5
       - name: Upload updated files artifact
         if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: updated_expected_results-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: ./functional_tests/**/*.yaml
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -148,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Download the latest published release to use as a base for the upgrade
         run: |
           helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
@@ -188,7 +188,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -225,7 +225,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Download the latest published release to use as a base for the upgrade
         run: |
           helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
@@ -268,7 +268,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -306,7 +306,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -337,7 +337,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -372,7 +372,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Download the latest published release to use as a base for the upgrade
         run: |
           helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
@@ -413,7 +413,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -447,7 +447,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Download the latest published release to use as a base for the upgrade
         run: |
           helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
@@ -487,7 +487,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -524,7 +524,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Download the latest published release to use as a base for the upgrade
         run: |
           helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
