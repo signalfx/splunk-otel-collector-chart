@@ -90,14 +90,14 @@ jobs:
           ./splunk_kubernetes_debug_info.sh
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: tools/splunk_kubernetes_debug_info_*
           retention-days: 5
       - name: Upload updated files artifact
         if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: updated_expected_results-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           path: ./functional_tests/**/*.yaml
