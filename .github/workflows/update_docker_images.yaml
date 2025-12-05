@@ -74,6 +74,7 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
 
       - name: Apply Version Update and Generate Changelog
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
@@ -98,3 +99,4 @@ jobs:
           branch: "update-${{ matrix.name }}" # Same branch name for all PRs
           base: main
           delete-branch: true
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
