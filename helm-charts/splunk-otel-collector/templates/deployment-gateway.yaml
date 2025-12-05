@@ -28,6 +28,9 @@ spec:
         app: {{ template "splunk-otel-collector.name" . }}
         component: otel-collector
         release: {{ .Release.Name }}
+        {{- if .Values.autodetect.istio }}
+        sidecar.istio.io/inject: "false"
+        {{- end }}
         {{- if .Values.gateway.podLabels }}
         {{- toYaml .Values.gateway.podLabels | nindent 8 }}
         {{- end }}
@@ -35,9 +38,6 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap-gateway.yaml") . | sha256sum }}
         {{- if .Values.gateway.podAnnotations }}
         {{- toYaml .Values.gateway.podAnnotations | nindent 8 }}
-        {{- end }}
-        {{- if .Values.autodetect.istio }}
-        sidecar.istio.io/inject: "false"
         {{- end }}
     spec:
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
@@ -79,10 +79,16 @@ spec:
         env:
           {{- if .Values.featureGates.useMemoryLimitPercentage }}
           - name: GOMEMLIMIT
-            value: "{{ include "splunk-otel-collector.convertMemToBytes" .Values.gateway.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1"
           {{- else }}
           - name: SPLUNK_MEMORY_TOTAL_MIB
-            value: "{{ include "splunk-otel-collector.convertMemToMib" .Values.gateway.resources.limits.memory | int64 }}"
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
           {{- end }}
           - name: K8S_NODE_NAME
             valueFrom:

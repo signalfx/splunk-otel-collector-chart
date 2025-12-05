@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.136.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.136.1"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.136.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -175,8 +175,8 @@ data:
             - targets:
               - localhost:8889
       signalfx:
-        access_token_passthrough: true
         endpoint: 0.0.0.0:9943
+        include_metadata: true
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -194,14 +194,6 @@ data:
           - batch
           receivers:
           - otlp
-        logs/signalfx-events:
-          exporters:
-          - signalfx
-          processors:
-          - memory_limiter
-          - batch
-          receivers:
-          - signalfx
         metrics:
           exporters:
           - signalfx

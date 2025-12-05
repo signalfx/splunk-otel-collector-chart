@@ -1,0 +1,88 @@
+suite: Image Configuration Tests
+templates:
+  - "daemonset.yaml"
+  - "deployment-gateway.yaml"
+  - "deployment-cluster-receiver.yaml"
+  - "secret-splunk-validation-hook.yaml"
+  - "configmap-agent.yaml"
+  - "configmap-gateway.yaml"
+  - "configmap-cluster-receiver.yaml"
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  - it: should use correct otelcol image configuration in agent daemonset
+    template: daemonset.yaml
+    set:
+      image:
+        otelcol:
+          repository: custom-otelcol-repo
+          tag: "1.2.3"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[?(@.name=="otel-collector")].image
+          pattern: "^custom-otelcol-repo:1.2.3$"
+
+  - it: should use correct otelcol image configuration in gateway deployment
+    template: deployment-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+      image:
+        otelcol:
+          repository: custom-gateway-repo
+          tag: "2.3.4"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "custom-gateway-repo:2.3.4"
+
+  - it: should use correct otelcol image configuration in cluster receiver deployment
+    template: deployment-cluster-receiver.yaml
+    set:
+      image:
+        otelcol:
+          repository: custom-cluster-repo
+          tag: "3.4.5"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "custom-cluster-repo:3.4.5"
+
+
+  - it: should use correct initPatchLogDirs image configuration in agent daemonset
+    template: daemonset.yaml
+    set:
+      splunkPlatform:
+        endpoint: "https://splunk.example.com"
+        token: "test-token"
+      agent:
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      image:
+        initPatchLogDirs:
+          repository: custom-init-repo
+          tag: "5.6.7"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="patch-log-dirs")].image
+          pattern: "^custom-init-repo:5.6.7$"
+
+  - it: should use correct validateSecret image configuration in validation hook
+    template: secret-splunk-validation-hook.yaml
+    set:
+      secret:
+        create: false
+        validateSecret: true
+      image:
+        validateSecret:
+          repository: custom-validate-repo
+          tag: "6.7.8"
+    asserts:
+      - equal:
+          path: spec.containers[0].image
+          value: "custom-validate-repo:6.7.8"

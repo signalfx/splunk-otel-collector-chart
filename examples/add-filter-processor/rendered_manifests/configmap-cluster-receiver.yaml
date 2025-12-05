@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.136.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.136.1"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.136.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -43,7 +43,7 @@ data:
         source: kubernetes
         sourcetype: kube:events
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.136.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -103,6 +103,12 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/add_sourcetype:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
+            attributes["k8s.resource.name"]], ""))
       transform/k8sevents:
         error_mode: ignore
         log_statements:
@@ -125,16 +131,46 @@ data:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"],
             "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
+      transform/k8shpascaletargetref:
+        error_mode: ignore
+        metric_statements:
+        - context: resource
+          statements:
+          - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
+          - set(attributes["k8s.statefulset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
+          - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+            where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
         metadata_exporters:
         - signalfx
+        metrics:
+          k8s.container.status.reason:
+            enabled: true
+          k8s.node.condition:
+            enabled: true
+          k8s.pod.status_reason:
+            enabled: true
         resource_attributes:
-          k8s.container.status.last_terminated_reason:
+          k8s.hpa.scaletargetref.kind:
+            enabled: true
+          k8s.hpa.scaletargetref.name:
+            enabled: true
+          k8s.kubelet.version:
+            enabled: true
+          k8s.pod.qos_class:
             enabled: true
       k8s_events:
         auth_type: serviceAccount
+      k8sobjects:
+        auth_type: serviceAccount
+        objects:
+        - interval: 6h
+          mode: pull
+          name: pods
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -168,12 +204,24 @@ data:
           - transform/k8sevents
           receivers:
           - k8s_events
+        logs/objects:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          - resource
+          - transform/add_sourcetype
+          receivers:
+          - k8sobjects
         metrics:
           exporters:
           - signalfx
           processors:
           - memory_limiter
           - batch
+          - transform/k8shpascaletargetref
           - resource
           - resource/k8s_cluster
           receivers:

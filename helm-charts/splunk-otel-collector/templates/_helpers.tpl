@@ -158,12 +158,6 @@ Get Splunk API URL.
 {{- .Values.splunkObservability.apiUrl | default (printf "https://api.%s.signalfx.com" $realm) }}
 {{- end -}}
 
-{{/*
-Create the fluentd image name.
-*/}}
-{{- define "splunk-otel-collector.image.fluentd" -}}
-{{- printf "%s:%s" .Values.image.fluentd.repository .Values.image.fluentd.tag | trimSuffix ":" -}}
-{{- end -}}
 
 {{/*
 Create the opentelemetry collector image name.
@@ -183,50 +177,8 @@ Create the patch-log-dirs image name.
 Create the validateSecret image name.
 */}}
 {{- define "splunk-otel-collector.image.validateSecret" -}}
-{{- printf "%s:%s" .Values.image.initPatchLogDirs.repository .Values.image.initPatchLogDirs.tag | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.image.validateSecret.repository .Values.image.validateSecret.tag | trimSuffix ":" -}}
 {{- end -}}
-
-{{/*
-  This helper converts the input value of memory to Bytes.
-  Input needs to be a valid value as supported by k8s memory resource field.
- */}}
-{{- define "splunk-otel-collector.convertMemToBytes" }}
-{{- $mem := lower . -}}
-{{- if hasSuffix "e" $mem -}}
-{{- $mem = mulf (trimSuffix "e" $mem | float64) 1e18 -}}
-{{- else if hasSuffix "ei" $mem -}}
-{{- $mem = mulf (trimSuffix "e" $mem | float64) 0x1p60 -}}
-{{- else if hasSuffix "p" $mem -}}
-{{- $mem = mulf (trimSuffix "p" $mem | float64) 1e15 -}}
-{{- else if hasSuffix "pi" $mem -}}
-{{- $mem = mulf (trimSuffix "pi" $mem | float64) 0x1p50 -}}
-{{- else if hasSuffix "t" $mem -}}
-{{- $mem = mulf (trimSuffix "t" $mem | float64) 1e12 -}}
-{{- else if hasSuffix "ti" $mem -}}
-{{- $mem = mulf (trimSuffix "ti" $mem | float64) 0x1p40 -}}
-{{- else if hasSuffix "g" $mem -}}
-{{- $mem = mulf (trimSuffix "g" $mem | float64) 1e9 -}}
-{{- else if hasSuffix "gi" $mem -}}
-{{- $mem = mulf (trimSuffix "gi" $mem | float64) 0x1p30 -}}
-{{- else if hasSuffix "m" $mem -}}
-{{- $mem = mulf (trimSuffix "m" $mem | float64) 1e6 -}}
-{{- else if hasSuffix "mi" $mem -}}
-{{- $mem = mulf (trimSuffix "mi" $mem | float64) 0x1p20 -}}
-{{- else if hasSuffix "k" $mem -}}
-{{- $mem = mulf (trimSuffix "k" $mem | float64) 1e3 -}}
-{{- else if hasSuffix "ki" $mem -}}
-{{- $mem = mulf (trimSuffix "ki" $mem | float64) 0x1p10 -}}
-{{- end }}
-{{- $mem }}
-{{- end }}
-
-{{/*
-  This helper converts the input value of memory to MiB.
-  Input needs to be a valid value as supported by k8s memory resource field.
- */}}
-{{- define "splunk-otel-collector.convertMemToMib" }}
-{{- divf (include "splunk-otel-collector.convertMemToBytes" .) 0x1p20 | floor -}}
-{{- end }}
 
 {{/*
 Create a filter expression for multiline logs configuration.

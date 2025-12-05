@@ -50,6 +50,7 @@ const (
 	eksTestKubeEnv                         = "eks"
 	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
 	eksFargateTestKubeEnv                  = "eks/fargate"
+	gkeTestKubeEnv                         = "gke"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
 	gceTestKubeEnv                         = "gce"
@@ -59,8 +60,12 @@ const (
 	kindValuesDir                          = "expected_kind_values"
 	eksValuesDir                           = "expected_eks_values"
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
+	aksValuesDir                           = "expected_aks_values"
+	gkeValuesDir                           = "expected_gke_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
+	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	winPodMetricsPath                      = "C:\\metrics.json"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -68,6 +73,12 @@ var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 var globalSinks *sinks
 
 var expectedValuesDir string
+
+// Component names for health checks
+const (
+	kubeletstatsReceiverName = "kubeletstatsreceiver"
+	k8sClusterReceiverName   = "k8sclusterreceiver"
+)
 
 type sinks struct {
 	logsConsumer                      *consumertest.LogsSink
@@ -200,6 +211,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("eks_auto_mode_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksFargateTestKubeEnv:
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case gkeTestKubeEnv:
+		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -535,6 +548,18 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+
+	// Test component health - verify no RBAC or connection errors
+	t.Run("component error logs checks", func(t *testing.T) {
+		testKubeConfig := requireEnv(t, "KUBECONFIG")
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		require.NoError(t, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+	})
 }
 
 // runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
@@ -546,7 +571,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -554,16 +579,35 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
 		})
+
+		t.Run("component error logs checks", func(t *testing.T) {
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+		})
+	case autopilotTestKubeEnv:
+		t.Run("component error logs checks", func(t *testing.T) {
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
+
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
 	}
 }
 
 func selectExpectedValuesDir(kubeTestEnv string) string {
-	if kubeTestEnv == eksAutoModeTestKubeEnv {
+	switch kubeTestEnv {
+	case eksAutoModeTestKubeEnv:
 		return eksAutoModeValuesDir
+	case aksTestKubeEnv:
+		return aksValuesDir
+	case gkeTestKubeEnv:
+		return gkeValuesDir
+	default:
+		return eksValuesDir
 	}
-	return eksValuesDir
 }
 
 func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
@@ -584,11 +628,15 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
+	podPathFile := linuxPodMetricsPath
+	if pods.Items[0].Labels["osType"] == "windows" {
+		podPathFile = winPodMetricsPath
+	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
 	require.NoError(t, err)
 
-	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", "/tmp/metrics.json", tmpFile.Name())
+	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
 	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
@@ -929,60 +977,44 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	metricsConsumer := globalSinks.k8sclusterReceiverMetricsConsumer
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver.yaml")
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
-	require.NoError(t, err)
+	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
 
-	metricNames := []string{"k8s.node.condition_ready", "k8s.namespace.phase", "k8s.pod.phase", "k8s.replicaset.desired", "k8s.replicaset.available", "k8s.daemonset.ready_nodes", "k8s.daemonset.misscheduled_nodes", "k8s.daemonset.desired_scheduled_nodes", "k8s.daemonset.current_scheduled_nodes", "k8s.container.ready", "k8s.container.memory_request", "k8s.container.memory_limit", "k8s.container.cpu_request", "k8s.container.cpu_limit", "k8s.deployment.desired", "k8s.deployment.available", "k8s.container.restarts", "k8s.container.cpu_request", "k8s.container.memory_request", "k8s.container.memory_limit"}
-	replaceWithStar := func(string) string { return "*" }
+	targetMetric := "k8s.pod.phase"
+	selectedMetrics := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, false, 3*time.Minute, 10*time.Second)
+	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
-	var selectedMetrics *pmetric.Metrics
-	for h := len(metricsConsumer.AllMetrics()) - 1; h >= 0; h-- {
-		m := metricsConsumer.AllMetrics()[h]
-
-		err = pmetrictest.CompareMetrics(expectedMetrics, m,
-			pmetrictest.IgnoreTimestamp(),
-			pmetrictest.IgnoreStartTimestamp(),
-			pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-			pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-			pmetrictest.IgnoreMetricValues(metricNames...),
-			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
-			pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
-			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
-			pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
-			pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-			pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-			pmetrictest.IgnoreScopeVersion(),
-			pmetrictest.IgnoreResourceMetricsOrder(),
-			pmetrictest.IgnoreMetricsOrder(),
-			pmetrictest.IgnoreScopeMetricsOrder(),
-			pmetrictest.IgnoreMetricDataPointsOrder(),
-			pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
-		)
-		if err == nil {
-			selectedMetrics = &m
-			break
-		}
+	metricNames := internal.GetMetricNames(&expectedMetrics)
+	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
+		pmetrictest.IgnoreTimestamp(),
+		pmetrictest.IgnoreStartTimestamp(),
+		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
+		pmetrictest.IgnoreMetricValues(metricNames...),
+		pmetrictest.IgnoreScopeVersion(),
+		pmetrictest.IgnoreResourceMetricsOrder(),
+		pmetrictest.IgnoreMetricsOrder(),
+		pmetrictest.IgnoreScopeMetricsOrder(),
+		pmetrictest.IgnoreMetricDataPointsOrder(),
+		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
+	)
+	if err != nil {
+		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
 	}
-	require.NotNil(t, selectedMetrics)
-	require.NoError(t, err)
-	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+
+	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", selectedMetrics.MetricCount())
 }
 
 func testAgentLogs(t *testing.T) {
@@ -1227,16 +1259,7 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 // tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
 func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) error {
 	replaceWithStar := func(string) string { return "*" }
-
-	var metricNames []string
-	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
-		for j := 0; j < expected.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-			for k := 0; k < expected.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-				metric := expected.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-				metricNames = append(metricNames, metric.Name())
-			}
-		}
-	}
+	metricNames := internal.GetMetricNames(&expected)
 
 	return pmetrictest.CompareMetrics(expected, actual,
 		pmetrictest.IgnoreTimestamp(),

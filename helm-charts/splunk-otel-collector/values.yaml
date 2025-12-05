@@ -173,26 +173,17 @@ splunkObservability:
   # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
   profilingEnabled: false
 
+  # Enables Secure Application features
+  secureAppEnabled: false
+
 ################################################################################
 # Logs collection engine:
-# - `fluentd`: deploy a fluentd sidecar that will collect logs and send them to
-#   otel-collector agent for further processing.
-# - `otel`: utilize native OpenTelemetry log collection.
-#
-# `fluentd` is deprecated and will be removed in October 2025, please use `otel` instead.
+# Only `otel` (native OpenTelemetry log collection) is supported.
+# The `logsEngine` field is deprecated and will be removed in a future release.
+# The fluentd option has been removed.
 ################################################################################
 
-logsEngine: otel
-
-################################################################################
-# Migrating Fluentd's position file to Otel checkpoints
-# Aimed for users who have been using fluentd as a logging agent but wants to
-# use OpenTelemetry Collector.
-# Enabling this option during the switch to the `logsEngine: otel` prevents double ingestion.
-# When set to true, an initContainer is added to the daemonset and runs the migration
-################################################################################
-
-migrateLogsCheckpoints: false
+# logsEngine: otel
 
 ################################################################################
 # Cloud provider, if any, the collector is running on. Leave empty for none/other.
@@ -238,7 +229,7 @@ autodetect:
   # This option is recommended for Istio environments. It does the following things:
   # - Enables scraping Istio control plane metrics from Prometheus endpoints.
   # - Add a `service.name` resource attribute to logs with the same value as Istio generates for
-  #   traces to enable correlation between logs and traces usign this attribute.
+  #   traces to enable correlation between logs and traces using this attribute.
   istio: false
 
 ################################################################################
@@ -383,23 +374,12 @@ agent:
       hostPort: 14250
       protocol: TCP
       enabled_for: [traces]
-    fluentforward:
-      containerPort: 8006
-      hostPort: 8006
-      protocol: TCP
-      enabled_for: [logs]
-    signalfx:
-      containerPort: 9943
-      hostPort: 9943
-      protocol: TCP
-      enabled_for: [metrics]
 
   resources:
     limits:
       cpu: 200m
       # This value is being used as a source for default memory_limiter processor configurations
       memory: 500Mi
-
   # To collect container logs and journald logs, it will run the agent as a root user.
   # To run it as non root user, uncomment below `securityContext` options.
   # Setting runAsUser and runAsGroup to a non root user enables an init container that patches group
@@ -450,7 +430,6 @@ agent:
   extraEnvs: []
 
   # Extra volumes to be mounted to the agent daemonset.
-  # The volumes will be available for both OTel agent and fluentd containers.
   extraVolumes: []
   extraVolumeMounts: []
 
@@ -491,7 +470,6 @@ clusterReceiver:
     limits:
       cpu: 200m
       memory: 500Mi
-
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
@@ -562,7 +540,10 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
-  k8sObjects: []
+  k8sObjects:
+    - name: pods
+      mode: pull
+      interval: 6h
 
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
@@ -691,290 +672,6 @@ logsCollection:
   #       host.name: 'EXPR(env("K8S_NODE_NAME"))'
   #       com.splunk.sourcetype: kube:apiserver-audit
 
-################################################################################
-# Fluentd sidecar configuration for logs collection.
-# Applicable only if "logsEngine: fluentd".
-# Fluentd logs engine is now deprecated and will reach End Of Support in October 2025, it is strongly recommended to use "logsEngine: otel" instead.
-################################################################################
-
-fluentd:
-  resources:
-    limits:
-      cpu: 500m
-      memory: 500Mi
-    requests:
-      cpu: 100m
-      memory: 200Mi
-
-  securityContext:
-    runAsUser: 0
-
-  # Extra environment variables to be set in the FluentD container
-  extraEnvs: []
-
-  config:
-    # Configurations for container logs
-    containers:
-      # Path to root directory of container logs
-      path: /var/log
-      # Final volume destination of container log symlinks
-      pathDest: /var/lib/docker/containers
-      # Log format type, "json" or "cri".
-      # If omitted (default), the value is detected automatically based on container runtime.
-      # "json" is set if docker runtime detected, otherwise it defaults to "cri".
-      logFormatType: ""
-      # Specify the log format for "cri" logFormatType
-      # It can be "%Y-%m-%dT%H:%M:%S.%N%:z" for openshift and "%Y-%m-%dT%H:%M:%S.%NZ" for IBM IKS
-      criTimeFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"
-
-    # Directory where to read journald logs. (docker daemon logs, kubelet logs, and anyother specified serivce logs)
-    journalLogPath: /run/log/journal
-
-    # Controls the output buffer for the fluentd daemonset
-    # Note that, for memory buffer, if `resources.limits.memory` is set,
-    # the total buffer size should not bigger than the memory limit, it should also
-    # consider the basic memory usage by fluentd itself.
-    # All buffer parameters (except Argument) defined in
-    # https://docs.fluentd.org/v1.0/articles/buffer-section#parameters
-    # can be configured here.
-    buffer:
-      "@type": memory
-      total_limit_size: 600m
-      chunk_limit_size: 1m
-      chunk_limit_records: 100000
-      flush_interval: 5s
-      flush_thread_count: 1
-      overflow_action: block
-      retry_max_times: 3
-
-    # logLevel is to set log level of the Splunk log collector.
-    # Available values are: trace, debug, info, warn, error
-    logLevel: info
-
-    # path of logfiles, default /var/log/containers/*.log
-    path: /var/log/containers/*.log
-    # paths of logfiles to exclude. object type is array as per fluentd specification:
-    # https://docs.fluentd.org/input/tail#exclude_path
-    excludePath: []
-    #  - /var/log/containers/kube-svc-redirect*.log
-    #  - /var/log/containers/tiller*.log
-
-    # Prefix for pos_file tail source parameter
-    # Can be used if you want to run multiple instances of fluentd on the same host
-    # https://docs.fluentd.org/input/tail#pos_file-highly-recommended
-    posFilePrefix: /var/log/splunk-fluentd
-
-    # Specify the interval of refreshing the list of watch file. Defaults to 60 (seconds)
-    # uncomment the line below to override default behaviour
-    # refreshInterval: 60
-
-    # Enables the stat_watcher. Defaults to true.
-    # See: https://docs.fluentd.org/v1.0/articles/in_tail#enable_stat_watcher"
-    # uncomment the line below to disable it
-    # enableStatWatcher: false
-
-    # `customFilters` defines the custom filters to be used.
-    # This section can be used to define custom filters using plugins like https://github.com/splunk/fluent-plugin-jq
-    # Its also possible to use other filters like https://www.fluentd.org/plugins#filter
-    #
-    # The scheme to define a custom filter is:
-    #
-    # ```
-    # <name>:
-    #   tag: <fluentd tag for the filter>
-    #   type: <fluentd filter type>
-    #   body: <definition of the fluentd filter>
-    # ```
-    #
-    # = fluentd tag for the filter =
-    # This is the fluentd tag for the record
-    #
-    # = fluentd filter type =
-    # This is the fluentd filter that the user wants to use for record manipulation.
-    #
-    # = definition of the fluentd filter =
-    # This defines the body/logic for using the filter for record manipulation.
-    #
-    # For example if you want to define a filter which sets cluster_name field to "my_awesome_cluster" you would the following filter
-    # <filter tail.containers.**>
-    #  @type jq_transformer
-    #  jq '.record.cluster_name = "my_awesome_cluster" | .record'
-    # </filter>
-    # This can be defined in the customFilters section as follows:
-    # ```
-    # customFilters:
-    #   NamespaceSourcetypeFilter:
-    #     tag: tail.containers.**
-    #     type: jq_transformer
-    #     body: jq '.record.cluster_name = "my_awesome_cluster" | .record'
-    # ```
-    customFilters: {}
-
-    # `logs` defines the source of logs, multiline support, and their sourcetypes.
-    #
-    # The scheme to define a log is:
-    #
-    # ```
-    # <name>:
-    #   from:
-    #     <source>
-    #   timestampExtraction:
-    #     regexp: "<regexp_to_extract_timestamp_from_log>"
-    #     format: "<format_of_the_timestamp>"
-    #   multiline:
-    #     firstline: "<regexp_to_detect_firstline_of_multiline>"
-    #     flushInterval: 5s
-    #   sourcetype: "<sourcetype_of_logs>"
-    # ```
-    #
-    # = <source> =
-    # It supports 3 kinds of sources: journald, file, and container.
-    # For `journald` logs, `unit` is required for filtering using _SYSTEMD_UNIT, example:
-    # ```
-    # docker:
-    #   from:
-    #     journald:
-    #       unit: docker.service
-    # ```
-    #
-    # For `file` logs, `path` is required for specifying where is the log files. Log files are expected in `/var/log`, example:
-    # ```
-    # docker:
-    #   from:
-    #     file:
-    #       path: /var/log/docker.log
-    # ```
-    #
-    # For `container` logs, `pod` field is required. It represents part of
-    # the pod name, can be name of a deployment or replica set. Use "*" to
-    # apply the configuration to all pods. Optional `container` value can be
-    # used to apply configuration to a particular container.
-    # ```
-    # kube-apiserver:
-    #   from:
-    #     pod: kube-apiserver
-    #
-    # etcd:
-    #   from:
-    #     pod: etcd-server
-    #     container: etcd-container
-    # ```
-    #
-    # = timestamp =
-    # `timestampExtraction` defines how to extract timestamp from logs. This *only* works for `file` source.
-    # To use `timestampExtraction` you need to define both:
-    # - `regexp`: the Regular Expression used to find the timestamp from a log entry.
-    #             The timestamp part must be in a `time` named group. E.g.
-    #             (?<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})
-    # - `format`: a format string defintes how to parse the timestamp, e.g. "%Y-%m-%d %H:%M:%S".
-    #             More details can be find: http://ruby-doc.org/stdlib-2.5.0/libdoc/time/rdoc/Time.html#method-c-strptime
-    #
-    # = multiline =
-    # `multiline` options provide basic multiline support. Two options:
-    # - `firstline`: a Regular Expression used to detect the first line of a multiline log.
-    # - `flushInterval`: The interval between data flushes, default value: 5s.
-    #
-    # = sourcetype =
-    # sourcetype of each kind of log can be defined using the `sourcetype` field.
-    # If `sourcetype` is not defined, `name` will be used.
-    #
-    # ---
-    # Here we have some default timestampExtraction and multiline settings for kubernetes components.
-    # So, usually you just need to redefine the source of those components if necessary.
-    logs:
-      docker:
-        from:
-          journald:
-            unit: docker.service
-        timestampExtraction:
-          regexp: time="(?<time>\d{4}-\d{2}-\d{2}T[0-2]\d:[0-5]\d:[0-5]\d.\d{9}Z)"
-          format: "%Y-%m-%dT%H:%M:%S.%NZ"
-        sourcetype: kube:docker
-      kubelet: &glog
-        from:
-          journald:
-            unit: kubelet.service
-        timestampExtraction:
-          regexp: \w(?<time>[0-1]\d[0-3]\d [^\s]*)
-          format: "%m%d %H:%M:%S.%N"
-        multiline:
-          firstline: /^\w[0-1]\d[0-3]\d/
-        sourcetype: kube:kubelet
-      etcd:
-        from:
-          pod: etcd-server
-          container: etcd-container
-        timestampExtraction:
-          regexp: (?<time>\d{4}-\d{2}-\d{2} [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
-          format: "%Y-%m-%d %H:%M:%S.%N"
-      etcd-minikube:
-        from:
-          pod: etcd-minikube
-          container: etcd
-        timestampExtraction:
-          regexp: (?<time>\d{4}-\d{2}-\d{2} [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
-          format: "%Y-%m-%d %H:%M:%S.%N"
-      etcd-events:
-        from:
-          pod: etcd-server-events
-          container: etcd-container
-        timestampExtraction:
-          regexp: (?<time>\d{4}-[0-1]\d-[0-3]\d [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
-          format: "%Y-%m-%d %H:%M:%S.%N"
-      kube-apiserver:
-        <<: *glog
-        from:
-          pod: kube-apiserver
-        sourcetype: kube:kube-apiserver
-      kube-scheduler:
-        <<: *glog
-        from:
-          pod: kube-scheduler
-        sourcetype: kube:kube-scheduler
-      kube-controller-manager:
-        <<: *glog
-        from:
-          pod: kube-controller-manager
-        sourcetype: kube:kube-controller-manager
-      kube-proxy:
-        <<: *glog
-        from:
-          pod: kube-proxy
-        sourcetype: kube:kube-proxy
-      kubedns:
-        <<: *glog
-        from:
-          pod: kube-dns
-        sourcetype: kube:kubedns
-      dnsmasq:
-        <<: *glog
-        from:
-          pod: kube-dns
-        sourcetype: kube:dnsmasq
-      dns-sidecar:
-        <<: *glog
-        from:
-          pod: kube-dns
-          container: sidecar
-        sourcetype: kube:kubedns-sidecar
-      dns-controller:
-        <<: *glog
-        from:
-          pod: dns-controller
-        sourcetype: kube:dns-controller
-      kube-dns-autoscaler:
-        <<: *glog
-        from:
-          pod: kube-dns-autoscaler
-          container: autoscaler
-        sourcetype: kube:kube-dns-autoscaler
-      kube-audit:
-        from:
-          file:
-            path: /var/log/kube-apiserver-audit.log
-        timestampExtraction:
-          format: "%Y-%m-%dT%H:%M:%SZ"
-        sourcetype: kube:apiserver-audit
 
 ################################################################################
 # Docker image configuration
@@ -983,14 +680,6 @@ fluentd:
 image:
   # Secrets to attach to the respective serviceaccount to pull docker images
   imagePullSecrets: []
-
-  fluentd:
-    # The registry and name of the fluentd image to pull
-    repository: splunk/fluentd-hec
-    # The tag of the fluentd image to pull
-    tag: 1.3.3
-    # The policy that specifies when the user wants the fluentd images to be pulled
-    pullPolicy: IfNotPresent
 
   otelcol:
     # The registry and name of the opentelemetry collector image to pull
@@ -1260,7 +949,11 @@ operator:
 # Not available in EKS Add-on.
 instrumentation:
   spec:
-    # default spec configuration
+    # Optional "defaults" parameter for configuring default instrumentation behavior across all libraries.
+    # See: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md#instrumentationspecdefaults
+    defaults: {}
+      # useLabelsForResourceAttributes: true  # If enabled, Kubernetes labels will be used as resource attributes
+
     exporter:
       # Optional "endpoint" parameter for exporting data to a specific target.
       # By default, the endpoint will be set to the agent if it's enabled. If the agent is not enabled, the endpoint

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.136.0
+    helm.sh/chart: splunk-otel-collector-0.140.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.136.1"
+    app.kubernetes.io/version: "0.140.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.136.0
+    chart: splunk-otel-collector-0.140.0
     release: default
 data:
   relay: |
@@ -37,7 +37,7 @@ data:
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.136.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -61,7 +61,7 @@ data:
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.136.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -85,7 +85,7 @@ data:
           storage: null
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.136.0
+        splunk_app_version: 0.140.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -352,8 +352,6 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      fluentforward:
-        endpoint: 0.0.0.0:8006
       hostmetrics:
         collection_interval: 10s
         root_path: /hostfs
@@ -413,8 +411,6 @@ data:
         receivers: null
         watch_observers:
         - k8s_observer
-      signalfx:
-        endpoint: 0.0.0.0:9943
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -439,7 +435,6 @@ data:
           - resource/logs
           receivers:
           - filelog
-          - fluentforward
           - otlp
         metrics:
           exporters:
@@ -454,7 +449,6 @@ data:
           - hostmetrics
           - kubeletstats
           - otlp
-          - signalfx
         metrics/agent:
           exporters:
           - splunk_hec/platform_metrics

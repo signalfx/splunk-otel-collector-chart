@@ -161,16 +161,6 @@ The following table shows the options for migrating from SCK to Splunk OpenTelem
 
 As shown in the table, you can acquire logs, metrics and objects using Splunk OpenTelemetry Collector for Kubernetes.
 
-### Checkpoint translation
-
-With migration to the Splunk OpenTelemetry Collector for Kubernetes, the underlying framework/agent being used has changed, so there needs to be a translation for checkpoint data so that the new OpenTelemetry agent can continue where Fluentd left off. All of this occurs automatically as an initContainer when you deploy the new Helm chart in your cluster for the first time. If you are not using a custom path for checkpoint for fluentd, it should just work with default configurations for this new Helm chart.
-
-To migrate Fluentd's position files again:
-
-1. Stop the OpenTelemetry DaemonSet by deleting deployed Helm chart.
-2. Delete the OpenTelemetry checkpoint files in the ```"/var/addon/splunk/otel_pos/"``` directory from Kubernetes nodes.
-3. Restart the new Helm chart DaemonSet.
-
 ## Step 1: Preparing your values.yaml file for migration
 
 Translate the values.yaml file from SCK to an appropriate format for Splunk OpenTelemetry Collector for Kubernetes. The following are the configurations for SCK and Splunk OpenTelemetry Collector for Kubernetes:

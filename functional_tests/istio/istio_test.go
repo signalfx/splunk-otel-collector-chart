@@ -313,12 +313,14 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_xds_pushes", flakyMetrics, true, metricsSink)
+		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_services",
+			flakyMetrics, true, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istioingress.yaml", "istio_requests_total", flakyMetrics, true, metricsSink)
+		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
+			"istio_requests_total", flakyMetrics, true, metricsSink)
 	})
 }
 
@@ -327,17 +329,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 	require.NoError(t, err)
 
 	internal.WaitForMetrics(t, 2, metricsSink)
-
-	selectedMetrics := internal.SelectMetricSetWithTimeout(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen, 5*time.Minute, 30*time.Second)
-	if selectedMetrics == nil {
-		t.Error("No metric batch identified with the right metric count, exiting")
-		return
-	}
-	require.NotNil(t, selectedMetrics)
-
-	if flakyMetricNames != nil {
-		internal.RemoveFlakyMetrics(selectedMetrics, flakyMetricNames)
-	}
 
 	var metricNames []string
 	for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
@@ -349,29 +340,45 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 		}
 	}
 
-	internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreMetricValues(metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("host.name"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("os.type"),
-		pmetrictest.IgnoreMetricAttributeValue("server.address"),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("service.name"),
-		pmetrictest.IgnoreMetricAttributeValue("url.scheme"),
-		pmetrictest.IgnoreMetricAttributeValue("type", "pilot_xds_expired_nonce"),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreMetricAttributeValue("event"),
-		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
-	)
-	require.NoError(t, err)
+	require.Eventually(t, func() bool {
+		for _, receivedMetrics := range metricsSink.AllMetrics() {
+			if flakyMetricNames != nil {
+				internal.RemoveFlakyMetrics(&receivedMetrics, flakyMetricNames)
+			}
+
+			err = pmetrictest.CompareMetrics(expectedMetrics, receivedMetrics,
+				pmetrictest.IgnoreTimestamp(),
+				pmetrictest.IgnoreStartTimestamp(),
+				pmetrictest.IgnoreScopeVersion(),
+				pmetrictest.IgnoreMetricValues(metricNames...),
+				pmetrictest.IgnoreMetricAttributeValue("host.name"),
+				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
+				pmetrictest.IgnoreMetricAttributeValue("os.type"),
+				pmetrictest.IgnoreMetricAttributeValue("server.address"),
+				pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
+				pmetrictest.IgnoreMetricAttributeValue("service.name"),
+				pmetrictest.IgnoreMetricAttributeValue("url.scheme"),
+				pmetrictest.IgnoreMetricAttributeValue("type", "pilot_xds_expired_nonce"),
+				pmetrictest.IgnoreResourceMetricsOrder(),
+				pmetrictest.IgnoreMetricsOrder(),
+				pmetrictest.IgnoreScopeMetricsOrder(),
+				pmetrictest.IgnoreMetricDataPointsOrder(),
+				pmetrictest.IgnoreMetricAttributeValue("event"),
+				pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
+			)
+			if err == nil {
+				return true
+			}
+			t.Logf("Comparison error: %v", err)
+		}
+
+		selectedMetrics := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen)
+		if selectedMetrics != nil {
+			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+		}
+		return false
+	}, 5*time.Minute, 1*time.Second, "Expected metrics not found")
 }
 
 func Test_IstioTraces(t *testing.T) {
