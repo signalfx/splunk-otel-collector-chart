@@ -66,6 +66,8 @@ jobs:
           base: main
           delete-branch: true
           modify-outputs: false
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+
 
       - name: Apply Version Update and Generate Changelog
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
@@ -111,3 +113,4 @@ jobs:
           base: main
           delete-branch: true
           modify-outputs: false
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}

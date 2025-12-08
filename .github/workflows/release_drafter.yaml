@@ -69,3 +69,4 @@ jobs:
           branch: update-release
           base: main
           delete-branch: true
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
