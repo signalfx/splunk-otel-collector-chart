@@ -97,9 +97,6 @@ data:
             name: ip
         - sources:
           - from: connection
-        - sources:
-          - from: resource_attribute
-            name: host.name
       memory_limiter:
         check_interval: 2s
         limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
