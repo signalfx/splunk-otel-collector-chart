@@ -105,9 +105,6 @@ data:
             name: ip
         - sources:
           - from: connection
-        - sources:
-          - from: resource_attribute
-            name: host.name
       k8sattributes/metrics:
         extract:
           annotations:

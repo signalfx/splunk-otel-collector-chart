@@ -195,9 +195,6 @@ k8sattributes:
         name: ip
     - sources:
       - from: connection
-    - sources:
-      - from: resource_attribute
-        name: host.name
   extract:
     metadata:
       - k8s.namespace.name
