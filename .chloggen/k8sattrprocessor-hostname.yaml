@@ -1,7 +1,7 @@
 change_type: bug_fix
 component: agent
 note: Fix k8sattributes processor incorrectly using host.name for pod association
-issues: []
+issues: [2183]
 subtext: |
   The k8sattributes processor was configured to use host.name as one of the pod association sources.
   However, the processor expects host.name to be a pod IP address, while our collector sets
