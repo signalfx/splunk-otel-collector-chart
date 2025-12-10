@@ -14,7 +14,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Please send SignalFx events directly to Splunk Observability Cloud instead of through the gateway.
   This change will have no impact on users unless they've introduced custom behavior that sends
   events to the gateway.
-  
+
 
 ## [0.140.0] - 2025-11-21
 
