@@ -4,6 +4,26 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.141.0] - 2025-12-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.141.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.141.0).
+
+### 🛑 Breaking changes 🛑
+
+- `gateway`: Remove support for sending SignalFx events through the gateway ([#2170](https://github.com/signalfx/splunk-otel-collector-chart/pull/2170))
+  Please send SignalFx events directly to Splunk Observability Cloud instead of through the gateway.
+  This change will have no impact on users unless they've introduced custom behavior that sends
+  events to the gateway.
+  
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix k8sattributes processor incorrectly using host.name for pod association ([#2183](https://github.com/signalfx/splunk-otel-collector-chart/pull/2183))
+  The k8sattributes processor was configured to use host.name as one of the pod association sources.
+  However, the processor expects host.name to be a pod IP address, while our collector sets
+  host.name to the k8s node name.
+  
+
 ## [0.140.0] - 2025-11-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.140.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.140.0).
