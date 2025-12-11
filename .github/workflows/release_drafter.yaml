@@ -57,7 +57,7 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        run: make pre-commit || true
+        uses: ./.github/actions/run-precommit
 
       - name: Open PR for Version Update
         id: open_pr
