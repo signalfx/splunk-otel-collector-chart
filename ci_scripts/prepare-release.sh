@@ -57,7 +57,12 @@ CURRENT_CHART_VERSION_MAJOR=$(get_major_version "v$CURRENT_CHART_VERSION")
 CURRENT_CHART_VERSION_MINOR=$(get_minor_version "v$CURRENT_CHART_VERSION")
 
 # This is the version to use with the new release.
-LATEST_APP_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' https://api.github.com/repos/"$OWNER"/splunk-otel-collector/releases/latest | jq -r .tag_name | sed 's/^v//')
+# Get recent releases and filter for collector versions (v0.141.0, v0.140.0, etc.)
+# Exclude non-collector releases like Splunk_TA_otel/*, etc.
+LATEST_APP_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
+  "https://api.github.com/repos/$OWNER/splunk-otel-collector/releases?per_page=50" | \
+  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | first' | \
+  sed 's/^v//')
 if [[ "$APP_VERSION_OVERRIDDEN" = true ]]; then
     LATEST_APP_VERSION=$APP_VERSION
     debug "Using override collector app version value $LATEST_APP_VERSION"
