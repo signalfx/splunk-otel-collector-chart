@@ -14,7 +14,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Please send SignalFx events directly to Splunk Observability Cloud instead of through the gateway.
   This change will have no impact on users unless they've introduced custom behavior that sends
   events to the gateway.
-  
+
 
 ### 🧰 Bug fixes 🧰
 
@@ -22,7 +22,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   The k8sattributes processor was configured to use host.name as one of the pod association sources.
   However, the processor expects host.name to be a pod IP address, while our collector sets
   host.name to the k8s node name.
-  
+
 
 ## [0.140.0] - 2025-11-21
 
