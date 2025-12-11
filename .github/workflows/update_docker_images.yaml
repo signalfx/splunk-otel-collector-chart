@@ -87,7 +87,7 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
-        run: make pre-commit || true
+        uses: ./.github/actions/run-precommit
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 && steps.open_pr.outputs.pull-request-number != '' }}
