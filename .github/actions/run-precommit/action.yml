@@ -1,0 +1,14 @@
+name: 'Run pre-commit'
+description: 'Setup Python and run pre-commit hooks to auto-fix formatting issues'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.1
+      continue-on-error: true
