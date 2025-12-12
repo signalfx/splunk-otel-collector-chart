@@ -39,10 +39,6 @@ spec:
     port: 4318
     targetPort: otlp-http
     protocol: TCP
-  - name: signalfx
-    port: 9943
-    targetPort: signalfx
-    protocol: TCP
   - name: zipkin
     port: 9411
     targetPort: zipkin

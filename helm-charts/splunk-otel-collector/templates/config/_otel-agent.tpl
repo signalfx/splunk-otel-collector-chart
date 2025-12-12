@@ -1014,6 +1014,7 @@ exporters:
   signalfx:
     correlation:
     {{- if .Values.gateway.enabled }}
+    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}

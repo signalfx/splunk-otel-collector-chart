@@ -205,9 +205,6 @@ data:
             static_configs:
             - targets:
               - localhost:8889
-      signalfx:
-        endpoint: 0.0.0.0:9943
-        include_metadata: true
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
