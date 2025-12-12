@@ -5,13 +5,13 @@ component: gateway
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: Remove `signalfx` receiver from gateway
 # One or more tracking issues related to the change
-issues: []
+issues: [2191]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The signalfx receiver was removed from all default gateway pipelines in #2172. This change removes the
-  receiver's declaration in the gateway config. If the signalfx receiver is still needed, the following
+  The `signalfx` receiver was removed from all default gateway pipelines in #2172. This change removes the
+  receiver's declaration in the gateway config. If the `signalfx` receiver is still needed, the following
   section can be added to your values.yaml file:
   ```
   gateway:
@@ -26,4 +26,4 @@ subtext: |
         protocol: TCP
         enabled_for: [metrics, traces, logs]
   ```
-  Please note that the signalfx receiver will eventually be deprecated and removed.
+  Please note that the `signalfx` receiver will eventually be deprecated and removed.
