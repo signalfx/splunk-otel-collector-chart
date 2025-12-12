@@ -1026,6 +1026,19 @@ exporters:
     {{- end }}
     {{- end }}
 
+  {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  signalfx/host_metadata:
+    correlation:
+    realm: {{ include "splunk-otel-collector.fullname" . }}
+    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    sync_host_metadata: true
+    {{- if not .Values.isWindows }}
+    root_path: /hostfs
+    {{- end }}
+    exclude_metrics:
+      - metric_name: "**"
+  {{- end }}
+
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
     {{- if .Values.gateway.enabled }}
@@ -1267,6 +1280,11 @@ service:
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp
+        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+        # The signalfx exporter is only being used to sync host metadata when gateway is enabled.
+        # The otlp exporter sends the metric data.
+        - signalfx/host_metadata
+        {{- end }}
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -1295,15 +1313,13 @@ service:
         {{- end }}
         {{- end }}
       exporters:
-        {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
-        # Use signalfx instead of otlp even if collector is enabled
-        # in order to sync host metadata.
-        - signalfx
-        {{- end }}
-        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
         {{- if .Values.gateway.enabled }}
         - otlp
         {{- else }}
+        {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+        - signalfx
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
         - splunk_hec/platform_metrics
         {{- end }}
         {{- end }}

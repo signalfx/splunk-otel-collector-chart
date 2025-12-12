@@ -251,7 +251,7 @@ service:
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # default metrics pipeline
     metrics:
-      receivers: [otlp, signalfx]
+      receivers: [otlp]
       processors:
         - memory_limiter
         - batch

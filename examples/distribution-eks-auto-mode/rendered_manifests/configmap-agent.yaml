@@ -39,6 +39,14 @@ data:
         api_url: https://api.CHANGEME.signalfx.com
         ingest_url: https://ingest.CHANGEME.signalfx.com
         send_otlp_histograms: true
+      signalfx/host_metadata:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        correlation: null
+        exclude_metrics:
+        - metric_name: '**'
+        realm: default-splunk-otel-collector
+        root_path: /hostfs
+        sync_host_metadata: true
     extensions:
       headers_setter:
         headers:
@@ -346,6 +354,7 @@ data:
         metrics:
           exporters:
           - otlp
+          - signalfx/host_metadata
           processors:
           - memory_limiter
           - batch
@@ -357,7 +366,7 @@ data:
           - otlp
         metrics/agent:
           exporters:
-          - signalfx
+          - otlp
           processors:
           - memory_limiter
           - batch

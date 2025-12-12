@@ -234,7 +234,6 @@ data:
           - resourcedetection/k8s_cluster_name
           receivers:
           - otlp
-          - signalfx
         metrics/collector:
           exporters:
           - signalfx
