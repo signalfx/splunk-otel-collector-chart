@@ -29,15 +29,7 @@ otlphttp:
 {{/*
 Common config for the otel-collector traces receivers
 */}}
-{{- define "splunk-otel-collector.otelReceivers" -}}
-otlp:
-  protocols:
-    grpc:
-      endpoint: 0.0.0.0:4317
-    http:
-      # https://github.com/open-telemetry/opentelemetry-collector/blob/9d3a8a4608a7dbd9f787867226a78356ace9b5e4/receiver/otlpreceiver/otlp.go#L140-L152
-      endpoint: 0.0.0.0:4318
-
+{{- define "splunk-otel-collector.traceReceivers" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 jaeger:
   protocols:
