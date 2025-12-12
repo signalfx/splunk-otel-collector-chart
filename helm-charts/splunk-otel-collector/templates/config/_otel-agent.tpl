@@ -39,7 +39,7 @@ extensions:
         default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
 
 receivers:
-  {{- include "splunk-otel-collector.otelTraceReceivers" . | nindent 2 }}
+  {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
 
   otlp:
     protocols:

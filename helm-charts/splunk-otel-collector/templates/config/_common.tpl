@@ -29,7 +29,7 @@ otlphttp:
 {{/*
 Common config for the otel-collector traces receivers
 */}}
-{{- define "splunk-otel-collector.otelTraceReceivers" -}}
+{{- define "splunk-otel-collector.traceReceivers" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
 jaeger:
   protocols:
