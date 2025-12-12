@@ -1060,6 +1060,139 @@ certmanager:
   enabled: false
   installCRDs: true
 
+# OpenTelemetry eBPF Instrumentation configuration.
+# Provides zero-code instrumentation for applications using eBPF (kernel-level tracing).
+# WARNING: eBPF instrumentation only works on Linux nodes and requires elevated privileges.
+# This feature is not available on Windows and is not suitable for all cluster configurations.
+# Refer to https://opentelemetry.io/docs/zero-code/obi/security/ for security and capability requirements.
+# Not available in EKS Add-on.
+obi:
+  enabled: false
+
+  image:
+    # Image configuration for eBPF instrumentation.
+    tag: "latest"
+
+  podSecurityContext:
+    # Pod Security Context - Required for eBPF to access kernel capabilities
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+
+  securityContext:
+    # Container Security Context - Configure Linux capabilities required for
+    # eBPF operation.
+    #
+    # By default run as privileged.
+    privileged: true
+
+    # Alternatively, if your cluster policy requires, OBI can be run with
+    # reduced privileges:
+    #
+    #   privileged: false
+    #   allowPrivilegeEscalation: false
+    #   runAsUser: 0
+    #   readOnlyRootFilesystem: true
+    #   capabilities:
+    #     add:
+    #       - BPF                 # Required for most eBPF probes to function correctly.
+    #       - SYS_PTRACE          # Give permission access to the container namespaces and inspect executables.
+    #       - NET_RAW             # Give permission to use socket filters for http requests.
+    #       - CHECKPOINT_RESTORE  # Give permission to open ELF files.
+    #       - DAC_READ_SEARCH     # Give permission to open ELF files.
+    #       - PERFMON             # Give permission to load BPF programs.
+    #       - SYS_RESOURCE        # Give permission to increase the amount of locked memory (needed on pre 5.11 kernels).
+    #       - SYS_ADMIN           # Required for Go application trace context propagation, or if kernel.perf_event_paranoid >= 3 on Debian distributions.
+    #     drop:
+    #       - ALL
+
+  serviceAccount:
+    # Service account configuration for needed elevated permissions.
+    create: true
+    annotations: {}
+    name: ""
+
+  rbac:
+    # Enaure RBAC configuration is created to allow metadata decoration.
+    create: true
+
+  podAnnotations: {}
+
+  podLabels: {}
+
+  nodeSelector:
+    # Node selector to ensure pods run on Linux nodes only
+    kubernetes.io/os: linux
+
+  tolerations:
+    # Tolerations for node affinity.
+    - effect: NoSchedule
+      operator: Exists
+    - effect: NoExecute
+      operator: Exists
+
+  affinity: {}
+
+  # eBPF Instrumentation configuration
+  # For detailed options, see:
+  # https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation/blob/main/docs/conf.md
+  config:
+    data:
+      attributes:
+        kubernetes:
+          enable: true
+      discovery:
+        exclude_instrument:
+          - exe_path: "{*ebpf-instrument*,*otelcol*}"
+        instrument:
+          - k8s_namespace: "*"
+      filter:
+        network:
+          k8s_dst_owner_name:
+            not_match: '{kube*,*jaeger-agent*,*prometheus*}'
+          k8s_src_owner_name:
+            not_match: '{kube*,*jaeger-agent*,*prometheus*}'
+      otel_metrics_export:
+        endpoint: "http://${HOST_IP}:4317"
+        protocol: grpc
+        features:
+          - "application"
+        instrumentations:
+          - "*"
+      otel_traces_export:
+        endpoint: "http://${HOST_IP}:4317"
+        protocol: grpc
+        instrumentations:
+          - "*"
+
+  env:
+    # OTEL_EBPF_KUBE_CLUSTER_NAME sets the "cluster.name" attribute to match
+    # the collector's clusterName.
+    OTEL_EBPF_KUBE_CLUSTER_NAME: "{{ .Values.clusterName }}"
+
+  volumes:
+    # Additional volumes to mount for eBPF instrumentation.
+
+    # Required to correctly determine the Linux Kernel lockdown mode.
+    - name: kernel-security
+      hostPath:
+        path: /sys/kernel/security
+        type: Directory
+
+    # Required for proper context propagation in requests.
+    - name: cgroup
+      hostPath:
+        path: /sys/fs/cgroup
+        type: Directory
+
+  volumeMounts:
+    - name: kernel-security
+      mountPath: /sys/kernel/security
+      readOnly: true
+    - name: cgroup
+      mountPath: /sys/fs/cgroup
+      readOnly: true
+
 ################################################################################
 # Target Allocator
 # Notice: Target Allocator related features should be considered to have an alpha
