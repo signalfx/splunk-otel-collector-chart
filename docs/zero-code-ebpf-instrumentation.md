@@ -1,7 +1,7 @@
 # Zero-Code Instrumentation with eBPF
 
 [**O**penTelemetry e**B**PF **I**nstrumentation] (OBI) is a lightweight and efficient way to collect telemetry data using eBPF for user-space applications.
-It provides many feature for applications using a zero-code instrumentation approach:
+It provides many features for applications using a zero-code instrumentation approach:
 
 - **Context Propagation**: Propagate trace context across services automatically
 - **Wide language support**: Java, .NET, Go, Python, Ruby, Node.js, C, C++, and Rust
@@ -17,7 +17,7 @@ It provides many feature for applications using a zero-code instrumentation appr
 > [!TIP]
 > OBI provides broad observability for most services within a cluster.
 >
-> Use the language specific [auto-instrumentation] get deeper insights into applications where supported (Java, NodeJs, Python, .NET).
+> Use the language specific [auto-instrumentation] to get deeper insights into applications where supported (Java, NodeJs, Python, .NET).
 > OBI will auto-detect if auto-instrumentation is present and avoid duplicating traces.
 >
 > For more detailed observability, you can also combine OBI with application-level instrumentation using OpenTelemetry SDKs.
@@ -60,7 +60,7 @@ kubectl logs -l app.kubernetes.io/name=obi -f
 
 ## Platform Requirements
 
-> [!WARNING]:
+> [!WARNING]
 > OBI only works on Linux nodes. Windows is not supported.
 
 - Kubernetes 1.24+

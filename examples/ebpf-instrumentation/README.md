@@ -5,7 +5,7 @@ This example demonstrates how to enable zero-code instrumentation using [OpenTel
 See the [Zero-Code eBPF Instrumentation Documentation] for more details about deploying and troubleshooting OBI.
 
 [OpenTelemetry eBPF Instrumentation]: https://opentelemetry.io/docs/zero-code/obi/
-[Zero-Code eBPF Instrumentation Documentation]: https://opentelemetry.io/docs/zero-code/ebi/
+[Zero-Code eBPF Instrumentation Documentation]: https://opentelemetry.io/docs/zero-code/obi/
 
 ## Installation
 
