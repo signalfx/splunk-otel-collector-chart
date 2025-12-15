@@ -1,0 +1,26 @@
+---
+# Minimal values enabling OBI and setting a cluster name for non-managed distributions.
+clusterName: dev-obi
+
+splunkObservability:
+  realm: dev
+  accessToken: "dummy-token"
+
+clusterReceiver:
+  enabled: false
+
+agent:
+  config:
+    exporters:
+      otlp:
+        endpoint: "{{ .OTLPEndpoint }}"
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - otlp
+
+obi:
+  enabled: true
