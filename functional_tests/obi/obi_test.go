@@ -75,12 +75,10 @@ func deployPythonApp(t *testing.T, kubeconfig string) {
 	client, err := kubernetes.NewForConfig(cfg)
 	require.NoError(t, err)
 
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-
 	// Read and create/update the Deployment for the Python app in the default namespace.
 	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment.yaml"))
 	require.NoError(t, err)
-	obj, _, err := decode(stream, nil, nil)
+	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(stream, nil, nil)
 	require.NoError(t, err)
 	deployment := obj.(*appsv1.Deployment)
 

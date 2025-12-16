@@ -88,7 +88,7 @@ If your cluster policies require it, you can reduce permissions by:
 
 1. **Modifying container permissions**
    - **Unprivileged mode**: `privileged: false`
-   - **Run as non-root user**: `runAsUser: 0`
+   - **Run as root user**: `runAsUser: 0`
    - **Disable privilege escalation** (optional): `allowPrivilegeEscalation: false`
    - **Read-only filesystem** (optional): `readOnlyRootFilesystem: true`
 2. **Modifying Linux capabilities** (Remove unnecessary capabilities as needed)
@@ -104,7 +104,7 @@ Consult the [security documentation] for detailed guidance on adjusting permissi
 
 [security documentation]: https://opentelemetry.io/docs/zero-code/obi/security/
 
-> [!NOTE]:
+> [!NOTE]
 > Reducing permissions may limit OBI features.
 
 ## Troubleshooting
