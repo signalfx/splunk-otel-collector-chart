@@ -99,13 +99,13 @@ If your cluster policies require it, you can reduce permissions by:
    - **Disable privilege escalation** (optional): `allowPrivilegeEscalation: false`
    - **Read-only filesystem** (optional): `readOnlyRootFilesystem: true`
 2. **Modifying Linux capabilities** (Remove unnecessary capabilities as needed)
-   - `CAP_BPF`: Core eBPF for functionality (REQUIRED)
-   - `CAP_NET_RAW`: Network packet capture
-   - `CAP_NET_ADMIN`: Network filter programs
-   - `CAP_PERFMON`: Performance monitoring
-   - `CAP_DAC_READ_SEARCH`: Kernel introspection
-   - `CAP_CHECKPOINT_RESTORE`: Process introspection
-   - `CAP_SYS_PTRACE`: Executable module access
+   - `BPF`: Core eBPF for functionality (REQUIRED)
+   - `NET_RAW`: Network packet capture
+   - `NET_ADMIN`: Network filter programs
+   - `PERFMON`: Performance monitoring
+   - `DAC_READ_SEARCH`: Kernel introspection
+   - `CHECKPOINT_RESTORE`: Process introspection
+   - `SYS_PTRACE`: Executable module access
 
 Consult the [security documentation] for detailed guidance on adjusting permissions and information about how each capability is used.
 
@@ -127,7 +127,7 @@ If you see warnings like "Required system capabilities not present", either:
 
 1. Ensure nodes have required kernel support
 2. Adjust `kernel.perf_event_paranoid` sysctl on nodes (for [AKS/EKS])
-3. Modify the `securityContext.capabilities` to use `CAP_SYS_ADMIN` instead of granular capabilities
+3. Modify the `securityContext.capabilities` to use `SYS_ADMIN` instead of granular capabilities
 
 [AKS/EKS]: https://opentelemetry.io/docs/zero-code/obi/security/#deploy-on-akseks
 
