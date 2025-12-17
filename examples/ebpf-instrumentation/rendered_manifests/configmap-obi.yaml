@@ -12,9 +12,7 @@ metadata:
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.141.0"
     app: splunk-otel-collector
-    component: obi-config
     chart: splunk-otel-collector-0.141.0
     release: default
-    heritage: Helm
 data:
   OTEL_EBPF_KUBE_CLUSTER_NAME: "CHANGEME"
