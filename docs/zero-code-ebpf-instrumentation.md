@@ -1,5 +1,11 @@
 # Zero-Code Instrumentation with eBPF
 
+> [!IMPORTANT]
+> OBI support is a work in progress 🚧.
+> Some features may not be fully supported on all platforms or configurations.
+> OBI is currently only tested Ubuntu nodes.
+> Refer to the [upstream documentation] for the latest platform support information.
+
 [**O**penTelemetry e**B**PF **I**nstrumentation] (OBI) is a lightweight and efficient way to collect telemetry data using eBPF for user-space applications.
 It provides many features for applications using a zero-code instrumentation approach:
 
@@ -25,6 +31,7 @@ It provides many features for applications using a zero-code instrumentation app
 [**O**penTelemetry e**B**PF **I**nstrumentation]: https://opentelemetry.io/docs/zero-code/obi/
 [**Protocol support**]: https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation/blob/main/devdocs/features.md
 [auto-instrumentation]: ./auto-instrumentation-introduction.md
+[upstream documentation]: https://opentelemetry.io/docs/zero-code/obi/#requirements
 
 ## Getting Started
 
