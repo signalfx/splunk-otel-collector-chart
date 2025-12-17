@@ -23,14 +23,33 @@ import (
 )
 
 const (
-	testDir      = "testdata"
-	valuesDir    = "values"
-	manifestsDir = "python"
+	testDir   = "testdata"
+	valuesDir = "values"
 )
+
+type App struct {
+	Name         string
+	ManifestPath string
+}
+
+func (a App) LabelSelector() string {
+	return fmt.Sprintf("app=%s", a.Name)
+}
 
 func Test_OBI_Minimal_Traces(t *testing.T) {
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	require.True(t, ok, "KUBECONFIG must be set")
+
+	apps := []App{
+		{
+			Name:         "python-test",
+			ManifestPath: filepath.Join(testDir, "python", "deployment.yaml"),
+		},
+	}
+
+	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
+		teardown(t, kubeconfig, apps)
+	}
 
 	// Start a local OTLP sink on ports 4317/4318. OBI defaults export to ${HOST_IP}:4317 (gRPC).
 	tracesSink := internal.SetupOTLPTracesSink(t)
@@ -56,22 +75,21 @@ func Test_OBI_Minimal_Traces(t *testing.T) {
 		internal.ChartUninstall(t, kubeconfig)
 	})
 
-	// Deploy the simple Python app without language auto-instrumentation annotations.
-	// The container generates HTTP traffic to localhost periodically.
-	deployPythonApp(t, kubeconfig)
+	for _, app := range apps {
+		deployApp(t, kubeconfig, app)
+	}
 
 	// Wait until at least one trace is received at the OTLP sink.
 	internal.WaitForTraces(t, 1, tracesSink)
 }
 
-func deployPythonApp(t *testing.T, kubeconfig string) {
+func deployApp(t *testing.T, kubeconfig string, app App) {
 	cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	require.NoError(t, err)
 	client, err := kubernetes.NewForConfig(cfg)
 	require.NoError(t, err)
 
-	// Read and create/update the Deployment for the Python app in the default namespace.
-	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment.yaml"))
+	stream, err := os.ReadFile(app.ManifestPath)
 	require.NoError(t, err)
 	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(stream, nil, nil)
 	require.NoError(t, err)
@@ -84,8 +102,8 @@ func deployPythonApp(t *testing.T, kubeconfig string) {
 		require.NoError(t, err)
 	}
 
-	// Wait for the Python pod(s) to be Ready for a short stabilization period.
-	internal.CheckPodsReady(t, client, internal.DefaultNamespace, "app=python-test", 5*time.Minute, 15*time.Second)
+	// Wait for the pod(s) to be Ready for a short stabilization period.
+	internal.CheckPodsReady(t, client, internal.DefaultNamespace, app.LabelSelector(), 5*time.Minute, 15*time.Second)
 
 	// Ensure the deployment gets cleaned up.
 	t.Cleanup(func() {
@@ -93,6 +111,24 @@ func deployPythonApp(t *testing.T, kubeconfig string) {
 			return
 		}
 		grace := int64(0)
-		_ = deployments.Delete(t.Context(), "python-test", metav1.DeleteOptions{GracePeriodSeconds: &grace})
+		_ = deployments.Delete(t.Context(), app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
 	})
+}
+
+func teardown(t *testing.T, kubeconfig string, apps []App) {
+	t.Helper()
+
+	internal.ChartUninstall(t, kubeconfig)
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	require.NoError(t, err)
+
+	client, err := kubernetes.NewForConfig(cfg)
+	require.NoError(t, err)
+
+	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
+	grace := int64(0)
+	for _, app := range apps {
+		_ = deployments.Delete(t.Context(), app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
+	}
 }
