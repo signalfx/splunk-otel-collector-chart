@@ -128,7 +128,7 @@ If you see warnings like "Required system capabilities not present", either:
 
 1. Ensure nodes have required kernel support
 2. Adjust `kernel.perf_event_paranoid` sysctl on nodes (for [AKS/EKS])
-3. Modify the `securityContext.capabilities` to use `SYS_ADMIN` instead of granular capabilities
+3. Review and, if necessary, adjust the granular `securityContext.capabilities` as described in the [security documentation]. You may consider granting `SYS_ADMIN`, but understand this is highly privileged and effectively gives root‑equivalent access to the host.
 
 [AKS/EKS]: https://opentelemetry.io/docs/zero-code/obi/security/#deploy-on-akseks
 
