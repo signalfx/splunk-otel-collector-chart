@@ -33,7 +33,7 @@ OBI can be enabled by setting the `obi.enabled` value to `true` during installat
 ```bash
 helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector \
-  --set="obi.enabled=true"
+  --set="obi.enabled=true" \
   # All other options as needed ...
 ```
 
@@ -65,7 +65,7 @@ kubectl logs -l app.kubernetes.io/name=obi -f
 
 - Kubernetes 1.24+
 - Helm 3.9+
-- Linux kernel version 5.8 or later (or 4.18 for Redhat Enterprise Linux)
+- Linux kernel version 5.8 or later (or 4.18 for Red Hat Enterprise Linux)
 - x86_64 or arm64 processor
 - Runtime support for eBPF (most modern Linux distributions)
 
