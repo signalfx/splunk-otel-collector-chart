@@ -23,7 +23,7 @@ It provides many features for applications using a zero-code instrumentation app
 > [!TIP]
 > OBI provides broad observability for most services within a cluster.
 >
-> Use the language specific [auto-instrumentation] to get deeper insights into applications where supported (Java, NodeJs, Python, .NET).
+> Use the language specific [auto-instrumentation] to get deeper insights into applications where supported (Java, Node.js, Python, .NET).
 > OBI will auto-detect if auto-instrumentation is present and avoid duplicating traces.
 >
 > For more detailed observability, you can also combine OBI with application-level instrumentation using OpenTelemetry SDKs.
