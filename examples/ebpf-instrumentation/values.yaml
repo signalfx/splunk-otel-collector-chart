@@ -19,6 +19,11 @@
 # 1. Modify securityContext.capabilities to include only needed capabilities
 # 2. Review: https://opentelemetry.io/docs/zero-code/obi/security/
 
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
 # Enable the OpenTelemetry eBPF Instrumentation subchart
 #
 # Note: The eBPF instrumentation will instrument applications automatically.
