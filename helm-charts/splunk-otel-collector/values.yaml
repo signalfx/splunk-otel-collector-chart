@@ -1096,7 +1096,7 @@ obi:
     #   capabilities:
     #     add:
     #       - BPF                 # Required for most eBPF probes to function correctly.
-    #       - SYS_PTRACE          # Give permission access to the container namespaces and inspect executables.
+    #       - SYS_PTRACE          # Allow access to container namespaces and ability to inspect executables.
     #       - NET_RAW             # Give permission to use socket filters for http requests.
     #       - CHECKPOINT_RESTORE  # Give permission to open ELF files.
     #       - DAC_READ_SEARCH     # Give permission to open ELF files.
