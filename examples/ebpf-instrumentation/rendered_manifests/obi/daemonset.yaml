@@ -54,8 +54,11 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.hostIP
-            - name: OTEL_EBPF_KUBE_CLUSTER_NAME
-              value: "{{ .Values.clusterName }}"
+            - name: "OTEL_EBPF_KUBE_CLUSTER_NAME"
+              valueFrom:
+                configMapKeyRef:
+                  key: OTEL_EBPF_KUBE_CLUSTER_NAME
+                  name: 'default-obi-env'
           volumeMounts:
             - mountPath: /etc/ebpf-instrument/config
               name: ebpf-instrument-config
