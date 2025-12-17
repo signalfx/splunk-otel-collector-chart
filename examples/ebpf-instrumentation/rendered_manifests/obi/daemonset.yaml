@@ -35,7 +35,6 @@ spec:
     spec:
       serviceAccountName: default-obi
       hostPID: true
-      initContainers:
       containers:
         - name: ebpf-instrument
           image: ghcr.io/open-telemetry/opentelemetry-ebpf-instrumentation/ebpf-instrument:v0.3.0

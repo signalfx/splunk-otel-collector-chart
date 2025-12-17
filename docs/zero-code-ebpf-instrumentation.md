@@ -10,7 +10,7 @@
 It provides many features for applications using a zero-code instrumentation approach:
 
 - **Context Propagation**: Propagate trace context across services automatically
-- **Wide language support**: Java, .NET, Go, Python, Ruby, Node.js, C, C++, and Rust
+- **Broad language support**: Java, .NET, Go, Python, Ruby, Node.js, C, C++, and Rust
 - **Lightweight**: No code changes required, no libraries to install, no restarts needed
 - **Efficient instrumentation**: Traces and metrics are captured by eBPF probes with minimal overhead
 - **Kubernetes-native**: Provides configuration-free auto-instrumentation for Kubernetes applications
