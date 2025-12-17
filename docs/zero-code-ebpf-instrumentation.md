@@ -101,8 +101,8 @@ If your cluster policies require it, you can reduce permissions by:
    - **Read-only filesystem** (optional): `readOnlyRootFilesystem: true`
 2. **Modifying Linux capabilities** (Remove unnecessary capabilities as needed)
    - `BPF`: Core eBPF for functionality (REQUIRED)
-   - `NET_RAW`: Network packet capture
-   - `NET_ADMIN`: Network filter programs
+   - `NET_RAW`: Network observability
+   - `NET_ADMIN`: Network and application observability
    - `PERFMON`: Performance monitoring
    - `DAC_READ_SEARCH`: Kernel introspection
    - `CHECKPOINT_RESTORE`: Process introspection

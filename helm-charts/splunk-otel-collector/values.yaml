@@ -1097,7 +1097,8 @@ obi:
     #     add:
     #       - BPF                 # Required for most eBPF probes to function correctly.
     #       - SYS_PTRACE          # Allow access to container namespaces and ability to inspect executables.
-    #       - NET_RAW             # Give permission to use socket filters for http requests.
+    #       - NET_RAW             # Allow AF_PACKET raw socket creation (i.e. socket filtering used in network flows)
+    #       - NET_ADMIN           # Allow TC programs (i.e. networks flows and trace context propagation )
     #       - CHECKPOINT_RESTORE  # Give permission to open ELF files.
     #       - DAC_READ_SEARCH     # Give permission to open ELF files.
     #       - PERFMON             # Give permission to load BPF programs.
