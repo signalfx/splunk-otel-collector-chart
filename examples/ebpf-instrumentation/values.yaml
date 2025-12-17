@@ -7,17 +7,6 @@
 # - eBPF instrumentation ONLY works on Linux nodes
 # - Windows nodes are NOT supported and will be excluded via nodeSelector
 # - Kubernetes 1.24+ is required
-#
-# SECURITY REQUIREMENTS:
-# By default, eBPF instrumentation is configured with:
-# - Root-level privileges (required for kernel access)
-# - Linux capabilities needed for eBPF operations
-# - Read-only root filesystem for container security
-# - A privileged container.
-#
-# To reduce permissions (if your cluster policies require it):
-# 1. Modify securityContext.capabilities to include only needed capabilities
-# 2. Review: https://opentelemetry.io/docs/zero-code/obi/security/
 
 clusterName: CHANGEME
 splunkObservability:
