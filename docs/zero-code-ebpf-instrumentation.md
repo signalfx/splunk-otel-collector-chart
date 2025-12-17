@@ -40,8 +40,9 @@ OBI can be enabled by setting the `obi.enabled` value to `true` during installat
 ```bash
 helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector \
-  --set="obi.enabled=true" \
-  # All other options as needed ...
+  --set="splunkObservability.realm=${SPLUNK_REALM}" \
+  --set="splunkObservability.accessToken=${SPLUNK_ACCESS_TOKEN}" \
+  --set="obi.enabled=true"
 ```
 
 ### Configuration Options
