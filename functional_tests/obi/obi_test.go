@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -30,10 +29,6 @@ const (
 )
 
 func Test_OBI_Minimal_Traces(t *testing.T) {
-	if runtime.GOOS != "linux" {
-		t.Skip("OBI functional test runs only on Linux")
-	}
-
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	require.True(t, ok, "KUBECONFIG must be set")
 
