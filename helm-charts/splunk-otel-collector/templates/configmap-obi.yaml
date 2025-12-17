@@ -1,0 +1,16 @@
+{{- if .Values.obi.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-obi-env
+  namespace: {{ template "splunk-otel-collector.namespace" . }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: obi-config
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  OTEL_EBPF_KUBE_CLUSTER_NAME: {{ .Values.clusterName | quote }}
+{{- end }}

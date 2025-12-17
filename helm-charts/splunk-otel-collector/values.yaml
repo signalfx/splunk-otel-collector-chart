@@ -1165,10 +1165,18 @@ obi:
         instrumentations:
           - "*"
 
-  env:
-    # OTEL_EBPF_KUBE_CLUSTER_NAME sets the "cluster.name" attribute to match
-    # the collector's clusterName.
-    OTEL_EBPF_KUBE_CLUSTER_NAME: "{{ .Values.clusterName }}"
+  # Environment variables passed to the eBPF instrumentation container.
+  # Additional environment variables can be set here if needed.
+  env: {}
+
+  # Environment variables loaded from ConfigMaps or Secrets.
+  # The OTEL_EBPF_KUBE_CLUSTER_NAME is automatically set from a ConfigMap that is created
+  # by the parent chart using the clusterName value.
+  envValueFrom:
+    OTEL_EBPF_KUBE_CLUSTER_NAME:
+      configMapKeyRef:
+        name: '{{ .Release.Name }}-obi-env'
+        key: OTEL_EBPF_KUBE_CLUSTER_NAME
 
   volumes:
     # Additional volumes to mount for eBPF instrumentation.
