@@ -3,8 +3,8 @@
 > [!IMPORTANT]
 > OBI support is a work in progress 🚧.
 > Some features may not be fully supported on all platforms or configurations.
-> OBI is currently only tested on Ubuntu nodes.
-> Refer to the [upstream documentation] for the latest platform support information.
+> OBI is currently only tested on Ubuntu nodes that meet the [upstream documentation] requirements.
+> Always refer to the [upstream documentation] for the latest supported Ubuntu versions and platform information.
 
 [**O**penTelemetry e**B**PF **I**nstrumentation] (OBI) is a lightweight and efficient way to collect telemetry data using eBPF for user-space applications.
 It provides many features for applications using a zero-code instrumentation approach:
