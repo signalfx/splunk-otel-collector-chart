@@ -1134,11 +1134,12 @@ obi:
     #                             # kernels).
     #
     #       - SYS_ADMIN           # Required for Go application trace
-    #                             # context propagation, or if kernel.
-    #                             # perf_event_paranoid >= 3 on Debian
-    #                             # distributions (note: this effectively
-    #                             # grants root-equivalent access, verify
-    #                             # this is truly necessary before enabling.
+    #                             # context propagation, or if
+    #                             # kernel.perf_event_paranoid >= 3 on
+    #                             # Debian distributions (note: this
+    #                             # effectively grants root-equivalent
+    #                             # access, verify this is truly necessary
+    #                             # before enabling.
     #     drop:
     #       - ALL
 
