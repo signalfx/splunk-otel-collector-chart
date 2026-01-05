@@ -1200,7 +1200,7 @@ obi:
       #
       # The default exclusions prevent instrumentation of:
       #   - kube* : Kubernetes system components (kube-system namespace, kube-proxy, etc.)
-      #             These are internal infrastructure and typically don't need tracing
+      #             These are internal infrastructure components that don't require instrumentation
       #   - *jaeger-agent* : Jaeger tracing agent to avoid recursive instrumentation
       #   - *prometheus* : Prometheus monitoring components to avoid metric collection overhead
       #
