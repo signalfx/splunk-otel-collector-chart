@@ -106,7 +106,7 @@ If your cluster policies require it, you can reduce permissions by:
    - `PERFMON`: Performance monitoring
    - `DAC_READ_SEARCH`: Kernel introspection
    - `CHECKPOINT_RESTORE`: Process introspection
-   - `SYS_PTRACE`: Executable module access
+   - `SYS_PTRACE`: Allow access to container namespaces and ability to inspect executables
 
 Consult the [security documentation] for detailed guidance on adjusting permissions and information about how each capability is used.
 
