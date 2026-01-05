@@ -58,7 +58,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: OTEL_EBPF_KUBE_CLUSTER_NAME
-                  name: 'default-obi-env'
+                  name: splunk-otel-collector-obi-env
           volumeMounts:
             - mountPath: /etc/ebpf-instrument/config
               name: ebpf-instrument-config

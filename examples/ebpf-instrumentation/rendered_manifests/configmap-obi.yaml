@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: default-obi-env
+  name: splunk-otel-collector-obi-env
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
