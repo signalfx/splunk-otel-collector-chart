@@ -51,12 +51,23 @@ render_task() {
 
   # Redact cert/key fields in webhook.yaml while preserving yaml structure
   find "${rendered_manifests_dir}" -type f -name "*webhook.yaml" | while read -r webhook_file; do
-    yq -i '
-      (.. | select(has("caBundle"))) .caBundle |= "[REDACTED CABUNDLE]" |
-      (.. | select(has("data")) | .data | select(has("tls.crt"))) ."tls.crt" |= "[REDACTED CERTIFICATE]" |
-      (.. | select(has("data")) | .data | select(has("tls.key"))) ."tls.key" |= "[REDACTED PRIVATE KEY]" |
-      (.. | select(has("data")) | .data | select(has("ca.crt"))) ."ca.crt" |= "[REDACTED CA CERTIFICATE]"
-    ' "$webhook_file"
+    echo "Redacting sensitive data in ${webhook_file}"
+    yq -i -Y '
+        .. |=
+          if type == "!!map" then
+            . |
+            (if has("caBundle") then .caBundle = "[REDACTED CABUNDLE]" else . end) |
+            (if has("data") then
+              .data |= (
+                . |
+                (if has("tls.crt") then ."tls.crt" = "[REDACTED CERTIFICATE]" else . end) |
+                (if has("tls.key") then ."tls.key" = "[REDACTED PRIVATE KEY]" else . end) |
+                (if has("ca.crt")  then ."ca.crt"  = "[REDACTED CA CERTIFICATE]" else . end)
+              )
+            else . end)
+          else .
+          end
+      ' "$webhook_file"
   done
 
   # Move the chart renders
