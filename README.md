@@ -219,7 +219,7 @@ For setting up auto-instrumentation, see the [auto-instrumentation-introduction.
 
 ## Zero-Code Instrumentation with eBPF
 
-In addition to the OpenTelemetry Operator for injection-based auto-instrumentation of language runtimes, [OpenTelemetry eBPF Instrumentation](https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation) can be deployed for eBPF based zero-code instrumentation.
+In addition to the OpenTelemetry Operator for injection-based auto-instrumentation of language runtimes, [OpenTelemetry eBPF Instrumentation](https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation) can be deployed for eBPF-based zero-code instrumentation.
 See the [zero-code documentation](docs/zero-code-ebpf-instrumentation.md) for more details.
 
 ## Contributing
