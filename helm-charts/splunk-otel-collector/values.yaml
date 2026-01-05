@@ -1181,6 +1181,15 @@ obi:
         exclude_instrument:
           - exe_path: "{*ebpf-instrument*,*otelcol*}"
         instrument:
+          # By default, instrument all Kubernetes namespaces.
+          # This includes system and test namespaces (for example, "kube-system"),
+          # which may not be desired in all environments.
+          #
+          # To restrict instrumentation to specific namespaces, replace the wildcard
+          # entry below with one or more explicit k8s_namespace entries, for example:
+          #   instrument:
+          #     - k8s_namespace: "default"
+          #     - k8s_namespace: "production"
           - k8s_namespace: "*"
       filter:
         network:
