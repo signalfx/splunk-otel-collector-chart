@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-obi-env
+  name: splunk-otel-collector-obi-env
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}

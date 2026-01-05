@@ -1239,7 +1239,7 @@ obi:
   envValueFrom:
     OTEL_EBPF_KUBE_CLUSTER_NAME:
       configMapKeyRef:
-        name: '{{ .Release.Name }}-obi-env'
+        name: "splunk-otel-collector-obi-env"
         key: OTEL_EBPF_KUBE_CLUSTER_NAME
 
   volumes:
