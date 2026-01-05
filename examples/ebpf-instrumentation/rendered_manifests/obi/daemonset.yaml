@@ -6,10 +6,10 @@ metadata:
   name: default-obi
   namespace: default
   labels:
-    helm.sh/chart: obi-0.2.1
+    helm.sh/chart: obi-0.3.0
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "v0.2.0"
+    app.kubernetes.io/version: "v0.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: obi
     app.kubernetes.io/component: workload
@@ -23,12 +23,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 2e8d339b93ea73072807fd8830c1193423e1c6fb2a3f2e3a2db20fbdcc3ed683
+        checksum/config: 5a6135b98ac301fa57b75c6af38c223218caa7ff09606921367bca2f26995e45
       labels:
-        helm.sh/chart: obi-0.2.1
+        helm.sh/chart: obi-0.3.0
         app.kubernetes.io/name: obi
         app.kubernetes.io/instance: default
-        app.kubernetes.io/version: "v0.2.0"
+        app.kubernetes.io/version: "v0.3.0"
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: obi
         app.kubernetes.io/component: workload

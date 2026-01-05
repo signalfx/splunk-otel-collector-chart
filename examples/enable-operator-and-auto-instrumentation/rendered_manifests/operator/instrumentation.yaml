@@ -1,0 +1,87 @@
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: default-splunk-otel-collector
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.141.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.141.0"
+    app: splunk-otel-collector
+    component: otel-operator
+    chart: splunk-otel-collector-0.141.0
+    release: default
+    app.kubernetes.io/component: otel-operator
+spec:
+  exporter:
+    endpoint: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4317
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  apacheHttpd:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
+  dotnet:
+    env:
+    - name: OTEL_DOTNET_AUTO_PLUGINS
+      value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+    - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
+      value: "true"
+    - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
+      value: "false"
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-dotnet:v1.11.0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.11.0
+  go:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-go:v0.22.1
+    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.22.1
+  java:
+    env:
+    - name: OTEL_RESOURCE_DISABLED_KEYS
+      value: process.executable.path,process.command_args
+    - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
+      value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-java:v2.20.1
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.20.1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
+  nginx:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
+  nodejs:
+    env:
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-js:v3.3.0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.3.0
+  python:
+    env:
+    - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
+      value: ""
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: splunk.zc.method=splunk-otel-instrumentation-python:v2.7.0
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+    image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
