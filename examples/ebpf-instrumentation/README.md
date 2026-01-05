@@ -1,6 +1,6 @@
 # OpenTelemetry eBPF Instrumentation Example
 
-This example demonstrates how to enable zero-code instrumentation using [OpenTelemetry eBPF Instrumentation] (OBI) with the Splunk OpenTelemetry Collector Helm chart.
+This example demonstrates how to enable zero-code instrumentation using [OpenTelemetry eBPF Instrumentation (OBI)] with the Splunk OpenTelemetry Collector Helm chart.
 
 See the [OpenTelemetry eBPF Instrumentation] documentation for more details about deploying and troubleshooting OBI.
 
