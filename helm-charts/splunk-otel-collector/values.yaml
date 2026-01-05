@@ -1192,6 +1192,20 @@ obi:
           #     - k8s_namespace: "default"
           #     - k8s_namespace: "production"
           - k8s_namespace: "*"
+      # Filter network traffic to exclude system and monitoring workloads.
+      # These filters use shell-style globbing patterns with the following syntax:
+      #   - {pattern1,pattern2,...} : matches any of the comma-separated patterns
+      #   - * : wildcard matching any characters
+      #   - kube* : matches any name starting with "kube" (e.g., kube-system, kube-proxy)
+      #
+      # The default exclusions prevent instrumentation of:
+      #   - kube* : Kubernetes system components (kube-system namespace, kube-proxy, etc.)
+      #             These are internal infrastructure and typically don't need tracing
+      #   - *jaeger-agent* : Jaeger tracing agent to avoid recursive instrumentation
+      #   - *prometheus* : Prometheus monitoring components to avoid metric collection overhead
+      #
+      # Customize these patterns to match your environment's needs. For example:
+      #   not_match: "{kube*,*jaeger*,*prometheus*,*istio*}"
       filter:
         network:
           k8s_dst_owner_name:
