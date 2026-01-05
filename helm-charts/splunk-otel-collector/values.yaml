@@ -1064,7 +1064,7 @@ certmanager:
 #
 # OBI provides zero-code instrumentation for applications using eBPF
 # (kernel-level tracing).
-# It inspects application executables and the OS networking layer to automatically instrument network communication, application operation, and more.
+# It attaches probes to application executables and inspects the OS networking layer to automatically instrument network communication, application operation, and more.
 #
 # Enabling this configuration will deploy the OBI sub-chart, this means that OBI will be deployed as a daemonset within your Kubernetes cluster.
 # All applications within your cluster that are not already instrumented with OpenTelemetry will be instrumented.
@@ -1098,8 +1098,11 @@ obi:
     # By default run as privileged.
     privileged: true
 
-    # Alternatively, if your cluster policy requires, OBI can be run with
-    # reduced privileges:
+    # Alternatively, when your cluster policy requires non-privileged
+    # container, OBI can be run with reduced privileges. Reducing privileged
+    # will mean limiting the functionality of OBI, refer to the OBI
+    # documentation for more details about each capability and what it
+    # provides for OBI.
     #
     #   privileged: false
     #   allowPrivilegeEscalation: false
@@ -1107,15 +1110,34 @@ obi:
     #   readOnlyRootFilesystem: true
     #   capabilities:
     #     add:
-    #       - BPF                 # Required for most eBPF probes to function correctly.
-    #       - SYS_PTRACE          # Allow access to container namespaces and ability to inspect executables.
-    #       - NET_RAW             # Allow AF_PACKET raw socket creation (i.e. socket filtering used in network flows)
-    #       - NET_ADMIN           # Allow TC programs (i.e. network flows and trace context propagation )
+    #       - BPF                 # Required for most eBPF probes to
+    #                             # function correctly.
+    #
+    #       - SYS_PTRACE          # Allow access to container namespaces and
+    #                             # ability to inspect executables.
+    #
+    #       - NET_RAW             # Allow AF_PACKET raw socket creation (i.e.
+    #                             # socket filtering used in network flows)
+    #
+    #       - NET_ADMIN           # Allow TC programs (i.e. network flows and
+    #                             # trace context propagation)
+    #
     #       - CHECKPOINT_RESTORE  # Give permission to open ELF files.
+    #
     #       - DAC_READ_SEARCH     # Give permission to open ELF files.
+    #
     #       - PERFMON             # Give permission to load BPF programs.
-    #       - SYS_RESOURCE        # Give permission to increase the amount of locked memory (needed on pre 5.11 kernels).
-    #       - SYS_ADMIN           # Required for Go application trace context propagation, or if kernel.perf_event_paranoid >= 3 on Debian distributions.
+    #
+    #       - SYS_RESOURCE        # Give permission to increase the amount of
+    #                             # locked memory (needed on pre 5.11
+    #                             # kernels).
+    #
+    #       - SYS_ADMIN           # Required for Go application trace
+    #                             # context propagation, or if kernel.
+    #                             # perf_event_paranoid >= 3 on Debian
+    #                             # distributions (note: this effectively
+    #                             # grants root-equivalent access, verify
+    #                             # this is truly necessary before enabling.
     #     drop:
     #       - ALL
 
