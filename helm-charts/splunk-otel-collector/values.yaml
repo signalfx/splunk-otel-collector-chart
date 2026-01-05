@@ -39,9 +39,9 @@ splunkPlatform:
   # endpoint for proper extraction of fields.
   endpoint: ""
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
+  # HTTP Event Collector token.
   # Alternatively the token can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
-  # HTTP Event Collector token.
   token: ""
 
   # Name of the Splunk event type index targeted. Required when ingesting logs to Splunk Platform.
@@ -146,9 +146,9 @@ splunkObservability:
   # destination.
   realm: ""
   # Required for Splunk Observability (if `realm` is specified). Splunk
+  # Observability org access token.
   # Alternatively the accessToken can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
-  # Observability org access token.
   accessToken: ""
 
   # Optional. Splunk Observability ingest URL, default:
