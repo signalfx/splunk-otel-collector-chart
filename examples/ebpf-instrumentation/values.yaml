@@ -1,0 +1,28 @@
+# Example: Enable OpenTelemetry eBPF Instrumentation
+#
+# This example demonstrates how to enable zero-code eBPF-based instrumentation
+# for automatic collection of application traces and network metrics.
+#
+# IMPORTANT PLATFORM REQUIREMENTS:
+# - eBPF instrumentation ONLY works on Linux nodes
+# - Windows nodes are NOT supported and will be excluded via nodeSelector
+# - Kubernetes 1.24+ is required
+
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+# Enable the OpenTelemetry eBPF Instrumentation subchart
+#
+# Note: The eBPF instrumentation will instrument applications automatically.
+# It will inject trace context into application requests and collect metrics
+# from kernel probes.
+#
+# For more information on eBPF capabilities and security:
+# https://opentelemetry.io/docs/zero-code/obi/security/
+#
+# For eBPF Instrumentation configuration options:
+# https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation
+obi:
+  enabled: true
