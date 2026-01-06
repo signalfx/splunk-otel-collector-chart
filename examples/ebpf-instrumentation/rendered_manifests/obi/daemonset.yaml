@@ -1,0 +1,89 @@
+---
+# Source: splunk-otel-collector/charts/obi/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: default-obi
+  namespace: default
+  labels:
+    helm.sh/chart: obi-0.3.0
+    app.kubernetes.io/name: obi
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "v0.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: obi
+    app.kubernetes.io/component: workload
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: obi
+      app.kubernetes.io/instance: default
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: 5a6135b98ac301fa57b75c6af38c223218caa7ff09606921367bca2f26995e45
+      labels:
+        helm.sh/chart: obi-0.3.0
+        app.kubernetes.io/name: obi
+        app.kubernetes.io/instance: default
+        app.kubernetes.io/version: "v0.3.0"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: obi
+        app.kubernetes.io/component: workload
+    spec:
+      serviceAccountName: default-obi
+      hostPID: true
+      initContainers:
+      containers:
+        - name: ebpf-instrument
+          image: ghcr.io/open-telemetry/opentelemetry-ebpf-instrumentation/ebpf-instrument:v0.3.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          ports:
+          - name: metrics
+            containerPort: 9090
+            protocol: TCP
+          env:
+            - name: OTEL_EBPF_CONFIG_PATH
+              value: "/etc/ebpf-instrument/config/ebpf-instrument-config.yml"
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: "OTEL_EBPF_KUBE_CLUSTER_NAME"
+              valueFrom:
+                configMapKeyRef:
+                  key: OTEL_EBPF_KUBE_CLUSTER_NAME
+                  name: splunk-otel-collector-obi-env
+          volumeMounts:
+            - mountPath: /etc/ebpf-instrument/config
+              name: ebpf-instrument-config
+            - mountPath: /sys/kernel/security
+              name: kernel-security
+              readOnly: true
+            - mountPath: /sys/fs/cgroup
+              name: cgroup
+              readOnly: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      volumes:
+        - name: ebpf-instrument-config
+          configMap:
+            name: default-obi
+        - hostPath:
+            path: /sys/kernel/security
+            type: Directory
+          name: kernel-security
+        - hostPath:
+            path: /sys/fs/cgroup
+            type: Directory
+          name: cgroup
