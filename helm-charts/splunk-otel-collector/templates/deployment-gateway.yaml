@@ -16,7 +16,9 @@ metadata:
     {{- toYaml .Values.gateway.annotations | nindent 4 }}
   {{- end }}
 spec:
+  {{- if not (kindIs "invalid" .Values.gateway.replicaCount) }}
   replicas: {{ .Values.gateway.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}

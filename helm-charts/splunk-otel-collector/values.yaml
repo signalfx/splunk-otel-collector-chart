@@ -812,6 +812,7 @@ gateway:
   enabled: false
 
   # Number of collector replicas
+  # Set to null if using HorizontalPodAutoscaler to avoid conflicts
   replicaCount: 3
 
   # The ports exposed by the collector container.

@@ -1072,7 +1072,10 @@
           "type": "boolean"
         },
         "replicaCount": {
-          "type": "integer"
+          "type": [
+            "integer",
+            "null"
+          ]
         },
         "ports": {
           "type": "object",
