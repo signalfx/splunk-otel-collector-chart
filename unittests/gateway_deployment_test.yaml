@@ -1,0 +1,55 @@
+suite: splunk-otel-collector.gatewayDeployment
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - deployment-gateway.yaml
+  - configmap-gateway.yaml
+
+tests:
+  - it: should not render gateway deployment when gateway.enabled is false
+    set:
+      gateway:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render gateway deployment with default replicaCount
+    template: deployment-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should render gateway deployment with custom replicaCount
+    template: deployment-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+        replicaCount: 5
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  - it: should not set replicas field when replicaCount is null (for HPA usage)
+    template: deployment-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+        replicaCount: null
+    asserts:
+      - isKind:
+          of: Deployment
+      - isNull:
+          path: spec.replicas
