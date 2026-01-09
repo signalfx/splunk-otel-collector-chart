@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: k8s-debug-info-${{ matrix.k8s-minikube-version }}-${{ matrix.container_runtime }}-splunk-${{ matrix.splunk_version }}
           path: tools/splunk_kubernetes_debug_info_*
