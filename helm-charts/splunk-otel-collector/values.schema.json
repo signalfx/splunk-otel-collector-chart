@@ -1072,7 +1072,10 @@
           "type": "boolean"
         },
         "replicaCount": {
-          "type": "integer"
+          "type": [
+            "integer",
+            "null"
+          ]
         },
         "ports": {
           "type": "object",
@@ -1337,6 +1340,11 @@
           "additionalProperties": true
         }
       }
+    },
+    "obi": {
+      "description": "OpenTelemetry eBPF Instrumentation configuration. A subchart that is used to install the eBPF instrumentation, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
+      "type": "object",
+      "additionalProperties": true
     },
     "featureGates": {
       "description": "Helm Chart Feature Gates.",
