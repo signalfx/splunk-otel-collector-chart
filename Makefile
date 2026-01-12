@@ -62,10 +62,12 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 		helm repo add jetstack https://charts.jetstack.io || exit 1; \
 	fi ;\
 	helm repo update open-telemetry jetstack || exit 1; \
-	DEP_OK=true ;\
-	if ! helm dependencies list $$DIR | grep open-telemetry | grep -q ok ; then DEP_OK=false ; fi ;\
-	if ! helm dependencies list $$DIR | grep jetstack | grep -q ok ; then DEP_OK=false ; fi ;\
-	if [ "$$DEP_OK" = "false" ] ; then helm dependencies update $$DIR || exit 1; fi ;\
+	if helm dependencies list $$DIR | grep -q missing ; then \
+		echo "Dependencies missing, updating..."; \
+		helm dependencies update $$DIR || exit 1; \
+	else \
+		echo "All dependencies are up to date."; \
+	fi ;\
 	if [ -f "$$LOCK_FILE" ] ; then \
 		echo "Removing Chart.lock file post-update..."; \
 		rm -f "$$LOCK_FILE" || exit 1; \
