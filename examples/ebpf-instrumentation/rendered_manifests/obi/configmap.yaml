@@ -1,0 +1,46 @@
+---
+# Source: splunk-otel-collector/charts/obi/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-obi
+  namespace: default
+  labels:
+    helm.sh/chart: obi-0.3.0
+    app.kubernetes.io/name: obi
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "v0.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: obi
+    app.kubernetes.io/component: config
+data:
+  ebpf-instrument-config.yml: |
+    attributes:
+      kubernetes:
+        enable: true
+    discovery:
+      exclude_instrument:
+      - exe_path: '{*ebpf-instrument*,*otelcol*}'
+      instrument:
+      - k8s_namespace: '*'
+    filter:
+      network:
+        k8s_dst_owner_name:
+          not_match: '{kube*,*jaeger-agent*,*prometheus*}'
+        k8s_src_owner_name:
+          not_match: '{kube*,*jaeger-agent*,*prometheus*}'
+    otel_metrics_export:
+      endpoint: http://${HOST_IP}:4317
+      features:
+      - application
+      instrumentations:
+      - '*'
+      protocol: grpc
+    otel_traces_export:
+      endpoint: http://${HOST_IP}:4317
+      instrumentations:
+      - '*'
+      protocol: grpc
+    prometheus_export:
+      path: /metrics
+      port: 9090

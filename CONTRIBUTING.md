@@ -130,6 +130,14 @@ any 'help wanted' issues is a great place to start.
 
 ## Building
 
+### Prerequisites
+
+Building and rendering chart manifests requires [yq](https://github.com/mikefarah/yq) to be installed. Note that this is the Go-based `yq` by mikefarah, not the Python-based [yq by kislyuk](https://kislyuk.github.io/yq/).
+
+To install yq, follow the [installation instructions](https://github.com/mikefarah/yq#install) for your platform.
+
+### Rendering Manifests
+
 When changing the helm chart the files under `examples/*/rendered_manifests` need to be rebuilt with `make render`. It's strongly recommended to use [pre-commit](https://pre-commit.com/) which will do this automatically for each commit (as well as run some linting).
 
 ## Running locally
