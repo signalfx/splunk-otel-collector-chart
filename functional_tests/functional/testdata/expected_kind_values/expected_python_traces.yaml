@@ -27,13 +27,13 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: python-test-68df75b848-gcbdd
+            stringValue: python-test-68df75b848-gg2j9
         - key: k8s.replicaset.name
           value:
             stringValue: python-test-68df75b848
         - key: service.instance.id
           value:
-            stringValue: default.python-test-68df75b848-gcbdd.python-test
+            stringValue: default.python-test-68df75b848-gg2j9.python-test
         - key: service.namespace
           value:
             stringValue: default
@@ -52,15 +52,12 @@ resourceSpans:
         - key: telemetry.auto.version
           value:
             stringValue: 0.57b0
-        - key: k8s.pod.ip
-          value:
-            stringValue: 10.244.0.18
-        - key: k8s.pod.uid
-          value:
-            stringValue: 9fdf2256-4fba-414f-bed1-bc78502d5946
         - key: k8s.pod.labels.app
           value:
             stringValue: python-test
+        - key: k8s.pod.uid
+          value:
+            stringValue: 845a54e6-54c6-475a-a10f-7bbdf42501a8
         - key: container.image.name
           value:
             stringValue: quay.io/splunko11ytest/python_test
@@ -69,7 +66,7 @@ resourceSpans:
             stringValue: latest
         - key: container.id
           value:
-            stringValue: 3a197be35bcd7cf0f40c5c8f2d4c2d02c42efbd46b19e544bc662fac39f7e753
+            stringValue: 7ea1ad48290b80b3b1e750391be37aa6bb994a2eafd8ed86680b58355d0eb811
         - key: host.name
           value:
             stringValue: kind-control-plane
@@ -91,7 +88,7 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.38.0
     scopeSpans:
       - schemaUrl: https://opentelemetry.io/schemas/1.11.0
         scope:
@@ -124,7 +121,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "46490"
+                  intValue: "50102"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
@@ -137,14 +134,14 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1760360060298957510"
+            endTimeUnixNano: "1768314370285333153"
             flags: 256
             kind: 2
             name: GET /
-            spanId: b0700378ce3f9dbd
-            startTimeUnixNano: "1760360060298347539"
+            spanId: 95282eb3a7fbda57
+            startTimeUnixNano: "1768314370284728350"
             status: {}
-            traceId: 79981a4f3219ed1b55b25ae9d66b567e
+            traceId: c5620e94f1afc65ba081926ea3192418
           - attributes:
               - key: http.method
                 value:
@@ -172,7 +169,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "46504"
+                  intValue: "50116"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
@@ -185,14 +182,14 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1760360061299918044"
+            endTimeUnixNano: "1768314371287099414"
             flags: 256
             kind: 2
             name: GET /
-            spanId: 70176c3fb0360001
-            startTimeUnixNano: "1760360061299308996"
+            spanId: e3b7a7e597b7a4f4
+            startTimeUnixNano: "1768314371286429080"
             status: {}
-            traceId: 2b04b4d76302c26cdd42f1836f9eb9ac
+            traceId: b2ce9d014b955e3ce806130e9ac7140a
           - attributes:
               - key: http.method
                 value:
@@ -220,7 +217,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "46512"
+                  intValue: "50130"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
@@ -233,14 +230,14 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1760360062301298510"
+            endTimeUnixNano: "1768314372288676240"
             flags: 256
             kind: 2
             name: GET /
-            spanId: a629c00dae69eb15
-            startTimeUnixNano: "1760360062300656469"
+            spanId: fa8ce5d037f432d3
+            startTimeUnixNano: "1768314372287873973"
             status: {}
-            traceId: ee9fb458da42155417d776ad2fb6969f
+            traceId: e7047f1c90ab278208adde2828015c41
           - attributes:
               - key: http.method
                 value:
@@ -268,7 +265,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "46526"
+                  intValue: "38948"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
@@ -281,14 +278,14 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1760360063302325703"
+            endTimeUnixNano: "1768314373289473190"
             flags: 256
             kind: 2
             name: GET /
-            spanId: ac5b61a8b855b1f5
-            startTimeUnixNano: "1760360063301719780"
+            spanId: 0dc41eb3da6fbac5
+            startTimeUnixNano: "1768314373288868538"
             status: {}
-            traceId: 0f55d5638e4f19c0553c5db64257ba94
+            traceId: 57dcff3f9fafb2e50d2f852333e3ef31
           - attributes:
               - key: http.method
                 value:
@@ -316,7 +313,7 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "46538"
+                  intValue: "38958"
               - key: http.user_agent
                 value:
                   stringValue: curl/8.11.1
@@ -329,11 +326,11 @@ resourceSpans:
               - key: http.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1760360064303352360"
+            endTimeUnixNano: "1768314374290839083"
             flags: 256
             kind: 2
             name: GET /
-            spanId: 15933e08d02fd743
-            startTimeUnixNano: "1760360064302782044"
+            spanId: a63ea1ebe1926552
+            startTimeUnixNano: "1768314374290276031"
             status: {}
-            traceId: 6daace36f857a2d850dc35ddc5f9f7a7
+            traceId: 9b9ba966ffcd8e7378918c67788f4356

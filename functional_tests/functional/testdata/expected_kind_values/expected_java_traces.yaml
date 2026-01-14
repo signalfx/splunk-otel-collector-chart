@@ -3,7 +3,7 @@ resourceSpans:
       attributes:
         - key: container.id
           value:
-            stringValue: 354abfe47404d4a88bc20fe9331cce5463da74d1df9add587d9bcc7fd6102780
+            stringValue: b48a9a8a32ada74c7e0d83fdabe862897893b89828856f6ff0c2a65e4be5f119
         - key: k8s.container.name
           value:
             stringValue: java-test
@@ -18,7 +18,7 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: java-test-8b9646fc8-787lw
+            stringValue: java-test-8b9646fc8-wmbgw
         - key: k8s.replicaset.name
           value:
             stringValue: java-test-8b9646fc8
@@ -27,7 +27,7 @@ resourceSpans:
             intValue: "14"
         - key: service.instance.id
           value:
-            stringValue: default.java-test-8b9646fc8-787lw.java-test
+            stringValue: default.java-test-8b9646fc8-wmbgw.java-test
         - key: service.name
           value:
             stringValue: java-test
@@ -49,12 +49,9 @@ resourceSpans:
         - key: telemetry.sdk.version
           value:
             stringValue: 1.54.1
-        - key: k8s.pod.ip
-          value:
-            stringValue: 10.244.0.17
         - key: k8s.pod.uid
           value:
-            stringValue: 8ca39697-23ca-49ca-ba78-400cff7b6493
+            stringValue: 4216370d-bf8e-4ef7-b90a-9ec7a93148a9
         - key: k8s.pod.labels.app
           value:
             stringValue: java-test
@@ -123,7 +120,7 @@ resourceSpans:
                   stringValue: GET
               - key: network.peer.port
                 value:
-                  intValue: "39524"
+                  intValue: "41318"
               - key: webengine.version
                 value:
                   stringValue: 11.0.0.0
@@ -139,14 +136,14 @@ resourceSpans:
               - key: network.protocol.version
                 value:
                   stringValue: "1.1"
-            endTimeUnixNano: "1762146250407743628"
+            endTimeUnixNano: "1768314367750811383"
             flags: 257
             kind: 2
             name: GET /index.jsp
-            spanId: 21b5702ea012cdad
-            startTimeUnixNano: "1762146250405729170"
+            spanId: 4c465443c54cdedc
+            startTimeUnixNano: "1768314367749180218"
             status: {}
-            traceId: 2653ce47b7c435b5deab0078054fd1e1
+            traceId: f498165b30f387368c1bfd189e0662cb
           - attributes:
               - key: server.port
                 value:
@@ -180,7 +177,7 @@ resourceSpans:
                   stringValue: GET
               - key: network.peer.port
                 value:
-                  intValue: "46110"
+                  intValue: "41338"
               - key: webengine.version
                 value:
                   stringValue: 11.0.0.0
@@ -196,14 +193,14 @@ resourceSpans:
               - key: network.protocol.version
                 value:
                   stringValue: "1.1"
-            endTimeUnixNano: "1762146251418720898"
+            endTimeUnixNano: "1768314368763268116"
             flags: 257
             kind: 2
             name: GET /index.jsp
-            spanId: c6c7b53802f89e7c
-            startTimeUnixNano: "1762146251416741365"
+            spanId: 6de89e7cffa0e7b9
+            startTimeUnixNano: "1768314368761742154"
             status: {}
-            traceId: 2ac4cb457d671477c7d72a5716ad3eb0
+            traceId: ddad2e8bbcfb3f41e922788d91cdc1c0
           - attributes:
               - key: server.port
                 value:
@@ -237,7 +234,7 @@ resourceSpans:
                   stringValue: GET
               - key: network.peer.port
                 value:
-                  intValue: "46134"
+                  intValue: "41376"
               - key: webengine.version
                 value:
                   stringValue: 11.0.0.0
@@ -253,14 +250,71 @@ resourceSpans:
               - key: network.protocol.version
                 value:
                   stringValue: "1.1"
-            endTimeUnixNano: "1762146252429777525"
+            endTimeUnixNano: "1768314369775156278"
             flags: 257
             kind: 2
             name: GET /index.jsp
-            spanId: 1f5af53704c7ae1f
-            startTimeUnixNano: "1762146252427552154"
+            spanId: 45415bb70a4101df
+            startTimeUnixNano: "1768314369773323920"
             status: {}
-            traceId: 66428144f787bb4819db5835ee486473
+            traceId: a83320992af6a7f3309b9212091d2b4c
+          - attributes:
+              - key: server.port
+                value:
+                  intValue: "8080"
+              - key: webengine.name
+                value:
+                  stringValue: tomcat
+              - key: thread.id
+                value:
+                  intValue: "40"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: network.peer.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: http.route
+                value:
+                  stringValue: /index.jsp
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: network.peer.port
+                value:
+                  intValue: "41404"
+              - key: webengine.version
+                value:
+                  stringValue: 11.0.0.0
+              - key: url.scheme
+                value:
+                  stringValue: http
+              - key: thread.name
+                value:
+                  stringValue: http-nio-8080-exec-4
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.81.0
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+            endTimeUnixNano: "1768314370786441388"
+            flags: 257
+            kind: 2
+            name: GET /index.jsp
+            spanId: fd4b199d8338774b
+            startTimeUnixNano: "1768314370785099000"
+            status: {}
+            traceId: 1540e27b895e38f031e2c80269507d8f
           - attributes:
               - key: server.port
                 value:
@@ -294,7 +348,7 @@ resourceSpans:
                   stringValue: GET
               - key: network.peer.port
                 value:
-                  intValue: "46156"
+                  intValue: "41428"
               - key: webengine.version
                 value:
                   stringValue: 11.0.0.0
@@ -310,68 +364,11 @@ resourceSpans:
               - key: network.protocol.version
                 value:
                   stringValue: "1.1"
-            endTimeUnixNano: "1762146253441397051"
+            endTimeUnixNano: "1768314371798187977"
             flags: 257
             kind: 2
             name: GET /index.jsp
-            spanId: 4ff01d419022a5d1
-            startTimeUnixNano: "1762146253439447073"
+            spanId: 2a1a300e724ff64a
+            startTimeUnixNano: "1768314371796722927"
             status: {}
-            traceId: 7503e35e64925a9fd0cd72229b15b78b
-          - attributes:
-              - key: server.port
-                value:
-                  intValue: "8080"
-              - key: webengine.name
-                value:
-                  stringValue: tomcat
-              - key: thread.id
-                value:
-                  intValue: "42"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-              - key: url.path
-                value:
-                  stringValue: /
-              - key: network.peer.address
-                value:
-                  stringValue: 127.0.0.1
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: client.address
-                value:
-                  stringValue: 127.0.0.1
-              - key: http.route
-                value:
-                  stringValue: /index.jsp
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: network.peer.port
-                value:
-                  intValue: "46170"
-              - key: webengine.version
-                value:
-                  stringValue: 11.0.0.0
-              - key: url.scheme
-                value:
-                  stringValue: http
-              - key: thread.name
-                value:
-                  stringValue: http-nio-8080-exec-6
-              - key: user_agent.original
-                value:
-                  stringValue: curl/7.81.0
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-            endTimeUnixNano: "1762146254451371479"
-            flags: 257
-            kind: 2
-            name: GET /index.jsp
-            spanId: bdd3f2f93a51b7d2
-            startTimeUnixNano: "1762146254449640781"
-            status: {}
-            traceId: c9243a5400f2407c39f9c269b0768cba
+            traceId: 0a881af3b22b78a8705de1db13915d56
