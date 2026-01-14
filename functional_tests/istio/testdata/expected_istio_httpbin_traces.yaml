@@ -13,18 +13,15 @@ resourceSpans:
         - key: telemetry.sdk.version
           value:
             stringValue: 1a53bf14a57976dd0f509752b748caf3b1125d54/1.35.2-dev/Clean/RELEASE/BoringSSL
-        - key: k8s.pod.ip
-          value:
-            stringValue: 10.244.0.12
         - key: k8s.pod.name
           value:
-            stringValue: httpbin-686d6fc899-fmtfn
+            stringValue: httpbin-686d6fc899-kctgs
         - key: k8s.namespace.name
           value:
             stringValue: istio-workloads
         - key: k8s.pod.uid
           value:
-            stringValue: 63a8513e-fcb2-4107-8007-764e5b4bf6fe
+            stringValue: cd2d33b8-f868-4214-a8b0-57f63896ac28
         - key: k8s.node.name
           value:
             stringValue: kind-control-plane
@@ -43,7 +40,7 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.37.0
     scopeSpans:
       - scope:
           name: envoy
@@ -52,13 +49,13 @@ resourceSpans:
           - attributes:
               - key: node_id
                 value:
-                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-fmtfn.istio-workloads~istio-workloads.svc.cluster.local
+                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-kctgs.istio-workloads~istio-workloads.svc.cluster.local
               - key: zone
                 value:
                   stringValue: ""
               - key: guid:x-request-id
                 value:
-                  stringValue: 4590d1c6-15f7-9a3a-9b89-34e4cfaefa13
+                  stringValue: 749897e3-0dd5-96e8-9bef-019966035c1a
               - key: http.url
                 value:
                   stringValue: http://httpbin.example.com/status/200
@@ -98,41 +95,41 @@ resourceSpans:
               - key: response_flags
                 value:
                   stringValue: '-'
-              - key: istio.cluster_id
+              - key: istio.namespace
                 value:
-                  stringValue: Kubernetes
+                  stringValue: istio-workloads
               - key: istio.canonical_service
                 value:
                   stringValue: httpbin
               - key: istio.canonical_revision
                 value:
                   stringValue: v1
-              - key: istio.mesh_id
+              - key: istio.cluster_id
                 value:
-                  stringValue: cluster.local
-              - key: istio.namespace
-                value:
-                  stringValue: istio-workloads
+                  stringValue: Kubernetes
               - key: my-attribute
                 value:
                   stringValue: default-value
-            endTimeUnixNano: "1759357324718827000"
+              - key: istio.mesh_id
+                value:
+                  stringValue: cluster.local
+            endTimeUnixNano: "1768392706745113000"
             kind: 2
             name: httpbin.istio-workloads.svc.cluster.local:8000/status*
-            spanId: 3336d8be5da54087
-            startTimeUnixNano: "1759357324717694000"
+            spanId: 7ce0cade2f18a431
+            startTimeUnixNano: "1768392706744582000"
             status: {}
-            traceId: 01f3be3326d6d551d69ec57daae041dc
+            traceId: 7e5fc59bb37c123b5eefea2c79359af4
           - attributes:
               - key: node_id
                 value:
-                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-fmtfn.istio-workloads~istio-workloads.svc.cluster.local
+                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-kctgs.istio-workloads~istio-workloads.svc.cluster.local
               - key: zone
                 value:
                   stringValue: ""
               - key: guid:x-request-id
                 value:
-                  stringValue: 76367cd3-52bd-9dd0-a1f2-9df0a770be2b
+                  stringValue: be09f203-d8e0-92cf-bb15-f4d8be7ec3ba
               - key: http.url
                 value:
                   stringValue: http://httpbin.example.com/status/200
@@ -175,38 +172,38 @@ resourceSpans:
               - key: istio.canonical_service
                 value:
                   stringValue: httpbin
-              - key: istio.mesh_id
-                value:
-                  stringValue: cluster.local
-              - key: istio.namespace
-                value:
-                  stringValue: istio-workloads
-              - key: my-attribute
-                value:
-                  stringValue: default-value
               - key: istio.canonical_revision
                 value:
                   stringValue: v1
               - key: istio.cluster_id
                 value:
                   stringValue: Kubernetes
-            endTimeUnixNano: "1759357325716812000"
+              - key: my-attribute
+                value:
+                  stringValue: default-value
+              - key: istio.mesh_id
+                value:
+                  stringValue: cluster.local
+              - key: istio.namespace
+                value:
+                  stringValue: istio-workloads
+            endTimeUnixNano: "1768392707746298000"
             kind: 2
             name: httpbin.istio-workloads.svc.cluster.local:8000/status*
-            spanId: 68ae28b153b8d7b0
-            startTimeUnixNano: "1759357325715562000"
+            spanId: ead34bd5ecb6dfc4
+            startTimeUnixNano: "1768392707745721000"
             status: {}
-            traceId: 5834c11f6a36cb6d82be751c094e81a9
+            traceId: 76394ca20e3baaca55928a039e1bef05
           - attributes:
               - key: node_id
                 value:
-                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-fmtfn.istio-workloads~istio-workloads.svc.cluster.local
+                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-kctgs.istio-workloads~istio-workloads.svc.cluster.local
               - key: zone
                 value:
                   stringValue: ""
               - key: guid:x-request-id
                 value:
-                  stringValue: 3fd259fa-d776-9963-a488-28d9a327704a
+                  stringValue: fb4715fc-cb27-905e-838b-96d4f7fb4d09
               - key: http.url
                 value:
                   stringValue: http://httpbin.example.com/status/200
@@ -246,41 +243,41 @@ resourceSpans:
               - key: response_flags
                 value:
                   stringValue: '-'
-              - key: istio.canonical_revision
-                value:
-                  stringValue: v1
-              - key: istio.mesh_id
-                value:
-                  stringValue: cluster.local
-              - key: istio.canonical_service
-                value:
-                  stringValue: httpbin
-              - key: my-attribute
-                value:
-                  stringValue: default-value
               - key: istio.namespace
                 value:
                   stringValue: istio-workloads
+              - key: istio.canonical_service
+                value:
+                  stringValue: httpbin
               - key: istio.cluster_id
                 value:
                   stringValue: Kubernetes
-            endTimeUnixNano: "1759357326723521000"
+              - key: istio.canonical_revision
+                value:
+                  stringValue: v1
+              - key: my-attribute
+                value:
+                  stringValue: default-value
+              - key: istio.mesh_id
+                value:
+                  stringValue: cluster.local
+            endTimeUnixNano: "1768392708745146000"
             kind: 2
             name: httpbin.istio-workloads.svc.cluster.local:8000/status*
-            spanId: 617feaff3a6cb425
-            startTimeUnixNano: "1759357326720705000"
+            spanId: 53d505a45c2a12f5
+            startTimeUnixNano: "1768392708744559000"
             status: {}
-            traceId: 3beecbcbc9a77aa900bae00a3ad2e7d0
+            traceId: 37c95a9bfcc08052d48e32c6d7005902
           - attributes:
               - key: node_id
                 value:
-                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-fmtfn.istio-workloads~istio-workloads.svc.cluster.local
+                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-kctgs.istio-workloads~istio-workloads.svc.cluster.local
               - key: zone
                 value:
                   stringValue: ""
               - key: guid:x-request-id
                 value:
-                  stringValue: cd6a38e0-28b9-91b8-a264-9dc53aa454f2
+                  stringValue: 89c578f6-b5e3-9165-b3bc-2e7f07332dd3
               - key: http.url
                 value:
                   stringValue: http://httpbin.example.com/status/200
@@ -320,28 +317,102 @@ resourceSpans:
               - key: response_flags
                 value:
                   stringValue: '-'
-              - key: istio.mesh_id
+              - key: istio.canonical_revision
                 value:
-                  stringValue: cluster.local
-              - key: istio.namespace
+                  stringValue: v1
+              - key: istio.canonical_service
                 value:
-                  stringValue: istio-workloads
-              - key: my-attribute
-                value:
-                  stringValue: default-value
+                  stringValue: httpbin
               - key: istio.cluster_id
                 value:
                   stringValue: Kubernetes
+              - key: istio.mesh_id
+                value:
+                  stringValue: cluster.local
+              - key: my-attribute
+                value:
+                  stringValue: default-value
+              - key: istio.namespace
+                value:
+                  stringValue: istio-workloads
+            endTimeUnixNano: "1768392709742948000"
+            kind: 2
+            name: httpbin.istio-workloads.svc.cluster.local:8000/status*
+            spanId: 37428097cda5ffc6
+            startTimeUnixNano: "1768392709742387000"
+            status: {}
+            traceId: d6d7a792070ac45a3ece3f7f8a85d800
+          - attributes:
+              - key: node_id
+                value:
+                  stringValue: sidecar~10.244.0.12~httpbin-686d6fc899-kctgs.istio-workloads~istio-workloads.svc.cluster.local
+              - key: zone
+                value:
+                  stringValue: ""
+              - key: guid:x-request-id
+                value:
+                  stringValue: 1c2f4c13-af71-9b0c-b772-fc014cd78258
+              - key: http.url
+                value:
+                  stringValue: http://httpbin.example.com/status/200
+              - key: http.method
+                value:
+                  stringValue: GET
+              - key: downstream_cluster
+                value:
+                  stringValue: '-'
+              - key: user_agent
+                value:
+                  stringValue: Go-http-client/1.1
+              - key: http.protocol
+                value:
+                  stringValue: HTTP/1.1
+              - key: peer.address
+                value:
+                  stringValue: 10.244.0.11
+              - key: request_size
+                value:
+                  stringValue: "0"
+              - key: response_size
+                value:
+                  stringValue: "0"
+              - key: component
+                value:
+                  stringValue: proxy
+              - key: upstream_cluster
+                value:
+                  stringValue: inbound|8080||
+              - key: upstream_cluster.name
+                value:
+                  stringValue: inbound|8080||;
+              - key: http.status_code
+                value:
+                  stringValue: "200"
+              - key: response_flags
+                value:
+                  stringValue: '-'
+              - key: istio.namespace
+                value:
+                  stringValue: istio-workloads
               - key: istio.canonical_service
                 value:
                   stringValue: httpbin
               - key: istio.canonical_revision
                 value:
                   stringValue: v1
-            endTimeUnixNano: "1759357327716268000"
+              - key: istio.cluster_id
+                value:
+                  stringValue: Kubernetes
+              - key: istio.mesh_id
+                value:
+                  stringValue: cluster.local
+              - key: my-attribute
+                value:
+                  stringValue: default-value
+            endTimeUnixNano: "1768392710745140000"
             kind: 2
             name: httpbin.istio-workloads.svc.cluster.local:8000/status*
-            spanId: c48703a4017f09c7
-            startTimeUnixNano: "1759357327715476000"
+            spanId: c9b83730dcc72bea
+            startTimeUnixNano: "1768392710744538000"
             status: {}
-            traceId: 6eba1bc7996b5b8e2a5acf373ad6a8ed
+            traceId: 37ef9bb038fcff05b913c98c923aa5df
