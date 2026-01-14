@@ -37,7 +37,7 @@ jobs:
 
       - name: Open PR for matrix version update
         if: steps.git-check.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: Update matrix test versions
           title: Update matrix versions used for testing
