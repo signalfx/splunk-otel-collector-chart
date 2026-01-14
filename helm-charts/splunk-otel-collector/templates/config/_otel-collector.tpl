@@ -38,10 +38,6 @@ receivers:
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
 
-  signalfx:
-    endpoint: 0.0.0.0:9943
-    include_metadata: true
-
 # By default k8sattributes, memory_limiter and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
