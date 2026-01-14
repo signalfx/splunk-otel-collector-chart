@@ -4,6 +4,49 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.142.0] - 2026-01-14
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.142.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.142.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, gateway`: Send metrics collected about the agent pod itself via OTLP from agent to the gateway ([#2172](https://github.com/signalfx/splunk-otel-collector-chart/pull/2172))
+  Previously, metrics were being sent via SignalFx exporter to SignalFx receiver. This change removes
+  the SignalFx receiver from the gateway's metric pipelines. The SignalFx receiver is on the path towards
+  deprecation. The SignalFx exporter remains in the agent's `metrics` pipeline even when the gateway is enabled, but
+  its only purpose is to sync host metadata, it does not send any metrics.
+
+- `gateway`: Include metadata coming from connections to the OTLP receiver ([#2171](https://github.com/signalfx/splunk-otel-collector-chart/pull/2171))
+  This is part of an effort to remove the `signalfx` receiver from the default gateway configuration. This change
+  will allow access tokens to be passed from agents to the gateway through the OTLP receiver.
+  To revert this change to previous behavior, please add the following to your `values.yaml` file:
+  ```
+  gateway:
+    config:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              include_metadata: false
+            http:
+              include_metadata: false
+  ```
+
+
+### 🚀 New components 🚀
+
+- `OBI subchart`: Add the OpenTelemetry eBPF Instrumentation sub-chart ([#2190](https://github.com/signalfx/splunk-otel-collector-chart/pull/2190))
+  OpenTelemetry eBPF Instrumentation (OBI) is auto-instrumentation that generates trace and metric telemetry for your application using eBPF technology. OBI inspects application executables and the OS networking layer to automatically instrument network communication, application operation, and more.
+
+  The OBI sub-chart deploys OBI as a daemonset within your Kubernetes cluster. All applications within your cluster that are not already instrumented with OpenTelemetry will be instrumented. See the OBI documentation on how to customize this.
+
+  The OBI project, and this sub-chart, are still evolving. This functionality is in an alpha stage of release. Please direct any feedback or questions through Splunk support services.
+
+
+### 💡 Enhancements 💡
+
+- `gateway`: Make replicaCount optional for the gateway deployment to allow HPA to manage replicas without conflicts ([#2198](https://github.com/signalfx/splunk-otel-collector-chart/pull/2198))
+
 ## [0.141.0] - 2025-12-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.141.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.141.0).
