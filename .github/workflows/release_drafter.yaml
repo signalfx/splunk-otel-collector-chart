@@ -20,6 +20,14 @@ on:
         description: 'Optionally overrides the app version in Chart.yaml.'
         required: false
         default: ''
+      OVERWRITE_EXISTING_PR:
+        description: 'Allow updating an existing update-release PR if changes differ.'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
       DEBUG:
         description: 'Enable debug mode for the script.'
         required: false
@@ -31,6 +39,7 @@ jobs:
     env:
       CHART_VERSION: ${{ github.event.inputs.CHART_VERSION }}
       APP_VERSION: ${{ github.event.inputs.APP_VERSION }}
+      OVERWRITE_EXISTING_PR: ${{ github.event.inputs.OVERWRITE_EXISTING_PR }}
       DEBUG: ${{ github.event.inputs.DEBUG }}
     steps:
       - uses: actions/checkout@v6
@@ -48,10 +57,23 @@ jobs:
         run: |
           echo "PR_NEEDED=1" >> "$GITHUB_OUTPUT"
           git fetch origin
-          # Directly check if the feature branch exists and has the same changes in the remote repository
+
+          # Check if update-release branch exists
           if git ls-remote --heads origin update-release > /dev/null; then
-            if git diff --no-ext-diff --quiet origin/update-release -- helm-charts; then
+            if [ "$OVERWRITE_EXISTING_PR" = "true" ]; then
+              # Overwrite mode: Only skip if changes are identical
+              echo "OVERWRITE_EXISTING_PR is enabled - checking for changes"
+              if git diff --no-ext-diff --quiet origin/update-release -- helm-charts; then
+                echo "PR_NEEDED=0" >> "$GITHUB_OUTPUT"
+                echo "Skipping PR creation - no changes detected"
+              else
+                echo "Changes detected - will update existing PR"
+              fi
+            else
+              # Default mode: Skip if branch exists
               echo "PR_NEEDED=0" >> "$GITHUB_OUTPUT"
+              echo "Skipping PR creation - update-release branch already exists"
+              echo "Use OVERWRITE_EXISTING_PR=true to allow updating if changes differ"
             fi
           fi
 
