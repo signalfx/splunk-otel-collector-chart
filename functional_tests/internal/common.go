@@ -6,6 +6,7 @@ package internal
 import (
 	"context"
 	"io"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -52,11 +53,19 @@ func HostEndpoint(t *testing.T) string {
 	network, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
 	require.NoError(t, err)
 	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
+		if ipam.Gateway == "" {
+			continue
+		}
+		ip := net.ParseIP(ipam.Gateway)
+		if ip == nil {
+			continue
+		}
+		if ip.To4() != nil {
 			return ipam.Gateway
 		}
 	}
-	require.Fail(t, "failed to find host endpoint")
+
+	require.Fail(t, "failed to find an IPv4 host endpoint")
 	return ""
 }
 
