@@ -2,6 +2,14 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
+          - description: Total CPU usage (sum of all cores per second) averaged over the sample window
+            gauge:
+              dataPoints:
+                - asDouble: 0.004558032
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            name: container.cpu.usage
+            unit: "{cpu}"
           - name: k8s.pod.network.errors
             sum:
               aggregationTemporality: 2

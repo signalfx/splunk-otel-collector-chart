@@ -1223,6 +1223,7 @@ func testAgentMetrics(t *testing.T) {
 	})
 
 	t.Run("kubeletstats metrics", func(t *testing.T) {
+		t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubeletstats_metrics.yaml", "container.memory.usage")
 	})
 
