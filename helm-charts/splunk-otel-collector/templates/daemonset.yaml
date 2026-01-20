@@ -98,9 +98,9 @@ spec:
           fi;
           {{- end }}
           {{- if .Values.logsCollection.journald.enabled }}
-          if [ -d "{{ .Values.logsCollection.journald.directory }}" ];
+          if [ -d "{{ include "splunk-otel-collector.journaldDirectory" . }}" ];
           then
-              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx {{ .Values.logsCollection.journald.directory }};
+              setfacl -n -Rm d:m::rx,m::rx,d:g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx,g:{{ .Values.agent.securityContext.runAsGroup | default 999 }}:rx {{ include "splunk-otel-collector.journaldDirectory" . }};
           fi;
           {{- end }}
           {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
@@ -124,7 +124,7 @@ spec:
             {{- end }}
             {{- if .Values.logsCollection.journald.enabled }}
             - name: journaldlogs
-              mountPath: {{ .Values.logsCollection.journald.directory }}
+              mountPath: {{ include "splunk-otel-collector.journaldDirectory" . }}
             {{- end }}
             {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
             - name: persistent-queue
@@ -308,9 +308,17 @@ spec:
           mountPath: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
         {{- end }}
         {{- if .Values.logsCollection.journald.enabled }}
-        - mountPath: {{.Values.logsCollection.journald.directory}}
+        - mountPath: {{ include "splunk-otel-collector.journaldDirectory" . }}
           name: journaldlogs
           readOnly: true
+        {{- if .Values.logsCollection.journald.useHostJournalctl }}
+        - mountPath: {{ printf "%s%s" .Values.logsCollection.journald.root_path .Values.logsCollection.journald.journalctl_path }}
+          name: journalctl-bin
+        {{- range $_, $mnt := .Values.logsCollection.journald.mnts }}
+        - mountPath: {{ printf "%s%s" $.Values.logsCollection.journald.root_path $mnt.path }}
+          name: {{ $mnt.name }}
+        {{- end }}
+        {{- end }}
         {{- end }}
         {{- end }}
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
@@ -377,6 +385,18 @@ spec:
           type: DirectoryOrCreate
       {{- end }}
       {{- if .Values.logsCollection.journald.enabled }}
+      {{- if .Values.logsCollection.journald.useHostJournalctl -}}
+      {{- range $_, $mnt := .Values.logsCollection.journald.mnts }}
+      - name: {{ $mnt.name }}
+        hostPath:
+          path: {{ $mnt.path }}
+          type: Directory
+      {{- end }}
+      - name: journalctl-bin
+        hostPath:
+          path: {{ .Values.logsCollection.journald.journalctl_path }}
+          type: File
+      {{- end }}
       - name: journaldlogs
         hostPath:
           path: {{.Values.logsCollection.journald.directory}}

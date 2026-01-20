@@ -642,6 +642,20 @@ logsCollection:
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
+    # Set useHostJournalctl to true to read journald logs using the host's journalctl binary.
+    useHostJournalctl: false
+    # Path to the host filesystem root where the libraries needed by journalctl are mounted. Effective only if useHostJournalctl is set to true.
+    root_path: /hostfs
+    # Path to the host journalctl binary. Effective only if useHostJournalctl is set to true.
+    journalctl_path: /usr/bin/journalctl
+    # Host lib mounts needed to read journald logs using host's journalctl binary. Effective only if useHostJournalctl is set to true.
+    mnts:
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
     # Please update directory path for journald if it's different from below default value "/run/log/journal"
     directory: /run/log/journal
     # List of service units to collect journald logs for and configuration for each.

@@ -1,0 +1,30 @@
+clusterName: CHANGEME
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
+agent:
+  securityContext:
+    runAsUser: 20000
+    runAsGroup: 20000
+  config:
+    exporters:
+      debug:
+        verbosity: detailed
+    service:
+      pipelines:
+        logs/host:
+          exporters: [ debug ]
+          processors: [ memory_limiter, batch, resource ]
+          receivers: [ journald/kubelet ]
+
+logsEngine: otel
+logsCollection:
+  journald:
+    useHostJournalctl: true
+    enabled: true
+    directory: /var/log/journal
+    units:
+      - name: kubelet
+        priority: info

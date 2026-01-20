@@ -779,6 +779,10 @@ receivers:
   {{- if .Values.logsCollection.journald.enabled }}
   {{- range $_, $unit := .Values.logsCollection.journald.units }}
   {{- printf "journald/%s:" $unit.name | nindent 2 }}
+  {{- if $.Values.logsCollection.journald.useHostJournalctl }}
+    root_path: {{ $.Values.logsCollection.journald.root_path }}
+    journalctl_path: {{ $.Values.logsCollection.journald.journalctl_path }}
+  {{- end }}
     directory: {{ $.Values.logsCollection.journald.directory }}
     units: [{{ $unit.name }}]
     priority: {{ $unit.priority }}

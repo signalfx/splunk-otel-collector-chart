@@ -651,6 +651,36 @@ logsCollection:
     index: ""
 ```
 
+#### Use the Host Journalctl binary
+
+By default, the Splunk OpenTelemetry Collector for Kubernetes uses its own `journalctl` binary to read journald events.
+However, in some environments, the bundled binary may not be compatible with the version that generated the journald events.
+In such cases, you can configure the collector to use the host's `journalctl` binary to read journald events.
+This can be done by setting the `useHostJournalctl` option to `true` in the `logsCollection.journald` section of the values.yaml file.
+
+```yaml
+logsCollection:
+  journald:
+    useHostJournalctl: true
+    enabled: true
+```
+
+The chart exposes the following options to additionally configure the use of the host's `journalctl` binary:
+- `root_path`: Path to the host filesystem root where the libraries needed by journalctl are mounted, default `/hostfs`
+- `journalctl_path`: Path to the host journalctl binary, default `/usr/bin/journalctl`
+- `mnts`: List of host lib mounts needed to run the host's journalctl binary. default mounts are:
+```
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
+```
+
+For details on how this feature works, please refer to the upstream OpenTelemetry Collector Contrib documentation on
+[Journald Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver#docker--kubernetes)
+
 ### Managing Log Ingestion by Using Annotations
 
 Manage Splunk OTel Collector Logging with these supported annotations.
