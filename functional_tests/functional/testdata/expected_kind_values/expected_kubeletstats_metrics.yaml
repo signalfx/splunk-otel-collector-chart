@@ -2,14 +2,6 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
-          - description: Total CPU usage (sum of all cores per second) averaged over the sample window
-            gauge:
-              dataPoints:
-                - asDouble: 0.004558032
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-            name: container.cpu.usage
-            unit: "{cpu}"
           - name: k8s.pod.network.errors
             sum:
               aggregationTemporality: 2
@@ -10402,4 +10394,1060 @@ resourceMetrics:
                         stringValue: linux
                   timeUnixNano: "1000000"
               isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 0.007830836
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 0ba6823a147b45e7b66e64d7b3eb24e55821c51ab84d1741c523e0a32d0b6db8
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-controller-manager
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 8e56a81609a7131ab4e9457d5816b3b9
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 5.4425e-05
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 0df28ab697378844f51748b4fe0cc422693d8f4ad7e65c4c1775dedd83bfe1a7
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: local-path-provisioner
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: local-path-storage
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: local-path-provisioner-5cb96f8fdd-b6jjr
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: c85d0a3d-f613-4016-b4d5-67202cd0e7c4
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000227569
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 1ec88f6948ab77e7562343924a87090bf5ee839348fb60fe0165eb11ab4dc20b
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: manager
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-operator-5c49d5495b-mkm9g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: d8e6eedf-ff7b-4cfa-ae60-d9299f8dc70c
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000113664
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 220933ed87a29a1135c927a2916936651ba696878174ca51cd6198274fbbd567
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-wo-index-wo-ns-index
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-wo-index
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-wo-index-wo-ns-index-7s2tl
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: db2047b5-939f-4601-b060-499bfe08ea40
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.021479473
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 2670fe4ebca53e27834d06da71991be206781a035b327637d68d1c338c1e1ac0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-apiserver
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9c604e6eed410a52cd7b848e593909a5
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.013583412
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 2ac33d1de928a9a7fc0880ad1c3cfe2731aabfcb83b16355aff58fdc6f1c46d5
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: etcd
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: etcd-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 7a34ddb319d4b148de4363a2f9ae05ec
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000120589
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 5295856730648eb4f78e1b21acaa3ee9f5d999e99338816ee4b91dd24240bdba
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-w-index-w-ns-exclude
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-w-exclude
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-w-index-w-ns-exclude-bwv5g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9ebb3394-7115-464a-a270-5223335e36df
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 1.688e-05
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 68ebbd23b9fcd4c82496e518dee2fda50777e18f7998e6583a9fb7d7b14b1026
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-rbac-proxy
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-operator-5c49d5495b-mkm9g
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: d8e6eedf-ff7b-4cfa-ae60-d9299f8dc70c
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000104
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 6ed3da3f6e31ea64bfb369912c80e96a33d8c13dcdb96f0f1e75e1c306cbe79d
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-wo-index-w-ns-index
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-w-index
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-wo-index-w-ns-index-fzm54
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 577cc70e-e4c3-452e-a1b3-73e6d505c333
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.00057579
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 77879ef8ea79ecb2690196db3aee386c3c38c0f1c31303dc2ca30ca6ce15eec0
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: targetallocator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-ta-79c9cccc76-58dqd
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: c6942f85-4c87-4d9a-a78d-33cc5f4e2b3b
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000428651
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 836344c65017539282df211fe94d53e0fdaa0bbba0413003a1c9b045d919c02d
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-proxy
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-proxy-zvqn5
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 589bda58-8089-4b9c-9924-4aee003d4b5d
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.022128399
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 840a0f2ac211fe4ea526b10f188e09cf1c265f0baf3c4bed59837e11b050b64c
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: dotnet-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: dotnet-test-6f6d54979f-bklg4
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 72a1e61a-0f7f-4cfa-a718-17aeee244b62
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.010786436
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 860e62bd2d58a5fb964807e45e87d1d215cf323ca036a464d7a21d6fcdad3625
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: python-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: python-test-c68558cdd-h9cj5
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 27cee28b-df6f-498a-8706-0a4b1c09316f
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.00643644
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 8e269400060d763429f4270432b2d8fdc0ff8be40e19e43d223f6480aa606dc8
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: nodejs-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: nodejs-test-9d58b4f-8vkw2
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: dd459c1f-830c-4b80-9660-f85411cea50d
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000111189
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: 9eb2a53ad88f4a8816dd816bc5c738714f2adadc02296db25ab45ce410c78320
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-w-index-w-ns-exclude
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-w-index
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-w-exclude-wo-ns-exclude-fx8mw
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 9539d78c-03b1-4c43-83ee-c8917b2f3868
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.001093656
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: a06d4539c5bd2b4cacb616ebe8cdd5ec5467f861b61c00e8fbec73454b285e8a
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: prometheus-annotation-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: prometheus-annotation-test-5cdf674f5f-gmgs5
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 2f0a7eb8-5a78-46bc-9f7f-eb8fce8d8cd1
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.005052935
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: d1b61e63983cde323759aa9983f1368fbdede2f96516116efbcffa3a5aa7e4b3
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-556d7d6458fq9bl
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 394df219-c3ff-4494-a8b6-d6e38fe97a45
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.002102613
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: e8f3e321dbc63723136ba34757cedde244f11790c954930fe650ab085d3f1ed5
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kube-scheduler
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-scheduler-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 52a2a8415b6214d3cdfea34a8b0e255c
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000780804
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: efe20805aa0502ef47d70a4869a157cbdc88d07196c6ff11265385d683636267
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-7c65d6cfc9-bcfxn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 932842e4-84cc-4eef-96e2-be8ee87e40a1
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 8.4954e-05
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: f229402e94529e406e469746d026dbc290fab352bfe0f75d920ea8ab22756750
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: kindnet-cni
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kindnet-xtcr8
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 5d46f5c0-8b81-4da6-ae39-15752aa05c4b
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.001047129
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: f7b48deca10f8962531d2920da07d5c9f9ade1e0979669f5fbc65deeb4e4edf3
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: coredns
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-7c65d6cfc9-jdfcn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 2d4e593f-1187-4425-b008-328eb8eae860
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.028378574
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: fab87e1072449e989d01e4685894a6d6d69c50726cecacb939d6629640d97b0d
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: otel-collector
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-bsp77
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 07d25dd8-2bcf-4f84-b180-9648d063ebdd
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000115471
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: fb9939c163fcb03025fde529d0ded412223389bef42326497b5e7d8ce5cc4b71
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-w-index-wo-ns-index
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-wo-index
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-w-index-wo-ns-index-q9c4l
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 36f63e9d-27ff-4dec-91b5-16c6d1a7656e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.017171057
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: container.id
+                      value:
+                        stringValue: fd4a367e799e9da635679cf893253c476eee6b5c7cc994d98e6c0247458cc4fe
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: java-test
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: java-test-6ccc8c687d-f6pw6
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 3f6e9229-6294-42af-a78b-e236bd28154d
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+                - asDouble: 0.000106683
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: com.splunk.sourcetype
+                      value:
+                        stringValue: sourcetype-anno
+                    - key: container.id
+                      value:
+                        stringValue: 442eb98bf4ff8d48f928df45daf044273a1a99185de84b0fc0450e372965ba21
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: deployment.environment
+                      value:
+                        stringValue: dev
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.container.name
+                      value:
+                        stringValue: pod-w-index-w-ns-index
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: ns-w-index
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: pod-w-index-w-ns-index-2sq5z
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: d66d2ceb-5a3b-4db1-b4e3-7ac15832499d
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                  timeUnixNano: "1000000"
+            name: container.cpu.usage
         scope: {}
