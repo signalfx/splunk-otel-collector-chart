@@ -233,7 +233,15 @@ processors:
         key: {{ .name }}
         value: {{ .value }}
       {{- end }}
-
+      {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+      - key: cluster_name
+        from_attribute: k8s.cluster.name
+        action: upsert
+      {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+      - key: k8s.cluster.name
+        action: delete
+      {{- end }}
+      {{- end }}
 
   {{- if and ( eq ( include "splunk-otel-collector.objectsOrEventsEnabled" . ) "true") .Values.environment }}
   resource/add_environment:
