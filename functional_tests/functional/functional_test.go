@@ -78,6 +78,7 @@ var expectedValuesDir string
 const (
 	kubeletstatsReceiverName = "kubeletstatsreceiver"
 	k8sClusterReceiverName   = "k8sclusterreceiver"
+	journaldReceiverName     = "journald"
 )
 
 type sinks struct {
@@ -207,6 +208,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			ChartWait:        true,
 			ChartTimeout:     internal.HelmActionTimeout,
 		})
+	case eksTestKubeEnv:
+		addChartInfo("eks_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksAutoModeTestKubeEnv:
 		addChartInfo("eks_auto_mode_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksFargateTestKubeEnv:
@@ -581,6 +584,10 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		})
 
 		t.Run("component error logs checks", func(t *testing.T) {
+			// Limiting the journald error check to EKS only, other clusters have different errors that are not fatal
+			if kubeTestEnv == eksTestKubeEnv {
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, journaldReceiverName)
+			}
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 		})

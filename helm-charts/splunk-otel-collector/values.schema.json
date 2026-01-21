@@ -846,6 +846,32 @@
             "enabled": {
               "type": "boolean"
             },
+            "useHostJournalctl": {
+              "type": "boolean"
+            },
+            "root_path": {
+              "type": "string"
+            },
+            "journalctl_path": {
+              "type": "string"
+            },
+            "mnts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                }
+              }
+            },
             "directory": {
               "type": "string"
             },

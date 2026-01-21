@@ -413,3 +413,16 @@ If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will 
 {{- $useOldService := and (hasKey $values "service") (gt (len $values.service) 0) }}
 {{- toYaml (ternary $values.service $svc $useOldService) -}}
 {{- end -}}
+
+{{/*
+Return the journald directory path based on useHostJournalctl value.
+If useHostJournalctl is true, concatenate root_path and directory.
+Otherwise, return directory only.
+*/}}
+{{- define "splunk-otel-collector.journaldDirectory" -}}
+{{- if .Values.logsCollection.journald.useHostJournalctl -}}
+  {{- printf "%s%s" .Values.logsCollection.journald.root_path .Values.logsCollection.journald.directory -}}
+{{- else -}}
+  {{- .Values.logsCollection.journald.directory -}}
+{{- end -}}
+{{- end -}}

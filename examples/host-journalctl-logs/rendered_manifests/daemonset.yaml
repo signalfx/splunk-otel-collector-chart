@@ -1,0 +1,226 @@
+---
+# Source: splunk-otel-collector/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: default-splunk-otel-collector-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.143.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.143.0"
+    app: splunk-otel-collector
+    component: otel-collector-agent
+    chart: splunk-otel-collector-0.143.0
+    release: default
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: splunk-otel-collector
+      release: default
+  template:
+    metadata:
+      labels:
+        app: splunk-otel-collector
+        component: otel-collector-agent
+        release: default
+      annotations:
+        checksum/config: f14e1e61e68408abd48e53d0b5ddf6fe34bc8d50d4f5a487e07bb0fc6ce46fb5
+        kubectl.kubernetes.io/default-container: otel-collector
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: default-splunk-otel-collector
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: kubernetes.io/system-node
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/infra
+          operator: Exists
+      initContainers:
+        - name: patch-log-dirs
+          image: registry.access.redhat.com/ubi9/ubi
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', '
+          mkdir -p /var/addon/splunk/otel_pos;
+          chown -Rv 20000:20000 /var/addon/splunk/otel_pos;
+          chmod -v g+rwxs /var/addon/splunk/otel_pos;
+          if [ -d "/var/lib/docker/containers" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /var/lib/docker/containers;
+          fi;
+          if [ -d "/var/log/crio/pods" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /var/log/crio/pods;
+          fi;
+          if [ -d "/var/log/pods" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /var/log/pods;
+          fi;
+          if [ -d "/hostfs/var/log/journal" ];
+          then
+              setfacl -n -Rm d:m::rx,m::rx,d:g:20000:rx,g:20000:rx /hostfs/var/log/journal;
+          fi;']
+          securityContext:
+            runAsUser: 0
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
+          volumeMounts:
+            - name: checkpoint
+              mountPath: /var/addon/splunk/otel_pos
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+            - name: journaldlogs
+              mountPath: /hostfs/var/log/journal
+      containers:
+      - name: otel-collector
+        args:
+        - --config=/conf/relay.yaml
+        ports:
+        - name: otlp
+          containerPort: 4317
+          hostPort: 4317
+          protocol: TCP
+        - name: otlp-http
+          containerPort: 4318
+          hostPort: 4318
+          protocol: TCP
+        image: quay.io/signalfx/splunk-otel-collector:0.143.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsGroup: 20000
+          runAsUser: 20000
+        env:
+          - name: SPLUNK_MEMORY_TOTAL_MIB
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.memory
+                divisor: "1Mi"
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: K8S_NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: K8S_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: K8S_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SPLUNK_PLATFORM_HEC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: default-splunk-otel-collector
+                key: splunk_platform_hec_token
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /conf
+          name: otel-configmap
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: checkpoint
+          mountPath: /var/addon/splunk/otel_pos
+        - mountPath: /hostfs/var/log/journal
+          name: journaldlogs
+          readOnly: true
+        - mountPath: /hostfs/usr/bin/journalctl
+          name: journalctl-bin
+        - mountPath: /hostfs/lib64
+          name: host-lib64
+        - mountPath: /hostfs/lib
+          name: host-lib
+        - mountPath: /hostfs/usr/lib
+          name: host-usr-lib
+        - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
+          name: run-collectd
+          readOnly: false
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: run-collectd
+        emptyDir:
+          sizeLimit: 25Mi
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: checkpoint
+        hostPath:
+          path: /var/addon/splunk/otel_pos
+          type: DirectoryOrCreate
+      - name: host-lib64
+        hostPath:
+          path: /lib64
+          type: Directory
+      - name: host-lib
+        hostPath:
+          path: /lib
+          type: Directory
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
+          type: Directory
+      - name: journalctl-bin
+        hostPath:
+          path: /usr/bin/journalctl
+          type: File
+      - name: journaldlogs
+        hostPath:
+          path: /var/log/journal
+      - name: otel-configmap
+        configMap:
+          name: default-splunk-otel-collector-otel-agent
+          items:
+            - key: relay
+              path: relay.yaml
