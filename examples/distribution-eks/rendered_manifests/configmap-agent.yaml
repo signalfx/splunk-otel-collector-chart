@@ -197,8 +197,6 @@ data:
         - pod
         - node
         metrics:
-          container.cpu.usage:
-            enabled: false
           k8s.node.cpu.usage:
             enabled: false
           k8s.pod.cpu.usage:
