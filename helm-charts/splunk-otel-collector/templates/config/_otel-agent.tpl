@@ -543,8 +543,6 @@ receivers:
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     # Disable CPU usage metrics as they are not categorized as bundled in Splunk Observability
     metrics:
-      container.cpu.usage:
-        enabled: false
       k8s.pod.cpu.usage:
         enabled: false
       k8s.node.cpu.usage:
