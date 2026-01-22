@@ -559,7 +559,5 @@ Provide the component name as the input.
 {{- define "splunk-otel-collector.fieldNameConventionTransformProcessor" -}}
 transform/logs:
   log_statements:
-    - context: log
-      statements:
-        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+    - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":")) where resource.attributes["container.image.name"] != nil and resource.attributes["container.image.tag"] != nil
 {{- end }}

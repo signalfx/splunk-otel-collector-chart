@@ -248,10 +248,9 @@ data:
         timeout: 15s
       transform/logs:
         log_statements:
-        - context: log
-          statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
-            resource.attributes["container.image.tag"]], ":"))
+        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
+          resource.attributes["container.image.tag"]], ":")) where resource.attributes["container.image.name"]
+          != nil and resource.attributes["container.image.tag"] != nil
     receivers:
       filelog:
         encoding: utf-8

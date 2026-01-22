@@ -234,16 +234,14 @@ data:
             where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
       transform/logs:
         log_statements:
-        - context: log
-          statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
-            resource.attributes["container.image.tag"]], ":"))
+        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
+          resource.attributes["container.image.tag"]], ":")) where resource.attributes["container.image.name"]
+          != nil and resource.attributes["container.image.tag"] != nil
       transform/metrics:
         metric_statements:
-        - context: resource
-          statements:
-          - set(attributes["container_image"], Concat([resource.attributes["container.image.name"],
-            resource.attributes["container.image.tag"]], ":"))
+        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"],
+          resource.attributes["container.image.tag"]], ":")) where resource.attributes["container.image.tag"]
+          != nil and resource.attributes["container.image.name"] != nil
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
@@ -325,7 +323,6 @@ data:
           - resource
           - resource/add_mode
           - k8sattributes/metrics
-          - transform/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:

@@ -147,9 +147,7 @@ processors:
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   transform/metrics:
     metric_statements:
-      - context: resource
-        statements:
-          - set(attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+      - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":")) where resource.attributes["container.image.tag"] != nil and resource.attributes["container.image.name"] != nil
 
   {{- include "splunk-otel-collector.fieldNameConventionTransformProcessor" . | nindent 2 }}
   {{- end }}
@@ -379,9 +377,6 @@ service:
         - resource/metrics
         {{- end }}
         {{- end }}
-        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-        - transform/metrics
-        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -406,9 +401,6 @@ service:
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
-        {{- end }}
-        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-        - transform/metrics
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
