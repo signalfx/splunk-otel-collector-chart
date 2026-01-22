@@ -1,0 +1,12 @@
+clusterName: CHANGEME
+splunkPlatform:
+  fieldNameConvention:
+    renameFieldsSck: true
+    keepOtelConvention: false
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+  metricsEnabled: true
+  index: "index"
+  metricsIndex: "metricsIndex"
+
