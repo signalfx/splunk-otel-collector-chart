@@ -241,6 +241,7 @@ processors:
       - key: k8s.cluster.name
         action: delete
       {{- end }}
+      {{- include "splunk-otel-collector.sckNamingConvention" . | nindent 6 }}
       {{- end }}
 
   {{- if and ( eq ( include "splunk-otel-collector.objectsOrEventsEnabled" . ) "true") .Values.environment }}

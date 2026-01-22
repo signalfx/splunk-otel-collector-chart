@@ -133,6 +133,36 @@ data:
           key: cluster_name
         - action: delete
           key: k8s.cluster.name
+        - action: upsert
+          from_attribute: k8s.container.name
+          key: container_name
+        - action: upsert
+          from_attribute: container.id
+          key: container_id
+        - action: upsert
+          from_attribute: k8s.pod.name
+          key: pod
+        - action: upsert
+          from_attribute: k8s.pod.uid
+          key: pod_uid
+        - action: upsert
+          from_attribute: k8s.namespace.name
+          key: namespace
+        - action: upsert
+          from_attribute: k8s.pod.labels.app
+          key: label_app
+        - action: delete
+          key: k8s.container.name
+        - action: delete
+          key: container.id
+        - action: delete
+          key: k8s.pod.name
+        - action: delete
+          key: k8s.pod.uid
+        - action: delete
+          key: k8s.namespace.name
+        - action: delete
+          key: k8s.pod.labels.app
       resource/add_collector_k8s:
         attributes:
         - action: insert

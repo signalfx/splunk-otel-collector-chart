@@ -261,6 +261,46 @@ k8sattributes/metrics:
 {{- end }}
 
 {{/*
+Upsert and delete statements for setting SCK naming convention
+*/}}
+{{- define "splunk-otel-collector.sckNamingConvention" -}}
+{{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+- key: container_name
+  from_attribute: k8s.container.name
+  action: upsert
+- key: container_id
+  from_attribute: container.id
+  action: upsert
+- key: pod
+  from_attribute: k8s.pod.name
+  action: upsert
+- key: pod_uid
+  from_attribute: k8s.pod.uid
+  action: upsert
+- key: namespace
+  from_attribute: k8s.namespace.name
+  action: upsert
+- key: label_app
+  from_attribute: k8s.pod.labels.app
+  action: upsert
+{{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+- key: k8s.container.name
+  action: delete
+- key: container.id
+  action: delete
+- key: k8s.pod.name
+  action: delete
+- key: k8s.pod.uid
+  action: delete
+- key: k8s.namespace.name
+  action: delete
+- key: k8s.pod.labels.app
+  action: delete
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Resource processor for logs manipulations
 */}}
 {{- define "splunk-otel-collector.resourceLogsProcessor" -}}
@@ -278,40 +318,7 @@ resource/logs:
       action: delete
     - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
-    {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-    - key: container_name
-      from_attribute: k8s.container.name
-      action: upsert
-    - key: container_id
-      from_attribute: container.id
-      action: upsert
-    - key: pod
-      from_attribute: k8s.pod.name
-      action: upsert
-    - key: pod_uid
-      from_attribute: k8s.pod.uid
-      action: upsert
-    - key: namespace
-      from_attribute: k8s.namespace.name
-      action: upsert
-    - key: label_app
-      from_attribute: k8s.pod.labels.app
-      action: upsert
-    {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
-    - key: k8s.container.name
-      action: delete
-    - key: container.id
-      action: delete
-    - key: k8s.pod.name
-      action: delete
-    - key: k8s.pod.uid
-      action: delete
-    - key: k8s.namespace.name
-      action: delete
-    - key: k8s.pod.labels.app
-      action: delete
-    {{- end }}
-    {{- end }}
+    {{- include "splunk-otel-collector.sckNamingConvention" . | nindent 4 }}
 {{- end }}
 
 {{/*
