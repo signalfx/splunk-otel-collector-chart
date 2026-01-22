@@ -845,11 +845,7 @@ processors:
   {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-  transform/logs:
-    log_statements:
-      - context: log
-        statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+  {{- include "splunk-otel-collector.fieldNameConventionTransformProcessor" . | nindent 2 }}
   {{- end }}
   {{- end }}
 

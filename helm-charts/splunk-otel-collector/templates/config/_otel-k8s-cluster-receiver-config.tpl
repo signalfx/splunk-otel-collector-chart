@@ -144,6 +144,16 @@ processors:
       - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
+  {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+  transform/metrics:
+    metric_statements:
+      - context: resource
+        statements:
+          - set(attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+
+  {{- include "splunk-otel-collector.fieldNameConventionTransformProcessor" . | nindent 2 }}
+  {{- end }}
+
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
     attributes:
@@ -342,6 +352,9 @@ service:
         {{- end }}
         {{- end }}
         - resource/k8s_cluster
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -365,6 +378,9 @@ service:
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
+        {{- end }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/metrics
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
@@ -391,6 +407,9 @@ service:
         - resource/metrics
         {{- end }}
         {{- end }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/metrics
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
@@ -414,6 +433,9 @@ service:
         - resource/add_environment
         {{- end }}
         - transform/k8sevents
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/logs
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
@@ -433,6 +455,9 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/logs
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
@@ -450,6 +475,9 @@ service:
         - resource
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
+        {{- end }}
+        {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - transform/logs
         {{- end }}
       exporters:
         - signalfx

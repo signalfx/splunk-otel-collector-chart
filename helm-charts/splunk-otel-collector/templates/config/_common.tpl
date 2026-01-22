@@ -551,3 +551,15 @@ prometheus/{{ $receiver }}:
       static_configs:
       - targets: [localhost:{{ $port }}]
 {{- end }}
+
+{{/*
+Generates prometheus receiver config for internal metrics.
+Provide the component name as the input.
+*/}}
+{{- define "splunk-otel-collector.fieldNameConventionTransformProcessor" -}}
+transform/logs:
+  log_statements:
+    - context: log
+      statements:
+        - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+{{- end }}
