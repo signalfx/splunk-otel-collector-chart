@@ -1171,8 +1171,8 @@ obi:
   podAnnotations:
     # Automatically restart OBI pods when the cluster name ConfigMap changes.
     # This uses the checksum annotation pattern to trigger rollouts when the
-    # splunk-otel-collector-obi-env ConfigMap is updated.
-    checksum/obi-env: '{{ include (print $.Template.BasePath "/../templates/configmap-obi-env.yaml") . | sha256sum }}'
+    # parent chart's splunk-otel-collector-obi-env ConfigMap is updated.
+    checksum/obi-env: '{{ .Files.Get "templates/configmap-obi.yaml" | sha256sum }}'
 
   podLabels: {}
 
