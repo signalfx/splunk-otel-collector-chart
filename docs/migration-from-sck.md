@@ -394,8 +394,10 @@ If you wish to continue using Splunk Connect for Kubernetes's naming convention,
 ```yaml
 splunkPlatform:
   fieldNameConvention:
-    # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+    # Boolean for renaming pod log metadata fields to match to Splunk Connect for Kubernetes helm chart.
     renameFieldsSck: true
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: false
 ```
+
+Note that this configuration snippet only applies to log events; for metrics, users must provide their own processing.
