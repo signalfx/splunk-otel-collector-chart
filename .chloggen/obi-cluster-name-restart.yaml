@@ -1,0 +1,9 @@
+change_type: enhancement
+component: obi
+note: "Upgrade OBI sub-chart to v0.4.3 to support dynamic pod annotations with template expressions, enabling automatic pod restart when cluster name ConfigMap changes"
+issues: [2214]
+subtext: |
+  - OBI pods now automatically restart when the `splunk-otel-collector-obi-env` ConfigMap is updated
+  - Adds `checksum/obi-env` pod annotation that watches the cluster name ConfigMap
+  - When users change the cluster name and run `helm upgrade`, OBI pods restart to pick up the new cluster name
+  - Requires OBI v0.4.3 which supports `tpl` function in pod annotations
