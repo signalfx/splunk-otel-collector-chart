@@ -92,7 +92,7 @@ splunkPlatform:
   tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
-    # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+    # Boolean for renaming pod logs metadata fields to match to Splunk Connect for Kubernetes helm chart.
     renameFieldsSck: false
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: true
