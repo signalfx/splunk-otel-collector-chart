@@ -53,7 +53,7 @@ data:
         ingest_url: https://ingest.CHANGEME.signalfx.com
         send_otlp_histograms: true
       splunk_hec/o11y:
-        disable_compression: true
+        disable_compression: false
         endpoint: https://ingest.CHANGEME.signalfx.com/v1/log
         log_data_enabled: false
         profiling_data_enabled: true
