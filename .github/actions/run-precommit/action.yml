@@ -1,6 +1,12 @@
 name: 'Run pre-commit'
 description: 'Setup Python and run pre-commit hooks to auto-fix formatting issues'
 
+inputs:
+  continue-on-error:
+    description: 'Whether to continue if pre-commit fails (true for auto-fix mode, false for validation)'
+    required: false
+    default: 'true'
+
 runs:
   using: "composite"
   steps:
@@ -11,4 +17,4 @@ runs:
 
     - name: Run pre-commit
       uses: pre-commit/action@v3.0.1
-      continue-on-error: true
+      continue-on-error: ${{ inputs.continue-on-error == 'true' }}
