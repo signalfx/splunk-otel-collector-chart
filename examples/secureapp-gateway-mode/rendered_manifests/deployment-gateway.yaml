@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 8028ae8cd540d21cef0a55ec83160aef6cf1381d4d1197b2537d547eaaa4f99d
+        checksum/config: 81c7407a4feb410df88852e8813e03bd779bf4dd3b1bdf03d05d4264584867a6
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -88,9 +88,6 @@ spec:
           protocol: TCP
         - name: otlp-http
           containerPort: 4318
-          protocol: TCP
-        - name: signalfx
-          containerPort: 9943
           protocol: TCP
         - name: zipkin
           containerPort: 9411
