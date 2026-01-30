@@ -976,8 +976,10 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     auth:
       authenticator: headers_setter
+    {{- end }}
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
