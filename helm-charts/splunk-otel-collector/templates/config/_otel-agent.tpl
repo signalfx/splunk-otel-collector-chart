@@ -31,12 +31,14 @@ extensions:
 
   zpages:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   headers_setter:
     headers:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
         default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -1096,7 +1098,9 @@ service:
     - file_storage/persistent_queue
     {{- end }}
     - health_check
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    {{- end }}
     - k8s_observer
     - zpages
 
