@@ -96,12 +96,6 @@ data:
       file_storage/persistent_queue:
         directory: /var/addon/splunk/exporter_queue/agent
         timeout: 0
-      headers_setter:
-        headers:
-        - action: upsert
-          default_value: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-          from_context: X-SF-TOKEN
-          key: X-SF-TOKEN
       health_check:
         endpoint: 0.0.0.0:13133
       k8s_observer:
@@ -415,7 +409,6 @@ data:
       - file_storage
       - file_storage/persistent_queue
       - health_check
-      - headers_setter
       - k8s_observer
       - zpages
       pipelines:
