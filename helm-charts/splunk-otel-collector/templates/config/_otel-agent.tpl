@@ -31,12 +31,14 @@ extensions:
 
   zpages:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   headers_setter:
     headers:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
         default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -975,8 +977,10 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     auth:
       authenticator: headers_setter
+    {{- end }}
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -1097,7 +1101,9 @@ service:
     - file_storage/persistent_queue
     {{- end }}
     - health_check
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    {{- end }}
     - k8s_observer
     - zpages
 
