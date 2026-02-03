@@ -1,6 +1,6 @@
 module splunk-integration-tests
 
-go 1.24.11
+go 1.25.6
 
 require (
 	github.com/stretchr/testify v1.10.0
