@@ -7,6 +7,9 @@ name: Ensure valid and up-to-date Changelog
 
 on: pull_request
 
+env:
+  GO_VERSION: 1.25.6
+
 jobs:
   validate-changelog:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'Skip Changelog') && !contains(github.event.pull_request.title, '[chore]') }}
@@ -19,6 +22,8 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install chloggen
         run: make install-tools
