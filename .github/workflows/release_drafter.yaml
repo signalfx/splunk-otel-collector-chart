@@ -59,7 +59,7 @@ jobs:
           git fetch origin
 
           # Check if update-release branch exists
-          if git ls-remote --heads origin update-release > /dev/null; then
+          if [ -n "$(git ls-remote --heads origin update-release)" ]; then
             if [ "$OVERWRITE_EXISTING_PR" = "true" ]; then
               # Overwrite mode: Only skip if changes are identical
               echo "OVERWRITE_EXISTING_PR is enabled - checking for changes"
