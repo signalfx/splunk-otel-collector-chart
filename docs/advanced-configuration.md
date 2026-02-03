@@ -421,17 +421,6 @@ end user, collecting metrics from these distributions is not supported.
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
 
-### Receiver documentation
-
-Here are the documentation links that contain configuration options and supported metrics information for each receiver
-used to collect metrics from the control plane.
-* [smartagent/coredns](https://docs.splunk.com/Observability/gdi/coredns/coredns.html)
-* [smartagent/etcd](https://docs.splunk.com/Observability/gdi/etcd/etcd.html)
-* [smartagent/kube-controller-manager](https://docs.splunk.com/Observability/gdi/kube-controller-manager/kube-controller-manager.html)
-* [smartagent/kubernetes-apiserver](https://docs.splunk.com/Observability/gdi/kubernetes-apiserver/kubernetes-apiserver.html)
-* [smartagent/kubernetes-proxy](https://docs.splunk.com/Observability/gdi/kubernetes-proxy/kubernetes-proxy.html)
-* [smartagent/kubernetes-scheduler](https://docs.splunk.com/Observability/gdi/kubernetes-scheduler/kubernetes-scheduler.html)
-
 ### Setting up etcd metrics
 
 The etcd metrics cannot be collected out of box because etcd requires TLS authentication for communication. Below, we
@@ -540,18 +529,25 @@ agent:
       receiver_creator:
         receivers:
           # Template for overriding the discovery rule and config.
-          # smartagent/{control_plane_receiver}:
+          # prometheus/{control_plane_receiver}:
           #   rule: {rule_value}
           #   config:
           #     {config_value}
-          smartagent/kubernetes-apiserver:
+          prometheus/kubernetes-apiserver:
             rule: type == "port" && port == 3443 && pod.labels["k8s-app"] == "kube-apiserver"
             config:
-              clientCertPath: /etc/myapiserver/clients-ca.crt
-              clientKeyPath: /etc/myapiserver/clients-ca.key
-              skipVerify: true
-              useHTTPS: true
-              useServiceAccount: false
+              config:
+                scrape_configs:
+                - job_name: "kubernetes-apiserver"
+                  static_configs:
+                    - targets: ["`endpoint`:3443"]
+                  scheme: https
+                  authorization:
+                    credentials_file: "/etc/myapiserver/clients-ca.key"
+                    type: Bearer
+                  tls_config:
+                    ca_file: "/etc/myapiserver/clients-ca.crt"
+                    insecure_skip_verify: true
 ```
 
 ### Known issues
