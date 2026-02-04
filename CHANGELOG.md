@@ -4,6 +4,16 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.144.1] - 2026-02-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver`: Add additional Kubernetes API server metrics ([#2223](https://github.com/signalfx/splunk-otel-collector-chart/pull/2223))
+  Collect `apiserver_storage_size_bytes` and `apiserver_requested_deprecated_apis` metrics from the API server.
+  
+
 ## [0.144.0] - 2026-02-04
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
