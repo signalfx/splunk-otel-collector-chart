@@ -109,7 +109,9 @@ receivers:
                 apiserver_response_sizes|\
                 apiserver_request_total|\
                 rest_client_requests_total|\
-                rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
+                rest_client_request_duration_seconds|\
+                apiserver_storage_size_bytes|\
+                apiserver_requested_deprecated_apis)(?:_sum|_count|_bucket)?"
   {{- end }}
 
 processors:
