@@ -30,7 +30,7 @@ repos:
     rev: v3.2.0
     hooks:
     - id: trailing-whitespace
-      exclude: "^examples|^test"
+      exclude: '^examples|^test|^CHANGELOG\.md$'
     - id: end-of-file-fixer
       exclude: "^examples|^test"
     - id: pretty-format-json
