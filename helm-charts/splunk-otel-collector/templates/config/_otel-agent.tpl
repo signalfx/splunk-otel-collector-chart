@@ -991,7 +991,7 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
-    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    # TODO: Performance testing must be done before enabling compression
     disable_compression: true
   {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
