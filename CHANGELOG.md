@@ -4,6 +4,45 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.144.0] - 2026-02-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 🛑 Breaking changes 🛑
+
+- `gateway`: Remove `signalfx` receiver from gateway ([#2191](https://github.com/signalfx/splunk-otel-collector-chart/pull/2191))
+  The `signalfx` receiver was removed from all default gateway pipelines in #2172. This change removes the
+  receiver's declaration in the gateway config. If the `signalfx` receiver is still needed, the following
+  section can be added to your values.yaml file:
+  ```
+  gateway:
+    config:
+      receivers:
+        signalfx:
+          endpoint: 0.0.0.0:9943
+          include_metadata: true
+    ports:
+      signalfx:
+        containerPort: 9943
+        protocol: TCP
+        enabled_for: [metrics, traces, logs]
+  ```
+  Please note that the `signalfx` receiver will eventually be deprecated and removed.
+  
+
+### 💡 Enhancements 💡
+
+- `agent`: Enable `container.cpu.usage` metric by default ([#1962](https://github.com/signalfx/splunk-otel-collector-chart/pull/1962))
+- `agent (logsCollection-journald)`: Allow users to configure the chart so the `journald` receiver can use the host's journalctl binary. ([#2211](https://github.com/signalfx/splunk-otel-collector-chart/pull/2211))
+  To enable this, set the `logsCollection.journald.useHostJournalctl` option to true.
+  By default, this option is false, so the collector uses the bundled journalctl binary.
+  For more details, see [Advanced Configuration](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#use-the-host-journalctl-binary).
+  
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Skip token passthrough if Splunk Observability is disabled ([#2219](https://github.com/signalfx/splunk-otel-collector-chart/pull/2219))
+
 ## [0.143.0] - 2026-01-14
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.143.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.143.0).
