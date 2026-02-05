@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.144.2] - 2026-02-05
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix Prometheus autodetect metric filtering ([#2222](https://github.com/signalfx/splunk-otel-collector-chart/pull/2222))
+  A [change](https://github.com/signalfx/splunk-otel-collector-chart/pull/2141) was introduced in `v0.138.0` that
+  incorrectly set filters to only keep Istio and Envoy related metrics when `autodetect.prometheus` is enabled.
+  The filtering should keep all Prometheus metrics and only filter when `autodetect.prometheus` is disabled, and
+  `autodetect.istio` is enabled.
+  
+
 ## [0.144.1] - 2026-02-04
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
