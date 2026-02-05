@@ -96,7 +96,7 @@ receivers:
       {{- if .Values.featureGates.useLightPrometheusReceiver }}
       lightprometheus:
       {{- else }}
-      prometheus/istio:
+      prometheus/autodetect:
       {{- end }}
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
@@ -116,11 +116,12 @@ receivers:
           {{- else }}
           config:
             scrape_configs:
-              - job_name: 'istio'
+              - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
                 scrape_interval: 10s
                 static_configs:
                   - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`']
+                {{- if not .Values.autodetect.prometheus }}
                 metric_relabel_configs:
                   - source_labels: [__name__]
                     action: keep
@@ -195,6 +196,7 @@ receivers:
                     pilot_xds_rds_reject|\
                     pilot_xds_send_time|\
                     pilot_xds_write_timeout)(?:_sum|_count|_bucket)?"
+            {{- end }}
           {{- end }}
       {{- end }}
 
