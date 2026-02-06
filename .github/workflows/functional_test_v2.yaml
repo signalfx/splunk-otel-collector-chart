@@ -106,7 +106,7 @@ jobs:
   eks-test:
     name: Test helm install in EKS - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
@@ -140,7 +140,7 @@ jobs:
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
@@ -181,7 +181,7 @@ jobs:
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke/autopilot
@@ -217,7 +217,7 @@ jobs:
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke/autopilot
@@ -261,7 +261,7 @@ jobs:
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: aks
@@ -298,7 +298,7 @@ jobs:
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gce
@@ -328,7 +328,7 @@ jobs:
   eks-fargate-test:
     name: Test helm install in EKS Fargate - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
@@ -363,7 +363,7 @@ jobs:
   eks-fargate-upgrade-test:
     name: Test helm upgrade in EKS Fargate - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
@@ -405,7 +405,7 @@ jobs:
   eks-auto-mode-test:
     name: Test helm install in EKS Auto Mode - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
@@ -439,7 +439,7 @@ jobs:
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
@@ -480,7 +480,7 @@ jobs:
   gke-test:
     name: Test helm install in GKE - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke
@@ -516,7 +516,7 @@ jobs:
   gke-upgrade-test:
     name: Test helm upgrade in GKE - credentials needed
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
       (github.ref == 'refs/heads/main')
     env:
       KUBE_TEST_ENV: gke
