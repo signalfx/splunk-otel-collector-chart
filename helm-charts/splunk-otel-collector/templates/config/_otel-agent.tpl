@@ -1040,7 +1040,7 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    realm: {{ include "splunk-otel-collector.fullname" . }}
+    realm: {{ .Values.splunkObservability.realm }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
