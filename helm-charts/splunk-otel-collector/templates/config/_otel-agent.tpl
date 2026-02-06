@@ -1040,7 +1040,9 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    realm: {{ include "splunk-otel-collector.fullname" . }}
+    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
