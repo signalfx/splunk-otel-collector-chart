@@ -82,6 +82,9 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
+        - key: schemaUrl
+          value:
+            stringValue: https://opentelemetry.io/schemas/1.37.0
     schemaUrl: https://opentelemetry.io/schemas/1.24.0
     scopeSpans:
       - scope:
