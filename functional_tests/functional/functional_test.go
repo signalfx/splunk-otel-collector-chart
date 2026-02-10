@@ -1240,7 +1240,6 @@ func testAgentMetrics(t *testing.T) {
 
 // testAgentMetricsTemplate tests metrics using template matching with target metric detection
 func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string) {
-	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
