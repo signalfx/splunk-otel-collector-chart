@@ -373,7 +373,7 @@ data:
               source_labels:
               - __name__
             - action: drop
-              regex: otelcol_otelcol\.k8s\.pod\.association
+              regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
             scrape_interval: 10s
