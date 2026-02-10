@@ -4,6 +4,23 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.145.0] - 2026-02-10
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.145.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.145.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump dotnet to v1.13.0 in helm-charts/splunk-otel-collector/values.yaml ([#2187](https://github.com/signalfx/splunk-otel-collector-chart/pull/2187))
+- `operator`: Bump java to v2.24.0 in helm-charts/splunk-otel-collector/values.yaml ([#2177](https://github.com/signalfx/splunk-otel-collector-chart/pull/2177))
+- `operator`: Bump nodejs to v4.3.0 in helm-charts/splunk-otel-collector/values.yaml ([#2098](https://github.com/signalfx/splunk-otel-collector-chart/pull/2098))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix bug causing property updates to fail when the gateway is enabled ([#2234](https://github.com/signalfx/splunk-otel-collector-chart/pull/2234))
+  The SignalFx exporter's property updates coming from the agent were failing to properly be
+  sent when the gateway was enabled, due to a misconfigured realm value introduced in `v0.142.0`.
+  
+
 ## [0.144.2] - 2026-02-05
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
