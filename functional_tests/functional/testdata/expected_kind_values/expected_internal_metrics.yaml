@@ -9173,4 +9173,3411 @@ resourceMetrics:
                         stringValue: http
                   timeUnixNano: "1000000"
               isMonotonic: true
+          - name: otelcol_otelcol.k8s.pod.association
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 7
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 0abe65f14cc8c9b15aa3a4a6ecb11a8a
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 2
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.15
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.17
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.18
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 70
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 17b6dddd-6402-4720-befb-a3e574bdae99
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 3
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 1c9311a3bddf12802a4dc697e137ec1c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 10
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 24b086b4-6a19-4f44-8747-25d48e0e4c74
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 72
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 254ff71b-0553-4e34-89ec-5da5223bc877
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 1
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 43c62de2-593a-475f-b707-7e83c07d4db3
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 71
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 49bcb1cf-b5b8-45b6-ab10-81c5e4b434fb
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 1
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 5aa49c01-3360-426e-91d6-77b6f55ce5df
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 7
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 5ba6712f-62c5-4027-89d7-87750a8dc229
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 47
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 70bef485-5ab9-4d6c-97f6-8d2659c7c467
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 11
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 88854b97-9d04-4d9f-a36c-64947c0c42fb
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 1
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: 8c05b40a-4ed0-4c86-82af-94b77230392d
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 72
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: ab4d117b-09f2-41e4-a605-fcfa974d5912
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 17
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: befa3302-7937-4954-af1e-6fc645cbd93b
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 50
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: c0b3f16d-526e-43ae-99c8-6132694e6aac
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 71
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: c4f54393-1ca6-4fcd-ac4c-11b319bad785
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 2
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: c74996fd-59ef-4fb4-aa38-4085c2912a81
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 70
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: cd6f7c83-925d-40ab-991e-08637024921d
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 5
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: d1bd7bd747242401267e71159a15d471
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 6
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: ea04e47614aeab9f294f918d3c126b9c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 6
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: ee89cf61-58ed-4a72-911f-b59c762d8732
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 51
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: logs
+                    - key: pod_identifier
+                      value:
+                        stringValue: f8b32f90-185f-46e9-b013-aa87b43f7000
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 0abe65f14cc8c9b15aa3a4a6ecb11a8a
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 14
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 17b6dddd-6402-4720-befb-a3e574bdae99
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 1c9311a3bddf12802a4dc697e137ec1c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 20
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 24b086b4-6a19-4f44-8747-25d48e0e4c74
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 16
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 254ff71b-0553-4e34-89ec-5da5223bc877
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 43c62de2-593a-475f-b707-7e83c07d4db3
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 16
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 49bcb1cf-b5b8-45b6-ab10-81c5e4b434fb
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 5aa49c01-3360-426e-91d6-77b6f55ce5df
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 12
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 5ba6712f-62c5-4027-89d7-87750a8dc229
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 46
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 10
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 70bef485-5ab9-4d6c-97f6-8d2659c7c467
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 88854b97-9d04-4d9f-a36c-64947c0c42fb
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: 8c05b40a-4ed0-4c86-82af-94b77230392d
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 16
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: ab4d117b-09f2-41e4-a605-fcfa974d5912
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: befa3302-7937-4954-af1e-6fc645cbd93b
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 12
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: c0b3f16d-526e-43ae-99c8-6132694e6aac
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 14
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: c4f54393-1ca6-4fcd-ac4c-11b319bad785
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: c74996fd-59ef-4fb4-aa38-4085c2912a81
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 14
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: cd6f7c83-925d-40ab-991e-08637024921d
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: d1bd7bd747242401267e71159a15d471
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: ea04e47614aeab9f294f918d3c126b9c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 46
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: ee89cf61-58ed-4a72-911f-b59c762d8732
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 10
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: f8b32f90-185f-46e9-b013-aa87b43f7000
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 32
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: ff304083-74e3-4a83-9889-05b78baa9d0b
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 128
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: metrics
+                    - key: pod_identifier
+                      value:
+                        stringValue: unknown
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: error
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: traces
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.15
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: traces
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.16
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: traces
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.17
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+                - asDouble: 9
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: sock-splunk-otel-collector-agent-xphjk
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 6301e0ba-68c8-4468-a82e-928078f7879e
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: otelcol.service.mode
+                      value:
+                        stringValue: agent
+                    - key: otelcol.signal
+                      value:
+                        stringValue: traces
+                    - key: pod_identifier
+                      value:
+                        stringValue: 10.244.0.18
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 63858738-8717-4341-8fe8-1c7a4e63ae9e
+                    - key: service.name
+                      value:
+                        stringValue: otel-agent
+                    - key: service.version
+                      value:
+                        stringValue: v0.145.0
+                    - key: splunk_otlp_histograms
+                      value:
+                        stringValue: "true"
+                    - key: status
+                      value:
+                        stringValue: success
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+              isMonotonic: true
         scope: {}
