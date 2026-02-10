@@ -1295,6 +1295,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("com.splunk.sourcetype", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("device", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("pod_identifier", metricNames...),
 		pmetrictest.IgnoreMetricValues(),
 		pmetrictest.ChangeResourceAttributeValue("k8s.container.name", replaceWithStar),
 		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
