@@ -106,7 +106,8 @@ func sendTrace(t *testing.T) {
 	require.NoError(t, err)
 
 	// Send to kind cluster exposed port 43180 which is mapped to the container port 4318
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:43180/v1/traces", bytes.NewBuffer(data))
+	// Use 127.0.0.1 instead of localhost to avoid IPv6 resolution issues
+	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:43180/v1/traces", bytes.NewBuffer(data))
 	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-SF-Token", token)
