@@ -59,10 +59,10 @@ jobs:
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Update {0} chart dependency version', matrix.name) || 'Update operator CRDs' }}
-          title: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Bump {0} from {1} to {2} in {3}', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER, matrix.yaml_file_path) || format('Bump opentelemetry-operator-crds to {0}', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
-          body: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Use the latest version of {0}', matrix.name) || 'Update operator CRDs' }}
-          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          commit-message: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Update {0} chart dependency version and operator CRDs', matrix.name) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Update {0} chart dependency version', matrix.name)) || 'Update operator CRDs' }}
+          title: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Bump {0} from {1} to {2} and update operator CRDs', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Bump {0} from {1} to {2} in {3}', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER, matrix.yaml_file_path)) || format('Bump opentelemetry-operator-crds to {0}', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
+          body: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Use the latest version of {0} and update operator CRDs', matrix.name) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Use the latest version of {0}', matrix.name)) || 'Update operator CRDs' }}
+          branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
           modify-outputs: false
@@ -107,10 +107,10 @@ jobs:
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Update {0} chart dependency version', matrix.name) || 'Update operator CRDs and regenerate schemas' }}
-          title: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Bump {0} from {1} to {2} in {3}', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER, matrix.yaml_file_path) || format('Bump opentelemetry-operator-crds to {0}', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
-          body: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Use the latest version of {0}', matrix.name) || format('Update operator CRDs to {0} and regenerate schemas for kubeconform validation', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
-          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          commit-message: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Update {0} chart dependency version and operator CRDs', matrix.name) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Update {0} chart dependency version', matrix.name)) || 'Update operator CRDs and regenerate schemas' }}
+          title: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Bump {0} from {1} to {2} and update operator CRDs', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Bump {0} from {1} to {2} in {3}', matrix.name, steps.check_for_update.outputs.CURRENT_VER, steps.check_for_update.outputs.LATEST_VER, matrix.yaml_file_path)) || format('Bump opentelemetry-operator-crds to {0}', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
+          body: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1) && format('Use the latest version of {0} and update operator CRDs to {1} with schema regeneration', matrix.name, steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) || (steps.check_for_update.outputs.NEED_UPDATE == 1 && format('Use the latest version of {0}', matrix.name)) || format('Update operator CRDs to {0} and regenerate schemas for kubeconform validation', steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION) }}
+          branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
           modify-outputs: false
