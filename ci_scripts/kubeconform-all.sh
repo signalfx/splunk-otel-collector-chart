@@ -20,7 +20,11 @@ if [ -z "$MANIFEST_DIRS" ]; then
 fi
 
 # Validate all found manifest dirs
-if ! kubeconform -strict -schema-location default -schema-location "$SCHEMA_DIR/{{ .Group }}_{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" -output pretty -verbose -kubernetes-version "$K8S_VERSION" $MANIFEST_DIRS; then
+# Note: -ignore-missing-schemas skips validation for:
+# - Unsupported operator CRDs (opampbridges, targetallocators, opentelemetrycollectors) from the operator subchart
+# - cert-manager CRDs (Certificate, Issuer) from the operator subchart
+# We only generate schemas for the instrumentations CRD which we explicitly support.
+if ! kubeconform -strict -ignore-missing-schemas -schema-location default -schema-location "$SCHEMA_DIR/{{ .Group }}_{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" -output pretty -verbose -kubernetes-version "$K8S_VERSION" $MANIFEST_DIRS; then
   echo "kubeconform version: $(kubeconform -v)"
   echo "Failed validating one or more manifest directories."
   exit 1
