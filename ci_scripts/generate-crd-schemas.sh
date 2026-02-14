@@ -24,7 +24,7 @@ pip install --quiet pyyaml
 curl -s -L "https://raw.githubusercontent.com/yannh/kubeconform/v0.7.0/scripts/openapi2jsonschema.py" -o "$OPENAPI2JSONSCHEMA"
 
 # Generate schemas from opentelemetry-operator-crds subchart (only contains instrumentations CRD)
-if [ -d "$CRDS_DIR" ] && [ "$(ls -A "$CRDS_DIR"/*.yaml 2>/dev/null)" ]; then
+if [ -d "$CRDS_DIR" ] && compgen -G "$CRDS_DIR"/*.yaml > /dev/null; then
   echo "Generating schemas from opentelemetry-operator-crds..."
   (cd "$SCHEMA_DIR" && for crd in "$CRDS_DIR"/*.yaml; do FILENAME_FORMAT="{fullgroup}_{kind}_{version}" python "openapi2jsonschema.py" "$crd"; done)
 fi
