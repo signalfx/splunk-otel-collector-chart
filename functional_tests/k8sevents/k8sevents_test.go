@@ -129,8 +129,8 @@ func deployWorkloadAndCollector(t *testing.T) {
 		require.Fail(t, "host endpoint not found")
 	}
 	replacements := map[string]any{
-		"ApiURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		"LogURL": fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+		"ApiURL": internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"LogURL": internal.HostPortHTTP(hostEp, internal.HECLogsReceiverPort),
 	}
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 

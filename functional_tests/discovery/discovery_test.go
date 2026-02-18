@@ -4,7 +4,6 @@
 package k8sevents
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -168,9 +167,9 @@ func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesTmpl))
 	require.NoError(t, err)
 	internal.ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
-		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
-		"EventsURL": fmt.Sprintf("http://%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
+		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"IngestURL": internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
+		"EventsURL": internal.HostPortHTTP(hostEp, internal.OTLPHTTPReceiverPort),
 	}, 0, internal.GetDefaultChartOptions())
 }
 

@@ -105,8 +105,8 @@ func deployIstioAndCollector(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
-		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
+		"IngestURL": internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
+		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
 	}
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 
