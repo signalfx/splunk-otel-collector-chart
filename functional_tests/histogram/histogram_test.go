@@ -38,7 +38,7 @@ func deployChart(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"IngestURL": internal.HostPortHTTP(hostEp, signalFxReceiverPort),
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
