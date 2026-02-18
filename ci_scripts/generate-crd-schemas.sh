@@ -34,10 +34,17 @@ source "$VENV_DIR/bin/activate"
 pip install --quiet pyyaml
 
 # Generate schemas from opentelemetry-operator-crds subchart (only contains instrumentations CRD)
-if [ -d "$CRDS_DIR" ] && compgen -G "$CRDS_DIR"/*.yaml > /dev/null; then
-  echo "Generating schemas from opentelemetry-operator-crds..."
-  (cd "$SCHEMA_DIR" && for crd in "$CRDS_DIR"/*.yaml; do FILENAME_FORMAT="{fullgroup}_{kind}_{version}" python "openapi2jsonschema.py" "$crd"; done)
+# Fail fast if CRDs are missing so we don't commit empty schema dir and break later kubeconform runs
+if [ ! -d "$CRDS_DIR" ]; then
+  echo "Error: CRD directory not found: $CRDS_DIR"
+  exit 1
 fi
+if ! compgen -G "$CRDS_DIR"/*.yaml > /dev/null; then
+  echo "Error: No *.yaml CRD files in $CRDS_DIR"
+  exit 1
+fi
+echo "Generating schemas from opentelemetry-operator-crds..."
+(cd "$SCHEMA_DIR" && for crd in "$CRDS_DIR"/*.yaml; do FILENAME_FORMAT="{fullgroup}_{kind}_{version}" python "openapi2jsonschema.py" "$crd"; done)
 
 rm -f "$OPENAPI2JSONSCHEMA"
 deactivate
