@@ -5,7 +5,6 @@ package functional
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -227,14 +226,14 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	}
 
 	replacements := map[string]any{
-		"K8sClusterEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverK8sClusterReceiverPort),
-		"AgentEndpoint":         fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
-		"LogHecEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
-		"MetricHecEndpoint":     fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
-		"OtlpEndpoint":          fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
-		"OtlpHttpEndpoint":      fmt.Sprintf("%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
-		"ApiURLEndpoint":        fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		"LogObjectsHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort),
+		"K8sClusterEndpoint":    internal.HostPortHTTP(hostEp, signalFxReceiverK8sClusterReceiverPort),
+		"AgentEndpoint":         internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
+		"LogHecEndpoint":        internal.HostPortHTTP(hostEp, internal.HECLogsReceiverPort),
+		"MetricHecEndpoint":     internal.HostPortHTTP(hostEp, internal.HECMetricsReceiverPort) + "/services/collector",
+		"OtlpEndpoint":          internal.HostPort(hostEp, internal.OTLPGRPCReceiverPort),
+		"OtlpHttpEndpoint":      internal.HostPort(hostEp, internal.OTLPHTTPReceiverPort),
+		"ApiURLEndpoint":        internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"LogObjectsHecEndpoint": internal.HostPortHTTP(hostEp, internal.HECObjectsReceiverPort) + "/services/collector",
 		"KubeTestEnv":           kubeTestEnv,
 	}
 

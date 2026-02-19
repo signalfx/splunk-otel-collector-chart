@@ -6,8 +6,10 @@ package internal
 import (
 	"context"
 	"io"
+	"net"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -49,15 +51,40 @@ func HostEndpoint(t *testing.T) string {
 	client.NegotiateAPIVersion(t.Context())
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
+	netInfo, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
 	require.NoError(t, err)
-	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
+	// Prefer IPv4 gateway (e.g. on GitHub runners Docker/kind may expose IPv6 first).
+	var fallback string
+	for _, ipam := range netInfo.IPAM.Config {
+		if ipam.Gateway == "" {
+			continue
+		}
+		ip := net.ParseIP(ipam.Gateway)
+		if ip == nil {
+			continue
+		}
+		if ip.To4() != nil {
 			return ipam.Gateway
 		}
+		if fallback == "" {
+			fallback = ipam.Gateway
+		}
+	}
+	if fallback != "" {
+		return fallback
 	}
 	require.Fail(t, "failed to find host endpoint")
 	return ""
+}
+
+// HostPort returns "host:port" with correct bracketing for IPv6 (e.g. "[::1]:4317").
+func HostPort(host string, port int) string {
+	return net.JoinHostPort(host, strconv.Itoa(port))
+}
+
+// HostPortHTTP returns "http://host:port" using HostPort for correct IPv6 format.
+func HostPortHTTP(host string, port int) string {
+	return "http://" + HostPort(host, port)
 }
 
 func WaitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
