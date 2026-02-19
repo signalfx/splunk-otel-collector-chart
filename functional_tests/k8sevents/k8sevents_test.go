@@ -64,8 +64,13 @@ func Test_K8SEvents(t *testing.T) {
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
 		k8sEventsLogs := selectLogs("k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
+			s := body
 			re := regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\).*`)
-			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
+			s = re.ReplaceAllString(s, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
+			// Pre-1.35: "Created container: <name>", "Started container <name>". 1.35+: "Container created", "Container started".
+			s = regexp.MustCompile(`Created container: .*`).ReplaceAllString(s, "Container created")
+			s = regexp.MustCompile(`Started container( .*)?`).ReplaceAllString(s, "Container started")
+			return s
 		})
 
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"
