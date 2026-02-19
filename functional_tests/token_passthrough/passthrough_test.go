@@ -5,7 +5,6 @@ package passthrough
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -84,9 +83,9 @@ func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesTmpl))
 	require.NoError(t, err)
 	internal.ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
-		"ApiURL":    fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxAPIPort),
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, internal.SignalFxReceiverPort),
-		"OTLPSink":  fmt.Sprintf("http://%s:%d", hostEp, internal.OTLPHTTPReceiverPort),
+		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"IngestURL": internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
+		"OTLPSink":  internal.HostPortHTTP(hostEp, internal.OTLPHTTPReceiverPort),
 	}, 0, internal.GetDefaultChartOptions())
 }
 
@@ -106,7 +105,7 @@ func sendTrace(t *testing.T) {
 	require.NoError(t, err)
 
 	// Send to kind cluster exposed port 43180 which is mapped to the container port 4318
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:43180/v1/traces", bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, "http://"+internal.HostPort("127.0.0.1", 43180)+"/v1/traces", bytes.NewBuffer(data))
 	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-SF-Token", token)
