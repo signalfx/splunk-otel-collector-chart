@@ -23,8 +23,8 @@ const (
 	leaseName      = "functional-test-lock"
 	leaseNamespace = "default"
 
-	leaseDuration = 15 * time.Second
-	renewDeadline = 10 * time.Second
+	leaseDuration = 20 * time.Second
+	renewDeadline = 15 * time.Second
 	retryPeriod   = 2 * time.Second
 )
 
@@ -34,6 +34,9 @@ const (
 func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
+	// increase from the default of 5/10 to avoid rate limiting error noticed in K8s 1.35+
+	kubeConfig.QPS = 15
+	kubeConfig.Burst = 35
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
