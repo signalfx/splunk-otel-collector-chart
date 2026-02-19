@@ -456,6 +456,7 @@ receivers:
                     apiserver_storage_objects|\
                     apiserver_response_sizes|\
                     apiserver_request_total|\
+                    kubernetes_build_info|\
                     rest_client_requests_total|\
                     rest_client_request_duration_seconds|\
                     apiserver_storage_size_bytes|\
