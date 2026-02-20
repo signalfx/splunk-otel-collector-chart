@@ -45,7 +45,10 @@ func SetupHECObjectsSink(t *testing.T) *consumertest.LogsSink {
 func setupHECLogsSink(t *testing.T, port int) *consumertest.LogsSink {
 	f := splunkhecreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
+	cfg.NetAddr = confignet.AddrConfig{
+		Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
+		Transport: "tcp",
+	}
 
 	lc := new(consumertest.LogsSink)
 	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, lc)
@@ -64,7 +67,10 @@ func SetupHECMetricsSink(t *testing.T) *consumertest.MetricsSink {
 	// the splunkhecreceiver does poorly at receiving logs and metrics. Use separate ports for now.
 	f := splunkhecreceiver.NewFactory()
 	mCfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	mCfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", HECMetricsReceiverPort)
+	mCfg.NetAddr = confignet.AddrConfig{
+		Endpoint:  fmt.Sprintf("0.0.0.0:%d", HECMetricsReceiverPort),
+		Transport: "tcp",
+	}
 
 	mc := new(consumertest.MetricsSink)
 	mrcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), mCfg, mc)
@@ -93,7 +99,10 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+			NetAddr: confignet.AddrConfig{
+				Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+				Transport: "tcp",
+			},
 		},
 		TracesURLPath: "/v1/traces",
 	})
@@ -146,7 +155,10 @@ func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort i
 
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", httpPort),
+			NetAddr: confignet.AddrConfig{
+				Endpoint:  fmt.Sprintf("0.0.0.0:%d", httpPort),
+				Transport: "tcp",
+			},
 			Auth: configoptional.Some(confighttp.AuthConfig{
 				Config: configauth.Config{
 					AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
@@ -183,7 +195,10 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	})
 	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
-			Endpoint: fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+			NetAddr: confignet.AddrConfig{
+				Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
+				Transport: "tcp",
+			},
 		},
 		LogsURLPath: "/v1/logs",
 	})
@@ -204,7 +219,10 @@ func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
-	cfg.Endpoint = fmt.Sprintf("0.0.0.0:%d", port)
+	cfg.NetAddr = confignet.AddrConfig{
+		Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
+		Transport: "tcp",
+	}
 
 	rcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, mc)
 	require.NoError(t, err)
