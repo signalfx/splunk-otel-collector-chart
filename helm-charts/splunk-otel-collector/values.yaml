@@ -1162,7 +1162,11 @@ obi:
     # Ensure RBAC configuration is created to allow metadata decoration.
     create: true
 
-  podAnnotations: {}
+  podAnnotations:
+    # Automatically restart OBI pods when the cluster name ConfigMap changes.
+    # This uses the checksum annotation pattern to trigger rollouts when the
+    # parent chart's splunk-otel-collector-obi-env ConfigMap is updated.
+    checksum/clusterName: '{{ .Values.clusterName | default "" | sha256sum }}'
 
   podLabels: {}
 
