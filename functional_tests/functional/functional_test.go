@@ -1196,6 +1196,7 @@ func generateRequiredTelemetry(t *testing.T) {
 
 	testNamespaceName := "test-namespace"
 	internal.CreateNamespace(t, client, testNamespaceName)
+	internal.WaitForDefaultServiceAccount(t, client, testNamespaceName)
 
 	testPodConfig := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
