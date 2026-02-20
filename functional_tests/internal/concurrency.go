@@ -35,8 +35,8 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	require.NoError(t, err)
 	// increase from the default of 5/10 to avoid rate limiting error noticed in K8s 1.35+
-	kubeConfig.QPS = 15
-	kubeConfig.Burst = 35
+	kubeConfig.QPS = 50
+	kubeConfig.Burst = 100
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
