@@ -27,6 +27,13 @@ import (
 
 var eventsLogsConsumer *consumertest.LogsSink
 
+// Regexes for normalizing k8s event log bodies.
+var (
+	rePulledImage      = regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\).*`)
+	reCreatedContainer = regexp.MustCompile(`Created container: .*`)
+	reStartedContainer = regexp.MustCompile(`Started container( .*)?`)
+)
+
 // Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
 // SKIP_SETUP: if set to true, the test will skip setup
@@ -64,8 +71,16 @@ func Test_K8SEvents(t *testing.T) {
 	t.Run("CheckK8SEventsLogs", func(t *testing.T) {
 		actualLogs := selectResLogs("com.splunk.sourcetype", "kube:events", eventsLogsConsumer)
 		k8sEventsLogs := selectLogs("k8s.namespace.name", "k8sevents-test", &actualLogs, func(body string) string {
-			re := regexp.MustCompile(`Successfully pulled image "(busybox|alpine):latest" in .* \(.* including waiting\).*`)
-			return re.ReplaceAllString(body, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
+			s := body
+			// 1.35+ event messages have capitalized first letter
+			if len(s) > 0 && s[0] >= 'a' && s[0] <= 'z' {
+				s = string(rune(s[0])-'a'+'A') + s[1:]
+			}
+			s = rePulledImage.ReplaceAllString(s, `Successfully pulled image "$1:latest" in <time> (<time> including waiting)`)
+			// Pre-1.35: "Created container: <name>", "Started container <name>". 1.35+: "Container created", "Container started".
+			s = reCreatedContainer.ReplaceAllString(s, "Container created")
+			s = reStartedContainer.ReplaceAllString(s, "Container started")
+			return s
 		})
 
 		expectedEventsLogsFile := "testdata/expected_k8sevents.yaml"

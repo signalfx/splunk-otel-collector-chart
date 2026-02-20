@@ -342,6 +342,15 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }
 
+// WaitForDefaultServiceAccount waits for the "default" ServiceAccount to exist in the namespace.
+// The namespace controller creates it asynchronously; on K8s 1.35+ notice delay in creation.
+func WaitForDefaultServiceAccount(t *testing.T, clientset *kubernetes.Clientset, namespace string) {
+	require.Eventually(t, func() bool {
+		_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(t.Context(), "default", metav1.GetOptions{})
+		return err == nil
+	}, 1*time.Minute, 2*time.Second, "default ServiceAccount in namespace %s is not available", namespace)
+}
+
 func DeleteNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	err := clientset.CoreV1().Namespaces().Delete(t.Context(), name, metav1.DeleteOptions{})
 	if err != nil {
