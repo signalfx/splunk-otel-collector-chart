@@ -54,15 +54,65 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y skopeo
 
+      - name: Set PR message strings
+        id: pr_messages
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        run: |
+          NEED_UPDATE="${{ steps.check_for_update.outputs.NEED_UPDATE }}"
+          CRDS_UPDATE="${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE }}"
+          NAME="${{ matrix.name }}"
+          YAML_PATH="${{ matrix.yaml_file_path }}"
+          CURRENT_VER="${{ steps.check_for_update.outputs.CURRENT_VER }}"
+          LATEST_VER="${{ steps.check_for_update.outputs.LATEST_VER }}"
+          CRDS_VER="${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION }}"
+
+          CHART_TITLE="Bump $NAME from $CURRENT_VER to $LATEST_VER"
+          CHART_MSG="Update ${NAME} chart dependency version"
+          CHART_BODY="Use the latest version of ${NAME}"
+
+          if [ "$NEED_UPDATE" = "1" ] && [ "$CRDS_UPDATE" = "1" ]; then
+            title="${CHART_TITLE} and update operator CRDs"
+            commit_open="${CHART_MSG} and operator CRDs"
+            commit_finalize="${CHART_MSG} and operator CRDs"
+            body_open="${CHART_BODY} and update operator CRDs"
+            body_finalize="${CHART_BODY} and update operator CRDs to ${CRDS_VER} with schema regeneration"
+          elif [ "$NEED_UPDATE" = "1" ]; then
+            title="${CHART_TITLE} in ${YAML_PATH}"
+            commit_open="$CHART_MSG"
+            commit_finalize="$CHART_MSG"
+            body_open="$CHART_BODY"
+            body_finalize="$CHART_BODY"
+          else
+            title="Bump opentelemetry-operator-crds to $CRDS_VER"
+            commit_open="Update operator CRDs"
+            commit_finalize="Update operator CRDs and regenerate schemas"
+            body_open="Update operator CRDs"
+            body_finalize="Update operator CRDs to ${CRDS_VER} and regenerate schemas for kubeconform validation"
+          fi
+
+          echo "title=$title" >> $GITHUB_OUTPUT
+          echo "commit_message_open=$commit_open" >> $GITHUB_OUTPUT
+          echo "commit_message_finalize=$commit_finalize" >> $GITHUB_OUTPUT
+          echo "body_open=$body_open" >> $GITHUB_OUTPUT
+          echo "body_finalize=$body_finalize" >> $GITHUB_OUTPUT
+
+          [ "$NEED_UPDATE" = "1" ] && echo "chlog_note_chart=Bump ${NAME} to ${LATEST_VER} in ${YAML_PATH}" >> $GITHUB_OUTPUT
+          if [ "$CRDS_UPDATE" = "1" ]; then
+            CRDS_CHLOG="Bump subchart opentelemetry-operator-crds to ${CRDS_VER}. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using \`operatorcrds.install\` option."
+            echo "chlog_note_crds<<EOF" >> $GITHUB_OUTPUT
+            echo "$CRDS_CHLOG" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
       - name: Open PR for Version Update
         id: open_pr
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: Update ${{ matrix.name }} chart dependency version
-          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
-          body: Use the latest version of ${{ matrix.name }}
-          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          commit-message: ${{ steps.pr_messages.outputs.commit_message_open }}
+          title: ${{ steps.pr_messages.outputs.title }}
+          body: ${{ steps.pr_messages.outputs.body_open }}
+          branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
           modify-outputs: false
@@ -76,7 +126,7 @@ jobs:
           # We run `make update-chart-dep` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
           make render
-          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="Bump ${{ matrix.name }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Operator CRDs update
         env:
@@ -85,31 +135,32 @@ jobs:
         run: |
           make update-operator-crds DEBUG_MODE=$DEBUG_MODE
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="Bump subchart $COMPONENT to ${{ steps.check_for_crd_update.outputs.CRDS_LATEST_VERSION }}. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using `operatorcrds.install` option." ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
 
       - name: Set up Python
-        if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: Generate CRD Schemas for kubeconform
-        if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
+        # Regenerate schemas when operator chart or operator-crds are updated
+        if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         run: |
           make generate-crd-schemas
 
       - name: Run pre-commit to fix formatting
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: ./.github/actions/run-precommit
 
       - name: Finalize PR with updates
-        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: Update ${{ matrix.name }} chart dependency version
-          title: Bump ${{ matrix.name }} from ${{ steps.check_for_update.outputs.CURRENT_VER }} to ${{ steps.check_for_update.outputs.LATEST_VER }} in ${{ matrix.yaml_file_path }}
-          body: Use the latest version of ${{ matrix.name }}
-          branch: "update-${{ matrix.name }}" # Same branch name for all PRs
+          commit-message: ${{ steps.pr_messages.outputs.commit_message_finalize }}
+          title: ${{ steps.pr_messages.outputs.title }}
+          body: ${{ steps.pr_messages.outputs.body_finalize }}
+          branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
           modify-outputs: false
