@@ -44,8 +44,8 @@ spec:
   go:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: splunk.zc.method=autoinstrumentation-go:v0.22.1
-    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.22.1
+      value: splunk.zc.method=autoinstrumentation-go:v0.23.0
+    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.23.0
   java:
     env:
     - name: OTEL_RESOURCE_DISABLED_KEYS
