@@ -451,6 +451,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 						crs.SetSchemaUrl(rs.SchemaUrl())
 						css := crs.ScopeSpans().AppendEmpty()
 						ss.Scope().CopyTo(css.Scope())
+						css.SetSchemaUrl(ss.SchemaUrl())
 						span.CopyTo(css.Spans().AppendEmpty())
 
 						err = ptracetest.CompareTraces(expectedTraces, candidate,
