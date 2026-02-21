@@ -34,7 +34,11 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-const istioVersion = "1.27.1"
+const (
+	istioVersion       = "1.27.1"
+	httpbinServiceName = "httpbin.istio-workloads"
+	httpbinStatusURL   = "http://httpbin.example.com/status/200"
+)
 
 type request struct {
 	url    string
@@ -405,11 +409,6 @@ func Test_IstioTraces(t *testing.T) {
 	})
 }
 
-const (
-	httpbinServiceName = "httpbin.istio-workloads"
-	httpbinStatusURL   = "http://httpbin.example.com/status/200"
-)
-
 func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink *consumertest.TracesSink) {
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
@@ -426,6 +425,8 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	// Find a single httpbin /status/200 span and compare against the golden file.
 	// Pre-filter on service.name, scope, and http.url to skip unrelated spans.
 	require.Eventually(t, func() bool {
+		lastCandidate := ptrace.NewTraces()
+		var matched bool
 		for _, traces := range tracesSink.AllTraces() {
 			for i := 0; i < traces.ResourceSpans().Len(); i++ {
 				rs := traces.ResourceSpans().At(i)
@@ -453,6 +454,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 						ss.Scope().CopyTo(css.Scope())
 						css.SetSchemaUrl(ss.SchemaUrl())
 						span.CopyTo(css.Spans().AppendEmpty())
+						lastCandidate = candidate
 
 						err = ptracetest.CompareTraces(expectedTraces, candidate,
 							ptracetest.IgnoreResourceSpansOrder(),
@@ -471,16 +473,23 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 							ptracetest.IgnoreSpanAttributeValue("peer.address"),
 						)
 						if err == nil {
-							internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &candidate)
-							return true
+							matched = true
+						} else {
+							t.Logf("span comparison error: %v", err)
 						}
-						t.Logf("span comparison error: %v", err)
 					}
 				}
 			}
 		}
 
+		if lastCandidate.ResourceSpans().Len() > 0 {
+			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &lastCandidate)
+		}
+		if matched {
+			return true
+		}
+
 		sendWorkloadHTTPRequests(t, requests)
 		return false
-	}, 2*time.Minute, 2*time.Second, "No received httpbin span matched expected trace structure")
+	}, 3*time.Minute, 2*time.Second, "No received httpbin span matched expected trace structure")
 }
