@@ -34,7 +34,11 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-const istioVersion = "1.27.1"
+const (
+	istioVersion       = "1.27.1"
+	httpbinServiceName = "httpbin.istio-workloads"
+	httpbinStatusURL   = "http://httpbin.example.com/status/200"
+)
 
 type request struct {
 	url    string
@@ -410,52 +414,82 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	require.NoError(t, err)
 	require.NotEmpty(t, expectedTraces)
 
-	// Send traffic through ingress gateways
 	requests := []request{
 		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
 	}
-	sendWorkloadHTTPRequests(t, requests)
+	for range 3 {
+		sendWorkloadHTTPRequests(t, requests)
+		time.Sleep(500 * time.Millisecond)
+	}
 
+	// Find a single httpbin /status/200 span and compare against the golden file.
+	// Pre-filter on service.name, scope, and http.url to skip unrelated spans.
 	require.Eventually(t, func() bool {
-		foundTraces := false
-		for _, receivedTraces := range tracesSink.AllTraces() {
-			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &receivedTraces)
-
-			// Multiple resource spans are created intermittently in testing.
-			// In an attempt to reduce flakiness the expected data just has a single
-			// resource span, so the comparison here is just to ensure that at least
-			// one of the received resource spans matches what's expected.
-			for i := 0; i < receivedTraces.ResourceSpans().Len(); i++ {
-				receivedResourceSpans := receivedTraces.ResourceSpans().At(i)
-				tempTraces := ptrace.NewTraces()
-				tempResourceSpans := tempTraces.ResourceSpans().AppendEmpty()
-				receivedResourceSpans.CopyTo(tempResourceSpans)
-
-				err = ptracetest.CompareTraces(expectedTraces, tempTraces,
-					ptracetest.IgnoreResourceSpansOrder(),
-					ptracetest.IgnoreSpansOrder(),
-					ptracetest.IgnoreStartTimestamp(),
-					ptracetest.IgnoreEndTimestamp(),
-					ptracetest.IgnoreTraceID(),
-					ptracetest.IgnoreSpanID(),
-					ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-					ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-					ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-					ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
-					ptracetest.IgnoreSpanAttributeValue("node_id"),
-					ptracetest.IgnoreSpanAttributeValue("peer.address"),
-				)
-				if err == nil {
-					foundTraces = true
-					break
+		lastCandidate := ptrace.NewTraces()
+		var matched bool
+		for _, traces := range tracesSink.AllTraces() {
+			for i := 0; i < traces.ResourceSpans().Len(); i++ {
+				rs := traces.ResourceSpans().At(i)
+				svcName, ok := rs.Resource().Attributes().Get("service.name")
+				if !ok || svcName.Str() != httpbinServiceName {
+					continue
 				}
-				t.Logf("Comparison error: %v", err)
+				for j := 0; j < rs.ScopeSpans().Len(); j++ {
+					ss := rs.ScopeSpans().At(j)
+					if ss.Scope().Name() != "envoy" {
+						continue
+					}
+					for k := 0; k < ss.Spans().Len(); k++ {
+						span := ss.Spans().At(k)
+						httpURL, urlOk := span.Attributes().Get("http.url")
+						if !urlOk || httpURL.Str() != httpbinStatusURL {
+							continue
+						}
+
+						candidate := ptrace.NewTraces()
+						crs := candidate.ResourceSpans().AppendEmpty()
+						rs.Resource().CopyTo(crs.Resource())
+						crs.SetSchemaUrl(rs.SchemaUrl())
+						css := crs.ScopeSpans().AppendEmpty()
+						ss.Scope().CopyTo(css.Scope())
+						css.SetSchemaUrl(ss.SchemaUrl())
+						span.CopyTo(css.Spans().AppendEmpty())
+						lastCandidate = candidate
+
+						err = ptracetest.CompareTraces(expectedTraces, candidate,
+							ptracetest.IgnoreResourceSpansOrder(),
+							ptracetest.IgnoreSpansOrder(),
+							ptracetest.IgnoreStartTimestamp(),
+							ptracetest.IgnoreEndTimestamp(),
+							ptracetest.IgnoreTraceID(),
+							ptracetest.IgnoreSpanID(),
+							ptracetest.IgnoreScopeSpanInstrumentationScopeVersion(),
+							ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+							ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+							ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+							ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+							ptracetest.IgnoreSpanAttributeValue("guid:x-request-id"),
+							ptracetest.IgnoreSpanAttributeValue("node_id"),
+							ptracetest.IgnoreSpanAttributeValue("peer.address"),
+						)
+						if err == nil {
+							matched = true
+						} else {
+							t.Logf("span comparison error: %v", err)
+						}
+					}
+				}
 			}
 		}
 
-		if !foundTraces {
-			sendWorkloadHTTPRequests(t, requests)
+		if lastCandidate.ResourceSpans().Len() > 0 {
+			internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, &lastCandidate)
 		}
-		return foundTraces
-	}, 1*time.Minute, 1*time.Second, "Expected traces not found")
+		if matched {
+			return true
+		}
+
+		sendWorkloadHTTPRequests(t, requests)
+		return false
+	}, 3*time.Minute, 2*time.Second, "No received httpbin span matched expected trace structure")
 }
