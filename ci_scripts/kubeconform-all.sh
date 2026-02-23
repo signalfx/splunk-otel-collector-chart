@@ -20,7 +20,15 @@ if [ -z "$MANIFEST_DIRS" ]; then
 fi
 
 # Validate all found manifest dirs
-if ! kubeconform -strict -schema-location default -schema-location "$SCHEMA_DIR/{{ .Group }}_{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" -output pretty -verbose -kubernetes-version "$K8S_VERSION" $MANIFEST_DIRS; then
+# Note: -ignore-missing-schemas skips validation for unsupported CRDs.
+# Ensure the Instrumentation CRD schema exists so validation is not silently skipped.
+if ! compgen -G "$SCHEMA_DIR/opentelemetry.io_instrumentation_*.json" > /dev/null; then
+  echo "Error: Expected Instrumentation CRD schema not found in $SCHEMA_DIR."
+  echo "Make sure Instrumentation schemas are generated before running kubeconform."
+  exit 1
+fi
+
+if ! kubeconform -strict -ignore-missing-schemas -schema-location default -schema-location "$SCHEMA_DIR/{{ .Group }}_{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" -output pretty -verbose -kubernetes-version "$K8S_VERSION" $MANIFEST_DIRS; then
   echo "kubeconform version: $(kubeconform -v)"
   echo "Failed validating one or more manifest directories."
   exit 1
