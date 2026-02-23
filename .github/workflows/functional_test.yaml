@@ -14,7 +14,7 @@ on:
           - true
 
 env:
-  GO_VERSION: 1.24.11
+  GO_VERSION: 1.25.7
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: k8s-debug-info-${{ matrix.k8s-minikube-version }}-${{ matrix.container_runtime }}-splunk-${{ matrix.splunk_version }}
           path: tools/splunk_kubernetes_debug_info_*

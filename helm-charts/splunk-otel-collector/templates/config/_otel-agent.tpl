@@ -31,12 +31,14 @@ extensions:
 
   zpages:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   headers_setter:
     headers:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
         default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -94,7 +96,7 @@ receivers:
       {{- if .Values.featureGates.useLightPrometheusReceiver }}
       lightprometheus:
       {{- else }}
-      prometheus/istio:
+      prometheus/autodetect:
       {{- end }}
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
@@ -114,11 +116,12 @@ receivers:
           {{- else }}
           config:
             scrape_configs:
-              - job_name: 'istio'
+              - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
                 scrape_interval: 10s
                 static_configs:
                   - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`']
+                {{- if not .Values.autodetect.prometheus }}
                 metric_relabel_configs:
                   - source_labels: [__name__]
                     action: keep
@@ -193,6 +196,7 @@ receivers:
                     pilot_xds_rds_reject|\
                     pilot_xds_send_time|\
                     pilot_xds_write_timeout)(?:_sum|_count|_bucket)?"
+            {{- end }}
           {{- end }}
       {{- end }}
 
@@ -452,8 +456,11 @@ receivers:
                     apiserver_storage_objects|\
                     apiserver_response_sizes|\
                     apiserver_request_total|\
+                    kubernetes_build_info|\
                     rest_client_requests_total|\
-                    rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
+                    rest_client_request_duration_seconds|\
+                    apiserver_storage_size_bytes|\
+                    apiserver_requested_deprecated_apis)(?:_sum|_count|_bucket)?"
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       prometheus/kubernetes-proxy:
@@ -974,8 +981,10 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     auth:
       authenticator: headers_setter
+    {{- end }}
   {{- else }}
   # If gateway is disabled, data will be sent to directly to backends.
   {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
@@ -987,7 +996,7 @@ exporters:
     token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
-    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    # TODO: Performance testing must be done before enabling compression
     disable_compression: true
   {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
@@ -1032,7 +1041,9 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    realm: {{ include "splunk-otel-collector.fullname" . }}
+    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
@@ -1096,7 +1107,9 @@ service:
     - file_storage/persistent_queue
     {{- end }}
     - health_check
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    {{- end }}
     - k8s_observer
     - zpages
 

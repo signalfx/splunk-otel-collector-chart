@@ -36,13 +36,13 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: nodejs-test-cbbdf469-8wmd4
+            stringValue: nodejs-test-cbbdf469-s45pj
         - key: k8s.replicaset.name
           value:
             stringValue: nodejs-test-cbbdf469
         - key: service.instance.id
           value:
-            stringValue: default.nodejs-test-cbbdf469-8wmd4.nodejs-test
+            stringValue: default.nodejs-test-cbbdf469-s45pj.nodejs-test
         - key: service.namespace
           value:
             stringValue: default
@@ -93,7 +93,7 @@ resourceSpans:
             stringValue: root
         - key: k8s.pod.uid
           value:
-            stringValue: 788a623b-751a-47c3-89de-20aeb28e4a67
+            stringValue: 2ff42276-c882-46dd-92ba-335c2783212d
         - key: k8s.pod.labels.app
           value:
             stringValue: nodejs-test
@@ -105,7 +105,7 @@ resourceSpans:
             stringValue: latest
         - key: container.id
           value:
-            stringValue: 2341298a992bdd0bc571d32b8f15a1592c9c1a77759aa89e90a3407ac3ec6ebf
+            stringValue: b8900764eb17fcc90b866946001b67d147bfa5642dfe1a7cf059bac0ad07062f
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
@@ -165,20 +165,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "35028"
+                  intValue: "49962"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1768393628242673325"
+            endTimeUnixNano: "1770199586134807511"
             kind: 2
             name: GET
-            spanId: d2864ed0a1fee765
-            startTimeUnixNano: "1768393628242000000"
+            spanId: d9ad03c8017a81f1
+            startTimeUnixNano: "1770199586134000000"
             status: {}
-            traceId: 02b146e39f74b2780458af3312482512
+            traceId: b8bd54c0d1d132d086f6d1df8cfac5b7
           - attributes:
               - key: http.url
                 value:
@@ -218,20 +218,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "35030"
+                  intValue: "49978"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1768393629255697416"
+            endTimeUnixNano: "1770199587142746360"
             kind: 2
             name: GET
-            spanId: 24156e6496aaf341
-            startTimeUnixNano: "1768393629255000000"
+            spanId: 633f94d257863b70
+            startTimeUnixNano: "1770199587142000000"
             status: {}
-            traceId: 70230185d6076061a5beca07f701f709
+            traceId: 357950035f07887b9469bffce8a06047
           - attributes:
               - key: http.url
                 value:
@@ -271,20 +271,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "35034"
+                  intValue: "49984"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1768393630269202076"
+            endTimeUnixNano: "1770199588149773001"
             kind: 2
             name: GET
-            spanId: bafa2dd051d52638
-            startTimeUnixNano: "1768393630268000000"
+            spanId: 580cb449e62d2ead
+            startTimeUnixNano: "1770199588149000000"
             status: {}
-            traceId: 19a263e54be5d2074e267838d1c047a8
+            traceId: a9d1a42ffee28f62431628288d579e61
           - attributes:
               - key: http.url
                 value:
@@ -324,20 +324,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "35044"
+                  intValue: "49988"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1768393631287695472"
+            endTimeUnixNano: "1770199589159295508"
             kind: 2
             name: GET
-            spanId: f81e22cff9a065a0
-            startTimeUnixNano: "1768393631284000000"
+            spanId: 5a253f284b52dd38
+            startTimeUnixNano: "1770199589158000000"
             status: {}
-            traceId: 135c2e255792397aee1f97551b5b5145
+            traceId: 750966c8e0d823bd53e2a98c43a1c9e1
           - attributes:
               - key: http.url
                 value:
@@ -377,17 +377,17 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "35056"
+                  intValue: "52794"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1768393632297943631"
+            endTimeUnixNano: "1770199590166834372"
             kind: 2
             name: GET
-            spanId: dc783a52abc986d9
-            startTimeUnixNano: "1768393632297000000"
+            spanId: 1987fa1379e45047
+            startTimeUnixNano: "1770199590166000000"
             status: {}
-            traceId: d269e14b216b12b17c079b1ee30a4d7c
+            traceId: 591d9272866df14ddc74b006aa26f9e0

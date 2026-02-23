@@ -59,7 +59,7 @@ jobs:
           git fetch origin
 
           # Check if update-release branch exists
-          if git ls-remote --heads origin update-release > /dev/null; then
+          if [ -n "$(git ls-remote --heads origin update-release)" ]; then
             if [ "$OVERWRITE_EXISTING_PR" = "true" ]; then
               # Overwrite mode: Only skip if changes are identical
               echo "OVERWRITE_EXISTING_PR is enabled - checking for changes"
@@ -84,7 +84,7 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}

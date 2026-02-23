@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.143.0
+    helm.sh/chart: splunk-otel-collector-0.145.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.143.0"
+    app.kubernetes.io/version: "0.145.1"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.143.0
+    chart: splunk-otel-collector-0.145.1
     release: default
 data:
   relay: |
@@ -203,6 +203,10 @@ data:
               regex: otelcol_processor_batch_.*
               source_labels:
               - __name__
+            - action: drop
+              regex: .*otelcol\.k8s\.pod\.association
+              source_labels:
+              - __name__
             scrape_interval: 10s
             static_configs:
             - targets:
@@ -263,7 +267,7 @@ data:
                   job_name: kubernetes-apiserver
                   metric_relabel_configs:
                   - action: keep
-                    regex: (apiserver_longrunning_requests|apiserver_request_duration_seconds|apiserver_storage_objects|apiserver_response_sizes|apiserver_request_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
+                    regex: (apiserver_longrunning_requests|apiserver_request_duration_seconds|apiserver_storage_objects|apiserver_response_sizes|apiserver_request_total|kubernetes_build_info|rest_client_requests_total|rest_client_request_duration_seconds|apiserver_storage_size_bytes|apiserver_requested_deprecated_apis)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
                   scheme: https

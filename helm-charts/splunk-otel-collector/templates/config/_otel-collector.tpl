@@ -154,7 +154,7 @@ exporters:
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     sending_queue:
       num_consumers: 32
-    # Temporary disable compression until 0.68.0 to workaround a compression bug
+    # TODO: Performance testing must be done before enabling compression
     disable_compression: true
   {{- end }}
 
