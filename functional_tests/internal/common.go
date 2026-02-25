@@ -140,6 +140,16 @@ func MaybeWriteUpdateExpectedTracesResults(t *testing.T, file string, traces *pt
 	}
 }
 
+// ClearTraceSchemaURLs strips schema URLs from all ResourceSpans and ScopeSpans
+func ClearTraceSchemaURLs(td ptrace.Traces) {
+	for i := 0; i < td.ResourceSpans().Len(); i++ {
+		td.ResourceSpans().At(i).SetSchemaUrl("")
+		for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
+			td.ResourceSpans().At(i).ScopeSpans().At(j).SetSchemaUrl("")
+		}
+	}
+}
+
 func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
 	if shouldUpdateExpectedResults() {
 		require.NoError(t, golden.WriteMetrics(t, file, *metrics))
@@ -420,49 +430,67 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	}
 }
 
-// SelectMetricSet finds a metrics payload containing a target metric without any re-checking logic.
-func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
-	var selectedMetrics *pmetric.Metrics
+// SelectMetricSet finds a metrics payload containing a target metric.
+// It first tries to find a payload with an exact ResourceMetrics and MetricCount
+// match to expected (best candidate for CompareMetrics). If none is found, it
+// falls back to the payload with the highest MetricCount (most complete batch,
+// suitable for updating golden files).
+// Returns the selected payload and whether it was an exact match.
+func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink) (*pmetric.Metrics, bool) {
+	var exactMatch *pmetric.Metrics
+	var fallback *pmetric.Metrics
+	fallbackCount := -1
 
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricSink.AllMetrics()[h]
-		foundTargetMetric := false
-
-	OUTER:
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-					metric := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-					if metric.Name() == targetMetric {
-						foundTargetMetric = true
-						break OUTER
-					}
-				}
-			}
-		}
-
-		if !foundTargetMetric {
+		if !containsMetric(m, targetMetric) {
 			continue
 		}
-
-		if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
-			selectedMetrics = &m
-			t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
+		if m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+			exactMatch = &m
 			break
+		}
+		if m.MetricCount() > fallbackCount {
+			fallback = &m
+			fallbackCount = m.MetricCount()
 		}
 	}
 
-	return selectedMetrics
+	if exactMatch != nil {
+		t.Logf("Selected exact-match payload with target metric '%s': %d metrics, %d resources",
+			targetMetric, exactMatch.MetricCount(), exactMatch.ResourceMetrics().Len())
+		return exactMatch, true
+	}
+	if fallback != nil {
+		t.Logf("No exact match for expected counts (%d metrics, %d resources); selected best-effort payload with '%s': %d metrics, %d resources",
+			expected.MetricCount(), expected.ResourceMetrics().Len(), targetMetric, fallback.MetricCount(), fallback.ResourceMetrics().Len())
+	}
+	return fallback, false
 }
 
-// SelectMetricSetWithTimeout finds a metrics payload containing a target metric with Eventually timeout
-func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool, timeout time.Duration, interval time.Duration) *pmetric.Metrics {
+func containsMetric(m pmetric.Metrics, name string) bool {
+	for i := 0; i < m.ResourceMetrics().Len(); i++ {
+		for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+				if m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k).Name() == name {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// SelectMetricSetWithTimeout retries SelectMetricSet until a payload is found or the timeout expires.
+// Returns the selected payload and whether it was an exact match on counts.
+func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, timeout time.Duration, interval time.Duration) (*pmetric.Metrics, bool) {
 	var selectedMetrics *pmetric.Metrics
+	var exactMatch bool
 
 	require.Eventuallyf(t, func() bool {
-		selectedMetrics = SelectMetricSet(t, expected, targetMetric, metricSink, ignoreLen)
+		selectedMetrics, exactMatch = SelectMetricSet(t, expected, targetMetric, metricSink)
 		return selectedMetrics != nil
 	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
 
-	return selectedMetrics
+	return selectedMetrics, exactMatch
 }

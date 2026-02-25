@@ -318,17 +318,17 @@ func Test_IstioMetrics(t *testing.T) {
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_services",
-			flakyMetrics, true, metricsSink)
+			flakyMetrics, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
-			"istio_requests_total", flakyMetrics, true, metricsSink)
+			"istio_requests_total", flakyMetrics, metricsSink)
 	})
 }
 
-func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, ignoreLen bool, metricsSink *consumertest.MetricsSink) {
+func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, metricsSink *consumertest.MetricsSink) {
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
@@ -377,7 +377,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 			t.Logf("Comparison error: %v", err)
 		}
 
-		selectedMetrics := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink, ignoreLen)
+		selectedMetrics, _ := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink)
 		if selectedMetrics != nil {
 			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		}
@@ -413,6 +413,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
 	require.NotEmpty(t, expectedTraces)
+	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	requests := []request{
 		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
@@ -456,6 +457,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 						span.CopyTo(css.Spans().AppendEmpty())
 						lastCandidate = candidate
 
+						internal.ClearTraceSchemaURLs(candidate)
 						err = ptracetest.CompareTraces(expectedTraces, candidate,
 							ptracetest.IgnoreResourceSpansOrder(),
 							ptracetest.IgnoreSpansOrder(),
