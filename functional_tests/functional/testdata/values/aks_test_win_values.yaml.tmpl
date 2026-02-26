@@ -94,6 +94,9 @@ operatorcrds:
   install: true
 operator:
   enabled: true
+  manager:
+    image:
+      imagePullPolicy: Always
   automountServiceAccountToken: false
   admissionWebhooks:
     certManager:

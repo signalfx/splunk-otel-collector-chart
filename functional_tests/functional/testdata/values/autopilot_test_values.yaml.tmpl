@@ -63,8 +63,6 @@ operatorcrds:
   install: true
 operator:
   enabled: true
-  admissionWebhooks:
-    certManager:
-      enabled: false
-    autoGenerateCert:
-      enabled: true
+  manager:
+    image:
+      imagePullPolicy: Always
