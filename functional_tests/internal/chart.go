@@ -18,6 +18,8 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
@@ -71,25 +73,26 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
 	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
 	if upgradeFromValues != "" {
-		// install the base chart
+		oldChartDir := os.Getenv("UPGRADE_FROM_CHART_DIR")
+		oldChartPath := filepath.Join("..", "..", oldChartDir)
+		newChartPath := filepath.Join("..", "..", defaultChartPath)
+
 		valuesDir := filepath.Dir(valuesFile)
 		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues))
 		require.NoError(t, rfErr)
-		initChart := loadChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
+		initChart := loadChartFromDir(t, oldChartDir)
 		var initValues map[string]any
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
-		// if install crds option is enabled, try to update the crds
-		t.Logf("Checking if CRD installation is enabled in %s", valuesFile)
-		if update := crdsInstallEnabled(values); update {
-			t.Log("Updating CRDs")
-			UpdateOperatorCRDs(t, filepath.Join("..", "..", os.Getenv("UPGRADE_FROM_CHART_DIR")), filepath.Join("..", "..", defaultChartPath), testKubeConfig)
-		} else {
-			t.Log("Skipping CRDs update")
+
+		// Helm upgrade does not install or update CRDs, so apply them
+		// from the new chart if the CRD version changed.
+		if crdsInstallEnabled(values) {
+			UpdateOperatorCRDs(t, oldChartPath, newChartPath, testKubeConfig)
 		}
-		// test the upgrade
+
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = options.ChartNamespace
 		upgrade.Wait = options.ChartWait
@@ -143,8 +146,8 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
-		// try to delete the cert secret for the default release name/namespace
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
+		deleteOperatorCRDs(t, testKubeConfig)
 		return
 	}
 
@@ -156,6 +159,60 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 		t.Logf("Uninstalling release: %s (namespace: %s)", release.Name, release.Namespace)
 		_, _ = uninstall.Run(release.Name)
 		deleteCertSecret(t, clientset, release.Name, release.Namespace)
+	}
+
+	deleteOperatorCRDs(t, testKubeConfig)
+}
+
+func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	if err != nil {
+		t.Logf("Failed to build kube config for CRD cleanup: %v", err)
+		return
+	}
+	crdClient, err := apiextensionsclient.NewForConfig(kubeConfig)
+	if err != nil {
+		t.Logf("Failed to create apiextensions client for CRD cleanup: %v", err)
+		return
+	}
+
+	ctx := t.Context()
+	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
+	if err != nil {
+		t.Logf("Failed to list CRDs: %v", err)
+		return
+	}
+
+	var deleted []string
+	for _, crd := range crdList.Items {
+		if crd.Spec.Group != "opentelemetry.io" {
+			continue
+		}
+		delErr := crdClient.ApiextensionsV1().CustomResourceDefinitions().Delete(ctx, crd.Name, v1.DeleteOptions{})
+		if k8serrors.IsNotFound(delErr) {
+			t.Logf("CRD %s already absent, skipping", crd.Name)
+			continue
+		}
+		if delErr != nil {
+			t.Logf("CRD %s not deleted: %v", crd.Name, delErr)
+			continue
+		}
+		t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
+		deleted = append(deleted, crd.Name)
+	}
+
+	if len(deleted) == 0 {
+		t.Log("No opentelemetry.io CRDs found to delete")
+		return
+	}
+
+	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
+	for _, name := range deleted {
+		require.Eventually(t, func() bool {
+			_, getErr := crdAPI.Get(ctx, name, v1.GetOptions{})
+			return k8serrors.IsNotFound(getErr)
+		}, 3*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
+		t.Logf("CRD %s fully removed", name)
 	}
 }
 
@@ -178,12 +235,12 @@ func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, 
 	}
 	t.Logf("Updating CRDs from %s to %s", oldCrdsVer, newCrdsVer)
 
-	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")) //nolint:gosec
+	crdsDir := filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")
+	cmd := exec.Command("kubectl", "apply", "-f", crdsDir)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err, "failed to apply CRDs: %s", string(output))
-
-	t.Logf("Successfully applied CRDs from %s", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+	t.Logf("Successfully applied CRDs from %s", crdsDir)
 }
 
 func loadChart(t *testing.T) *chart.Chart {

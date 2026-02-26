@@ -138,14 +138,25 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+
+			// If the CRD is stuck in Terminating from a previous run, wait for it to be fully removed.
+			existing, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
+			if getErr == nil && existing.DeletionTimestamp != nil {
+				t.Logf("CRD %s is terminating, waiting for removal...", crd.Name)
+				require.EventuallyWithT(t, func(tt *assert.CollectT) {
+					_, e := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
+					assert.True(tt, k8serrors.IsNotFound(e), "CRD %s still exists", crd.Name)
+				}, 3*time.Minute, 3*time.Second, "CRD %s stuck in Terminating", crd.Name)
+			}
+
 			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
 			require.NoError(t, err)
 			t.Logf("Deployed CRD %s", crd.Name)
 
 			// Wait for CRD to be Established before moving on
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
-				latest, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
-				assert.NoError(tt, getErr)
+				latest, latestErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
+				assert.NoError(tt, latestErr)
 				established := false
 				for _, cond := range latest.Status.Conditions {
 					if cond.Type == appextensionsv1.Established && cond.Status == appextensionsv1.ConditionTrue {
