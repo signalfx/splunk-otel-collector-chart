@@ -23,9 +23,9 @@ const (
 	leaseName      = "functional-test-lock"
 	leaseNamespace = "default"
 
-	leaseDuration = 20 * time.Second
-	renewDeadline = 15 * time.Second
-	retryPeriod   = 2 * time.Second
+	leaseDuration = 60 * time.Second
+	renewDeadline = 40 * time.Second
+	retryPeriod   = 5 * time.Second
 )
 
 // AcquireLeaseForTest acquires (and holds) a cluster-wide lease for the duration of the
