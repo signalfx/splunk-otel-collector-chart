@@ -70,9 +70,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
         - [enable useLabelsForResourceAttributes](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-use-labels-for-resource-attributes.yaml).
 
 ```bash
-helm install splunk-otel-collector -f ./my_values.yaml \
-  --set operatorcrds.install=true,operator.enabled=true,environment=dev \
-  splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
@@ -490,17 +488,9 @@ helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
 With Helm v3.0 and later, CRDs created by this chart are not updated automatically. To update CRDs, you must apply the updated CRD definitions manually.
 Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/) for more details.
 
-#### Uninstall Cleanup
+#### CRD Cleanup
 
-Helm does **not** automatically remove CRDs. To fully clean up after uninstalling:
-
-1. **Uninstall the Helm release:**
-
-```bash
-helm uninstall <release-name> -n <namespace>
-```
-
-2. **Delete the CRDs** (only if you no longer need them):
+When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following command:
 
 ```bash
 kubectl delete crd instrumentations.opentelemetry.io
@@ -709,16 +699,6 @@ Test API Server to Operator Webhook Connection
      kubectl get <crd-name> --all-namespaces
      kubectl get <crd-name> -n <namespace> -o yaml
      ```
-
-**[GKE Private Cluster] Webhook timeout: "context deadline exceeded"**
-- **Cause:** On GKE private clusters, the default firewall rules only allow the
-  control plane to reach nodes on TCP ports 443 and 10250. The operator webhook
-  pod listens on port **9443**, which is blocked by default. This causes webhook
-  calls to time out when creating the Instrumentation resource.
-- **Resolution:** Add a GCP firewall rule allowing the control plane to reach
-  TCP port 9443 on cluster nodes. Follow the instructions in the GKE
-  documentation:
-  [Add firewall rules for specific use cases](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/latest/network-isolation#add_firewall_rules).
 
 **[EKS/Cilium] API Server Error: "No endpoints available for service 'splunk-otel-collector-operator-webhook'"**
 - **Cause:** This is a general known issue in setups where the Kubernetes control plane cannot communicate
