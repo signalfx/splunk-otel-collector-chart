@@ -73,25 +73,26 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
 	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
 	if upgradeFromValues != "" {
-		// install the base chart
+		oldChartDir := os.Getenv("UPGRADE_FROM_CHART_DIR")
+		oldChartPath := filepath.Join("..", "..", oldChartDir)
+		newChartPath := filepath.Join("..", "..", defaultChartPath)
+
 		valuesDir := filepath.Dir(valuesFile)
 		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues))
 		require.NoError(t, rfErr)
-		initChart := loadChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
+		initChart := loadChartFromDir(t, oldChartDir)
 		var initValues map[string]any
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
-		// if install crds option is enabled, try to update the crds
-		t.Logf("Checking if CRD installation is enabled in %s", valuesFile)
-		if update := crdsInstallEnabled(values); update {
-			t.Log("Updating CRDs")
-			UpdateOperatorCRDs(t, filepath.Join("..", "..", os.Getenv("UPGRADE_FROM_CHART_DIR")), filepath.Join("..", "..", defaultChartPath), testKubeConfig)
-		} else {
-			t.Log("Skipping CRDs update")
+
+		// Helm upgrade does not install or update CRDs, so apply them
+		// from the new chart if the CRD version changed.
+		if crdsInstallEnabled(values) {
+			UpdateOperatorCRDs(t, oldChartPath, newChartPath, testKubeConfig)
 		}
-		// test the upgrade
+
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = options.ChartNamespace
 		upgrade.Wait = options.ChartWait
@@ -234,12 +235,12 @@ func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, 
 	}
 	t.Logf("Updating CRDs from %s to %s", oldCrdsVer, newCrdsVer)
 
-	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")) //nolint:gosec
+	crdsDir := filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")
+	cmd := exec.Command("kubectl", "apply", "-f", crdsDir)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err, "failed to apply CRDs: %s", string(output))
-
-	t.Logf("Successfully applied CRDs from %s", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+	t.Logf("Successfully applied CRDs from %s", crdsDir)
 }
 
 func loadChart(t *testing.T) *chart.Chart {
