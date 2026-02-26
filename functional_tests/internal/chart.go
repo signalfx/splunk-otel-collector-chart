@@ -5,6 +5,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -18,6 +19,8 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
@@ -131,6 +134,7 @@ func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
+	ctx := t.Context()
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	client := action.NewList(actionConfig)
 	client.AllNamespaces = true
@@ -143,8 +147,8 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
-		// try to delete the cert secret for the default release name/namespace
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
+		deleteOperatorCRDs(ctx, t, testKubeConfig)
 		return
 	}
 
@@ -156,6 +160,51 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 		t.Logf("Uninstalling release: %s (namespace: %s)", release.Name, release.Namespace)
 		_, _ = uninstall.Run(release.Name)
 		deleteCertSecret(t, clientset, release.Name, release.Namespace)
+	}
+
+	// Delete CRDs last, after the operator and all CRs are gone.
+	deleteOperatorCRDs(ctx, t, testKubeConfig)
+}
+
+func deleteOperatorCRDs(ctx context.Context, t *testing.T, testKubeConfig string) {
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	if err != nil {
+		t.Logf("Failed to build kube config for CRD cleanup: %v", err)
+		return
+	}
+	crdClient, err := apiextensionsclient.NewForConfig(kubeConfig)
+	if err != nil {
+		t.Logf("Failed to create apiextensions client for CRD cleanup: %v", err)
+		return
+	}
+
+	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
+	if err != nil {
+		t.Logf("Failed to list CRDs: %v", err)
+		return
+	}
+
+	var deleted []string
+	for _, crd := range crdList.Items {
+		if crd.Spec.Group != "opentelemetry.io" {
+			continue
+		}
+		delErr := crdClient.ApiextensionsV1().CustomResourceDefinitions().Delete(ctx, crd.Name, v1.DeleteOptions{})
+		if delErr != nil {
+			t.Logf("CRD %s not deleted: %v", crd.Name, delErr)
+		} else {
+			t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
+			deleted = append(deleted, crd.Name)
+		}
+	}
+
+	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
+	for _, name := range deleted {
+		require.Eventually(t, func() bool {
+			_, getErr := crdAPI.Get(ctx, name, v1.GetOptions{})
+			return k8serrors.IsNotFound(getErr)
+		}, 3*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
+		t.Logf("CRD %s fully removed", name)
 	}
 }
 
