@@ -437,8 +437,8 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 // suitable for updating golden files).
 // Returns the selected payload and whether it was an exact match.
 func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink) (*pmetric.Metrics, bool) {
-	var exactMatch *pmetric.Metrics
-	var fallback *pmetric.Metrics
+	var exactMatchMetrics *pmetric.Metrics
+	var fallbackMetrics *pmetric.Metrics
 	fallbackCount := -1
 
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
@@ -447,25 +447,25 @@ func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string
 			continue
 		}
 		if m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
-			exactMatch = &m
+			exactMatchMetrics = &m
 			break
 		}
 		if m.MetricCount() > fallbackCount {
-			fallback = &m
+			fallbackMetrics = &m
 			fallbackCount = m.MetricCount()
 		}
 	}
 
-	if exactMatch != nil {
+	if exactMatchMetrics != nil {
 		t.Logf("Selected exact-match payload with target metric '%s': %d metrics, %d resources",
-			targetMetric, exactMatch.MetricCount(), exactMatch.ResourceMetrics().Len())
-		return exactMatch, true
+			targetMetric, exactMatchMetrics.MetricCount(), exactMatchMetrics.ResourceMetrics().Len())
+		return exactMatchMetrics, true
 	}
-	if fallback != nil {
+	if fallbackMetrics != nil {
 		t.Logf("No exact match for expected counts (%d metrics, %d resources); selected best-effort payload with '%s': %d metrics, %d resources",
-			expected.MetricCount(), expected.ResourceMetrics().Len(), targetMetric, fallback.MetricCount(), fallback.ResourceMetrics().Len())
+			expected.MetricCount(), expected.ResourceMetrics().Len(), targetMetric, fallbackMetrics.MetricCount(), fallbackMetrics.ResourceMetrics().Len())
 	}
-	return fallback, false
+	return fallbackMetrics, false
 }
 
 func containsMetric(m pmetric.Metrics, name string) bool {
@@ -481,16 +481,29 @@ func containsMetric(m pmetric.Metrics, name string) bool {
 	return false
 }
 
-// SelectMetricSetWithTimeout retries SelectMetricSet until a payload is found or the timeout expires.
-// Returns the selected payload and whether it was an exact match on counts.
+// SelectMetricSetWithTimeout retries SelectMetricSet until an exact-match
+// payload is found or the timeout expires. If the timeout is reached without
+// an exact match, the best fallback (highest MetricCount) is returned.
 func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, timeout time.Duration, interval time.Duration) (*pmetric.Metrics, bool) {
+	deadline := time.Now().Add(timeout)
 	var selectedMetrics *pmetric.Metrics
 	var exactMatch bool
 
-	require.Eventuallyf(t, func() bool {
+	for time.Now().Before(deadline) {
 		selectedMetrics, exactMatch = SelectMetricSet(t, expected, targetMetric, metricSink)
-		return selectedMetrics != nil
-	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
+		if exactMatch {
+			return selectedMetrics, true
+		}
+		time.Sleep(interval)
+	}
 
-	return selectedMetrics, exactMatch
+	// Final attempt after timeout to capture the latest state.
+	selectedMetrics, exactMatch = SelectMetricSet(t, expected, targetMetric, metricSink)
+	if exactMatch {
+		return selectedMetrics, true
+	}
+
+	require.NotNilf(t, selectedMetrics, "No payload containing metric %s found within %v", targetMetric, timeout)
+	t.Logf("No exact-match payload found for %s within %v; using best-effort fallback", targetMetric, timeout)
+	return selectedMetrics, false
 }
