@@ -5,7 +5,6 @@ package internal
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -134,7 +133,6 @@ func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
-	ctx := t.Context()
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	client := action.NewList(actionConfig)
 	client.AllNamespaces = true
@@ -148,7 +146,7 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
-		deleteOperatorCRDs(ctx, t, testKubeConfig)
+		deleteOperatorCRDs(t, testKubeConfig)
 		return
 	}
 
@@ -162,11 +160,10 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 		deleteCertSecret(t, clientset, release.Name, release.Namespace)
 	}
 
-	// Delete CRDs last, after the operator and all CRs are gone.
-	deleteOperatorCRDs(ctx, t, testKubeConfig)
+	deleteOperatorCRDs(t, testKubeConfig)
 }
 
-func deleteOperatorCRDs(ctx context.Context, t *testing.T, testKubeConfig string) {
+func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
 	if err != nil {
 		t.Logf("Failed to build kube config for CRD cleanup: %v", err)
@@ -178,6 +175,7 @@ func deleteOperatorCRDs(ctx context.Context, t *testing.T, testKubeConfig string
 		return
 	}
 
+	ctx := t.Context()
 	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
 	if err != nil {
 		t.Logf("Failed to list CRDs: %v", err)
@@ -190,12 +188,21 @@ func deleteOperatorCRDs(ctx context.Context, t *testing.T, testKubeConfig string
 			continue
 		}
 		delErr := crdClient.ApiextensionsV1().CustomResourceDefinitions().Delete(ctx, crd.Name, v1.DeleteOptions{})
+		if k8serrors.IsNotFound(delErr) {
+			t.Logf("CRD %s already absent, skipping", crd.Name)
+			continue
+		}
 		if delErr != nil {
 			t.Logf("CRD %s not deleted: %v", crd.Name, delErr)
-		} else {
-			t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
-			deleted = append(deleted, crd.Name)
+			continue
 		}
+		t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
+		deleted = append(deleted, crd.Name)
+	}
+
+	if len(deleted) == 0 {
+		t.Log("No opentelemetry.io CRDs found to delete")
+		return
 	}
 
 	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
