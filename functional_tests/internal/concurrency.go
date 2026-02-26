@@ -37,6 +37,7 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	// increase from the default of 5/10 to avoid rate limiting error noticed in K8s 1.35+
 	kubeConfig.QPS = 50
 	kubeConfig.Burst = 100
+	kubeConfig.Timeout = 20 * time.Second
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
