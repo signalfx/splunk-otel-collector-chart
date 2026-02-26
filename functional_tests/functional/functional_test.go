@@ -683,7 +683,6 @@ func testNodeJSTraces(t *testing.T) {
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_nodejs_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	internal.WaitForTraces(t, 10, tracesConsumer)
 
@@ -705,7 +704,6 @@ func testNodeJSTraces(t *testing.T) {
 
 	maskScopeVersion(*selectedTrace)
 	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
@@ -751,7 +749,6 @@ func testPythonTraces(t *testing.T) {
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_python_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	internal.WaitForTraces(t, 10, tracesConsumer)
 
@@ -775,7 +772,6 @@ func testPythonTraces(t *testing.T) {
 
 	maskScopeVersion(*selectedTrace)
 	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
@@ -821,7 +817,6 @@ func testJavaTraces(t *testing.T) {
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	internal.WaitForTraces(t, 10, tracesConsumer)
 
@@ -843,7 +838,6 @@ func testJavaTraces(t *testing.T) {
 
 	maskScopeVersion(*selectedTrace)
 	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
@@ -887,7 +881,6 @@ func testDotNetTraces(t *testing.T) {
 	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_dotnet_traces.yaml")
 	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
 	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	internal.WaitForTraces(t, 30, tracesConsumer)
 	var selectedTrace *ptrace.Traces
@@ -910,7 +903,6 @@ func testDotNetTraces(t *testing.T) {
 	maskScopeVersion(expectedTraces)
 	maskSpanParentID(*selectedTrace)
 	maskSpanParentID(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
@@ -994,7 +986,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
 
 	targetMetric := "k8s.pod.phase"
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
+	selectedMetrics, _ := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
 	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
 	metricNames := internal.GetMetricNames(&expectedMetrics)
@@ -1024,9 +1016,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
 	)
 	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
-		}
 		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
 	}
@@ -1255,7 +1244,7 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
 
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsSink, 3*time.Minute, 10*time.Second)
+	selectedMetrics, _ := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsSink, 3*time.Minute, 10*time.Second)
 	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
 	testName := t.Name()
@@ -1265,15 +1254,13 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 
 	err = tryMetricsComparison(expectedMetrics, *selectedMetrics)
 	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
-		}
 		t.Logf("Metric comparison failed for %s: %v", testName, err)
 		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 		require.NoError(t, err, "Metric comparison failed for %s test. Error: %v", testName, err)
 	}
 
-	t.Logf("Metric comparison passed for %d metrics in %s test", selectedMetrics.MetricCount(), testName)
+	metricCount := selectedMetrics.MetricCount()
+	t.Logf("Metric comparison passed for %d metrics in %s test", metricCount, testName)
 }
 
 // tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
