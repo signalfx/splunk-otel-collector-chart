@@ -390,7 +390,6 @@ spec:
       - name: {{ $mnt.name }}
         hostPath:
           path: {{ $mnt.path }}
-          type: Directory
       {{- end }}
       - name: journalctl-bin
         hostPath:
