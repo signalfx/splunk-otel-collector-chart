@@ -1,0 +1,18 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+# Disable the agent daemonset since this example focuses on the cluster receiver.
+agent:
+  enabled: false
+
+clusterReceiver:
+  # k8s_events receiver must be enabled for the pipeline to be active.
+  eventsEnabled: true
+
+featureGates:
+  # Enable sending Kubernetes events to the Splunk Observability events/v3 endpoint.
+  # Creates a dedicated logs/k8s_events_o11y pipeline that routes k8s events through
+  # an otlphttp exporter with the "o11yevents" routing header.
+  sendK8sEventsToO11yEvents: true

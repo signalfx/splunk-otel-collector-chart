@@ -48,7 +48,7 @@ receivers:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true")) }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -155,7 +155,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true")) }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
   transform/k8sevents:
@@ -272,6 +272,14 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
+  {{- end }}
+
+  {{- if eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true" }}
+  otlphttp/o11y_events:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-SF-EVENT-ROUTING-KEY": "o11yevents"
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -462,6 +470,25 @@ service:
         - resource
       exporters:
         - signalfx/histograms
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true" }}
+    # k8s events o11y pipeline - sends Kubernetes events to Splunk Observability events/v3 endpoint
+    logs/k8s_events_o11y:
+      receivers:
+        - k8s_events
+      processors:
+        - memory_limiter
+        - batch
+        - attributes/drop_event_attrs
+        - resourcedetection
+        - resource
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
+        - transform/k8sevents
+      exporters:
+        - otlphttp/o11y_events
     {{- end }}
 
 {{- end }}

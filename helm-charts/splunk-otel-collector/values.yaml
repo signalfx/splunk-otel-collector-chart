@@ -1348,3 +1348,12 @@ featureGates:
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   enableEKSApiServerMetrics: true
+  # This feature gate enables sending Kubernetes entities to Splunk Observability Cloud.
+  # When enabled, a new logs pipeline is created in the cluster receiver with a k8s_cluster receiver
+  # and an otlphttp exporter pointed to the o11y v3/event endpoint.
+  sendK8sEntities: false
+  # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
+  # When enabled, a new logs pipeline is created in the cluster receiver with a k8s_events receiver
+  # and an otlphttp exporter pointed to the o11y events/v3 endpoint with an o11yevents routing header.
+  # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured.
+  sendK8sEventsToO11yEvents: false
