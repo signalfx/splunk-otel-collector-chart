@@ -1,0 +1,29 @@
+# Values for local testing: Splunk OTel Collector with k8s_events_o11y pipeline
+# pointing to Splunk Observability Cloud lab0 environment.
+#
+# Usage:
+#   1. Replace YOUR_LAB0_ACCESS_TOKEN with your Splunk Observability lab0 org token
+#   2. If using a locally built image, ensure image.otelcol is correct for your setup
+#   3. helm install my-splunk-otel-collector -f lab0-local-test-values.yaml helm-charts/splunk-otel-collector
+
+clusterName: lab0-local-test
+splunkObservability:
+  realm: <org-name>
+  accessToken: <splunk-observability-access-token>  # Get from: O11y Cloud → Settings → Organization → Access Tokens
+
+# Disable agent; focus on cluster receiver for k8s events
+agent:
+  enabled: false
+
+clusterReceiver:
+  eventsEnabled: true
+
+featureGates:
+  sendK8sEventsToO11yEvents: true
+
+# Uncomment and adjust when using a locally built collector image:
+# image:
+#   otelcol:
+#     repository: splunk-otel-collector
+#     tag: dev
+#     pullPolicy: IfNotPresent
