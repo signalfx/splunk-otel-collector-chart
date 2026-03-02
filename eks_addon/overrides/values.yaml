@@ -19,3 +19,17 @@ image:
   validateSecret:
     repository: public.ecr.aws/docker/library/almalinux
     tag: "9"
+
+# A required shared library for journalctl is under /usr/lib64 on Amazon Linux 2023. The default mnts configuration has
+# to be overridden to include this path for the journald receiver to work properly in EKS Add-on.
+logsCollection:
+  journald:
+    mnts:
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
+      - name: host-usr-lib64
+        path: /usr/lib64
