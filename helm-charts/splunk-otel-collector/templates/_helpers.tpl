@@ -106,7 +106,7 @@ Whether traces enabled for any destination.
 Whether logs enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.logsEnabled" -}}
-{{- include "splunk-otel-collector.platformLogsEnabled" . }}
+{{- or (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -293,20 +293,11 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 {{- or .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
 {{- end -}}
 
-
-{{/*
-Whether k8s entities sending to Splunk Observability is enabled
-*/}}
-{{- define "splunk-otel-collector.sendK8sEntitiesEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.sendK8sEntities -}}
-{{- end -}}
-
-
 {{/*
 Whether k8s events sending to Splunk Observability events/v3 endpoint is enabled
 */}}
-{{- define "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.clusterReceiver.eventsEnabled .Values.featureGates.sendK8sEventsToO11yEvents -}}
+{{- define "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.clusterReceiver.eventsEnabled .Values.featureGates.sendK8sEventsToSplunkO11y -}}
 {{- end -}}
 
 
