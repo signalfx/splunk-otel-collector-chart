@@ -19,7 +19,7 @@ data:
     exporters:
       otlphttp/o11y_events:
         headers:
-          X-SF-EVENT-ROUTING-KEY: o11yevents
+          X-Splunk-Instrumentation-Library: o11yevents
           X-SF-TOKEN: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
       signalfx:

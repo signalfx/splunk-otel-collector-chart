@@ -279,7 +279,7 @@ exporters:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
-      "X-SF-EVENT-ROUTING-KEY": "o11yevents"
+      "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -420,6 +420,9 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
+        {{- if eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true" }}
+        - otlphttp/o11y_events
+        {{- end }}
     {{- end }}
 
     {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -470,25 +473,6 @@ service:
         - resource
       exporters:
         - signalfx/histograms
-    {{- end }}
-
-    {{- if eq (include "splunk-otel-collector.sendK8sEventsToO11yEventsEnabled" .) "true" }}
-    # k8s events o11y pipeline - sends Kubernetes events to Splunk Observability events/v3 endpoint
-    logs/k8s_events_o11y:
-      receivers:
-        - k8s_events
-      processors:
-        - memory_limiter
-        - batch
-        - attributes/drop_event_attrs
-        - resourcedetection
-        - resource
-        {{- if .Values.environment }}
-        - resource/add_environment
-        {{- end }}
-        - transform/k8sevents
-      exporters:
-        - otlphttp/o11y_events
     {{- end }}
 
 {{- end }}
