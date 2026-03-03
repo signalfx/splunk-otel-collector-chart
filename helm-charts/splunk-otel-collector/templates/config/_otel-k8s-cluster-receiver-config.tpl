@@ -439,7 +439,7 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
-      exporters:    
+      exporters:
         - splunk_hec/platform_logs
     {{- end }}
     {{- end }}
