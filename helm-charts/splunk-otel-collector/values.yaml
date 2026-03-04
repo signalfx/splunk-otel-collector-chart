@@ -946,13 +946,7 @@ operator:
   admissionWebhooks:
     autoGenerateCert:
       enabled: true
-      # When true, Helm generates a new CA and certificate on every upgrade.
-      # You must also set manager.rolling=true so the operator pod restarts
-      # and picks up the fresh cert. When false (default), the existing
-      # certificate is reused across upgrades — no pod restart needed.
-      # The default certPeriodDays is 10 years, so rotation is not required
-      # for most deployments. Set recreate: true and manager.rolling: true
-      # if your compliance policy mandates regular certificate rotation.
+      # See docs/auto-instrumentation-install.md#certificate-rotation-recreate-true
       recreate: false
       certPeriodDays: 3650
     certManager:
