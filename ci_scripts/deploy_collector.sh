@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 
 #Make sure to check and clean previously failed deployment
 echo "Checking if previous deployment exist..."

@@ -12,12 +12,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/registry"
-	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/kube"
+	"helm.sh/helm/v4/pkg/registry"
+	releasev1 "helm.sh/helm/v4/pkg/release/v1"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -190,19 +190,16 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 	install.ReleaseName = redisReleaseName
 	install.RepoURL = redisChartRepo
 	install.Version = "22.0.7"
-	install.Wait = true
+	install.WaitStrategy = kube.StatusWatcherStrategy
 	install.Timeout = internal.HelmActionTimeout
 	hCli := cli.New()
 	hCli.KubeConfig = kubeConfig
 	chartPath, err := install.LocateChart(redisChart, hCli)
 	require.NoError(t, err)
-	var ch *chart.Chart
-	ch, err = loader.Load(chartPath)
+	ch, err := loader.Load(chartPath)
 	require.NoError(t, err)
 
-	// Install the redis chart with no replicas and no auth
-	var release *release.Release
-	release, err = install.Run(ch, map[string]any{
+	rel, err := install.Run(ch, map[string]any{
 		"auth": map[string]any{
 			"enabled": false,
 		},
@@ -214,13 +211,14 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 		},
 	})
 	require.NoError(t, err)
-	t.Logf("Helm chart installed. Release name: %s", release.Name)
+	r := rel.(*releasev1.Release)
+	t.Logf("Helm chart installed. Release name: %s", r.Name)
 }
 
 func uninstallRedisChart(t *testing.T, kubeConfig string) {
 	t.Helper()
 	uninstallAction := action.NewUninstall(internal.InitHelmActionConfig(t, kubeConfig))
-	uninstallAction.Wait = true
+	uninstallAction.WaitStrategy = kube.StatusWatcherStrategy
 	uninstallAction.Timeout = internal.HelmActionTimeout
 	uninstallAction.IgnoreNotFound = true
 	_, err := uninstallAction.Run(redisReleaseName)

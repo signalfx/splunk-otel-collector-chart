@@ -16,9 +16,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/kube"
+	releasev1 "helm.sh/helm/v4/pkg/release/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,7 +39,7 @@ const (
 type ChartOptions struct {
 	ChartNamespace   string
 	ChartReleaseName string
-	ChartWait        bool
+	WaitStrategy     kube.WaitStrategy
 	ChartTimeout     time.Duration
 }
 
@@ -45,7 +47,7 @@ func GetDefaultChartOptions() ChartOptions {
 	return ChartOptions{
 		ChartNamespace:   DefaultNamespace,
 		ChartReleaseName: DefaultChartReleaseName,
-		ChartWait:        true,
+		WaitStrategy:     kube.StatusWatcherStrategy,
 		ChartTimeout:     HelmActionTimeout,
 	}
 }
@@ -66,7 +68,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	install := action.NewInstall(actionConfig)
 	install.Namespace = options.ChartNamespace
 	install.ReleaseName = options.ChartReleaseName
-	install.Wait = options.ChartWait
+	install.WaitStrategy = options.WaitStrategy
 	install.Timeout = options.ChartTimeout
 	install.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 
@@ -96,7 +98,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = options.ChartNamespace
-		upgrade.Wait = options.ChartWait
+		upgrade.WaitStrategy = options.WaitStrategy
 		upgrade.Timeout = options.ChartTimeout
 		t.Log("Running helm upgrade")
 		_, err = upgrade.Run(options.ChartReleaseName, loadChart(t), values)
@@ -156,12 +158,13 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
+	uninstall.WaitStrategy = kube.StatusWatcherStrategy
 	uninstall.Timeout = HelmActionTimeout
-	for _, release := range releases {
-		t.Logf("Uninstalling release: %s (namespace: %s)", release.Name, release.Namespace)
-		_, _ = uninstall.Run(release.Name)
-		deleteCertSecret(t, clientset, release.Name, release.Namespace)
+	for _, rel := range releases {
+		r := rel.(*releasev1.Release)
+		t.Logf("Uninstalling release: %s (namespace: %s)", r.Name, r.Namespace)
+		_, _ = uninstall.Run(r.Name)
+		deleteCertSecret(t, clientset, r.Name, r.Namespace)
 	}
 
 	deleteOperatorCRDs(t, testKubeConfig)
@@ -225,7 +228,7 @@ func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration
 	cf := genericclioptions.NewConfigFlags(true)
 	cf.Namespace = &DefaultNamespace
 	cf.KubeConfig = &kubeConfig
-	require.NoError(t, actionConfig.Init(cf, DefaultNamespace, os.Getenv("HELM_DRIVER"), t.Logf))
+	require.NoError(t, actionConfig.Init(cf, DefaultNamespace, os.Getenv("HELM_DRIVER")))
 	return actionConfig
 }
 
@@ -247,11 +250,11 @@ func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, 
 	t.Logf("Successfully applied CRDs from %s", crdsDir)
 }
 
-func loadChart(t *testing.T) *chart.Chart {
+func loadChart(t *testing.T) chart.Charter {
 	return loadChartFromDir(t, defaultChartPath)
 }
 
-func loadChartFromDir(t *testing.T, dir string) *chart.Chart {
+func loadChartFromDir(t *testing.T, dir string) chart.Charter {
 	chartPath := filepath.Join("..", "..", dir)
 	c, err := loader.Load(chartPath)
 	require.NoError(t, err)
