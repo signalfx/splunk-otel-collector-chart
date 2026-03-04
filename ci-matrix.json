@@ -16,9 +16,9 @@
       "8.2.12"
     ]
   },
-  "_comment_functional_test_v2": "k8s v1.35 disabled temporarily due to issues with 1.35",
   "functional_test_v2": {
     "k8s-kind-version": [
+      "v1.35.1",
       "v1.34.3",
       "v1.33.7",
       "v1.32.11"
@@ -33,6 +33,12 @@
       "token_passthrough",
       "logs",
       "obi"
+    ],
+    "exclude": [
+      {
+        "k8s-kind-version": "v1.35.1",
+        "test-job": "functional"
+      }
     ]
   },
   "kubeconform_tests": {
