@@ -48,7 +48,7 @@ receivers:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -155,7 +155,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
   transform/k8sevents:
@@ -272,6 +272,14 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
+  {{- end }}
+
+  {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
+  otlphttp/o11y_events:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -394,7 +402,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
     logs:
       receivers:
         - k8s_events
@@ -412,6 +420,9 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
+        {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
+        - otlphttp/o11y_events
+        {{- end }}
     {{- end }}
 
     {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
@@ -428,9 +439,9 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
-        {{- end }}
+      {{- end }}
     {{- end }}
 
     {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
