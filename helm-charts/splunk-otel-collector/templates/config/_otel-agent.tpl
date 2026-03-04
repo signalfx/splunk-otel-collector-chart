@@ -200,7 +200,7 @@ receivers:
           {{- end }}
       {{- end }}
 
-      {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
       # Receivers for collecting k8s control plane metrics as native OpenTelemetry metrics, including histogram data.
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
