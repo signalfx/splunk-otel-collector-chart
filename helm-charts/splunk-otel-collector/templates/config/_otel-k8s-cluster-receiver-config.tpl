@@ -426,7 +426,6 @@ service:
     {{- end }}
 
     {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
-    {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
     logs/objects:
       receivers:
         - k8sobjects
@@ -440,8 +439,9 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
+      {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
-    {{- end }}
+      {{- end }}
     {{- end }}
 
     {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}

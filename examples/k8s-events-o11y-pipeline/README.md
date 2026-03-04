@@ -2,10 +2,11 @@
 
 ## Send Kubernetes events to Splunk Observability /v3/event
 
-This configuration enables the `sendK8sEventsToSplunkO11y` feature gate, which creates a
-dedicated `logs/k8s_events_o11y` pipeline in the cluster receiver. The pipeline collects
-Kubernetes events via the `k8s_events` receiver and routes them to the Splunk Observability
-`/v3/event` endpoint using an OTLP HTTP exporter with an `o11yevents` routing header.
+This configuration enables the `sendK8sEventsToSplunkO11y` feature gate, which configures
+the existing `logs` pipeline in the cluster receiver to route Kubernetes events to the
+Splunk Observability `/v3/event` endpoint. It adds an additional `otlphttp/o11y_events`
+exporter to the pipeline that collects events via the `k8s_events` receiver and sends them
+with the `o11yevents` routing header.
 
 ### Prerequisites
 
@@ -19,6 +20,6 @@ featureGates:
   sendK8sEventsToSplunkO11y: true
 ```
 
-The rendered `logs/k8s_events_o11y` pipeline applies the same processors as the standard
-k8s events logs pipeline (`attributes/drop_event_attrs`, `transform/k8sevents`, etc.) so
-events arrive at the /v3/event endpoint enriched with the same k8s metadata.
+The `logs` pipeline applies the same processors (`attributes/drop_event_attrs`,
+`transform/k8sevents`, etc.) whether exporting to Splunk Platform or Splunk Observability,
+so events arrive at the /v3/event endpoint enriched with the same k8s metadata.
