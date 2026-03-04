@@ -24,6 +24,7 @@ image:
 # to be overridden to include this path for the journald receiver to work properly in EKS Add-on.
 logsCollection:
   journald:
+    directory: /var/log/journal
     mnts:
       - name: host-lib64
         path: /lib64
