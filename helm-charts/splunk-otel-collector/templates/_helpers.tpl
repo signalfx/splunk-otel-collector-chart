@@ -106,7 +106,7 @@ Whether traces enabled for any destination.
 Whether logs enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.logsEnabled" -}}
-{{- or (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true") }}
+{{- eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
 {{- end -}}
 
 {{/*

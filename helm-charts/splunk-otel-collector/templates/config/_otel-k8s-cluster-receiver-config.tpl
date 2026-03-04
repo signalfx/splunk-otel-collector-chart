@@ -402,7 +402,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
     logs:
       receivers:
         - k8s_events
