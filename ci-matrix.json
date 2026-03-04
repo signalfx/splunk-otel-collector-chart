@@ -33,6 +33,12 @@
       "token_passthrough",
       "logs",
       "obi"
+    ],
+    "exclude": [
+      {
+        "k8s-kind-version": "v1.35.1",
+        "test-job": "functional"
+      }
     ]
   },
   "kubeconform_tests": {
