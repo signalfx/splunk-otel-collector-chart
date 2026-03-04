@@ -5,6 +5,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -121,11 +122,13 @@ func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 }
 
 func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName, namespace string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
 	secretName := releaseName + "-operator-controller-manager-service-cert"
 	t.Logf("Attempting to delete secret: %s in namespace: %s", secretName, namespace)
-	_, getErr := clientset.CoreV1().Secrets(namespace).Get(t.Context(), secretName, v1.GetOptions{})
+	_, getErr := clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, v1.GetOptions{})
 	if getErr == nil {
-		deleteErr := clientset.CoreV1().Secrets(namespace).Delete(t.Context(), secretName, v1.DeleteOptions{})
+		deleteErr := clientset.CoreV1().Secrets(namespace).Delete(ctx, secretName, v1.DeleteOptions{})
 		require.NoError(t, deleteErr)
 		t.Logf("Deleted webhook secret: %s (namespace: %s)", secretName, namespace)
 	} else {
@@ -176,7 +179,8 @@ func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
 		return
 	}
 
-	ctx := t.Context()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
 	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
 	if err != nil {
 		t.Logf("Failed to list CRDs: %v", err)

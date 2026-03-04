@@ -71,6 +71,9 @@ clusterName: test
 environment: test
 cloudProvider: gcp
 distribution: gke
+featureGates:
+  instrumentationJobDeployment:
+    enabled: true
 operatorcrds:
   install: true
 operator:

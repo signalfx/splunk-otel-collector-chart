@@ -1,4 +1,15 @@
 {{/*
+Derive the operator subchart's Deployment name by calling the subchart's own
+fullname template with a context that matches what Helm passes to the subchart:
+  .Chart.Name = "operator" (the alias from Chart.yaml)
+  .Values     = the values scoped under the "operator:" key
+  .Release    = the release object (shared with the parent)
+*/}}
+{{- define "splunk-otel-collector.operator.deploymentName" -}}
+{{- include "opentelemetry-operator.fullname" (dict "Chart" (dict "Name" "operator") "Release" .Release "Values" .Values.operator) }}
+{{- end }}
+
+{{/*
 Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operator.
 - Checks for a valid endpoint for exporting telemetry data.
 - Validates that the operator is configured correctly according to user input and default settings.

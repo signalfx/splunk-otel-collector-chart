@@ -1,0 +1,10 @@
+featureGates:
+  instrumentationJobDeployment:
+    enabled: true
+operator:
+  manager:
+    rolling: true
+  admissionWebhooks:
+    autoGenerateCert:
+      enabled: true
+      recreate: true
