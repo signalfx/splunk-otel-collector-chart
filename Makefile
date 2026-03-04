@@ -62,7 +62,8 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 		helm repo add jetstack https://charts.jetstack.io || exit 1; \
 	fi ;\
 	helm repo update open-telemetry jetstack || exit 1; \
-	if helm dependencies list $$DIR | grep -qE 'missing|wrong version' ; then \
+	DEP_STATUS=$$(helm dependencies list $$DIR) || { echo "Error: helm dependencies list failed"; exit 1; } ;\
+	if echo "$$DEP_STATUS" | grep -qE 'missing|wrong version' ; then \
 		echo "Dependencies need updating..."; \
 		helm dependencies update $$DIR || exit 1; \
 	else \
