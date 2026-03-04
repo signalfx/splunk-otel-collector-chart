@@ -4,9 +4,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.95.3
+    helm.sh/chart: operator-0.106.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.134.0"
+    app.kubernetes.io/version: "0.145.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default
@@ -193,6 +193,13 @@ rules:
       - list
       - update
   - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+  - apiGroups:
       - events.k8s.io
     resources:
       - events
@@ -333,6 +340,14 @@ rules:
     - patch
     - update
   - apiGroups:
+    - opentelemetry.io
+    resources:
+    - targetallocators/finalizers
+    verbs:
+    - get
+    - patch
+    - update
+  - apiGroups:
       - cert-manager.io
     resources:
       - issuers
@@ -358,9 +373,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.95.3
+    helm.sh/chart: operator-0.106.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.134.0"
+    app.kubernetes.io/version: "0.145.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default
@@ -377,9 +392,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.95.3
+    helm.sh/chart: operator-0.106.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.134.0"
+    app.kubernetes.io/version: "0.145.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default
