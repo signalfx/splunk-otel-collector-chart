@@ -4,6 +4,22 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.146.0] - 2026-03-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.146.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.146.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add feature gate to send Kubernetes events to Splunk Observability /v3/event endpoint ([#2263](https://github.com/signalfx/splunk-otel-collector-chart/pull/2263))
+  When enabled via `featureGates.sendK8sEventsToSplunkO11y`, the cluster receiver routes
+  Kubernetes events to the Splunk Observability /v3/event endpoint with the
+  `X-Splunk-Instrumentation-Library` header. Requires `clusterReceiver.eventsEnabled` and
+  Splunk Observability configuration.
+  
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.6. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using  option. ([#2244](https://github.com/signalfx/splunk-otel-collector-chart/pull/2244))
+- `operator`: Bump java to v2.25.1 in helm-charts/splunk-otel-collector/values.yaml ([#2258](https://github.com/signalfx/splunk-otel-collector-chart/pull/2258))
+- `operator`: Bump operator to 0.106.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2244](https://github.com/signalfx/splunk-otel-collector-chart/pull/2244))
+
 ## [0.145.1] - 2026-02-23
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.145.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.145.1).
