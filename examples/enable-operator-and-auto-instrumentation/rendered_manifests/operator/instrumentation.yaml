@@ -3,26 +3,20 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
+  labels:
+    app: splunk-otel-collector
+    app.kubernetes.io/component: otel-operator
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: splunk-otel-collector
+    app.kubernetes.io/version: 0.146.0
+    chart: splunk-otel-collector-0.146.0
+    component: otel-operator
+    helm.sh/chart: splunk-otel-collector-0.146.0
+    release: default
   name: default-splunk-otel-collector
   namespace: default
-  labels:
-    app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.146.0
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.146.0"
-    app: splunk-otel-collector
-    component: otel-operator
-    chart: splunk-otel-collector-0.146.0
-    release: default
-    app.kubernetes.io/component: otel-operator
 spec:
-  exporter:
-    endpoint: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4317
-  propagators:
-    - tracecontext
-    - baggage
-    - b3
   apacheHttpd:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -41,6 +35,8 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
+  exporter:
+    endpoint: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4317
   go:
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -76,6 +72,10 @@ spec:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
     image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.3.0
+  propagators:
+  - tracecontext
+  - baggage
+  - b3
   python:
     env:
     - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS

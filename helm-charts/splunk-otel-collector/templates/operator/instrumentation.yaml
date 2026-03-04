@@ -1,22 +1,8 @@
 {{- if (and .Values.operator.enabled .Values.instrumentation.enabled (not .Values.featureGates.instrumentationJobDeployment.enabled)) }}
 {{- include "splunk-otel-collector.operator.validation-rules" . -}}
-apiVersion: opentelemetry.io/v1alpha1
-kind: Instrumentation
-metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}
-  namespace: {{ template "splunk-otel-collector.namespace" . }}
-  labels:
-    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
-    app: {{ template "splunk-otel-collector.name" . }}
-    component: otel-operator
-    chart: {{ template "splunk-otel-collector.chart" . }}
-    release: {{ .Release.Name }}
-    app.kubernetes.io/component: otel-operator
+{{- $cr := include "splunk-otel-collector.operator.instrumentation-cr" . | fromYaml }}
 {{- if .Values.operator.crds.create }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "5"
+{{- $_ := set $cr.metadata "annotations" (dict "helm.sh/hook" "post-install,post-upgrade" "helm.sh/hook-weight" "5") }}
 {{- end }}
-spec:
-{{ include "splunk-otel-collector.operator.instrumentation-spec" . }}
+{{ toYaml $cr }}
 {{- end }}

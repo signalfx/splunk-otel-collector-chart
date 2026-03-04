@@ -57,20 +57,7 @@ metadata:
     app.kubernetes.io/component: instrumentation-job
 data:
   instrumentation.yaml: |
-    apiVersion: opentelemetry.io/v1alpha1
-    kind: Instrumentation
-    metadata:
-      name: {{ include "splunk-otel-collector.fullname" . }}
-      namespace: {{ $ns }}
-      labels:
-        {{- include "splunk-otel-collector.commonLabels" . | nindent 8 }}
-        app: {{ include "splunk-otel-collector.name" . }}
-        component: otel-operator
-        chart: {{ include "splunk-otel-collector.chart" . }}
-        release: {{ .Release.Name }}
-        app.kubernetes.io/component: otel-operator
-    spec:
-    {{ include "splunk-otel-collector.operator.instrumentation-spec" . | nindent 4 }}
+    {{- include "splunk-otel-collector.operator.instrumentation-cr" . | nindent 4 }}
 ---
 apiVersion: batch/v1
 kind: Job

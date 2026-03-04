@@ -142,6 +142,24 @@ Helper to build entries for instrumentation libraries
   {{- end }}
 {{- end -}}
 
+{{/* Render the full Instrumentation CR manifest (used by both resource and job modes) */}}
+{{- define "splunk-otel-collector.operator.instrumentation-cr" -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: {{ include "splunk-otel-collector.fullname" . }}
+  namespace: {{ include "splunk-otel-collector.namespace" . }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ include "splunk-otel-collector.name" . }}
+    component: otel-operator
+    chart: {{ include "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    app.kubernetes.io/component: otel-operator
+spec:
+{{ include "splunk-otel-collector.operator.instrumentation-spec" . }}
+{{- end -}}
+
 {{/* Helper to build instrumentation spec */}}
 {{- define "splunk-otel-collector.operator.instrumentation-spec" -}}
   {{- printf "%s%s%s%s%s%s"
