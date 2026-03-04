@@ -1349,5 +1349,6 @@ featureGates:
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   enableEKSApiServerMetrics: true
   # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
-  # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured.
+  # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
+  # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
