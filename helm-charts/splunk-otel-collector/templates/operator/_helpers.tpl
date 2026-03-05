@@ -142,13 +142,18 @@ Helper to build entries for instrumentation libraries
   {{- end }}
 {{- end -}}
 
-{{/* Render the full Instrumentation CR manifest (used by both resource and job modes) */}}
+{{/* Render the full Instrumentation CR manifest (used by both resource and job modes).
+Includes Helm ownership annotations so Helm can adopt the CR if the user switches
+from installationJob mode back to resource mode. */}}
 {{- define "splunk-otel-collector.operator.instrumentation-cr" -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
   name: {{ include "splunk-otel-collector.fullname" . }}
   namespace: {{ include "splunk-otel-collector.namespace" . }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ include "splunk-otel-collector.name" . }}

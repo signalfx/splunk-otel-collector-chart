@@ -2,7 +2,7 @@
 {{- include "splunk-otel-collector.operator.validation-rules" . -}}
 {{- $cr := include "splunk-otel-collector.operator.instrumentation-cr" . | fromYaml }}
 {{- if .Values.operator.crds.create }}
-{{- $_ := set $cr.metadata "annotations" (dict "helm.sh/hook" "post-install,post-upgrade" "helm.sh/hook-weight" "5") }}
+{{- $_ := merge $cr.metadata.annotations (dict "helm.sh/hook" "post-install,post-upgrade" "helm.sh/hook-weight" "5") }}
 {{- end }}
 {{ toYaml $cr }}
 {{- end }}

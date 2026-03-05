@@ -34,6 +34,9 @@ data:
     metadata:
       name: default-splunk-otel-collector
       namespace: default
+      annotations:
+        meta.helm.sh/release-name: "default"
+        meta.helm.sh/release-namespace: "default"
       labels:
         app.kubernetes.io/name: splunk-otel-collector
         helm.sh/chart: splunk-otel-collector-0.146.0
