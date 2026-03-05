@@ -27,8 +27,8 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [INFO] Auto-instrumentation is enabled (operator.enabled=true).
 {{- if .Values.instrumentation.enabled }}
 
-{{- if .Values.featureGates.instrumentationJobDeployment.enabled }}
-  Instrumentation CR: deployed via Job (featureGates.instrumentationJobDeployment.enabled=true).
+{{- if .Values.instrumentation.installationJob.enabled }}
+  Instrumentation CR: deployed via Job (instrumentation.installationJob.enabled=true).
     A Job will wait for the operator Deployment to be Available before creating the CR.
 
   Uninstall: The CR is NOT deleted by "helm uninstall". Delete it first:
@@ -56,7 +56,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           You can safely remove this parameter from your values.yaml.
 {{ end }}
 {{- if .Values.operator.enabled }}
-{{- $instrKeys := without (keys .Values.instrumentation) "spec" "enabled" }}
+{{- $instrKeys := without (keys .Values.instrumentation) "spec" "enabled" "installationJob" }}
 {{- if gt (len $instrKeys) 0 }}
 {{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
 {{- end }}

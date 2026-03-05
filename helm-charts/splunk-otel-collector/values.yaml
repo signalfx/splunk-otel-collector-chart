@@ -965,6 +965,24 @@ instrumentation:
   # Useful if you want to manage the CR outside of Helm or apply it manually.
   enabled: true
 
+  # Deploy the Instrumentation CR via a Kubernetes Job that waits for webhook
+  # readiness before applying. Recommended for Helm v4 or slow-starting operators.
+  # See docs/auto-instrumentation-install.md#instrumentation-cr-management
+  installationJob:
+    enabled: false
+    image:
+      repository: registry.k8s.io/kubectl
+      # Should match your cluster's Kubernetes minor version (±1 supported).
+      tag: "v1.35.1"
+    backoffLimit: 6
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
   spec:
     # Optional "defaults" parameter for configuring default instrumentation behavior across all libraries.
     # See: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md#instrumentationspecdefaults
@@ -1361,20 +1379,3 @@ featureGates:
   sendK8sEventsToSplunkO11y: false
   # Deploy the Instrumentation CR via a Kubernetes Job instead of a regular Helm resource.
   # The Job waits for the operator Deployment to become Available, then applies the CR
-  # via kubectl apply with retry logic (backoffLimit). This is the most reliable method
-  # for environments where the operator webhook may not be ready when the CR is first created.
-  # See: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management
-  instrumentationJobDeployment:
-    enabled: false
-    image:
-      repository: registry.k8s.io/kubectl
-      # Should match your cluster's Kubernetes minor version (±1 supported).
-      tag: "v1.35.1"
-    backoffLimit: 6
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi

@@ -1,4 +1,4 @@
-{{- if (and .Values.operator.enabled .Values.instrumentation.enabled .Values.featureGates.instrumentationJobDeployment.enabled) }}
+{{- if (and .Values.operator.enabled .Values.instrumentation.enabled .Values.instrumentation.installationJob.enabled) }}
 {{- include "splunk-otel-collector.operator.validation-rules" . -}}
 {{- $name := printf "%s-inst-hook" (include "splunk-otel-collector.fullname" .) }}
 {{- $ns := include "splunk-otel-collector.namespace" . }}
@@ -69,7 +69,7 @@ metadata:
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
-  backoffLimit: {{ .Values.featureGates.instrumentationJobDeployment.backoffLimit }}
+  backoffLimit: {{ .Values.instrumentation.installationJob.backoffLimit }}
   template:
     metadata:
       labels:
@@ -94,9 +94,9 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-operator
-          image: "{{ .Values.featureGates.instrumentationJobDeployment.image.repository }}:{{ .Values.featureGates.instrumentationJobDeployment.image.tag }}"
+          image: "{{ .Values.instrumentation.installationJob.image.repository }}:{{ .Values.instrumentation.installationJob.image.tag }}"
           command: ["kubectl", "wait", "--for=condition=Available", "--timeout=120s", "deployment/{{ $operatorDeploy }}", "-n", "{{ $ns }}"]
-          {{- with .Values.featureGates.instrumentationJobDeployment.resources }}
+          {{- with .Values.instrumentation.installationJob.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -108,7 +108,7 @@ spec:
           {{- end }}
       containers:
         - name: apply-cr
-          image: "{{ .Values.featureGates.instrumentationJobDeployment.image.repository }}:{{ .Values.featureGates.instrumentationJobDeployment.image.tag }}"
+          image: "{{ .Values.instrumentation.installationJob.image.repository }}:{{ .Values.instrumentation.installationJob.image.tag }}"
           command: ["kubectl", "apply", "-f", "/config/instrumentation.yaml"]
           volumeMounts:
             - name: cr-config
@@ -119,7 +119,7 @@ spec:
               name: serviceaccount-token
               readOnly: true
             {{- end }}
-          {{- with .Values.featureGates.instrumentationJobDeployment.resources }}
+          {{- with .Values.instrumentation.installationJob.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

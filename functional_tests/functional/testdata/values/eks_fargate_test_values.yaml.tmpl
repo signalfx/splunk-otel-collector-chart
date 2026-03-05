@@ -6,6 +6,9 @@ splunkObservability:
    apiUrl: {{ .ApiURLEndpoint }}
 
 environment: dev
+instrumentation:
+  installationJob:
+    enabled: true
 operatorcrds:
   install: true
 operator:
@@ -15,5 +18,3 @@ cloudProvider: aws
 distribution: eks/fargate
 featureGates:
   enableEKSApiServerMetrics: true
-  instrumentationJobDeployment:
-    enabled: true

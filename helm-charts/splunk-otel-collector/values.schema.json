@@ -1326,6 +1326,11 @@
           "description": "Whether to deploy the Instrumentation CR.",
           "default": true
         },
+        "installationJob": {
+          "type": "object",
+          "description": "Deploy the Instrumentation CR via a Kubernetes Job that waits for webhook readiness.",
+          "additionalProperties": true
+        },
         "spec": {
           "type": "object",
           "description": "Instrumentation CR spec passed to the OpenTelemetry Operator.",

@@ -1,4 +1,4 @@
-{{- if (and .Values.operator.enabled .Values.instrumentation.enabled (not .Values.featureGates.instrumentationJobDeployment.enabled)) }}
+{{- if (and .Values.operator.enabled .Values.instrumentation.enabled (not .Values.instrumentation.installationJob.enabled)) }}
 {{- include "splunk-otel-collector.operator.validation-rules" . -}}
 {{- $cr := include "splunk-otel-collector.operator.instrumentation-cr" . | fromYaml }}
 {{- if .Values.operator.crds.create }}

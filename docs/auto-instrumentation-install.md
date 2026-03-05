@@ -523,24 +523,24 @@ into Pods.
 Set `instrumentation.enabled=false` to skip deploying the CR entirely. This is useful if you
 want to manage the CR outside of Helm (e.g. via GitOps or `kubectl apply`).
 
-#### Recommended: Job mode (feature gate)
+#### Recommended: Installation Job
 
-We recommend enabling the `instrumentationJobDeployment` feature gate. It deploys the CR via
-a Kubernetes Job that handles webhook readiness automatically — no manual workarounds needed
-regardless of Helm version. The Job:
+We recommend enabling the installation Job. It deploys the CR via a Kubernetes Job that
+handles webhook readiness automatically — no manual workarounds needed regardless of Helm
+version. The Job:
 
 1. Waits for the operator Deployment to become `Available`.
 2. Applies the CR via `kubectl apply`.
 3. Retries automatically (up to `backoffLimit`) if the apply fails.
 
-Enable it by adding `--set featureGates.instrumentationJobDeployment.enabled=true` to your
+Enable it by adding `--set instrumentation.installationJob.enabled=true` to your
 `helm install` / `helm upgrade` command.
 
 ```bash
 helm install splunk-otel-collector \
   -f ./my_values.yaml \
   --set operatorcrds.install=true,operator.enabled=true,environment=dev \
-  --set featureGates.instrumentationJobDeployment.enabled=true \
+  --set instrumentation.installationJob.enabled=true \
   splunk-otel-collector-chart/splunk-otel-collector
 ```
 
@@ -556,17 +556,17 @@ helm install splunk-otel-collector \
 
 | Value | Default | Description |
 |---|---|---|
-| `featureGates.instrumentationJobDeployment.enabled` | `false` | Enable Job-based CR deployment. |
-| `featureGates.instrumentationJobDeployment.image.repository` | `registry.k8s.io/kubectl` | Official kubectl image (distroless). |
-| `featureGates.instrumentationJobDeployment.image.tag` | `v1.35.1` | Image tag — should match your cluster version. |
-| `featureGates.instrumentationJobDeployment.backoffLimit` | `6` | Maximum retries before the Job is marked failed. |
-| `featureGates.instrumentationJobDeployment.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 100m, memory: 128Mi}}` | Resource requests/limits applied to **both** the `wait-operator` init container and the `apply-cr` container. |
+| `instrumentation.installationJob.enabled` | `false` | Enable Job-based CR deployment. |
+| `instrumentation.installationJob.image.repository` | `registry.k8s.io/kubectl` | Official kubectl image (distroless). |
+| `instrumentation.installationJob.image.tag` | `v1.35.1` | Image tag — should match your cluster version. |
+| `instrumentation.installationJob.backoffLimit` | `6` | Maximum retries before the Job is marked failed. |
+| `instrumentation.installationJob.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 100m, memory: 128Mi}}` | Resource requests/limits applied to **both** the `wait-operator` init container and the `apply-cr` container. |
 
 ---
 
 #### Uninstall cleanup (job mode)
 
-When using the job mode feature gate, the CR is not managed by Helm's lifecycle. Delete it
+When using the installation Job, the CR is not managed by Helm's lifecycle. Delete it
 **before** uninstalling so the CRD still exists:
 
 ```bash
@@ -593,7 +593,7 @@ kubectl delete otelinst <release-name>-splunk-otel-collector -n <namespace>
 
 #### Resource mode (default)
 
-Without the feature gate, the CR is deployed as a regular Helm resource. This is simpler but
+Without the installation Job, the CR is deployed as a regular Helm resource. This is simpler but
 has Helm-version-dependent behavior on first install:
 
 - **Helm v3** — the CR is applied before webhook configurations are registered, so it skips
@@ -602,7 +602,7 @@ has Helm-version-dependent behavior on first install:
   [registered first](https://github.com/helm/helm/blob/v4.1.1/pkg/release/v1/util/kind_sorter.go),
   and since the operator is not ready yet (`failurePolicy: Fail`), **`helm install` will fail**.
 
-If you cannot use the Job feature gate with Helm v4, use a two-step install:
+If you cannot use the installation Job with Helm v4, use a two-step install:
 
 ```bash
 # Step 1: deploy without the CR; --wait ensures the operator webhook is serving.
