@@ -211,7 +211,8 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 		},
 	})
 	require.NoError(t, err)
-	r := rel.(*releasev1.Release)
+	r, ok := rel.(*releasev1.Release)
+	require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
 	t.Logf("Helm chart installed. Release name: %s", r.Name)
 }
 

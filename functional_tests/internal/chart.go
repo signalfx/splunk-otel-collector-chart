@@ -169,7 +169,8 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	uninstall.WaitStrategy = kube.StatusWatcherStrategy
 	uninstall.Timeout = HelmActionTimeout
 	for _, rel := range releases {
-		r := rel.(*releasev1.Release)
+		r, ok := rel.(*releasev1.Release)
+		require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
 		t.Logf("Uninstalling release: %s (namespace: %s)", r.Name, r.Namespace)
 		_, _ = uninstall.Run(r.Name)
 		deleteCertSecret(t, clientset, r.Name, r.Namespace)
