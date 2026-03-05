@@ -39,7 +39,7 @@ jobs:
           ./splunk_kubernetes_debug_info.sh
       - name: Upload Kubernetes Cluster debug info
         if: always() && steps.run-e2e.outcome == 'failure'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: k8s-debug-info-instrumentation-cr
           path: tools/splunk_kubernetes_debug_info_*
