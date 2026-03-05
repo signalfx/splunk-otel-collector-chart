@@ -965,8 +965,8 @@ instrumentation:
   # Useful if you want to manage the CR outside of Helm or apply it manually.
   enabled: true
 
-  # Deploy the Instrumentation CR via a Kubernetes Job that waits for webhook
-  # readiness before applying. Recommended for Helm v4 or slow-starting operators.
+  # Deploy the Instrumentation CR via a Kubernetes Job instead of a regular Helm resource.
+  # The Job waits for the operator Deployment to become Available, then applies the CR.
   # See docs/auto-instrumentation-install.md#instrumentation-cr-management
   installationJob:
     enabled: false
@@ -1377,5 +1377,3 @@ featureGates:
   # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
   # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
-  # Deploy the Instrumentation CR via a Kubernetes Job instead of a regular Helm resource.
-  # The Job waits for the operator Deployment to become Available, then applies the CR
