@@ -1,4 +1,15 @@
 {{/*
+Derive the operator subchart's Deployment name by calling the subchart's own
+fullname template with a context that matches what Helm passes to the subchart:
+  .Chart.Name = "operator" (the alias from Chart.yaml)
+  .Values     = the values scoped under the "operator:" key
+  .Release    = the release object (shared with the parent)
+*/}}
+{{- define "splunk-otel-collector.operator.deploymentName" -}}
+{{- include "opentelemetry-operator.fullname" (dict "Chart" (dict "Name" "operator") "Release" .Release "Values" .Values.operator) }}
+{{- end }}
+
+{{/*
 Helper to ensure the correct usage of the Splunk OpenTelemetry Collector Operator.
 - Checks for a valid endpoint for exporting telemetry data.
 - Validates that the operator is configured correctly according to user input and default settings.
@@ -129,6 +140,29 @@ Helper to build entries for instrumentation libraries
       {{- toYaml $mergedLibSpec | nindent 2 -}}
     {{- end -}}
   {{- end }}
+{{- end -}}
+
+{{/* Render the full Instrumentation CR manifest (used by both resource and job modes).
+Includes Helm ownership annotations so Helm can adopt the CR if the user switches
+from installationJob mode back to resource mode. */}}
+{{- define "splunk-otel-collector.operator.instrumentation-cr" -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: {{ include "splunk-otel-collector.fullname" . }}
+  namespace: {{ include "splunk-otel-collector.namespace" . }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ include "splunk-otel-collector.name" . }}
+    component: otel-operator
+    chart: {{ include "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+    app.kubernetes.io/component: otel-operator
+spec:
+{{ include "splunk-otel-collector.operator.instrumentation-spec" . }}
 {{- end -}}
 
 {{/* Helper to build instrumentation spec */}}

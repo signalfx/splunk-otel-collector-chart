@@ -1,0 +1,14 @@
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+clusterName: cr-test
+environment: dev
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+instrumentation:
+  spec:
+    propagators:
+      - tracecontext
+      - baggage

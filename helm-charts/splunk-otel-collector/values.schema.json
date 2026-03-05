@@ -1318,11 +1318,26 @@
       "additionalProperties": true
     },
     "instrumentation": {
-      "spec": {
-        "description": "Instrumentation configuration spec for OpenTelemetry Operator.",
-        "type": "object",
-        "additionalProperties": true
-      }
+      "type": "object",
+      "description": "Instrumentation CR configuration for OpenTelemetry Operator auto-instrumentation.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether to deploy the Instrumentation CR.",
+          "default": true
+        },
+        "installationJob": {
+          "type": "object",
+          "description": "Deploy the Instrumentation CR via a Kubernetes Job that waits for webhook readiness.",
+          "additionalProperties": true
+        },
+        "spec": {
+          "type": "object",
+          "description": "Instrumentation CR spec passed to the OpenTelemetry Operator.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
     },
     "certmanager": {
       "description": "[Deprecated] cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates.",

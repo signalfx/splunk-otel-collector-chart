@@ -1,0 +1,214 @@
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: default-splunk-otel-collector-inst-hook
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.146.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.146.0"
+    app.kubernetes.io/component: instrumentation-job
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-inst-hook
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.146.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.146.0"
+    app.kubernetes.io/component: instrumentation-job
+data:
+  instrumentation.yaml: |
+    apiVersion: opentelemetry.io/v1alpha1
+    kind: Instrumentation
+    metadata:
+      name: default-splunk-otel-collector
+      namespace: default
+      annotations:
+        meta.helm.sh/release-name: "default"
+        meta.helm.sh/release-namespace: "default"
+      labels:
+        app.kubernetes.io/name: splunk-otel-collector
+        helm.sh/chart: splunk-otel-collector-0.146.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: default
+        app.kubernetes.io/version: "0.146.0"
+        app: splunk-otel-collector
+        component: otel-operator
+        chart: splunk-otel-collector-0.146.0
+        release: default
+        app.kubernetes.io/component: otel-operator
+    spec:
+      exporter:
+        endpoint: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4317
+      propagators:
+        - tracecontext
+        - baggage
+        - b3
+      apacheHttpd:
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
+      dotnet:
+        env:
+        - name: OTEL_DOTNET_AUTO_PLUGINS
+          value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
+        - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
+          value: "true"
+        - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
+          value: "false"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=splunk-otel-dotnet:v1.13.0
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+        image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
+      go:
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=autoinstrumentation-go:v0.23.0
+        image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.23.0
+      java:
+        env:
+        - name: OTEL_RESOURCE_DISABLED_KEYS
+          value: process.executable.path,process.command_args
+        - name: OTEL_JAVA_ENABLED_RESOURCE_PROVIDERS
+          value: io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.sdk.autoconfigure.EnvironmentResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=splunk-otel-java:v2.25.1
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+        image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.25.1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+      nginx:
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=autoinstrumentation-apache-httpd:1.0.4
+        image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
+      nodejs:
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=splunk-otel-js:v4.3.0
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+        image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.3.0
+      python:
+        env:
+        - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
+          value: ""
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: splunk.zc.method=splunk-otel-instrumentation-python:v2.7.0
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
+        image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: default-splunk-otel-collector-inst-hook
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.146.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.146.0"
+    app.kubernetes.io/component: instrumentation-job
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["opentelemetry.io"]
+    resources: ["instrumentations"]
+    verbs: ["get", "create", "update", "patch"]
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default-splunk-otel-collector-inst-hook
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.146.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.146.0"
+    app.kubernetes.io/component: instrumentation-job
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: default-splunk-otel-collector-inst-hook
+subjects:
+  - kind: ServiceAccount
+    name: default-splunk-otel-collector-inst-hook
+    namespace: default
+---
+# Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: default-splunk-otel-collector-inst-hook
+  namespace: default
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: splunk-otel-collector-inst-hook
+    spec:
+      serviceAccountName: default-splunk-otel-collector-inst-hook
+      restartPolicy: OnFailure
+      nodeSelector:
+        kubernetes.io/os: linux
+      initContainers:
+        - name: wait-operator
+          image: "registry.k8s.io/kubectl:v1.35.1"
+          command: ["kubectl", "wait", "--for=condition=Available", "--timeout=120s", "deployment/default-operator", "-n", "default"]
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      containers:
+        - name: apply-cr
+          image: "registry.k8s.io/kubectl:v1.35.1"
+          command: ["kubectl", "apply", "-f", "/config/instrumentation.yaml"]
+          volumeMounts:
+            - name: cr-config
+              mountPath: /config
+              readOnly: true
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: cr-config
+          configMap:
+            name: default-splunk-otel-collector-inst-hook

@@ -1,0 +1,77 @@
+suite: splunk-otel-collector.instrumentation
+templates:
+  - "operator/instrumentation.yaml"
+  - "operator/instrumentation-hook-job.yaml"
+release:
+  name: test-release
+
+tests:
+  # --- Resource mode (default) ---
+
+  - it: renders CR as a regular resource by default
+    values:
+      - ./values/instrumentation_method_resource.yaml
+    template: operator/instrumentation.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.annotations["meta.helm.sh/release-name"]
+          value: test-release
+
+  - it: does not render CR when instrumentation.enabled is false
+    values:
+      - ./values/instrumentation_disabled.yaml
+    template: operator/instrumentation.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # --- Job mode (installationJob) ---
+
+  - it: does not render CR resource when installationJob is enabled
+    values:
+      - ./values/instrumentation_hook_job.yaml
+    template: operator/instrumentation.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render job resources when installationJob is disabled
+    values:
+      - ./values/instrumentation_method_resource.yaml
+    template: operator/instrumentation-hook-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders all 5 job resources when installationJob is enabled
+    values:
+      - ./values/instrumentation_hook_job.yaml
+    template: operator/instrumentation-hook-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 5
+
+  - it: Job has correct hook annotations and delete policy
+    values:
+      - ./values/instrumentation_hook_job.yaml
+    template: operator/instrumentation-hook-job.yaml
+    documentIndex: 4
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: post-install,post-upgrade
+      - equal:
+          path: metadata.annotations["helm.sh/hook-delete-policy"]
+          value: before-hook-creation,hook-succeeded
+
+  - it: Job init container waits for the correct operator deployment name
+    values:
+      - ./values/instrumentation_hook_job.yaml
+    template: operator/instrumentation-hook-job.yaml
+    documentIndex: 4
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].command
+          content: "deployment/test-release-operator"

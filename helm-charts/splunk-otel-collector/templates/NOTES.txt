@@ -24,9 +24,26 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
 {{ end }}
 {{- if .Values.operator.enabled }}
-[INFO] You've enabled the operator's auto-instrumentation feature (operator.enabled=true)! The operator can automatically instrument Kubernetes hosted applications.
-  - Status: Instrumentation language maturity varies. See `operator.instrumentation.spec` and documentation for utilized instrumentation details.
-  - Splunk Support: We offer full support for Splunk distributions and best-effort support for native OpenTelemetry distributions of auto-instrumentation libraries.
+[INFO] Auto-instrumentation is enabled (operator.enabled=true).
+{{- if .Values.instrumentation.enabled }}
+
+{{- if .Values.instrumentation.installationJob.enabled }}
+  Instrumentation CR: deployed via Job (instrumentation.installationJob.enabled=true).
+    A Job will wait for the operator Deployment to be Available before creating the CR.
+
+  Uninstall: The CR is NOT deleted by "helm uninstall". Delete it first:
+    kubectl delete otelinst {{ include "splunk-otel-collector.fullname" . }} -n {{ include "splunk-otel-collector.namespace" . }}
+    helm uninstall {{ .Release.Name }} -n {{ include "splunk-otel-collector.namespace" . }}
+
+  Cleanup: Failed Jobs are not removed by "helm uninstall". To remove manually:
+    kubectl delete job {{ include "splunk-otel-collector.fullname" . }}-inst-hook -n {{ include "splunk-otel-collector.namespace" . }}
+{{- else }}
+  Instrumentation CR: deployed as a regular Helm resource.
+{{- end }}
+
+  If the Instrumentation CR was not created, see Troubleshooting:
+  https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#troubleshooting-the-operator
+{{- end }}
 {{- end }}
 {{- if not (eq (toString .Values.gateway.securityContext) "<nil>") }}
 [WARNING] "gateway.securityContext" parameter is deprecated. Please use "gateway.podSecurityContext" instead.
@@ -39,7 +56,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           You can safely remove this parameter from your values.yaml.
 {{ end }}
 {{- if .Values.operator.enabled }}
-{{- $instrKeys := without (keys .Values.instrumentation) "spec" }}
+{{- $instrKeys := without (keys .Values.instrumentation) "spec" "enabled" "installationJob" }}
 {{- if gt (len $instrKeys) 0 }}
 {{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
 {{- end }}

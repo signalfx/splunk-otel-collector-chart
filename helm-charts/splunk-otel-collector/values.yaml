@@ -946,6 +946,8 @@ operator:
   admissionWebhooks:
     autoGenerateCert:
       enabled: true
+      # See docs/auto-instrumentation-install.md#certificate-rotation-recreate-true
+      recreate: false
       certPeriodDays: 3650
     certManager:
       enabled: false
@@ -956,7 +958,31 @@ operator:
 # - OpenTelemetry Documentation: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 # - For all the supported properties spec, see the operator CRDS: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml
 # Not available in EKS Add-on.
+# For Instrumentation CR deployment details and Helm version caveats, see:
+# https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management
 instrumentation:
+  # Set to false to skip deploying the Instrumentation CR entirely.
+  # Useful if you want to manage the CR outside of Helm or apply it manually.
+  enabled: true
+
+  # Deploy the Instrumentation CR via a Kubernetes Job instead of a regular Helm resource.
+  # The Job waits for the operator Deployment to become Available, then applies the CR.
+  # See docs/auto-instrumentation-install.md#instrumentation-cr-management
+  installationJob:
+    enabled: false
+    image:
+      repository: registry.k8s.io/kubectl
+      # Should match your cluster's Kubernetes minor version (±1 supported).
+      tag: "v1.35.1"
+    backoffLimit: 6
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
   spec:
     # Optional "defaults" parameter for configuring default instrumentation behavior across all libraries.
     # See: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md#instrumentationspecdefaults

@@ -15,7 +15,10 @@ operatorcrds:
   install: true
 operator:
   enabled: true
+# See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management
 instrumentation:
+  installationJob:
+    enabled: true
   spec:
     java:
       resources:

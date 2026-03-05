@@ -1,0 +1,7 @@
+instrumentation:
+  spec:
+    propagators:
+      - tracecontext
+      - baggage
+      - b3
+      - ottrace
