@@ -197,7 +197,7 @@ To upgrade a deployment follow the instructions for installing
 but use `upgrade` instead of `install`, for example:
 
 ```bash
-helm upgrade my-splunk-otel-collector --values my_values.yaml
+helm upgrade my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### How to uninstall
@@ -205,7 +205,7 @@ helm upgrade my-splunk-otel-collector --values my_values.yaml
 To uninstall/delete a deployment with name `my-splunk-otel-collector`:
 
 ```bash
-helm delete my-splunk-otel-collector
+helm uninstall my-splunk-otel-collector
 ```
 
 ## Advanced Configuration

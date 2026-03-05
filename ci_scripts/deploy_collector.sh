@@ -7,7 +7,7 @@ echo "Checking if previous deployment exist..."
 if [ "`helm ls --short`" == "" ]; then
    echo "Nothing to clean, ready for deployment"
 else
-   helm delete $(helm ls --short)
+   helm uninstall $(helm ls --short)
 fi
 echo "Deploying Splunk OTel Collector for Kubernetes"
 helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \

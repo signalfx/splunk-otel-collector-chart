@@ -200,7 +200,7 @@ With the assumption your Helm release is named "splunk-otel-collector", we show 
 Use a command like this to delete the chart in your namespace:
 
 ```bash
-helm delete splunk-otel-collector --namespace <your_namespace>
+helm uninstall splunk-otel-collector --namespace <your_namespace>
 ```
 
 #### **Step 2: Verify If the Old Cert Manager Secret Does Not Exists Anymore**
@@ -268,7 +268,7 @@ If you're using chart versions 0.110.0 to 1.113.0, CRDs are likely deployed via 
 Remove the chart to prepare for a fresh installation:
 
 ```bash
-helm delete <release-name>
+helm uninstall <release-name>
 ```
 
 #### Step 2: Verify or Remove Existing CRDs
