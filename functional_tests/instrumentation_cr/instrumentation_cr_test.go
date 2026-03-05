@@ -109,6 +109,7 @@ func helmInstall(t *testing.T, valueFiles ...string) {
 	install.ReleaseName = internal.DefaultChartReleaseName
 	install.WaitStrategy = kube.StatusWatcherStrategy
 	install.Timeout = internal.HelmActionTimeout
+	install.ForceConflicts = false
 	install.Labels = map[string]string{"helm.sh/chart-name": internal.DefaultChartReleaseName}
 	_, err := install.Run(loadChart(t), vals)
 	require.NoError(t, err)
@@ -122,6 +123,7 @@ func helmUpgrade(t *testing.T, valueFiles ...string) {
 	upgrade.Namespace = internal.DefaultNamespace
 	upgrade.WaitStrategy = kube.StatusWatcherStrategy
 	upgrade.Timeout = internal.HelmActionTimeout
+	upgrade.ForceConflicts = false
 	_, err := upgrade.Run(internal.DefaultChartReleaseName, loadChart(t), vals)
 	require.NoError(t, err)
 }
@@ -174,6 +176,7 @@ func helmUpgradeInstall(t *testing.T, valueFiles ...string) {
 	upgrade.Namespace = internal.DefaultNamespace
 	upgrade.WaitStrategy = kube.StatusWatcherStrategy
 	upgrade.Timeout = internal.HelmActionTimeout
+	upgrade.ForceConflicts = false
 	_, err := upgrade.Run(internal.DefaultChartReleaseName, loadChart(t), vals)
 	require.NoError(t, err)
 }
@@ -191,6 +194,7 @@ func tryInstallOrRecover(t *testing.T, cs *kubernetes.Clientset, valueFiles ...s
 	install.ReleaseName = internal.DefaultChartReleaseName
 	install.WaitStrategy = kube.StatusWatcherStrategy
 	install.Timeout = internal.HelmActionTimeout
+	install.ForceConflicts = false
 	install.Labels = map[string]string{"helm.sh/chart-name": internal.DefaultChartReleaseName}
 	_, installErr := install.Run(loadChart(t), vals)
 	if installErr == nil {
