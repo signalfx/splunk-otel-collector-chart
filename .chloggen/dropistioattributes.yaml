@@ -3,7 +3,7 @@ change_type: bug_fix
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: "Drop more Istio metric attributes"
+note: "Drop `destination_service_namespace` from Istio metric attributes"
 # One or more tracking issues related to the change
 issues: [2275]
 # (Optional) One or more lines of additional information to render under the primary note.
@@ -11,6 +11,5 @@ issues: [2275]
 # Use pipe (|) for multiline entries.
 subtext: |
   Users running the chart with `autodetect` enabled have hit the dimension limit
-  for Istio metrics. This fix drops more metric dimensions to avoid hitting the dimension
-  limit and dropping the data point entirely. Attributes dropped by this change are
-  `source_workload_namespace` and `destination_workload_namespace`.
+  for Istio metrics. This fix drops the `destination_service_namespace` metric
+  dimension to avoid hitting the dimension limit and dropping the data point entirely.

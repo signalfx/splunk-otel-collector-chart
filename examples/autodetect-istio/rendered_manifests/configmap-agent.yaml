@@ -93,9 +93,7 @@ data:
         - action: delete
           key: destination_canonical_revision
         - action: delete
-          key: source_workload_namespace
-        - action: delete
-          key: destination_workload_namespace
+          key: destination_service_namespace
         include:
           match_type: regexp
           metric_names:
