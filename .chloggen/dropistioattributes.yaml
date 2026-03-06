@@ -10,7 +10,7 @@ issues: [2275]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Users running the chart with `autodetect:istio: true` have hit the dimension limit
+  Users running the chart with `autodetect.istio: true` have hit the dimension limit
   with Istio metrics. This fix drops more metric dimensions to avoid hitting the dimension
   limit and dropping the data point entirely. Attributes dropped by this change are
   `server.port` and `url.scheme`.
