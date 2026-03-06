@@ -374,7 +374,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 					}
 				default:
 					continue
-
 				}
 			}
 		}
