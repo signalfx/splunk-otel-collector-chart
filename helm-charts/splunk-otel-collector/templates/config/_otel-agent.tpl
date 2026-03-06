@@ -954,10 +954,12 @@ processors:
       metric_names:
         - istio_.*
     actions:
+      {{- if .Values.autodetect.istio }}
       - action: delete
         key: server.port
       - action: delete
         key: url.scheme
+      {{- end }}
       - action: delete
         key: source_cluster
       - action: delete
