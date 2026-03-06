@@ -81,10 +81,6 @@ data:
       attributes/istio:
         actions:
         - action: delete
-          key: server.port
-        - action: delete
-          key: url.scheme
-        - action: delete
           key: source_cluster
         - action: delete
           key: destination_cluster
@@ -96,6 +92,10 @@ data:
           key: source_canonical_revision
         - action: delete
           key: destination_canonical_revision
+        - action: delete
+          key: source_workload_namespace
+        - action: delete
+          key: destination_workload_namespace
         include:
           match_type: regexp
           metric_names:

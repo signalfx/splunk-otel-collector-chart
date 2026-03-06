@@ -954,12 +954,6 @@ processors:
       metric_names:
         - istio_.*
     actions:
-      {{- if .Values.autodetect.istio }}
-      - action: delete
-        key: server.port
-      - action: delete
-        key: url.scheme
-      {{- end }}
       - action: delete
         key: source_cluster
       - action: delete
@@ -972,6 +966,10 @@ processors:
         key: source_canonical_revision
       - action: delete
         key: destination_canonical_revision
+      - action: delete
+        key: source_workload_namespace
+      - action: delete
+        key: destination_workload_namespace
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
