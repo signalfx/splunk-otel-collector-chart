@@ -955,6 +955,10 @@ processors:
         - istio_.*
     actions:
       - action: delete
+        key: server.port
+      - action: delete
+        key: url.scheme
+      - action: delete
         key: source_cluster
       - action: delete
         key: destination_cluster
