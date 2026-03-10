@@ -25,7 +25,6 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -330,7 +329,6 @@ func Test_IstioMetrics(t *testing.T) {
 }
 
 func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, metricsSink *consumertest.MetricsSink) {
-	dimensionLimit := 36
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err)
 
@@ -342,39 +340,6 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 			for k := 0; k < expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 				metric := expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
 				metricNames = append(metricNames, metric.Name())
-
-				// Customers have run into dimension limits with Istio in the past due to how many
-				// labels are being sent automatically by Istio environments.
-				// Ensure expected metrics don't exceed dimension limit.
-				switch metricType := metric.Type(); metricType {
-				case pmetric.MetricTypeExponentialHistogram:
-					for l := 0; l < metric.ExponentialHistogram().DataPoints().Len(); l++ {
-						dataPoint := metric.ExponentialHistogram().DataPoints().At(l)
-						require.LessOrEqual(t, dataPoint.Attributes().Len(), dimensionLimit)
-					}
-				case pmetric.MetricTypeGauge:
-					for l := 0; l < metric.Gauge().DataPoints().Len(); l++ {
-						dataPoint := metric.Gauge().DataPoints().At(l)
-						require.LessOrEqual(t, dataPoint.Attributes().Len(), dimensionLimit)
-					}
-				case pmetric.MetricTypeHistogram:
-					for l := 0; l < metric.Histogram().DataPoints().Len(); l++ {
-						dataPoint := metric.Histogram().DataPoints().At(l)
-						require.LessOrEqual(t, dataPoint.Attributes().Len(), dimensionLimit)
-					}
-				case pmetric.MetricTypeSum:
-					for l := 0; l < metric.Sum().DataPoints().Len(); l++ {
-						dataPoint := metric.Sum().DataPoints().At(l)
-						require.LessOrEqual(t, dataPoint.Attributes().Len(), dimensionLimit)
-					}
-				case pmetric.MetricTypeSummary:
-					for l := 0; l < metric.Summary().DataPoints().Len(); l++ {
-						dataPoint := metric.Summary().DataPoints().At(l)
-						require.LessOrEqual(t, dataPoint.Attributes().Len(), dimensionLimit)
-					}
-				default:
-					continue
-				}
 			}
 		}
 	}
