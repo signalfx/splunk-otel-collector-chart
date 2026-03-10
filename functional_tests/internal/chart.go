@@ -86,6 +86,12 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
+		if err != nil {
+			cmd := exec.Command("kubectl", "get", "pods", "--all-namespaces")
+			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+			output, _ := cmd.CombinedOutput()
+			t.Logf("kubectl get pods --all-namespaces: %s", string(output))
+		}
 		require.NoError(t, err)
 
 		// Helm upgrade does not install or update CRDs, so apply them
