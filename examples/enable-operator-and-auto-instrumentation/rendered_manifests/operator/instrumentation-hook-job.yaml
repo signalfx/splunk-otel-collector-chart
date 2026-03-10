@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.147.1"
     app.kubernetes.io/component: instrumentation-job
 ---
 # Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
@@ -25,7 +25,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.147.1"
     app.kubernetes.io/component: instrumentation-job
 data:
   instrumentation.yaml: |
@@ -42,7 +42,7 @@ data:
         helm.sh/chart: splunk-otel-collector-0.147.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: default
-        app.kubernetes.io/version: "0.147.0"
+        app.kubernetes.io/version: "0.147.1"
         app: splunk-otel-collector
         component: otel-operator
         chart: splunk-otel-collector-0.147.1
@@ -129,7 +129,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.147.1"
     app.kubernetes.io/component: instrumentation-job
 rules:
   - apiGroups: ["apps"]
@@ -150,7 +150,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.147.1"
     app.kubernetes.io/component: instrumentation-job
 roleRef:
   apiGroup: rbac.authorization.k8s.io
