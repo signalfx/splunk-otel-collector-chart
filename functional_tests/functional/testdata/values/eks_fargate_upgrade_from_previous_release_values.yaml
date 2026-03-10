@@ -8,4 +8,7 @@ distribution: eks/fargate
 operatorcrds:
   install: true
 operator:
-  enabled: false
+  enabled: true
+instrumentation:
+  installationJob:
+    enabled: true
