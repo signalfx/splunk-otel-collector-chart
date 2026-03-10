@@ -966,8 +966,6 @@ processors:
         key: source_canonical_revision
       - action: delete
         key: destination_canonical_revision
-      - action: delete
-        key: destination_service_namespace
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
