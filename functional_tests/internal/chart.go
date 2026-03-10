@@ -93,7 +93,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 			output, _ := cmd.CombinedOutput()
 			t.Logf("kubectl get pods --all-namespaces: %s", string(output))
 
-			re := regexp.MustCompile("sock-splunk-otel-collector-agent-*")
+			re := regexp.MustCompile("sock-splunk-otel-collector-agent-\\S*")
 			agentPodName := re.FindString(string(output))
 			t.Logf("agentPodName: %s", agentPodName)
 
