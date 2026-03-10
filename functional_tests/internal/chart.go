@@ -91,6 +91,21 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
 			output, _ := cmd.CombinedOutput()
 			t.Logf("kubectl get pods --all-namespaces: %s", string(output))
+
+			cmd = exec.Command("kubectl", "describe", "pods", "-l", "app=splunk-otel-collector")
+			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+			output, _ = cmd.CombinedOutput()
+			t.Logf("kubectl describe pods -l app=splunk-otel-collector: %s", string(output))
+
+			cmd = exec.Command("kubectl get pods -l app=splunk-otel-collector -o name --no-headers | cut -d/ -f2 | head -1")
+			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+			output, _ = cmd.CombinedOutput()
+			t.Logf("pod name: %s", string(output))
+
+			cmd = exec.Command("kubectl", "logs", string(output))
+			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+			output, _ = cmd.CombinedOutput()
+			t.Logf("kubectl logs: %s", string(output))
 		}
 		require.NoError(t, err)
 
