@@ -3,7 +3,7 @@ change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Replace smartagent control plane monitors with native Prometheus receivers
+note: Replace Smart Agent control plane monitors with native Prometheus receivers
 # One or more tracking issues related to the change
 issues: [2266]
 # (Optional) One or more lines of additional information to render under the primary note.
@@ -11,5 +11,4 @@ issues: [2266]
 # Use pipe (|) for multiline entries.
 subtext: |
   This only impacts configurations that set the feature gate `useControlPlaneMetricsHistogramData: false`.
-  Metrics coming from the Kubernetes control plane will now be in the form of histograms when relevant, even
-  with the feature gate disabled. The `smartagent` monitors are on the path to deprecation.
+  The `smartagent` monitors are on the path to deprecation.
