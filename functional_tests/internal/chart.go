@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	HelmActionTimeout       = 15 * time.Minute
+	HelmActionTimeout       = 5 * time.Minute
 	DefaultChartReleaseName = "sock"
 	chartLabelKey           = "helm.sh/chart-name"
 	defaultChartPath        = "helm-charts/splunk-otel-collector"
@@ -97,14 +97,20 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 			output, _ = cmd.CombinedOutput()
 			t.Logf("kubectl describe pods -l app=splunk-otel-collector: %s", string(output))
 
-			cmd = exec.Command("kubectl get pods -l app=splunk-otel-collector -o name --no-headers | cut -d/ -f2 | head -1")
+			cmd = exec.Command("kubectl", "get", "pods", "--no-headers", "|", "grep", "'^sock-splunk-otel-collector-agent'", "|", "awk", "'{print $1}'", "|", "head", "-1")
 			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
-			output, _ = cmd.CombinedOutput()
+			output, err = cmd.CombinedOutput()
+			if err != nil {
+				t.Logf("Err: %v", err)
+			}
 			t.Logf("pod name: %s", string(output))
 
 			cmd = exec.Command("kubectl", "logs", string(output))
 			cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
-			output, _ = cmd.CombinedOutput()
+			output, err = cmd.CombinedOutput()
+			if err != nil {
+				t.Logf("Err: %v", err)
+			}
 			t.Logf("kubectl logs: %s", string(output))
 		}
 		require.NoError(t, err)
