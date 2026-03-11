@@ -93,6 +93,16 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		output, _ := cmd.CombinedOutput()
 		t.Logf("kubectl get pods --all-namespaces: %s", string(output))
 
+		cmd = exec.Command("kubectl", "get", "cm")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ = cmd.CombinedOutput()
+		t.Logf("kubectl get cm: %s", string(output))
+
+		cmd = exec.Command("kubectl", "describe", "cm/sock-splunk-otel-collector-otel-agent")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ = cmd.CombinedOutput()
+		t.Logf("kubectl get cm: %s", string(output))
+
 		re := regexp.MustCompile("sock-splunk-otel-collector-agent-\\S*")
 		agentPodName := re.FindString(string(output))
 		t.Logf("agentPodName: %s", agentPodName)
@@ -127,6 +137,38 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	} else {
 		t.Log("Running helm install")
 		_, err = install.Run(loadChart(t), values)
+
+		cmd := exec.Command("kubectl", "get", "pods", "--all-namespaces")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ := cmd.CombinedOutput()
+		t.Logf("kubectl get pods --all-namespaces: %s", string(output))
+
+		cmd = exec.Command("kubectl", "get", "cm")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ = cmd.CombinedOutput()
+		t.Logf("kubectl get cm: %s", string(output))
+
+		cmd = exec.Command("kubectl", "describe", "cm/sock-splunk-otel-collector-otel-agent")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ = cmd.CombinedOutput()
+		t.Logf("kubectl get cm: %s", string(output))
+
+		re := regexp.MustCompile("sock-splunk-otel-collector-agent-\\S*")
+		agentPodName := re.FindString(string(output))
+		t.Logf("agentPodName: %s", agentPodName)
+
+		cmd = exec.Command("kubectl", "describe", "pods", "-l", "app=splunk-otel-collector")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, _ = cmd.CombinedOutput()
+		t.Logf("kubectl describe pods -l app=splunk-otel-collector: %s", string(output))
+
+		cmd = exec.Command("kubectl", "logs", string(agentPodName))
+		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			t.Logf("Err: %v", err)
+		}
+		t.Logf("kubectl logs: %s", string(output))
 	}
 	require.NoError(t, err)
 
