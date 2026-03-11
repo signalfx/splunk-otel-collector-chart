@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.147.1] - 2026-03-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Revert change in `v0.147.0` that dropped `destination_service_namespace` from Istio metric attributes ([#2279](https://github.com/signalfx/splunk-otel-collector-chart/pull/2279))
+- `agent, clusterReceiver, gateway`: Remove reference to a removed Google Kubernetes Engine (GKE) attribute in the resource detection processor ([#2282](https://github.com/signalfx/splunk-otel-collector-chart/pull/2282))
+  The `faas.id` attribute has been removed in favor of `faas.instance`. Referencing this
+  attribute in the processor configuration was causing upgrades to fail in GKE environments
+  when `clusterName` is not set in `values.yaml`.
+  
+
 ## [0.147.0] - 2026-03-10
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
