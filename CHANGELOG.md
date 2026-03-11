@@ -22,7 +22,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 ### ❗ Known Issues ❗
 
-- `GKE`: This version is broken in GKE environments when `clusterName` is set in `values.yaml`. For this distribution,
+- `GKE`: This version is broken in GKE environments when `clusterName` is not set in `values.yaml`. For this distribution,
   please skip this release in favor of `v0.147.1`.
 
 ### 🛑 Breaking changes 🛑
