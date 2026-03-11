@@ -143,8 +143,6 @@ resourcedetection/k8s_cluster_name:
         enabled: false
       faas.version:
         enabled: false
-      faas.id:
-        enabled: false
       faas.instance:
         enabled: false
       gcp.cloud_run.job.execution:
