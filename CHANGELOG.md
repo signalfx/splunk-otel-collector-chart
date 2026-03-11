@@ -4,9 +4,26 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.147.1] - 2026-03-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`, `clusterReceiver`, `gateway`: Remove reference to a removed Google Kubernetes Engine (GKE) attribute in the resource detection processor ([#2282](https://github.com/signalfx/splunk-otel-collector-chart/pull/2282))
+  The `faas.id` attribute has been removed in favor of `faas.instance`. Referencing this
+  attribute in the processor configuration was causing upgrades to fail in GKE environments
+  when `clusterName` is not set in `values.yaml`.
+- `agent`: Revert change in `v0.147.0` that dropped `destination_service_namespace` from Istio metric attributes ([#2279](https://github.com/signalfx/splunk-otel-collector-chart/pull/2279))
+
 ## [0.147.0] - 2026-03-10
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
+
+### ❗ Known Issues ❗
+
+- `GKE`: This version is broken in GKE environments when `clusterName` is not set in `values.yaml`. For this distribution,
+  please skip this release in favor of `v0.147.1`.
 
 ### 🛑 Breaking changes 🛑
 
@@ -25,12 +42,17 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
       autoGenerateCert:
         recreate: true
   ```
-  
+
   Note: `manager.rolling: true` is recommended with `recreate: true` — it restarts the operator
   pod so it loads the new certificate promptly. Without it, there is a delay before the
   webhook server picks up the new cert, during which Instrumentation CR requests may fail
   with x509 errors.
-  
+
+- `agent`: Drop `destination_service_namespace` from Istio metric attributes ([#2275](https://github.com/signalfx/splunk-otel-collector-chart/pull/2275))
+  Users running the chart with `autodetect` enabled have hit the dimension limit
+  for Istio metrics. This fix drops the `destination_service_namespace` metric
+  dimension to avoid hitting the dimension limit and dropping the data point entirely.
+
 
 ### 💡 Enhancements 💡
 
@@ -39,17 +61,12 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   `instrumentation.installationJob.enabled` deploys the CR via a Kubernetes Job that waits
   for webhook readiness before applying the CR, with built-in retry. This is the recommended
   option for Helm v4 or environments with slow operator startup.
-  
+
   See [Auto-instrumentation Install](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management) for details.
-  
+
 
 ### 🧰 Bug fixes 🧰
 
-- `agent`: Drop `destination_service_namespace` from Istio metric attributes ([#2275](https://github.com/signalfx/splunk-otel-collector-chart/pull/2275))
-  Users running the chart with `autodetect` enabled have hit the dimension limit
-  for Istio metrics. This fix drops the `destination_service_namespace` metric
-  dimension to avoid hitting the dimension limit and dropping the data point entirely.
-  
 - `eks_addon`: Fixed journald receiver issues in the EKS Add-on by mounting required shared library paths used by journalctl and aligning the directory structure with EKS node conventions. ([#2260](https://github.com/signalfx/splunk-otel-collector-chart/pull/2260))
 
 ## [0.146.0] - 2026-03-04

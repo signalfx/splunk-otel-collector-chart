@@ -8,7 +8,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.0
+    helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.147.0"
@@ -22,7 +22,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.0
+    helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.147.0"
@@ -39,13 +39,13 @@ data:
         meta.helm.sh/release-namespace: "default"
       labels:
         app.kubernetes.io/name: splunk-otel-collector
-        helm.sh/chart: splunk-otel-collector-0.147.0
+        helm.sh/chart: splunk-otel-collector-0.147.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: default
         app.kubernetes.io/version: "0.147.0"
         app: splunk-otel-collector
         component: otel-operator
-        chart: splunk-otel-collector-0.147.0
+        chart: splunk-otel-collector-0.147.1
         release: default
         app.kubernetes.io/component: otel-operator
     spec:
@@ -126,7 +126,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.0
+    helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.147.0"
@@ -147,7 +147,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.0
+    helm.sh/chart: splunk-otel-collector-0.147.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.147.0"
