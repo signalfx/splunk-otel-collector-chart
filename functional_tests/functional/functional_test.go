@@ -669,9 +669,10 @@ func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) 
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
 	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
-	attrs.Range(func(k string, _ pcommon.Value) bool {
+	attrs.Range(func(k string, v pcommon.Value) bool {
 		for _, skipKey := range skipKeys {
 			if k == skipKey {
+				t.Logf("Hit skip key %s, value: %s", k, v.Str())
 				return true
 			}
 		}
