@@ -282,6 +282,14 @@ exporters:
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
+  {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+  otlphttp/o11y_entities:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": k8sentities
+  {{- end }}
+
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
@@ -473,6 +481,22 @@ service:
         - resource
       exporters:
         - signalfx/histograms
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+    # [EXPERIMENTAL] k8s entities pipeline: sends k8s_cluster receiver data to Splunk Observability v3/event endpoint.
+    logs/k8s_entities:
+      receivers:
+        - k8s_cluster
+      processors:
+        - memory_limiter
+        - batch
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        - resource
+      exporters:
+        - otlphttp/o11y_entities
     {{- end }}
 
 {{- end }}

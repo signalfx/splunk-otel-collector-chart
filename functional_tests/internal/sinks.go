@@ -215,6 +215,35 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	return ls
 }
 
+// SetupOTLPLogsSinkOnPort starts an OTLP HTTP logs receiver on the given port that only
+// accepts logs POSTed to the specified URL path (e.g. "/v3/event"). No GRPC listener is
+// started so the port is dedicated to a single HTTP path.
+func SetupOTLPLogsSinkOnPort(t *testing.T, port int, logsPath string) *consumertest.LogsSink {
+	ls := new(consumertest.LogsSink)
+	f := otlpreceiver.NewFactory()
+	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
+	cfg.GRPC = configoptional.None[configgrpc.ServerConfig]()
+	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+		ServerConfig: confighttp.ServerConfig{
+			NetAddr: confignet.AddrConfig{
+				Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
+				Transport: "tcp",
+			},
+		},
+		LogsURLPath: otlpreceiver.SanitizedURLPath(logsPath),
+	})
+
+	rcvr, err := f.CreateLogs(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, ls)
+	require.NoError(t, err)
+
+	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
+	t.Cleanup(func() {
+		require.NoError(t, rcvr.Shutdown(t.Context()))
+	})
+
+	return ls
+}
+
 func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
