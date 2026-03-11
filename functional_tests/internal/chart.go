@@ -86,7 +86,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		var initValues map[string]any
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
-		_, err2 = install.Run(initChart, initValues)
+		_, err2 := install.Run(initChart, initValues)
 
 		cmd := exec.Command("kubectl", "get", "pods", "--all-namespaces")
 		cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
