@@ -189,6 +189,11 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/istio:
+        error_mode: ignore
+        metric_statements:
+        - delete_keys(resource.attributes, ["server.address", "server.port"]) where resource.attributes["service.name"]
+          == "istio"
       transform/istio_service_name:
         error_mode: ignore
         log_statements:
@@ -540,6 +545,7 @@ data:
           - memory_limiter
           - batch
           - attributes/istio
+          - transform/istio
           - resourcedetection
           - resource
           receivers:
