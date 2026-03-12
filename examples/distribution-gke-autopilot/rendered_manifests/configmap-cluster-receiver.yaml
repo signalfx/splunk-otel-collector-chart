@@ -37,9 +37,6 @@ data:
         - action: insert
           key: metric_source
           value: kubernetes
-        - action: upsert
-          key: k8s.cluster.name
-          value: CHANGEME
       resource/add_collector_k8s:
         attributes:
         - action: insert
@@ -69,6 +66,49 @@ data:
         - env
         - gcp
         - system
+        gcp:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
+        override: true
+        timeout: 15s
+      resourcedetection/k8s_cluster_name:
+        detectors:
+        - gcp
+        gcp:
+          resource_attributes:
+            cloud.account.id:
+              enabled: false
+            cloud.availability_zone:
+              enabled: false
+            cloud.platform:
+              enabled: false
+            cloud.provider:
+              enabled: false
+            cloud.region:
+              enabled: false
+            faas.instance:
+              enabled: false
+            faas.name:
+              enabled: false
+            faas.version:
+              enabled: false
+            gcp.cloud_run.job.execution:
+              enabled: false
+            gcp.cloud_run.job.task_index:
+              enabled: false
+            gcp.gce.instance.hostname:
+              enabled: false
+            gcp.gce.instance.name:
+              enabled: false
+            host.id:
+              enabled: false
+            host.name:
+              enabled: false
+            host.type:
+              enabled: false
+            k8s.cluster.name:
+              enabled: true
         override: true
         timeout: 15s
       transform/k8shpascaletargetref:
@@ -135,6 +175,7 @@ data:
           - memory_limiter
           - batch
           - transform/k8shpascaletargetref
+          - resourcedetection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:
