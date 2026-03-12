@@ -348,7 +348,7 @@ To delete the SCK deployment, find the name of the deployment using the `helm ls
 
 * **If you want to delete your entire SCK deployment (logs, objects and metrics), run the following command**
 
-  * helm delete local-k8s
+  * helm uninstall local-k8s
 
 ## Step 3: Installing Splunk OpenTelemetry Collector for Kubernetes
 

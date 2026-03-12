@@ -36,7 +36,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.18.0
+          version: v4.1.1
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
 
       - name: Set up chart dependencies
@@ -52,7 +52,7 @@ jobs:
         uses: ./.github/actions/run-precommit
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@v1.8.1
         with:
           charts_dir: helm-charts
           config: .github/workflows/configs/cr.yaml
