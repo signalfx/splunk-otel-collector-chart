@@ -257,13 +257,12 @@ func deleteAllCRs(ctx context.Context, t *testing.T, dynClient dynamic.Interface
 			Resource: crd.Spec.Names.Plural,
 		}
 		err := dynClient.Resource(gvr).Namespace("").DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
+		if err != nil && !k8serrors.IsNotFound(err) {
+			t.Logf("Failed to delete CRs for %s (version %s), trying next version: %v", crd.Name, ver.Name, err)
+			continue
+		}
 		if err != nil {
-			if k8serrors.IsNotFound(err) {
-				t.Logf("No %s CRs found to delete (version %s)", crd.Name, ver.Name)
-			} else {
-				t.Logf("Failed to delete CRs for %s (version %s), trying next version: %v", crd.Name, ver.Name, err)
-				continue
-			}
+			t.Logf("No %s CRs found to delete (version %s)", crd.Name, ver.Name)
 		} else {
 			t.Logf("Deleted all %s CRs (version %s)", crd.Name, ver.Name)
 		}
