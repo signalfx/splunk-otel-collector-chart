@@ -986,7 +986,8 @@ processors:
   transform/istio:
     error_mode: ignore
     metric_statements:
-      - delete_keys(resource.attributes, ["server.address", "server.port"]) where resource.attributes["service.name"] == "istio"
+      - delete_key(resource.attributes, "server.address") where resource.attributes["service.name"] == "istio"
+      - delete_key(resource.attributes, "server.port") where resource.attributes["service.name"] == "istio"
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
