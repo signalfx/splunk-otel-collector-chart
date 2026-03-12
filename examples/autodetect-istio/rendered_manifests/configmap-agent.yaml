@@ -192,7 +192,9 @@ data:
       transform/istio:
         error_mode: ignore
         metric_statements:
-        - delete_keys(resource.attributes, ["server.address", "server.port"]) where resource.attributes["service.name"]
+        - delete_key(resource.attributes, "server.address") where resource.attributes["service.name"]
+          == "istio"
+        - delete_key(resource.attributes, "server.port") where resource.attributes["service.name"]
           == "istio"
       transform/istio_service_name:
         error_mode: ignore
