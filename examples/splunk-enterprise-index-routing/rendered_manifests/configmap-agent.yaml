@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: http://localhost:8088/services/collector

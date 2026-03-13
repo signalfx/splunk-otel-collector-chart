@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       otlp:
         auth:
           authenticator: headers_setter
@@ -392,6 +394,7 @@ data:
           - receiver_creator
         traces:
           exporters:
+          - debug
           - otlp
           - signalfx
           processors:

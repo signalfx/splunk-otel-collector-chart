@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       splunk_hec/platform_metrics:
         disable_compression: true
         endpoint: CHANGEME

@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       splunk_hec/platform_logs:
         disable_compression: true
         endpoint: CHANGEME
@@ -458,6 +460,7 @@ data:
           - prometheus/agent
         traces:
           exporters:
+          - debug
           - splunk_hec/platform_traces
           processors:
           - memory_limiter

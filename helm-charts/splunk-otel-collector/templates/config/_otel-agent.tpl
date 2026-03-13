@@ -974,6 +974,8 @@ processors:
 # using the otlphttp exporter.
 # These values should not be specified manually and will be set in the templates.
 exporters:
+  debug:
+    verbosity: detailed
 
   {{- if .Values.gateway.enabled }}
   # If gateway is enabled, metrics, logs and traces will be sent to the gateway
@@ -1240,6 +1242,7 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
+        - debug
         {{- if .Values.gateway.enabled }}
         - otlp
         {{- else }}

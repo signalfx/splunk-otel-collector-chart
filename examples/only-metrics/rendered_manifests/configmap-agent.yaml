@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       otlphttp/entities:
         auth:
           authenticator: headers_setter

@@ -17,6 +17,8 @@ metadata:
 data:
   relay: |
     exporters:
+      debug:
+        verbosity: detailed
       otlphttp:
         auth:
           authenticator: headers_setter
@@ -214,6 +216,7 @@ data:
           - prometheus/agent
         traces:
           exporters:
+          - debug
           - otlphttp
           processors:
           - memory_limiter
