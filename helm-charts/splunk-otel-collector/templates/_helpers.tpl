@@ -509,3 +509,15 @@ Usage:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Returns true if a separate pipeline for autodetected Prometheus or Istio metrics is required
+*/}}
+{{- define "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" -}}
+{{- and
+  (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+  (and
+    (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
+    (or .Values.autodetect.prometheus .Values.autodetect.istio))
+-}}
+{{- end -}}
