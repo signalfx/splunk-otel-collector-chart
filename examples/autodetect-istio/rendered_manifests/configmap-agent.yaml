@@ -16,6 +16,8 @@ metadata:
     release: default
 data:
   relay: |
+    connectors:
+      forward: null
     exporters:
       otlphttp:
         auth:
@@ -544,8 +546,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - attributes/istio
-          - transform/istio
           - resourcedetection
           - resource
           receivers:
