@@ -1094,11 +1094,12 @@ exporters:
   {{- end }}
   {{- end }}
 
+connectors:
+  forward:
 {{- if and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
   (.Values.splunkObservability.secureAppEnabled)
 }}
-connectors:
   routing/logs:
     default_pipelines: [logs]
     table:
@@ -1278,6 +1279,27 @@ service:
         {{- end }}
     {{- end }}
 
+    {{- if and
+      (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+      (and
+        (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
+        (or .Values.autodetect.prometheus .Values.autodetect.istio)) }}
+    metrics/prometheus:
+       receivers:
+        - receiver_creator
+       processors:
+        - memory_limiter
+        - batch
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        {{- end }}
+        {{- if .Values.autodetect.istio }}
+        - transform/istio
+        {{- end }}
+       exporters:
+        - forward
+    {{- end }}
+
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
@@ -1285,8 +1307,14 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        {{- if and
+          (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+          (and
+            (not .Values.autodetect.prometheus)
+            (not .Values.autodetect.istio)) }}
         - receiver_creator
+        {{- else if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        - forward
         {{- end }}
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
@@ -1294,10 +1322,6 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-        - attributes/istio
-        - transform/istio
-        {{- end }}
         - resourcedetection
         - resource
         {{/*
