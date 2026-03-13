@@ -17,8 +17,6 @@ metadata:
 data:
   relay: |
     exporters:
-      debug:
-        verbosity: detailed
       otlp:
         endpoint: <custom-gateway-url>:4317
         tls:

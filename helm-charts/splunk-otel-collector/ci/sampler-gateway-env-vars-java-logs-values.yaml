@@ -4,6 +4,10 @@ splunkPlatform:
   token: CHANGEME
   logsEnabled: true
 
+splunkObservability:
+  realm: fake-realm
+  accessToken: fake-token
+
 agent:
   config:
     processors:
