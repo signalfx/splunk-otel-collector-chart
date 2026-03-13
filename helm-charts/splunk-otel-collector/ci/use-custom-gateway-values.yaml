@@ -8,7 +8,8 @@ agent:
     exporters:
       otlp:
         endpoint: 192.168.0.10:4317
-        insecure: true
+        tls:
+          insecure: true
       signalfx:
         ingest_url: http://192.168.0.10:9943
         api_url: http://192.168.0.10:6060
