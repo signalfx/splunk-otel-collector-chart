@@ -966,6 +966,15 @@ processors:
         key: source_canonical_revision
       - action: delete
         key: destination_canonical_revision
+
+  # This processor is used to remove excessive attributes from Istio metrics to avoid running into the dimensions limit.
+  # These attributes are resource attributes coming from Prometheus scraping, which are eventually converted into
+  # data point attributes in the SignalFx exporter, counting against the dimension limit.
+  transform/istio:
+    error_mode: ignore
+    metric_statements:
+      - delete_key(resource.attributes, "server.address")
+      - delete_key(resource.attributes, "server.port")
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
@@ -1072,11 +1081,21 @@ exporters:
   {{- end }}
   {{- end }}
 
+{{- if or
+  (and
+    (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+    (.Values.splunkObservability.secureAppEnabled))
+  (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true")
+}}
+connectors:
+{{- end }}
+{{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
+  forward:
+{{- end }}
 {{- if and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
   (.Values.splunkObservability.secureAppEnabled)
 }}
-connectors:
   routing/logs:
     default_pipelines: [logs]
     table:
@@ -1256,6 +1275,14 @@ service:
         {{- end }}
     {{- end }}
 
+    {{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
+    metrics/prometheus:
+       receivers:
+        - receiver_creator
+       exporters:
+        - forward
+    {{- end }}
+
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     # Default metrics pipeline.
     metrics:
@@ -1263,7 +1290,9 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        {{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
+        - forward
+        {{- else if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
         {{- if .Values.targetAllocator.enabled  }}
@@ -1274,6 +1303,7 @@ service:
         - batch
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
+        - transform/istio
         {{- end }}
         - resourcedetection
         - resource
