@@ -300,12 +300,20 @@ Whether k8s events sending to Splunk Observability events/v3 endpoint is enabled
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.clusterReceiver.eventsEnabled .Values.featureGates.sendK8sEventsToSplunkO11y -}}
 {{- end -}}
 
+{{/*
+[EXPERIMENTAL] Whether the k8s entities pipeline is enabled.
+Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via otlphttp.
+*/}}
+{{- define "splunk-otel-collector.k8sEntitiesEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.enableK8sEntities -}}
+{{- end -}}
+
 
 {{/*
 Whether clusterReceiver should be enabled
 */}}
 {{- define "splunk-otel-collector.clusterReceiverEnabled" -}}
-{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
+{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") (eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true")) -}}
 {{- end -}}
 
 

@@ -1377,3 +1377,8 @@ featureGates:
   # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
   # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
+  # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
+  # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlphttp.
+  # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
+  # This feature is experimental and may change or be removed in future releases.
+  enableK8sEntities: false
