@@ -1094,8 +1094,25 @@ exporters:
   {{- end }}
   {{- end }}
 
+{{- if or
+  (and
+    (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
+    (.Values.splunkObservability.secureAppEnabled))
+  (and
+    (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+    (and
+      (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
+      (or .Values.autodetect.prometheus .Values.autodetect.istio)))
+}}
 connectors:
+{{- end }}
+{{- if and
+  (not .Values.featureGates.useControlPlaneMetricsHistogramData)
+  (and
+    (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
+    (or .Values.autodetect.prometheus .Values.autodetect.istio)) }}
   forward:
+{{- end }}
 {{- if and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
   (.Values.splunkObservability.secureAppEnabled)
