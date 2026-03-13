@@ -16,8 +16,6 @@ metadata:
     release: default
 data:
   relay: |
-    connectors:
-      forward: null
     exporters:
       splunk_hec/platform_logs:
         disable_compression: true
