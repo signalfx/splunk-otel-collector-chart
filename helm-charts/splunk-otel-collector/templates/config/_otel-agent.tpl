@@ -1085,19 +1085,11 @@ exporters:
   (and
     (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
     (.Values.splunkObservability.secureAppEnabled))
-  (and
-    (not .Values.featureGates.useControlPlaneMetricsHistogramData)
-    (and
-      (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
-      (or .Values.autodetect.prometheus .Values.autodetect.istio)))
+  (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true")
 }}
 connectors:
 {{- end }}
-{{- if and
-  (not .Values.featureGates.useControlPlaneMetricsHistogramData)
-  (and
-    (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
-    (or .Values.autodetect.prometheus .Values.autodetect.istio)) }}
+{{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
   forward:
 {{- end }}
 {{- if and
@@ -1283,23 +1275,10 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and
-      (not .Values.featureGates.useControlPlaneMetricsHistogramData)
-      (and
-        (eq (include "splunk-otel-collector.metricsEnabled" .) "true")
-        (or .Values.autodetect.prometheus .Values.autodetect.istio)) }}
+    {{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
     metrics/prometheus:
        receivers:
         - receiver_creator
-       processors:
-        - memory_limiter
-        - batch
-        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-        - attributes/istio
-        {{- end }}
-        {{- if .Values.autodetect.istio }}
-        - transform/istio
-        {{- end }}
        exporters:
         - forward
     {{- end }}
@@ -1311,14 +1290,10 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if and
-          (not .Values.featureGates.useControlPlaneMetricsHistogramData)
-          (and
-            (not .Values.autodetect.prometheus)
-            (not .Values.autodetect.istio)) }}
-        - receiver_creator
-        {{- else if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        {{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
         - forward
+        {{- else if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
+        - receiver_creator
         {{- end }}
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
@@ -1326,6 +1301,10 @@ service:
       processors:
         - memory_limiter
         - batch
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        - transform/istio
+        {{- end }}
         - resourcedetection
         - resource
         {{/*
