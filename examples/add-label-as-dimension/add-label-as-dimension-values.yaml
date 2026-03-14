@@ -3,12 +3,7 @@ splunkObservability:
   realm: CHANGEME
   accessToken: CHANGEME
   metricsEnabled: true
-  tracesEnabled: true
-
-splunkPlatform:
-  endpoint: CHANGEME
-  token: CHANGEME
-  logsEnabled: true
+  tracesEnabled: false
 
 agent:
   config:
@@ -37,6 +32,8 @@ agent:
             - tag_name: l2 # extracts value of label from pods with key `label2` and inserts it as a tag with key `l2`
               key: label2
               from: pod
+        filter:
+          node_from_env_var: K8S_NODE_NAME
 
     service:
       pipelines:
