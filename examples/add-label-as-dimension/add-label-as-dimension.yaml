@@ -1,0 +1,66 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: true
+  tracesEnabled: true
+
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
+agent:
+  config:
+    processors:
+      k8sattributes/labelasdim:
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: resource_attribute
+                name: k8s.namespace.name
+              - from: resource_attribute
+                name: k8s.pod.name
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: connection
+        extract:
+          metadata: [ ]
+          labels:
+            - tag_name: l1 # extracts value of label from namespaces with key `label1` and inserts it as a tag with key `l1`
+              key: label1
+              from: namespace
+            - tag_name: l2 # extracts value of label from pods with key `label2` and inserts it as a tag with key `l2`
+              key: label2
+              from: pod
+
+    service:
+      pipelines:
+        metrics:
+          processors:
+            - memory_limiter
+            - k8sattributes/labelasdim
+            - batch
+            - resourcedetection
+            - resource
+        metrics/agent:
+          processors:
+            - memory_limiter
+            - k8sattributes/labelasdim
+            - batch
+            - resource/add_agent_k8s
+            - resourcedetection
+            - resource
+            - resource/add_mode
+        metrics/histograms:
+          processors:
+            - memory_limiter
+            - k8sattributes/labelasdim
+            - batch
+            - resource/add_agent_k8s
+            - resourcedetection
+            - resource
