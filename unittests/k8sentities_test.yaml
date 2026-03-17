@@ -31,9 +31,6 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "/v3/event"
-      - matchRegex:
-          path: data["relay"]
-          pattern: "k8sentities"
 
   - it: should use the ingestUrl from splunkObservability when featureGates.enableK8sEntities is true
     set:

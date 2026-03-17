@@ -602,16 +602,45 @@ has Helm-version-dependent behavior on first install:
   [registered first](https://github.com/helm/helm/blob/v4.1.1/pkg/release/v1/util/kind_sorter.go),
   and since the operator is not ready yet (`failurePolicy: Fail`), **`helm install` will fail**.
 
-If you cannot use the installation Job with Helm v4, use a two-step install:
+If you cannot use the installation Job, use a two-step install:
 
 ```bash
-# Step 1: deploy without the CR; --wait ensures the operator webhook is serving.
-helm install splunk-otel-collector --wait \
+# Step 1: deploy without the CR.
+# Helm v4: use --wait=watcher (the default --wait only waits for hooks).
+# Helm v3: use --wait (it already waits for all resources).
+helm install splunk-otel-collector --wait=watcher \
   -f ./my_values.yaml \
   --set operatorcrds.install=true,operator.enabled=true \
   --set instrumentation.enabled=false \
   splunk-otel-collector-chart/splunk-otel-collector
+```
 
+> **Webhook readiness caveat:** The operator's readiness probe currently passes before the
+> webhook TLS listener is fully accepting connections, so `--wait` alone may not be enough.
+> If step 2 fails, verify the webhook is ready before retrying:
+>
+> ```bash
+> until kubectl apply --dry-run=server -f - <<'EOF' 2>/dev/null
+> apiVersion: opentelemetry.io/v1alpha1
+> kind: Instrumentation
+> metadata:
+>   name: webhook-check
+> spec:
+>   exporter:
+>     endpoint: http://localhost:4317
+> EOF
+> do
+>   echo "Waiting for webhook to accept connections..."
+>   sleep 10
+> done
+> echo "Webhook is ready!"
+> ```
+>
+> This extra check will no longer be needed once the operator ships a webhook-aware
+> readiness probe
+> ([opentelemetry-operator#4778](https://github.com/open-telemetry/opentelemetry-operator/pull/4778)).
+
+```bash
 # Step 2: enable the CR (webhook is now ready).
 helm upgrade --install splunk-otel-collector \
   -f ./my_values.yaml \

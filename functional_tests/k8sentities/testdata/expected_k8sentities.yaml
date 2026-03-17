@@ -1,1 +1,4362 @@
-resourceLogs: []
+resourceLogs:
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.daemonset.uid
+                        value:
+                          stringValue: 24be6dab-82ac-40ea-97f1-f6ae2827059e
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.daemonset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app
+                        value:
+                          stringValue: kindnet
+                      - key: k8s-app
+                        value:
+                          stringValue: kindnet
+                      - key: tier
+                        value:
+                          stringValue: node
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: DaemonSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: kindnet
+                      - key: daemonset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:30Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+            body: {}
+            timeUnixNano: "1773784010559450917"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.daemonset.uid
+                        value:
+                          stringValue: 6902de71-445c-463d-9df4-795d714e8e1c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.daemonset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: kube-proxy
+                      - key: daemonset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:29Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-proxy
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: DaemonSet
+            body: {}
+            timeUnixNano: "1773784010559641083"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 69b93c52-00af-441c-9e2a-ea134fa023eb
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 4df82e24-e3ca-4ffd-befc-ca9b126f1897
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 57fffdc84b
+                      - key: app
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: cert-manager-57fffdc84b
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller
+                      - key: k8s.service.cert-manager
+                        value:
+                          stringValue: ""
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 0ff7091c-3865-47f3-a7d1-33d488198515
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-57fffdc84b-b9gcx
+            body: {}
+            timeUnixNano: "1773784010559455250"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 368dc9845a9d7700065712db7239887f325cb875aa4bc00fd66ad4fef6aef62c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 69b93c52-00af-441c-9e2a-ea134fa023eb
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.container.name
+                        value:
+                          stringValue: cert-manager-controller
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-57fffdc84b-b9gcx
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:46Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/jetstack/cert-manager-controller
+            body: {}
+            timeUnixNano: "1773784010559455250"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: 1b2977de-4367-4383-a879-a8af8ed4e863
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.label.app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.service.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-webhook
+                      - key: k8s.service.label.app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.service.label.app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.service.annotation.meta.helm.sh/release-namespace
+                        value:
+                          stringValue: default
+                      - key: k8s.service.annotation.meta.helm.sh/release-name
+                        value:
+                          stringValue: sock
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.service.selector.app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.service.selector.app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: k8s.service.label.app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+            body: {}
+            timeUnixNano: "1773784010559497125"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: b4ab50a1-6478-43cd-8322-9af99bbba57c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:29Z"
+                      - key: k8s.service.label.k8s-app
+                        value:
+                          stringValue: kube-dns
+                      - key: k8s.service.label.kubernetes.io/name
+                        value:
+                          stringValue: CoreDNS
+                      - key: k8s.service.annotation.prometheus.io/scrape
+                        value:
+                          stringValue: "true"
+                      - key: k8s.service.name
+                        value:
+                          stringValue: kube-dns
+                      - key: k8s.service.selector.k8s-app
+                        value:
+                          stringValue: kube-dns
+                      - key: k8s.service.label.kubernetes.io/cluster-service
+                        value:
+                          stringValue: "true"
+                      - key: k8s.service.annotation.prometheus.io/port
+                        value:
+                          stringValue: "9153"
+            body: {}
+            timeUnixNano: "1773784010559669000"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: b565f810-1977-447b-b17c-2bc2d16f7ab8
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.label.app
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.service.selector.app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.selector.app.kubernetes.io/name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.selector.app.kubernetes.io/component
+                        value:
+                          stringValue: controller
+                      - key: k8s.service.label.app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.service.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.label.app.kubernetes.io/component
+                        value:
+                          stringValue: controller
+                      - key: k8s.service.label.app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.label.app.kubernetes.io/name
+                        value:
+                          stringValue: cert-manager
+            body: {}
+            timeUnixNano: "1773784010559678625"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: 8a8641ea-28f5-4463-8446-3823438523f3
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.label.app
+                        value:
+                          stringValue: webhook
+                      - key: k8s.service.label.app.kubernetes.io/component
+                        value:
+                          stringValue: webhook
+                      - key: k8s.service.label.app.kubernetes.io/name
+                        value:
+                          stringValue: webhook
+                      - key: k8s.service.selector.app.kubernetes.io/name
+                        value:
+                          stringValue: webhook
+                      - key: k8s.service.label.app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.label.app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.service.selector.app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.service.selector.app.kubernetes.io/component
+                        value:
+                          stringValue: webhook
+            body: {}
+            timeUnixNano: "1773784010559685042"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: 3bc4324d-484e-47a6-9ca3-75934e91d60b
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.service.name
+                        value:
+                          stringValue: kubernetes
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:28Z"
+                      - key: k8s.service.label.provider
+                        value:
+                          stringValue: kubernetes
+                      - key: k8s.service.label.component
+                        value:
+                          stringValue: apiserver
+            body: {}
+            timeUnixNano: "1773784010559690833"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: acfbce8c-ab5d-4787-812a-1f5ea108ecb1
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: cert-manager-cainjector-76dbc5d8c9
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-cainjector
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: cainjector
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-cainjector
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 40ae4615-6974-4667-be0e-0532bdb60d47
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cainjector
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 76dbc5d8c9
+                      - key: app
+                        value:
+                          stringValue: cainjector
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 699f856a-c792-490c-8242-27f3f8d36b8d
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-cainjector-76dbc5d8c9-22l9m
+            body: {}
+            timeUnixNano: "1773784010559687667"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 223475cca2cb39128439b5b8624282c891d9277dd4daaa9d8858787d2d1624ca
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/jetstack/cert-manager-cainjector
+                      - key: k8s.container.name
+                        value:
+                          stringValue: cert-manager-cainjector
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-cainjector-76dbc5d8c9-22l9m
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:35Z"
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: acfbce8c-ab5d-4787-812a-1f5ea108ecb1
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: container.status
+                        value:
+                          stringValue: running
+            body: {}
+            timeUnixNano: "1773784010559687667"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.uid
+                        value:
+                          stringValue: 9359d6cc-a2ae-4146-9b91-bbe8d5aec141
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.service
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.service.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.service.selector.app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.service.label.app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.service.label.app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: k8s.service.label.app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.service.annotation.meta.helm.sh/release-name
+                        value:
+                          stringValue: sock
+                      - key: k8s.service.annotation.meta.helm.sh/release-namespace
+                        value:
+                          stringValue: default
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.service.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.service.selector.app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.service.label.app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.label.helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+            body: {}
+            timeUnixNano: "1773784010559697542"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.node.uid
+                        value:
+                          stringValue: 9893ac10-a525-40fb-87d1-4fec3af0600b
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.node
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: node.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:27Z"
+                      - key: k8s.node.condition_memory_pressure
+                        value:
+                          stringValue: "false"
+                      - key: k8s.node.condition_disk_pressure
+                        value:
+                          stringValue: "false"
+                      - key: beta.kubernetes.io/os
+                        value:
+                          stringValue: linux
+                      - key: node-role.kubernetes.io/control-plane
+                        value:
+                          stringValue: ""
+                      - key: k8s.node.condition_pid_pressure
+                        value:
+                          stringValue: "false"
+                      - key: k8s.node.condition_ready
+                        value:
+                          stringValue: "true"
+                      - key: beta.kubernetes.io/arch
+                        value:
+                          stringValue: arm64
+                      - key: kubernetes.io/arch
+                        value:
+                          stringValue: arm64
+                      - key: kubernetes.io/hostname
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: kubernetes.io/os
+                        value:
+                          stringValue: linux
+            body: {}
+            timeUnixNano: "1773784010559511042"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 4df82e24-e3ca-4ffd-befc-ca9b126f1897
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller
+            body: {}
+            timeUnixNano: "1773784010559532042"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 40ae4615-6974-4667-be0e-0532bdb60d47
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-cainjector
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cainjector
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: cainjector
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app
+                        value:
+                          stringValue: cainjector
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-cainjector
+            body: {}
+            timeUnixNano: "1773784010559706833"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6073943c-1b3d-4bf2-b85f-6b4585c9ae8a
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: app
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: webhook
+            body: {}
+            timeUnixNano: "1773784010559711500"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 231f3bc5-fceb-49b7-b367-378bcfe1a0ba
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 547cd8975c
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-webhook-547cd8975c-v2d9b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: app
+                        value:
+                          stringValue: webhook
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6073943c-1b3d-4bf2-b85f-6b4585c9ae8a
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: webhook
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: cert-manager-webhook-547cd8975c
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 1c467247-3b84-48d9-92a2-3ae2d901685d
+                      - key: k8s.service.cert-manager-webhook
+                        value:
+                          stringValue: ""
+            body: {}
+            timeUnixNano: "1773784010559712292"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 669be64803e63c15e184da9e7b92f156e936465024749011ee49bcd49a9847e9
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:26Z"
+                      - key: k8s.container.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: cert-manager-webhook-547cd8975c-v2d9b
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 231f3bc5-fceb-49b7-b367-378bcfe1a0ba
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/jetstack/cert-manager-webhook
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+            body: {}
+            timeUnixNano: "1773784010559712292"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+            body: {}
+            timeUnixNano: "1773784010559715333"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.147.0
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: splunk-otel-collector-0.147.1
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: chart
+                        value:
+                          stringValue: splunk-otel-collector-0.147.1
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: release
+                        value:
+                          stringValue: sock
+            body: {}
+            timeUnixNano: "1773784010559722292"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6ff789be-4768-462f-8904-d68d8bc5320f
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-dns
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: coredns
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:29Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: coredns
+            body: {}
+            timeUnixNano: "1773784010559727417"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 31749f86-38bd-4593-ba50-07e56370faaa
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:31Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: local-path-storage
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: local-path-provisioner
+            body: {}
+            timeUnixNano: "1773784010559732042"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: fcf85b1c-81c8-4c3b-a828-e388c94f7eb6
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:27Z"
+            body: {}
+            timeUnixNano: "1773784010559541958"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: b286c1b2-3c9a-4b1b-adb3-79e5954e8d73
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-node-lease
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:27Z"
+            body: {}
+            timeUnixNano: "1773784010559740667"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 018e4c5c82f262ded86fc923c01980a6e7450b4cd1dc77ec02100959a7dc77c9
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+                      - key: container.image.tag
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.container.name
+                        value:
+                          stringValue: manager
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+            body: {}
+            timeUnixNano: "1773784010559738458"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: "5987647569"
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.service.sock-opentelemetry-operator-webhook
+                        value:
+                          stringValue: ""
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: a2f96bbb-c3ea-4528-94e5-46ba94c8db2b
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+            body: {}
+            timeUnixNano: "1773784010559738458"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 78d9af732b5ad97132f059c5a309dfc78d6417b39a5bdc445af5c43d371019e1
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.image.tag
+                        value:
+                          stringValue: v0.19.1
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:50Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/brancz/kube-rbac-proxy
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-rbac-proxy
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+            body: {}
+            timeUnixNano: "1773784010559738458"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: 2bef1ee9-af6a-418b-853d-10b93833a097
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:27Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-public
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+            body: {}
+            timeUnixNano: "1773784010559744000"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: 126e5c52-a507-46a0-a635-49373f703635
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:27Z"
+            body: {}
+            timeUnixNano: "1773784010559747042"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: 3ed14777-6e9b-44c4-a6bf-6a4242f6332c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: local-path-storage
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:31Z"
+            body: {}
+            timeUnixNano: "1773784010559753875"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.uid
+                        value:
+                          stringValue: 2c170950-c806-4649-8eff-684fdc1bae20
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.namespace
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.namespace.phase
+                        value:
+                          stringValue: active
+                      - key: k8s.namespace.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+            body: {}
+            timeUnixNano: "1773784010559757000"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 0ff7091c-3865-47f3-a7d1-33d488198515
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-57fffdc84b
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 57fffdc84b
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 4df82e24-e3ca-4ffd-befc-ca9b126f1897
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: app
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller
+            body: {}
+            timeUnixNano: "1773784010559549000"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 9893f4d5-5aa1-4985-8ebc-4a83db79d4c0
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 5586b6c947
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: b838ee20-933c-47ea-9cd2-0d938deadc22
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947qn5mf
+                      - key: k8s.service.kubernetes
+                        value:
+                          stringValue: ""
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: release
+                        value:
+                          stringValue: sock
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+            body: {}
+            timeUnixNano: "1773784010559758708"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 476df624b3b5c5905c1dd42e6a422a91550c7a6cb5f907198a32c369b544eade
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/signalfx/splunk-otel-collector
+                      - key: k8s.container.name
+                        value:
+                          stringValue: otel-collector
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947qn5mf
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:50Z"
+                      - key: container.image.tag
+                        value:
+                          stringValue: 0.147.0
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 9893f4d5-5aa1-4985-8ebc-4a83db79d4c0
+                      - key: container.status
+                        value:
+                          stringValue: running
+            body: {}
+            timeUnixNano: "1773784010559758708"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 699f856a-c792-490c-8242-27f3f8d36b8d
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 40ae4615-6974-4667-be0e-0532bdb60d47
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 76dbc5d8c9
+                      - key: app
+                        value:
+                          stringValue: cainjector
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: cainjector
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: cainjector
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-cainjector-76dbc5d8c9
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-cainjector
+            body: {}
+            timeUnixNano: "1773784010559763417"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 1c467247-3b84-48d9-92a2-3ae2d901685d
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: v1.14.4
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 547cd8975c
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:15:16Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: cert-manager
+                      - key: app
+                        value:
+                          stringValue: webhook
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: cert-manager
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: cert-manager-webhook-547cd8975c
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: cert-manager-webhook
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6073943c-1b3d-4bf2-b85f-6b4585c9ae8a
+            body: {}
+            timeUnixNano: "1773784010559772625"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: a2f96bbb-c3ea-4528-94e5-46ba94c8db2b
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: pod-template-hash
+                        value:
+                          stringValue: "5987647569"
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+            body: {}
+            timeUnixNano: "1773784010559777458"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: b838ee20-933c-47ea-9cd2-0d938deadc22
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 5586b6c947
+                      - key: release
+                        value:
+                          stringValue: sock
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+            body: {}
+            timeUnixNano: "1773784010559784167"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 78252fe9-84a3-445d-82c5-e1642ed155d4
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 7d764666f9
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: coredns-7d764666f9-g79d6
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: coredns-7d764666f9
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-dns
+                      - key: k8s.service.kube-dns
+                        value:
+                          stringValue: ""
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6ff789be-4768-462f-8904-d68d8bc5320f
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 633b8736-7c8c-48a6-82f8-5129c1bcb90c
+            body: {}
+            timeUnixNano: "1773784010559772542"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: d78b0ece1daa304e819d6a1540055099298ab66967480e6f30c39a9612aa9187
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/coredns/coredns
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.13.1
+                      - key: k8s.container.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:33Z"
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: coredns-7d764666f9-g79d6
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 78252fe9-84a3-445d-82c5-e1642ed155d4
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+            body: {}
+            timeUnixNano: "1773784010559772542"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 633b8736-7c8c-48a6-82f8-5129c1bcb90c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 7d764666f9
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: coredns-7d764666f9
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6ff789be-4768-462f-8904-d68d8bc5320f
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-dns
+            body: {}
+            timeUnixNano: "1773784010559790250"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 758e8a7a-1aef-466c-967d-c253b420c1a4
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 67b8995b4b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: local-path-provisioner-67b8995b4b
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: local-path-storage
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 31749f86-38bd-4593-ba50-07e56370faaa
+                      - key: app
+                        value:
+                          stringValue: local-path-provisioner
+            body: {}
+            timeUnixNano: "1773784010559794792"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 1f962b8f-fa63-48d8-a59d-ef2419d0d8fb
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.service.kube-dns
+                        value:
+                          stringValue: ""
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: coredns-7d764666f9-j25qk
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-dns
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 7d764666f9
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: coredns-7d764666f9
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 633b8736-7c8c-48a6-82f8-5129c1bcb90c
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 6ff789be-4768-462f-8904-d68d8bc5320f
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+            body: {}
+            timeUnixNano: "1773784010559800333"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 522f2450beccae0fae86ef22d8327ff85a28f9b078c841525c226b51af58a6c0
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/coredns/coredns
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.13.1
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 1f962b8f-fa63-48d8-a59d-ef2419d0d8fb
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:33Z"
+                      - key: k8s.container.name
+                        value:
+                          stringValue: coredns
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: coredns-7d764666f9-j25qk
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+            body: {}
+            timeUnixNano: "1773784010559800333"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: b1e1a81a-1b06-4ccb-8de5-67a09c6231b4
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:29Z"
+                      - key: k8s.node.uid
+                        value:
+                          stringValue: 9893ac10-a525-40fb-87d1-4fec3af0600b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Node
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: etcd-chart-testing-control-plane
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: component
+                        value:
+                          stringValue: etcd
+                      - key: tier
+                        value:
+                          stringValue: control-plane
+            body: {}
+            timeUnixNano: "1773784010559826500"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 66b1975b4b485a9a289077f7a1fdb738dbd8c2e0c12485499b9620eca227a6f5
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.container.name
+                        value:
+                          stringValue: etcd
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: etcd-chart-testing-control-plane
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: b1e1a81a-1b06-4ccb-8de5-67a09c6231b4
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.image.tag
+                        value:
+                          stringValue: 3.6.6-0
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:30Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/etcd
+            body: {}
+            timeUnixNano: "1773784010559826500"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 31451ad9-dad0-46e6-9145-fb4f8e2259dd
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app
+                        value:
+                          stringValue: kindnet
+                      - key: k8s-app
+                        value:
+                          stringValue: kindnet
+                      - key: k8s.daemonset.uid
+                        value:
+                          stringValue: 24be6dab-82ac-40ea-97f1-f6ae2827059e
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: DaemonSet
+                      - key: controller-revision-hash
+                        value:
+                          stringValue: 789b96769b
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.daemonset.name
+                        value:
+                          stringValue: kindnet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: kindnet
+                      - key: tier
+                        value:
+                          stringValue: node
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: pod-template-generation
+                        value:
+                          stringValue: "1"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kindnet-tbwbr
+            body: {}
+            timeUnixNano: "1773784010559841083"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 7f12fa8db875fd862b46750d2e5e9ad783f0568dafd9d851f90aeb22b9b2e4b3
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 31451ad9-dad0-46e6-9145-fb4f8e2259dd
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.image.name
+                        value:
+                          stringValue: docker.io/kindest/kindnetd
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kindnet-cni
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kindnet-tbwbr
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:33Z"
+                      - key: container.image.tag
+                        value:
+                          stringValue: v20251212-v0.29.0-alpha-105-g20ccfc88
+            body: {}
+            timeUnixNano: "1773784010559841083"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 140dfe53-45e7-4ac2-9047-6fafde8a7658
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Node
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: component
+                        value:
+                          stringValue: kube-apiserver
+                      - key: tier
+                        value:
+                          stringValue: control-plane
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:28Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.node.uid
+                        value:
+                          stringValue: 9893ac10-a525-40fb-87d1-4fec3af0600b
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-apiserver-chart-testing-control-plane
+            body: {}
+            timeUnixNano: "1773784010559864917"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 65c46907b13d52fb65836db6aa51913bd49ba22c193ebc965ac7e431dd8212ff
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/kube-apiserver-arm64
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.35.0
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-apiserver
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:30Z"
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-apiserver-chart-testing-control-plane
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 140dfe53-45e7-4ac2-9047-6fafde8a7658
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+            body: {}
+            timeUnixNano: "1773784010559864917"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: ff47e38f-0d2a-486f-b2fe-53285d2a63bc
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:29Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.node.uid
+                        value:
+                          stringValue: 9893ac10-a525-40fb-87d1-4fec3af0600b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Node
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: tier
+                        value:
+                          stringValue: control-plane
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-controller-manager-chart-testing-control-plane
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: component
+                        value:
+                          stringValue: kube-controller-manager
+            body: {}
+            timeUnixNano: "1773784010559875833"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 1e0acbe0516b2e6196f0af95695e9ae4546fd61844e6de53109131a174fb5c4c
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-controller-manager
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-controller-manager-chart-testing-control-plane
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: ff47e38f-0d2a-486f-b2fe-53285d2a63bc
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:30Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/kube-controller-manager-arm64
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.35.0
+            body: {}
+            timeUnixNano: "1773784010559875833"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: b68dc4ca-3d18-47df-a3f7-63ea4ebc2636
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: pod-template-generation
+                        value:
+                          stringValue: "1"
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.daemonset.uid
+                        value:
+                          stringValue: 6902de71-445c-463d-9df4-795d714e8e1c
+                      - key: k8s-app
+                        value:
+                          stringValue: kube-proxy
+                      - key: k8s.daemonset.name
+                        value:
+                          stringValue: kube-proxy
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-proxy-z5znv
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: kube-proxy
+                      - key: controller-revision-hash
+                        value:
+                          stringValue: 69494898cd
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: DaemonSet
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+            body: {}
+            timeUnixNano: "1773784010559899333"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 67d3110c7e6cd01e78e47fb491447dbe8aaa3c07567e49db88501d54ed1a5297
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:33Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/kube-proxy-arm64
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-proxy-z5znv
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.35.0
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-proxy
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: b68dc4ca-3d18-47df-a3f7-63ea4ebc2636
+            body: {}
+            timeUnixNano: "1773784010559899333"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: d017d908-2ecc-4167-b67f-4b22afaf3c92
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: component
+                        value:
+                          stringValue: kube-scheduler
+                      - key: tier
+                        value:
+                          stringValue: control-plane
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:28Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.node.uid
+                        value:
+                          stringValue: 9893ac10-a525-40fb-87d1-4fec3af0600b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Node
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-scheduler-chart-testing-control-plane
+            body: {}
+            timeUnixNano: "1773784010559913875"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 5add32124e8736e168a9b26ba43532490ff70fdac5d8e3e837d3819c1c755309
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: registry.k8s.io/kube-scheduler-arm64
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-scheduler
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: kube-scheduler-chart-testing-control-plane
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: d017d908-2ecc-4167-b67f-4b22afaf3c92
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: kube-system
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:05:30Z"
+                      - key: container.image.tag
+                        value:
+                          stringValue: v1.35.0
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+            body: {}
+            timeUnixNano: "1773784010559913875"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: f425ca99-5815-4387-90d7-8559363f8cb0
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: local-path-provisioner-67b8995b4b
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: local-path-storage
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 67b8995b4b
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-03T22:21:35Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: 758e8a7a-1aef-466c-967d-c253b420c1a4
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: 31749f86-38bd-4593-ba50-07e56370faaa
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: local-path-provisioner-67b8995b4b-mhrgh
+            body: {}
+            timeUnixNano: "1773784010559925208"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 9fc2a01dd7d2e6c73a90149c3bdceb02ed474ddff375b2340f0a122ca4332a22
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.tag
+                        value:
+                          stringValue: v20251212-v0.29.0-alpha-105-g20ccfc88
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: f425ca99-5815-4387-90d7-8559363f8cb0
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T19:06:15Z"
+                      - key: k8s.container.name
+                        value:
+                          stringValue: local-path-provisioner
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: local-path-provisioner-67b8995b4b-mhrgh
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: local-path-storage
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.image.name
+                        value:
+                          stringValue: docker.io/kindest/local-path-provisioner
+            body: {}
+            timeUnixNano: "1773784010559925208"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 9893f4d5-5aa1-4985-8ebc-4a83db79d4c0
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 5586b6c947
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+                      - key: k8s.service.kubernetes
+                        value:
+                          stringValue: ""
+                      - key: release
+                        value:
+                          stringValue: sock
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: b838ee20-933c-47ea-9cd2-0d938deadc22
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947qn5mf
+            body: {}
+            timeUnixNano: "1773784011233355084"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 476df624b3b5c5905c1dd42e6a422a91550c7a6cb5f907198a32c369b544eade
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/signalfx/splunk-otel-collector
+                      - key: k8s.container.name
+                        value:
+                          stringValue: otel-collector
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 9893f4d5-5aa1-4985-8ebc-4a83db79d4c0
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.image.tag
+                        value:
+                          stringValue: 0.147.0
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947qn5mf
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:50Z"
+            body: {}
+            timeUnixNano: "1773784011233355084"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: b838ee20-933c-47ea-9cd2-0d938deadc22
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: pod-template-hash
+                        value:
+                          stringValue: 5586b6c947
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: release
+                        value:
+                          stringValue: sock
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver-5586b6c947
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+            body: {}
+            timeUnixNano: "1773784011237966959"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: caba11d4-c7b9-4d65-9c00-bc1b7efb9378
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.147.0
+                      - key: component
+                        value:
+                          stringValue: otel-k8s-cluster-receiver
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: release
+                        value:
+                          stringValue: sock
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: splunk-otel-collector-0.147.1
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: splunk-otel-collector
+                      - key: chart
+                        value:
+                          stringValue: splunk-otel-collector-0.147.1
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-splunk-otel-collector-k8s-cluster-receiver
+            body: {}
+            timeUnixNano: "1773784011241886167"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 018e4c5c82f262ded86fc923c01980a6e7450b4cd1dc77ec02100959a7dc77c9
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.name
+                        value:
+                          stringValue: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+                      - key: container.image.tag
+                        value:
+                          stringValue: 0.134.0
+                      - key: k8s.container.name
+                        value:
+                          stringValue: manager
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+            body: {}
+            timeUnixNano: "1773784021241419755"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.pod
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: k8s.service.kubernetes
+                        value:
+                          stringValue: ""
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: a2f96bbb-c3ea-4528-94e5-46ba94c8db2b
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: pod-template-hash
+                        value:
+                          stringValue: "5987647569"
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.replicaset.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: pod.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:49Z"
+                      - key: k8s.pod.phase
+                        value:
+                          stringValue: Running
+            body: {}
+            timeUnixNano: "1773784021241419755"
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.id
+                        value:
+                          stringValue: 78d9af732b5ad97132f059c5a309dfc78d6417b39a5bdc445af5c43d371019e1
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: container
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: container.image.tag
+                        value:
+                          stringValue: v0.19.1
+                      - key: k8s.container.name
+                        value:
+                          stringValue: kube-rbac-proxy
+                      - key: k8s.pod.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569-54vmn
+                      - key: k8s.pod.uid
+                        value:
+                          stringValue: 5e90f592-bde8-4f41-8f40-89cd5fe9bab5
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: container.status
+                        value:
+                          stringValue: running
+                      - key: container.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:50Z"
+                      - key: container.image.name
+                        value:
+                          stringValue: quay.io/brancz/kube-rbac-proxy
+                      - key: k8s.node.name
+                        value:
+                          stringValue: chart-testing-control-plane
+            body: {}
+            timeUnixNano: "1773784021241419755"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.replicaset.uid
+                        value:
+                          stringValue: a2f96bbb-c3ea-4528-94e5-46ba94c8db2b
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.replicaset
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: pod-template-hash
+                        value:
+                          stringValue: "5987647569"
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: ReplicaSet
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator-5987647569
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: replicaset.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+            body: {}
+            timeUnixNano: "1773784021246851463"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true
+  - resource:
+      attributes:
+        - key: metric_source
+          value:
+            stringValue: kubernetes
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: otel.entity.id
+                value:
+                  kvlistValue:
+                    values:
+                      - key: k8s.deployment.uid
+                        value:
+                          stringValue: d1fd5707-6e61-4ada-9f23-444c3cd454f3
+              - key: otel.entity.event.type
+                value:
+                  stringValue: entity_state
+              - key: otel.entity.type
+                value:
+                  stringValue: k8s.deployment
+              - key: otel.entity.interval
+                value:
+                  intValue: "300000"
+              - key: otel.entity.attributes
+                value:
+                  kvlistValue:
+                    values:
+                      - key: app.kubernetes.io/managed-by
+                        value:
+                          stringValue: Helm
+                      - key: app.kubernetes.io/name
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/part-of
+                        value:
+                          stringValue: opentelemetry-operator
+                      - key: app.kubernetes.io/version
+                        value:
+                          stringValue: 0.134.0
+                      - key: helm.sh/chart
+                        value:
+                          stringValue: opentelemetry-operator-0.95.3
+                      - key: k8s.workload.kind
+                        value:
+                          stringValue: Deployment
+                      - key: deployment.creation_timestamp
+                        value:
+                          stringValue: "2026-03-17T21:46:48Z"
+                      - key: k8s.namespace.name
+                        value:
+                          stringValue: default
+                      - key: app.kubernetes.io/component
+                        value:
+                          stringValue: controller-manager
+                      - key: app.kubernetes.io/instance
+                        value:
+                          stringValue: sock
+                      - key: k8s.workload.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+                      - key: k8s.deployment.name
+                        value:
+                          stringValue: sock-opentelemetry-operator
+            body: {}
+            timeUnixNano: "1773784021251080963"
+        scope:
+          attributes:
+            - key: otel.entity.event_as_log
+              value:
+                boolValue: true

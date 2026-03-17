@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"helm.sh/helm/v4/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -209,13 +210,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("aks_test_win_values.yaml.tmpl", internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-win",
-			ChartWait:        true,
+			WaitStrategy:     kube.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
 		})
 		addChartInfo("aks_test_linux_values.yaml.tmpl", internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-linux",
-			ChartWait:        true,
+			WaitStrategy:     kube.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
 		})
 	case eksTestKubeEnv:
