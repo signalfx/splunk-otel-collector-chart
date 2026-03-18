@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-scheduler-kind-control-plane
+            stringValue: kube-apiserver-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: 1e477251-4096-45cd-bf22-95d9e8634c36
+            stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
         - key: os.type
           value:
             stringValue: linux
@@ -27,19 +27,123 @@ resourceMetrics:
             stringValue: 172.18.0.2
         - key: server.port
           value:
-            stringValue: "10259"
+            stringValue: "6443"
         - key: service.instance.id
           value:
-            stringValue: 172.18.0.2:10259
+            stringValue: 172.18.0.2:6443
         - key: service.name
           value:
-            stringValue: kubernetes-scheduler
+            stringValue: kubernetes-apiserver
         - key: url.scheme
           value:
             stringValue: https
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
+          - description: '[STABLE] Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: subresource
+                      value:
+                        stringValue: /healthz
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 0.005
+                    - 0.025
+                    - 0.05
+                    - 0.1
+                    - 0.2
+                    - 0.4
+                    - 0.6
+                    - 0.8
+                    - 1
+                    - 1.25
+                    - 1.5
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 8
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+                    - 45
+                    - 60
+                  sum: 0.000851084
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_request_duration_seconds
+          - description: '[STABLE] Response size distribution in bytes for each group, version, verb, resource, subresource, scope and component.'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: subresource
+                      value:
+                        stringValue: /healthz
+                    - key: verb
+                      value:
+                        stringValue: GET
+                  bucketCounts:
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 1000
+                    - 10000
+                    - 100000
+                    - 1e+06
+                    - 1e+07
+                    - 1e+08
+                    - 1e+09
+                  sum: 2
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: apiserver_response_sizes
           - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
             histogram:
               aggregationTemporality: 2
@@ -47,25 +151,25 @@ resourceMetrics:
                 - attributes:
                     - key: host
                       value:
-                        stringValue: 172.18.0.2:6443
+                        stringValue: '[::1]:6443'
                     - key: verb
                       value:
                         stringValue: GET
                   bucketCounts:
+                    - "202"
                     - "35"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "1"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "37"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "237"
                   explicitBounds:
                     - 0.005
                     - 0.025
@@ -79,120 +183,13 @@ resourceMetrics:
                     - 15
                     - 30
                     - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 1.2911871279999998
+                  sum: 0.43515590800000037
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: rest_client_request_duration_seconds
-          - description: '[ALPHA] Scheduling algorithm latency in seconds'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "9"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "10"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.002151085
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: scheduler_scheduling_algorithm_duration_seconds
-          - description: '[BETA] E2e latency for a pod being scheduled, from the time the pod enters the scheduling queue an d might involve multiple scheduling attempts.'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - attributes:
-                    - key: attempts
-                      value:
-                        stringValue: "1"
-                  bucketCounts:
-                    - "4"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "4"
-                  explicitBounds:
-                    - 0.01
-                    - 0.02
-                    - 0.04
-                    - 0.08
-                    - 0.16
-                    - 0.32
-                    - 0.64
-                    - 1.28
-                    - 2.56
-                    - 5.12
-                    - 10.24
-                    - 20.48
-                    - 40.96
-                    - 81.92
-                    - 163.84
-                    - 327.68
-                    - 655.36
-                    - 1310.72
-                    - 2621.44
-                    - 5242.88
-                  startTimeUnixNano: "1000000"
-                  sum: 0.0146925
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: scheduler_pod_scheduling_sli_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-proxy-bjl2s
+            stringValue: kube-proxy-zhvhd
         - key: k8s.pod.uid
           value:
-            stringValue: ba41bb83-884e-41e6-a28a-306daaf438cd
+            stringValue: 10a03030-6ed1-4f4d-9a0c-f2d8ee308b1f
         - key: os.type
           value:
             stringValue: linux
@@ -37,19 +37,73 @@ resourceMetrics:
         - key: url.scheme
           value:
             stringValue: http
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
+          - description: '[ALPHA] SyncProxyRules latency in seconds'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: ip_family
+                      value:
+                        stringValue: IPv4
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "2"
+                    - "4"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "6"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  sum: 0.22374162599999997
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: kubeproxy_sync_proxy_rules_duration_seconds
           - description: '[ALPHA] In Cluster Network Programming Latency in seconds'
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - bucketCounts:
+                - attributes:
+                    - key: ip_family
+                      value:
+                        stringValue: IPv4
+                  bucketCounts:
+                    - "0"
+                    - "0"
                     - "0"
                     - "1"
-                    - "0"
+                    - "2"
                     - "3"
-                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -126,8 +180,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                  count: "5"
+                  count: "6"
                   explicitBounds:
                     - 0
                     - 0.25
@@ -210,60 +263,13 @@ resourceMetrics:
                     - 240
                     - 270
                     - 300
-                  startTimeUnixNano: "1000000"
-                  sum: 3.7748657870000004
+                  sum: 10.666429804
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: kubeproxy_network_programming_duration_seconds
-          - description: '[ALPHA] SyncProxyRules latency in seconds'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "2"
-                    - "6"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "8"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.265200249
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: kubeproxy_sync_proxy_rules_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

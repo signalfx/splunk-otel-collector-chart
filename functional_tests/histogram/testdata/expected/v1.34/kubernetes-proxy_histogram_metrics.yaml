@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: kube-proxy-bjl2s
+            stringValue: kube-proxy-b7dj5
         - key: k8s.pod.uid
           value:
-            stringValue: ba41bb83-884e-41e6-a28a-306daaf438cd
+            stringValue: 14960fb6-9e3b-48ab-a616-d9f415dd30cd
         - key: os.type
           value:
             stringValue: linux
@@ -37,20 +37,24 @@ resourceMetrics:
         - key: url.scheme
           value:
             stringValue: http
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
           - description: '[ALPHA] In Cluster Network Programming Latency in seconds'
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - bucketCounts:
+                - attributes:
+                    - key: ip_family
+                      value:
+                        stringValue: IPv4
+                  bucketCounts:
+                    - "0"
+                    - "0"
                     - "0"
                     - "1"
-                    - "0"
                     - "3"
                     - "1"
-                    - "0"
                     - "0"
                     - "0"
                     - "0"
@@ -210,8 +214,7 @@ resourceMetrics:
                     - 240
                     - 270
                     - 300
-                  startTimeUnixNano: "1000000"
-                  sum: 3.7748657870000004
+                  sum: 7.435401902000001
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
@@ -222,24 +225,28 @@ resourceMetrics:
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - bucketCounts:
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "2"
-                    - "6"
-                    - "0"
-                    - "0"
-                    - "0"
+                - attributes:
+                    - key: ip_family
+                      value:
+                        stringValue: IPv4
+                  bucketCounts:
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                  count: "8"
+                    - "5"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "6"
                   explicitBounds:
                     - 0.001
                     - 0.002
@@ -256,8 +263,7 @@ resourceMetrics:
                     - 4.096
                     - 8.192
                     - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.265200249
+                  sum: 0.277174375
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
@@ -266,4 +272,4 @@ resourceMetrics:
             name: kubeproxy_sync_proxy_rules_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

@@ -2,11 +2,9 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
-          - name: coredns_cache_hits_total
-            sum:
-              aggregationTemporality: 2
+          - gauge:
               dataPoints:
-                - asDouble: 12
+                - asDouble: 28
                   attributes:
                     - key: host.name
                       value:
@@ -22,10 +20,52 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.4
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.4:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                  timeUnixNano: "1000000"
+            name: scrape_samples_post_metric_relabeling
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-7d764666f9-sxnnn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -54,12 +94,71 @@ resourceMetrics:
                       value:
                         stringValue: .
                   timeUnixNano: "1000000"
+            name: coredns_cache_entries
+          - name: coredns_dns_requests_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 44
+                  attributes:
+                    - key: family
+                      value:
+                        stringValue: "1"
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: coredns-7d764666f9-sxnnn
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: proto
+                      value:
+                        stringValue: udp
+                    - key: server
+                      value:
+                        stringValue: dns://:53
+                    - key: server.address
+                      value:
+                        stringValue: 10.244.0.4
+                    - key: server.port
+                      value:
+                        stringValue: "9153"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 10.244.0.4:9153
+                    - key: service.name
+                      value:
+                        stringValue: coredns
+                    - key: type
+                      value:
+                        stringValue: A
+                    - key: url.scheme
+                      value:
+                        stringValue: http
+                    - key: zone
+                      value:
+                        stringValue: .
+                  timeUnixNano: "1000000"
               isMonotonic: true
           - name: coredns_dns_responses_total
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asDouble: 23
+                - asDouble: 31
                   attributes:
                     - key: host.name
                       value:
@@ -75,10 +174,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -113,7 +212,7 @@ resourceMetrics:
               isMonotonic: true
           - gauge:
               dataPoints:
-                - asDouble: 0.0054375
+                - asDouble: 1
                   attributes:
                     - key: host.name
                       value:
@@ -129,10 +228,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -152,10 +251,10 @@ resourceMetrics:
                       value:
                         stringValue: http
                   timeUnixNano: "1000000"
-            name: scrape_duration_seconds
+            name: up
           - gauge:
               dataPoints:
-                - asDouble: 195
+                - asDouble: 198
                   attributes:
                     - key: host.name
                       value:
@@ -171,10 +270,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -197,7 +296,7 @@ resourceMetrics:
             name: scrape_samples_scraped
           - gauge:
               dataPoints:
-                - asDouble: 29
+                - asDouble: 28
                   attributes:
                     - key: host.name
                       value:
@@ -213,52 +312,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_samples_post_metric_relabeling
-          - gauge:
-              dataPoints:
-                - asDouble: 29
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -279,9 +336,11 @@ resourceMetrics:
                         stringValue: http
                   timeUnixNano: "1000000"
             name: scrape_series_added
-          - gauge:
+          - name: coredns_cache_hits_total
+            sum:
+              aggregationTemporality: 2
               dataPoints:
-                - asDouble: 9
+                - asDouble: 15
                   attributes:
                     - key: host.name
                       value:
@@ -297,10 +356,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -321,7 +380,7 @@ resourceMetrics:
                         stringValue: coredns
                     - key: type
                       value:
-                        stringValue: denial
+                        stringValue: success
                     - key: url.scheme
                       value:
                         stringValue: http
@@ -329,12 +388,12 @@ resourceMetrics:
                       value:
                         stringValue: .
                   timeUnixNano: "1000000"
-            name: coredns_cache_entries
+              isMonotonic: true
           - name: coredns_cache_misses_total
             sum:
               aggregationTemporality: 2
               dataPoints:
-                - asDouble: 14
+                - asDouble: 71
                   attributes:
                     - key: host.name
                       value:
@@ -350,10 +409,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -380,68 +439,9 @@ resourceMetrics:
                         stringValue: .
                   timeUnixNano: "1000000"
               isMonotonic: true
-          - name: coredns_dns_requests_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 17
-                  attributes:
-                    - key: family
-                      value:
-                        stringValue: "1"
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: proto
-                      value:
-                        stringValue: udp
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: server.address
-                      value:
-                        stringValue: 10.244.0.4
-                    - key: server.port
-                      value:
-                        stringValue: "9153"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 10.244.0.4:9153
-                    - key: service.name
-                      value:
-                        stringValue: coredns
-                    - key: type
-                      value:
-                        stringValue: A
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                    - key: zone
-                      value:
-                        stringValue: .
-                  timeUnixNano: "1000000"
-              isMonotonic: true
           - gauge:
               dataPoints:
-                - asDouble: 1
+                - asDouble: 0.203855708
                   attributes:
                     - key: host.name
                       value:
@@ -457,10 +457,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: coredns-7db6d8ff4d-n74qk
+                        stringValue: coredns-7d764666f9-sxnnn
                     - key: k8s.pod.uid
                       value:
-                        stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+                        stringValue: e5f93b2e-1455-40e0-b9a2-968881686a6f
                     - key: os.type
                       value:
                         stringValue: linux
@@ -480,5 +480,5 @@ resourceMetrics:
                       value:
                         stringValue: http
                   timeUnixNano: "1000000"
-            name: up
+            name: scrape_duration_seconds
         scope: {}

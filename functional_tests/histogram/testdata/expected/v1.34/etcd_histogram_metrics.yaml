@@ -15,47 +15,43 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: coredns-7db6d8ff4d-n74qk
+            stringValue: etcd-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: f3d17933-779e-4b5e-ad52-a5a1ec12ddd3
+            stringValue: 128cede5-fbdd-498b-b70e-cca60fa62149
         - key: os.type
           value:
             stringValue: linux
         - key: server.address
           value:
-            stringValue: 10.244.0.4
+            stringValue: 172.18.0.2
         - key: server.port
           value:
-            stringValue: "9153"
+            stringValue: "2381"
         - key: service.instance.id
           value:
-            stringValue: 10.244.0.4:9153
+            stringValue: 172.18.0.2:2381
         - key: service.name
           value:
-            stringValue: coredns
+            stringValue: etcd
         - key: url.scheme
           value:
             stringValue: http
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
-          - description: Histogram of the time (in seconds) each request took per zone.
+          - description: The latency distributions of fsync called by WAL.
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - attributes:
-                    - key: server
-                      value:
-                        stringValue: dns://:53
-                    - key: zone
-                      value:
-                        stringValue: .
-                  bucketCounts:
-                    - "22"
-                    - "10"
+                - bucketCounts:
+                    - "502"
+                    - "76"
+                    - "15"
+                    - "8"
                     - "0"
-                    - "1"
+                    - "0"
+                    - "2"
                     - "1"
                     - "0"
                     - "1"
@@ -63,16 +59,9 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
                     - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "36"
+                  count: "605"
                   explicitBounds:
-                    - 0.00025
-                    - 0.0005
                     - 0.001
                     - 0.002
                     - 0.004
@@ -87,14 +76,13 @@ resourceMetrics:
                     - 2.048
                     - 4.096
                     - 8.192
-                  startTimeUnixNano: "1000000"
-                  sum: 0.5227330409999998
+                  sum: 0.9867931329999998
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: coredns_dns_request_duration_seconds
+            name: etcd_disk_wal_fsync_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

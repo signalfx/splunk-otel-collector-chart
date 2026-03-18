@@ -18,7 +18,7 @@ resourceMetrics:
             stringValue: kube-scheduler-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: 1e477251-4096-45cd-bf22-95d9e8634c36
+            stringValue: fe3b52bb-c269-426b-857b-4a8fe97f57a5
         - key: os.type
           value:
             stringValue: linux
@@ -37,7 +37,7 @@ resourceMetrics:
         - key: url.scheme
           value:
             stringValue: https
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
           - description: '[ALPHA] Request latency in seconds. Broken down by verb, and host.'
@@ -52,20 +52,20 @@ resourceMetrics:
                       value:
                         stringValue: GET
                   bucketCounts:
-                    - "35"
+                    - "31"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
                     - "1"
                     - "0"
                     - "0"
                     - "0"
                     - "0"
-                    - "1"
                     - "0"
                     - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "37"
+                  count: "32"
                   explicitBounds:
                     - 0.005
                     - 0.025
@@ -79,61 +79,14 @@ resourceMetrics:
                     - 15
                     - 30
                     - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 1.2911871279999998
+                  sum: 1.4737507100000007
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: rest_client_request_duration_seconds
-          - description: '[ALPHA] Scheduling algorithm latency in seconds'
-            histogram:
-              aggregationTemporality: 2
-              dataPoints:
-                - bucketCounts:
-                    - "9"
-                    - "1"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "10"
-                  explicitBounds:
-                    - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                    - 16.384
-                  startTimeUnixNano: "1000000"
-                  sum: 0.002151085
-                  timeUnixNano: "1000000"
-            metadata:
-              - key: prometheus.type
-                value:
-                  stringValue: histogram
-            name: scheduler_scheduling_algorithm_duration_seconds
-          - description: '[BETA] E2e latency for a pod being scheduled, from the time the pod enters the scheduling queue an d might involve multiple scheduling attempts.'
+          - description: '[BETA] E2e latency for a pod being scheduled, from the time the pod enters the scheduling queue and might involve multiple scheduling attempts.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
@@ -142,8 +95,8 @@ resourceMetrics:
                       value:
                         stringValue: "1"
                   bucketCounts:
-                    - "4"
-                    - "0"
+                    - "2"
+                    - "2"
                     - "0"
                     - "0"
                     - "0"
@@ -185,14 +138,58 @@ resourceMetrics:
                     - 1310.72
                     - 2621.44
                     - 5242.88
-                  startTimeUnixNano: "1000000"
-                  sum: 0.0146925
+                  sum: 0.034292084
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
             name: scheduler_pod_scheduling_sli_duration_seconds
+          - description: '[ALPHA] Scheduling algorithm latency in seconds'
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "9"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "10"
+                  explicitBounds:
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+                    - 16.384
+                  sum: 0.012000375000000002
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: scheduler_scheduling_algorithm_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0
