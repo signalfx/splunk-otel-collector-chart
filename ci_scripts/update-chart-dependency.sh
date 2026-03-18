@@ -38,6 +38,24 @@ update_operator_images() {
     $SCRIPT_DIR/update-images-operator-otel.sh
 }
 
+# Function: update_obi_image_tag
+# Description: Keeps the parent chart's default OBI image tag aligned with the subchart version.
+update_obi_image_tag() {
+    local values_file="$VALUES_FILE_PATH"
+    local target_tag="v$LATEST_VER"
+    local current_tag
+
+    current_tag=$(yq eval '.obi.image.tag' "$values_file")
+    echo "Current OBI image tag in values.yaml is $current_tag"
+
+    if [ "$current_tag" != "$target_tag" ]; then
+        echo "Updating OBI image tag to $target_tag in values.yaml"
+        yq eval -i ".obi.image.tag = \"$target_tag\"" "$values_file"
+    else
+        echo "OBI image tag is already up to date in values.yaml"
+    fi
+}
+
 # Function: maybe_update_chart_dependency_version
 # Description: Updates the chart dependency version if a newer version is available.
 maybe_update_chart_dependency_version() {
@@ -65,6 +83,8 @@ maybe_update_chart_dependency_version() {
 
       if [ "$SUBCHART_NAME" == "opentelemetry-operator" ]; then
         update_operator_images
+      elif [ "$SUBCHART_NAME" == "opentelemetry-ebpf-instrumentation" ]; then
+        update_obi_image_tag
       fi
 
       echo "Current git diff:"
