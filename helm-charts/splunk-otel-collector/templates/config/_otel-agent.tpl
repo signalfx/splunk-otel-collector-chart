@@ -1031,6 +1031,9 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    {{- if or .Values.featureGates.enableOTLPHistograms .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    send_otlp_histograms: true
+    {{- end }}
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
@@ -1062,14 +1065,6 @@ exporters:
     {{- end }}
     auth:
       authenticator: headers_setter
-
-  {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
-  signalfx/histograms:
-    ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
-    api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    send_otlp_histograms: true
-  {{- end }}
   {{- end }}
 
 {{- if and
@@ -1263,9 +1258,7 @@ service:
         - hostmetrics
         - kubeletstats
         - otlp
-        {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
-        {{- end }}
         {{- if .Values.targetAllocator.enabled  }}
         - prometheus/ta
         {{- end }}
@@ -1351,20 +1344,6 @@ service:
         - resourcedetection
         - resource
       exporters: [otlphttp/entities]
-
-    {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
-    metrics/histograms:
-      receivers:
-       - receiver_creator
-      processors:
-        - memory_limiter
-        - batch
-        - resource/add_agent_k8s
-        - resourcedetection
-        - resource
-      exporters:
-        - signalfx/histograms
-    {{- end }}
     {{- end }}
 {{- end }}
 {{/*

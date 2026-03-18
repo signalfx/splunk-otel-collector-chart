@@ -1362,7 +1362,8 @@ featureGates:
   # and target allocator deployments.
   # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
-  # Use a specific metrics pipeline to report control plane metrics as histograms. Enabled by default.
+  # DEPRECATED: Use a specific metrics pipeline to report control plane metrics as histograms. Enabled by default.
+  # Use the enableOTLPHistograms feature gate instead.
   useControlPlaneMetricsHistogramData: true
   # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being
   # rolled over during high load.
@@ -1382,3 +1383,6 @@ featureGates:
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false
+  # Enable sending histogram metrics as OTLP for all telemetry pipelines. This is relevant only metrics
+  # sent to Splunk Observability Cloud. Enabled by default.
+  enableOTLPHistograms: true
