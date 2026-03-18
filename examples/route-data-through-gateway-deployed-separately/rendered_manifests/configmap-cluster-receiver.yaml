@@ -22,6 +22,7 @@ data:
         api_url: http://<custom-gateway-url>:6060
         disable_default_translation_rules: true
         ingest_url: http://<custom-gateway-url>:9943
+        send_otlp_histograms: true
         timeout: 10s
     extensions:
       health_check:

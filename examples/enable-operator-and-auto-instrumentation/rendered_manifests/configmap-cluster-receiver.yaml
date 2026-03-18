@@ -22,6 +22,7 @@ data:
         api_url: https://api.us0.signalfx.com
         disable_default_translation_rules: true
         ingest_url: https://ingest.us0.signalfx.com
+        send_otlp_histograms: true
         timeout: 10s
       splunk_hec/platform_logs:
         disable_compression: true
