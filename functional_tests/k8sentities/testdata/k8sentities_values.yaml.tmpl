@@ -1,0 +1,17 @@
+splunkObservability:
+  realm: test
+  accessToken: "00000000-0000-0000-0000-0000000000000"
+  ingestUrl: {{ .IngestURL }}
+  apiUrl: {{ .ApiURL }}
+  metricsEnabled: false
+
+agent:
+  enabled: false
+
+clusterReceiver:
+  enabled: true
+
+clusterName: dev-operator
+
+featureGates:
+  enableK8sEntities: true

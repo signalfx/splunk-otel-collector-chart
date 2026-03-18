@@ -1,0 +1,58 @@
+suite: splunk-otel-collector.k8sEntities
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-cluster-receiver.yaml
+
+tests:
+  - it: should NOT render k8s entities pipeline when featureGates.enableK8sEntities is false (default)
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "otlphttp/o11y_entities"
+
+  - it: should render k8s entities pipeline when featureGates.enableK8sEntities is true
+    set:
+      featureGates:
+        enableK8sEntities: true
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlphttp/o11y_entities"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "/v3/event"
+
+  - it: should use the ingestUrl from splunkObservability when featureGates.enableK8sEntities is true
+    set:
+      featureGates:
+        enableK8sEntities: true
+      splunkObservability:
+        realm: us1
+        accessToken: test
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "https://ingest.us1.signalfx.com/v3/event"
+
+  - it: should NOT render k8s entities pipeline when featureGate is true but custom ingestUrl is set
+    set:
+      featureGates:
+        enableK8sEntities: true
+      splunkObservability:
+        realm: us0
+        accessToken: test
+        ingestUrl: "https://custom-ingest.example.com"
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "https://custom-ingest.example.com/v3/event"
