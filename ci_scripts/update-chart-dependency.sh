@@ -42,7 +42,8 @@ update_operator_images() {
 # Description: Keeps the parent chart's default OBI image tag aligned with the subchart version.
 update_obi_image_tag() {
     local values_file="$VALUES_FILE_PATH"
-    local target_tag="v$LATEST_VER"
+    local normalized_ver="${LATEST_VER#v}"  # Strip leading 'v' if present
+    local target_tag="v$normalized_ver"
     local current_tag
 
     current_tag=$(yq eval '.obi.image.tag' "$values_file")
