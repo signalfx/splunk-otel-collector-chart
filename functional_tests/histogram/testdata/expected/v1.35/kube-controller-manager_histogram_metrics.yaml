@@ -15,10 +15,10 @@ resourceMetrics:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: etcd-kind-control-plane
+            stringValue: kube-controller-manager-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+            stringValue: 823fe0f6-5c0e-4471-a203-52841e26c826
         - key: os.type
           value:
             stringValue: linux
@@ -27,63 +27,58 @@ resourceMetrics:
             stringValue: 172.18.0.2
         - key: server.port
           value:
-            stringValue: "2381"
+            stringValue: "10257"
         - key: service.instance.id
           value:
-            stringValue: 172.18.0.2:2381
+            stringValue: 172.18.0.2:10257
         - key: service.name
           value:
-            stringValue: etcd
+            stringValue: kube-controller-manager
         - key: url.scheme
           value:
-            stringValue: http
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+            stringValue: https
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
-          - description: The latency distributions of fsync called by WAL.
+          - description: '[ALPHA] How long in seconds an item stays in workqueue before being requested.'
             histogram:
               aggregationTemporality: 2
               dataPoints:
-                - bucketCounts:
-                    - "512"
-                    - "127"
-                    - "27"
+                - attributes:
+                    - key: name
+                      value:
+                        stringValue: ClusterRoleAggregator
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "4"
+                    - "7"
+                    - "3"
                     - "4"
                     - "3"
-                    - "1"
-                    - "1"
-                    - "2"
                     - "0"
                     - "0"
                     - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                    - "0"
-                  count: "677"
+                  count: "21"
                   explicitBounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
                     - 0.001
-                    - 0.002
-                    - 0.004
-                    - 0.008
-                    - 0.016
-                    - 0.032
-                    - 0.064
-                    - 0.128
-                    - 0.256
-                    - 0.512
-                    - 1.024
-                    - 2.048
-                    - 4.096
-                    - 8.192
-                  startTimeUnixNano: "1000000"
-                  sum: 0.7357501239999988
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+                  sum: 0.208810874
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
                 value:
                   stringValue: histogram
-            name: etcd_disk_wal_fsync_duration_seconds
+            name: workqueue_queue_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

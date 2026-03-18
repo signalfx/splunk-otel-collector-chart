@@ -18,7 +18,7 @@ resourceMetrics:
             stringValue: kube-apiserver-kind-control-plane
         - key: k8s.pod.uid
           value:
-            stringValue: b3dd8b73-2077-41db-a5ba-ca3372f4799a
+            stringValue: e1a4290c-75c4-4dbe-a037-2de1e039e207
         - key: os.type
           value:
             stringValue: linux
@@ -37,7 +37,7 @@ resourceMetrics:
         - key: url.scheme
           value:
             stringValue: https
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
     scopeMetrics:
       - metrics:
           - description: '[STABLE] Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component.'
@@ -52,7 +52,7 @@ resourceMetrics:
                       value:
                         stringValue: GET
                   bucketCounts:
-                    - "2"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -76,7 +76,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "2"
+                  count: "1"
                   explicitBounds:
                     - 0.005
                     - 0.025
@@ -101,8 +101,7 @@ resourceMetrics:
                     - 30
                     - 45
                     - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 0.000451333
+                  sum: 0.00196875
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
@@ -121,7 +120,7 @@ resourceMetrics:
                       value:
                         stringValue: GET
                   bucketCounts:
-                    - "2"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -129,7 +128,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "2"
+                  count: "1"
                   explicitBounds:
                     - 1000
                     - 10000
@@ -138,8 +137,7 @@ resourceMetrics:
                     - 1e+07
                     - 1e+08
                     - 1e+09
-                  startTimeUnixNano: "1000000"
-                  sum: 4
+                  sum: 2
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
@@ -156,10 +154,10 @@ resourceMetrics:
                         stringValue: '[::1]:6443'
                     - key: verb
                       value:
-                        stringValue: GET
+                        stringValue: DELETE
                   bucketCounts:
-                    - "216"
-                    - "15"
+                    - "0"
+                    - "1"
                     - "0"
                     - "0"
                     - "0"
@@ -171,7 +169,7 @@ resourceMetrics:
                     - "0"
                     - "0"
                     - "0"
-                  count: "231"
+                  count: "1"
                   explicitBounds:
                     - 0.005
                     - 0.025
@@ -185,8 +183,7 @@ resourceMetrics:
                     - 15
                     - 30
                     - 60
-                  startTimeUnixNano: "1000000"
-                  sum: 0.27701721300000026
+                  sum: 0.007909292
                   timeUnixNano: "1000000"
             metadata:
               - key: prometheus.type
@@ -195,4 +192,4 @@ resourceMetrics:
             name: rest_client_request_duration_seconds
         scope:
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version: v0.127.0
+          version: v0.147.0

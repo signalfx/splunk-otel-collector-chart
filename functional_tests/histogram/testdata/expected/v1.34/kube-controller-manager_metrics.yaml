@@ -4,220 +4,6 @@ resourceMetrics:
       - metrics:
           - gauge:
               dataPoints:
-                - asDouble: 1376
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_samples_scraped
-          - gauge:
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: etcd_server_is_leader
-          - name: etcd_server_leader_changes_seen_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
-                - asDouble: 1
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-              isMonotonic: true
-          - gauge:
-              dataPoints:
-                - asDouble: 701
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: etcd_server_proposals_applied_total
-          - gauge:
-              dataPoints:
-                - asDouble: 701
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: etcd_server_proposals_committed_total
-          - name: etcd_server_proposals_failed_total
-            sum:
-              aggregationTemporality: 2
-              dataPoints:
                 - asDouble: 0
                   attributes:
                     - key: host.name
@@ -234,10 +20,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: etcd-kind-control-plane
+                        stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: name
+                      value:
+                        stringValue: ClusterRoleAggregator
                     - key: os.type
                       value:
                         stringValue: linux
@@ -246,21 +35,21 @@ resourceMetrics:
                         stringValue: 172.18.0.2
                     - key: server.port
                       value:
-                        stringValue: "2381"
+                        stringValue: "10257"
                     - key: service.instance.id
                       value:
-                        stringValue: 172.18.0.2:2381
+                        stringValue: 172.18.0.2:10257
                     - key: service.name
                       value:
-                        stringValue: etcd
+                        stringValue: kube-controller-manager
                     - key: url.scheme
                       value:
-                        stringValue: http
+                        stringValue: https
                   timeUnixNano: "1000000"
-              isMonotonic: true
+            name: workqueue_unfinished_work_seconds
           - gauge:
               dataPoints:
-                - asDouble: 0.0162525
+                - asDouble: 0.0528645
                   attributes:
                     - key: host.name
                       value:
@@ -276,10 +65,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: etcd-kind-control-plane
+                        stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
                     - key: os.type
                       value:
                         stringValue: linux
@@ -288,20 +77,104 @@ resourceMetrics:
                         stringValue: 172.18.0.2
                     - key: server.port
                       value:
-                        stringValue: "2381"
+                        stringValue: "10257"
                     - key: service.instance.id
                       value:
-                        stringValue: 172.18.0.2:2381
+                        stringValue: 172.18.0.2:10257
                     - key: service.name
                       value:
-                        stringValue: etcd
+                        stringValue: kube-controller-manager
                     - key: url.scheme
                       value:
-                        stringValue: http
+                        stringValue: https
                   timeUnixNano: "1000000"
             name: scrape_duration_seconds
           - gauge:
               dataPoints:
+                - asDouble: 896
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10257"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10257
+                    - key: service.name
+                      value:
+                        stringValue: kube-controller-manager
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_samples_post_metric_relabeling
+          - gauge:
+              dataPoints:
+                - asDouble: 896
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10257"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10257
+                    - key: service.name
+                      value:
+                        stringValue: kube-controller-manager
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_series_added
+          - gauge:
+              dataPoints:
                 - asDouble: 0
                   attributes:
                     - key: host.name
@@ -318,10 +191,13 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: etcd-kind-control-plane
+                        stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: name
+                      value:
+                        stringValue: ClusterRoleAggregator
                     - key: os.type
                       value:
                         stringValue: linux
@@ -330,18 +206,110 @@ resourceMetrics:
                         stringValue: 172.18.0.2
                     - key: server.port
                       value:
-                        stringValue: "2381"
+                        stringValue: "10257"
                     - key: service.instance.id
                       value:
-                        stringValue: 172.18.0.2:2381
+                        stringValue: 172.18.0.2:10257
                     - key: service.name
                       value:
-                        stringValue: etcd
+                        stringValue: kube-controller-manager
                     - key: url.scheme
                       value:
-                        stringValue: http
+                        stringValue: https
                   timeUnixNano: "1000000"
-            name: etcd_server_proposals_pending
+            name: workqueue_depth
+          - gauge:
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: name
+                      value:
+                        stringValue: ClusterRoleAggregator
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10257"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10257
+                    - key: service.name
+                      value:
+                        stringValue: kube-controller-manager
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: workqueue_longest_running_processor_seconds
+          - name: workqueue_retries_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 0
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-controller-manager-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
+                    - key: name
+                      value:
+                        stringValue: ClusterRoleAggregator
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "10257"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:10257
+                    - key: service.name
+                      value:
+                        stringValue: kube-controller-manager
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+              isMonotonic: true
           - gauge:
               dataPoints:
                 - asDouble: 1
@@ -360,10 +328,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: etcd-kind-control-plane
+                        stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
                     - key: os.type
                       value:
                         stringValue: linux
@@ -372,21 +340,21 @@ resourceMetrics:
                         stringValue: 172.18.0.2
                     - key: server.port
                       value:
-                        stringValue: "2381"
+                        stringValue: "10257"
                     - key: service.instance.id
                       value:
-                        stringValue: 172.18.0.2:2381
+                        stringValue: 172.18.0.2:10257
                     - key: service.name
                       value:
-                        stringValue: etcd
+                        stringValue: kube-controller-manager
                     - key: url.scheme
                       value:
-                        stringValue: http
+                        stringValue: https
                   timeUnixNano: "1000000"
             name: up
           - gauge:
               dataPoints:
-                - asDouble: 23
+                - asDouble: 2685
                   attributes:
                     - key: host.name
                       value:
@@ -402,10 +370,10 @@ resourceMetrics:
                         stringValue: kind-control-plane
                     - key: k8s.pod.name
                       value:
-                        stringValue: etcd-kind-control-plane
+                        stringValue: kube-controller-manager-kind-control-plane
                     - key: k8s.pod.uid
                       value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
+                        stringValue: 60c51e93-a725-4f2d-a974-d3aafa671ca0
                     - key: os.type
                       value:
                         stringValue: linux
@@ -414,58 +382,16 @@ resourceMetrics:
                         stringValue: 172.18.0.2
                     - key: server.port
                       value:
-                        stringValue: "2381"
+                        stringValue: "10257"
                     - key: service.instance.id
                       value:
-                        stringValue: 172.18.0.2:2381
+                        stringValue: 172.18.0.2:10257
                     - key: service.name
                       value:
-                        stringValue: etcd
+                        stringValue: kube-controller-manager
                     - key: url.scheme
                       value:
-                        stringValue: http
+                        stringValue: https
                   timeUnixNano: "1000000"
-            name: scrape_samples_post_metric_relabeling
-          - gauge:
-              dataPoints:
-                - asDouble: 23
-                  attributes:
-                    - key: host.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.cluster.name
-                      value:
-                        stringValue: sock
-                    - key: k8s.namespace.name
-                      value:
-                        stringValue: kube-system
-                    - key: k8s.node.name
-                      value:
-                        stringValue: kind-control-plane
-                    - key: k8s.pod.name
-                      value:
-                        stringValue: etcd-kind-control-plane
-                    - key: k8s.pod.uid
-                      value:
-                        stringValue: a92a4542-9353-4858-9bfc-59ac53f60f62
-                    - key: os.type
-                      value:
-                        stringValue: linux
-                    - key: server.address
-                      value:
-                        stringValue: 172.18.0.2
-                    - key: server.port
-                      value:
-                        stringValue: "2381"
-                    - key: service.instance.id
-                      value:
-                        stringValue: 172.18.0.2:2381
-                    - key: service.name
-                      value:
-                        stringValue: etcd
-                    - key: url.scheme
-                      value:
-                        stringValue: http
-                  timeUnixNano: "1000000"
-            name: scrape_series_added
+            name: scrape_samples_scraped
         scope: {}
