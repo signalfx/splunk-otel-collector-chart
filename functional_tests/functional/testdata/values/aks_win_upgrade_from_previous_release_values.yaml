@@ -3,9 +3,6 @@ cloudProvider: azure
 distribution: aks
 environment: dev
 isWindows: true
-image:
-  otelcol:
-    repository: quay.io/signalfx/splunk-otel-collector-fips
 splunkObservability:
   realm: us0
   accessToken: xxxxx
