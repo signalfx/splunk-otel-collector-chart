@@ -335,6 +335,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubedns"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153`']
               tls_config:
@@ -350,6 +351,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "coredns"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
                 - targets: ["`endpoint`:9154"]
@@ -386,6 +388,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "etcd"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:2381"]
               metric_relabel_configs:
@@ -410,6 +413,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kube-controller-manager"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:10257"]
               scheme: https
@@ -439,6 +443,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-apiserver"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -473,6 +478,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-proxy"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               scheme: https
               tls_config:
@@ -507,6 +513,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-scheduler"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:10259"]
               scheme: https

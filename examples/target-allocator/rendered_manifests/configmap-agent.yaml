@@ -231,6 +231,7 @@ data:
                     regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:9153'
@@ -249,6 +250,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
@@ -271,6 +273,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -289,6 +292,7 @@ data:
                     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total|kubeproxy_sync_proxy_rules_service_changes_total|kubeproxy_sync_proxy_rules_service_changes_pending|kubeproxy_sync_proxy_rules_duration_seconds|kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10249'
@@ -307,6 +311,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'

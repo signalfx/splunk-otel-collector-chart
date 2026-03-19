@@ -173,6 +173,7 @@ data:
               source_labels:
               - __name__
             scheme: https
+            scrape_interval: 10s
             static_configs:
             - targets:
               - ${KUBERNETES_SERVICE_HOST}:443

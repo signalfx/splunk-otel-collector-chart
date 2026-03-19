@@ -294,6 +294,9 @@ agent:
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
+    # Scrape interval for Prometheus receivers collecting control plane metrics.
+    # The SmartAgent receivers that were replaced used a 10-second default.
+    scrapeInterval: 10s
     apiserver:
       # Specifies whether to collect apiserver metrics.
       enabled: true

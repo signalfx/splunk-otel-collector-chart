@@ -353,6 +353,10 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "scrapeInterval": {
+              "type": "string",
+              "description": "Scrape interval for Prometheus receivers collecting control plane metrics."
+            },
             "apiserver": {
               "type": "object",
               "additionalProperties": false,
