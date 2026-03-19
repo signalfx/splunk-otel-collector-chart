@@ -295,7 +295,8 @@ agent:
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
     # Scrape interval for Prometheus receivers collecting control plane metrics.
-    # The SmartAgent receivers that were replaced used a 10-second default.
+    # This value is also used by the EKS apiserver Prometheus receiver in the
+    # cluster receiver. Accepts Prometheus duration strings (e.g. 10s, 1m).
     scrapeInterval: 10s
     apiserver:
       # Specifies whether to collect apiserver metrics.
