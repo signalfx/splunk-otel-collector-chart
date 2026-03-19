@@ -10,6 +10,7 @@ operatorcrds:
   install: true
 operator:
   enabled: true
+  automountServiceAccountToken: false
   admissionWebhooks:
     certManager:
       enabled: false
