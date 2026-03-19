@@ -1,0 +1,24 @@
+cloudProvider: azure
+distribution: aks
+environment: dev
+isWindows: true
+image:
+  otelcol:
+    repository: quay.io/signalfx/splunk-otel-collector-fips
+splunkObservability:
+  realm: us0
+  accessToken: xxxxx
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true
+  nodeSelector:
+    kubernetes.io/os: "linux"
+instrumentation:
+  installationJob:
+    enabled: true
