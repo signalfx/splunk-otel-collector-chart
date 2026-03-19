@@ -10,6 +10,9 @@ splunkObservability:
   accessToken: CHANGEME
   metricsEnabled: true
 
+gateway:
+  enabled: true
+
 featureGates:
   useControlPlaneMetricsHistogramData: true
   enableOTLPHistograms: false
