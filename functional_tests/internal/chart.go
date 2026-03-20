@@ -40,11 +40,13 @@ const (
 )
 
 type ChartOptions struct {
-	ChartNamespace   string
-	ChartReleaseName string
-	WaitStrategy     kube.WaitStrategy
-	ChartTimeout     time.Duration
-	ForceConflicts   bool
+	ChartNamespace      string
+	ChartReleaseName    string
+	WaitStrategy        kube.WaitStrategy
+	ChartTimeout        time.Duration
+	ForceConflicts      bool
+	UpgradeFromValues   string
+	UpgradeFromChartDir string
 }
 
 func GetDefaultChartOptions() ChartOptions {
@@ -78,11 +80,16 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	install.ForceConflicts = options.ForceConflicts
 	install.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 
-	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
-	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
-	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
+	// Determine upgrade-from values: prefer ChartOptions fields, fall back to env vars.
+	upgradeFromValues := options.UpgradeFromValues
+	if upgradeFromValues == "" {
+		upgradeFromValues = os.Getenv("UPGRADE_FROM_VALUES")
+	}
 	if upgradeFromValues != "" {
-		oldChartDir := os.Getenv("UPGRADE_FROM_CHART_DIR")
+		oldChartDir := options.UpgradeFromChartDir
+		if oldChartDir == "" {
+			oldChartDir = os.Getenv("UPGRADE_FROM_CHART_DIR")
+		}
 		oldChartPath := filepath.Join("..", "..", oldChartDir)
 		newChartPath := filepath.Join("..", "..", defaultChartPath)
 
