@@ -1362,7 +1362,7 @@ featureGates:
   # and target allocator deployments.
   # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
-  # DEPRECATED: Report OTLP histograms to Splunk Observability Cloud from the agent. Enabled by default.
+  # DEPRECATED: Send OTLP histograms to Splunk Observability Cloud from the agent. Enabled by default.
   # This feature gate has no impact if enableOTLPHistograms is enabled.
   # Use the enableOTLPHistograms feature gate instead.
   useControlPlaneMetricsHistogramData: true
