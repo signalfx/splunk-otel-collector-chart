@@ -296,7 +296,8 @@ agent:
   controlPlaneMetrics:
     # Scrape interval for Prometheus receivers collecting control plane metrics.
     # This value is also used by the EKS apiserver Prometheus receiver in the
-    # cluster receiver. Accepts Prometheus duration strings (e.g. 10s, 1m).
+    # cluster receiver when featureGates.enableEKSApiServerMetrics is enabled.
+    # Accepts Prometheus duration strings (e.g. 10s, 1m).
     scrapeInterval: 10s
     apiserver:
       # Specifies whether to collect apiserver metrics.
@@ -1376,6 +1377,7 @@ featureGates:
   useMemoryLimitPercentage: false
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
+  # The scrape interval for this receiver is controlled by agent.controlPlaneMetrics.scrapeInterval.
   enableEKSApiServerMetrics: true
   # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
   # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
