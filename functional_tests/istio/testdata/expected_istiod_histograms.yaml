@@ -1,0 +1,251 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: istio-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: istiod-cbf58fd6-m42v7
+        - key: k8s.pod.uid
+          value:
+            stringValue: 288e5f12-8495-4086-9572-370705711b8f
+        - key: os.type
+          value:
+            stringValue: linux
+        - key: server.address
+          value:
+            stringValue: 10.244.0.5
+        - key: server.port
+          value:
+            stringValue: "15014"
+        - key: service.instance.id
+          value:
+            stringValue: 10.244.0.5:15014
+        - key: service.name
+          value:
+            stringValue: autodetect-metrics
+        - key: url.scheme
+          value:
+            stringValue: http
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
+    scopeMetrics:
+      - metrics:
+          - description: Delay in seconds between config change and a proxy receiving all required configuration.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "21"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 0.1
+                    - 0.5
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.017099703999999997
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: pilot_proxy_convergence_time
+          - description: Total time in seconds Pilot takes to push lds, rds, cds and eds.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: type
+                      value:
+                        stringValue: cds
+                  bucketCounts:
+                    - "14"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "14"
+                  explicitBounds:
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.004902988
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: type
+                      value:
+                        stringValue: eds
+                  bucketCounts:
+                    - "25"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "25"
+                  explicitBounds:
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.005452854000000001
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: type
+                      value:
+                        stringValue: lds
+                  bucketCounts:
+                    - "14"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "14"
+                  explicitBounds:
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.006864674
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: type
+                      value:
+                        stringValue: rds
+                  bucketCounts:
+                    - "10"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "10"
+                  explicitBounds:
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.002205471
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: pilot_xds_push_time
+          - description: Time in seconds, a proxy is in the push queue before being dequeued.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "21"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "21"
+                  explicitBounds:
+                    - 0.1
+                    - 0.5
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.000988456
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: pilot_proxy_queue_time
+          - description: Total time in seconds Pilot takes to send generated configuration.
+            histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - bucketCounts:
+                    - "63"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "63"
+                  explicitBounds:
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 3
+                    - 5
+                    - 10
+                    - 20
+                    - 30
+                  sum: 0.0009487959999999998
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: pilot_xds_send_time
+        scope:
+          name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
+          version: v0.147.0

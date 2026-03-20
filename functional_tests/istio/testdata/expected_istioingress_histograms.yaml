@@ -1,0 +1,501 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.cluster.name
+          value:
+            stringValue: dev-operator
+        - key: k8s.namespace.name
+          value:
+            stringValue: istio-system
+        - key: k8s.node.name
+          value:
+            stringValue: kind-control-plane
+        - key: k8s.pod.name
+          value:
+            stringValue: istio-ingressgateway-5784bbb957-b7dfj
+        - key: k8s.pod.uid
+          value:
+            stringValue: 80057eb4-798a-4b99-bd38-cc72d7828e93
+        - key: os.type
+          value:
+            stringValue: linux
+        - key: server.address
+          value:
+            stringValue: 10.244.0.7
+        - key: server.port
+          value:
+            stringValue: "15020"
+        - key: service.instance.id
+          value:
+            stringValue: 10.244.0.7:15020
+        - key: service.name
+          value:
+            stringValue: autodetect-metrics
+        - key: url.scheme
+          value:
+            stringValue: http
+    schemaUrl: https://opentelemetry.io/schemas/1.39.0
+    scopeMetrics:
+      - metrics:
+          - histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: connection_security_policy
+                      value:
+                        stringValue: unknown
+                    - key: destination_app
+                      value:
+                        stringValue: httpbin
+                    - key: destination_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                    - key: destination_service
+                      value:
+                        stringValue: httpbin.istio-workloads.svc.cluster.local
+                    - key: destination_service_name
+                      value:
+                        stringValue: httpbin
+                    - key: destination_service_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: destination_version
+                      value:
+                        stringValue: v1
+                    - key: destination_workload
+                      value:
+                        stringValue: httpbin
+                    - key: destination_workload_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: reporter
+                      value:
+                        stringValue: source
+                    - key: request_protocol
+                      value:
+                        stringValue: http
+                    - key: response_code
+                      value:
+                        stringValue: "200"
+                    - key: response_flags
+                      value:
+                        stringValue: '-'
+                    - key: source_app
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                    - key: source_workload
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_workload_namespace
+                      value:
+                        stringValue: istio-system
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "2"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "2"
+                  explicitBounds:
+                    - 0.5
+                    - 1
+                    - 5
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                    - 10000
+                    - 30000
+                    - 60000
+                    - 300000
+                    - 600000
+                    - 1.8e+06
+                    - 3.6e+06
+                  sum: 220
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: connection_security_policy
+                      value:
+                        stringValue: unknown
+                    - key: destination_app
+                      value:
+                        stringValue: httpbin
+                    - key: destination_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                    - key: destination_service
+                      value:
+                        stringValue: httpbin.istio-workloads.svc.cluster.local
+                    - key: destination_service_name
+                      value:
+                        stringValue: httpbin
+                    - key: destination_service_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: destination_version
+                      value:
+                        stringValue: v1
+                    - key: destination_workload
+                      value:
+                        stringValue: httpbin
+                    - key: destination_workload_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: reporter
+                      value:
+                        stringValue: source
+                    - key: request_protocol
+                      value:
+                        stringValue: http
+                    - key: response_code
+                      value:
+                        stringValue: "404"
+                    - key: response_flags
+                      value:
+                        stringValue: '-'
+                    - key: source_app
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                    - key: source_workload
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_workload_namespace
+                      value:
+                        stringValue: istio-system
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 0.5
+                    - 1
+                    - 5
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                    - 10000
+                    - 30000
+                    - 60000
+                    - 300000
+                    - 600000
+                    - 1.8e+06
+                    - 3.6e+06
+                  sum: 115.00000000000001
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: istio_request_bytes
+          - histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: connection_security_policy
+                      value:
+                        stringValue: unknown
+                    - key: destination_app
+                      value:
+                        stringValue: httpbin
+                    - key: destination_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                    - key: destination_service
+                      value:
+                        stringValue: httpbin.istio-workloads.svc.cluster.local
+                    - key: destination_service_name
+                      value:
+                        stringValue: httpbin
+                    - key: destination_service_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: destination_version
+                      value:
+                        stringValue: v1
+                    - key: destination_workload
+                      value:
+                        stringValue: httpbin
+                    - key: destination_workload_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: reporter
+                      value:
+                        stringValue: source
+                    - key: request_protocol
+                      value:
+                        stringValue: http
+                    - key: response_code
+                      value:
+                        stringValue: "200"
+                    - key: response_flags
+                      value:
+                        stringValue: '-'
+                    - key: source_app
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                    - key: source_workload
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_workload_namespace
+                      value:
+                        stringValue: istio-system
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "2"
+                  explicitBounds:
+                    - 0.5
+                    - 1
+                    - 5
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                    - 10000
+                    - 30000
+                    - 60000
+                    - 300000
+                    - 600000
+                    - 1.8e+06
+                    - 3.6e+06
+                  sum: 1056.05
+                  timeUnixNano: "1000000"
+                - attributes:
+                    - key: connection_security_policy
+                      value:
+                        stringValue: unknown
+                    - key: destination_app
+                      value:
+                        stringValue: httpbin
+                    - key: destination_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                    - key: destination_service
+                      value:
+                        stringValue: httpbin.istio-workloads.svc.cluster.local
+                    - key: destination_service_name
+                      value:
+                        stringValue: httpbin
+                    - key: destination_service_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: destination_version
+                      value:
+                        stringValue: v1
+                    - key: destination_workload
+                      value:
+                        stringValue: httpbin
+                    - key: destination_workload_namespace
+                      value:
+                        stringValue: istio-workloads
+                    - key: reporter
+                      value:
+                        stringValue: source
+                    - key: request_protocol
+                      value:
+                        stringValue: http
+                    - key: response_code
+                      value:
+                        stringValue: "404"
+                    - key: response_flags
+                      value:
+                        stringValue: '-'
+                    - key: source_app
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_principal
+                      value:
+                        stringValue: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                    - key: source_workload
+                      value:
+                        stringValue: istio-ingressgateway
+                    - key: source_workload_namespace
+                      value:
+                        stringValue: istio-system
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 0.5
+                    - 1
+                    - 5
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                    - 10000
+                    - 30000
+                    - 60000
+                    - 300000
+                    - 600000
+                    - 1.8e+06
+                    - 3.6e+06
+                  sum: 3.05
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: istio_request_duration_milliseconds
+          - histogram:
+              aggregationTemporality: 2
+              dataPoints:
+                - attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: xds-grpc
+                  bucketCounts:
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "1"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                    - "0"
+                  count: "1"
+                  explicitBounds:
+                    - 0.5
+                    - 1
+                    - 5
+                    - 10
+                    - 25
+                    - 50
+                    - 100
+                    - 250
+                    - 500
+                    - 1000
+                    - 2500
+                    - 5000
+                    - 10000
+                    - 30000
+                    - 60000
+                    - 300000
+                    - 600000
+                    - 1.8e+06
+                    - 3.6e+06
+                  sum: 5.05
+                  timeUnixNano: "1000000"
+            metadata:
+              - key: prometheus.type
+                value:
+                  stringValue: histogram
+            name: envoy_cluster_upstream_cx_connect_ms
+        scope:
+          name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
+          version: v0.147.0
