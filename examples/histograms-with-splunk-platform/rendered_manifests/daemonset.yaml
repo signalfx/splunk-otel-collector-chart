@@ -31,13 +31,14 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: c50eb4fe379e3f9cb4e55af2139c392fab1f17f6270112476233c7d956412eba
+        checksum/config: be9fd79b55fcd638b7ae5dd3bb34fc25d0016a3d1acb4682b7c6ef7091c29487
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
+      hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
-        kubernetes.io/os: windows
+        kubernetes.io/os: linux
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
@@ -51,6 +52,7 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
+      initContainers:
       containers:
       - name: otel-collector
         args:
@@ -79,8 +81,7 @@ spec:
         image: quay.io/signalfx/splunk-otel-collector:0.147.0
         imagePullPolicy: IfNotPresent
         securityContext:
-          windowsOptions:
-            runAsUserName: ContainerAdministrator
+          runAsUser: 0
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             valueFrom:
@@ -125,12 +126,10 @@ spec:
                 key: splunk_platform_hec_token
 
         readinessProbe:
-          initialDelaySeconds: 60
           httpGet:
             path: /
             port: 13133
         livenessProbe:
-          initialDelaySeconds: 60
           httpGet:
             path: /
             port: 13133
@@ -141,15 +140,32 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
-        - mountPath: C:\hostfs
-          name: hostfs
+        - mountPath: /hostfs/dev
+          name: host-dev
+          readOnly: true
+        - mountPath: /hostfs/etc
+          name: host-etc
+          readOnly: true
+        - mountPath: /hostfs/proc
+          name: host-proc
+          readOnly: true
+        - mountPath: /hostfs/run/udev/data
+          name: host-run-udev-data
+          readOnly: true
+        - mountPath: /hostfs/sys
+          name: host-sys
+          readOnly: true
+        - mountPath: /hostfs/var/run/utmp
+          name: host-var-run-utmp
+          readOnly: true
+        - mountPath: /hostfs/usr/lib/os-release
+          name: host-usr-lib-osrelease
           readOnly: true
         - name: varlog
-          mountPath: C:\var\log
+          mountPath: /var/log
           readOnly: true
-          # C:\ProgramData mount is needed for access to container storage in C:\ProgramData\docker\containers and C:\ProgramData\containerd\root.
-        - name: programdata
-          mountPath: C:\ProgramData
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
           readOnly: true
         - name: checkpoint
           mountPath: /var/addon/splunk/otel_pos
@@ -163,17 +179,35 @@ spec:
           sizeLimit: 25Mi
       - name: varlog
         hostPath:
-          path: C:\var\log
-      - name: programdata
+          path: /var/log
+      - name: varlibdockercontainers
         hostPath:
-          path: C:\ProgramData
+          path: /var/lib/docker/containers
       - name: checkpoint
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
-      - name: hostfs
+      - name: host-dev
         hostPath:
-          path: C:\
+          path: /dev
+      - name: host-etc
+        hostPath:
+          path: /etc
+      - name: host-proc
+        hostPath:
+          path: /proc
+      - name: host-run-udev-data
+        hostPath:
+          path: /run/udev/data
+      - name: host-sys
+        hostPath:
+          path: /sys
+      - name: host-var-run-utmp
+        hostPath:
+          path: /var/run/utmp
+      - name: host-usr-lib-osrelease
+        hostPath:
+          path: /usr/lib/os-release
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent
