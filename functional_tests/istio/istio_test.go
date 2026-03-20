@@ -300,8 +300,6 @@ func Test_IstioMetrics(t *testing.T) {
 		teardown(t)
 	}
 
-	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
-
 	// create an API server
 	internal.SetupSignalFxAPIServer(t)
 	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
@@ -329,7 +327,7 @@ func Test_IstioMetrics(t *testing.T) {
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
-	t.Run("istio ingress metrics captured", func(t *testing.T) {
+	t.Run("istio ingress non-histogram metrics captured", func(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
 			"istio_requests_total", flakyMetrics, metricsSink)
 	})
