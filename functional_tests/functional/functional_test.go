@@ -207,18 +207,26 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	case autopilotTestKubeEnv:
 		addChartInfo("autopilot_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case aksTestKubeEnv:
-		addChartInfo("aks_test_win_values.yaml.tmpl", internal.ChartOptions{
+		aksWinOpts := internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-win",
 			WaitStrategy:     kube.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
-		})
-		addChartInfo("aks_test_linux_values.yaml.tmpl", internal.ChartOptions{
+		}
+		aksLinuxOpts := internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-linux",
 			WaitStrategy:     kube.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
-		})
+		}
+		if upgradeChartDir := os.Getenv("UPGRADE_FROM_CHART_DIR"); upgradeChartDir != "" {
+			aksWinOpts.UpgradeFromValues = "aks_win_upgrade_from_previous_release_values.yaml"
+			aksWinOpts.UpgradeFromChartDir = upgradeChartDir
+			aksLinuxOpts.UpgradeFromValues = "aks_linux_upgrade_from_previous_release_values.yaml"
+			aksLinuxOpts.UpgradeFromChartDir = upgradeChartDir
+		}
+		addChartInfo("aks_test_win_values.yaml.tmpl", aksWinOpts)
+		addChartInfo("aks_test_linux_values.yaml.tmpl", aksLinuxOpts)
 	case eksTestKubeEnv:
 		addChartInfo("eks_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case eksAutoModeTestKubeEnv:
