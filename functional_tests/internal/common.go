@@ -5,6 +5,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -247,9 +248,28 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 		TailLines: &tailLines,
 	}
 
-	podLogsRequest := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOptions)
+	const maxRetries = 3
+	for attempt := range maxRetries {
+		logs, err := tryGetPodLogs(t, clientset, namespace, podName, &podLogOptions)
+		if err == nil {
+			return logs
+		}
+		if attempt < maxRetries-1 {
+			t.Logf("Attempt %d/%d failed to get logs from pod %s: %v, retrying...", attempt+1, maxRetries, podName, err)
+			time.Sleep(time.Duration(attempt+1) * 5 * time.Second)
+		} else {
+			require.NoError(t, err, "error getting logs from pod %s in namespace %s after %d attempts", podName, namespace, maxRetries)
+		}
+	}
+	return ""
+}
+
+func tryGetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName string, opts *v1.PodLogOptions) (string, error) {
+	podLogsRequest := clientset.CoreV1().Pods(namespace).GetLogs(podName, opts)
 	stream, err := podLogsRequest.Stream(t.Context())
-	require.NoError(t, err, "error streaming logs from pod %s in namespace %s", podName, namespace)
+	if err != nil {
+		return "", fmt.Errorf("error streaming logs from pod %s in namespace %s: %w", podName, namespace, err)
+	}
 	defer stream.Close()
 
 	var sb strings.Builder
@@ -262,10 +282,12 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 		if readErr == io.EOF {
 			break
 		}
-		require.NoError(t, readErr, "error reading stream from pod %s in namespace %s", podName, namespace)
+		if readErr != nil {
+			return "", fmt.Errorf("error reading stream from pod %s in namespace %s: %w", podName, namespace, readErr)
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	return sb.String()
+	return sb.String(), nil
 }
 
 func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string) *v1.PodList {
