@@ -300,6 +300,8 @@ func Test_IstioMetrics(t *testing.T) {
 		teardown(t)
 	}
 
+	t.Setenv("UPDATE_EXPECTED_RESULTS", "true")
+
 	// create an API server
 	internal.SetupSignalFxAPIServer(t)
 	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
