@@ -13,5 +13,6 @@ subtext: |
   The control plane-related receivers will now be included in the `metrics` pipeline in the agent.
   This should not impact users unless custom configuration is referring to this pipeline.
   Note that the only change in default behavior will be that some resource attributes
-  (`k8s.namespace.name`, `k8s.pod.uid`, and `k8s.pod.name`) will no longer be overwritten as
-  the agent's values in the telemetry pipeline, they will simply be the value coming from the source.
+  (`k8s.namespace.name`, `k8s.pod.uid`, and `k8s.pod.name`) will no longer be overwritten by
+  the agent's values in the telemetry pipeline, they will simply be the value coming from the source
+  (if present).

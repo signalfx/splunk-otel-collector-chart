@@ -11,5 +11,5 @@ issues: [2308]
 # Use pipe (|) for multiline entries.
 subtext: |
   This fixes a bug in the chart logic that resulted in control plane metrics going straight to Splunk Observability
-  Cloud from the agent, even when the gateway was enabled. These metrics will now go through the gateway when
+  Cloud from the agent even when the gateway was enabled. These metrics will now go through the gateway when
   the feature gate and gateway are enabled.
