@@ -317,6 +317,7 @@ echo "Script end time: $script_end_time" >> "$output_file"
 echo "Copying golden files to temp directory"
 
 cp ../functional_tests/istio/testdata/expected_istiod.yaml $temp_dir/
+cp ../functional_tests/istio/testdata/expected_istiod_histograms.yaml $temp_dir/
 cp ../functional_tests/istio/testdata/expected_istioingress.yaml $temp_dir/
 
 # Create a ZIP archive of all the collected YAML files
