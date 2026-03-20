@@ -45,7 +45,7 @@ update_obi_image_tag() {
     local normalized_ver="${LATEST_VER#v}"  # Strip leading 'v' if present
     local target_tag="v$normalized_ver"
     local current_tag
-    local updated_file
+    local updated_file=""
 
     current_tag=$(yq eval '.obi.image.tag' "$values_file")
     echo "Current OBI image tag in values.yaml is $current_tag"
@@ -53,7 +53,14 @@ update_obi_image_tag() {
     if [ "$current_tag" != "$target_tag" ]; then
         echo "Updating OBI image tag to $target_tag in values.yaml"
         updated_file=$(mktemp "${values_file}.XXXXXX")
-        awk -v target_tag="$target_tag" '
+        cleanup_updated_file() {
+            if [ -n "$updated_file" ] && [ -f "$updated_file" ]; then
+                rm -f "$updated_file"
+            fi
+        }
+        trap cleanup_updated_file RETURN
+
+        if awk -v target_tag="$target_tag" '
             BEGIN {
                 in_obi=0
                 in_image=0
@@ -79,8 +86,12 @@ update_obi_image_tag() {
                     exit 1
                 }
             }
-        ' "$values_file" > "$updated_file"
-        mv "$updated_file" "$values_file"
+        ' "$values_file" > "$updated_file"; then
+            mv "$updated_file" "$values_file"
+            updated_file=""
+        else
+            return 1
+        fi
     else
         echo "OBI image tag is already up to date in values.yaml"
     fi
