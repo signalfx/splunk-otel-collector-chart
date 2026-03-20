@@ -142,8 +142,15 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 			}
 
 			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed CRD %s", crd.Name)
+			if err != nil {
+				if k8serrors.IsAlreadyExists(err) {
+					t.Logf("CRD %s already exists, skipping creation", crd.Name)
+				} else {
+					require.NoError(t, err)
+				}
+			} else {
+				t.Logf("Deployed CRD %s", crd.Name)
+			}
 
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
 				latest, latestErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
@@ -224,9 +231,12 @@ func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsCl
 			groupVersionKind.Kind == "CustomResourceDefinition" {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
+			err = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: &waitTime,
 			})
+			if err != nil && !k8serrors.IsNotFound(err) {
+				t.Logf("Failed to delete CRD %s during teardown: %v", crd.Name, err)
+			}
 		}
 	}
 }
