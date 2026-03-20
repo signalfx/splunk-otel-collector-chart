@@ -64,13 +64,18 @@ resourcedetection:
     - env
     {{- if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
     - gcp
-    {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
     {{- else if eq .Values.distribution "aks" }}
     - aks
+    {{- else if eq .Values.distribution "openshift" }}
+    - openshift
     {{- end }}
     {{- if eq .Values.cloudProvider "azure" }}
     - azure
+    {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "aws")) }}
+    - ec2
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
@@ -80,7 +85,7 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+  {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
   eks:
     node_from_env_var: K8S_NODE_NAME
     resource_attributes:
@@ -103,6 +108,36 @@ resourcedetection:
         enabled: true
     {{- end }}
   {{- end }}
+  {{- if eq .Values.distribution "openshift" }}
+  openshift:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+      cloud.provider:
+        enabled: true
+      cloud.platform:
+        enabled: true
+      cloud.region:
+        enabled: true
+  {{- end }}
+  {{- if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "aws")) }}
+  ec2:
+    resource_attributes:
+      host.id:
+        enabled: true
+      cloud.region:
+        enabled: true
+      cloud.availability_zone:
+        enabled: true
+      cloud.account.id:
+        enabled: true
+      host.name:
+        enabled: true
+      host.image.id:
+        enabled: true
+      host.type:
+        enabled: true
+  {{- end }}
   override: true
   timeout: 15s
 {{- end }}
@@ -117,6 +152,8 @@ resourcedetection/k8s_cluster_name:
     - gcp
     {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
+    {{- else if eq .Values.distribution "openshift" }}
+    - openshift
     {{- end }}
   {{- if hasPrefix "gke" .Values.distribution }}
   gcp:
@@ -162,6 +199,17 @@ resourcedetection/k8s_cluster_name:
       cloud.provider:
         enabled: false
       cloud.platform:
+        enabled: false
+  {{- else if eq .Values.distribution "openshift" }}
+  openshift:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
+      cloud.region:
         enabled: false
   {{- end }}
   override: true

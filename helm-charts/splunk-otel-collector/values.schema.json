@@ -1431,7 +1431,7 @@
       "if": {
         "properties": {
           "distribution": {
-            "pattern": "^(gke|eks).*"
+            "pattern": "^(gke|eks|openshift).*"
           }
         },
         "required": [
@@ -1446,7 +1446,7 @@
         }
       },
       "else": {
-        "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
+        "$comment": "The clusterName is required if the distribution doesn't start with eks, gke, or match openshift.",
         "properties": {
           "clusterName": {
             "minLength": 1
