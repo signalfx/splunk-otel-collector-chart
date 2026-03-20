@@ -333,6 +333,11 @@ func Test_IstioMetrics(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
 			"istio_requests_total", flakyMetrics, metricsSink)
 	})
+
+	t.Run("istio ingress histogram metrics captured", func(t *testing.T) {
+		testIstioMetrics(t, "testdata/expected_istioingress_histograms.yaml",
+			"istio_request_bytes", flakyMetrics, metricsSink)
+	})
 }
 
 func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, metricsSink *consumertest.MetricsSink) {
