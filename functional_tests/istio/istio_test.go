@@ -360,11 +360,22 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 				internal.RemoveFlakyMetrics(&receivedMetrics, flakyMetricNames)
 			}
 
+			// Note: For some tests the attributes will be metric data point attributes (non-histogram)
+			// and for other tests they'll be resoruce attributes (histogram). That's why they're ignored
+			// twice here.
 			err = pmetrictest.CompareMetrics(expectedMetrics, receivedMetrics,
 				pmetrictest.IgnoreTimestamp(),
 				pmetrictest.IgnoreStartTimestamp(),
 				pmetrictest.IgnoreScopeVersion(),
 				pmetrictest.IgnoreMetricValues(metricNames...),
+				pmetrictest.IgnoreResourceAttributeValue("host.name"),
+				pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
+				pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+				pmetrictest.IgnoreResourceAttributeValue("os.type"),
+				pmetrictest.IgnoreResourceAttributeValue("server.address"),
+				pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
+				pmetrictest.IgnoreResourceAttributeValue("service.name"),
+				pmetrictest.IgnoreResourceAttributeValue("url.scheme"),
 				pmetrictest.IgnoreMetricAttributeValue("host.name"),
 				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
 				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
