@@ -53,6 +53,7 @@ const (
 	gkeTestKubeEnv                         = "gke"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
+	rosaTestKubeEnv                        = "rosa"
 	gceTestKubeEnv                         = "gce"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
@@ -62,6 +63,7 @@ const (
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
 	aksValuesDir                           = "expected_aks_values"
 	gkeValuesDir                           = "expected_gke_values"
+	rosaValuesDir                          = "expected_rosa_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
@@ -104,17 +106,11 @@ func setupSinks(t *testing.T) {
 	}
 }
 
-func deployChartsAndApps(t *testing.T, testKubeConfig string) {
-	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
-	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	extensionsClient, err := clientset.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
-	require.NoError(t, err)
+func requiresPrometheusCRD(kubeTestEnv string) bool {
+	return kubeTestEnv == kindTestKubeEnv
+}
+
+func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
@@ -122,13 +118,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	sch := k8sruntime.NewScheme()
 
+	var obj k8sruntime.Object
+	var groupVersionKind *schema.GroupVersionKind
 	for _, resourceYAML := range strings.Split(string(stream), "---") {
 		if len(resourceYAML) == 0 {
 			continue
 		}
 
-		var groupVersionKind *schema.GroupVersionKind
-		var obj k8sruntime.Object
 		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
@@ -140,7 +136,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
 
-			// If the CRD is stuck in Terminating from a previous run, wait for it to be fully removed.
 			existing, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
 			if getErr == nil && existing.DeletionTimestamp != nil {
 				t.Logf("CRD %s is terminating, waiting for removal...", crd.Name)
@@ -151,10 +146,16 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			}
 
 			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed CRD %s", crd.Name)
+			if err != nil {
+				if k8serrors.IsAlreadyExists(err) {
+					t.Logf("CRD %s already exists, skipping creation", crd.Name)
+				} else {
+					require.NoError(t, err)
+				}
+			} else {
+				t.Logf("Deployed CRD %s", crd.Name)
+			}
 
-			// Wait for CRD to be Established before moving on
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
 				latest, latestErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
 				assert.NoError(tt, latestErr)
@@ -197,6 +198,71 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
+	// Prometheus service monitor
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
+	require.NoError(t, err)
+	serviceMonitor, _, err := crdDecode(stream, nil, nil)
+	require.NoError(t, err)
+	g = schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "servicemonitors",
+	}
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	assert.NoError(t, err)
+}
+
+func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsClient *clientset.Clientset) {
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	waitTime := int64(0)
+	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	var obj k8sruntime.Object
+	var groupVersionKind *schema.GroupVersionKind
+	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err = decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "apiextensions.k8s.io" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+			err = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: &waitTime,
+			})
+			if err != nil && !k8serrors.IsNotFound(err) {
+				t.Logf("Failed to delete CRD %s during teardown: %v", crd.Name, err)
+			}
+		}
+	}
+}
+
+func deployChartsAndApps(t *testing.T, testKubeConfig string) {
+	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
+	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	extensionsClient, err := clientset.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	if requiresPrometheusCRD(kubeTestEnv) {
+		deployPrometheusResources(t, extensionsClient, dynamicClient)
+	}
+
+	var stream []byte
 	chartInfo := map[string]internal.ChartOptions{}
 	addChartInfo := func(fileName string, chartOption internal.ChartOptions) {
 		valuesFile, errAbs := filepath.Abs(filepath.Join(testDir, valuesDir, fileName))
@@ -235,6 +301,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case gkeTestKubeEnv:
 		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case rosaTestKubeEnv:
+		addChartInfo("rosa_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -337,21 +405,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	_, err = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), service.(*corev1.Service),
 		metav1.CreateOptions{})
 	require.NoError(t, err)
-
-	// Prometheus service monitor
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
-	require.NoError(t, err)
-
-	serviceMonitor, _, err := crdDecode(stream, nil, nil)
-	require.NoError(t, err)
-	g = schema.GroupVersionResource{
-		Group:    "monitoring.coreos.com",
-		Version:  "v1",
-		Resource: "servicemonitors",
-	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
-		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
 
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
@@ -487,27 +540,8 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err = decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-		}
+	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+		teardownPrometheusResources(ctx, t, extensionsClient)
 	}
 
 	for _, nm := range namespaces {
@@ -593,7 +627,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -631,6 +665,8 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 		return aksValuesDir
 	case gkeTestKubeEnv:
 		return gkeValuesDir
+	case rosaTestKubeEnv:
+		return rosaValuesDir
 	default:
 		return eksValuesDir
 	}
