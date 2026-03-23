@@ -33,6 +33,10 @@ on:
         required: false
         default: 'false'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   prepare_release:
     runs-on: ubuntu-latest
@@ -42,7 +46,7 @@ jobs:
       OVERWRITE_EXISTING_PR: ${{ github.event.inputs.OVERWRITE_EXISTING_PR }}
       DEBUG: ${{ github.event.inputs.DEBUG }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install tools
         run: make install-tools
@@ -84,7 +88,7 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
