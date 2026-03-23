@@ -7,12 +7,15 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
 
+permissions:
+  contents: read
+
 jobs:
   get-test-matrix:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: get matrix
         id: test_matrix
@@ -29,7 +32,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install kubeconform
         run: |

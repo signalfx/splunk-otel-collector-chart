@@ -13,6 +13,9 @@ on:
           - false
           - true
 
+permissions:
+  contents: read
+
 env:
   GO_VERSION: 1.26.1
   # Make sure to exit early if cache segment download times out after 2 minutes.
@@ -24,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: get matrix
         id: test_matrix
@@ -58,15 +61,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
 
 #      # Leave this here for debugging
 #      - name: Setup upterm session
-#        uses: lhotari/action-upterm@v1
+#        uses: lhotari/action-upterm@b0357f23233f5ea6d58947c0c402e0631bab7334 # v1
 
       - name: Setup Minikube
         run: |
@@ -134,7 +137,7 @@ jobs:
 
       - name: Upload Kubernetes Cluster debug info
         if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: k8s-debug-info-${{ matrix.k8s-minikube-version }}-${{ matrix.container_runtime }}-splunk-${{ matrix.splunk_version }}
           path: tools/splunk_kubernetes_debug_info_*
