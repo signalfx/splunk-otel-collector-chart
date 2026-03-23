@@ -17,7 +17,7 @@ while IFS= read -r line; do
   lineno=$(echo "$line" | cut -d: -f2)
   content=$(echo "$line" | cut -d: -f3-)
 
-  ref=$(echo "$content" | sed -n "s/.*uses:[[:space:]]*['\"]*//" | sed "s/['\"].*$//" | sed 's/[[:space:]]*$//')
+  ref=$(echo "$content" | sed -n "s/.*uses:[[:space:]]*['\"]*//p" | sed "s/['\"].*$//" | sed 's/[[:space:]]*$//')
 
   # Skip local actions, empty lines, and shell script false positives
   case "$ref" in
@@ -28,9 +28,8 @@ while IFS= read -r line; do
     echo "FAIL: ${file}:${lineno} — ${ref}"
     errors=$((errors + 1))
   fi
-done < <(grep -rn 'uses:' ${SCAN_PATHS[@]} 2>/dev/null \
-  | grep -v '^\s*#' \
-  | grep -v '#.*uses:')
+done < <(grep -rn '^[[:space:]]*-\?[[:space:]]*uses:' "${SCAN_PATHS[@]}" 2>/dev/null \
+  | grep -v '#[[:space:]]*uses:')
 
 if [ "$errors" -gt 0 ]; then
   echo ""
