@@ -106,6 +106,10 @@ func setupSinks(t *testing.T) {
 	}
 }
 
+func requiresPrometheusCRD(kubeTestEnv string) bool {
+	return kubeTestEnv == kindTestKubeEnv
+}
+
 func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
@@ -254,8 +258,7 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
-	// Prometheus CRDs are pre-installed on ROSA; Prometheus scraping is not tested there.
-	if kubeTestEnv != rosaTestKubeEnv {
+	if requiresPrometheusCRD(kubeTestEnv) {
 		deployPrometheusResources(t, extensionsClient, dynamicClient)
 	}
 
@@ -537,7 +540,7 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	if os.Getenv("KUBE_TEST_ENV") != rosaTestKubeEnv {
+	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
 		teardownPrometheusResources(ctx, t, extensionsClient)
 	}
 
