@@ -28,7 +28,7 @@ jobs:
           rm actionlint.tar.gz
 
       - name: Run actionlint
-        run: actionlint -color .github/workflows/*.yaml .github/actions/*.yaml
+        run: actionlint -color .github/workflows/*.yaml .github/workflows/*.yml
 
   security-checks:
     runs-on: ubuntu-latest
