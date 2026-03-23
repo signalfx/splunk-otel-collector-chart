@@ -361,7 +361,7 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 			}
 
 			// Note: For some tests the attributes will be metric data point attributes (non-histogram)
-			// and for other tests they'll be resoruce attributes (histogram). That's why they're ignored
+			// and for other tests they'll be resource attributes (histogram). That's why they're ignored
 			// twice here.
 			err = pmetrictest.CompareMetrics(expectedMetrics, receivedMetrics,
 				pmetrictest.IgnoreTimestamp(),
