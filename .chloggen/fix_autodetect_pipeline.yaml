@@ -11,7 +11,7 @@ issues: [2308]
 # Use pipe (|) for multiline entries.
 subtext: |
   Due to a bug in rendering when `useControlPlaneMetricsHistogramData` was enabled, the autodetect
-  related scrapers were in the `metrics/histogram` pipeline rather than the `metrics`
+  related scrapers were in the `metrics/histograms` pipeline rather than the `metrics`
   pipeline. This means these metrics weren't properly going through the gateway, and were not being
   sent to Splunk Platform (when these options were enabled). These metrics were also not going
   through a processor intended for Istio metrics that drops unnecessary dimensions to avoid
