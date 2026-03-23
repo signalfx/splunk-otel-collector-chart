@@ -382,7 +382,10 @@ func checkNonHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, c
 
 func checkAttributes(t *testing.T, attrs pcommon.Map, expectedAttrs map[string]string, component string) error {
 	for key, regex := range expectedAttrs {
-		val, _ := attrs.Get(key)
+		val, found := attrs.Get(key)
+		if !found {
+			return fmt.Errorf("attribute %s not found", key)
+		}
 		if !assert.Regexp(t, regex, val.AsString(), "Attribute %s does not match regex %s for component %s", key, regex, component) {
 			return fmt.Errorf("attribute %s does not match regex %s for component %s", key, regex, component)
 		}
