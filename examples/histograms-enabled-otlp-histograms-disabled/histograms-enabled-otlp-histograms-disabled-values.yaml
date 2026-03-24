@@ -1,0 +1,15 @@
+clusterName: CHANGEME
+splunkPlatform:
+  token: CHANGEME
+  endpoint: http://localhost:8088/services/collector
+  metricsEnabled: true
+  metricsIndex: CHANGEME
+
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: true
+
+featureGates:
+  useControlPlaneMetricsHistogramData: true
+  enableSplunkO11yOTLPHistograms: false

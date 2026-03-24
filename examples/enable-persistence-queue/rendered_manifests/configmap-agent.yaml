@@ -443,6 +443,7 @@ data:
           - hostmetrics
           - kubeletstats
           - otlp
+          - receiver_creator
         metrics/agent:
           exporters:
           - splunk_hec/platform_metrics

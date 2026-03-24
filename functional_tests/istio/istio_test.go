@@ -316,15 +316,25 @@ func Test_IstioMetrics(t *testing.T) {
 	}
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
-	t.Run("istiod metrics captured", func(t *testing.T) {
+	t.Run("istiod non-histogram metrics captured", func(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_services",
 			flakyMetrics, metricsSink)
 	})
 
+	t.Run("istiod histogram metrics captured", func(t *testing.T) {
+		testIstioMetrics(t, "testdata/expected_istiod_histograms.yaml", "pilot_proxy_queue_time",
+			flakyMetrics, metricsSink)
+	})
+
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
-	t.Run("istio ingress metrics captured", func(t *testing.T) {
+	t.Run("istio ingress non-histogram metrics captured", func(t *testing.T) {
 		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
 			"istio_requests_total", flakyMetrics, metricsSink)
+	})
+
+	t.Run("istio ingress histogram metrics captured", func(t *testing.T) {
+		testIstioMetrics(t, "testdata/expected_istioingress_histograms.yaml",
+			"istio_request_bytes", flakyMetrics, metricsSink)
 	})
 }
 
@@ -350,11 +360,22 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 				internal.RemoveFlakyMetrics(&receivedMetrics, flakyMetricNames)
 			}
 
+			// Note: For some tests the attributes will be metric data point attributes (non-histogram)
+			// and for other tests they'll be resource attributes (histogram). That's why they're ignored
+			// twice here.
 			err = pmetrictest.CompareMetrics(expectedMetrics, receivedMetrics,
 				pmetrictest.IgnoreTimestamp(),
 				pmetrictest.IgnoreStartTimestamp(),
 				pmetrictest.IgnoreScopeVersion(),
 				pmetrictest.IgnoreMetricValues(metricNames...),
+				pmetrictest.IgnoreResourceAttributeValue("host.name"),
+				pmetrictest.IgnoreResourceAttributeValue("k8s.pod.name"),
+				pmetrictest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+				pmetrictest.IgnoreResourceAttributeValue("os.type"),
+				pmetrictest.IgnoreResourceAttributeValue("server.address"),
+				pmetrictest.IgnoreResourceAttributeValue("service.instance.id"),
+				pmetrictest.IgnoreResourceAttributeValue("service.name"),
+				pmetrictest.IgnoreResourceAttributeValue("url.scheme"),
 				pmetrictest.IgnoreMetricAttributeValue("host.name"),
 				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
 				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),

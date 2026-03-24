@@ -126,6 +126,9 @@ exporters:
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
     sending_queue:
       num_consumers: 32
+    {{- if .Values.featureGates.enableSplunkO11yOTLPHistograms }}
+    send_otlp_histograms: true
+    {{- end }}
   # To send entities (applicable only if discovery mode is enabled)
   otlphttp/entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event

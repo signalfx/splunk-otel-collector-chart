@@ -272,6 +272,9 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
+    {{- if .Values.featureGates.enableSplunkO11yOTLPHistograms }}
+    send_otlp_histograms: true
+    {{- end }}
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
@@ -309,7 +312,9 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
+    {{- if .Values.featureGates.enableSplunkO11yOTLPHistograms }}
     send_otlp_histograms: true
+    {{- end }}
   {{- end }}
 
 service:
