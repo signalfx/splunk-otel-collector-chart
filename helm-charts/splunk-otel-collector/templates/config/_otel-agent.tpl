@@ -908,7 +908,7 @@ exporters:
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
     access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-    {{- if or .Values.featureGates.enableOTLPHistograms .Values.featureGates.useControlPlaneMetricsHistogramData }}
+    {{- if or .Values.featureGates.enableSplunkO11yOTLPHistograms .Values.featureGates.useControlPlaneMetricsHistogramData }}
     send_otlp_histograms: true
     {{- end }}
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}

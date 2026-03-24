@@ -272,7 +272,7 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
-    {{- if .Values.featureGates.enableOTLPHistograms }}
+    {{- if .Values.featureGates.enableSplunkO11yOTLPHistograms }}
     send_otlp_histograms: true
     {{- end }}
   {{- end }}
@@ -312,7 +312,7 @@ exporters:
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
-    {{- if .Values.featureGates.enableOTLPHistograms }}
+    {{- if .Values.featureGates.enableSplunkO11yOTLPHistograms }}
     send_otlp_histograms: true
     {{- end }}
   {{- end }}

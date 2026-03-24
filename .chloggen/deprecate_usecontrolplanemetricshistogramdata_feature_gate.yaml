@@ -10,8 +10,8 @@ issues: [2308]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Please use the newly introduced `enableOTLPHistograms` feature gate instead.
+  Please use the newly introduced `enableSplunkO11yOTLPHistograms` feature gate instead.
   The value of `useControlPlaneMetricsHistogramData` will only change the chart's configuration when it's enabled,
-  `enableOTLPHistograms` is disabled, and the gateway is disabled. In this case, control plane metrics
-  will be sent as histograms to Splunk Observability Cloud. Otherwise, the behavior of `enableOTLPHistograms`
+  `enableSplunkO11yOTLPHistograms` is disabled, and the gateway is disabled. In this case, control plane metrics
+  will be sent as histograms to Splunk Observability Cloud. Otherwise, the behavior of `enableSplunkO11yOTLPHistograms`
   will take precedent.
