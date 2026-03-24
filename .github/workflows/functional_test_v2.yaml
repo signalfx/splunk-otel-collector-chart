@@ -280,7 +280,7 @@ jobs:
         uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
         with:
           kubelogin-version: "v0.0.24"
-      - uses: azure/login@eec3c95657c1536435858eda1f3ff5437fee8474 # v2.3.0
+      - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: azure/aks-set-context@0f6a7a712dd90901e06e8ecb972e773574dee819 # v4
@@ -322,7 +322,7 @@ jobs:
         uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
         with:
           kubelogin-version: "v0.0.24"
-      - uses: azure/login@eec3c95657c1536435858eda1f3ff5437fee8474 # v2.3.0
+      - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: azure/aks-set-context@0f6a7a712dd90901e06e8ecb972e773574dee819 # v4
