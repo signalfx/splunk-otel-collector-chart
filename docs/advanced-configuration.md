@@ -406,10 +406,16 @@ end user, collecting metrics from these distributions is not supported.
   * openshift v4.9
 * Unsupported Distributions:
   * aks
-  * eks
+  * eks (API server metrics are collected separately, see below)
   * eks/fargate
   * gke
   * gke/autopilot
+
+For EKS clusters, although the control plane pods are not directly accessible, API server metrics
+can still be collected via `featureGates.enableEKSApiServerMetrics` (enabled by default). This
+configures a Prometheus receiver in the cluster receiver that scrapes the Kubernetes API server
+endpoint. The scrape interval for this receiver is controlled by
+`agent.controlPlaneMetrics.scrapeInterval` (default: `10s`).
 
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).

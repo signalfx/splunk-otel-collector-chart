@@ -92,6 +92,7 @@ receivers:
     config:
       scrape_configs:
         - job_name: 'kubernetes-apiserver'
+          scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
           tls_config:
             ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           authorization:

@@ -225,6 +225,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:9154'
@@ -246,6 +247,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
@@ -268,6 +270,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -290,6 +293,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -312,6 +316,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'
