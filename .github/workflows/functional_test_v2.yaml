@@ -123,7 +123,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -162,7 +162,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -389,7 +389,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -429,7 +429,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -465,7 +465,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
@@ -504,7 +504,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
