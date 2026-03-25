@@ -19,6 +19,10 @@ on:
         required: false
         default: 'false'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   check_and_update:
     runs-on: ubuntu-latest
@@ -34,7 +38,7 @@ jobs:
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for Version Updates
         id: check_for_update
@@ -107,7 +111,7 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: ${{ steps.pr_messages.outputs.commit_message_open }}
           title: ${{ steps.pr_messages.outputs.title }}
@@ -139,7 +143,7 @@ jobs:
 
       - name: Set up Python
         if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: '3.11'
 
@@ -155,7 +159,7 @@ jobs:
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: ${{ steps.pr_messages.outputs.commit_message_finalize }}
           title: ${{ steps.pr_messages.outputs.title }}

@@ -1,0 +1,11 @@
+clusterName: ci-k8s-cluster
+cloudProvider: aws
+distribution: openshift
+environment: dev
+splunkObservability:
+  realm: us0
+  accessToken: xxxxx
+operatorcrds:
+  install: false
+operator:
+  enabled: false
