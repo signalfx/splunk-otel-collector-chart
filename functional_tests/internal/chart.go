@@ -286,7 +286,7 @@ func deleteAllCRs(ctx context.Context, t *testing.T, dynClient dynamic.Interface
 		}
 
 		// Cluster-scoped CRDs.
-		err := dynClient.Resource(gvr).Namespace("").DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
+		err := dynClient.Resource(gvr).DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
 		if err != nil && !k8serrors.IsNotFound(err) {
 			t.Logf("Failed to delete CRs for %s (version %s), trying next version: %v", crd.Name, ver.Name, err)
 			continue
