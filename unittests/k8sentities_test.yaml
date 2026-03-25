@@ -15,7 +15,7 @@ tests:
           pattern: "logs/k8s_entities"
       - notMatchRegex:
           path: data["relay"]
-          pattern: "otlphttp/o11y_entities"
+          pattern: "otlp_http/o11y_entities"
 
   - it: should render k8s entities pipeline when featureGates.enableK8sEntities is true
     set:
@@ -27,7 +27,7 @@ tests:
           pattern: "logs/k8s_entities"
       - matchRegex:
           path: data["relay"]
-          pattern: "otlphttp/o11y_entities"
+          pattern: "otlp_http/o11y_entities"
       - matchRegex:
           path: data["relay"]
           pattern: "/v3/event"
