@@ -932,6 +932,9 @@ operatorcrds:
 # Not available in EKS Add-on.
 operator:
   enabled: false
+  # To pull the operator image from a private registry, set imagePullSecrets as follows:
+  #   imagePullSecrets:
+  #     - name: my-registry-secret
   manager:
     ignoreMissingCollectorCRDs: true
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
