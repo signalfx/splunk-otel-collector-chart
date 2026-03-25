@@ -274,7 +274,11 @@ func deleteAllCRs(ctx context.Context, t *testing.T, dynClient dynamic.Interface
 		if crd.Spec.Scope == apiextensionsv1.NamespaceScoped {
 			delErr := dynClient.Resource(gvr).Namespace(DefaultNamespace).DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
 			if delErr != nil && !k8serrors.IsNotFound(delErr) {
-				t.Logf("Failed to delete %s CRs in namespace %s (version %s): %v", crd.Name, DefaultNamespace, ver.Name, delErr)
+				t.Logf("Failed to delete %s CRs in namespace %s (version %s): %v, trying next version", crd.Name, DefaultNamespace, ver.Name, delErr)
+				continue
+			}
+			if k8serrors.IsNotFound(delErr) {
+				t.Logf("No %s CRs found to delete in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
 			} else {
 				t.Logf("Deleted %s CRs in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
 			}
