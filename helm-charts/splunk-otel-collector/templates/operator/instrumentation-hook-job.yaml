@@ -7,6 +7,12 @@
 apiVersion: v1
 kind: ServiceAccount
 automountServiceAccountToken: {{ .Values.featureGates.explicitMountServiceAccountToken | ternary false true }}
+{{- if .Values.image.imagePullSecrets }}
+imagePullSecrets:
+{{- range .Values.image.imagePullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
 metadata:
   name: {{ $name }}
   namespace: {{ $ns }}

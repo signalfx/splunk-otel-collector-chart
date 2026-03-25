@@ -37,7 +37,7 @@ jobs:
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
 
       - name: Install Helm
-        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a #v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 #v4
         with:
           version: v4.1.1
         if: ${{ steps.check_update_chart.outputs.NEED_RELEASE == 1 }}
@@ -55,7 +55,7 @@ jobs:
         uses: ./.github/actions/run-precommit
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           charts_dir: helm-charts
           config: .github/workflows/configs/cr.yaml

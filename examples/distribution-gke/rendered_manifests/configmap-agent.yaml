@@ -268,6 +268,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
@@ -281,6 +282,7 @@ data:
               config:
                 scrape_configs:
                 - job_name: kubedns
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"]
@@ -302,6 +304,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -320,6 +323,7 @@ data:
                     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total|kubeproxy_sync_proxy_rules_service_changes_total|kubeproxy_sync_proxy_rules_service_changes_pending|kubeproxy_sync_proxy_rules_duration_seconds|kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10249'
@@ -338,6 +342,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'
