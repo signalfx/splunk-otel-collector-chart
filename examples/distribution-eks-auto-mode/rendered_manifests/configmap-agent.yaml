@@ -23,7 +23,7 @@ data:
         endpoint: default-splunk-otel-collector:4317
         tls:
           insecure: true
-      otlphttp/entities:
+      otlp_http/entities:
         auth:
           authenticator: headers_setter
         endpoint: http://default-splunk-otel-collector:4318
@@ -65,7 +65,7 @@ data:
       batch:
         metadata_keys:
         - X-SF-Token
-      k8sattributes:
+      k8s_attributes:
         extract:
           annotations:
           - from: pod
@@ -362,7 +362,7 @@ data:
       pipelines:
         logs/entities:
           exporters:
-          - otlphttp/entities
+          - otlp_http/entities
           processors:
           - memory_limiter
           - batch
@@ -412,7 +412,7 @@ data:
           - signalfx
           processors:
           - memory_limiter
-          - k8sattributes
+          - k8s_attributes
           - batch
           - resourcedetection
           - resource

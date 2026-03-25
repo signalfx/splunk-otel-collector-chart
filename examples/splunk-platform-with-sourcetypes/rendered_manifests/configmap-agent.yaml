@@ -84,7 +84,7 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      k8sattributes:
+      k8s_attributes:
         extract:
           annotations:
           - from: pod
@@ -125,7 +125,7 @@ data:
             name: ip
         - sources:
           - from: connection
-      k8sattributes/metrics:
+      k8s_attributes/metrics:
         extract:
           annotations:
           - from: namespace
@@ -402,7 +402,7 @@ data:
           - splunk_hec/platform_logs
           processors:
           - memory_limiter
-          - k8sattributes
+          - k8s_attributes
           - filter/logs
           - batch
           - resourcedetection
@@ -419,7 +419,7 @@ data:
           - batch
           - resourcedetection
           - resource
-          - k8sattributes/metrics
+          - k8s_attributes/metrics
           - resource/metrics
           receivers:
           - hostmetrics
@@ -435,7 +435,7 @@ data:
           - resourcedetection
           - resource
           - resource/add_mode
-          - k8sattributes/metrics
+          - k8s_attributes/metrics
           - resource/metrics
           receivers:
           - prometheus/agent

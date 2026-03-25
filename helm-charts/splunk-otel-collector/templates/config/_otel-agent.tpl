@@ -830,10 +830,10 @@ receivers:
   {{- end }}
   {{- end }}
 
-# By default k8sattributes and batch processors enabled.
+# By default k8s_attributes and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
-    # Agent specific configuration of k8sattributes:
+    # Agent specific configuration of k8s_attributes:
     # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
@@ -978,7 +978,7 @@ processors:
 # If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
 # to the gateway deployment.
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
-# using the otlphttp exporter.
+# using the otlp_http exporter.
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
@@ -1007,7 +1007,7 @@ exporters:
     disable_compression: true
   {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
-  otlphttp/secureapp:
+  otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -1061,7 +1061,7 @@ exporters:
   {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
-  otlphttp/entities:
+  otlp_http/entities:
     {{- if .Values.gateway.enabled }}
     endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4318
     {{- else }}
@@ -1139,7 +1139,7 @@ service:
         {{- if .Values.gateway.enabled }}
         - otlp
         {{- else }}
-        - otlphttp/secureapp
+        - otlp_http/secureapp
         {{- end }}
     {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
@@ -1161,7 +1161,7 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         {{- if not .Values.gateway.enabled }}
         - filter/logs
         {{- end }}
@@ -1239,7 +1239,7 @@ service:
         - zipkin
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         - batch
         - resourcedetection
         - resource
@@ -1251,7 +1251,7 @@ service:
         - otlp
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - otlphttp
+        - otlp_http
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
@@ -1295,7 +1295,7 @@ service:
         - metricstransform
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -1330,7 +1330,7 @@ service:
         - resource
         - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -1357,7 +1357,7 @@ service:
         - batch
         - resourcedetection
         - resource
-      exporters: [otlphttp/entities]
+      exporters: [otlp_http/entities]
 
     {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     metrics/histograms:

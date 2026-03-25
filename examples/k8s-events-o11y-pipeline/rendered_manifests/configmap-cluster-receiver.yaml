@@ -17,7 +17,7 @@ metadata:
 data:
   relay: |
     exporters:
-      otlphttp/o11y_events:
+      otlp_http/o11y_events:
         headers:
           X-SF-TOKEN: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
           X-Splunk-Instrumentation-Library: o11yevents
@@ -177,7 +177,7 @@ data:
       pipelines:
         logs:
           exporters:
-          - otlphttp/o11y_events
+          - otlp_http/o11y_events
           processors:
           - memory_limiter
           - batch
