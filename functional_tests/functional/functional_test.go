@@ -1345,6 +1345,8 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreMetricAttributeValue("pod_identifier", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("otelcol_signal", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.name", metricNames...),
