@@ -333,11 +333,8 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 				for l := 0; l < sm.Metrics().Len(); l++ {
 					metric := sm.Metrics().At(l)
 					if metric.Type() == pmetric.MetricTypeHistogram {
-						for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
-							dp := metric.Histogram().DataPoints().At(m)
-							if dp.BucketCounts().Len() > maxBucketCount {
-								return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
-							}
+						if err := internal.CheckHistogramBucketCount(metric); err != nil {
+							return err
 						}
 					}
 				}

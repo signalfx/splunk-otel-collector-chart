@@ -37,7 +37,10 @@ import (
 
 var DefaultNamespace = "default"
 
-const waitTimeout = 3 * time.Minute
+const (
+	maxHistogramBucketCount = 32
+	waitTimeout             = 3 * time.Minute
+)
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
@@ -546,4 +549,16 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 	require.NotNilf(t, selectedMetrics, "No payload containing metric %s found within %v", targetMetric, timeout)
 	t.Logf("No exact-match payload found for %s within %v; using best-effort fallback", targetMetric, timeout)
 	return selectedMetrics, false
+}
+
+func CheckHistogramBucketCount(metric pmetric.Metric) error {
+	if metric.Type() == pmetric.MetricTypeHistogram {
+		for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
+			dp := metric.Histogram().DataPoints().At(m)
+			if dp.BucketCounts().Len() > maxHistogramBucketCount {
+				return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
+			}
+		}
+	}
+	return nil
 }
