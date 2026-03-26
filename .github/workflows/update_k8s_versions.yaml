@@ -28,7 +28,7 @@ jobs:
         id: check_for_update
         run: |
           echo "Checking for new matrix versions"
-          make update-matrix-versions DEBUG=$DEBUG
+          make update-matrix-versions DEBUG="$DEBUG"
 
       - name: check for changes
         id: git-check
@@ -37,7 +37,7 @@ jobs:
             echo "No changes detected, exiting workflow successfully"
             exit 0
           fi
-          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "changes=true" >> "$GITHUB_OUTPUT"
 
       - name: Open PR for matrix version update
         if: steps.git-check.outputs.changes == 'true'

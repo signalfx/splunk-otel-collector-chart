@@ -54,7 +54,7 @@ jobs:
       - name: Prepare Release
         id: prepare_release
         run: |
-          make prepare-release CHART_VERSION=$CHART_VERSION APP_VERSION=$APP_VERSION CREATE_BRANCH=false DEBUG=$DEBUG
+          make prepare-release CHART_VERSION="$CHART_VERSION" APP_VERSION="$APP_VERSION" CREATE_BRANCH=false DEBUG="$DEBUG"
 
       - name: Check if PR is already open
         id: check_if_pr_open

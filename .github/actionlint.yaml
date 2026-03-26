@@ -2,17 +2,3 @@ self-hosted-runner:
   labels: []
 
 config-variables: []
-
-# Ignore pre-existing shellcheck warnings in workflow run: scripts.
-# TODO: Fix these in a follow-up PR and remove these ignores.
-paths:
-  .github/workflows/**:
-    ignore:
-      - 'SC2086'
-      - 'SC2006'
-      - 'SC1083'
-      - 'SC2155'
-      - 'SC1105'
-      - 'SC2102'
-      - 'SC2129'
-      - 'SC2002'

@@ -45,13 +45,13 @@ jobs:
         run: |
           echo "Checking chart dependency version for ${{ matrix.name }}"
 
-          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
 
       - name: Check for Operator CRD Updates
         id: check_for_crd_update
         if: ${{ matrix.name == 'operator' }}
         run: |
-          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
+          make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
 
       - name: Install Skopeo
         run: |
@@ -94,18 +94,22 @@ jobs:
             body_finalize="Update operator CRDs to ${CRDS_VER} and regenerate schemas for kubeconform validation"
           fi
 
-          echo "title=$title" >> $GITHUB_OUTPUT
-          echo "commit_message_open=$commit_open" >> $GITHUB_OUTPUT
-          echo "commit_message_finalize=$commit_finalize" >> $GITHUB_OUTPUT
-          echo "body_open=$body_open" >> $GITHUB_OUTPUT
-          echo "body_finalize=$body_finalize" >> $GITHUB_OUTPUT
+          {
+            echo "title=$title"
+            echo "commit_message_open=$commit_open"
+            echo "commit_message_finalize=$commit_finalize"
+            echo "body_open=$body_open"
+            echo "body_finalize=$body_finalize"
+          } >> "$GITHUB_OUTPUT"
 
-          [ "$NEED_UPDATE" = "1" ] && echo "chlog_note_chart=Bump ${NAME} to ${LATEST_VER} in ${YAML_PATH}" >> $GITHUB_OUTPUT
+          [ "$NEED_UPDATE" = "1" ] && echo "chlog_note_chart=Bump ${NAME} to ${LATEST_VER} in ${YAML_PATH}" >> "$GITHUB_OUTPUT"
           if [ "$CRDS_UPDATE" = "1" ]; then
             CRDS_CHLOG="Bump subchart opentelemetry-operator-crds to ${CRDS_VER}. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using \`operatorcrds.install\` option."
-            echo "chlog_note_crds<<EOF" >> $GITHUB_OUTPUT
-            echo "$CRDS_CHLOG" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            {
+              echo "chlog_note_crds<<EOF"
+              echo "$CRDS_CHLOG"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
           fi
 
       - name: Open PR for Version Update
@@ -128,18 +132,18 @@ jobs:
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # We run `make update-chart-dep` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
-          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Operator CRDs update
         env:
           COMPONENT: opentelemetry-operator-crds
         if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         run: |
-          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
+          make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT="$COMPONENT" NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Set up Python
         if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
