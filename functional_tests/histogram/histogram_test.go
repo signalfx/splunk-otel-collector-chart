@@ -27,8 +27,8 @@ import (
 
 const (
 	signalFxReceiverPort = 4317
-
-	valuesDir = "values"
+	maxBucketCount       = 32
+	valuesDir            = "values"
 )
 
 func deployChart(t *testing.T) {
@@ -324,6 +324,27 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 			return fmt.Errorf("metric name %s not found in received metrics for component %s", name, component)
 		}
 	}
+
+	for i := 0; i < actual.ResourceMetrics().Len(); i++ {
+		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
+			actualRm := actual.ResourceMetrics().At(j)
+			for k := 0; k < actualRm.ScopeMetrics().Len(); k++ {
+				sm := actualRm.ScopeMetrics().At(k)
+				for l := 0; l < sm.Metrics().Len(); l++ {
+					metric := sm.Metrics().At(l)
+					if metric.Type() == pmetric.MetricTypeHistogram {
+						for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
+							dp := metric.Histogram().DataPoints().At(m)
+							if dp.BucketCounts().Len() > maxBucketCount {
+								return fmt.Errorf("metric name %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
