@@ -336,7 +336,7 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 						for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
 							dp := metric.Histogram().DataPoints().At(m)
 							if dp.BucketCounts().Len() > maxBucketCount {
-								return fmt.Errorf("metric name %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
+								return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
 							}
 						}
 					}
