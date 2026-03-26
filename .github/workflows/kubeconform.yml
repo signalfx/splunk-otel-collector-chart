@@ -21,8 +21,8 @@ jobs:
         id: test_matrix
         run: |
           echo "Getting test matrix"
-          matrix=`cat ci-matrix.json | jq '.kubeconform_tests' | jq -r 'tostring' | tr -d '\n'`
-          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
+          matrix=$(jq -r '.kubeconform_tests | tostring' ci-matrix.json | tr -d '\n')
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
     outputs:
       matrix: ${{ steps.test_matrix.outputs.matrix }}
 
