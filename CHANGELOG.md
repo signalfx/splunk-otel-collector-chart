@@ -15,9 +15,12 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Kubernetes entity data (from the k8s_cluster receiver) to the Splunk Observability
   /v3/event endpoint via otlphttp. Requires Splunk Observability configuration.
   This feature is experimental and may change or be removed in future releases.
-  
+
 
 ### 🧰 Bug fixes 🧰
+
+- `config`: Updated default configuration to use dot-notation attributes for internal metrics,
+  addressing the upstream change in ([#14815](https://github.com/open-telemetry/opentelemetry-collector/pull/14815))
 
 - `agent`: Add configurable scrapeInterval for control plane Prometheus receivers and default to 10s ([#2302](https://github.com/signalfx/splunk-otel-collector-chart/pull/2302))
   The Prometheus receivers that replaced SmartAgent receivers for control plane components
@@ -26,12 +29,12 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   `agent.controlPlaneMetrics.scrapeInterval` config option has been added (default: `10s`)
   to allow users to tune the interval. This also applies to the EKS apiserver metrics
   collected by the cluster receiver.
-  
+
 - `operator`: Fix instrumentation hook job ServiceAccount missing imagePullSecrets from image.imagePullSecrets ([#2321](https://github.com/signalfx/splunk-otel-collector-chart/pull/2321))
   When instrumentation.installationJob.enabled=true and image.imagePullSecrets is set,
   the dedicated ServiceAccount created for the hook job now receives the pull secrets,
   allowing the job's kubectl image to be pulled from a private registry.
-  
+
 
 ## [0.147.1] - 2026-03-11
 
