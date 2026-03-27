@@ -58,7 +58,7 @@ func testNodeJSTraces(t *testing.T) {
 	var selectedTrace *ptrace.Traces
 
 	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+		for i := len(tracesConsumer.AllTraces()) - 1; i >= 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
 				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
@@ -127,7 +127,7 @@ func testPythonTraces(t *testing.T) {
 
 	read := 0
 	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > read; i-- {
+		for i := len(tracesConsumer.AllTraces()) - 1; i >= read; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "python") {
 				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
@@ -196,7 +196,7 @@ func testJavaTraces(t *testing.T) {
 	var selectedTrace *ptrace.Traces
 
 	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+		for i := len(tracesConsumer.AllTraces()) - 1; i >= 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
 				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
@@ -261,7 +261,7 @@ func testDotNetTraces(t *testing.T) {
 	var selectedTrace *ptrace.Traces
 
 	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
+		for i := len(tracesConsumer.AllTraces()) - 1; i >= 0; i-- {
 			trace := tracesConsumer.AllTraces()[i]
 			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
 				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
@@ -339,8 +339,9 @@ func testPythonMetrics(t *testing.T) {
 	})
 }
 
-// Profiling tests — look for com.splunk.sourcetype=otel.profiling* logs
-// carrying the expected telemetry.sdk.language + service.name.
+// Profiling tests — verify both CPU and allocation profiling logs arrive.
+// HEC round-trip: com.splunk.sourcetype → resource attr;
+// all other attrs (identity + profiling.data.type) → log record attrs.
 
 func testJavaProfiling(t *testing.T)   { checkProfilingFromApp(t, "java", "java-test") }
 func testNodeJSProfiling(t *testing.T) { checkProfilingFromApp(t, "nodejs", "nodejs-test") }
@@ -350,34 +351,33 @@ func testPythonProfiling(t *testing.T) { checkProfilingFromApp(t, "python", "pyt
 func checkProfilingFromApp(t *testing.T, sdkLanguage, serviceName string) {
 	lc := globalSinks.logsConsumer
 	label := sdkLanguage + "/" + serviceName
-	require.Eventuallyf(t, func() bool {
-		return hasProfilingFromApp(lc, sdkLanguage, serviceName)
-	}, 3*time.Minute, 5*time.Second,
-		"no profiling logs (otel.profiling*) for %s within timeout", label)
-	t.Logf("Received profiling logs from %s", label)
+	for _, pt := range []string{"cpu", "allocation"} {
+		t.Run(pt, func(t *testing.T) {
+			require.Eventuallyf(t, func() bool {
+				return hasProfilingFromApp(lc, sdkLanguage, serviceName, pt)
+			}, 3*time.Minute, 5*time.Second,
+				"no %s profiling logs for %s within timeout", pt, label)
+			t.Logf("Received %s profiling logs from %s", pt, label)
+		})
+	}
 }
 
-// hasProfilingFromApp checks the logs sink for profiling entries matching the app.
-// After the HEC round-trip, identity attrs may appear at the resource or log record level.
-func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName string) bool {
-	matchIdentity := func(attrs pcommon.Map) bool {
-		return hasAttrMatch(attrs, "telemetry.sdk.language", sdkLanguage) &&
-			hasAttrMatch(attrs, "service.name", serviceName)
-	}
+// hasProfilingFromApp finds a profiling log record matching the given identity
+// and profiling type.
+func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, profilingType string) bool {
 	for _, logs := range lc.AllLogs() {
 		for i := 0; i < logs.ResourceLogs().Len(); i++ {
 			rl := logs.ResourceLogs().At(i)
-			resAttrs := rl.Resource().Attributes()
-			stVal, stOk := resAttrs.Get("com.splunk.sourcetype")
-			if !stOk || !strings.HasPrefix(stVal.Str(), "otel.profiling") {
+			if !hasAttrMatch(rl.Resource().Attributes(), "com.splunk.sourcetype", "otel.profiling") {
 				continue
 			}
-			if matchIdentity(resAttrs) {
-				return true
-			}
 			for j := 0; j < rl.ScopeLogs().Len(); j++ {
-				for k := 0; k < rl.ScopeLogs().At(j).LogRecords().Len(); k++ {
-					if matchIdentity(rl.ScopeLogs().At(j).LogRecords().At(k).Attributes()) {
+				sl := rl.ScopeLogs().At(j)
+				for k := 0; k < sl.LogRecords().Len(); k++ {
+					recAttrs := sl.LogRecords().At(k).Attributes()
+					if hasAttrMatch(recAttrs, "telemetry.sdk.language", sdkLanguage) &&
+						hasAttrMatch(recAttrs, "service.name", serviceName) &&
+						hasAttrMatch(recAttrs, "profiling.data.type", profilingType) {
 						return true
 					}
 				}

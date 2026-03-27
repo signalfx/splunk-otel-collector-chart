@@ -1316,6 +1316,12 @@ func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
 				return true
 			}
 		}
+	case pmetric.MetricTypeExponentialHistogram:
+		for i := 0; i < metric.ExponentialHistogram().DataPoints().Len(); i++ {
+			if check(metric.ExponentialHistogram().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
 	}
 	return false
 }
