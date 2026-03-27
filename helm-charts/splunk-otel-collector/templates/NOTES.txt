@@ -61,3 +61,27 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
 {{- end }}
 {{- end }}
+
+{{- if contains "k8sattributes" (toString .Values.clusterReceiver.config) }}
+{{- fail (printf "ERROR: The k8sattributes alias for the k8s_attributes processor has been deprecated. Please update references to the k8sattributes processor in .Values.clusterReceiver.config to k8s_attributes.") }}
+{{- end}}
+
+{{- if contains "k8sattributes" (toString .Values.agent.config) }}
+{{- fail (printf "ERROR: The k8sattributes alias for the k8s_attributes processor has been deprecated. Please update references to the k8sattributes processor in .Values.agent.config to k8s_attributes.") }}
+{{- end}}
+
+{{- if contains "k8sattributes" (toString .Values.gateway.config) }}
+{{- fail (printf "ERROR: The k8sattributes alias for the k8s_attributes processor has been deprecated. Please update references to the k8sattributes processor in .Values.gateway.config to k8s_attributes.") }}
+{{- end}}
+
+{{- if contains "otlphttp" (toString .Values.clusterReceiver.config) }}
+{{- fail (printf "ERROR: The otlphttp alias for the otlp_http exporter has been deprecated. Please update references to the otlphttp exporter in .Values.clusterReceiver.config to otlp_http.") }}
+{{- end}}
+
+{{- if contains "otlphttp" (toString .Values.agent.config) }}
+{{- fail (printf "ERROR: The otlphttp alias for the otlp_http exporter has been deprecated. Please update references to the otlphttp exporter in .Values.agent.config to otlp_http.") }}
+{{- end}}
+
+{{- if contains "otlphttp" (toString .Values.gateway.config) }}
+{{- fail (printf "ERROR: The otlphttp alias for the otlp_http exporter has been deprecated. Please update references to the otlphttp exporter in .Values.gateway.config to otlp_http.") }}
+{{- end}}
