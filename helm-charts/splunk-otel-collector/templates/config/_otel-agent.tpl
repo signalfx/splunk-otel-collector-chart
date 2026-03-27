@@ -501,6 +501,9 @@ receivers:
                     kubeproxy_sync_proxy_rules_service_changes_pending|\
                     kubeproxy_sync_proxy_rules_duration_seconds|\
                     kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?"
+                - action: drop
+                  regex: 'kubeproxy_network_programming_duration_seconds_bucket;(11\.0|12\.0|13\.0|14\.0|16\.0|17\.0|18\.0|19\.0|21\.0|22\.0|23\.0|24\.0|26\.0|27\.0|28\.0|29\.0|31\.0|32\.0|33\.0|34\.0|36\.0|37\.0|38\.0|39\.0|41\.0|42\.0|43\.0|44\.0|45\.0|46\.0|47\.0|48\.0|49\.0|51\.0|52\.0|52\.0|53\.0|54\.0|55\.0|56\.0|57\.0|58\.0|59\.0|65\.0|75\.0|85\.0|95\.0|85\.0|100\.0|110\.0|115\.0|270\.0)'
+                  source_labels: [__name__, le]
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       prometheus/kubernetes-scheduler:
@@ -975,7 +978,6 @@ processors:
         key: destination_canonical_revision
   {{- end }}
 
-# If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
   {{- if and .Values.agent.controlPlaneMetrics.proxy.enabled .Values.featureGates.useControlPlaneMetricsHistogramData }}
   transform/k8s_proxy_histogram:
     metric_statements:
@@ -1032,6 +1034,8 @@ processors:
       - merge_histogram_buckets(115.0) where metric.name == "kubeproxy_network_programming_duration_seconds"
       - merge_histogram_buckets(270.0) where metric.name == "kubeproxy_network_programming_duration_seconds"
   {{- end }}
+
+# If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
 # to the gateway deployment.
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
 # using the otlp_http exporter.
@@ -1425,9 +1429,6 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
-        {{- if and .Values.agent.controlPlaneMetrics.proxy.enabled }}
-        - transform/k8s_proxy_histogram
-        {{- end }}
       exporters:
         - signalfx/histograms
     {{- end }}
