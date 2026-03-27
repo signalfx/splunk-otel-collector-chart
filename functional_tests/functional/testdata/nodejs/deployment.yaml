@@ -20,5 +20,12 @@ spec:
         - image: quay.io/splunko11ytest/nodejs_test:latest
           name: nodejs-test
           imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: SPLUNK_PROFILER_LOGS_ENDPOINT
+              value: "http://$(NODE_IP):4318"
       nodeSelector:
         kubernetes.io/os: "linux"

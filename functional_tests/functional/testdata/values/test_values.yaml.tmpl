@@ -98,8 +98,6 @@ instrumentation:
       env:
         - name: SPLUNK_METRICS_ENABLED
           value: "true"
-        - name: SPLUNK_PROFILER_LOGS_ENDPOINT
-          value: "http://$(SPLUNK_OTEL_AGENT):4318"
   installationJob:
     enabled: true
 operatorcrds:
