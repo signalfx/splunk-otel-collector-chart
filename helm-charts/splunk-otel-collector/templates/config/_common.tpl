@@ -74,7 +74,7 @@ resourcedetection:
     {{- if eq .Values.cloudProvider "azure" }}
     - azure
     {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "aws")) }}
+    {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
     - ec2
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
@@ -120,7 +120,7 @@ resourcedetection:
       cloud.region:
         enabled: true
   {{- end }}
-  {{- if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "aws")) }}
+  {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
   ec2:
     resource_attributes:
       host.id:
