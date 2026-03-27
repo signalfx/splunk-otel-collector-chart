@@ -16,6 +16,9 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   /v3/event endpoint via otlphttp. Requires Splunk Observability configuration.
   This feature is experimental and may change or be removed in future releases.
 
+- `operator`: Bump java to v2.26.1 in helm-charts/splunk-otel-collector/values.yaml ([#2299](https://github.com/signalfx/splunk-otel-collector-chart/pull/2299))
+
+- `operator`: Bump nodejs to v4.4.0 in helm-charts/splunk-otel-collector/values.yaml ([#2276](https://github.com/signalfx/splunk-otel-collector-chart/pull/2276))
 
 ### 🧰 Bug fixes 🧰
 
