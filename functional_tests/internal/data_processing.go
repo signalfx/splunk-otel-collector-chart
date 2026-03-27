@@ -153,6 +153,9 @@ func CompareHistogramBuckets(expected pmetric.Metric, actual pmetric.Metric) err
 		if expectedBounds.Len() != actualDP.ExplicitBounds().Len() {
 			return fmt.Errorf("expected exactly %v buckets, got %v", expectedBounds.Len(), actualDP.ExplicitBounds().Len())
 		}
+		if actualDP.ExplicitBounds().Len()+1 != actualDP.BucketCounts().Len() {
+			return fmt.Errorf("Actual data point's bucket count length %v did not match expected: %v", actualDP.BucketCounts().Len(), actualDP.ExplicitBounds().Len()+1)
+		}
 		for j := 0; j < actualDP.ExplicitBounds().Len(); j++ {
 			if expectedBounds.At(j) != actualDP.ExplicitBounds().At(j) {
 				return fmt.Errorf("Explicit histogram buckets do not match. At %v expected %v, got %v", j, expectedBounds.At(j), actualDP.ExplicitBounds().At(j))
