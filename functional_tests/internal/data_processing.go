@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
@@ -134,7 +133,33 @@ func CompareHistograms(expected pmetric.Metric, actual pmetric.Metric) error {
 		return err
 	}
 
-	return pmetrictest.CompareMetric(expected, actual)
+	return CompareHistogramBuckets(expected, actual)
+}
+
+func CompareHistogramBuckets(expected pmetric.Metric, actual pmetric.Metric) error {
+	if expected.Type() != pmetric.MetricTypeHistogram {
+		return fmt.Errorf("expected type %q, got %q", pmetric.MetricTypeHistogram, expected.Type())
+	}
+	if actual.Type() != pmetric.MetricTypeHistogram {
+		return fmt.Errorf("expected type %q, got %q", pmetric.MetricTypeHistogram, actual.Type())
+	}
+	if expected.Histogram().DataPoints().Len() < 1 {
+		return fmt.Errorf("expected at least 1 histogram, got %v", expected.Histogram().DataPoints().Len())
+	}
+	expectedBounds := expected.Histogram().DataPoints().At(0).ExplicitBounds()
+
+	for i := 0; i < actual.Histogram().DataPoints().Len(); i++ {
+		actualDP := actual.Histogram().DataPoints().At(i)
+		if expectedBounds.Len() != actualDP.ExplicitBounds().Len() {
+			return fmt.Errorf("expected exactly %v buckets, got %v", expectedBounds.Len(), actualDP.ExplicitBounds().Len())
+		}
+		for j := 0; j < actualDP.ExplicitBounds().Len(); j++ {
+			if expectedBounds.At(j) != actualDP.ExplicitBounds().At(j) {
+				return fmt.Errorf("Explicit histogram buckets do not match. At %v expected %v, got %v", j, expectedBounds.At(j), actualDP.ExplicitBounds().At(j))
+			}
+		}
+	}
+	return nil
 }
 
 func CheckHistogramBucketCount(metric pmetric.Metric) error {
