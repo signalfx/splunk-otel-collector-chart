@@ -125,7 +125,7 @@ func GetMetric(metrics *pmetric.Metrics, name string) (pmetric.Metric, bool) {
 	return pmetric.NewMetric(), false
 }
 
-func CompareHistograms(expected pmetric.Metric, actual pmetric.Metric) error {
+func CompareHistograms(expected pmetric.Histogram, actual pmetric.Histogram) error {
 	if err := CheckHistogramBucketCount(expected); err != nil {
 		return err
 	}
@@ -136,20 +136,14 @@ func CompareHistograms(expected pmetric.Metric, actual pmetric.Metric) error {
 	return CompareHistogramBuckets(expected, actual)
 }
 
-func CompareHistogramBuckets(expected pmetric.Metric, actual pmetric.Metric) error {
-	if expected.Type() != pmetric.MetricTypeHistogram {
-		return fmt.Errorf("expected type %q, got %q", pmetric.MetricTypeHistogram, expected.Type())
+func CompareHistogramBuckets(expected pmetric.Histogram, actual pmetric.Histogram) error {
+	if expected.DataPoints().Len() < 1 {
+		return fmt.Errorf("expected at least 1 histogram, got %v", expected.DataPoints().Len())
 	}
-	if actual.Type() != pmetric.MetricTypeHistogram {
-		return fmt.Errorf("expected type %q, got %q", pmetric.MetricTypeHistogram, actual.Type())
-	}
-	if expected.Histogram().DataPoints().Len() < 1 {
-		return fmt.Errorf("expected at least 1 histogram, got %v", expected.Histogram().DataPoints().Len())
-	}
-	expectedBounds := expected.Histogram().DataPoints().At(0).ExplicitBounds()
+	expectedBounds := expected.DataPoints().At(0).ExplicitBounds()
 
-	for i := 0; i < actual.Histogram().DataPoints().Len(); i++ {
-		actualDP := actual.Histogram().DataPoints().At(i)
+	for i := 0; i < actual.DataPoints().Len(); i++ {
+		actualDP := actual.DataPoints().At(i)
 		if expectedBounds.Len() != actualDP.ExplicitBounds().Len() {
 			return fmt.Errorf("expected exactly %v buckets, got %v", expectedBounds.Len(), actualDP.ExplicitBounds().Len())
 		}
@@ -165,13 +159,11 @@ func CompareHistogramBuckets(expected pmetric.Metric, actual pmetric.Metric) err
 	return nil
 }
 
-func CheckHistogramBucketCount(metric pmetric.Metric) error {
-	if metric.Type() == pmetric.MetricTypeHistogram {
-		for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
-			dp := metric.Histogram().DataPoints().At(m)
-			if dp.BucketCounts().Len() > maxHistogramBucketCount {
-				return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
-			}
+func CheckHistogramBucketCount(metric pmetric.Histogram) error {
+	for m := 0; m < metric.DataPoints().Len(); m++ {
+		dp := metric.DataPoints().At(m)
+		if dp.BucketCounts().Len() > maxHistogramBucketCount {
+			return fmt.Errorf("metric has too many histogram buckets: %v", dp.BucketCounts().Len())
 		}
 	}
 	return nil

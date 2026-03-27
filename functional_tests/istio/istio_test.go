@@ -343,7 +343,8 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 				metricNames = append(metricNames, metric.Name())
 
 				if metric.Type() == pmetric.MetricTypeHistogram {
-					require.NoError(t, internal.CheckHistogramBucketCount(metric))
+					err = internal.CheckHistogramBucketCount(metric.Histogram())
+					require.NoError(t, err, "metric %s hit error: %s", metric.Name(), err)
 				}
 			}
 		}

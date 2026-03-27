@@ -332,14 +332,19 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 				sm := expectedRm.ScopeMetrics().At(k)
 				for l := 0; l < sm.Metrics().Len(); l++ {
 					expectedMetric := sm.Metrics().At(l)
+					if expectedMetric.Type() != pmetric.MetricTypeHistogram {
+						continue
+					}
+
 					actualMetric, found := internal.GetMetric(actual, expectedMetric.Name())
 					if !found {
 						return fmt.Errorf("metric %s not found in received metrics for component %s", expectedMetric.Name(), component)
 					}
-					if expectedMetric.Type() == pmetric.MetricTypeHistogram {
-						if err := internal.CompareHistograms(expectedMetric, actualMetric); err != nil {
-							return err
-						}
+					if actualMetric.Type() != pmetric.MetricTypeHistogram {
+						return fmt.Errorf("expected metric is %v but actual metric received is %v", pmetric.MetricTypeHistogram.String(), actualMetric.Type().String())
+					}
+					if err := internal.CompareHistograms(expectedMetric.Histogram(), actualMetric.Histogram()); err != nil {
+						return fmt.Errorf("metric %s hit error: %w", expectedMetric.Name(), err)
 					}
 				}
 			}
