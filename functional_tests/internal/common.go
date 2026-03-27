@@ -550,15 +550,3 @@ func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMe
 	t.Logf("No exact-match payload found for %s within %v; using best-effort fallback", targetMetric, timeout)
 	return selectedMetrics, false
 }
-
-func CheckHistogramBucketCount(metric pmetric.Metric) error {
-	if metric.Type() == pmetric.MetricTypeHistogram {
-		for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
-			dp := metric.Histogram().DataPoints().At(m)
-			if dp.BucketCounts().Len() > maxHistogramBucketCount {
-				return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
-			}
-		}
-	}
-	return nil
-}

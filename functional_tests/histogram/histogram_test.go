@@ -325,15 +325,19 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 		}
 	}
 
-	for i := 0; i < actual.ResourceMetrics().Len(); i++ {
-		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
-			actualRm := actual.ResourceMetrics().At(j)
-			for k := 0; k < actualRm.ScopeMetrics().Len(); k++ {
-				sm := actualRm.ScopeMetrics().At(k)
+	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
+		for j := 0; j < expected.ResourceMetrics().Len(); j++ {
+			expectedRm := expected.ResourceMetrics().At(j)
+			for k := 0; k < expectedRm.ScopeMetrics().Len(); k++ {
+				sm := expectedRm.ScopeMetrics().At(k)
 				for l := 0; l < sm.Metrics().Len(); l++ {
-					metric := sm.Metrics().At(l)
-					if metric.Type() == pmetric.MetricTypeHistogram {
-						if err := internal.CheckHistogramBucketCount(metric); err != nil {
+					expectedMetric := sm.Metrics().At(l)
+					actualMetric, found := internal.GetMetric(actual, expectedMetric.Name())
+					if !found {
+						return fmt.Errorf("metric %s not found in received metrics for component %s", expectedMetric.Name(), component)
+					}
+					if expectedMetric.Type() == pmetric.MetricTypeHistogram {
+						if err := internal.CompareHistograms(expectedMetric, actualMetric); err != nil {
 							return err
 						}
 					}

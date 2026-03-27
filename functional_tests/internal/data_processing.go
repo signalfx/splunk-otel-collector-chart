@@ -1,6 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
@@ -106,4 +109,42 @@ func GetMetricNames(metrics *pmetric.Metrics) []string {
 		uniqueNames = append(uniqueNames, name)
 	}
 	return uniqueNames
+}
+
+// GetMetric returns metric with given name. Boolean signifies whether metric name was found.
+func GetMetric(metrics *pmetric.Metrics, name string) (pmetric.Metric, bool) {
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		for j := 0; j < metrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			for k := 0; k < metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+				metric := metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+				if name == metric.Name() {
+					return metric, true
+				}
+			}
+		}
+	}
+	return pmetric.NewMetric(), false
+}
+
+func CompareHistograms(expected pmetric.Metric, actual pmetric.Metric) error {
+	if err := CheckHistogramBucketCount(expected); err != nil {
+		return err
+	}
+	if err := CheckHistogramBucketCount(actual); err != nil {
+		return err
+	}
+
+	return pmetrictest.CompareMetric(expected, actual)
+}
+
+func CheckHistogramBucketCount(metric pmetric.Metric) error {
+	if metric.Type() == pmetric.MetricTypeHistogram {
+		for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
+			dp := metric.Histogram().DataPoints().At(m)
+			if dp.BucketCounts().Len() > maxHistogramBucketCount {
+				return fmt.Errorf("metric %s has too many histogram buckets: %v", metric.Name(), dp.BucketCounts().Len())
+			}
+		}
+	}
+	return nil
 }
