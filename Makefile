@@ -327,11 +327,24 @@ kind-delete: ## Delete kind cluster and remove kubeconfig
 	fi
 	@echo "=== Kind cluster cleanup complete ==="
 
+PYTHON_TEST_IMAGE ?= quay.io/splunko11ytest/python_test:latest
+
+.PHONY: kind-build-test-images
+kind-build-test-images: ## Build test app images and load them into kind cluster
+	@echo "Building Python test app image..."
+	docker build -t $(PYTHON_TEST_IMAGE) functional_tests/functional/testdata/python
+	@echo "Loading Python test app image into kind cluster..."
+	kind load docker-image $(PYTHON_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
+	@echo "=== Test images loaded into kind ==="
+
 .PHONY: functionaltest-local
 functionaltest-local: ## Run functional tests using local kind cluster (automatically sets up and tears down cluster)
 	@echo "Running functional tests with automated kind cluster management..."
 	@echo "=== Setting up kind cluster ==="
 	$(MAKE) kind-setup
+	@echo ""
+	@echo "=== Building and loading test images ==="
+	$(MAKE) kind-build-test-images
 	@echo ""
 	@echo "=== Running functional tests ==="
 	@echo "Using kind cluster: $(KIND_CLUSTER_NAME)"

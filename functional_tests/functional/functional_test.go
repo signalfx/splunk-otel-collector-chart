@@ -14,14 +14,12 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"helm.sh/helm/v4/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -597,6 +595,14 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("java traces captured", testJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
 	t.Run("Python traces captured", testPythonTraces)
+	t.Run("java metrics captured", testJavaMetrics)
+	t.Run("node.js metrics captured", testNodeJSMetrics)
+	t.Run(".NET metrics captured", testDotNetMetrics)
+	t.Run("Python metrics captured", testPythonMetrics)
+	t.Run("java profiling captured", testJavaProfiling)
+	t.Run("node.js profiling captured", testNodeJSProfiling)
+	t.Run(".NET profiling captured", testDotNetProfiling)
+	t.Run("Python profiling captured", testPythonProfiling)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
 	t.Run("test HEC metrics", testHECMetrics)
@@ -730,272 +736,6 @@ func requireEnv(t *testing.T, key string) string {
 	value, set := os.LookupEnv(key)
 	require.True(t, set, "the environment variable %s must be set", key)
 	return value
-}
-
-func testNodeJSTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_nodejs_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.command"),
-		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
-		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
-		ptracetest.IgnoreResourceAttributeValue("process.owner"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
-		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-		ptracetest.IgnoreScopeSpanInstrumentationScopeVersion(),
-	)
-	require.NoError(t, err)
-}
-
-func testPythonTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_python_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	read := 0
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > read; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "python") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		read = len(tracesConsumer.AllTraces()) - 1
-		return selectedTrace != nil
-	}, 1*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.command"),
-		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
-		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
-		ptracetest.IgnoreResourceAttributeValue("process.owner"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
-		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
-}
-
-func testJavaTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("host.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.description"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("thread.id"),
-		ptracetest.IgnoreSpanAttributeValue("thread.name"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
-}
-
-func testDotNetTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_dotnet_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 30, tracesConsumer)
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	maskSpanParentID(*selectedTrace)
-	maskSpanParentID(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("host.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("thread.id"),
-		ptracetest.IgnoreSpanAttributeValue("thread.name"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
 }
 
 func containerImageShorten(value string) string {
@@ -1463,7 +1203,7 @@ func testHECMetrics(t *testing.T) {
 		"system.processes.count",
 		"system.processes.created",
 	}
-	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames, nil)
+	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {
@@ -1479,83 +1219,105 @@ func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset)
 	}, 5*time.Minute, 10*time.Second)
 }
 
-func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(pcommon.Map) bool) {
+// metricMatchFn decides whether a given metric (with its resource attributes)
+// should be counted. Return true to accept the metric.
+type metricMatchFn func(resAttrs pcommon.Map, metric pmetric.Metric) bool
+
+func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string) {
+	checkMetrics(t, mc, metricNames, "", nil)
+}
+
+func checkMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName string, metricNames []string) {
+	checkMetrics(t, mc, metricNames, sdkLanguage+"/"+serviceName, func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
+		if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
+			return true
+		}
+		return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
+	})
+}
+
+func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, label string, match metricMatchFn) {
 	metricsToFind := map[string]bool{}
 	for _, name := range metricNames {
 		metricsToFind[name] = false
 	}
-	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
 		for _, m := range mc.AllMetrics() {
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
 				rm := m.ResourceMetrics().At(i)
+				resAttrs := rm.Resource().Attributes()
 				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
 					sm := rm.ScopeMetrics().At(j)
 					for k := 0; k < sm.Metrics().Len(); k++ {
 						metric := sm.Metrics().At(k)
-						var attrs pcommon.Map
-						switch metric.Type() {
-						case pmetric.MetricTypeGauge:
-							attrs = metric.Gauge().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeSum:
-							attrs = metric.Sum().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeHistogram:
-							attrs = metric.Histogram().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeExponentialHistogram:
-							attrs = metric.ExponentialHistogram().DataPoints().At(0).Attributes()
-						default:
-							panic("Unsupported type " + metric.Type().String())
-						}
-						if matchFn == nil || matchFn(attrs) {
+						if match == nil || match(resAttrs, metric) {
 							metricsToFind[metric.Name()] = true
 						}
 					}
 				}
 			}
 		}
-		var stillMissing []string
-		var found []string
-		missingCount := 0
-		foundCount := 0
+		var stillMissing, found []string
 		for _, name := range metricNames {
-			if !metricsToFind[name] {
-				stillMissing = append(stillMissing, name)
-				missingCount++
-			} else {
+			if metricsToFind[name] {
 				found = append(found, name)
-				foundCount++
+			} else {
+				stillMissing = append(stillMissing, name)
 			}
 		}
-		t.Logf("Found: %s", strings.Join(found, ","))
-		t.Logf("Metrics found: %d, metrics still missing: %d\n%s\n", foundCount, missingCount, strings.Join(stillMissing, ","))
-		return missingCount == 0
-	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
-		"failed to receive all metrics in %d minutes", timeoutMinutes)
-}
-
-func maskScopeVersion(traces ptrace.Traces) {
-	rss := traces.ResourceSpans()
-	for i := 0; i < rss.Len(); i++ {
-		rs := rss.At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			ss.Scope().SetVersion("")
+		if label != "" {
+			t.Logf("[%s] found=%d missing=%d (%s)", label, len(found), len(stillMissing), strings.Join(stillMissing, ", "))
+		} else {
+			t.Logf("found=%d missing=%d (%s)", len(found), len(stillMissing), strings.Join(stillMissing, ", "))
 		}
-	}
+		return len(stillMissing) == 0
+	}, 3*time.Minute, 10*time.Second,
+		"failed to receive all metrics %s in 3 minutes", label)
 }
 
-func maskSpanParentID(traces ptrace.Traces) {
-	rss := traces.ResourceSpans()
-	for i := 0; i < rss.Len(); i++ {
-		rs := rss.At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetParentSpanID(pcommon.NewSpanIDEmpty())
+func hasAttrMatch(attrs pcommon.Map, key, expected string) bool {
+	v, ok := attrs.Get(key)
+	return ok && v.Str() == expected
+}
+
+// metricDataPointsHaveAttrs checks whether any data point in a metric carries
+// all of the given key/value pairs. Pairs are passed as alternating key, value strings.
+func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
+	check := func(attrs pcommon.Map) bool {
+		for i := 0; i < len(kvPairs)-1; i += 2 {
+			if !hasAttrMatch(attrs, kvPairs[i], kvPairs[i+1]) {
+				return false
+			}
+		}
+		return true
+	}
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		for i := 0; i < metric.Gauge().DataPoints().Len(); i++ {
+			if check(metric.Gauge().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeSum:
+		for i := 0; i < metric.Sum().DataPoints().Len(); i++ {
+			if check(metric.Sum().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeHistogram:
+		for i := 0; i < metric.Histogram().DataPoints().Len(); i++ {
+			if check(metric.Histogram().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeSummary:
+		for i := 0; i < metric.Summary().DataPoints().Len(); i++ {
+			if check(metric.Summary().DataPoints().At(i).Attributes()) {
+				return true
 			}
 		}
 	}
+	return false
 }
 
 func formatResourceAttributesString(attributesMap pcommon.Map) string {

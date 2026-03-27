@@ -78,6 +78,9 @@ jobs:
       - name: Update dependencies
         run: |
           make dep-update
+      - name: Build and load test images into kind
+        run: |
+          make kind-build-test-images
       - name: run functional tests
         id: run-functional-tests
         env:
