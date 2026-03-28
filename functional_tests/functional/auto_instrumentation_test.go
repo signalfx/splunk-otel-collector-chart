@@ -339,19 +339,31 @@ func testPythonMetrics(t *testing.T) {
 	})
 }
 
-// Profiling tests — verify both CPU and allocation profiling logs arrive.
-// HEC round-trip: com.splunk.sourcetype → resource attr;
-// all other attrs (identity + profiling.data.type) → log record attrs.
+// Profiling tests — verify expected profiling types arrive for each language.
+// HEC round-trip: com.splunk.sourcetype → resource attr (HEC metadata);
+// identity + profiling.data.type → log record attrs (HEC fields).
+// Python does not support memory profiling option.
 
-func testJavaProfiling(t *testing.T)   { checkProfilingFromApp(t, "java", "java-test") }
-func testNodeJSProfiling(t *testing.T) { checkProfilingFromApp(t, "nodejs", "nodejs-test") }
-func testDotNetProfiling(t *testing.T) { checkProfilingFromApp(t, "dotnet", "dotnet-test") }
-func testPythonProfiling(t *testing.T) { checkProfilingFromApp(t, "python", "python-test") }
+func testJavaProfiling(t *testing.T) {
+	checkProfilingFromApp(t, "java", "java-test", []string{"cpu", "allocation"})
+}
 
-func checkProfilingFromApp(t *testing.T, sdkLanguage, serviceName string) {
+func testNodeJSProfiling(t *testing.T) {
+	checkProfilingFromApp(t, "nodejs", "nodejs-test", []string{"cpu", "allocation"})
+}
+
+func testDotNetProfiling(t *testing.T) {
+	checkProfilingFromApp(t, "dotnet", "dotnet-test", []string{"cpu", "allocation"})
+}
+
+func testPythonProfiling(t *testing.T) {
+	checkProfilingFromApp(t, "python", "python-test", []string{"cpu"})
+}
+
+func checkProfilingFromApp(t *testing.T, sdkLanguage, serviceName string, profilingTypes []string) {
 	lc := globalSinks.logsConsumer
 	label := sdkLanguage + "/" + serviceName
-	for _, pt := range []string{"cpu", "allocation"} {
+	for _, pt := range profilingTypes {
 		t.Run(pt, func(t *testing.T) {
 			require.Eventuallyf(t, func() bool {
 				return hasProfilingFromApp(lc, sdkLanguage, serviceName, pt)
