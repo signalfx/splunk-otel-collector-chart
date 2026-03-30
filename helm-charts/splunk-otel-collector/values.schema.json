@@ -353,6 +353,11 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "scrapeInterval": {
+              "type": "string",
+              "pattern": "^[0-9]+(ms|s|m|h)$",
+              "description": "Scrape interval for control plane Prometheus receivers (Prometheus duration, e.g. 10s, 1m). Also applies to the EKS apiserver receiver in the cluster receiver."
+            },
             "apiserver": {
               "type": "object",
               "additionalProperties": false,

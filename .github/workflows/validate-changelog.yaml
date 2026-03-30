@@ -7,6 +7,9 @@ name: Ensure valid and up-to-date Changelog
 
 on: pull_request
 
+permissions:
+  contents: read
+
 env:
   GO_VERSION: 1.26.1
 
@@ -16,12 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -41,14 +44,14 @@ jobs:
 
       - name: Read current version of the Chart
         id: read-chart
-        uses: cumulusds/get-yaml-paths-action@v1
+        uses: cumulusds/get-yaml-paths-action@9cffc368facb8b506c7fdd8ee4f365ab2206d12a # v1
         with:
           file: helm-charts/splunk-otel-collector/Chart.yaml
           version: version
 
       - name: Ensure that CHANGELOG.md has an entry for the current version
         id: read-changelog
-        uses: mindsers/changelog-reader-action@v2
+        uses: mindsers/changelog-reader-action@32aa5b4c155d76c94e4ec883a223c947b2f02656 # v2.2.3
         with:
           version: ${{ steps.read-chart.outputs.version }}
           path: ./CHANGELOG.md

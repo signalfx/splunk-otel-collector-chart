@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.1
+    helm.sh/chart: splunk-otel-collector-0.148.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.148.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.147.1
+    chart: splunk-otel-collector-0.148.0
     release: default
 data:
   relay: |
@@ -57,7 +57,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.147.1
+        splunk_app_version: 0.148.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -380,6 +380,17 @@ data:
           scrape_configs:
           - job_name: otel-agent
             metric_relabel_configs:
+            - source_labels:
+              - service_name
+              target_label: service.name
+            - source_labels:
+              - service_instance_id
+              target_label: service.instance.id
+            - source_labels:
+              - service_version
+              target_label: service.version
+            - action: labeldrop
+              regex: service_name|service_instance_id|service_version
             - action: drop
               regex: promhttp_metric_handler_errors.*
               source_labels:
@@ -408,6 +419,7 @@ data:
                     regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:9153'
@@ -426,6 +438,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
@@ -448,6 +461,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -466,6 +480,7 @@ data:
                     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total|kubeproxy_sync_proxy_rules_service_changes_total|kubeproxy_sync_proxy_rules_service_changes_pending|kubeproxy_sync_proxy_rules_duration_seconds|kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10249'
@@ -484,6 +499,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'

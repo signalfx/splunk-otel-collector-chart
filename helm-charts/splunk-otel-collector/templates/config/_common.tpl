@@ -530,6 +530,14 @@ prometheus/{{ $receiver }}:
     scrape_configs:
     - job_name: "otel-{{ $job }}"
       metric_relabel_configs:
+      - source_labels: [ service_name ]
+        target_label: service.name
+      - source_labels: [ service_instance_id ]
+        target_label: service.instance.id
+      - source_labels: [ service_version ]
+        target_label: service.version
+      - regex: service_name|service_instance_id|service_version
+        action: labeldrop
       - action: drop
         regex: "promhttp_metric_handler_errors.*"
         source_labels:
