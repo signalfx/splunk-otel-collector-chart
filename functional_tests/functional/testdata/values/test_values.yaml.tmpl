@@ -4,6 +4,7 @@ splunkObservability:
    accessToken: CHANGEME
    ingestUrl: {{ .AgentEndpoint }}
    apiUrl: {{ .ApiURLEndpoint }}
+   profilingEnabled: true
 
 splunkPlatform:
   token: foobar
@@ -31,6 +32,8 @@ agent:
           insecure: true
       splunk_hec/platform_metrics:
         endpoint: {{ .MetricHecEndpoint }}
+      splunk_hec/o11y:
+        endpoint: {{ .LogHecEndpoint }}
     service:
       pipelines:
         {{ if (eq .KubeTestEnv "eks") }}
@@ -90,6 +93,11 @@ extraAttributes:
 
 environment: dev
 instrumentation:
+  spec:
+    nodejs:
+      env:
+        - name: SPLUNK_METRICS_ENABLED
+          value: "true"
   installationJob:
     enabled: true
 operatorcrds:
