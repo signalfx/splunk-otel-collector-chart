@@ -62,17 +62,20 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
+    {{- if eq .Values.distribution "openshift" }}
+    - openshift
+    {{- else if eq .Values.distribution "aks" }}
+    - aks
+    {{- else if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
     - gcp
     {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
-    {{- else if eq .Values.distribution "aks" }}
-    - aks
-    {{- else if eq .Values.distribution "openshift" }}
-    - openshift
     {{- end }}
     {{- if eq .Values.cloudProvider "azure" }}
     - azure
+    {{- end }}
+    {{- if and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "gcp") }}
+    - gcp
     {{- end }}
     {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
     - ec2
@@ -118,6 +121,33 @@ resourcedetection:
       cloud.platform:
         enabled: true
       cloud.region:
+        enabled: true
+  {{- end }}
+  #
+  # --- Secondary detector configs ---
+  # Only instance-level attributes enabled; cloud.platform and cloud.provider
+  # are disabled so the primary detector's values are preserved (override: true).
+  #
+  {{- if and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "gcp") }}
+  gcp:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: false
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
+      cloud.account.id:
+        enabled: true
+      cloud.region:
+        enabled: true
+      cloud.availability_zone:
+        enabled: true
+      host.id:
+        enabled: true
+      host.name:
+        enabled: true
+      host.type:
         enabled: true
   {{- end }}
   {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}

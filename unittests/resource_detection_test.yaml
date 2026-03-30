@@ -1,0 +1,90 @@
+suite: splunk-otel-collector.resourceDetection
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+
+tests:
+  - it: "vanilla K8s on AWS: detectors = [env, ec2, system]"
+    set:
+      distribution: ""
+      cloudProvider: aws
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- ec2\\n\\s+- system"
+
+  - it: "vanilla K8s on GCP: detectors = [env, gcp, system]"
+    set:
+      distribution: ""
+      cloudProvider: gcp
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system"
+
+  - it: "vanilla K8s on Azure: detectors = [env, azure, system]"
+    set:
+      distribution: ""
+      cloudProvider: azure
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- azure\\n\\s+- system"
+
+  - it: "OpenShift on AWS: detectors = [env, openshift, ec2, system]"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- ec2\\n\\s+- system"
+
+  - it: "OpenShift on GCP: detectors = [env, openshift, gcp, system]"
+    set:
+      distribution: openshift
+      cloudProvider: gcp
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- gcp\\n\\s+- system"
+
+  - it: "OpenShift on Azure: detectors = [env, openshift, azure, system]"
+    set:
+      distribution: openshift
+      cloudProvider: azure
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- azure\\n\\s+- system"
+
+  - it: "EKS on AWS: detectors = [env, eks, system]"
+    set:
+      distribution: eks
+      cloudProvider: aws
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- eks\\n\\s+- system"
+
+  - it: "GKE on GCP: detectors = [env, gcp, system]"
+    set:
+      distribution: gke
+      cloudProvider: gcp
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system"
+
+  - it: "AKS on Azure: detectors = [env, aks, azure, system]"
+    set:
+      distribution: aks
+      cloudProvider: azure
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- aks\\n\\s+- azure\\n\\s+- system"

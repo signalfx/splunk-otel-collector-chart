@@ -3,15 +3,19 @@ change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: agent, clusterReceiver, gateway
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add OpenShift resource detection support using the openshift and ec2 detectors
+note: Add OpenShift resource detection support
 # One or more tracking issues related to the change
 issues: [2330]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  When distribution is set to "openshift", the openshift detector is enabled to auto-discover
-  k8s.cluster.name, cloud.provider, cloud.platform (aws_openshift), and cloud.region via the
-  OpenShift API. On AWS (cloudProvider=aws), the ec2 detector is also enabled to collect EC2
-  instance metadata such as host.id, cloud.account.id, and cloud.availability_zone.
-  The clusterName field is now optional for OpenShift distributions.
+  When distribution is set to "openshift", the openshift detector is enabled regardless of
+  cloudProvider. It auto-discovers k8s.cluster.name, cloud.provider, cloud.platform, and
+  cloud.region via the OpenShift API (config.openshift.io/v1/infrastructures). The
+  cloud.platform value reflects the actual hosting environment (e.g., aws_openshift,
+  gcp_openshift, azure_openshift). Cloud-provider-specific detectors are also enabled
+  alongside the openshift detector to collect instance metadata: ec2 on AWS, gcp on GCP,
+  and azure on Azure. Distribution-specific detectors (openshift, aks) now take priority
+  over the cloud-provider catch-all in detector selection, ensuring the correct
+  cloud.platform is always set. The clusterName field is now optional for OpenShift.
