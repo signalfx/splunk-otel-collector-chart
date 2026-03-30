@@ -14,7 +14,7 @@ subtext: |
   cloudProvider. It auto-discovers k8s.cluster.name, cloud.provider, cloud.platform, and
   cloud.region via the OpenShift API (config.openshift.io/v1/infrastructures). The
   cloud.platform value reflects the actual hosting environment (e.g., aws_openshift,
-  gcp_openshift, azure_openshift). Cloud-provider-specific detectors are also enabled
+  gcp_openshift, azure.openshift). Cloud-provider-specific detectors are also enabled
   alongside the openshift detector to collect instance metadata: ec2 on AWS, gcp on GCP,
   and azure on Azure. Distribution-specific detectors (openshift, aks) now take priority
   over the cloud-provider catch-all in detector selection, ensuring the correct
