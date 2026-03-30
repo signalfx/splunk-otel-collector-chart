@@ -111,51 +111,6 @@ resourcedetection:
         enabled: true
     {{- end }}
   {{- end }}
-  #
-  # --- Secondary detector configs ---
-  # Only instance-level attributes enabled; cloud.platform and cloud.provider
-  # are disabled so the primary detector's values are preserved (override: true).
-  #
-  {{- if and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "gcp") }}
-  gcp:
-    resource_attributes:
-      k8s.cluster.name:
-        enabled: false
-      cloud.provider:
-        enabled: false
-      cloud.platform:
-        enabled: false
-      cloud.account.id:
-        enabled: true
-      cloud.region:
-        enabled: true
-      cloud.availability_zone:
-        enabled: true
-      host.id:
-        enabled: true
-      host.name:
-        enabled: true
-      host.type:
-        enabled: true
-  {{- end }}
-  {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
-  ec2:
-    resource_attributes:
-      host.id:
-        enabled: true
-      cloud.region:
-        enabled: true
-      cloud.availability_zone:
-        enabled: true
-      cloud.account.id:
-        enabled: true
-      host.name:
-        enabled: true
-      host.image.id:
-        enabled: true
-      host.type:
-        enabled: true
-  {{- end }}
   override: true
   timeout: 15s
 {{- end }}
