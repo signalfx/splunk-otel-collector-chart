@@ -1428,14 +1428,28 @@
       ]
     },
     {
+      "$comment": "clusterName is optional for distributions that auto-detect it (gke, eks, eks/auto-mode, openshift). eks/fargate cannot auto-detect so clusterName is required.",
       "if": {
-        "properties": {
-          "distribution": {
-            "pattern": "^(gke|eks|openshift).*"
+        "allOf": [
+          {
+            "properties": {
+              "distribution": {
+                "pattern": "^(gke|eks|openshift).*"
+              }
+            },
+            "required": [
+              "distribution"
+            ]
+          },
+          {
+            "not": {
+              "properties": {
+                "distribution": {
+                  "const": "eks/fargate"
+                }
+              }
+            }
           }
-        },
-        "required": [
-          "distribution"
         ]
       },
       "then": {

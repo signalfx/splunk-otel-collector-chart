@@ -15,7 +15,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- ec2\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- ec2\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "vanilla K8s on GCP: detectors = [env, gcp, system]"
     set:
@@ -24,7 +24,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "vanilla K8s on Azure: detectors = [env, azure, system]"
     set:
@@ -33,7 +33,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- azure\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- azure\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "OpenShift on AWS: detectors = [env, openshift, ec2, system]"
     set:
@@ -42,7 +42,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- ec2\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- ec2\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "OpenShift on GCP: detectors = [env, openshift, gcp, system]"
     set:
@@ -51,7 +51,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- gcp\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- gcp\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "OpenShift on Azure: detectors = [env, openshift, azure, system]"
     set:
@@ -60,7 +60,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- azure\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- openshift\\n\\s+- azure\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "EKS on AWS: detectors = [env, eks, system]"
     set:
@@ -69,7 +69,16 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- eks\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- eks\\n\\s+- system\\n\\s+[a-z]"
+
+  - it: "EKS/auto-mode on AWS: detectors = [env, eks, system]"
+    set:
+      distribution: eks/auto-mode
+      cloudProvider: aws
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- eks\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "GKE on GCP: detectors = [env, gcp, system]"
     set:
@@ -78,7 +87,16 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system\\n\\s+[a-z]"
+
+  - it: "GKE/Autopilot on GCP: detectors = [env, gcp, system]"
+    set:
+      distribution: gke/autopilot
+      cloudProvider: gcp
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- gcp\\n\\s+- system\\n\\s+[a-z]"
 
   - it: "AKS on Azure: detectors = [env, aks, azure, system]"
     set:
@@ -87,4 +105,4 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "detectors:\\n\\s+- env\\n\\s+- aks\\n\\s+- azure\\n\\s+- system"
+          pattern: "detectors:\\n\\s+- env\\n\\s+- aks\\n\\s+- azure\\n\\s+- system\\n\\s+[a-z]"

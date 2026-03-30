@@ -1,0 +1,19 @@
+suite: splunk-otel-collector.resourceDetection.fargate
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-cluster-receiver.yaml
+
+tests:
+  - it: "EKS/Fargate on AWS: detectors = [env, system] (no cloud detector, Fargate lacks IMDS)"
+    set:
+      distribution: eks/fargate
+      cloudProvider: aws
+      clusterName: fargate-test
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "detectors:\\n\\s+- env\\n\\s+- system\\n\\s+[a-z]"
