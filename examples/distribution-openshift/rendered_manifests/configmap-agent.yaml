@@ -144,16 +144,6 @@ data:
         - env
         - openshift
         - system
-        openshift:
-          resource_attributes:
-            cloud.platform:
-              enabled: true
-            cloud.provider:
-              enabled: true
-            cloud.region:
-              enabled: true
-            k8s.cluster.name:
-              enabled: true
         override: true
         timeout: 15s
     receivers:

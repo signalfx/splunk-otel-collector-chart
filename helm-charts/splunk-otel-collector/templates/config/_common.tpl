@@ -111,18 +111,6 @@ resourcedetection:
         enabled: true
     {{- end }}
   {{- end }}
-  {{- if eq .Values.distribution "openshift" }}
-  openshift:
-    resource_attributes:
-      k8s.cluster.name:
-        enabled: true
-      cloud.provider:
-        enabled: true
-      cloud.platform:
-        enabled: true
-      cloud.region:
-        enabled: true
-  {{- end }}
   #
   # --- Secondary detector configs ---
   # Only instance-level attributes enabled; cloud.platform and cloud.provider
