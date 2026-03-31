@@ -975,7 +975,7 @@ processors:
         key: destination_canonical_revision
   {{- end }}
 
-# If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
+# If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
 # to the gateway deployment.
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
 # using the otlp_http exporter.
@@ -984,7 +984,7 @@ exporters:
 
   {{- if .Values.gateway.enabled }}
   # If gateway is enabled, metrics, logs and traces will be sent to the gateway
-  otlp:
+  otlp_grpc:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
@@ -1137,7 +1137,7 @@ service:
       processors: [memory_limiter, batch]
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         - otlp_http/secureapp
         {{- end }}
@@ -1184,7 +1184,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -1221,7 +1221,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
@@ -1248,7 +1248,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
         - otlp_http
@@ -1302,7 +1302,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         # The signalfx exporter is only being used to sync host metadata when gateway is enabled.
         # The otlp exporter sends the metric data.
@@ -1337,7 +1337,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         - signalfx

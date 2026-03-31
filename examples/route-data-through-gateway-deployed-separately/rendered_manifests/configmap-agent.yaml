@@ -17,7 +17,7 @@ metadata:
 data:
   relay: |
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: <custom-gateway-url>:4317
         tls:
           insecure: true
@@ -340,7 +340,7 @@ data:
       pipelines:
         logs:
           exporters:
-          - otlp
+          - otlp_grpc
         logs/entities:
           exporters:
           - otlp_http/entities
@@ -353,7 +353,7 @@ data:
           - nop
         metrics:
           exporters:
-          - otlp
+          - otlp_grpc
           processors:
           - memory_limiter
           - batch
@@ -388,7 +388,7 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx
           processors:
           - memory_limiter

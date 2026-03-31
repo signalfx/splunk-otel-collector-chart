@@ -17,7 +17,7 @@ metadata:
 data:
   relay: |
     exporters:
-      otlp:
+      otlp_grpc:
         auth:
           authenticator: headers_setter
         endpoint: default-splunk-otel-collector:4317
@@ -341,7 +341,7 @@ data:
           - nop
         metrics:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx/host_metadata
           processors:
           - memory_limiter
@@ -354,7 +354,7 @@ data:
           - otlp
         metrics/agent:
           exporters:
-          - otlp
+          - otlp_grpc
           processors:
           - memory_limiter
           - batch
@@ -377,7 +377,7 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx
           processors:
           - memory_limiter
