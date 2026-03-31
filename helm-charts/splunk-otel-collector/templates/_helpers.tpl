@@ -442,7 +442,7 @@ Otherwise, return directory only.
 {{- end -}}
 {{- end -}}
 
-{/*
+{{/*
 Fail if a collector config override uses deprecated component names.
 Checks exporter/processor definitions and pipeline references.
 
