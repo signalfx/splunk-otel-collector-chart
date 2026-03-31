@@ -62,6 +62,7 @@ const (
 	aksValuesDir                           = "expected_aks_values"
 	gkeValuesDir                           = "expected_gke_values"
 	rosaValuesDir                          = "expected_rosa_values"
+	gceValuesDir                           = "expected_gce_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
@@ -301,6 +302,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case rosaTestKubeEnv:
 		addChartInfo("rosa_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case gceTestKubeEnv:
+		addChartInfo("gce_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -633,7 +636,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
@@ -643,7 +646,6 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		})
 
 		t.Run("component error logs checks", func(t *testing.T) {
-			// Limiting the journald error check to EKS only, other clusters have different errors that are not fatal
 			if kubeTestEnv == eksTestKubeEnv {
 				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, journaldReceiverName)
 			}
@@ -673,6 +675,8 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 		return gkeValuesDir
 	case rosaTestKubeEnv:
 		return rosaValuesDir
+	case gceTestKubeEnv:
+		return gceValuesDir
 	default:
 		return eksValuesDir
 	}
