@@ -12,7 +12,7 @@ clusterReceiver:
 agent:
   config:
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: "{{ .OTLPEndpoint }}"
         tls:
           insecure: true
@@ -20,7 +20,7 @@ agent:
       pipelines:
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
 
 obi:
   enabled: true

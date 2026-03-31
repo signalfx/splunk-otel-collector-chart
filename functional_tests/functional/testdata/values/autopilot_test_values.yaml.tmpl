@@ -12,7 +12,7 @@ splunkPlatform:
 agent:
   config:
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
@@ -20,7 +20,7 @@ agent:
       pipelines:
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
 clusterReceiver:
   eventsEnabled: true
   config:
