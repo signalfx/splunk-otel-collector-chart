@@ -495,8 +495,9 @@ clusterReceiver:
   # This flag enables collection of Kubernetes events as logs using OpenTelemetry k8s events receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   # The receiver currently is in "Alpha" state which means that events format might change over time.
-  # This option requires `splunkPlatform.logsEnabled` or `featureGates.sendK8sEventsToSplunkO11y` to be
-  # set to `true`.
+  # This option requires at least one of the following:
+  #   - `splunkPlatform.logsEnabled` to be true
+  #   - `featureGates.sendK8sEventsToSplunkO11y` to be true and splunkObservability to be configured.
   eventsEnabled: true
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
