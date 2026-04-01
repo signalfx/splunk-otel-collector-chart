@@ -24,7 +24,7 @@ agent:
     exporters:
       file:
         path: /tmp/metrics.json
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
@@ -37,7 +37,7 @@ agent:
             - file
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
 clusterReceiver:
   eventsEnabled: true
   config:
