@@ -69,9 +69,6 @@ func validateLogAttributes(t *testing.T, logsConsumer *consumertest.LogsSink) {
 		assert.True(tt, found, "log from log-attr-test container not found")
 	}, 3*time.Minute, 5*time.Second)
 
-	t.Logf("Raw log resource attributes: %s", internal.FormatAttributes(foundLog.ResourceLogs().At(0).Resource().Attributes()))
-	t.Logf("Raw log record attributes: %s", internal.FormatAttributes(foundLog.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Attributes()))
-
 	normalizeLogData(&foundLog)
 
 	t.Logf("Normalized log resource attributes: %s", internal.FormatAttributes(foundLog.ResourceLogs().At(0).Resource().Attributes()))

@@ -11,6 +11,9 @@ spec:
     metadata:
       labels:
         app: log-attr-test
+        extra-label: should-not-appear
+      annotations:
+        extra-annotation: should-not-appear
     spec:
       automountServiceAccountToken: false
       containers:
