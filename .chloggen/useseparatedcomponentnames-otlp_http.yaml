@@ -3,14 +3,14 @@ change_type: breaking
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: chart
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Rename all `otlp` exporter references to `otlp_grpc`
+note: Rename all `otlphttp` exporter references to `otlp_http`
 # One or more tracking issues related to the change
 issues: [2326]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The `otlp` alias has been deprecated in favor of `otlp_grpc` in the chart-generated configuration.
-  Any Helm values or overrides that reference `otlp` (for example, `*.config.exporters.otlp`
-  or pipelines that list `otlp` as a exporter) must be updated to use `otlp_grpc`.
+  The `otlphttp` alias has been deprecated in favor of `otlp_http` in the chart-generated configuration.
+  Any Helm values or overrides that reference `otlphttp` (for example, `*.config.exporters.otlphttp`
+  or pipelines that list `otlphttp` as a exporter) must be updated to use `otlp_http`.
   The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
