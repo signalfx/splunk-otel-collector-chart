@@ -10,13 +10,13 @@ issues: [2330]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Two issues were fixed for non-EKS Kubernetes clusters running on AWS (cloudProvider=aws):
-  1. The chart was using the eks detector, which only activates on actual EKS clusters
-     (it checks for EKS-specific signals like IRSA/Pod Identity token paths, the OIDC
-     issuer, and the cluster version string). On non-EKS clusters these checks all fail
-     and the detector returns empty, so EC2 metadata (host.id, cloud.account.id,
-     cloud.availability_zone, etc.) was never collected. Switched to the ec2 detector,
-     which works on any AWS instance with IMDS access.
-  2. The condition for detecting non-EKS AWS clusters only matched when distribution was
-     unset (empty string), excluding the OpenShift distribution that can run on AWS
-     but is not EKS. Broadened the condition to match any non-EKS distribution on AWS.
+  For non-EKS Kubernetes clusters on AWS (cloudProvider=aws with distribution unset or
+  set to openshift), EC2 instance metadata (host.id, cloud.account.id,
+  cloud.availability_zone, etc.) was never collected. Two issues contributed to this:
+  1. The chart used the eks detector, which only works on actual EKS clusters — it checks
+     for EKS-specific signals (IRSA/Pod Identity token paths, OIDC issuer, Kubernetes
+     version string) and returns an empty resource when those are absent. Switched to the
+     ec2 detector, which works on any AWS instance with IMDS access.
+  2. This code path only matched when distribution was unset (empty string), so OpenShift
+     clusters on AWS (distribution=openshift, cloudProvider=aws) were excluded entirely.
+     Broadened the condition to also match the openshift distribution.
