@@ -1,0 +1,72 @@
+resourceLogs:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: node-000
+        - key: com.splunk.source
+          value:
+            stringValue: /var/log/pods/default_log-attr-test-0000000000-xxxxx_00000000-0000-0000-0000-000000000000/log-attr-test/0.log
+        - key: com.splunk.sourcetype
+          value:
+            stringValue: kube:container:log-attr-test
+        - key: com.splunk.index
+          value:
+            stringValue: main
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: cluster_name
+                value:
+                  stringValue: ci-k8s-cluster
+              - key: container.image.name
+                value:
+                  stringValue: busybox
+              - key: container.image.tag
+                value:
+                  stringValue: "1.36"
+              - key: customfield1
+                value:
+                  stringValue: customvalue1
+              - key: customfield2
+                value:
+                  stringValue: customvalue2
+              - key: deployment.environment
+                value:
+                  stringValue: dev
+              - key: k8s.cluster.name
+                value:
+                  stringValue: dev-operator
+              - key: k8s.container.name
+                value:
+                  stringValue: log-attr-test
+              - key: k8s.container.restart_count
+                value:
+                  stringValue: "0"
+              - key: k8s.namespace.name
+                value:
+                  stringValue: default
+              - key: k8s.node.name
+                value:
+                  stringValue: node-000
+              - key: k8s.pod.labels.app
+                value:
+                  stringValue: log-attr-test
+              - key: k8s.pod.name
+                value:
+                  stringValue: log-attr-test-0000000000-xxxxx
+              - key: k8s.pod.uid
+                value:
+                  stringValue: 00000000-0000-0000-0000-000000000000
+              - key: log.iostream
+                value:
+                  stringValue: stdout
+              - key: logtag
+                value:
+                  stringValue: F
+              - key: os.type
+                value:
+                  stringValue: linux
+            body:
+              stringValue: LOG_ATTR_VALIDATION_MARKER
+        scope: {}

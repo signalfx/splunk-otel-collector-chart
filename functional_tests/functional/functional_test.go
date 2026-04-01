@@ -144,19 +144,21 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 				}, 3*time.Minute, 3*time.Second, "CRD %s stuck in Terminating", crd.Name)
 			}
 
-			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
-			if err != nil {
-				if k8serrors.IsAlreadyExists(err) {
-					t.Logf("CRD %s already exists, skipping creation", crd.Name)
+			crdName := crd.Name
+			crdSpec := crd.Spec
+			created, createErr := apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
+			if createErr != nil {
+				if k8serrors.IsAlreadyExists(createErr) {
+					t.Logf("CRD %s already exists, skipping creation", crdName)
 				} else {
-					require.NoError(t, err)
+					require.NoError(t, createErr)
 				}
 			} else {
-				t.Logf("Deployed CRD %s", crd.Name)
+				t.Logf("Deployed CRD %s", created.Name)
 			}
 
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
-				latest, latestErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
+				latest, latestErr := apiExtensions.Get(t.Context(), crdName, metav1.GetOptions{})
 				assert.NoError(tt, latestErr)
 				established := false
 				for _, cond := range latest.Status.Conditions {
@@ -165,14 +167,14 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 					}
 				}
 				assert.True(tt, established)
-			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crd.Name)
+			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crdName)
 
-			for _, version := range crd.Spec.Versions {
+			for _, version := range crdSpec.Versions {
 				sch.AddKnownTypeWithName(
 					schema.GroupVersionKind{
-						Group:   crd.Spec.Group,
+						Group:   crdSpec.Group,
 						Version: version.Name,
-						Kind:    crd.Spec.Names.Kind,
+						Kind:    crdSpec.Names.Kind,
 					},
 					&unstructured.Unstructured{},
 				)
@@ -332,70 +334,28 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
-	// NodeJS test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err := decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
+	deployApp := func(filePath string) {
+		data, readErr := os.ReadFile(filePath)
+		require.NoError(t, readErr)
+		dep, _, decodeErr := decode(data, nil, nil)
+		require.NoError(t, decodeErr)
+		if _, createErr := deployments.Create(t.Context(), dep.(*appsv1.Deployment), metav1.CreateOptions{}); createErr != nil {
+			_, updateErr := deployments.Update(t.Context(), dep.(*appsv1.Deployment), metav1.UpdateOptions{})
+			assert.NoError(t, updateErr)
+			if updateErr != nil {
+				require.NoError(t, createErr)
+			}
 		}
 	}
-	// Java test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "java", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// .NET test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "dotnet", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// Python test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "python", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// Prometheus annotation
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
+	for _, f := range []string{
+		filepath.Join(testDir, "nodejs", "deployment.yaml"),
+		filepath.Join(testDir, "java", "deployment.yaml"),
+		filepath.Join(testDir, "dotnet", "deployment.yaml"),
+		filepath.Join(testDir, "python", "deployment.yaml"),
+		filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"),
+		filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"),
+	} {
+		deployApp(f)
 	}
 
 	// Service
@@ -496,6 +456,9 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		GracePeriodSeconds: &waitTime,
 	})
 	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
+	_ = deployments.Delete(ctx, "log-attr-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
 	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
@@ -608,6 +571,9 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("Python profiling captured", testPythonProfiling)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
+	t.Run("container log attributes validation", func(t *testing.T) {
+		validateLogAttributes(t, globalSinks.logsConsumer)
+	})
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
@@ -713,7 +679,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
 
-	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, formatResourceAttributesString(expectedResourceAttributes), formatResourceAttributesString(actualResourceAttributes))
+	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
 
 	t.Cleanup(func() {
 		require.NoError(t, os.Remove(tmpFile.Name()))
@@ -723,16 +689,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
-	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
-	attrs.Range(func(k string, _ pcommon.Value) bool {
-		for _, skipKey := range skipKeys {
-			if k == skipKey {
-				return true
-			}
-		}
-		attrs.PutStr(k, "abcd")
-		return true
-	})
+	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
 }
 
@@ -1328,13 +1285,4 @@ func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
 		}
 	}
 	return false
-}
-
-func formatResourceAttributesString(attributesMap pcommon.Map) string {
-	var attrsStr strings.Builder
-	attributesMap.Range(func(k string, v pcommon.Value) bool {
-		attrsStr.WriteString(k + "=" + v.Str() + ";")
-		return true
-	})
-	return attrsStr.String()
 }

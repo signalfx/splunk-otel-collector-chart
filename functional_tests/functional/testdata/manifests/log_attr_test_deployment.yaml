@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-attr-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-attr-test
+  template:
+    metadata:
+      labels:
+        app: log-attr-test
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: log-attr-test
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do echo LOG_ATTR_VALIDATION_MARKER; sleep 10; done"]
+      nodeSelector:
+        kubernetes.io/os: "linux"
