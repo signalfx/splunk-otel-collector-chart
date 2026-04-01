@@ -140,6 +140,9 @@ func CompareHistogramBuckets(expected pmetric.Histogram, actual pmetric.Histogra
 	if expected.DataPoints().Len() < 1 {
 		return fmt.Errorf("expected at least 1 histogram, got %v", expected.DataPoints().Len())
 	}
+	if actual.DataPoints().Len() < 1 {
+		return fmt.Errorf("requires at least 1 actual histogram data point, got %v", actual.DataPoints().Len())
+	}
 	expectedBounds := expected.DataPoints().At(0).ExplicitBounds()
 
 	for i := 0; i < actual.DataPoints().Len(); i++ {

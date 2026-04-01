@@ -11,6 +11,7 @@ issues: [2328]
 # Use pipe (|) for multiline entries.
 subtext: |
   Splunk Observability Cloud has a limit of 32 buckets for histograms. By default this histogram
-  has more than 32 buckets, so the config will now automatically merge buckets to meet the required limit
-  to avoid this metric being dropped. This change is relevant when both the `useControlPlaneMetricsHistogramData`
-  feature gate and `agent.controlPlaneMetrics.proxy` are both enabled.
+  has more than 32 buckets, so the config will now merge buckets to meet the required limit
+  to avoid this metric being dropped entirely. This change is relevant when both the
+  `useControlPlaneMetricsHistogramData` feature gate and `agent.controlPlaneMetrics.proxy`
+  config option are both enabled.
