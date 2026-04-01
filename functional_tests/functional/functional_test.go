@@ -339,12 +339,12 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		require.NoError(t, readErr)
 		dep, _, decodeErr := decode(data, nil, nil)
 		require.NoError(t, decodeErr)
-		if _, createErr := deployments.Create(t.Context(), dep.(*appsv1.Deployment), metav1.CreateOptions{}); createErr != nil {
+		_, createErr := deployments.Create(t.Context(), dep.(*appsv1.Deployment), metav1.CreateOptions{})
+		if k8serrors.IsAlreadyExists(createErr) {
 			_, updateErr := deployments.Update(t.Context(), dep.(*appsv1.Deployment), metav1.UpdateOptions{})
-			assert.NoError(t, updateErr)
-			if updateErr != nil {
-				require.NoError(t, createErr)
-			}
+			require.NoError(t, updateErr)
+		} else {
+			require.NoError(t, createErr)
 		}
 	}
 	for _, f := range []string{
