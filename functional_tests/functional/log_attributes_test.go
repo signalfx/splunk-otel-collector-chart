@@ -25,10 +25,11 @@ import (
 // (node names, UIDs, etc.) to deterministic placeholders of similar size/shape
 // so golden-file comparisons remain stable.
 var dynamicAttrPlaceholders = map[string]string{
-	"k8s.pod.uid":   "00000000-0000-0000-0000-000000000000",
-	"k8s.pod.name":  "log-attr-test-0000000000-xxxxx",
-	"k8s.node.name": "node-000",
-	"host.name":     "node-000",
+	"k8s.pod.uid":   "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+	"k8s.pod.name":  "log-attr-test-7bc5f4d89b-xj8k2",
+	"k8s.node.name": "node-001",
+	"host.name":     "node-001",
+	"container.id":  "a1b2c3d4e5f6071890abcdef12345678a1b2c3d4e5f6071890abcdef12345678",
 }
 
 // podUIDRe matches a UUID embedded in file paths (the pod UID segment).
@@ -52,6 +53,9 @@ func validateLogAttributes(t *testing.T, logsConsumer *consumertest.LogsSink) {
 						lr := sl.LogRecords().At(m)
 						v, ok := lr.Attributes().Get("k8s.container.name")
 						if !ok || v.AsString() != "log-attr-test" {
+							continue
+						}
+						if _, hasContainerID := lr.Attributes().Get("container.id"); !hasContainerID {
 							continue
 						}
 						if strings.Contains(lr.Body().AsString(), "LOG_ATTR_VALIDATION_MARKER") {
@@ -127,8 +131,8 @@ func normalizeDynamicAttrs(m pcommon.Map) {
 			return true
 		}
 		if k == "com.splunk.source" {
-			s := podUIDRe.ReplaceAllString(v.AsString(), "00000000-0000-0000-0000-000000000000")
-			s = podNameRe.ReplaceAllString(s, "log-attr-test-0000000000-xxxxx")
+			s := podUIDRe.ReplaceAllString(v.AsString(), "f47ac10b-58cc-4372-a567-0e02b2c3d479")
+			s = podNameRe.ReplaceAllString(s, "log-attr-test-7bc5f4d89b-xj8k2")
 			m.PutStr(k, s)
 		}
 		return true
