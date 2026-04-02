@@ -14,9 +14,10 @@ namespaceOverride: ""
 # clusterName is an optional parameter that is used as the "k8s.cluster.name" attribute
 # for all traces, metrics, and logs.
 #
-# For EKS and GKE clusters, excluding EKS/Fargate:
-#   - Do NOT set this field if you have 'distribution' set to values starting with 'eks' or 'gke'.
-#     The cluster name is auto-discovered from the cloud provider.
+# For EKS, GKE, and OpenShift clusters, excluding EKS/Fargate:
+#   - Do NOT set this field if you have 'distribution' set to values starting with
+#     'eks', 'gke', or set to 'openshift'.
+#     The cluster name is auto-discovered from the cloud provider or platform API.
 #     Note: In EKS, the collector should be able to assume the node's IAM role, as it requires
 #     the EC2:DescribeInstances permission, which is available by default unless disabled manually.
 #

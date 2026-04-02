@@ -1,0 +1,22 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: bug_fix
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: agent, clusterReceiver, gateway
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Fix resource detection for non-EKS Kubernetes clusters on AWS
+# One or more tracking issues related to the change
+issues: [2330]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  For non-EKS Kubernetes clusters on AWS (cloudProvider=aws with distribution unset or
+  set to openshift), EC2 instance metadata (host.id, cloud.account.id,
+  cloud.availability_zone, etc.) was never collected. Two issues contributed to this:
+  1. The chart used the eks detector, which only works on actual EKS clusters — it checks
+     for EKS-specific signals (IRSA/Pod Identity token paths, OIDC issuer, Kubernetes
+     version string) and returns an empty resource when those are absent. Switched to the
+     ec2 detector, which works on any AWS instance with IMDS access.
+  2. This code path only matched when distribution was unset (empty string), so OpenShift
+     clusters on AWS (distribution=openshift, cloudProvider=aws) were excluded entirely.
+     Broadened the condition to also match the openshift distribution.

@@ -21,6 +21,7 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -163,6 +164,29 @@ func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) 
 		require.NoError(t, golden.WriteLogs(t, file, *logs))
 		t.Logf("Wrote updated expected log results to %s", file)
 	}
+}
+
+// NormalizeAttributes replaces every value in m with "abcd" except keys listed in skipKeys.
+func NormalizeAttributes(m pcommon.Map, skipKeys ...string) {
+	m.Range(func(k string, _ pcommon.Value) bool {
+		for _, sk := range skipKeys {
+			if k == sk {
+				return true
+			}
+		}
+		m.PutStr(k, "abcd")
+		return true
+	})
+}
+
+// FormatAttributes returns a semicolon-separated "key=value;" string for debugging attribute maps.
+func FormatAttributes(m pcommon.Map) string {
+	var b strings.Builder
+	m.Range(func(k string, v pcommon.Value) bool {
+		b.WriteString(k + "=" + v.Str() + ";")
+		return true
+	})
+	return b.String()
 }
 
 // CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod using `cat`,
