@@ -67,6 +67,8 @@ const (
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -607,8 +609,11 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 		t.Run("agent resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "agent")
 		})
-		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
+		t.Run("cluster receiver self-metrics resource attributes validation", func(t *testing.T) {
 			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
+		})
+		t.Run("cluster receiver k8s cluster metrics resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver_k8s_cluster")
 		})
 
 		t.Run("component error logs checks", func(t *testing.T) {
@@ -649,7 +654,7 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 }
 
 func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
-	var labelSelector, expectedResourceAttributesFile string
+	var labelSelector, expectedResourceAttributesFile, podPathFile string
 
 	switch collectorType {
 	case "agent":
@@ -658,17 +663,29 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 	case "cluster_receiver":
 		labelSelector = clusterReceiverLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver.yaml")
+	case "cluster_receiver_k8s_cluster":
+		labelSelector = clusterReceiverLabelSelector
+		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver_k8s_cluster.yaml")
 	default:
-		require.Failf(t, "failed to run validateResourceAttributes", "collectorType must be either 'agent' or 'cluster_receiver' but got %s", collectorType)
+		require.Failf(t, "failed to run validateResourceAttributes", "unknown collectorType %q", collectorType)
 	}
 
 	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
-	podPathFile := linuxPodMetricsPath
-	if pods.Items[0].Labels["osType"] == "windows" {
-		podPathFile = winPodMetricsPath
+	isWindows := pods.Items[0].Labels["osType"] == "windows"
+
+	if collectorType == "cluster_receiver_k8s_cluster" {
+		podPathFile = linuxPodK8sClusterMetricsPath
+		if isWindows {
+			podPathFile = winPodK8sClusterMetricsPath
+		}
+	} else {
+		podPathFile = linuxPodMetricsPath
+		if isWindows {
+			podPathFile = winPodMetricsPath
+		}
 	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")

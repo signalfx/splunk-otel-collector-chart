@@ -46,6 +46,8 @@ clusterReceiver:
     exporters:
       file:
         path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
@@ -57,6 +59,9 @@ clusterReceiver:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - file/k8s_cluster
 
   k8sObjects:
     - name: pods

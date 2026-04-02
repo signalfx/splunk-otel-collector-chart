@@ -36,11 +36,16 @@ clusterReceiver:
           insecure: true
       file:
         path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
     service:
       pipelines:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - file/k8s_cluster
 
   k8sObjects:
     - name: pods
