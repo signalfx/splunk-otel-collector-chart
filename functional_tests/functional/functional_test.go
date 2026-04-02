@@ -676,8 +676,8 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
-	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
-	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
+	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
 
 	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
 

@@ -62,15 +62,23 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
-    - gcp
-    {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
-    - eks
+    {{- if eq .Values.distribution "openshift" }}
+    - openshift
     {{- else if eq .Values.distribution "aks" }}
     - aks
+    {{- else if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
+    - gcp
+    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
+    - eks
     {{- end }}
     {{- if eq .Values.cloudProvider "azure" }}
     - azure
+    {{- end }}
+    {{- if and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "gcp") }}
+    - gcp
+    {{- end }}
+    {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
+    - ec2
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
@@ -80,7 +88,7 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+  {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
   eks:
     node_from_env_var: K8S_NODE_NAME
     resource_attributes:
@@ -117,6 +125,8 @@ resourcedetection/k8s_cluster_name:
     - gcp
     {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
+    {{- else if eq .Values.distribution "openshift" }}
+    - openshift
     {{- end }}
   {{- if hasPrefix "gke" .Values.distribution }}
   gcp:
@@ -162,6 +172,17 @@ resourcedetection/k8s_cluster_name:
       cloud.provider:
         enabled: false
       cloud.platform:
+        enabled: false
+  {{- else if eq .Values.distribution "openshift" }}
+  openshift:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
+      cloud.region:
         enabled: false
   {{- end }}
   override: true

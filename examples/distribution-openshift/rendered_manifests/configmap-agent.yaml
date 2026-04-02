@@ -142,6 +142,7 @@ data:
       resourcedetection:
         detectors:
         - env
+        - openshift
         - system
         override: true
         timeout: 15s

@@ -341,7 +341,7 @@ Build the securityContext for Linux and Windows
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
-{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") (eq .Values.distribution "openshift") }}
 {{- end -}}
 
 {{/*
@@ -396,12 +396,12 @@ Returns true if the distribution is eks but not eks/fargate.
 {{- end -}}
 
 {{/*
-Identifies K8s clutser running on AWS but they are not EKS.
-Returns true if the cloud provider is aws and distribution is not set.
-example: Vanilla K8s on AWS EC2
+Identifies K8s cluster running on AWS but not EKS.
+Returns true if the cloud provider is aws and the distribution is not EKS-based.
+Examples: Vanilla K8s on AWS EC2, OpenShift on AWS (ROSA)
 */}}
 {{- define "splunk-otel-collector.isNonEKSonAWS" -}}
-{{- and (eq .Values.cloudProvider "aws") (eq .Values.distribution "") -}}
+{{- and (eq .Values.cloudProvider "aws") (not (hasPrefix "eks" .Values.distribution)) -}}
 {{- end -}}
 
 {{/*
