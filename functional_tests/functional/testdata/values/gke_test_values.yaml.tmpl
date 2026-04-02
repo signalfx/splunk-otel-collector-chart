@@ -45,6 +45,7 @@ clusterReceiver:
             - file
         metrics:
           exporters:
+            - signalfx
             - file/k8s_cluster
 
   k8sObjects:
