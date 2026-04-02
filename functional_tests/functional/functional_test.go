@@ -693,8 +693,15 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
-	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
-	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
+	skipKeys := []string{"k8s.cluster.name", "cloud.platform"}
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
+
+	var actualResourceAttributes pcommon.Map
+	if collectorType == "cluster_receiver_k8s_cluster" {
+		actualResourceAttributes = findResourceByAttr(t, tmpFile.Name(), "k8s.pod.name", skipKeys...)
+	} else {
+		actualResourceAttributes = readAndNormalizeMetrics(t, tmpFile.Name(), skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
+	}
 
 	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
 
@@ -708,6 +715,23 @@ func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) 
 	require.NoError(t, err)
 	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
+}
+
+// findResourceByAttr reads metrics from filePath, finds the first ResourceMetrics
+// whose resource attributes contain the given key, normalizes it, and returns the attributes.
+func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys ...string) pcommon.Map {
+	metrics, err := golden.ReadMetrics(filePath)
+	require.NoError(t, err)
+	rm := metrics.ResourceMetrics()
+	for i := 0; i < rm.Len(); i++ {
+		attrs := rm.At(i).Resource().Attributes()
+		if _, ok := attrs.Get(attrKey); ok {
+			internal.NormalizeAttributes(attrs, skipKeys...)
+			return attrs
+		}
+	}
+	require.Failf(t, "resource not found", "no ResourceMetrics with attribute %q in %s", attrKey, filePath)
+	return pcommon.NewMap()
 }
 
 func requireEnv(t *testing.T, key string) string {

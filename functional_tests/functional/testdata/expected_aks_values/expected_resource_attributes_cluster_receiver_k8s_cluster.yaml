@@ -13,6 +13,21 @@ resourceMetrics:
         - key: k8s.cluster.name
           value:
             stringValue: test
+        - key: k8s.namespace.name
+          value:
+            stringValue: abcd
+        - key: k8s.node.name
+          value:
+            stringValue: abcd
+        - key: k8s.pod.name
+          value:
+            stringValue: abcd
+        - key: k8s.pod.qos_class
+          value:
+            stringValue: abcd
+        - key: k8s.pod.uid
+          value:
+            stringValue: abcd
         - key: metric_source
           value:
             stringValue: abcd
