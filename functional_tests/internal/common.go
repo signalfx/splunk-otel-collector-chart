@@ -56,14 +56,10 @@ func HostEndpoint(t *testing.T) string {
 	// Prefer IPv4 gateway (e.g. on GitHub runners Docker/kind may expose IPv6 first).
 	var fallback string
 	for _, ipam := range netInfo.Network.IPAM.Config {
-		if ipam.Gateway.String() == "invalid IP" || ipam.Gateway.String() == "" {
+		if !ipam.Gateway.IsValid() {
 			continue
 		}
-		ip := net.ParseIP(ipam.Gateway.String())
-		if ip == nil {
-			continue
-		}
-		if ip.To4() != nil {
+		if ipam.Gateway.Is4() {
 			return ipam.Gateway.String()
 		}
 		if fallback == "" {
