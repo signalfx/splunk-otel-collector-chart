@@ -1089,6 +1089,30 @@
         "successThreshold": {
           "type": "integer"
         }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "httpGet"
+            ]
+          },
+          {
+            "required": [
+              "exec"
+            ]
+          },
+          {
+            "required": [
+              "tcpSocket"
+            ]
+          },
+          {
+            "required": [
+              "grpc"
+            ]
+          }
+        ]
       }
     },
     "livenessProbe": {
@@ -1112,6 +1136,30 @@
         "terminationGracePeriodSeconds": {
           "type": "integer"
         }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "httpGet"
+            ]
+          },
+          {
+            "required": [
+              "exec"
+            ]
+          },
+          {
+            "required": [
+              "tcpSocket"
+            ]
+          },
+          {
+            "required": [
+              "grpc"
+            ]
+          }
+        ]
       }
     },
     "isWindows": {

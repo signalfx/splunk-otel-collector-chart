@@ -795,11 +795,12 @@ affinity: {}
 # Defines priorityClassName to assign a priority class to pods.
 priorityClassName: ""
 
-# Probe configuration for the collector pods. The httpGet action is managed by
-# the chart; all other standard Kubernetes probe fields are supported
-# (initialDelaySeconds, timeoutSeconds, periodSeconds, failureThreshold,
-# successThreshold). For Windows worker nodes it is recommended to set
-# initialDelaySeconds to 60.
+# Probe configuration for the collector pods. All standard K8s probe
+# fields are supported except the action (httpGet is managed by the chart;
+# httpGet, exec, tcpSocket, and grpc are rejected). For Windows worker nodes
+# it is recommended to set initialDelaySeconds to 60. For EKS Auto Mode
+# clusters, consider increasing timeoutSeconds (e.g. 3-5) to handle network
+# delay.
 readinessProbe: {}
 livenessProbe: {}
 
