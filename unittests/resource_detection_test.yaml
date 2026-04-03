@@ -32,6 +32,8 @@ tests:
           path: data["relay"]
           pattern: "resourcedetection:\\n\\s+detectors:\\n\\s+- env\\n\\s+- ec2\\n\\s+- system\\n\\s+[a-z]"
 
+  # The gcp detector populates gcp.gce.instance_group_manager.* only in its GCE code path;
+  # on GKE those attributes are never set regardless of the enabled flag in metadata.yaml.
   - it: "vanilla K8s on GCP — all modes have [env, gcp, system]"
     set:
       distribution: ""
