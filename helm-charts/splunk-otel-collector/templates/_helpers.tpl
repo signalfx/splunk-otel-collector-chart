@@ -296,7 +296,7 @@ Whether object collection by k8s object receiver is enabled
 {{- end -}}
 
 {{/*
-Determines whether a valid k8s object pipeline will be enabled in the k8s cluster receiver config
+Determines whether the k8s object pipeline will be enabled in the k8s cluster receiver config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" -}}
 {{- and (eq (include "splunk-otel-collector.objectsEnabled" .) "true")
