@@ -52,8 +52,7 @@ jobs:
       - name: Ensure that CHANGELOG.md has an entry for the current version
         id: read-changelog
         run: |
-          grep "${{ steps.read-chart.outputs.version }}" ./CHANGELOG.md
-          if [ "$?" != "0" ] ; then
+          if ! grep "${{ steps.read-chart.outputs.version }}" ./CHANGELOG.md ; then
             echo "Missing changelog entry for ${{ steps.read-chart.outputs.version }}"
             exit 1
           fi
