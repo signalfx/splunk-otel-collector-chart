@@ -44,14 +44,15 @@ jobs:
 
       - name: Read current version of the Chart
         id: read-chart
-        uses: cumulusds/get-yaml-paths-action@9cffc368facb8b506c7fdd8ee4f365ab2206d12a # v1
-        with:
-          file: helm-charts/splunk-otel-collector/Chart.yaml
-          version: version
+        run: |
+          version=$(yq e '.version' helm-charts/splunk-otel-collector/Chart.yaml)
+          echo "Current version is ${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Ensure that CHANGELOG.md has an entry for the current version
         id: read-changelog
-        uses: mindsers/changelog-reader-action@32aa5b4c155d76c94e4ec883a223c947b2f02656 # v2.2.3
-        with:
-          version: ${{ steps.read-chart.outputs.version }}
-          path: ./CHANGELOG.md
+        run: |
+          if ! grep "${{ steps.read-chart.outputs.version }}" ./CHANGELOG.md ; then
+            echo "Missing changelog entry for ${{ steps.read-chart.outputs.version }}"
+            exit 1
+          fi
