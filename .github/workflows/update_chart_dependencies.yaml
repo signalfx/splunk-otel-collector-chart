@@ -164,7 +164,6 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        continue-on-error: true
         uses: ./.github/actions/run-precommit
 
       - name: Finalize PR with updates
