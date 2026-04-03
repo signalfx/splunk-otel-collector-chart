@@ -67,6 +67,16 @@ const (
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
+)
+
+type collectorRole string
+
+const (
+	roleAgent              collectorRole = "agent"
+	roleClusterReceiver    collectorRole = "cluster_receiver"
+	roleClusterReceiverK8s collectorRole = "cluster_receiver_k8s_cluster"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -605,10 +615,13 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
-			validateResourceAttributes(t, client, kubeConfig, "agent")
+			validateResourceAttributes(t, client, kubeConfig, roleAgent)
 		})
-		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
-			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
+		t.Run("cluster receiver self-metrics resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, roleClusterReceiver)
+		})
+		t.Run("cluster receiver k8s cluster metrics resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, roleClusterReceiverK8s)
 		})
 
 		t.Run("component error logs checks", func(t *testing.T) {
@@ -648,27 +661,39 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 	}
 }
 
-func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
-	var labelSelector, expectedResourceAttributesFile string
+func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, role collectorRole) {
+	var labelSelector, expectedResourceAttributesFile, podPathFile string
 
-	switch collectorType {
-	case "agent":
+	switch role {
+	case roleAgent:
 		labelSelector = agentLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_agent.yaml")
-	case "cluster_receiver":
+	case roleClusterReceiver:
 		labelSelector = clusterReceiverLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver.yaml")
+	case roleClusterReceiverK8s:
+		labelSelector = clusterReceiverLabelSelector
+		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver_k8s_cluster.yaml")
 	default:
-		require.Failf(t, "failed to run validateResourceAttributes", "collectorType must be either 'agent' or 'cluster_receiver' but got %s", collectorType)
+		require.Failf(t, "failed to run validateResourceAttributes", "unknown role %q", role)
 	}
 
 	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
-	podPathFile := linuxPodMetricsPath
-	if pods.Items[0].Labels["osType"] == "windows" {
-		podPathFile = winPodMetricsPath
+	isWindows := strings.ToLower(pods.Items[0].Labels["osType"]) == "windows"
+
+	if role == roleClusterReceiverK8s {
+		podPathFile = linuxPodK8sClusterMetricsPath
+		if isWindows {
+			podPathFile = winPodK8sClusterMetricsPath
+		}
+	} else {
+		podPathFile = linuxPodMetricsPath
+		if isWindows {
+			podPathFile = winPodMetricsPath
+		}
 	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
@@ -676,10 +701,19 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
-	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
-	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name", "cloud.platform").ResourceMetrics().At(0).Resource().Attributes()
+	skipKeys := []string{"k8s.cluster.name", "cloud.platform"}
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
 
-	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
+	// The k8s_cluster receiver emits multiple ResourceMetrics groups.
+	// We pick a container resource for a stable comparison.
+	var actualResourceAttributes pcommon.Map
+	if role == roleClusterReceiverK8s {
+		actualResourceAttributes = findResourceByAttr(t, tmpFile.Name(), "k8s.container.name", skipKeys...)
+	} else {
+		actualResourceAttributes = readAndNormalizeMetrics(t, tmpFile.Name(), skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
+	}
+
+	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", role, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
 
 	t.Cleanup(func() {
 		require.NoError(t, os.Remove(tmpFile.Name()))
@@ -691,6 +725,23 @@ func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) 
 	require.NoError(t, err)
 	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
+}
+
+// findResourceByAttr reads metrics from filePath, finds the first ResourceMetrics
+// whose resource attributes contain the given key, normalizes it, and returns the attributes.
+func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys ...string) pcommon.Map {
+	metrics, err := golden.ReadMetrics(filePath)
+	require.NoError(t, err)
+	rm := metrics.ResourceMetrics()
+	for i := 0; i < rm.Len(); i++ {
+		attrs := rm.At(i).Resource().Attributes()
+		if _, ok := attrs.Get(attrKey); ok {
+			internal.NormalizeAttributes(attrs, skipKeys...)
+			return attrs
+		}
+	}
+	require.Failf(t, "resource not found", "no ResourceMetrics with attribute %q in %s", attrKey, filePath)
+	return pcommon.NewMap()
 }
 
 func requireEnv(t *testing.T, key string) string {

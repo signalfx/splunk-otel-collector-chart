@@ -19,6 +19,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
     - name: Run pre-commit
-      uses: ./.github/actions/run-precommit
-      with:
-        continue-on-error: 'false'
+      run: |
+        pip install pre-commit==4.5.1
+        pre-commit run --all-files
+      env:
+        SKIP: actionlint

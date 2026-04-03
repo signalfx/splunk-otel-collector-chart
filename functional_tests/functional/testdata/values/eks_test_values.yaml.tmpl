@@ -53,6 +53,8 @@ clusterReceiver:
       {{ if (eq .KubeTestEnv "eks") }}
       file:
         path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
       {{ end }}
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
@@ -66,6 +68,10 @@ clusterReceiver:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - signalfx
+            - file/k8s_cluster
     {{ end }}
 
   k8sObjects:

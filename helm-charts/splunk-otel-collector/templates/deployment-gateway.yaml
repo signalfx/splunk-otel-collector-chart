@@ -138,19 +138,19 @@ spec:
         {{- end }}
         {{- end }}
         readinessProbe:
-          {{- if .Values.readinessProbe.initialDelaySeconds }}
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-          {{- end }}
           httpGet:
             path: /
             port: 13133
+          {{- if gt (len .Values.readinessProbe) 0 }}
+          {{- toYaml .Values.readinessProbe | nindent 10 }}
+          {{- end }}
         livenessProbe:
-          {{- if .Values.livenessProbe.initialDelaySeconds }}
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          {{- end }}
           httpGet:
             path: /
             port: 13133
+          {{- if gt (len .Values.livenessProbe) 0 }}
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+          {{- end }}
         resources:
           {{- toYaml .Values.gateway.resources | nindent 10 }}
         volumeMounts:
