@@ -1,6 +1,15 @@
 resourceMetrics:
   - resource:
       attributes:
+        - key: container.id
+          value:
+            stringValue: abcd
+        - key: container.image.name
+          value:
+            stringValue: abcd
+        - key: container.image.tag
+          value:
+            stringValue: abcd
         - key: cluster_name
           value:
             stringValue: abcd
@@ -13,6 +22,9 @@ resourceMetrics:
         - key: k8s.cluster.name
           value:
             stringValue: rotel-eks
+        - key: k8s.container.name
+          value:
+            stringValue: abcd
         - key: k8s.namespace.name
           value:
             stringValue: abcd
@@ -20,9 +32,6 @@ resourceMetrics:
           value:
             stringValue: abcd
         - key: k8s.pod.name
-          value:
-            stringValue: abcd
-        - key: k8s.pod.qos_class
           value:
             stringValue: abcd
         - key: k8s.pod.uid
