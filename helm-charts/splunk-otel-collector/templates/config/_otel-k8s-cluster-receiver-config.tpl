@@ -276,7 +276,7 @@ exporters:
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
-  otlphttp/o11y_events:
+  otlp_http/o11y_events:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -284,7 +284,7 @@ exporters:
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
-  otlphttp/o11y_entities:
+  otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -346,7 +346,7 @@ service:
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -371,7 +371,7 @@ service:
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -396,7 +396,7 @@ service:
         - resource
         - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -429,7 +429,7 @@ service:
         - splunk_hec/platform_logs
         {{- end }}
         {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
-        - otlphttp/o11y_events
+        - otlp_http/o11y_events
         {{- end }}
     {{- end }}
 
@@ -496,7 +496,7 @@ service:
         {{- end }}
         - resource
       exporters:
-        - otlphttp/o11y_entities
+        - otlp_http/o11y_entities
     {{- end }}
 
 {{- end }}

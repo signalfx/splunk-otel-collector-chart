@@ -46,7 +46,7 @@ data:
     processors:
       batch:
         send_batch_max_size: 32768
-      k8sattributes/metrics:
+      k8s_attributes/metrics:
         extract:
           annotations:
           - from: namespace
@@ -183,7 +183,7 @@ data:
           - batch
           - transform/k8shpascaletargetref
           - resource
-          - k8sattributes/metrics
+          - k8s_attributes/metrics
           - resource/k8s_cluster
           receivers:
           - k8s_cluster
@@ -197,7 +197,7 @@ data:
           - resourcedetection
           - resource
           - resource/add_mode
-          - k8sattributes/metrics
+          - k8s_attributes/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:

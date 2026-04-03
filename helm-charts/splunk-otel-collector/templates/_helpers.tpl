@@ -302,7 +302,7 @@ Whether k8s events sending to Splunk Observability events/v3 endpoint is enabled
 
 {{/*
 [EXPERIMENTAL] Whether the k8s entities pipeline is enabled.
-Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via otlphttp.
+Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via otlp_http.
 */}}
 {{- define "splunk-otel-collector.k8sEntitiesEnabled" -}}
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.enableK8sEntities -}}
@@ -439,5 +439,54 @@ Otherwise, return directory only.
   {{- printf "%s%s" .Values.logsCollection.journald.root_path .Values.logsCollection.journald.directory -}}
 {{- else -}}
   {{- .Values.logsCollection.journald.directory -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Fail if a collector config override uses deprecated component names.
+Checks exporter/processor definitions and pipeline references.
+
+To add a new deprecation, add an entry to $depExporters or $depProcessors.
+
+Usage:
+  include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config")
+*/}}
+{{- define "splunk-otel-collector.failOnDeprecatedNames" -}}
+{{- if .config -}}
+{{- $source := .source -}}
+{{- $depExporters := dict "otlp" "otlp_grpc" "otlphttp" "otlp_http" -}}
+{{- $depProcessors := dict "k8sattributes" "k8s_attributes" -}}
+{{- range $key, $_ := (dig "exporters" (dict) .config) -}}
+  {{- range $old, $new := $depExporters -}}
+    {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
+      {{- fail (printf "%s.exporters.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $key, $_ := (dig "processors" (dict) .config) -}}
+  {{- range $old, $new := $depProcessors -}}
+    {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
+      {{- fail (printf "%s.processors.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $pname, $p := (dig "service" "pipelines" (dict) .config) -}}
+  {{- if $p -}}
+  {{- range $item := (dig "exporters" (list) $p) -}}
+    {{- range $old, $new := $depExporters -}}
+      {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
+        {{- fail (printf "%s.service.pipelines.%s.exporters references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $item := (dig "processors" (list) $p) -}}
+    {{- range $old, $new := $depProcessors -}}
+      {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
+        {{- fail (printf "%s.service.pipelines.%s.processors references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}

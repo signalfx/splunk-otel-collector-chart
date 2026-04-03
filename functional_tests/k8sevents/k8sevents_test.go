@@ -122,7 +122,7 @@ func Test_K8SEvents(t *testing.T) {
 			plogtest.IgnoreResourceAttributeValue("host.name"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
-			plogtest.IgnoreResourceAttributeValue("com.splunk.index"), // this is flaky, the index can be the value from pod annotation due to the k8sattributes processor in the pipeline or main
+			plogtest.IgnoreResourceAttributeValue("com.splunk.index"), // this is flaky, the index can be the value from pod annotation due to the k8s_attributes processor in the pipeline or main
 			plogtest.IgnoreResourceLogsOrder(),
 			plogtest.IgnoreScopeLogsOrder(),
 			plogtest.IgnoreLogRecordsOrder(),

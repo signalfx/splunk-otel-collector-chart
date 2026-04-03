@@ -6,7 +6,7 @@
 //
 // When enabled, the helm chart adds a logs/k8s_entities pipeline to the cluster
 // receiver that collects Kubernetes entity data via the k8s_cluster receiver and
-// forwards it to the Splunk Observability v3/event endpoint using an otlphttp
+// forwards it to the Splunk Observability v3/event endpoint using an otlp_http
 // exporter. This test deploys the chart with the feature gate enabled, waits for
 // data to arrive at a local OTLP HTTP sink that mimics the v3/event endpoint,
 // and compares the collected logs against a golden file.
@@ -56,7 +56,7 @@ func Test_K8SEntities(t *testing.T) {
 
 	internal.SetupSignalFxAPIServer(t)
 
-	// Receive OTLP logs sent by the otlphttp/o11y_entities exporter to the /v3/event path.
+	// Receive OTLP logs sent by the otlp_http/o11y_entities exporter to the /v3/event path.
 	entitiesLogsSink = internal.SetupOTLPLogsSinkOnPort(t, otlpEntitiesPort, "/v3/event")
 
 	if os.Getenv("SKIP_SETUP") == "true" {
