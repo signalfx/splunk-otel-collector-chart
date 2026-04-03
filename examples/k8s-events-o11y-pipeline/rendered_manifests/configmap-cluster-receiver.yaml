@@ -83,6 +83,12 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/add_sourcetype:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.sourcetype"], Concat(["kube:object:",
+            attributes["k8s.resource.name"]], ""))
       transform/k8sevents:
         error_mode: ignore
         log_statements:
@@ -139,6 +145,12 @@ data:
             enabled: true
       k8s_events:
         auth_type: serviceAccount
+      k8sobjects:
+        auth_type: serviceAccount
+        objects:
+        - interval: 6h
+          mode: pull
+          name: pods
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
@@ -187,6 +199,17 @@ data:
           - transform/k8sevents
           receivers:
           - k8s_events
+        logs/objects:
+          exporters:
+          - otlp_http/o11y_events
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          - resource
+          - transform/add_sourcetype
+          receivers:
+          - k8sobjects
         metrics:
           exporters:
           - signalfx
