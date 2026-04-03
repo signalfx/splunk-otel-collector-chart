@@ -44,10 +44,9 @@ jobs:
 
       - name: Read current version of the Chart
         id: read-chart
-        uses: cumulusds/get-yaml-paths-action@9cffc368facb8b506c7fdd8ee4f365ab2206d12a # v1
-        with:
-          file: helm-charts/splunk-otel-collector/Chart.yaml
-          version: version
+        run: |
+          version=$(yq e '.version' helm-charts/splunk-otel-collector/Chart.yaml)
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Ensure that CHANGELOG.md has an entry for the current version
         id: read-changelog
