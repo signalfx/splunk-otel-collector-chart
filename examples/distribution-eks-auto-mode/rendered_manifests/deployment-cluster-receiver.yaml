@@ -33,6 +33,7 @@ spec:
         checksum/config: 4f4aac5f41a43881cf84aebbf6385df6a02dd0c333bbea073e4caea230ae1f08
     spec:
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux

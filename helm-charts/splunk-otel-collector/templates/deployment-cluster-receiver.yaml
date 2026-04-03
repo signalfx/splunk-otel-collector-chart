@@ -54,6 +54,9 @@ spec:
       {{- if and (eq $hostNetworkEnabled "true") (not .Values.isWindows) }}
       hostNetwork: {{ $hostNetworkEnabled }}
       {{- end }}
+      {{- if eq $hostNetworkEnabled "true" }}
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       automountServiceAccountToken: false
