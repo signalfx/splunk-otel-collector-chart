@@ -52,7 +52,8 @@ spec:
     spec:
       {{- $hostNetworkEnabled := include "splunk-otel-collector.clusterReceiverHostNetworkEnabled" . }}
       {{- if and (eq $hostNetworkEnabled "true") (not .Values.isWindows) }}
-      hostNetwork: {{ $hostNetworkEnabled }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
