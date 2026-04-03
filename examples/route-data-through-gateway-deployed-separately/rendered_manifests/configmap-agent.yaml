@@ -17,16 +17,16 @@ metadata:
 data:
   relay: |
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: <custom-gateway-url>:4317
         tls:
           insecure: true
-      otlphttp:
+      otlp_http:
         auth:
           authenticator: headers_setter
         metrics_endpoint: https://ingest.CHANGEME.signalfx.com/v2/datapoint/otlp
         traces_endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace/otlp
-      otlphttp/entities:
+      otlp_http/entities:
         auth:
           authenticator: headers_setter
         logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
@@ -66,7 +66,7 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      k8sattributes:
+      k8s_attributes:
         extract:
           annotations:
           - from: pod
@@ -340,10 +340,10 @@ data:
       pipelines:
         logs:
           exporters:
-          - otlp
+          - otlp_grpc
         logs/entities:
           exporters:
-          - otlphttp/entities
+          - otlp_http/entities
           processors:
           - memory_limiter
           - batch
@@ -353,7 +353,7 @@ data:
           - nop
         metrics:
           exporters:
-          - otlp
+          - otlp_grpc
           processors:
           - memory_limiter
           - batch
@@ -388,11 +388,11 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx
           processors:
           - memory_limiter
-          - k8sattributes
+          - k8s_attributes
           - batch
           - resourcedetection
           - resource

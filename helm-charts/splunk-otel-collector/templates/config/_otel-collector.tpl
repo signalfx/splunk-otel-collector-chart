@@ -38,7 +38,7 @@ receivers:
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
 
-# By default k8sattributes, memory_limiter and batch processors enabled.
+# By default k8s_attributes, memory_limiter and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
 
@@ -127,12 +127,12 @@ exporters:
     sending_queue:
       num_consumers: 32
   # To send entities (applicable only if discovery mode is enabled)
-  otlphttp/entities:
+  otlp_http/entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
       authenticator: headers_setter
   {{- if .Values.splunkObservability.secureAppEnabled }}
-  otlphttp/secureapp:
+  otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -220,7 +220,7 @@ service:
       receivers: [otlp, jaeger, zipkin]
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
@@ -236,7 +236,7 @@ service:
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - otlphttp
+        - otlp_http
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
@@ -268,7 +268,7 @@ service:
         - resource/add_environment
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -292,14 +292,14 @@ service:
         - otlp
         {{- end }}
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/entities]
+      exporters: [otlp_http/entities]
     {{- if .Values.splunkObservability.secureAppEnabled }}
     # secureapp events
     logs/secureapp:
       receivers:
         - routing/logs
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/secureapp]
+      exporters: [otlp_http/secureapp]
     {{- end }}
     {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
@@ -318,7 +318,7 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         - filter/logs
         - batch
         {{- if .Values.autodetect.istio }}
@@ -348,7 +348,7 @@ service:
         - resource/add_cluster_name
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}

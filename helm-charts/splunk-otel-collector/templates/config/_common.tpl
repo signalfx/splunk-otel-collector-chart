@@ -14,11 +14,11 @@ memory_limiter:
 {{- end }}
 
 {{/*
-Common config for the otel-collector otlphttp exporter
+Common config for the otel-collector otlp_http exporter
 */}}
 {{- define "splunk-otel-collector.otlpHttpExporter" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
-otlphttp:
+otlp_http:
   metrics_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/datapoint/otlp
   traces_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace/otlp
   auth:
@@ -193,7 +193,7 @@ resourcedetection/k8s_cluster_name:
 Common config for K8s attributes processor adding k8s metadata to resource attributes.
 */}}
 {{- define "splunk-otel-collector.k8sAttributesProcessor" -}}
-k8sattributes:
+k8s_attributes:
   pod_association:
     - sources:
       - from: resource_attribute
@@ -241,7 +241,7 @@ k8sattributes:
 Common config for K8s attributes processor adding k8s metadata to metrics resource attributes.
 */}}
 {{- define "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" -}}
-k8sattributes/metrics:
+k8s_attributes/metrics:
   pod_association:
     - sources:
       - from: resource_attribute

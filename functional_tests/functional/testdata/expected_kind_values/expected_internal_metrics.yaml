@@ -1271,7 +1271,7 @@ resourceMetrics:
                         stringValue: logs
                     - key: exporter
                       value:
-                        stringValue: otlphttp/entities
+                        stringValue: otlp_http/entities
                     - key: host.name
                       value:
                         stringValue: kind-control-plane
@@ -1556,7 +1556,7 @@ resourceMetrics:
                         stringValue: traces
                     - key: exporter
                       value:
-                        stringValue: otlp
+                        stringValue: otlp_grpc
                     - key: host.name
                       value:
                         stringValue: kind-control-plane
@@ -2673,7 +2673,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes
+                        stringValue: k8s_attributes
                     - key: server.port
                       value:
                         stringValue: "8889"
@@ -3072,7 +3072,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes/metrics
+                        stringValue: k8s_attributes/metrics
                     - key: server.port
                       value:
                         stringValue: "8889"
@@ -3471,7 +3471,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes
+                        stringValue: k8s_attributes
                     - key: server.port
                       value:
                         stringValue: "8889"
@@ -5755,7 +5755,7 @@ resourceMetrics:
                         stringValue: logs
                     - key: exporter
                       value:
-                        stringValue: otlphttp/entities
+                        stringValue: otlp_http/entities
                     - key: host.name
                       value:
                         stringValue: kind-control-plane
@@ -8345,7 +8345,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes
+                        stringValue: k8s_attributes
                     - key: server.port
                       value:
                         stringValue: "8889"
@@ -8744,7 +8744,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes/metrics
+                        stringValue: k8s_attributes/metrics
                     - key: server.port
                       value:
                         stringValue: "8889"
@@ -9143,7 +9143,7 @@ resourceMetrics:
                         stringValue: agent
                     - key: processor
                       value:
-                        stringValue: k8sattributes
+                        stringValue: k8s_attributes
                     - key: server.port
                       value:
                         stringValue: "8889"

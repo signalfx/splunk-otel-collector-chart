@@ -63,7 +63,7 @@ however, only the Splunk distributions are in scope for official Splunk support 
 This distribution currently supports:
 
 - [Splunk APM](https://www.splunk.com/en_us/products/apm-application-performance-monitoring.html) via the
-  [`otlphttp`
+  [`otlp_http`
   exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter).
 - [Splunk Infrastructure
   Monitoring](https://www.splunk.com/en_us/products/infrastructure-monitoring.html)
