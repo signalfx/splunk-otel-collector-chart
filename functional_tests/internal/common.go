@@ -15,8 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/network"
-	docker "github.com/docker/docker/client"
+	docker "github.com/moby/moby/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
@@ -48,28 +47,27 @@ func HostEndpoint(t *testing.T) string {
 		return "host.docker.internal"
 	}
 
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
+	client, err := docker.New(docker.FromEnv)
 	require.NoError(t, err)
-	client.NegotiateAPIVersion(t.Context())
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	netInfo, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
+	netInfo, err := client.NetworkInspect(ctx, "kind", docker.NetworkInspectOptions{})
 	require.NoError(t, err)
 	// Prefer IPv4 gateway (e.g. on GitHub runners Docker/kind may expose IPv6 first).
 	var fallback string
-	for _, ipam := range netInfo.IPAM.Config {
-		if ipam.Gateway == "" {
+	for _, ipam := range netInfo.Network.IPAM.Config {
+		if ipam.Gateway.String() == "invalid IP" || ipam.Gateway.String() == "" {
 			continue
 		}
-		ip := net.ParseIP(ipam.Gateway)
+		ip := net.ParseIP(ipam.Gateway.String())
 		if ip == nil {
 			continue
 		}
 		if ip.To4() != nil {
-			return ipam.Gateway
+			return ipam.Gateway.String()
 		}
 		if fallback == "" {
-			fallback = ipam.Gateway
+			fallback = ipam.Gateway.String()
 		}
 	}
 	if fallback != "" {
