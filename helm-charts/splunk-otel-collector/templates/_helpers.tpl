@@ -302,9 +302,7 @@ Determines whether the k8s object pipeline will be enabled in the k8s cluster re
 {{- and (eq (include "splunk-otel-collector.objectsEnabled" .) "true")
         (or
           (eq (include "splunk-otel-collector.logsEnabled" .) "true")
-          (and
-            (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
-            .Values.featureGates.sendK8sEventsToSplunkO11y)) }}
+          (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true")) }}
 {{- end -}}
 
 {{/*
