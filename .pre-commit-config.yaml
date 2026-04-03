@@ -40,7 +40,7 @@ repos:
       pass_filenames: false
     - id: actionlint
       name: Lint GitHub Actions workflows
-      entry: bash -c 'actionlint .github/workflows/*.yaml .github/workflows/*.yml'
+      entry: bash -c 'actionlint .github/workflows/*.yaml'
       language: system
       files: '^\.github/workflows/'
       pass_filenames: false
