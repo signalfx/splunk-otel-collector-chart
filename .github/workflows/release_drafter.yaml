@@ -48,8 +48,8 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Install tools
-        run: make install-tools
+      - name: Install chloggen
+        run: make install-chloggen
 
       - name: Prepare Release
         id: prepare_release
@@ -83,7 +83,11 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: ./.github/actions/run-precommit
+        run: |
+          pip install pre-commit==4.5.1
+          pre-commit run --all-files || true
+        env:
+          SKIP: actionlint,render,go-fmt,go-lint,go-mod-tidy
 
       - name: Open PR for Version Update
         id: open_pr

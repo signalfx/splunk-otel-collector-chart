@@ -163,9 +163,6 @@ while IFS='=' read -r IMAGE_KEY VERSION; do
     fi
 done < "${TEMP_VERSIONS}"
 
-# Emit the NEED_UPDATE variable to either GitHub output or stdout
-emit_output "NEED_UPDATE"
-
 if [[ "${NEED_UPDATE}" == "1" ]]; then
     echo "Merging updated subsection back into values.yaml"
     # Merge the updated subsection back into values.yaml

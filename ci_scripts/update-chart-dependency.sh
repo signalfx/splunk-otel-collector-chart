@@ -63,8 +63,6 @@ maybe_update_chart_dependency_version() {
         update_operator_images
       fi
 
-      # Emit outputs AFTER subprocess calls to prevent update-images-operator-otel.sh
-      # from overwriting NEED_UPDATE in $GITHUB_OUTPUT (last value wins).
       emit_output "NEED_UPDATE"
       emit_output "CURRENT_VER"
       emit_output "LATEST_VER"

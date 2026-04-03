@@ -150,12 +150,6 @@ jobs:
           make render
           make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT="$COMPONENT" NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
-      - name: Set up Python
-        if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-        with:
-          python-version: '3.11'
-
       - name: Generate CRD Schemas for kubeconform
         # Regenerate schemas when operator chart or operator-crds are updated
         if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
@@ -164,8 +158,11 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        continue-on-error: true
-        uses: ./.github/actions/run-precommit
+        run: |
+          pip install pre-commit==4.5.1
+          pre-commit run --all-files || true
+        env:
+          SKIP: actionlint,render,go-fmt,go-lint,go-mod-tidy
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
