@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 	"time"
@@ -253,8 +254,15 @@ func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
 		require.Eventually(t, func() bool {
 			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
 			defer pollCancel()
-			_, getErr := crdAPI.Get(pollCtx, name, v1.GetOptions{})
-			t.Logf("Require eventually crdAPI.Get err: %v", getErr)
+			crd, getErr := crdAPI.Get(pollCtx, name, v1.GetOptions{})
+			if getErr != nil {
+				t.Logf("Require eventually, crdAPI.Get err: %v", getErr)
+			}
+			if crd == nil {
+				t.Logf("CRD %s not found", name)
+			} else {
+				t.Logf("Require eventually, not nil crd name: %s, status: %s, finalizers: %s, deletion timestamp: %v, deletion grace period: %v", crd.Name, crd.Status.String(), strings.Join(crd.Finalizers, ","), crd.DeletionTimestamp, crd.DeletionGracePeriodSeconds)
+			}
 			return k8serrors.IsNotFound(getErr)
 		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
 		t.Logf("CRD %s fully removed", name)
