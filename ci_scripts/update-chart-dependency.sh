@@ -69,9 +69,9 @@ update_obi_image_tag() {
             }
             /^obi:/ { in_obi=1 }
             in_obi && /^[^[:space:]][^:]*:/ && !/^obi:/ { in_obi=0; in_image=0 }
-            in_obi && match($0, /^([[:space:]]+)image:/, matches) {
+            in_obi && match($0, /^[[:space:]]+image:/) {
                 in_image=1
-                image_indent=matches[1]
+                image_indent=substr($0, RSTART, RLENGTH - length("image:"))
             }
             in_image && $0 ~ ("^" image_indent "[^[:space:]][^:]*:") && $0 !~ ("^" image_indent "image:") { in_image=0 }
             in_image && $0 ~ ("^" image_indent "[[:space:]]+tag: ") {
