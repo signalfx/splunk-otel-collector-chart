@@ -6,7 +6,6 @@ package internal
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,7 +14,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v4/pkg/action"
@@ -27,7 +25,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -173,13 +170,14 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	releases, err := client.Run()
 	require.NoError(t, err)
 
-	// Delete CRs before helm uninstall. It will strip finalizers if the CR is not deleted in 1min.
+	// Stop any lingering hook Job from a previous test run.
+	deleteHookJobs(t, clientset)
 	deleteOperatorCRs(t, crdClient, dynClient)
 
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
-		deleteOperatorCRDs(t, crdClient)
+		deleteOperatorCRDs(t, crdClient, dynClient)
 		return
 	}
 
@@ -191,11 +189,55 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 		r, ok := rel.(*releasev1.Release)
 		require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
 		t.Logf("Uninstalling release: %s (namespace: %s)", r.Name, r.Namespace)
-		_, _ = uninstall.Run(r.Name)
+		resp, uninstallErr := uninstall.Run(r.Name)
+		if uninstallErr != nil {
+			t.Logf("Helm uninstall error for %s: %v", r.Name, uninstallErr)
+		}
+		if resp != nil && resp.Info != "" {
+			t.Logf("Helm uninstall kept resources: %s", resp.Info)
+		}
 		deleteCertSecret(t, clientset, r.Name, r.Namespace)
 	}
 
-	deleteOperatorCRDs(t, crdClient)
+	// Log remaining CRs after helm uninstall to diagnose CRD cleanup issues.
+	// Use context.Background because t.Context() is already cancelled during t.Cleanup.
+	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
+	defer diagCancel()
+	postGVRs, _ := otelGVRs(diagCtx, crdClient)
+	for _, gvr := range postGVRs {
+		list, listErr := dynClient.Resource(gvr).List(diagCtx, v1.ListOptions{})
+		if listErr != nil {
+			t.Logf("Post-uninstall: failed to list %s CRs: %v", gvr.Resource, listErr)
+			continue
+		}
+		for i := range list.Items {
+			cr := &list.Items[i]
+			t.Logf("Post-uninstall: remaining CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+				gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
+		}
+	}
+
+	deleteOperatorCRDs(t, crdClient, dynClient)
+}
+
+// deleteHookJobs deletes the instrumentation hook Job and its pods.
+func deleteHookJobs(t *testing.T, clientset *kubernetes.Clientset) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
+	defer cancel()
+
+	jobName := DefaultChartReleaseName + "-splunk-otel-collector-inst-hook"
+	propagation := v1.DeletePropagationBackground
+	err := clientset.BatchV1().Jobs(DefaultNamespace).Delete(ctx, jobName, v1.DeleteOptions{
+		PropagationPolicy: &propagation,
+	})
+	switch {
+	case k8serrors.IsNotFound(err):
+		// Already cleaned up by hook-succeeded policy.
+	case err != nil:
+		t.Logf("Failed to delete hook Job %s: %v", jobName, err)
+	default:
+		t.Logf("Deleted hook Job %s (stops potential CR recreation)", jobName)
+	}
 }
 
 // otelGVRs returns the GVR for each opentelemetry.io CRD (first served version).
@@ -223,33 +265,10 @@ func otelGVRs(ctx context.Context, crdClient apiextensionsclient.Interface) ([]s
 	return gvrs, nil
 }
 
-// stripFinalizers patches all CRs for the given GVR to remove finalizers.
-func stripFinalizers(ctx context.Context, t *testing.T, dynClient dynamic.Interface, gvr schema.GroupVersionResource) {
-	patch, _ := json.Marshal(map[string]any{"metadata": map[string]any{"finalizers": nil}})
-	list, err := dynClient.Resource(gvr).List(ctx, v1.ListOptions{})
-	if err != nil || len(list.Items) == 0 {
-		return
-	}
-	for i := range list.Items {
-		cr := &list.Items[i]
-		if len(cr.GetFinalizers()) == 0 {
-			continue
-		}
-		_, patchErr := dynClient.Resource(gvr).Namespace(cr.GetNamespace()).Patch(
-			ctx, cr.GetName(), types.MergePatchType, patch, v1.PatchOptions{})
-		if patchErr != nil {
-			t.Logf("Failed to strip finalizers from %s/%s (ns: %s): %v", gvr.Resource, cr.GetName(), cr.GetNamespace(), patchErr)
-		} else {
-			t.Logf("Stripped finalizers from %s/%s (ns: %s)", gvr.Resource, cr.GetName(), cr.GetNamespace())
-		}
-	}
-}
-
-// deleteOperatorCRs deletes all opentelemetry.io CRs across all namespaces.
-// It first requests deletion and waits for the operator to process finalizers.
-// If CRs are still stuck after 1 minute, it strips finalizers as a fallback.
+// deleteOperatorCRs deletes all opentelemetry.io CRs across all namespaces
+// and waits for them to be fully removed.
 func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
 	defer cancel()
 
 	gvrs, err := otelGVRs(ctx, crdClient)
@@ -270,41 +289,13 @@ func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dy
 		t.Logf("Found %d %s CRs across all namespaces", len(list.Items), gvr.Resource)
 		for i := range list.Items {
 			cr := &list.Items[i]
-			t.Logf("Deleting %s %s/%s (ns: %s, finalizers: %v)",
-				cr.GetKind(), gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers())
+			t.Logf("Deleting %s %s/%s (ns: %s)",
+				cr.GetKind(), gvr.Resource, cr.GetName(), cr.GetNamespace())
 			delErr := dynClient.Resource(gvr).Namespace(cr.GetNamespace()).Delete(ctx, cr.GetName(), v1.DeleteOptions{})
 			if delErr != nil && !k8serrors.IsNotFound(delErr) {
 				t.Logf("Failed to delete %s/%s (ns: %s): %v", gvr.Resource, cr.GetName(), cr.GetNamespace(), delErr)
 			}
 		}
-	}
-
-	// Wait for operator to process finalizers and fully remove CRs.
-	allGone := true
-	for _, gvr := range gvrs {
-		gone := assert.Eventually(t, func() bool {
-			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
-			defer pollCancel()
-			list, listErr := dynClient.Resource(gvr).List(pollCtx, v1.ListOptions{})
-			if listErr != nil {
-				return false
-			}
-			return len(list.Items) == 0
-		}, 1*time.Minute, 2*time.Second, "CRs for %s not removed by operator in time", gvr.Resource)
-		if gone {
-			t.Logf("All %s CRs removed by operator", gvr.Resource)
-		} else {
-			allGone = false
-		}
-	}
-	if allGone {
-		return
-	}
-
-	// Fallback: strip finalizers from any remaining CRs.
-	t.Log("Operator did not remove all CRs in time, stripping finalizers")
-	for _, gvr := range gvrs {
-		stripFinalizers(ctx, t, dynClient, gvr)
 	}
 
 	for _, gvr := range gvrs {
@@ -316,12 +307,12 @@ func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dy
 				return false
 			}
 			return len(list.Items) == 0
-		}, 1*time.Minute, 2*time.Second, "CRs for %s still present after stripping finalizers", gvr.Resource)
-		t.Logf("All %s CRs removed after stripping finalizers", gvr.Resource)
+		}, 2*time.Minute, 2*time.Second, "CRs for %s were not removed in time", gvr.Resource)
+		t.Logf("All %s CRs removed", gvr.Resource)
 	}
 }
 
-func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface) {
+func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
 	defer cancel()
 
@@ -336,7 +327,11 @@ func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface) {
 	}
 
 	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
-	var deleted []string
+	type crdTarget struct {
+		name string
+		gvr  schema.GroupVersionResource
+	}
+	var deleted []crdTarget
 	for _, gvr := range gvrs {
 		crdName := gvr.Resource + "." + gvr.Group
 		delErr := crdAPI.Delete(ctx, crdName, v1.DeleteOptions{})
@@ -349,29 +344,38 @@ func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface) {
 			continue
 		}
 		t.Logf("Deleted CRD %s, waiting for removal...", crdName)
-		deleted = append(deleted, crdName)
+		deleted = append(deleted, crdTarget{name: crdName, gvr: gvr})
 	}
 
-	for _, name := range deleted {
+	for _, tgt := range deleted {
 		require.Eventually(t, func() bool {
 			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
 			defer pollCancel()
-			crd, getErr := crdAPI.Get(pollCtx, name, v1.GetOptions{})
+			crd, getErr := crdAPI.Get(pollCtx, tgt.name, v1.GetOptions{})
 			if k8serrors.IsNotFound(getErr) {
 				return true
 			}
 			if getErr != nil {
-				t.Logf("CRD %s poll error: %v", name, getErr)
+				t.Logf("CRD %s poll error: %v", tgt.name, getErr)
 				return false
 			}
 			for _, c := range crd.Status.Conditions {
 				if c.Type == "Terminating" {
-					t.Logf("CRD %s still terminating: %s", name, c.Message)
+					t.Logf("CRD %s still terminating: %s", tgt.name, c.Message)
+				}
+			}
+			// Log remaining CRs that may be blocking CRD removal.
+			list, listErr := dynClient.Resource(tgt.gvr).List(pollCtx, v1.ListOptions{})
+			if listErr == nil && len(list.Items) > 0 {
+				for i := range list.Items {
+					cr := &list.Items[i]
+					t.Logf("CRD %s blocked by CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+						tgt.name, tgt.gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
 				}
 			}
 			return false
-		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
-		t.Logf("CRD %s fully removed", name)
+		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", tgt.name)
+		t.Logf("CRD %s fully removed", tgt.name)
 	}
 }
 
