@@ -254,6 +254,7 @@ func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
 			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
 			defer pollCancel()
 			_, getErr := crdAPI.Get(pollCtx, name, v1.GetOptions{})
+			t.Logf("Require eventually crdAPI.Get err: %v", getErr)
 			return k8serrors.IsNotFound(getErr)
 		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
 		t.Logf("CRD %s fully removed", name)
