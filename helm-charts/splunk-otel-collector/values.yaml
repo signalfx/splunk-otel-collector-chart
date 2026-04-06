@@ -14,9 +14,10 @@ namespaceOverride: ""
 # clusterName is an optional parameter that is used as the "k8s.cluster.name" attribute
 # for all traces, metrics, and logs.
 #
-# For EKS and GKE clusters, excluding EKS/Fargate:
-#   - Do NOT set this field if you have 'distribution' set to values starting with 'eks' or 'gke'.
-#     The cluster name is auto-discovered from the cloud provider.
+# For EKS, GKE, and OpenShift clusters, excluding EKS/Fargate:
+#   - Do NOT set this field if you have 'distribution' set to values starting with
+#     'eks', 'gke', or set to 'openshift'.
+#     The cluster name is auto-discovered from the cloud provider or platform API.
 #     Note: In EKS, the collector should be able to assume the node's IAM role, as it requires
 #     the EC2:DescribeInstances permission, which is available by default unless disabled manually.
 #
@@ -294,6 +295,11 @@ agent:
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
+    # Scrape interval for Prometheus receivers collecting control plane metrics.
+    # This value is also used by the EKS apiserver Prometheus receiver in the
+    # cluster receiver when featureGates.enableEKSApiServerMetrics is enabled.
+    # Accepts Prometheus duration strings (e.g. 10s, 1m).
+    scrapeInterval: 10s
     apiserver:
       # Specifies whether to collect apiserver metrics.
       enabled: true
@@ -490,7 +496,9 @@ clusterReceiver:
   # This flag enables collection of Kubernetes events as logs using OpenTelemetry k8s events receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   # The receiver currently is in "Alpha" state which means that events format might change over time.
-  # This option requires `splunkPlatform.logsEnabled` to be set to `true'.
+  # This option requires at least one of the following:
+  #   - `splunkPlatform.logsEnabled` to be true
+  #   - `featureGates.sendK8sEventsToSplunkO11y` to be true and splunkObservability to be configured.
   eventsEnabled: true
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
@@ -789,13 +797,14 @@ affinity: {}
 # Defines priorityClassName to assign a priority class to pods.
 priorityClassName: ""
 
-# This tells the kubelet that it should wait for x seconds before performing the first probe.
-# This is required in case you are using windows worker nodes.
-# It is recommended to keep it a 60-second window but it depends on cluster specification.
-readinessProbe:
-  initialDelaySeconds: 0
-livenessProbe:
-  initialDelaySeconds: 0
+# Probe configuration for the collector pods. All standard K8s probe
+# fields are supported except the action (httpGet is managed by the chart;
+# httpGet, exec, tcpSocket, and grpc are rejected). For Windows worker nodes
+# it is recommended to set initialDelaySeconds to 60. For EKS Auto Mode
+# clusters, consider increasing timeoutSeconds (e.g. 3-5) to handle network
+# delay.
+readinessProbe: {}
+livenessProbe: {}
 
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
@@ -932,6 +941,9 @@ operatorcrds:
 # Not available in EKS Add-on.
 operator:
   enabled: false
+  # To pull the operator image from a private registry, set imagePullSecrets as follows:
+  #   imagePullSecrets:
+  #     - name: my-registry-secret
   manager:
     ignoreMissingCollectorCRDs: true
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
@@ -1054,7 +1066,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.25.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.26.1
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1073,7 +1085,7 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.3.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.4.0
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
@@ -1118,7 +1130,7 @@ obi:
   image:
     # Image configuration for eBPF instrumentation.
     # NOTE: Keep this tag in sync with the OBI chart version specified in Chart.yaml.
-    tag: "v0.4.1"
+    tag: "v0.6.0"
 
   podSecurityContext:
     # Pod Security Context - Required for eBPF to access kernel capabilities
@@ -1315,6 +1327,7 @@ obi:
 targetAllocator:
   enabled: false
   image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
+  resources: {}
   serviceAccount:
     # Specifies whether a ServiceAccount should be created
     create: true
@@ -1372,13 +1385,14 @@ featureGates:
   useMemoryLimitPercentage: false
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
+  # The scrape interval for this receiver is controlled by agent.controlPlaneMetrics.scrapeInterval.
   enableEKSApiServerMetrics: true
   # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
   # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
   # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
   # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
-  # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlphttp.
+  # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlp_http.
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false

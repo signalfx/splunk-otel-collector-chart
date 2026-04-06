@@ -21,6 +21,13 @@ spec:
       containers:
         - name: targetallocator
           image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
           ports:
             - containerPort: 8080
               name: http-port

@@ -113,11 +113,7 @@ maybe_update_chart_dependency_version() {
     if [ "$LATEST_VER" != "$CURRENT_VER" ]; then
       echo "Updating to new version $LATEST_VER in Chart.yaml"
 
-      # Emit the NEED_UPDATE variable to either GitHub output or stdout
       NEED_UPDATE=1
-      emit_output "NEED_UPDATE"
-      emit_output "CURRENT_VER"
-      emit_output "LATEST_VER"
 
       # Update the version in Chart.yaml
       yq eval -i "(.dependencies[] | select(.name == \"$SUBCHART_NAME\")).version = \"$LATEST_VER\"" $CHART_PATH
@@ -127,6 +123,10 @@ maybe_update_chart_dependency_version() {
       elif [ "$SUBCHART_NAME" == "opentelemetry-ebpf-instrumentation" ]; then
         update_obi_image_tag
       fi
+
+      emit_output "NEED_UPDATE"
+      emit_output "CURRENT_VER"
+      emit_output "LATEST_VER"
 
       echo "Current git diff:"
       git --no-pager diff

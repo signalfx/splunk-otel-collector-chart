@@ -23,6 +23,10 @@ spec:
       containers:
         - name: targetallocator
           image: {{ .Values.targetAllocator.image }}
+          {{- with .Values.targetAllocator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: 8080
               name: http-port

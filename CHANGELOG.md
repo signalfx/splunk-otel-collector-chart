@@ -4,6 +4,41 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.148.0] - 2026-03-26
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.148.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.148.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add feature gate to send Kubernetes entities to Splunk Observability v3/event endpoint ([#2284](https://github.com/signalfx/splunk-otel-collector-chart/pull/2284))
+  When enabled via `featureGates.enableK8sEntities`, the cluster receiver routes
+  Kubernetes entity data (from the k8s_cluster receiver) to the Splunk Observability
+  /v3/event endpoint via otlphttp. Requires Splunk Observability configuration.
+  This feature is experimental and may change or be removed in future releases.
+
+- `operator`: Bump java to v2.26.1 in helm-charts/splunk-otel-collector/values.yaml ([#2299](https://github.com/signalfx/splunk-otel-collector-chart/pull/2299))
+
+- `operator`: Bump nodejs to v4.4.0 in helm-charts/splunk-otel-collector/values.yaml ([#2276](https://github.com/signalfx/splunk-otel-collector-chart/pull/2276))
+
+### 🧰 Bug fixes 🧰
+
+- `config`: Updated default configuration to use dot-notation attributes for internal metrics,
+  addressing the upstream change in ([#14815](https://github.com/open-telemetry/opentelemetry-collector/pull/14815))
+
+- `agent`: Add configurable scrapeInterval for control plane Prometheus receivers and default to 10s ([#2302](https://github.com/signalfx/splunk-otel-collector-chart/pull/2302))
+  The Prometheus receivers that replaced SmartAgent receivers for control plane components
+  (apiserver, controller-manager, scheduler, proxy, coredns, etcd) were using the Prometheus
+  default scrape interval of 60s instead of the SmartAgent default of 10s. A new
+  `agent.controlPlaneMetrics.scrapeInterval` config option has been added (default: `10s`)
+  to allow users to tune the interval. This also applies to the EKS apiserver metrics
+  collected by the cluster receiver.
+
+- `operator`: Fix instrumentation hook job ServiceAccount missing imagePullSecrets from image.imagePullSecrets ([#2321](https://github.com/signalfx/splunk-otel-collector-chart/pull/2321))
+  When instrumentation.installationJob.enabled=true and image.imagePullSecrets is set,
+  the dedicated ServiceAccount created for the hook job now receives the pull secrets,
+  allowing the job's kubectl image to be pulled from a private registry.
+
+
 ## [0.147.1] - 2026-03-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).

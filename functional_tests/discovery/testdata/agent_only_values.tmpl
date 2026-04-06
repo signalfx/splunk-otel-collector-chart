@@ -11,7 +11,7 @@ agent:
     enabled: true
   config:
     exporters:
-      otlphttp/entities:
+      otlp_http/entities:
         logs_endpoint: {{ .EventsURL }}/v1/logs
 
 clusterReceiver:

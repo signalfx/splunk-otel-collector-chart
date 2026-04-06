@@ -14,14 +14,12 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"helm.sh/helm/v4/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -53,6 +51,7 @@ const (
 	gkeTestKubeEnv                         = "gke"
 	autopilotTestKubeEnv                   = "gke/autopilot"
 	aksTestKubeEnv                         = "aks"
+	rosaTestKubeEnv                        = "rosa"
 	gceTestKubeEnv                         = "gce"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
@@ -62,10 +61,22 @@ const (
 	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
 	aksValuesDir                           = "expected_aks_values"
 	gkeValuesDir                           = "expected_gke_values"
+	rosaValuesDir                          = "expected_rosa_values"
+	gceValuesDir                           = "expected_gce_values"
 	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
+)
+
+type collectorRole string
+
+const (
+	roleAgent              collectorRole = "agent"
+	roleClusterReceiver    collectorRole = "cluster_receiver"
+	roleClusterReceiverK8s collectorRole = "cluster_receiver_k8s_cluster"
 )
 
 var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
@@ -104,17 +115,11 @@ func setupSinks(t *testing.T) {
 	}
 }
 
-func deployChartsAndApps(t *testing.T, testKubeConfig string) {
-	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
-	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	extensionsClient, err := clientset.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
-	require.NoError(t, err)
+func requiresPrometheusCRD(kubeTestEnv string) bool {
+	return kubeTestEnv == kindTestKubeEnv
+}
+
+func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
@@ -122,13 +127,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	sch := k8sruntime.NewScheme()
 
+	var obj k8sruntime.Object
+	var groupVersionKind *schema.GroupVersionKind
 	for _, resourceYAML := range strings.Split(string(stream), "---") {
 		if len(resourceYAML) == 0 {
 			continue
 		}
 
-		var groupVersionKind *schema.GroupVersionKind
-		var obj k8sruntime.Object
 		obj, groupVersionKind, err = decode(
 			[]byte(resourceYAML),
 			nil,
@@ -140,7 +145,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			crd := obj.(*appextensionsv1.CustomResourceDefinition)
 			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
 
-			// If the CRD is stuck in Terminating from a previous run, wait for it to be fully removed.
 			existing, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
 			if getErr == nil && existing.DeletionTimestamp != nil {
 				t.Logf("CRD %s is terminating, waiting for removal...", crd.Name)
@@ -150,13 +154,21 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 				}, 3*time.Minute, 3*time.Second, "CRD %s stuck in Terminating", crd.Name)
 			}
 
-			crd, err = apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
-			require.NoError(t, err)
-			t.Logf("Deployed CRD %s", crd.Name)
+			crdName := crd.Name
+			crdSpec := crd.Spec
+			created, createErr := apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
+			if createErr != nil {
+				if k8serrors.IsAlreadyExists(createErr) {
+					t.Logf("CRD %s already exists, skipping creation", crdName)
+				} else {
+					require.NoError(t, createErr)
+				}
+			} else {
+				t.Logf("Deployed CRD %s", created.Name)
+			}
 
-			// Wait for CRD to be Established before moving on
 			require.EventuallyWithT(t, func(tt *assert.CollectT) {
-				latest, latestErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
+				latest, latestErr := apiExtensions.Get(t.Context(), crdName, metav1.GetOptions{})
 				assert.NoError(tt, latestErr)
 				established := false
 				for _, cond := range latest.Status.Conditions {
@@ -165,14 +177,14 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 					}
 				}
 				assert.True(tt, established)
-			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crd.Name)
+			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crdName)
 
-			for _, version := range crd.Spec.Versions {
+			for _, version := range crdSpec.Versions {
 				sch.AddKnownTypeWithName(
 					schema.GroupVersionKind{
-						Group:   crd.Spec.Group,
+						Group:   crdSpec.Group,
 						Version: version.Name,
-						Kind:    crd.Spec.Names.Kind,
+						Kind:    crdSpec.Names.Kind,
 					},
 					&unstructured.Unstructured{},
 				)
@@ -197,6 +209,71 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	assert.NoError(t, err)
 
+	// Prometheus service monitor
+	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
+	require.NoError(t, err)
+	serviceMonitor, _, err := crdDecode(stream, nil, nil)
+	require.NoError(t, err)
+	g = schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "servicemonitors",
+	}
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
+	assert.NoError(t, err)
+}
+
+func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsClient *clientset.Clientset) {
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	waitTime := int64(0)
+	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	var obj k8sruntime.Object
+	var groupVersionKind *schema.GroupVersionKind
+	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
+		if len(resourceYAML) == 0 {
+			continue
+		}
+
+		obj, groupVersionKind, err = decode(
+			[]byte(resourceYAML),
+			nil,
+			nil)
+		require.NoError(t, err)
+		if groupVersionKind.Group == "apiextensions.k8s.io" &&
+			groupVersionKind.Version == "v1" &&
+			groupVersionKind.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
+			err = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: &waitTime,
+			})
+			if err != nil && !k8serrors.IsNotFound(err) {
+				t.Logf("Failed to delete CRD %s during teardown: %v", crd.Name, err)
+			}
+		}
+	}
+}
+
+func deployChartsAndApps(t *testing.T, testKubeConfig string) {
+	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
+	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	extensionsClient, err := clientset.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	if requiresPrometheusCRD(kubeTestEnv) {
+		deployPrometheusResources(t, extensionsClient, dynamicClient)
+	}
+
+	var stream []byte
 	chartInfo := map[string]internal.ChartOptions{}
 	addChartInfo := func(fileName string, chartOption internal.ChartOptions) {
 		valuesFile, errAbs := filepath.Abs(filepath.Join(testDir, valuesDir, fileName))
@@ -235,6 +312,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		addChartInfo("eks_fargate_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case gkeTestKubeEnv:
 		addChartInfo("gke_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case rosaTestKubeEnv:
+		addChartInfo("rosa_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case gceTestKubeEnv:
+		addChartInfo("gce_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
@@ -263,70 +344,28 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
-	// NodeJS test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "nodejs", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err := decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
+	deployApp := func(filePath string) {
+		data, readErr := os.ReadFile(filePath)
+		require.NoError(t, readErr)
+		dep, _, decodeErr := decode(data, nil, nil)
+		require.NoError(t, decodeErr)
+		_, createErr := deployments.Create(t.Context(), dep.(*appsv1.Deployment), metav1.CreateOptions{})
+		if k8serrors.IsAlreadyExists(createErr) {
+			_, updateErr := deployments.Update(t.Context(), dep.(*appsv1.Deployment), metav1.UpdateOptions{})
+			require.NoError(t, updateErr)
+		} else {
+			require.NoError(t, createErr)
 		}
 	}
-	// Java test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "java", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// .NET test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "dotnet", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// Python test app
-	stream, err = os.ReadFile(filepath.Join(testDir, "python", "deployment.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
-	}
-	// Prometheus annotation
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"))
-	require.NoError(t, err)
-	deployment, _, err = decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = deployments.Create(t.Context(), deployment.(*appsv1.Deployment), metav1.CreateOptions{})
-	if err != nil {
-		_, err2 := deployments.Update(t.Context(), deployment.(*appsv1.Deployment), metav1.UpdateOptions{})
-		assert.NoError(t, err2)
-		if err2 != nil {
-			require.NoError(t, err)
-		}
+	for _, f := range []string{
+		filepath.Join(testDir, "nodejs", "deployment.yaml"),
+		filepath.Join(testDir, "java", "deployment.yaml"),
+		filepath.Join(testDir, "dotnet", "deployment.yaml"),
+		filepath.Join(testDir, "python", "deployment.yaml"),
+		filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"),
+		filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"),
+	} {
+		deployApp(f)
 	}
 
 	// Service
@@ -337,21 +376,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	_, err = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), service.(*corev1.Service),
 		metav1.CreateOptions{})
 	require.NoError(t, err)
-
-	// Prometheus service monitor
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
-	require.NoError(t, err)
-
-	serviceMonitor, _, err := crdDecode(stream, nil, nil)
-	require.NoError(t, err)
-	g = schema.GroupVersionResource{
-		Group:    "monitoring.coreos.com",
-		Version:  "v1",
-		Resource: "servicemonitors",
-	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
-		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
 
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
@@ -444,6 +468,9 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
+	_ = deployments.Delete(ctx, "log-attr-test", metav1.DeleteOptions{
+		GracePeriodSeconds: &waitTime,
+	})
 	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
 		metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
@@ -487,27 +514,8 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err = decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			_ = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-		}
+	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+		teardownPrometheusResources(ctx, t, extensionsClient)
 	}
 
 	for _, nm := range namespaces {
@@ -563,8 +571,19 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("java traces captured", testJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
 	t.Run("Python traces captured", testPythonTraces)
+	t.Run("java metrics captured", testJavaMetrics)
+	t.Run("node.js metrics captured", testNodeJSMetrics)
+	t.Run(".NET metrics captured", testDotNetMetrics)
+	t.Run("Python metrics captured", testPythonMetrics)
+	t.Run("java profiling captured", testJavaProfiling)
+	t.Run("node.js profiling captured", testNodeJSProfiling)
+	t.Run(".NET profiling captured", testDotNetProfiling)
+	t.Run("Python profiling captured", testPythonProfiling)
 	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 	t.Run("agent logs", testAgentLogs)
+	t.Run("container log attributes validation", func(t *testing.T) {
+		validateLogAttributes(t, globalSinks.logsConsumer)
+	})
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
@@ -593,17 +612,19 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
-			validateResourceAttributes(t, client, kubeConfig, "agent")
+			validateResourceAttributes(t, client, kubeConfig, roleAgent)
 		})
-		t.Run("cluster receiver resource attributes validation", func(t *testing.T) {
-			validateResourceAttributes(t, client, kubeConfig, "cluster_receiver")
+		t.Run("cluster receiver self-metrics resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, roleClusterReceiver)
+		})
+		t.Run("cluster receiver k8s cluster metrics resource attributes validation", func(t *testing.T) {
+			validateResourceAttributes(t, client, kubeConfig, roleClusterReceiverK8s)
 		})
 
 		t.Run("component error logs checks", func(t *testing.T) {
-			// Limiting the journald error check to EKS only, other clusters have different errors that are not fatal
 			if kubeTestEnv == eksTestKubeEnv {
 				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, journaldReceiverName)
 			}
@@ -631,32 +652,48 @@ func selectExpectedValuesDir(kubeTestEnv string) string {
 		return aksValuesDir
 	case gkeTestKubeEnv:
 		return gkeValuesDir
+	case rosaTestKubeEnv:
+		return rosaValuesDir
+	case gceTestKubeEnv:
+		return gceValuesDir
 	default:
 		return eksValuesDir
 	}
 }
 
-func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, collectorType string) {
-	var labelSelector, expectedResourceAttributesFile string
+func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, kubeConfig *rest.Config, role collectorRole) {
+	var labelSelector, expectedResourceAttributesFile, podPathFile string
 
-	switch collectorType {
-	case "agent":
+	switch role {
+	case roleAgent:
 		labelSelector = agentLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_agent.yaml")
-	case "cluster_receiver":
+	case roleClusterReceiver:
 		labelSelector = clusterReceiverLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver.yaml")
+	case roleClusterReceiverK8s:
+		labelSelector = clusterReceiverLabelSelector
+		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_cluster_receiver_k8s_cluster.yaml")
 	default:
-		require.Failf(t, "failed to run validateResourceAttributes", "collectorType must be either 'agent' or 'cluster_receiver' but got %s", collectorType)
+		require.Failf(t, "failed to run validateResourceAttributes", "unknown role %q", role)
 	}
 
 	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
-	podPathFile := linuxPodMetricsPath
-	if pods.Items[0].Labels["osType"] == "windows" {
-		podPathFile = winPodMetricsPath
+	isWindows := strings.ToLower(pods.Items[0].Labels["osType"]) == "windows"
+
+	if role == roleClusterReceiverK8s {
+		podPathFile = linuxPodK8sClusterMetricsPath
+		if isWindows {
+			podPathFile = winPodK8sClusterMetricsPath
+		}
+	} else {
+		podPathFile = linuxPodMetricsPath
+		if isWindows {
+			podPathFile = winPodMetricsPath
+		}
 	}
 
 	tmpFile, err := os.CreateTemp(t.TempDir(), "actualResourceAttributes*.yaml")
@@ -664,10 +701,19 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	internal.CopyFileFromPod(t, clientset, kubeConfig, internal.DefaultNamespace, podName, "otel-collector", podPathFile, tmpFile.Name())
 
-	actualResourceAttributes := readAndNormalizeMetrics(t, tmpFile.Name(), "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
-	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, "k8s.cluster.name").ResourceMetrics().At(0).Resource().Attributes()
+	skipKeys := []string{"k8s.cluster.name", "cloud.platform"}
+	expectedResourceAttributes := readAndNormalizeMetrics(t, expectedResourceAttributesFile, skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
 
-	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", collectorType, formatResourceAttributesString(expectedResourceAttributes), formatResourceAttributesString(actualResourceAttributes))
+	// The k8s_cluster receiver emits multiple ResourceMetrics groups.
+	// We pick a container resource for a stable comparison.
+	var actualResourceAttributes pcommon.Map
+	if role == roleClusterReceiverK8s {
+		actualResourceAttributes = findResourceByAttr(t, tmpFile.Name(), "k8s.container.name", skipKeys...)
+	} else {
+		actualResourceAttributes = readAndNormalizeMetrics(t, tmpFile.Name(), skipKeys...).ResourceMetrics().At(0).Resource().Attributes()
+	}
+
+	require.True(t, expectedResourceAttributes.Equal(actualResourceAttributes), "Resource Attributes comparison failed for %s , expected values %s , actual values %s", role, internal.FormatAttributes(expectedResourceAttributes), internal.FormatAttributes(actualResourceAttributes))
 
 	t.Cleanup(func() {
 		require.NoError(t, os.Remove(tmpFile.Name()))
@@ -677,289 +723,31 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
-	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
-	attrs.Range(func(k string, _ pcommon.Value) bool {
-		for _, skipKey := range skipKeys {
-			if k == skipKey {
-				return true
-			}
-		}
-		attrs.PutStr(k, "abcd")
-		return true
-	})
+	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
+}
+
+// findResourceByAttr reads metrics from filePath, finds the first ResourceMetrics
+// whose resource attributes contain the given key, normalizes it, and returns the attributes.
+func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys ...string) pcommon.Map {
+	metrics, err := golden.ReadMetrics(filePath)
+	require.NoError(t, err)
+	rm := metrics.ResourceMetrics()
+	for i := 0; i < rm.Len(); i++ {
+		attrs := rm.At(i).Resource().Attributes()
+		if _, ok := attrs.Get(attrKey); ok {
+			internal.NormalizeAttributes(attrs, skipKeys...)
+			return attrs
+		}
+	}
+	require.Failf(t, "resource not found", "no ResourceMetrics with attribute %q in %s", attrKey, filePath)
+	return pcommon.NewMap()
 }
 
 func requireEnv(t *testing.T, key string) string {
 	value, set := os.LookupEnv(key)
 	require.True(t, set, "the environment variable %s must be set", key)
 	return value
-}
-
-func testNodeJSTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_nodejs_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "nodejs") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.command"),
-		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
-		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
-		ptracetest.IgnoreResourceAttributeValue("process.owner"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
-		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-		ptracetest.IgnoreScopeSpanInstrumentationScopeVersion(),
-	)
-	require.NoError(t, err)
-}
-
-func testPythonTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_python_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	read := 0
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > read; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "python") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		read = len(tracesConsumer.AllTraces()) - 1
-		return selectedTrace != nil
-	}, 1*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.version"),
-		ptracetest.IgnoreResourceAttributeValue("process.command"),
-		ptracetest.IgnoreResourceAttributeValue("process.command_args"),
-		ptracetest.IgnoreResourceAttributeValue("process.executable.path"),
-		ptracetest.IgnoreResourceAttributeValue("process.owner"),
-		ptracetest.IgnoreResourceAttributeValue("process.runtime.description"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreSpanAttributeValue("http.user_agent"),
-		ptracetest.IgnoreSpanAttributeValue("net.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
-}
-
-func testJavaTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_java_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 10, tracesConsumer)
-
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "java") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("host.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.description"),
-		ptracetest.IgnoreResourceAttributeValue("process.pid"),
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("os.version"),
-		ptracetest.IgnoreResourceAttributeValue("host.arch"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("thread.id"),
-		ptracetest.IgnoreSpanAttributeValue("thread.name"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
-}
-
-func testDotNetTraces(t *testing.T) {
-	tracesConsumer := globalSinks.tracesConsumer
-
-	var expectedTraces ptrace.Traces
-	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_dotnet_traces.yaml")
-	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
-	require.NoError(t, err)
-	internal.ClearTraceSchemaURLs(expectedTraces)
-
-	internal.WaitForTraces(t, 30, tracesConsumer)
-	var selectedTrace *ptrace.Traces
-
-	require.Eventually(t, func() bool {
-		for i := len(tracesConsumer.AllTraces()) - 1; i > 0; i-- {
-			trace := tracesConsumer.AllTraces()[i]
-			if val, ok := trace.ResourceSpans().At(0).Resource().Attributes().Get("telemetry.sdk.language"); ok && strings.Contains(val.Str(), "dotnet") {
-				if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
-					selectedTrace = &trace
-					break
-				}
-			}
-		}
-		return selectedTrace != nil
-	}, 3*time.Minute, 5*time.Second)
-	require.NotNil(t, selectedTrace)
-
-	maskScopeVersion(*selectedTrace)
-	maskScopeVersion(expectedTraces)
-	maskSpanParentID(*selectedTrace)
-	maskSpanParentID(expectedTraces)
-	internal.ClearTraceSchemaURLs(*selectedTrace)
-
-	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
-	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
-		ptracetest.IgnoreResourceAttributeValue("host.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
-		ptracetest.IgnoreResourceAttributeValue("container.id"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
-		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
-		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
-		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
-		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
-		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
-		ptracetest.IgnoreSpanAttributeValue("thread.id"),
-		ptracetest.IgnoreSpanAttributeValue("thread.name"),
-		ptracetest.IgnoreSpanAttributeValue("os.version"),
-		ptracetest.IgnoreTraceID(),
-		ptracetest.IgnoreSpanID(),
-		ptracetest.IgnoreStartTimestamp(),
-		ptracetest.IgnoreEndTimestamp(),
-		ptracetest.IgnoreResourceSpansOrder(),
-		ptracetest.IgnoreScopeSpansOrder(),
-	)
-	require.NoError(t, err)
 }
 
 func containerImageShorten(value string) string {
@@ -1309,6 +1097,8 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreMetricAttributeValue("pod_identifier", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("otelcol_signal", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.name", metricNames...),
@@ -1425,7 +1215,7 @@ func testHECMetrics(t *testing.T) {
 		"system.processes.count",
 		"system.processes.created",
 	}
-	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames, nil)
+	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {
@@ -1441,90 +1231,109 @@ func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset)
 	}, 5*time.Minute, 10*time.Second)
 }
 
-func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, matchFn func(pcommon.Map) bool) {
+// metricMatchFn decides whether a given metric (with its resource attributes)
+// should be counted. Return true to accept the metric.
+type metricMatchFn func(resAttrs pcommon.Map, metric pmetric.Metric) bool
+
+func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string) {
+	checkMetrics(t, mc, metricNames, "", nil)
+}
+
+func checkMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName string, metricNames []string) {
+	checkMetrics(t, mc, metricNames, sdkLanguage+"/"+serviceName, func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
+		if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
+			return true
+		}
+		return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
+	})
+}
+
+func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, label string, match metricMatchFn) {
 	metricsToFind := map[string]bool{}
 	for _, name := range metricNames {
 		metricsToFind[name] = false
 	}
-	timeoutMinutes := 3
 	require.Eventuallyf(t, func() bool {
 		for _, m := range mc.AllMetrics() {
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
 				rm := m.ResourceMetrics().At(i)
+				resAttrs := rm.Resource().Attributes()
 				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
 					sm := rm.ScopeMetrics().At(j)
 					for k := 0; k < sm.Metrics().Len(); k++ {
 						metric := sm.Metrics().At(k)
-						var attrs pcommon.Map
-						switch metric.Type() {
-						case pmetric.MetricTypeGauge:
-							attrs = metric.Gauge().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeSum:
-							attrs = metric.Sum().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeHistogram:
-							attrs = metric.Histogram().DataPoints().At(0).Attributes()
-						case pmetric.MetricTypeExponentialHistogram:
-							attrs = metric.ExponentialHistogram().DataPoints().At(0).Attributes()
-						default:
-							panic("Unsupported type " + metric.Type().String())
-						}
-						if matchFn == nil || matchFn(attrs) {
+						if match == nil || match(resAttrs, metric) {
 							metricsToFind[metric.Name()] = true
 						}
 					}
 				}
 			}
 		}
-		var stillMissing []string
-		var found []string
-		missingCount := 0
-		foundCount := 0
+		var stillMissing, found []string
 		for _, name := range metricNames {
-			if !metricsToFind[name] {
-				stillMissing = append(stillMissing, name)
-				missingCount++
-			} else {
+			if metricsToFind[name] {
 				found = append(found, name)
-				foundCount++
+			} else {
+				stillMissing = append(stillMissing, name)
 			}
 		}
-		t.Logf("Found: %s", strings.Join(found, ","))
-		t.Logf("Metrics found: %d, metrics still missing: %d\n%s\n", foundCount, missingCount, strings.Join(stillMissing, ","))
-		return missingCount == 0
-	}, time.Duration(timeoutMinutes)*time.Minute, 10*time.Second,
-		"failed to receive all metrics in %d minutes", timeoutMinutes)
-}
-
-func maskScopeVersion(traces ptrace.Traces) {
-	rss := traces.ResourceSpans()
-	for i := 0; i < rss.Len(); i++ {
-		rs := rss.At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			ss.Scope().SetVersion("")
+		if label != "" {
+			t.Logf("[%s] found=%d missing=%d (%s)", label, len(found), len(stillMissing), strings.Join(stillMissing, ", "))
+		} else {
+			t.Logf("found=%d missing=%d (%s)", len(found), len(stillMissing), strings.Join(stillMissing, ", "))
 		}
-	}
+		return len(stillMissing) == 0
+	}, 3*time.Minute, 10*time.Second,
+		"failed to receive all metrics %s in 3 minutes", label)
 }
 
-func maskSpanParentID(traces ptrace.Traces) {
-	rss := traces.ResourceSpans()
-	for i := 0; i < rss.Len(); i++ {
-		rs := rss.At(i)
-		for j := 0; j < rs.ScopeSpans().Len(); j++ {
-			ss := rs.ScopeSpans().At(j)
-			for k := 0; k < ss.Spans().Len(); k++ {
-				span := ss.Spans().At(k)
-				span.SetParentSpanID(pcommon.NewSpanIDEmpty())
+func hasAttrMatch(attrs pcommon.Map, key, expected string) bool {
+	v, ok := attrs.Get(key)
+	return ok && v.Str() == expected
+}
+
+// metricDataPointsHaveAttrs checks whether any data point in a metric carries
+// all of the given key/value pairs. Pairs are passed as alternating key, value strings.
+func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
+	check := func(attrs pcommon.Map) bool {
+		for i := 0; i < len(kvPairs)-1; i += 2 {
+			if !hasAttrMatch(attrs, kvPairs[i], kvPairs[i+1]) {
+				return false
 			}
 		}
-	}
-}
-
-func formatResourceAttributesString(attributesMap pcommon.Map) string {
-	var attrsStr strings.Builder
-	attributesMap.Range(func(k string, v pcommon.Value) bool {
-		attrsStr.WriteString(k + "=" + v.Str() + ";")
 		return true
-	})
-	return attrsStr.String()
+	}
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		for i := 0; i < metric.Gauge().DataPoints().Len(); i++ {
+			if check(metric.Gauge().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeSum:
+		for i := 0; i < metric.Sum().DataPoints().Len(); i++ {
+			if check(metric.Sum().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeHistogram:
+		for i := 0; i < metric.Histogram().DataPoints().Len(); i++ {
+			if check(metric.Histogram().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeSummary:
+		for i := 0; i < metric.Summary().DataPoints().Len(); i++ {
+			if check(metric.Summary().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	case pmetric.MetricTypeExponentialHistogram:
+		for i := 0; i < metric.ExponentialHistogram().DataPoints().Len(); i++ {
+			if check(metric.ExponentialHistogram().DataPoints().At(i).Attributes()) {
+				return true
+			}
+		}
+	}
+	return false
 }

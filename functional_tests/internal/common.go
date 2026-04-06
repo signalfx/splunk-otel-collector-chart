@@ -15,12 +15,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/network"
-	docker "github.com/docker/docker/client"
+	docker "github.com/moby/moby/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -47,28 +47,23 @@ func HostEndpoint(t *testing.T) string {
 		return "host.docker.internal"
 	}
 
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
+	client, err := docker.New(docker.FromEnv)
 	require.NoError(t, err)
-	client.NegotiateAPIVersion(t.Context())
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	netInfo, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
+	netInfo, err := client.NetworkInspect(ctx, "kind", docker.NetworkInspectOptions{})
 	require.NoError(t, err)
 	// Prefer IPv4 gateway (e.g. on GitHub runners Docker/kind may expose IPv6 first).
 	var fallback string
-	for _, ipam := range netInfo.IPAM.Config {
-		if ipam.Gateway == "" {
+	for _, ipam := range netInfo.Network.IPAM.Config {
+		if !ipam.Gateway.IsValid() {
 			continue
 		}
-		ip := net.ParseIP(ipam.Gateway)
-		if ip == nil {
-			continue
-		}
-		if ip.To4() != nil {
-			return ipam.Gateway
+		if ipam.Gateway.Is4() {
+			return ipam.Gateway.String()
 		}
 		if fallback == "" {
-			fallback = ipam.Gateway
+			fallback = ipam.Gateway.String()
 		}
 	}
 	if fallback != "" {
@@ -163,6 +158,29 @@ func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) 
 		require.NoError(t, golden.WriteLogs(t, file, *logs))
 		t.Logf("Wrote updated expected log results to %s", file)
 	}
+}
+
+// NormalizeAttributes replaces every value in m with "abcd" except keys listed in skipKeys.
+func NormalizeAttributes(m pcommon.Map, skipKeys ...string) {
+	m.Range(func(k string, _ pcommon.Value) bool {
+		for _, sk := range skipKeys {
+			if k == sk {
+				return true
+			}
+		}
+		m.PutStr(k, "abcd")
+		return true
+	})
+}
+
+// FormatAttributes returns a semicolon-separated "key=value;" string for debugging attribute maps.
+func FormatAttributes(m pcommon.Map) string {
+	var b strings.Builder
+	m.Range(func(k string, v pcommon.Value) bool {
+		b.WriteString(k + "=" + v.Str() + ";")
+		return true
+	})
+	return b.String()
 }
 
 // CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod using `cat`,

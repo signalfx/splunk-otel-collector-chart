@@ -1,0 +1,11 @@
+cloudProvider: aws
+distribution: openshift
+clusterName: rosa-test-htcpw
+environment: dev
+splunkObservability:
+  realm: us0
+  accessToken: xxxxx
+operatorcrds:
+  install: false
+operator:
+  enabled: false

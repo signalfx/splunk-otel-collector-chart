@@ -14,5 +14,5 @@ clusterReceiver:
 featureGates:
   # Enable sending Kubernetes events to the Splunk Observability events/v3 endpoint.
   # Configures the existing logs pipeline to route k8s events through an additional
-  # otlphttp/o11y_events exporter with the "o11yevents" routing header.
+  # otlp_http/o11y_events exporter with the "o11yevents" routing header.
   sendK8sEventsToSplunkO11y: true

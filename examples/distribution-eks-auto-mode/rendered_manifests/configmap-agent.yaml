@@ -7,23 +7,23 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.147.1
+    helm.sh/chart: splunk-otel-collector-0.148.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.147.0"
+    app.kubernetes.io/version: "0.148.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.147.1
+    chart: splunk-otel-collector-0.148.0
     release: default
 data:
   relay: |
     exporters:
-      otlp:
+      otlp_grpc:
         auth:
           authenticator: headers_setter
         endpoint: default-splunk-otel-collector:4317
         tls:
           insecure: true
-      otlphttp/entities:
+      otlp_http/entities:
         auth:
           authenticator: headers_setter
         endpoint: http://default-splunk-otel-collector:4318
@@ -65,7 +65,7 @@ data:
       batch:
         metadata_keys:
         - X-SF-Token
-      k8sattributes:
+      k8s_attributes:
         extract:
           annotations:
           - from: pod
@@ -221,6 +221,17 @@ data:
           scrape_configs:
           - job_name: otel-agent
             metric_relabel_configs:
+            - source_labels:
+              - service_name
+              target_label: service.name
+            - source_labels:
+              - service_instance_id
+              target_label: service.instance.id
+            - source_labels:
+              - service_version
+              target_label: service.version
+            - action: labeldrop
+              regex: service_name|service_instance_id|service_version
             - action: drop
               regex: promhttp_metric_handler_errors.*
               source_labels:
@@ -249,6 +260,7 @@ data:
                     regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:9153'
@@ -267,6 +279,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10257'
@@ -289,6 +302,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -307,6 +321,7 @@ data:
                     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total|kubeproxy_sync_proxy_rules_service_changes_total|kubeproxy_sync_proxy_rules_service_changes_pending|kubeproxy_sync_proxy_rules_duration_seconds|kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10249'
@@ -325,6 +340,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
+                  scrape_interval: 10s
                   static_configs:
                   - targets:
                     - '`endpoint`:10259'
@@ -346,7 +362,7 @@ data:
       pipelines:
         logs/entities:
           exporters:
-          - otlphttp/entities
+          - otlp_http/entities
           processors:
           - memory_limiter
           - batch
@@ -356,7 +372,7 @@ data:
           - nop
         metrics:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx/host_metadata
           processors:
           - memory_limiter
@@ -369,7 +385,7 @@ data:
           - otlp
         metrics/agent:
           exporters:
-          - otlp
+          - otlp_grpc
           processors:
           - memory_limiter
           - batch
@@ -392,11 +408,11 @@ data:
           - receiver_creator
         traces:
           exporters:
-          - otlp
+          - otlp_grpc
           - signalfx
           processors:
           - memory_limiter
-          - k8sattributes
+          - k8s_attributes
           - batch
           - resourcedetection
           - resource

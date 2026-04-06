@@ -4,7 +4,7 @@
 
 This configuration enables the `sendK8sEventsToSplunkO11y` feature gate, which configures
 the existing `logs` pipeline in the cluster receiver to route Kubernetes events to the
-Splunk Observability `/v3/event` endpoint. It adds an additional `otlphttp/o11y_events`
+Splunk Observability `/v3/event` endpoint. It adds an additional `otlp_http/o11y_events`
 exporter to the pipeline that collects events via the `k8s_events` receiver and sends them
 with the `o11yevents` routing header.
 

@@ -61,3 +61,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- fail (printf "ERROR: Deprecated instrumentation configuration detected, the following %s is no longer supported under instrumentation. Please migrate to instrumentation.spec.*. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01280-to-01290 for details." $instrKeys) }}
 {{- end }}
 {{- end }}
+
+{{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config") }}
+{{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.gateway.config "source" "gateway.config") }}
+{{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.clusterReceiver.config "source" "clusterReceiver.config") }}

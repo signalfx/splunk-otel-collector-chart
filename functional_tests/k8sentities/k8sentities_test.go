@@ -6,7 +6,7 @@
 //
 // When enabled, the helm chart adds a logs/k8s_entities pipeline to the cluster
 // receiver that collects Kubernetes entity data via the k8s_cluster receiver and
-// forwards it to the Splunk Observability v3/event endpoint using an otlphttp
+// forwards it to the Splunk Observability v3/event endpoint using an otlp_http
 // exporter. This test deploys the chart with the feature gate enabled, waits for
 // data to arrive at a local OTLP HTTP sink that mimics the v3/event endpoint,
 // and compares the collected logs against a golden file.
@@ -56,7 +56,7 @@ func Test_K8SEntities(t *testing.T) {
 
 	internal.SetupSignalFxAPIServer(t)
 
-	// Receive OTLP logs sent by the otlphttp/o11y_entities exporter to the /v3/event path.
+	// Receive OTLP logs sent by the otlp_http/o11y_entities exporter to the /v3/event path.
 	entitiesLogsSink = internal.SetupOTLPLogsSinkOnPort(t, otlpEntitiesPort, "/v3/event")
 
 	if os.Getenv("SKIP_SETUP") == "true" {
@@ -90,20 +90,19 @@ func Test_K8SEntities(t *testing.T) {
 		expectedLogs, err := golden.ReadLogs(expectedFile)
 		require.NoError(t, err, "failed to read golden file %s", expectedFile)
 
-		// The k8s_cluster receiver reports entities for every resource in the
-		// cluster. The exact count and UIDs change on each helm install cycle,
-		// so a strict plogtest.CompareLogs is not feasible. Instead we compare
-		// against the golden file by verifying:
-		//   1. Every entity type present in the golden file also appears in actual.
-		//   2. Actual has at least as many entities as the golden file.
-		//   3. Every entity record has the expected structural attributes.
-		expectedTypes := extractEntityTypeCounts(expectedLogs)
-		actualTypes := extractEntityTypeCounts(actualLogs)
+		// The k8s_cluster receiver reports entities for whatever resources are
+		// present in the cluster at collection time. Exact record counts, UIDs,
+		// ordering, and some payload details change across Kubernetes versions,
+		// so keep the validation at the invariant level:
+		//   1. The golden-file entity types appear at least once in actual data.
+		//   2. Every entity record has the expected structural attributes.
+		expectedTypes := extractEntityTypes(expectedLogs)
+		actualTypes := extractEntityTypes(actualLogs)
 
-		for etype, expectedCount := range expectedTypes {
-			actualCount := actualTypes[etype]
-			assert.GreaterOrEqualf(t, actualCount, expectedCount,
-				"entity type %q: expected at least %d, got %d", etype, expectedCount, actualCount)
+		require.NotEmpty(t, actualTypes, "expected at least one entity type in the k8s entities payload")
+		for etype := range expectedTypes {
+			_, ok := actualTypes[etype]
+			assert.Truef(t, ok, "entity type %q not found in actual logs", etype)
 		}
 
 		// Validate structure of every actual entity against golden-file invariants.
@@ -133,12 +132,24 @@ func Test_K8SEntities(t *testing.T) {
 							"otel.entity.event.type must be entity_state or entity_delete")
 					}
 
-					_, hasID := attrs.Get("otel.entity.id")
+					entityID, hasID := attrs.Get("otel.entity.id")
 					assert.True(t, hasID, "log record must have otel.entity.id")
+					if hasID {
+						assert.Equal(t, pcommon.ValueTypeMap, entityID.Type(),
+							"otel.entity.id must be a map")
+						assert.Positive(t, entityID.Map().Len(),
+							"otel.entity.id must not be empty")
+					}
 
 					if hasEventType && eventType.Str() == "entity_state" {
-						_, hasAttrs := attrs.Get("otel.entity.attributes")
+						entityAttrs, hasAttrs := attrs.Get("otel.entity.attributes")
 						assert.True(t, hasAttrs, "entity_state log record must have otel.entity.attributes")
+						if hasAttrs {
+							assert.Equal(t, pcommon.ValueTypeMap, entityAttrs.Type(),
+								"otel.entity.attributes must be a map")
+							assert.Positive(t, entityAttrs.Map().Len(),
+								"otel.entity.attributes must not be empty")
+						}
 					}
 				}
 			}
@@ -192,9 +203,9 @@ func teardown(t *testing.T, _ *k8stest.K8sClient) {
 	internal.ChartUninstall(t, testKubeConfig)
 }
 
-// extractEntityTypeCounts returns a map of entity type -> count from the logs.
-func extractEntityTypeCounts(logs plog.Logs) map[string]int {
-	counts := make(map[string]int)
+// extractEntityTypes returns the set of entity types found in the logs.
+func extractEntityTypes(logs plog.Logs) map[string]struct{} {
+	entityTypes := make(map[string]struct{})
 	rl := logs.ResourceLogs()
 	for i := 0; i < rl.Len(); i++ {
 		sl := rl.At(i).ScopeLogs()
@@ -202,12 +213,12 @@ func extractEntityTypeCounts(logs plog.Logs) map[string]int {
 			lr := sl.At(j).LogRecords()
 			for k := 0; k < lr.Len(); k++ {
 				if v, ok := lr.At(k).Attributes().Get("otel.entity.type"); ok {
-					counts[v.Str()]++
+					entityTypes[v.Str()] = struct{}{}
 				}
 			}
 		}
 	}
-	return counts
+	return entityTypes
 }
 
 func assertResourceAttr(t *testing.T, attrs pcommon.Map, key, expected string) {

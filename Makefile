@@ -18,7 +18,7 @@ endif
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
-CHLOGGEN ?= $(LOCALBIN)/chloggen
+CHLOGGEN ?= $(TOOLS_BIN_DIR)/chloggen
 
 CERTMANAGER_VERSION ?= $(shell yq eval ".dependencies[] | select(.name == \"cert-manager\") | .version" helm-charts/splunk-otel-collector/Chart.yaml)
 
@@ -42,6 +42,9 @@ help: ## Display Makefile help information for all actions
 install-tools: ## Install tools (macOS/Linux)
 	LOCALBIN=$(LOCALBIN) GOBIN=$(LOCALBIN) ci_scripts/install-tools.sh || exit 1
 	$(MAKE) goinstall-tools
+
+.PHONY: install-chloggen
+install-chloggen: $(CHLOGGEN) ## Install chloggen tool (used by CI)
 
 ##@ Build
 # Tasks related to building the Helm chart
@@ -123,7 +126,7 @@ functionaltest: ## Run functional tests for this Helm chart with optional tags a
 .PHONY: chlog-available
 chlog-available: ## Validate the chloggen tool is available
 	@if [ -z "$(CHLOGGEN)" ]; then \
-		echo "Error: chloggen is not available. Please run 'make install-tools' to install it."; \
+		echo "Error: chloggen is not available. Please run 'make install-chloggen' or 'make install-tools' to install it."; \
 		exit 1; \
 	fi
 
@@ -327,11 +330,28 @@ kind-delete: ## Delete kind cluster and remove kubeconfig
 	fi
 	@echo "=== Kind cluster cleanup complete ==="
 
+PYTHON_TEST_IMAGE ?= quay.io/splunko11ytest/python_test:latest
+NODEJS_TEST_IMAGE ?= quay.io/splunko11ytest/nodejs_test:latest
+
+.PHONY: kind-build-test-images
+kind-build-test-images: ## Build test app images and load them into kind cluster
+	@echo "Building Python test app image..."
+	docker build -t $(PYTHON_TEST_IMAGE) functional_tests/functional/testdata/python
+	@echo "Building Node.js test app image..."
+	docker build -t $(NODEJS_TEST_IMAGE) functional_tests/functional/testdata/nodejs
+	@echo "Loading test app images into kind cluster..."
+	kind load docker-image $(PYTHON_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
+	kind load docker-image $(NODEJS_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
+	@echo "=== Test images loaded into kind ==="
+
 .PHONY: functionaltest-local
 functionaltest-local: ## Run functional tests using local kind cluster (automatically sets up and tears down cluster)
 	@echo "Running functional tests with automated kind cluster management..."
 	@echo "=== Setting up kind cluster ==="
 	$(MAKE) kind-setup
+	@echo ""
+	@echo "=== Building and loading test images ==="
+	$(MAKE) kind-build-test-images
 	@echo ""
 	@echo "=== Running functional tests ==="
 	@echo "Using kind cluster: $(KIND_CLUSTER_NAME)"

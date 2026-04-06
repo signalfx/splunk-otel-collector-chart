@@ -1,0 +1,29 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: agent, clusterReceiver, gateway
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Add OpenShift resource detection support
+# One or more tracking issues related to the change
+issues: [2330]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  When distribution is set to "openshift", the openshift resource detector is now enabled
+  in the resourcedetection processor. Previously, OpenShift clusters only had cloud-provider
+  detectors (azure for cloudProvider=azure, gcp for cloudProvider=gcp) but no
+  OpenShift-specific detector, and no detector at all for cloudProvider=aws (see the
+  ec2 bug fix in this release). The openshift detector auto-discovers `k8s.cluster.name`,
+  `cloud.provider`, `cloud.platform`, and `cloud.region` via the OpenShift API
+  (`config.openshift.io/v1/infrastructures`). The `cloud.platform` value reflects the
+  actual hosting environment (e.g., `aws_openshift`, `gcp_openshift`, `azure.openshift`).
+
+  Cloud-provider-specific detectors remain enabled alongside the openshift detector to
+  collect instance-level metadata: ec2 on AWS, gcp on GCP, and azure on Azure. The
+  openshift detector is listed first to ensure the correct `cloud.platform` is set before
+  cloud-provider detectors run.
+
+  The `clusterName` Helm value is now optional for OpenShift (same as EKS and GKE). When
+  not set, the openshift detector auto-discovers it from the cluster API. When explicitly
+  set, the static value takes precedence.

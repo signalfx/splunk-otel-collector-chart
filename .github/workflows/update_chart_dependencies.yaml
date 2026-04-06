@@ -20,6 +20,10 @@ on:
         required: false
         default: 'false'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   check_and_update:
     runs-on: ubuntu-latest
@@ -39,20 +43,25 @@ jobs:
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 #v4
+        with:
+          version: v4.1.1
 
       - name: Check for Version Updates
         id: check_for_update
         run: |
           echo "Checking chart dependency version for ${{ matrix.name }}"
 
-          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
 
       - name: Check for Operator CRD Updates
         id: check_for_crd_update
         if: ${{ matrix.name == 'operator' }}
         run: |
-          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
+          make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
 
       - name: Install Skopeo
         if: ${{ matrix.name == 'operator' }}
@@ -96,23 +105,28 @@ jobs:
             body_finalize="Update operator CRDs to ${CRDS_VER} and regenerate schemas for kubeconform validation"
           fi
 
-          echo "title=$title" >> $GITHUB_OUTPUT
-          echo "commit_message_open=$commit_open" >> $GITHUB_OUTPUT
-          echo "commit_message_finalize=$commit_finalize" >> $GITHUB_OUTPUT
-          echo "body_open=$body_open" >> $GITHUB_OUTPUT
-          echo "body_finalize=$body_finalize" >> $GITHUB_OUTPUT
-          [ "$NEED_UPDATE" = "1" ] && echo "chlog_note_chart=Bump ${NAME} to ${LATEST_VER} in ${YAML_PATH}" >> $GITHUB_OUTPUT
+          {
+            echo "title=$title"
+            echo "commit_message_open=$commit_open"
+            echo "commit_message_finalize=$commit_finalize"
+            echo "body_open=$body_open"
+            echo "body_finalize=$body_finalize"
+          } >> "$GITHUB_OUTPUT"
+
+          [ "$NEED_UPDATE" = "1" ] && echo "chlog_note_chart=Bump ${NAME} to ${LATEST_VER} in ${YAML_PATH}" >> "$GITHUB_OUTPUT"
           if [ "$CRDS_UPDATE" = "1" ]; then
             CRDS_CHLOG="Bump subchart opentelemetry-operator-crds to ${CRDS_VER}. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using \`operatorcrds.install\` option."
-            echo "chlog_note_crds<<EOF" >> $GITHUB_OUTPUT
-            echo "$CRDS_CHLOG" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            {
+              echo "chlog_note_crds<<EOF"
+              echo "$CRDS_CHLOG"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
           fi
 
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: ${{ steps.pr_messages.outputs.commit_message_open }}
           title: ${{ steps.pr_messages.outputs.title }}
@@ -120,7 +134,6 @@ jobs:
           branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
-          modify-outputs: false
           author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
 
 
@@ -129,24 +142,18 @@ jobs:
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # We run `make update-chart-dep` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
-          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE=$DEBUG_MODE
+          make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Operator CRDs update
         env:
           COMPONENT: opentelemetry-operator-crds
         if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         run: |
-          make update-operator-crds DEBUG_MODE=$DEBUG_MODE
+          make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT=$COMPONENT NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES=[${{ steps.open_pr.outputs.pull-request-number }}]
-
-      - name: Set up Python
-        if: ${{ (steps.check_for_update.outputs.NEED_UPDATE == 1 && matrix.name == 'operator') || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT="$COMPONENT" NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Generate CRD Schemas for kubeconform
         # Regenerate schemas when operator chart or operator-crds are updated
@@ -156,11 +163,15 @@ jobs:
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: ./.github/actions/run-precommit
+        run: |
+          pip install pre-commit==4.5.1
+          pre-commit run --all-files || true
+        env:
+          SKIP: actionlint,render,go-fmt,go-lint,go-mod-tidy
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: ${{ steps.pr_messages.outputs.commit_message_finalize }}
           title: ${{ steps.pr_messages.outputs.title }}
@@ -168,5 +179,4 @@ jobs:
           branch: "update-${{ matrix.name }}"
           base: main
           delete-branch: true
-          modify-outputs: false
           author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}

@@ -26,8 +26,26 @@ repos:
       language: system
       files: '(\.go$|go\.mod$|go\.sum$)'
       pass_filenames: false
+    - id: actions-pin-check
+      name: Check GitHub Actions are pinned to SHA
+      entry: bash ci_scripts/check-actions-pinned.sh
+      language: system
+      files: '^\.github/(workflows|actions)/'
+      pass_filenames: false
+    - id: actions-permissions-check
+      name: Check GitHub Actions workflows declare permissions
+      entry: bash ci_scripts/check-actions-permissions.sh
+      language: system
+      files: '^\.github/(workflows|actions)/'
+      pass_filenames: false
+    - id: actionlint
+      name: Lint GitHub Actions workflows
+      entry: bash -c 'actionlint .github/workflows/*.yaml'
+      language: system
+      files: '^\.github/workflows/'
+      pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
     hooks:
     - id: trailing-whitespace
       exclude: '^examples|^test|^CHANGELOG\.md$'

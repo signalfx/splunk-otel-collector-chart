@@ -335,6 +335,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubedns"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153`']
               tls_config:
@@ -350,6 +351,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "coredns"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
                 - targets: ["`endpoint`:9154"]
@@ -386,6 +388,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "etcd"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:2381"]
               metric_relabel_configs:
@@ -410,6 +413,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kube-controller-manager"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:10257"]
               scheme: https
@@ -439,6 +443,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-apiserver"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -473,6 +478,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-proxy"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               scheme: https
               tls_config:
@@ -507,6 +513,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-scheduler"
+              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
                 - targets: ["`endpoint`:10259"]
               scheme: https
@@ -823,10 +830,10 @@ receivers:
   {{- end }}
   {{- end }}
 
-# By default k8sattributes and batch processors enabled.
+# By default k8s_attributes and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
-    # Agent specific configuration of k8sattributes:
+    # Agent specific configuration of k8s_attributes:
     # If gateway deployment is enabled, the `passthrough` configuration is enabled by default.
     # It means that traces and metrics enrichment happens in the gateway, and the agent only passes information
     # about traces and metrics source, without calling k8s API.
@@ -968,16 +975,16 @@ processors:
         key: destination_canonical_revision
   {{- end }}
 
-# If the gateway deployment is enabled, it will use a otlp exporter to send from the daemonset
+# If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
 # to the gateway deployment.
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
-# using the otlphttp exporter.
+# using the otlp_http exporter.
 # These values should not be specified manually and will be set in the templates.
 exporters:
 
   {{- if .Values.gateway.enabled }}
   # If gateway is enabled, metrics, logs and traces will be sent to the gateway
-  otlp:
+  otlp_grpc:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
@@ -1000,7 +1007,7 @@ exporters:
     disable_compression: true
   {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
-  otlphttp/secureapp:
+  otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
       "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
@@ -1054,7 +1061,7 @@ exporters:
   {{- end }}
 
   # To send entities (applicable only if discovery mode is enabled)
-  otlphttp/entities:
+  otlp_http/entities:
     {{- if .Values.gateway.enabled }}
     endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4318
     {{- else }}
@@ -1130,9 +1137,9 @@ service:
       processors: [memory_limiter, batch]
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
-        - otlphttp/secureapp
+        - otlp_http/secureapp
         {{- end }}
     {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
@@ -1154,7 +1161,7 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         {{- if not .Values.gateway.enabled }}
         - filter/logs
         {{- end }}
@@ -1177,7 +1184,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -1214,7 +1221,7 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
@@ -1232,7 +1239,7 @@ service:
         - zipkin
       processors:
         - memory_limiter
-        - k8sattributes
+        - k8s_attributes
         - batch
         - resourcedetection
         - resource
@@ -1241,10 +1248,10 @@ service:
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yTracesEnabled" .) "true") }}
-        - otlphttp
+        - otlp_http
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
@@ -1288,14 +1295,14 @@ service:
         - metricstransform
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         # The signalfx exporter is only being used to sync host metadata when gateway is enabled.
         # The otlp exporter sends the metric data.
@@ -1323,14 +1330,14 @@ service:
         - resource
         - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
-        - otlp
+        - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
         - signalfx
@@ -1350,7 +1357,7 @@ service:
         - batch
         - resourcedetection
         - resource
-      exporters: [otlphttp/entities]
+      exporters: [otlp_http/entities]
 
     {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
     metrics/histograms:

@@ -4,6 +4,7 @@ splunkObservability:
    accessToken: CHANGEME
    ingestUrl: {{ .AgentEndpoint }}
    apiUrl: {{ .ApiURLEndpoint }}
+   profilingEnabled: true
 
 splunkPlatform:
   token: foobar
@@ -25,12 +26,14 @@ agent:
       file:
         path: /tmp/metrics.json
       {{ end }}
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
       splunk_hec/platform_metrics:
         endpoint: {{ .MetricHecEndpoint }}
+      splunk_hec/o11y:
+        endpoint: {{ .LogHecEndpoint }}
     service:
       pipelines:
         {{ if (eq .KubeTestEnv "eks") }}
@@ -40,7 +43,7 @@ agent:
         {{ end }}
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
 clusterReceiver:
   eventsEnabled: true
   config:
@@ -90,6 +93,11 @@ extraAttributes:
 
 environment: dev
 instrumentation:
+  spec:
+    nodejs:
+      env:
+        - name: SPLUNK_METRICS_ENABLED
+          value: "true"
   installationJob:
     enabled: true
 operatorcrds:

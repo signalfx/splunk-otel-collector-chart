@@ -353,6 +353,11 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "scrapeInterval": {
+              "type": "string",
+              "pattern": "^[0-9]+(ms|s|m|h)$",
+              "description": "Scrape interval for control plane Prometheus receivers (Prometheus duration, e.g. 10s, 1m). Also applies to the EKS apiserver receiver in the cluster receiver."
+            },
             "apiserver": {
               "type": "object",
               "additionalProperties": false,
@@ -1067,10 +1072,95 @@
       "type": "string"
     },
     "readinessProbe": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "initialDelaySeconds": {
+          "type": "integer"
+        },
+        "timeoutSeconds": {
+          "type": "integer"
+        },
+        "periodSeconds": {
+          "type": "integer"
+        },
+        "failureThreshold": {
+          "type": "integer"
+        },
+        "successThreshold": {
+          "type": "integer"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "httpGet"
+            ]
+          },
+          {
+            "required": [
+              "exec"
+            ]
+          },
+          {
+            "required": [
+              "tcpSocket"
+            ]
+          },
+          {
+            "required": [
+              "grpc"
+            ]
+          }
+        ]
+      }
     },
     "livenessProbe": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "initialDelaySeconds": {
+          "type": "integer"
+        },
+        "timeoutSeconds": {
+          "type": "integer"
+        },
+        "periodSeconds": {
+          "type": "integer"
+        },
+        "failureThreshold": {
+          "type": "integer"
+        },
+        "successThreshold": {
+          "type": "integer"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": "integer"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "httpGet"
+            ]
+          },
+          {
+            "required": [
+              "exec"
+            ]
+          },
+          {
+            "required": [
+              "tcpSocket"
+            ]
+          },
+          {
+            "required": [
+              "grpc"
+            ]
+          }
+        ]
+      }
     },
     "isWindows": {
       "description": "Apply for k8s cluster with windows worker node.",
@@ -1361,6 +1451,42 @@
         "image": {
           "type": "string"
         },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "memory": {
+                  "type": "string"
+                }
+              }
+            },
+            "requests": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
+                "memory": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
         "serviceAccount": {
           "type": "object",
           "additionalProperties": false,
@@ -1423,14 +1549,28 @@
       ]
     },
     {
+      "$comment": "clusterName is optional for distributions that auto-detect it (gke, eks, eks/auto-mode, openshift). eks/fargate cannot auto-detect so clusterName is required.",
       "if": {
-        "properties": {
-          "distribution": {
-            "pattern": "^(gke|eks).*"
+        "allOf": [
+          {
+            "properties": {
+              "distribution": {
+                "pattern": "^(gke|eks|openshift).*"
+              }
+            },
+            "required": [
+              "distribution"
+            ]
+          },
+          {
+            "not": {
+              "properties": {
+                "distribution": {
+                  "const": "eks/fargate"
+                }
+              }
+            }
           }
-        },
-        "required": [
-          "distribution"
         ]
       },
       "then": {
@@ -1441,7 +1581,7 @@
         }
       },
       "else": {
-        "$comment": "The clusterName is required if the distribution doesn't start with eks or gke.",
+        "$comment": "The clusterName is required if the distribution doesn't start with eks, gke, or match openshift.",
         "properties": {
           "clusterName": {
             "minLength": 1
