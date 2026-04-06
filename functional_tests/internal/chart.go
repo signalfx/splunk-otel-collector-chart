@@ -237,7 +237,7 @@ func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
 			t.Logf("CRD %s not deleted: %v", crd.Name, delErr)
 			continue
 		}
-		t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
+		t.Logf("Deleted CRD: %s, err: %v, waiting for removal...", crd.Name, delErr)
 		deleted = append(deleted, crd.Name)
 	}
 
