@@ -280,7 +280,7 @@ func deleteAllCRs(ctx context.Context, t *testing.T, dynClient dynamic.Interface
 			if k8serrors.IsNotFound(delErr) {
 				t.Logf("No %s CRs found to delete in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
 			} else {
-				t.Logf("Deleted %s CRs in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
+				t.Logf("Deleted %s CRs in namespace %s (version %s), deletion error: %v", crd.Name, DefaultNamespace, ver.Name, delErr)
 			}
 			return
 		}
