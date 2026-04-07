@@ -1,11 +1,5 @@
 ---
 # Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
----
----
-# Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
----
----
-# Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -199,6 +193,14 @@ webhooks:
         scope: Namespaced
     sideEffects: None
     timeoutSeconds: 10
+---
+
+---
+
+---
+
+---
+
 ---
 # Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
 apiVersion: v1
