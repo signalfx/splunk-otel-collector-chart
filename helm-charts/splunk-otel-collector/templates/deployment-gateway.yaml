@@ -60,6 +60,10 @@ spec:
       affinity:
         {{- toYaml .Values.gateway.affinity | nindent 8 }}
       {{- end }}
+      {{- if .Values.gateway.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.gateway.topologySpreadConstraints | nindent 8 }}
+      {{- end }}
       {{- $podSecurityContext := .Values.gateway.podSecurityContext | default .Values.gateway.securityContext }}
       {{- if $podSecurityContext }}
       securityContext:
