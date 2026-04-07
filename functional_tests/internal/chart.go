@@ -201,7 +201,7 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	// Use context.Background because t.Context() is already cancelled during t.Cleanup.
 	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
 	defer diagCancel()
-	postGVRs, _ := otelGVRs(diagCtx, crdClient)
+	postGVRs, _ := otelServedGVRs(diagCtx, crdClient)
 	for _, gvr := range postGVRs {
 		list, listErr := dynClient.Resource(gvr).List(diagCtx, v1.ListOptions{})
 		if listErr != nil {
@@ -218,8 +218,9 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	deleteOperatorCRDs(t, crdClient, dynClient)
 }
 
-// otelGVRs returns the GVR for each opentelemetry.io CRD (first served version).
-func otelGVRs(ctx context.Context, crdClient apiextensionsclient.Interface) ([]schema.GroupVersionResource, error) {
+// otelServedGVRs returns the GVR for each opentelemetry.io CRD using its first
+// served version.
+func otelServedGVRs(ctx context.Context, crdClient apiextensionsclient.Interface) ([]schema.GroupVersionResource, error) {
 	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -249,7 +250,7 @@ func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dy
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
 	defer cancel()
 
-	gvrs, err := otelGVRs(ctx, crdClient)
+	gvrs, err := otelServedGVRs(ctx, crdClient)
 	if err != nil {
 		t.Logf("Failed to list CRDs for CR cleanup: %v", err)
 		return
@@ -294,7 +295,7 @@ func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, d
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
 	defer cancel()
 
-	gvrs, err := otelGVRs(ctx, crdClient)
+	gvrs, err := otelServedGVRs(ctx, crdClient)
 	if err != nil {
 		t.Logf("Failed to list CRDs for CRD cleanup: %v", err)
 		return
@@ -313,16 +314,15 @@ func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, d
 	for _, gvr := range gvrs {
 		crdName := gvr.Resource + "." + gvr.Group
 		delErr := crdAPI.Delete(ctx, crdName, v1.DeleteOptions{})
-		if k8serrors.IsNotFound(delErr) {
+		switch {
+		case k8serrors.IsNotFound(delErr):
 			t.Logf("CRD %s already absent", crdName)
-			continue
-		}
-		if delErr != nil {
+		case delErr != nil:
 			t.Logf("CRD %s not deleted: %v", crdName, delErr)
-			continue
+		default:
+			t.Logf("Deleted CRD %s, waiting for removal...", crdName)
+			deleted = append(deleted, crdTarget{name: crdName, gvr: gvr})
 		}
-		t.Logf("Deleted CRD %s, waiting for removal...", crdName)
-		deleted = append(deleted, crdTarget{name: crdName, gvr: gvr})
 	}
 
 	for _, tgt := range deleted {
