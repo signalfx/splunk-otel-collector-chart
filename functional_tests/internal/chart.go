@@ -170,8 +170,6 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	releases, err := client.Run()
 	require.NoError(t, err)
 
-	// Stop any lingering hook Job from a previous test run.
-	deleteHookJobs(t, clientset)
 	deleteOperatorCRs(t, crdClient, dynClient)
 
 	if len(releases) == 0 {
@@ -218,26 +216,6 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	}
 
 	deleteOperatorCRDs(t, crdClient, dynClient)
-}
-
-// deleteHookJobs deletes the instrumentation hook Job and its pods.
-func deleteHookJobs(t *testing.T, clientset *kubernetes.Clientset) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
-	defer cancel()
-
-	jobName := DefaultChartReleaseName + "-splunk-otel-collector-inst-hook"
-	propagation := v1.DeletePropagationBackground
-	err := clientset.BatchV1().Jobs(DefaultNamespace).Delete(ctx, jobName, v1.DeleteOptions{
-		PropagationPolicy: &propagation,
-	})
-	switch {
-	case k8serrors.IsNotFound(err):
-		// Already cleaned up by hook-succeeded policy.
-	case err != nil:
-		t.Logf("Failed to delete hook Job %s: %v", jobName, err)
-	default:
-		t.Logf("Deleted hook Job %s (stops potential CR recreation)", jobName)
-	}
 }
 
 // otelGVRs returns the GVR for each opentelemetry.io CRD (first served version).

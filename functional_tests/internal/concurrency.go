@@ -85,7 +85,7 @@ func AcquireLeaseForTest(t *testing.T, testKubeConfig string) {
 	}
 
 	// Run the leader election in a goroutine, so we can block until acquiring the lease
-	ctx, cancel := context.WithCancel(t.Context())
+	ctx, cancel := context.WithCancel(context.Background()) //nolint:usetesting
 	go elector.Run(ctx)
 
 	// Wait until we become leader OR the test context ends
