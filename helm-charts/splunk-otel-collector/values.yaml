@@ -548,6 +548,10 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
+  #
+  # NOTE: Adding custom object types here may require additional RBAC permissions
+  # beyond what the chart grants by default. Use `rbac.customRules` to add the
+  # necessary "get", "list", and "watch" permissions for any extra resources.
   k8sObjects:
     - name: pods
       mode: pull
