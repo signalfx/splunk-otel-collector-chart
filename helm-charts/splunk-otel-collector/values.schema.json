@@ -1300,7 +1300,10 @@
           "type": "object"
         },
         "topologySpreadConstraints": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
         },
         "securityContext": {
           "description": "[DEPRECATED] Use podSecurityContext instead.",

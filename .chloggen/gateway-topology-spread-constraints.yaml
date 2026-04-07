@@ -12,7 +12,7 @@ issues: [2361]
 subtext: |
   The gateway deployment now supports `gateway.topologySpreadConstraints` to control how
   gateway pods are distributed across topology domains (e.g., availability zones). When
-  combined with `gateway.service.trafficDistribution: PreferSameZone` (Kubernetes 1.35+,
+  combined with `gateway.service.trafficDistribution` (`PreferSameZone` on Kubernetes 1.35+,
   or `PreferClose` on older versions), this enables zone-aware routing where clients prefer
   sending traffic to gateways in the same zone. Together, these options ensure gateways are
   evenly spread across zones while minimizing cross-AZ network traffic and costs.
