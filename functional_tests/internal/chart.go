@@ -21,7 +21,6 @@ import (
 	"helm.sh/helm/v4/pkg/chart/loader"
 	"helm.sh/helm/v4/pkg/kube"
 	releasev1 "helm.sh/helm/v4/pkg/release/v1"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -154,6 +153,15 @@ func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	crdClient, err := apiextensionsclient.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	dynClient, err := dynamic.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	client := action.NewList(actionConfig)
 	client.AllNamespaces = true
@@ -161,13 +169,13 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	client.StateMask = action.ListAll // Include releases in all states
 	releases, err := client.Run()
 	require.NoError(t, err)
-	clientset, err := getKubeClient(testKubeConfig)
-	require.NoError(t, err)
+
+	deleteOperatorCRs(t, crdClient, dynClient)
 
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
-		deleteOperatorCRDs(t, testKubeConfig)
+		deleteOperatorCRDs(t, crdClient, dynClient)
 		return
 	}
 
@@ -179,124 +187,173 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 		r, ok := rel.(*releasev1.Release)
 		require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
 		t.Logf("Uninstalling release: %s (namespace: %s)", r.Name, r.Namespace)
-		_, _ = uninstall.Run(r.Name)
+		resp, uninstallErr := uninstall.Run(r.Name)
+		if uninstallErr != nil {
+			t.Logf("Helm uninstall error for %s: %v", r.Name, uninstallErr)
+		}
+		if resp != nil && resp.Info != "" {
+			t.Logf("Helm uninstall kept resources: %s", resp.Info)
+		}
 		deleteCertSecret(t, clientset, r.Name, r.Namespace)
 	}
 
-	deleteOperatorCRDs(t, testKubeConfig)
-}
-
-func deleteOperatorCRDs(t *testing.T, testKubeConfig string) {
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	if err != nil {
-		t.Logf("Failed to build kube config for CRD cleanup: %v", err)
-		return
-	}
-	crdClient, err := apiextensionsclient.NewForConfig(kubeConfig)
-	if err != nil {
-		t.Logf("Failed to create apiextensions client for CRD cleanup: %v", err)
-		return
-	}
-
-	// Use a short-lived context only for the list/delete initiation phase.
-	setupCtx, setupCancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
-	defer setupCancel()
-
-	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(setupCtx, v1.ListOptions{})
-	if err != nil {
-		t.Logf("Failed to list CRDs: %v", err)
-		return
-	}
-
-	// Delete all CRs for each opentelemetry.io CRD before deleting the CRD.
-	dynClient, dynErr := dynamic.NewForConfig(kubeConfig)
-	if dynErr != nil {
-		t.Logf("Failed to create dynamic client for CR cleanup: %v", dynErr)
-	}
-
-	if dynClient != nil {
-		for _, crd := range crdList.Items {
-			if crd.Spec.Group != "opentelemetry.io" {
-				continue
-			}
-			deleteAllCRs(setupCtx, t, dynClient, crd)
+	// Log remaining CRs after helm uninstall to diagnose CRD cleanup issues.
+	// Use context.Background because t.Context() is already cancelled during t.Cleanup.
+	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
+	defer diagCancel()
+	postGVRs, _ := otelServedGVRs(diagCtx, crdClient)
+	for _, gvr := range postGVRs {
+		list, listErr := dynClient.Resource(gvr).List(diagCtx, v1.ListOptions{})
+		if listErr != nil {
+			t.Logf("Post-uninstall: failed to list %s CRs: %v", gvr.Resource, listErr)
+			continue
+		}
+		for i := range list.Items {
+			cr := &list.Items[i]
+			t.Logf("Post-uninstall: remaining CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+				gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
 		}
 	}
 
-	var deleted []string
+	deleteOperatorCRDs(t, crdClient, dynClient)
+}
+
+// otelServedGVRs returns the GVR for each opentelemetry.io CRD using its first
+// served version.
+func otelServedGVRs(ctx context.Context, crdClient apiextensionsclient.Interface) ([]schema.GroupVersionResource, error) {
+	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var gvrs []schema.GroupVersionResource
 	for _, crd := range crdList.Items {
 		if crd.Spec.Group != "opentelemetry.io" {
 			continue
 		}
-		delErr := crdClient.ApiextensionsV1().CustomResourceDefinitions().Delete(setupCtx, crd.Name, v1.DeleteOptions{})
-		if k8serrors.IsNotFound(delErr) {
-			t.Logf("CRD %s already absent, skipping", crd.Name)
-			continue
+		for _, ver := range crd.Spec.Versions {
+			if ver.Served {
+				gvrs = append(gvrs, schema.GroupVersionResource{
+					Group:    crd.Spec.Group,
+					Version:  ver.Name,
+					Resource: crd.Spec.Names.Plural,
+				})
+				break
+			}
 		}
-		if delErr != nil {
-			t.Logf("CRD %s not deleted: %v", crd.Name, delErr)
-			continue
-		}
-		t.Logf("Deleted CRD: %s, waiting for removal...", crd.Name)
-		deleted = append(deleted, crd.Name)
+	}
+	return gvrs, nil
+}
+
+// deleteOperatorCRs deletes all opentelemetry.io CRs across all namespaces
+// and waits for them to be fully removed.
+func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
+
+	gvrs, err := otelServedGVRs(ctx, crdClient)
+	if err != nil {
+		t.Logf("Failed to list CRDs for CR cleanup: %v", err)
+		return
+	}
+	if len(gvrs) == 0 {
+		return
 	}
 
-	if len(deleted) == 0 {
+	for _, gvr := range gvrs {
+		list, listErr := dynClient.Resource(gvr).List(ctx, v1.ListOptions{})
+		if listErr != nil {
+			t.Logf("Failed to list %s CRs: %v", gvr.Resource, listErr)
+			continue
+		}
+		t.Logf("Found %d %s CRs across all namespaces", len(list.Items), gvr.Resource)
+		for i := range list.Items {
+			cr := &list.Items[i]
+			t.Logf("Deleting %s %s/%s (ns: %s)",
+				cr.GetKind(), gvr.Resource, cr.GetName(), cr.GetNamespace())
+			delErr := dynClient.Resource(gvr).Namespace(cr.GetNamespace()).Delete(ctx, cr.GetName(), v1.DeleteOptions{})
+			if delErr != nil && !k8serrors.IsNotFound(delErr) {
+				t.Logf("Failed to delete %s/%s (ns: %s): %v", gvr.Resource, cr.GetName(), cr.GetNamespace(), delErr)
+			}
+		}
+	}
+
+	for _, gvr := range gvrs {
+		require.Eventually(t, func() bool {
+			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
+			defer pollCancel()
+			list, listErr := dynClient.Resource(gvr).List(pollCtx, v1.ListOptions{})
+			if listErr != nil {
+				return false
+			}
+			return len(list.Items) == 0
+		}, 2*time.Minute, 2*time.Second, "CRs for %s were not removed in time", gvr.Resource)
+		t.Logf("All %s CRs removed", gvr.Resource)
+	}
+}
+
+func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
+
+	gvrs, err := otelServedGVRs(ctx, crdClient)
+	if err != nil {
+		t.Logf("Failed to list CRDs for CRD cleanup: %v", err)
+		return
+	}
+	if len(gvrs) == 0 {
 		t.Log("No opentelemetry.io CRDs found to delete")
 		return
 	}
 
-	// Use a fresh context for the polling phase so it is not bounded by the
-	// setup context deadline (2 min)
 	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
-	for _, name := range deleted {
+	type crdTarget struct {
+		name string
+		gvr  schema.GroupVersionResource
+	}
+	var deleted []crdTarget
+	for _, gvr := range gvrs {
+		crdName := gvr.Resource + "." + gvr.Group
+		delErr := crdAPI.Delete(ctx, crdName, v1.DeleteOptions{})
+		switch {
+		case k8serrors.IsNotFound(delErr):
+			t.Logf("CRD %s already absent", crdName)
+		case delErr != nil:
+			t.Logf("CRD %s not deleted: %v", crdName, delErr)
+		default:
+			t.Logf("Deleted CRD %s, waiting for removal...", crdName)
+			deleted = append(deleted, crdTarget{name: crdName, gvr: gvr})
+		}
+	}
+
+	for _, tgt := range deleted {
 		require.Eventually(t, func() bool {
 			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
 			defer pollCancel()
-			_, getErr := crdAPI.Get(pollCtx, name, v1.GetOptions{})
-			return k8serrors.IsNotFound(getErr)
-		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", name)
-		t.Logf("CRD %s fully removed", name)
-	}
-}
-
-func deleteAllCRs(ctx context.Context, t *testing.T, dynClient dynamic.Interface, crd apiextensionsv1.CustomResourceDefinition) {
-	for _, ver := range crd.Spec.Versions {
-		if !ver.Served {
-			continue
-		}
-		gvr := schema.GroupVersionResource{
-			Group:    crd.Spec.Group,
-			Version:  ver.Name,
-			Resource: crd.Spec.Names.Plural,
-		}
-
-		if crd.Spec.Scope == apiextensionsv1.NamespaceScoped {
-			delErr := dynClient.Resource(gvr).Namespace(DefaultNamespace).DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
-			if delErr != nil && !k8serrors.IsNotFound(delErr) {
-				t.Logf("Failed to delete %s CRs in namespace %s (version %s): %v, trying next version", crd.Name, DefaultNamespace, ver.Name, delErr)
-				continue
+			crd, getErr := crdAPI.Get(pollCtx, tgt.name, v1.GetOptions{})
+			if k8serrors.IsNotFound(getErr) {
+				return true
 			}
-			if k8serrors.IsNotFound(delErr) {
-				t.Logf("No %s CRs found to delete in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
-			} else {
-				t.Logf("Deleted %s CRs in namespace %s (version %s)", crd.Name, DefaultNamespace, ver.Name)
+			if getErr != nil {
+				t.Logf("CRD %s poll error: %v", tgt.name, getErr)
+				return false
 			}
-			return
-		}
-
-		// Cluster-scoped CRDs.
-		err := dynClient.Resource(gvr).DeleteCollection(ctx, v1.DeleteOptions{}, v1.ListOptions{})
-		if err != nil && !k8serrors.IsNotFound(err) {
-			t.Logf("Failed to delete CRs for %s (version %s), trying next version: %v", crd.Name, ver.Name, err)
-			continue
-		}
-		if err != nil {
-			t.Logf("No %s CRs found to delete (version %s)", crd.Name, ver.Name)
-		} else {
-			t.Logf("Deleted all %s CRs (version %s)", crd.Name, ver.Name)
-		}
-		return
+			for _, c := range crd.Status.Conditions {
+				if c.Type == "Terminating" {
+					t.Logf("CRD %s still terminating: %s", tgt.name, c.Message)
+				}
+			}
+			// Log remaining CRs that may be blocking CRD removal.
+			list, listErr := dynClient.Resource(tgt.gvr).List(pollCtx, v1.ListOptions{})
+			if listErr == nil && len(list.Items) > 0 {
+				for i := range list.Items {
+					cr := &list.Items[i]
+					t.Logf("CRD %s blocked by CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+						tgt.name, tgt.gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
+				}
+			}
+			return false
+		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", tgt.name)
+		t.Logf("CRD %s fully removed", tgt.name)
 	}
 }
 

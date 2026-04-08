@@ -25,6 +25,7 @@ import (
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -340,6 +341,11 @@ func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricNam
 			for k := 0; k < expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
 				metric := expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
 				metricNames = append(metricNames, metric.Name())
+
+				if metric.Type() == pmetric.MetricTypeHistogram {
+					err = internal.CheckHistogramBucketCount(metric.Histogram())
+					require.NoError(t, err, "metric %s hit error: %s", metric.Name(), err)
+				}
 			}
 		}
 	}

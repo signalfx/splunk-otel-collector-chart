@@ -1,14 +1,18 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
 change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: chart
+component: gateway
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Bump the OBI subchart to upstream opentelemetry-ebpf-instrumentation 0.6.0
+note: Add topologySpreadConstraints support for gateway deployment
 # One or more tracking issues related to the change
-issues: [2300]
+issues: [2361]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Updates the vendored OBI dependency and rendered eBPF instrumentation example
-  manifests to the upstream 0.6.0 chart release.
+  The gateway deployment now supports `gateway.topologySpreadConstraints` to control how
+  gateway pods are distributed across topology domains (e.g., availability zones). When
+  combined with `gateway.service.trafficDistribution` (`PreferSameZone` on Kubernetes 1.35+,
+  or `PreferClose` on older versions), this enables zone-aware routing where clients prefer
+  sending traffic to gateways in the same zone. Together, these options ensure gateways are
+  evenly spread across zones while minimizing cross-AZ network traffic and costs.

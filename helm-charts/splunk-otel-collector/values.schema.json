@@ -1299,6 +1299,12 @@
         "affinity": {
           "type": "object"
         },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
         "securityContext": {
           "description": "[DEPRECATED] Use podSecurityContext instead.",
           "type": "object"

@@ -3,7 +3,7 @@
 
 module github.com/signalfx/splunk-otel-collector-chart/functional_tests
 
-go 1.26.1
+go 1.26.2
 
 require (
 	github.com/moby/moby/client v0.3.0
