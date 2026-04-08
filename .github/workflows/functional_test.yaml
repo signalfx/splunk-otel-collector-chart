@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: 1.26.1
+  GO_VERSION: 1.26.2
   # Make sure to exit early if cache segment download times out after 2 minutes.
   # We limit cache download as a whole to 5 minutes.
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
