@@ -1392,9 +1392,11 @@ featureGates:
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   # The scrape interval for this receiver is controlled by agent.controlPlaneMetrics.scrapeInterval.
   enableEKSApiServerMetrics: true
-  # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
-  # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
-  # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
+  # This feature gate enables sending Kubernetes objects and events to the Splunk Observability v3/event endpoint.
+  # Requires Splunk Observability to be configured and at least one of the following:
+  #   - clusterReceiver.eventsEnabled to be true
+  #   - clusterReceiver.k8sObjects to be configured
+  # Does not require splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
   # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
   # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlp_http.

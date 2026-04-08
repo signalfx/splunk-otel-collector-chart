@@ -278,12 +278,31 @@ The name of the gateway service.
 {{- end }}
 {{- end -}}
 
+{{/*
+Determines whether the k8s events pipeline will be enabled in the k8s cluster receiver config
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" -}}
+{{- and .Values.clusterReceiver.eventsEnabled
+        (or
+          (eq (include "splunk-otel-collector.logsEnabled" .) "true")
+          (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true")) }}
+{{- end -}}
 
 {{/*
 Whether object collection by k8s object receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsEnabled" -}}
 {{- gt (len .Values.clusterReceiver.k8sObjects) 0 }}
+{{- end -}}
+
+{{/*
+Determines whether the k8s object pipeline will be enabled in the k8s cluster receiver config
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.objectsEnabled" .) "true")
+        (or
+          (eq (include "splunk-otel-collector.logsEnabled" .) "true")
+          (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true")) }}
 {{- end -}}
 
 {{/*
@@ -294,10 +313,10 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 {{- end -}}
 
 {{/*
-Whether k8s events sending to Splunk Observability events/v3 endpoint is enabled
+Whether sending to Splunk Observability v3/event endpoint is enabled
 */}}
-{{- define "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.clusterReceiver.eventsEnabled .Values.featureGates.sendK8sEventsToSplunkO11y -}}
+{{- define "splunk-otel-collector.splunkO11yEventsEndpointEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.sendK8sEventsToSplunkO11y -}}
 {{- end -}}
 
 {{/*
