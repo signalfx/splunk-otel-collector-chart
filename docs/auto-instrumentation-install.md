@@ -60,12 +60,17 @@ these frameworks often have pre-built instrumentation capabilities already avail
 - **Auto-instrumentation Configuration Overrides (Optional)**
   - **[Default Instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml) Object Deployment**
     - Automatically deploys with `operator.enabled=true`.
-    - Supports AlwaysOn Profiling when `splunkObservability.profilingEnabled=true`.
+    - Supports AlwaysOn Profiling when `splunkObservability.profilingEnabled=true`. When enabled, the chart:
+      - Configures the collector's logs pipeline and `splunk_hec/o11y` exporter to forward profiling data to Splunk Observability Cloud.
+      - Automatically injects `SPLUNK_PROFILER_ENABLED=true` and `SPLUNK_PROFILER_MEMORY_ENABLED=true` into the Instrumentation CR's global `spec.env`, unless already defined there.
+      - To disable profiling for specific languages, override these vars in the per-language env (e.g. `instrumentation.spec.java.env`). See the [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml) example.
+      - To disable profiling globally while keeping the pipeline active, set `SPLUNK_PROFILER_ENABLED=false` and `SPLUNK_PROFILER_MEMORY_ENABLED=false` in `instrumentation.spec.env`.
   - **Customizing Instrumentation**
-    - `operator.instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
+    - `instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
       - **Examples**
         - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
         - [trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
+        - [enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling.yaml)
         - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
         - [enable useLabelsForResourceAttributes](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-use-labels-for-resource-attributes.yaml).
 
