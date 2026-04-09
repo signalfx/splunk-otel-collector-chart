@@ -5,8 +5,9 @@ name: Check for new chart dependency updates
 # Specifically, it:
 #   1. Checks for new versions of (subchart) dependencies listed in chart.yaml.
 #   2. Updates chart.yaml with new versions where applicable.
-#   3. If the 'opentelemetry-operator' subchart is updated in chart.yaml, it also updates related
-#      image tags in values.yaml.
+#   3. Updates related values.yaml defaults when a subchart version bump requires it.
+#   4. If the 'opentelemetry-operator' subchart is updated in chart.yaml, it also updates related
+#      image tags in values.yaml and CRD assets when needed.
 
 on:
   schedule:
@@ -35,6 +36,10 @@ jobs:
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
             dependency_name: 'opentelemetry-operator'
+          - name: 'obi'
+            component: 'chart'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'opentelemetry-ebpf-instrumentation'
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
@@ -59,6 +64,7 @@ jobs:
           make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
 
       - name: Install Skopeo
+        if: ${{ matrix.name == 'operator' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y skopeo
