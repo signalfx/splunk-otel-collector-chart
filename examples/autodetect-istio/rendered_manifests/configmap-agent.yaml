@@ -565,8 +565,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - attributes/istio
-          - transform/istio
           - resourcedetection
           - resource
           receivers:
@@ -594,6 +592,8 @@ data:
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - attributes/istio
+          - transform/istio
           receivers:
           - receiver_creator
         traces:

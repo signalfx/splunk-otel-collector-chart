@@ -512,6 +512,8 @@ Usage:
 
 {{/*
 Returns true if a separate pipeline for autodetected Prometheus or Istio metrics is required
+TODO: Feature gate reference needs updated after bug with histograms pipeline is resolved.
+The reference here is to keep existing behavior consistent.
 */}}
 {{- define "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" -}}
 {{- and

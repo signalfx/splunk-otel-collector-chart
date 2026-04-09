@@ -1290,9 +1290,12 @@ service:
 
     {{- if (eq (include "splunk-otel-collector.useSeparatePrometheusMetricsPipeline" .) "true") }}
     metrics/prometheus:
-       receivers:
+      receivers:
         - receiver_creator
-       exporters:
+      processors:
+        - attributes/istio
+        - transform/istio
+      exporters:
         - forward
     {{- end }}
 
@@ -1314,10 +1317,6 @@ service:
       processors:
         - memory_limiter
         - batch
-        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-        - attributes/istio
-        - transform/istio
-        {{- end }}
         - resourcedetection
         - resource
         {{/*
@@ -1405,6 +1404,10 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        - transform/istio
+        {{- end }}
       exporters:
         - signalfx/histograms
     {{- end }}

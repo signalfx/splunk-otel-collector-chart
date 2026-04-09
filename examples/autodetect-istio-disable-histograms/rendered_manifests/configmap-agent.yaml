@@ -502,8 +502,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - attributes/istio
-          - transform/istio
           - resourcedetection
           - resource
           receivers:
@@ -526,6 +524,9 @@ data:
         metrics/prometheus:
           exporters:
           - forward
+          processors:
+          - attributes/istio
+          - transform/istio
           receivers:
           - receiver_creator
         traces:
