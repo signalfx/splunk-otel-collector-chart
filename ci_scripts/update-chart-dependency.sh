@@ -45,50 +45,51 @@ update_obi_image_tag() {
     local normalized_ver="${LATEST_VER#v}"  # Strip leading 'v' if present
     local target_tag="v$normalized_ver"
     local current_tag
-    local updated_file=""
 
     current_tag=$(yq eval '.obi.image.tag' "$values_file")
     echo "Current OBI image tag in values.yaml is $current_tag"
 
     if [ "$current_tag" != "$target_tag" ]; then
         echo "Updating OBI image tag to $target_tag in values.yaml"
-        updated_file=$(mktemp "${values_file}.XXXXXX")
-        cleanup_updated_file() {
-            if [ -n "$updated_file" ] && [ -f "$updated_file" ]; then
-                rm -f "$updated_file"
-            fi
-        }
-        trap cleanup_updated_file RETURN
+        if (
+            updated_file=$(mktemp "${values_file}.XXXXXX")
+            trap 'if [ -n "$updated_file" ] && [ -f "$updated_file" ]; then rm -f "$updated_file"; fi' EXIT
 
-        if awk -v target_tag="$target_tag" '
-            BEGIN {
-                in_obi=0
-                in_image=0
-                updated=0
-                image_indent=""
-            }
-            /^obi:/ { in_obi=1 }
-            in_obi && /^[^[:space:]][^:]*:/ && !/^obi:/ { in_obi=0; in_image=0 }
-            in_obi && match($0, /^[[:space:]]+image:/) {
-                in_image=1
-                image_indent=substr($0, RSTART, RLENGTH - length("image:"))
-            }
-            in_image && $0 ~ ("^" image_indent "[^[:space:]][^:]*:") && $0 !~ ("^" image_indent "image:") { in_image=0 }
-            in_image && $0 ~ ("^" image_indent "[[:space:]]+tag: ") {
-                print image_indent "  tag: \"" target_tag "\""
-                updated=1
-                in_image=0
-                next
-            }
-            { print }
-            END {
-                if (!updated) {
-                    exit 1
+            if awk -v target_tag="$target_tag" '
+                BEGIN {
+                    in_obi=0
+                    in_image=0
+                    updated=0
+                    image_indent=""
                 }
-            }
-        ' "$values_file" > "$updated_file"; then
-            mv "$updated_file" "$values_file"
-            updated_file=""
+                /^obi:/ { in_obi=1 }
+                in_obi && /^[^[:space:]][^:]*:/ && !/^obi:/ { in_obi=0; in_image=0 }
+                in_obi && match($0, /^[[:space:]]+image:/) {
+                    in_image=1
+                    image_indent=substr($0, RSTART, RLENGTH - length("image:"))
+                }
+                in_image && $0 ~ ("^" image_indent "[^[:space:]][^:]*:") && $0 !~ ("^" image_indent "image:") { in_image=0 }
+                in_image && $0 ~ ("^" image_indent "[[:space:]]+tag: ") {
+                    print image_indent "  tag: \"" target_tag "\""
+                    updated=1
+                    in_image=0
+                    next
+                }
+                { print }
+                END {
+                    if (!updated) {
+                        exit 1
+                    }
+                }
+            ' "$values_file" > "$updated_file"; then
+                mv "$updated_file" "$values_file"
+                updated_file=""
+            else
+                echo "Error: Failed to update obi.image.tag in $values_file; expected to find obi.image.tag and rewrite it to $target_tag." >&2
+                exit 1
+            fi
+        ); then
+            :
         else
             return 1
         fi
