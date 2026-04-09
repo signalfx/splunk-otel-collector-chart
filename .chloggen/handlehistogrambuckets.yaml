@@ -1,16 +1,17 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
 change_type: bug_fix
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: clusterReceiver
+component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Set dnsPolicy to ClusterFirstWithHostNet for cluster receiver when clusterReceiver.hostNetwork is enabled
+note: Fix histogram bucket count for `kubeproxy_network_programming_duration_seconds` metric
 # One or more tracking issues related to the change
-issues: [2348]
+issues: [2328]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  When clusterReceiver.hostNetwork is enabled (e.g. for EKS Auto mode), the cluster receiver
-  pod was unable to resolve in-cluster DNS names. Pods running with
-  hostNetwork fall back to the node's DNS configuration unless dnsPolicy is explicitly set
-  to ClusterFirstWithHostNet. This matches the existing daemonset behavior.
+  Splunk Observability Cloud has a limit of 32 buckets for histograms. By default this histogram
+  has more than 32 buckets, so the config will now merge buckets to meet the required limit
+  to avoid this metric being dropped entirely. This change is relevant when both the
+  `useControlPlaneMetricsHistogramData` feature gate and `agent.controlPlaneMetrics.proxy`
+  config option are both enabled.

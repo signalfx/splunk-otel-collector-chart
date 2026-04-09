@@ -37,7 +37,10 @@ import (
 
 var DefaultNamespace = "default"
 
-const waitTimeout = 3 * time.Minute
+const (
+	maxHistogramBucketCount = 32
+	waitTimeout             = 3 * time.Minute
+)
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {

@@ -501,6 +501,9 @@ receivers:
                     kubeproxy_sync_proxy_rules_service_changes_pending|\
                     kubeproxy_sync_proxy_rules_duration_seconds|\
                     kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?"
+                - action: drop
+                  regex: 'kubeproxy_network_programming_duration_seconds_bucket;([1-3][1-46-9]|[4-9][1-9]|100|110|115|270)\.0'
+                  source_labels: [__name__, le]
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       prometheus/kubernetes-scheduler:

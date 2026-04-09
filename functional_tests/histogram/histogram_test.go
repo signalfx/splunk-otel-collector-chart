@@ -27,8 +27,7 @@ import (
 
 const (
 	signalFxReceiverPort = 4317
-
-	valuesDir = "values"
+	valuesDir            = "values"
 )
 
 func deployChart(t *testing.T) {
@@ -324,6 +323,31 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 			return fmt.Errorf("metric name %s not found in received metrics for component %s", name, component)
 		}
 	}
+
+	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
+		expectedRm := expected.ResourceMetrics().At(i)
+		for j := 0; j < expectedRm.ScopeMetrics().Len(); j++ {
+			sm := expectedRm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				expectedMetric := sm.Metrics().At(k)
+				if expectedMetric.Type() != pmetric.MetricTypeHistogram {
+					continue
+				}
+
+				actualMetric, found := internal.GetMetric(actual, expectedMetric.Name())
+				if !found {
+					return fmt.Errorf("metric %s not found in received metrics for component %s", expectedMetric.Name(), component)
+				}
+				if actualMetric.Type() != pmetric.MetricTypeHistogram {
+					return fmt.Errorf("expected metric is %v but actual metric received is %v", pmetric.MetricTypeHistogram.String(), actualMetric.Type().String())
+				}
+				if err := internal.CompareHistograms(expectedMetric.Histogram(), actualMetric.Histogram()); err != nil {
+					return fmt.Errorf("metric %s hit error: %w", expectedMetric.Name(), err)
+				}
+			}
+		}
+	}
+
 	return nil
 }
 

@@ -548,6 +548,10 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
+  #
+  # NOTE: Adding custom object types here may require additional RBAC permissions
+  # beyond what the chart grants by default. Use `rbac.customRules` to add the
+  # necessary "get", "list", and "watch" permissions for any extra resources.
   k8sObjects:
     - name: pods
       mode: pull
@@ -887,6 +891,7 @@ gateway:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  topologySpreadConstraints: []
 
   # Pod configurations
   podSecurityContext: {}
@@ -1387,9 +1392,11 @@ featureGates:
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
   # The scrape interval for this receiver is controlled by agent.controlPlaneMetrics.scrapeInterval.
   enableEKSApiServerMetrics: true
-  # This feature gate enables sending Kubernetes events to the Splunk Observability events/v3 endpoint.
-  # Requires clusterReceiver.eventsEnabled and Splunk Observability to be configured. Does not require
-  # splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
+  # This feature gate enables sending Kubernetes objects and events to the Splunk Observability v3/event endpoint.
+  # Requires Splunk Observability to be configured and at least one of the following:
+  #   - clusterReceiver.eventsEnabled to be true
+  #   - clusterReceiver.k8sObjects to be configured
+  # Does not require splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
   # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
   # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlp_http.

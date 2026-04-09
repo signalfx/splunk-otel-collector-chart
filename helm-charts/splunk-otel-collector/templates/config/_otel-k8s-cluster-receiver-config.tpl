@@ -43,12 +43,12 @@ receivers:
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
     {{- end }}
-  {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
   k8sobjects:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
-  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
+  {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -156,7 +156,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
-  {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
+  {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
   transform/k8sevents:
@@ -189,7 +189,7 @@ processors:
         action: delete
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
   transform/add_sourcetype:
     log_statements:
       - context: log
@@ -275,7 +275,7 @@ exporters:
     {{- end}}
   {{- end }}
 
-  {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
+  {{- if eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true" }}
   otlp_http/o11y_events:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
@@ -410,7 +410,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and .Values.clusterReceiver.eventsEnabled (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true")) }}
+    {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
     logs:
       receivers:
         - k8s_events
@@ -428,12 +428,12 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
-        {{- if eq (include "splunk-otel-collector.sendK8sEventsToSplunkO11yEnabled" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true" }}
         - otlp_http/o11y_events
         {{- end }}
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
     logs/objects:
       receivers:
         - k8sobjects
@@ -449,6 +449,9 @@ service:
       exporters:
       {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
+      {{- end }}
+      {{- if (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true") }}
+        - otlp_http/o11y_events
       {{- end }}
     {{- end }}
 
