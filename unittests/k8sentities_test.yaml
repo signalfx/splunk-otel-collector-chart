@@ -42,7 +42,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "https://ingest.us1.signalfx.com/v3/event"
+          pattern: "https://ingest.us1.observability.splunkcloud.com/v3/event"
 
   - it: should NOT render k8s entities pipeline when featureGate is true but custom ingestUrl is set
     set:

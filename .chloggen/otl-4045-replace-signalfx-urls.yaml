@@ -1,0 +1,42 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: breaking
+
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: chart
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Replace default endpoint URLs from `*.signalfx.com` to `*.observability.splunkcloud.com` across all chart templates, values, examples, and tests.
+
+# One or more tracking issues related to the change
+issues: [4045]
+
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  The default API and ingest endpoint URLs have been updated to use the `observability.splunkcloud.com` domain:
+  - `https://ingest.<realm>.signalfx.com` → `https://ingest.<realm>.observability.splunkcloud.com`
+  - `https://api.<realm>.signalfx.com` → `https://api.<realm>.observability.splunkcloud.com`
+
+  These defaults are constructed in `_helpers.tpl` via `splunk-otel-collector.o11yIngestUrl` and
+  `splunk-otel-collector.o11yApiUrl` and apply when `splunkObservability.ingestUrl` / `splunkObservability.apiUrl`
+  are not explicitly set in values.
+
+  All rendered example manifests under `examples/*/rendered_manifests/` and unit test fixtures have been
+  updated to reflect the new domain.
+
+  **Migration Notes — Proxy / Firewall Configuration:**
+  If you have configured a proxy or firewall allowlist with rules for `*.signalfx.com`, you must update
+  those rules to allow traffic to `*.observability.splunkcloud.com` (or the specific realm-scoped hostnames
+  such as `api.<realm>.observability.splunkcloud.com` and `ingest.<realm>.observability.splunkcloud.com`).
+
+  **Using legacy `*.signalfx.com` endpoints:**
+  If you want to keep sending traffic to the previous SignalFx hostnames, set these values explicitly
+  in your `values.yaml` (replace `<realm>` with your Observability realm, e.g. `us0`):
+  ```yaml
+  splunkObservability:
+    ingestUrl: "https://ingest.<realm>.signalfx.com"
+    apiUrl: "https://api.<realm>.signalfx.com"
+  ```
+  If you already set `ingestUrl`/`apiUrl` explicitly in your deployment, no change is required —
+  the legacy endpoints remain available during the transition period.
