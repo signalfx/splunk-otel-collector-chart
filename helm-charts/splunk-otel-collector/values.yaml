@@ -168,10 +168,13 @@ splunkObservability:
   # Consider using `clusterReceiver.eventsEnabled` option instead.
   infrastructureMonitoringEventsEnabled: false
 
-  # This option just enables the shared pipeline for logs and profiling data.
-  # There is no active collection of profiling data.
-  # Instrumentation libraries must be configured to send it to the collector.
-  # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
+  # Enables the shared logs pipeline and the splunk_hec/o11y exporter for profiling data.
+  # This does not actively collect profiling data on its own.
+  # Instrumentation libraries must be configured to send profiling data to the collector
+  # via the OTLP receiver (ports 4317/4318).
+  # When the operator is enabled, setting this to true also injects SPLUNK_PROFILER_ENABLED
+  # and SPLUNK_PROFILER_MEMORY_ENABLED into the Instrumentation CR's global environment.
+  # If you don't use AlwaysOn Profiling for Splunk APM, you can leave this disabled.
   profilingEnabled: false
 
   # Enables Secure Application features
@@ -849,11 +852,11 @@ gateway:
     otlp:
       containerPort: 4317
       protocol: TCP
-      enabled_for: [metrics, traces, logs]
+      enabled_for: [metrics, traces, logs, profiling]
     otlp-http:
       containerPort: 4318
       protocol: TCP
-      enabled_for: [metrics, traces, logs]
+      enabled_for: [metrics, traces, logs, profiling]
     jaeger-thrift:
       containerPort: 14268
       protocol: TCP
