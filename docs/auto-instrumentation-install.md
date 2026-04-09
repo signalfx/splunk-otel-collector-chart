@@ -55,7 +55,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
 
   - **Alternative Methods**
     - **Instrumentation Spec**
-      - `operator.instrumentation.spec.env`: Use with the `OTEL_RESOURCE_ATTRIBUTES` environment variable to specify the deployment environment.
+      - `instrumentation.spec.env`: Use with the `OTEL_RESOURCE_ATTRIBUTES` environment variable to specify the deployment environment.
 
 - **Auto-instrumentation Configuration Overrides (Optional)**
   - **[Default Instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml) Object Deployment**
@@ -68,7 +68,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
   - **Customizing Instrumentation**
     - `instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
       - **Examples**
-        - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
+        - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-custom-environment-span-tag.yaml)
         - [trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
         - [enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling.yaml)
         - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
