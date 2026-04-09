@@ -8,6 +8,7 @@ autodetect:
   istio: true
 
 agent:
+
   controlPlaneMetrics:
     apiserver:
       enabled: false
@@ -28,3 +29,6 @@ clusterReceiver:
 
 environment: dev
 clusterName: dev-operator
+
+featureGate:
+  useControlPlaneMetricsHistogramData: false
