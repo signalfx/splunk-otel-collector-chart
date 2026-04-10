@@ -1011,7 +1011,6 @@ func testTargetAllocator(t *testing.T) {
 
 	// check target allocator logs
 	taPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
-	t.Logf("Target Allocator pod list has %v pods", len(taPodList.Items))
 	for _, pod := range taPodList.Items {
 		if pod.Status.Phase != "Running" {
 			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
@@ -1019,27 +1018,23 @@ func testTargetAllocator(t *testing.T) {
 		}
 		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
 		require.Contains(t, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
-		t.Logf("Target allocator pod logs: %s", podLogs)
 	}
 
 	// check agent logs
 	agentPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
-	t.Logf("Agent pod list has %v pods", len(agentPodList.Items))
 	for _, pod := range agentPodList.Items {
 		if pod.Status.Phase != "Running" {
 			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
 			continue
 		}
-		// TODO: This might be an invalid test in some places since the target allocator spreads
-		// scrape jobs across pods. One pod might have a scrape job for serviceMonitor, the
-		// other has one for podMonitor.
-		// Maybe combine logs from each pod and check at the end to make sure at least one has them?
+		// NOTE: These tests may eventually fail due to bigger test clusters. If this happens,
+		// consider combining all agent logs into one big string, then do the scrape job check,
+		// as one agent may have logs for the pod monitor scrape job, another may have been
+		// given the service monitor scrape target.
 		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
 		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
 		require.Regexp(t, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`), podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
 		require.Regexp(t, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`), podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-
-		t.Logf("Agent pod logs: %s", podLogs)
 	}
 }
 
