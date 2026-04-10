@@ -46,10 +46,17 @@ helm install my-splunk-otel-collector \
   --set="obi.enabled=true"
 ```
 
+On EKS, GKE, and OpenShift, the chart can auto-detect `k8s.cluster.name` when
+`distribution` is set appropriately, so `clusterName` can be omitted there.
+For other distributions, set `clusterName` explicitly.
+
 ### Configuration Options
 
-For basic usage, set `clusterName` to identify your Kubernetes cluster and enable
-OBI with `obi.enabled=true`.
+For basic usage, enable OBI with `obi.enabled=true` and make sure the chart can
+set `k8s.cluster.name` either by:
+
+- Setting `clusterName` explicitly
+- Setting `distribution` to EKS, GKE, or OpenShift so the chart can auto-detect it
 
 Additional configuration options are available to customize OBI features.
 Refer to the [OBI chart's documentation] for more details.

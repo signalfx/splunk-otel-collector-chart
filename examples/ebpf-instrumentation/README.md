@@ -20,6 +20,9 @@ helm install splunk-otel-collector splunk-otel-collector-chart/splunk-otel-colle
   --set="environment=<ENVIRONMENT>"
 ```
 
+On EKS, GKE, and OpenShift, `clusterName` can be omitted when `distribution` is
+set appropriately and the chart auto-detects `k8s.cluster.name`.
+
 Refer to OBI [documentation for deployment on AKS/EKS](https://opentelemetry.io/docs/zero-code/obi/security/#deploy-on-akseks) if needed.
 
 [platform requirements]: ../../docs/zero-code-ebpf-instrumentation.md#platform-requirements
