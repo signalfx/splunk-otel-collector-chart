@@ -1036,8 +1036,8 @@ func testTargetAllocator(t *testing.T) {
 		// Maybe combine logs from each pod and check at the end to make sure at least one has them?
 		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
 		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
-		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.\\*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".\\*\\\"jobName\\\": \"serviceMonitor\\/default\\/prometheus-service-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.\\*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".\\*\\\"jobName\\\": \"podMonitor\\/default\\/pod-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		require.Regexp(t, podLogs, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		require.Regexp(t, podLogs, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
 
 		t.Logf("Agent pod logs: %s", podLogs)
 	}
