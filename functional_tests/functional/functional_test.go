@@ -679,7 +679,8 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 		require.Failf(t, "failed to run validateResourceAttributes", "unknown role %q", role)
 	}
 
-	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	pods, err := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	require.NoError(t, err)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
@@ -1012,7 +1013,9 @@ func testTargetAllocator(t *testing.T) {
 
 	// check target allocator logs
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
-		taPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
+		var taPodList *corev1.PodList
+		taPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
+		assert.NoError(c, err)
 		containsReadyTAPod := false
 		for _, pod := range taPodList.Items {
 			if pod.Status.Phase != "Running" {
@@ -1020,7 +1023,9 @@ func testTargetAllocator(t *testing.T) {
 				continue
 			}
 			containsReadyTAPod = true
-			podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
+			var podLogs string
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
+			assert.NoError(c, err)
 			assert.Contains(c, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
 		}
 		assert.True(c, containsReadyTAPod, "No target allocator pod found ready")
@@ -1030,7 +1035,9 @@ func testTargetAllocator(t *testing.T) {
 	serviceMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`)
 	podMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`)
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
-		agentPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+		var agentPodList *corev1.PodList
+		agentPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+		assert.NoError(c, err)
 		containsReadyAgentPod := false
 		var combinedPodLogs strings.Builder
 		for i, pod := range agentPodList.Items {
@@ -1039,7 +1046,9 @@ func testTargetAllocator(t *testing.T) {
 				continue
 			}
 			containsReadyAgentPod = true
-			podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			var podLogs string
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			assert.NoError(c, err)
 			assert.Contains(c, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
 
 			if i > 0 {

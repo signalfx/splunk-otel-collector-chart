@@ -46,8 +46,9 @@ func CheckComponentHealth(t *testing.T, clientset *kubernetes.Clientset, namespa
 
 		t.Logf("Checking logs for pod: %s, container: %s", pod.Name, CollectorContainerName)
 
-		logs := GetPodLogs(t, clientset, namespace, pod.Name, CollectorContainerName, 500)
-
+		var logs string
+		logs, err = GetPodLogs(t, clientset, namespace, pod.Name, CollectorContainerName, 500)
+		require.NoError(t, err, "failed to get logs for pod: %s", pod.Name)
 		// Debug: count total error lines and lines mentioning the component
 		totalLines := len(strings.Split(logs, "\n"))
 		errorCount := strings.Count(strings.ToLower(logs), "\terror\t")

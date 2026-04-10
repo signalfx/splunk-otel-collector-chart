@@ -18,7 +18,6 @@ import (
 	docker "github.com/moby/moby/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -267,7 +266,7 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
 }
 
-func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, containerName string, tailLines int64) string {
+func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, containerName string, tailLines int64) (string, error) {
 	podLogOptions := v1.PodLogOptions{
 		Container: containerName,
 		Follow:    false,
@@ -275,19 +274,19 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 	}
 
 	const maxRetries = 3
+	var err error
 	for attempt := range maxRetries {
-		logs, err := tryGetPodLogs(t, clientset, namespace, podName, &podLogOptions)
+		var logs string
+		logs, err = tryGetPodLogs(t, clientset, namespace, podName, &podLogOptions)
 		if err == nil {
-			return logs
+			return logs, nil
 		}
 		if attempt < maxRetries-1 {
 			t.Logf("Attempt %d/%d failed to get logs from pod %s: %v, retrying...", attempt+1, maxRetries, podName, err)
 			time.Sleep(time.Duration(attempt+1) * 5 * time.Second)
-		} else {
-			assert.NoError(t, err, "error getting logs from pod %s in namespace %s after %d attempts", podName, namespace, maxRetries)
 		}
 	}
-	return ""
+	return "", err
 }
 
 func tryGetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName string, opts *v1.PodLogOptions) (string, error) {
@@ -316,12 +315,10 @@ func tryGetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, pod
 	return sb.String(), nil
 }
 
-func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string) *v1.PodList {
-	pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
+func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string) (*v1.PodList, error) {
+	return clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
-	assert.NoError(t, err, "failed to list pods in namespace %s with label selector %s", namespace, labelSelector)
-	return pods
 }
 
 func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string,

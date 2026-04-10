@@ -376,7 +376,8 @@ func assertInjectionWorks(t *testing.T, cs *kubernetes.Clientset, label string) 
 	})
 
 	t.Run("injection: OTEL env vars present ("+label+")", func(t *testing.T) {
-		pods := internal.GetPods(t, cs, internal.DefaultNamespace, "app="+testDeploymentName)
+		pods, err := internal.GetPods(t, cs, internal.DefaultNamespace, "app="+testDeploymentName)
+		require.NoError(t, err)
 		require.NotEmpty(t, pods.Items)
 		pod := pods.Items[0]
 		assert.True(t, hasEnvVar(pod, "app", "JAVA_TOOL_OPTIONS"),

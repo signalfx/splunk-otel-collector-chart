@@ -64,7 +64,9 @@ func Test_NoDropLogs(t *testing.T) {
 	// This can be verified by matching the number of log records to the test log file line count
 	t.Run("NoDropLogs", func(t *testing.T) {
 		time.Sleep(10 * time.Second)
-		podLogs := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
+		var podLogs string
+		podLogs, err = internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
+		require.NoError(t, err, "failed to get logs for pod: %s", podName)
 		require.Contains(t, podLogs, "Exporting failed. Rejecting data.", "expected log message not found in pod logs")
 
 		logsConsumer := internal.SetupHECLogsSink(t)
@@ -104,7 +106,8 @@ func deployChart(t *testing.T, testKubeConfig string, clientset *kubernetes.Clie
 
 func deployTestLogToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config) {
 	// log file is copied to only one randomly selected pod, and we need to remember the pod name for later log retrieval
-	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, internal.AgentLabelSelector)
+	pods, err := internal.GetPods(t, clientset, internal.DefaultNamespace, internal.AgentLabelSelector)
+	require.NoError(t, err)
 	if len(pods.Items) == 0 {
 		require.Failf(t, "no pods found for label %s", internal.AgentLabelSelector)
 	}
