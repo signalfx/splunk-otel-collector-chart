@@ -1010,42 +1010,45 @@ func testTargetAllocator(t *testing.T) {
 	require.NoError(t, err)
 
 	// check target allocator logs
-	taPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
-	containsReadyTAPod := false
-	for _, pod := range taPodList.Items {
-		if pod.Status.Phase != "Running" {
-			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
-			continue
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		taPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
+		containsReadyTAPod := false
+		for _, pod := range taPodList.Items {
+			if pod.Status.Phase != "Running" {
+				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
+				continue
+			}
+			containsReadyTAPod = true
+			podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
+			require.Contains(c, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
 		}
-		containsReadyTAPod = true
-		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
-		require.Contains(t, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
-	}
-	require.True(t, containsReadyTAPod, "No target allocator pod found ready")
+		require.True(c, containsReadyTAPod, "No target allocator pod found ready")
+	}, 3*time.Minute, 3*time.Second, "Failed to find required target allocator pod logs")
 
 	// check agent logs
-	agentPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
-	containsReadyAgentPod := false
-	for _, pod := range agentPodList.Items {
-		if pod.Status.Phase != "Running" {
-			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
-			continue
-		}
-		containsReadyAgentPod = true
-		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
-		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
-
-		// NOTE: These tests may eventually fail due to bigger test clusters. If this happens,
-		// consider combining all agent logs into one big string, then do the scrape job check,
-		// as one agent may have logs for the pod monitor scrape job, another may have been
-		// given the service monitor scrape target.
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		agentPodList := internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+		containsReadyAgentPod := false
 		serviceMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`)
-		require.Regexp(t, serviceMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-
 		podMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`)
-		require.Regexp(t, podMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-	}
-	require.True(t, containsReadyAgentPod, "No OTel Collector agent pod found ready")
+		for _, pod := range agentPodList.Items {
+			if pod.Status.Phase != "Running" {
+				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
+				continue
+			}
+			containsReadyAgentPod = true
+			podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			require.Contains(c, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
+
+			// NOTE: These tests may eventually fail due to bigger test clusters. If this happens,
+			// consider combining all agent logs into one big string, then do the scrape job check,
+			// as one agent may have logs for the pod monitor scrape job, another may have been
+			// given the service monitor scrape target.
+			require.Regexp(c, serviceMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+			require.Regexp(c, podMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		}
+		require.True(c, containsReadyAgentPod, "No OTel Collector agent pod found ready")
+	}, 3*time.Minute, 3*time.Second, "Failed to find required agent pod logs")
 }
 
 // Internal telemetry metrics are only sent when an event occurs. Due to cluster
