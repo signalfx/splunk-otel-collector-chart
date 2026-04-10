@@ -18,6 +18,7 @@ import (
 	docker "github.com/moby/moby/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -283,7 +284,7 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 			t.Logf("Attempt %d/%d failed to get logs from pod %s: %v, retrying...", attempt+1, maxRetries, podName, err)
 			time.Sleep(time.Duration(attempt+1) * 5 * time.Second)
 		} else {
-			require.NoError(t, err, "error getting logs from pod %s in namespace %s after %d attempts", podName, namespace, maxRetries)
+			assert.NoError(t, err, "error getting logs from pod %s in namespace %s after %d attempts", podName, namespace, maxRetries)
 		}
 	}
 	return ""
@@ -319,7 +320,7 @@ func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSele
 	pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
-	require.NoError(t, err, "failed to list pods in namespace %s with label selector %s", namespace, labelSelector)
+	assert.NoError(t, err, "failed to list pods in namespace %s with label selector %s", namespace, labelSelector)
 	return pods
 }
 
