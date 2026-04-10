@@ -186,7 +186,7 @@ data:
         - system
         override: true
         timeout: 15s
-      transform/istio:
+      transform/drop_server_attrs:
         error_mode: ignore
         metric_statements:
         - delete_key(resource.attributes, "server.address")
@@ -526,7 +526,7 @@ data:
           - forward
           processors:
           - attributes/istio
-          - transform/istio
+          - transform/drop_server_attrs
           receivers:
           - receiver_creator
         traces:

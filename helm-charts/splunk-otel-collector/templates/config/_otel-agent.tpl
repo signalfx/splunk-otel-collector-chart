@@ -983,7 +983,7 @@ processors:
   # This processor is used to remove excessive attributes from Istio metrics to avoid running into the dimensions limit.
   # These attributes are resource attributes coming from Prometheus scraping, which are eventually converted into
   # data point attributes in the SignalFx exporter, counting against the dimension limit.
-  transform/istio:
+  transform/drop_server_attrs:
     error_mode: ignore
     metric_statements:
       - delete_key(resource.attributes, "server.address")
@@ -1294,7 +1294,7 @@ service:
         - receiver_creator
       processors:
         - attributes/istio
-        - transform/istio
+        - transform/drop_server_attrs
       exporters:
         - forward
     {{- end }}
@@ -1406,7 +1406,7 @@ service:
         - resource
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
-        - transform/istio
+        - transform/drop_server_attrs
         {{- end }}
       exporters:
         - signalfx/histograms
