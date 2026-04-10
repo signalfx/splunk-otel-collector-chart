@@ -1027,14 +1027,18 @@ func testTargetAllocator(t *testing.T) {
 			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
 			continue
 		}
+		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
+
 		// NOTE: These tests may eventually fail due to bigger test clusters. If this happens,
 		// consider combining all agent logs into one big string, then do the scrape job check,
 		// as one agent may have logs for the pod monitor scrape job, another may have been
 		// given the service monitor scrape target.
-		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
-		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
-		require.Regexp(t, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`), podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-		require.Regexp(t, regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`), podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		serviceMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`)
+		require.Regexp(t, serviceMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+
+		podMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`)
+		require.Regexp(t, podMonitorRegex, podLogs, "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
 	}
 }
 
