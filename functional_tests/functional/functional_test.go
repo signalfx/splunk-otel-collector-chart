@@ -1007,6 +1007,7 @@ func testTargetAllocator(t *testing.T) {
 		}
 		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
 		require.Contains(t, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
+		t.Logf("Target allocator pod logs: %s", podLogs)
 	}
 
 	// check agent logs
@@ -1026,6 +1027,7 @@ func testTargetAllocator(t *testing.T) {
 		require.Contains(t, podLogs, "Scrape job added", "Collector failed to start scrape job. Received logs: %v", podLogs)
 		require.Contains(t, podLogs, "\"jobName\": \"serviceMonitor", "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
 		require.Contains(t, podLogs, "\"jobName\": \"podMonitor", "Collector failed to start scrape job for podMonitor. Received logs: %v", podLogs)
+		t.Logf("Agent pod logs: %s", podLogs)
 	}
 }
 
