@@ -1002,7 +1002,7 @@ func testK8sObjects(t *testing.T) {
 
 func testTargetAllocator(t *testing.T) {
 	if !requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
-		t.Skip("skipping test as required Prometheus CRDs are not installed")
+		t.Fatalf("Required Prometheus CRDs are not installed")
 	}
 
 	testKubeConfig := requireEnv(t, "KUBECONFIG")
@@ -1017,6 +1017,7 @@ func testTargetAllocator(t *testing.T) {
 		taPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
 		assert.NoError(c, err)
 		containsReadyTAPod := false
+
 		for _, pod := range taPodList.Items {
 			if pod.Status.Phase != "Running" {
 				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
@@ -1040,6 +1041,7 @@ func testTargetAllocator(t *testing.T) {
 		assert.NoError(c, err)
 		containsReadyAgentPod := false
 		var combinedPodLogs strings.Builder
+
 		for i, pod := range agentPodList.Items {
 			if pod.Status.Phase != "Running" {
 				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
