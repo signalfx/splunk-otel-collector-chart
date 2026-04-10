@@ -42,12 +42,14 @@ helm install my-splunk-otel-collector \
   splunk-otel-collector-chart/splunk-otel-collector \
   --set="splunkObservability.realm=${SPLUNK_REALM}" \
   --set="splunkObservability.accessToken=${SPLUNK_ACCESS_TOKEN}" \
+  --set="clusterName=${CLUSTER_NAME}" \
   --set="obi.enabled=true"
 ```
 
 ### Configuration Options
 
-For basic usage, no additional configuration is required.
+For basic usage, set `clusterName` to identify your Kubernetes cluster and enable
+OBI with `obi.enabled=true`.
 
 Additional configuration options are available to customize OBI features.
 Refer to the [OBI chart's documentation] for more details.
