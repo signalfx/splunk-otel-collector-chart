@@ -38,8 +38,12 @@ import (
 var DefaultNamespace = "default"
 
 const (
-	maxHistogramBucketCount = 32
-	waitTimeout             = 3 * time.Minute
+	AgentLabelSelector           = "component=otel-collector-agent"
+	CollectorContainerName       = "otel-collector"
+	maxHistogramBucketCount      = 32
+	TargetAllocatorContainerName = "targetallocator"
+	TargetAllocatorLabelSelector = "app=targetAllocator"
+	waitTimeout                  = 3 * time.Minute
 )
 
 func HostEndpoint(t *testing.T) string {
