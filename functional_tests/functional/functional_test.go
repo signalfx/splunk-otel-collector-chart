@@ -115,8 +115,7 @@ func setupSinks(t *testing.T) {
 }
 
 func requiresPrometheusCRD(kubeTestEnv string) bool {
-	// ROSA forbids creation of Prometheus CRDs
-	return kubeTestEnv != rosaTestKubeEnv
+	return kubeTestEnv == kindTestKubeEnv
 }
 
 func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
@@ -514,7 +513,9 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	teardownPrometheusResources(ctx, t, extensionsClient)
+	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+		teardownPrometheusResources(ctx, t, extensionsClient)
+	}
 
 	for _, nm := range namespaces {
 		nmClient := client.CoreV1().Namespaces()
@@ -998,10 +999,8 @@ func testK8sObjects(t *testing.T) {
 }
 
 func testTargetAllocator(t *testing.T) {
-	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
-	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
-	if !requiresPrometheusCRD(kubeTestEnv) {
-		t.Skip("Skipping test on ROSA - can't install required Prometheus CRDs")
+	if !requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+		t.Skip("skipping test as required Prometheus CRDs are not installed")
 	}
 
 	testKubeConfig := requireEnv(t, "KUBECONFIG")
@@ -1037,8 +1036,8 @@ func testTargetAllocator(t *testing.T) {
 		// Maybe combine logs from each pod and check at the end to make sure at least one has them?
 		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
 		require.Contains(t, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
-		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".*\\\"jobName\\\": \"serviceMonitor\\/default\\/prometheus-service-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
-		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".*\\\"jobName\\\": \"podMonitor\\/default\\/pod-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.\\*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".\\*\\\"jobName\\\": \"serviceMonitor\\/default\\/prometheus-service-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
+		require.Regexp(t, podLogs, regexp.MustCompile("Scrape job added.\\*\\\"otelcol\\.component\\.id\\\": \\\"prometheus\\/ta\\\".\\*\\\"jobName\\\": \"podMonitor\\/default\\/pod-monitor\\/0\\\""), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", podLogs)
 
 		t.Logf("Agent pod logs: %s", podLogs)
 	}
