@@ -1005,7 +1005,7 @@ func testTargetAllocator(t *testing.T) {
 			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
 			continue
 		}
-		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 100)
+		podLogs := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
 		require.Contains(t, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
 	}
 
