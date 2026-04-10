@@ -5,6 +5,7 @@ package functional
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -1044,14 +1045,14 @@ func testTargetAllocator(t *testing.T) {
 			if i > 0 {
 				combinedPodLogs.WriteString("\n")
 			}
-			combinedPodLogs.WriteString(podLogs)
+			combinedPodLogs.WriteString(fmt.Sprintf("%v\n%v", pod.Name, podLogs))
 
 		}
 		assert.True(c, containsReadyAgentPod, "No OTel Collector agent pod found ready")
 		// NOTE: The target allocator distributes scrape jobs across agents when there are more than one.
 		// Compile all logs from agents first, then ensure that altogether they have the required logs.
 		assert.Regexp(c, serviceMonitorRegex, combinedPodLogs.String(), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", combinedPodLogs.String())
-		assert.Regexp(c, podMonitorRegex, combinedPodLogs.String(), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", combinedPodLogs.String())
+		assert.Regexp(c, podMonitorRegex, combinedPodLogs.String(), "Collector failed to start scrape job for podMonitor. Received logs: %v", combinedPodLogs.String())
 	}, 3*time.Minute, 3*time.Second, "Failed to find required agent pod logs")
 }
 
