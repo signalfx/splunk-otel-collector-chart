@@ -64,7 +64,7 @@ func Test_NoDropLogs(t *testing.T) {
 	// This can be verified by matching the number of log records to the test log file line count
 	t.Run("NoDropLogs", func(t *testing.T) {
 		time.Sleep(10 * time.Second)
-		podLogs := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.TargetAllocatorContainerName, 100)
+		podLogs := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
 		require.Contains(t, podLogs, "Exporting failed. Rejecting data.", "expected log message not found in pod logs")
 
 		logsConsumer := internal.SetupHECLogsSink(t)
