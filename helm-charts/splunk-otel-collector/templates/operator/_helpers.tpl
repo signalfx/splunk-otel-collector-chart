@@ -95,10 +95,10 @@ sampler:
 {{- define "splunk-otel-collector.operator.instrumentation-env" -}}
   {{- $env := .Values.instrumentation.spec.env | default list -}}
   {{- if .Values.splunkObservability.profilingEnabled -}}
-    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.spec.env "envName" "SPLUNK_PROFILER_ENABLED")) "false" }}
       {{- $env = append $env (dict "name" "SPLUNK_PROFILER_ENABLED" "value" "true") -}}
     {{- end }}
-    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
+    {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" .Values.instrumentation.spec.env "envName" "SPLUNK_PROFILER_MEMORY_ENABLED")) "false" }}
       {{- $env = append $env (dict "name" "SPLUNK_PROFILER_MEMORY_ENABLED" "value" "true") -}}
     {{- end }}
   {{- end -}}

@@ -39,3 +39,32 @@ tests:
           content:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "false"
+
+  - it: should respect user-defined SPLUNK_PROFILER vars in global spec.env and not duplicate them
+    set:
+      instrumentation.spec.env:
+        - name: SPLUNK_PROFILER_ENABLED
+          value: "false"
+        - name: SPLUNK_PROFILER_MEMORY_ENABLED
+          value: "false"
+    asserts:
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_ENABLED
+            value: "false"
+      - contains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_MEMORY_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_ENABLED
+            value: "true"
+      - notContains:
+          path: spec.env
+          content:
+            name: SPLUNK_PROFILER_MEMORY_ENABLED
+            value: "true"

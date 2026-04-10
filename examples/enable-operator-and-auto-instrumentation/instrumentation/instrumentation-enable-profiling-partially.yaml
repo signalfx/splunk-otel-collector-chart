@@ -9,14 +9,14 @@
 #   profilingEnabled: true
 # operator:
 #   enabled: true
-#   instrumentation:
-#     spec:
-#       java:
-#         env:
-#           - name: SPLUNK_PROFILER_ENABLED
-#             value: "false"
-#           - name: SPLUNK_PROFILER_MEMORY_ENABLED
-#             value: "false"
+# instrumentation:
+#   spec:
+#     java:
+#       env:
+#         - name: SPLUNK_PROFILER_ENABLED
+#           value: "false"
+#         - name: SPLUNK_PROFILER_MEMORY_ENABLED
+#           value: "false"
 # certmanager:
 #   enabled: true
 # Output instrumentation.yaml:
