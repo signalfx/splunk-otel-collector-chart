@@ -91,7 +91,6 @@ func Test_K8SEvents(t *testing.T) {
 		err = plogtest.CompareLogs(expectedEventsLogs, k8sEventsLogs,
 			plogtest.IgnoreTimestamp(),
 			plogtest.IgnoreObservedTimestamp(),
-			plogtest.IgnoreResourceAttributeValue("host.name"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.statefulset.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.pod.uid"),
@@ -119,7 +118,6 @@ func Test_K8SEvents(t *testing.T) {
 		err = plogtest.CompareLogs(expectedObjectsLogs, k8sObjectsLogs,
 			plogtest.IgnoreTimestamp(),
 			plogtest.IgnoreObservedTimestamp(),
-			plogtest.IgnoreResourceAttributeValue("host.name"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.uid"),
 			plogtest.IgnoreLogRecordAttributeValue("k8s.object.resource_version"),
 			plogtest.IgnoreResourceAttributeValue("com.splunk.index"), // this is flaky, the index can be the value from pod annotation due to the k8s_attributes processor in the pipeline or main
