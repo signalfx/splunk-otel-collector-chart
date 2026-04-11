@@ -219,7 +219,6 @@ data:
           - memory_limiter
           - batch
           - attributes/drop_event_attrs
-          - resourcedetection
           - resource
           - resource/add_environment
           - transform/k8sevents
@@ -231,7 +230,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
           - resource
           - transform/add_sourcetype
           - resource/add_environment

@@ -30,7 +30,11 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
+<<<<<<< HEAD
         checksum/config: c613c8de6c5187ce8fb21ee8ee5efc771ac2418d1e751fb1bcf492482c3f887a
+=======
+        checksum/config: 8b635320d0a091760af1b6b0dc4b81b58b734db0db31f41209c20ee7805b7a03
+>>>>>>> 7e3b01a1 (Remove full resourcedetection from cluster receiver event/object pipelines)
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:

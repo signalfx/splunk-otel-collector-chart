@@ -418,7 +418,9 @@ service:
         - memory_limiter
         - batch
         - attributes/drop_event_attrs
-        - resourcedetection
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         {{- if .Values.environment }}
         - resource/add_environment
@@ -440,7 +442,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         - transform/add_sourcetype
         {{- if .Values.environment }}
@@ -462,7 +466,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
         - resource
         {{- if .Values.clusterName }}
         - resource/add_event_k8s

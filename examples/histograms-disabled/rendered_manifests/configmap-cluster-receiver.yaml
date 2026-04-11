@@ -275,7 +275,6 @@ data:
           - memory_limiter
           - batch
           - attributes/drop_event_attrs
-          - resourcedetection
           - resource
           - transform/k8sevents
           receivers:
@@ -286,7 +285,6 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
           - resource
           - transform/add_sourcetype
           receivers:
