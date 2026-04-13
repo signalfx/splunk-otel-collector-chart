@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -59,11 +58,8 @@ func Test_OBI_Minimal_Traces(t *testing.T) {
 	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
-	if strings.Contains(hostEp, ":") {
-		hostEp = fmt.Sprintf("[%s]", hostEp)
-	}
 	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{
-		"OTLPEndpoint": fmt.Sprintf("%s:%d", hostEp, internal.OTLPGRPCReceiverPort),
+		"OTLPEndpoint": internal.HostPort(hostEp, internal.OTLPGRPCReceiverPort),
 	}, 0, internal.GetDefaultChartOptions())
 
 	// Ensure chart resources are removed after test unless explicitly skipped.

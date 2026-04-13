@@ -32,7 +32,7 @@ gateway:
           http:
             include_metadata: true
     exporters:
-      otlphttp:
+      otlp_http:
         traces_endpoint: {{ .OTLPSink }}/v2/trace/otlp
 
 clusterReceiver:

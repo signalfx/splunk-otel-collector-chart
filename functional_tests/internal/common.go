@@ -5,19 +5,22 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"net"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/network"
-	docker "github.com/docker/docker/client"
+	docker "github.com/moby/moby/client"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -34,7 +37,10 @@ import (
 
 var DefaultNamespace = "default"
 
-const waitTimeout = 3 * time.Minute
+const (
+	maxHistogramBucketCount = 32
+	waitTimeout             = 3 * time.Minute
+)
 
 func HostEndpoint(t *testing.T) string {
 	if host, ok := os.LookupEnv("HOST_ENDPOINT"); ok {
@@ -44,20 +50,40 @@ func HostEndpoint(t *testing.T) string {
 		return "host.docker.internal"
 	}
 
-	client, err := docker.NewClientWithOpts(docker.FromEnv)
+	client, err := docker.New(docker.FromEnv)
 	require.NoError(t, err)
-	client.NegotiateAPIVersion(t.Context())
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	network, err := client.NetworkInspect(ctx, "kind", network.InspectOptions{})
+	netInfo, err := client.NetworkInspect(ctx, "kind", docker.NetworkInspectOptions{})
 	require.NoError(t, err)
-	for _, ipam := range network.IPAM.Config {
-		if ipam.Gateway != "" {
-			return ipam.Gateway
+	// Prefer IPv4 gateway (e.g. on GitHub runners Docker/kind may expose IPv6 first).
+	var fallback string
+	for _, ipam := range netInfo.Network.IPAM.Config {
+		if !ipam.Gateway.IsValid() {
+			continue
 		}
+		if ipam.Gateway.Is4() {
+			return ipam.Gateway.String()
+		}
+		if fallback == "" {
+			fallback = ipam.Gateway.String()
+		}
+	}
+	if fallback != "" {
+		return fallback
 	}
 	require.Fail(t, "failed to find host endpoint")
 	return ""
+}
+
+// HostPort returns "host:port" with correct bracketing for IPv6 (e.g. "[::1]:4317").
+func HostPort(host string, port int) string {
+	return net.JoinHostPort(host, strconv.Itoa(port))
+}
+
+// HostPortHTTP returns "http://host:port" using HostPort for correct IPv6 format.
+func HostPortHTTP(host string, port int) string {
+	return "http://" + HostPort(host, port)
 }
 
 func WaitForTraces(t *testing.T, entriesNum int, tc *consumertest.TracesSink) {
@@ -113,6 +139,16 @@ func MaybeWriteUpdateExpectedTracesResults(t *testing.T, file string, traces *pt
 	}
 }
 
+// ClearTraceSchemaURLs strips schema URLs from all ResourceSpans and ScopeSpans
+func ClearTraceSchemaURLs(td ptrace.Traces) {
+	for i := 0; i < td.ResourceSpans().Len(); i++ {
+		td.ResourceSpans().At(i).SetSchemaUrl("")
+		for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
+			td.ResourceSpans().At(i).ScopeSpans().At(j).SetSchemaUrl("")
+		}
+	}
+}
+
 func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
 	if shouldUpdateExpectedResults() {
 		require.NoError(t, golden.WriteMetrics(t, file, *metrics))
@@ -125,6 +161,29 @@ func MaybeUpdateExpectedLogsResults(t *testing.T, file string, logs *plog.Logs) 
 		require.NoError(t, golden.WriteLogs(t, file, *logs))
 		t.Logf("Wrote updated expected log results to %s", file)
 	}
+}
+
+// NormalizeAttributes replaces every value in m with "abcd" except keys listed in skipKeys.
+func NormalizeAttributes(m pcommon.Map, skipKeys ...string) {
+	m.Range(func(k string, _ pcommon.Value) bool {
+		for _, sk := range skipKeys {
+			if k == sk {
+				return true
+			}
+		}
+		m.PutStr(k, "abcd")
+		return true
+	})
+}
+
+// FormatAttributes returns a semicolon-separated "key=value;" string for debugging attribute maps.
+func FormatAttributes(m pcommon.Map) string {
+	var b strings.Builder
+	m.Range(func(k string, v pcommon.Value) bool {
+		b.WriteString(k + "=" + v.Str() + ";")
+		return true
+	})
+	return b.String()
 }
 
 // CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod using `cat`,
@@ -210,9 +269,28 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 		TailLines: &tailLines,
 	}
 
-	podLogsRequest := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOptions)
+	const maxRetries = 3
+	for attempt := range maxRetries {
+		logs, err := tryGetPodLogs(t, clientset, namespace, podName, &podLogOptions)
+		if err == nil {
+			return logs
+		}
+		if attempt < maxRetries-1 {
+			t.Logf("Attempt %d/%d failed to get logs from pod %s: %v, retrying...", attempt+1, maxRetries, podName, err)
+			time.Sleep(time.Duration(attempt+1) * 5 * time.Second)
+		} else {
+			require.NoError(t, err, "error getting logs from pod %s in namespace %s after %d attempts", podName, namespace, maxRetries)
+		}
+	}
+	return ""
+}
+
+func tryGetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName string, opts *v1.PodLogOptions) (string, error) {
+	podLogsRequest := clientset.CoreV1().Pods(namespace).GetLogs(podName, opts)
 	stream, err := podLogsRequest.Stream(t.Context())
-	require.NoError(t, err, "error streaming logs from pod %s in namespace %s", podName, namespace)
+	if err != nil {
+		return "", fmt.Errorf("error streaming logs from pod %s in namespace %s: %w", podName, namespace, err)
+	}
 	defer stream.Close()
 
 	var sb strings.Builder
@@ -225,10 +303,12 @@ func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podNam
 		if readErr == io.EOF {
 			break
 		}
-		require.NoError(t, readErr, "error reading stream from pod %s in namespace %s", podName, namespace)
+		if readErr != nil {
+			return "", fmt.Errorf("error reading stream from pod %s in namespace %s: %w", podName, namespace, readErr)
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	return sb.String()
+	return sb.String(), nil
 }
 
 func GetPods(t *testing.T, clientset *kubernetes.Clientset, namespace, labelSelector string) *v1.PodList {
@@ -315,6 +395,15 @@ func CreateNamespace(t *testing.T, clientset *kubernetes.Clientset, name string)
 	}, 1*time.Minute, 5*time.Second, "namespace %s is not available", name)
 }
 
+// WaitForDefaultServiceAccount waits for the "default" ServiceAccount to exist in the namespace.
+// The namespace controller creates it asynchronously; on K8s 1.35+ notice delay in creation.
+func WaitForDefaultServiceAccount(t *testing.T, clientset *kubernetes.Clientset, namespace string) {
+	require.Eventually(t, func() bool {
+		_, err := clientset.CoreV1().ServiceAccounts(namespace).Get(t.Context(), "default", metav1.GetOptions{})
+		return err == nil
+	}, 1*time.Minute, 2*time.Second, "default ServiceAccount in namespace %s is not available", namespace)
+}
+
 func DeleteNamespace(t *testing.T, clientset *kubernetes.Clientset, name string) {
 	err := clientset.CoreV1().Namespaces().Delete(t.Context(), name, metav1.DeleteOptions{})
 	if err != nil {
@@ -384,49 +473,80 @@ func DeleteObject(t *testing.T, k8sClient *k8stest.K8sClient, objYAML string) {
 	}
 }
 
-// SelectMetricSet finds a metrics payload containing a target metric without any re-checking logic.
-func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool) *pmetric.Metrics {
-	var selectedMetrics *pmetric.Metrics
+// SelectMetricSet finds a metrics payload containing a target metric.
+// It first tries to find a payload with an exact ResourceMetrics and MetricCount
+// match to expected (best candidate for CompareMetrics). If none is found, it
+// falls back to the payload with the highest MetricCount (most complete batch,
+// suitable for updating golden files).
+// Returns the selected payload and whether it was an exact match.
+func SelectMetricSet(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink) (*pmetric.Metrics, bool) {
+	var exactMatchMetrics *pmetric.Metrics
+	var fallbackMetrics *pmetric.Metrics
+	fallbackCount := -1
 
 	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
 		m := metricSink.AllMetrics()[h]
-		foundTargetMetric := false
-
-	OUTER:
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-					metric := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-					if metric.Name() == targetMetric {
-						foundTargetMetric = true
-						break OUTER
-					}
-				}
-			}
-		}
-
-		if !foundTargetMetric {
+		if !containsMetric(m, targetMetric) {
 			continue
 		}
-
-		if ignoreLen || (m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount()) {
-			selectedMetrics = &m
-			t.Logf("Found target metric '%s' in payload with %d total metrics", targetMetric, m.MetricCount())
+		if m.ResourceMetrics().Len() == expected.ResourceMetrics().Len() && m.MetricCount() == expected.MetricCount() {
+			exactMatchMetrics = &m
 			break
+		}
+		if m.MetricCount() > fallbackCount {
+			fallbackMetrics = &m
+			fallbackCount = m.MetricCount()
 		}
 	}
 
-	return selectedMetrics
+	if exactMatchMetrics != nil {
+		t.Logf("Selected exact-match payload with target metric '%s': %d metrics, %d resources",
+			targetMetric, exactMatchMetrics.MetricCount(), exactMatchMetrics.ResourceMetrics().Len())
+		return exactMatchMetrics, true
+	}
+	if fallbackMetrics != nil {
+		t.Logf("No exact match for expected counts (%d metrics, %d resources); selected best-effort payload with '%s': %d metrics, %d resources",
+			expected.MetricCount(), expected.ResourceMetrics().Len(), targetMetric, fallbackMetrics.MetricCount(), fallbackMetrics.ResourceMetrics().Len())
+	}
+	return fallbackMetrics, false
 }
 
-// SelectMetricSetWithTimeout finds a metrics payload containing a target metric with Eventually timeout
-func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, ignoreLen bool, timeout time.Duration, interval time.Duration) *pmetric.Metrics {
+func containsMetric(m pmetric.Metrics, name string) bool {
+	for i := 0; i < m.ResourceMetrics().Len(); i++ {
+		for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+				if m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k).Name() == name {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// SelectMetricSetWithTimeout retries SelectMetricSet until an exact-match
+// payload is found or the timeout expires. If the timeout is reached without
+// an exact match, the best fallback (highest MetricCount) is returned.
+func SelectMetricSetWithTimeout(t *testing.T, expected pmetric.Metrics, targetMetric string, metricSink *consumertest.MetricsSink, timeout time.Duration, interval time.Duration) (*pmetric.Metrics, bool) {
+	deadline := time.Now().Add(timeout)
 	var selectedMetrics *pmetric.Metrics
+	var exactMatch bool
 
-	require.Eventuallyf(t, func() bool {
-		selectedMetrics = SelectMetricSet(t, expected, targetMetric, metricSink, ignoreLen)
-		return selectedMetrics != nil
-	}, timeout, interval, "Failed to find target metric %s within timeout period of %v", targetMetric, timeout)
+	for time.Now().Before(deadline) {
+		selectedMetrics, exactMatch = SelectMetricSet(t, expected, targetMetric, metricSink)
+		if exactMatch {
+			return selectedMetrics, true
+		}
+		time.Sleep(interval)
+	}
 
-	return selectedMetrics
+	// Final attempt after timeout to capture the latest state.
+	selectedMetrics, exactMatch = SelectMetricSet(t, expected, targetMetric, metricSink)
+	if exactMatch {
+		return selectedMetrics, true
+	}
+
+	require.NotNilf(t, selectedMetrics, "No payload containing metric %s found within %v", targetMetric, timeout)
+	t.Logf("No exact-match payload found for %s within %v; using best-effort fallback", targetMetric, timeout)
+	return selectedMetrics, false
 }

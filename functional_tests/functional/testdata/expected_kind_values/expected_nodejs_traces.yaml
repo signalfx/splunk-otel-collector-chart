@@ -36,13 +36,13 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: nodejs-test-cbbdf469-2cvn7
+            stringValue: nodejs-test-cbbdf469-s45pj
         - key: k8s.replicaset.name
           value:
             stringValue: nodejs-test-cbbdf469
         - key: service.instance.id
           value:
-            stringValue: default.nodejs-test-cbbdf469-2cvn7.nodejs-test
+            stringValue: default.nodejs-test-cbbdf469-s45pj.nodejs-test
         - key: service.namespace
           value:
             stringValue: default
@@ -60,10 +60,10 @@ resourceSpans:
             stringValue: linux
         - key: os.version
           value:
-            stringValue: 6.11.0-1018-azure
+            stringValue: 6.8.0-1033-aws
         - key: process.pid
           value:
-            intValue: "13"
+            intValue: "14"
         - key: process.executable.name
           value:
             stringValue: node
@@ -91,12 +91,9 @@ resourceSpans:
         - key: process.owner
           value:
             stringValue: root
-        - key: k8s.pod.ip
-          value:
-            stringValue: 10.244.0.17
         - key: k8s.pod.uid
           value:
-            stringValue: 90fd2dca-01f1-4414-95ef-c8849e9a8509
+            stringValue: 2ff42276-c882-46dd-92ba-335c2783212d
         - key: k8s.pod.labels.app
           value:
             stringValue: nodejs-test
@@ -108,7 +105,7 @@ resourceSpans:
             stringValue: latest
         - key: container.id
           value:
-            stringValue: d0b1428dafc3c648b896d19e3e7290ade510bd2610f4a06831fd1207bce42717
+            stringValue: b8900764eb17fcc90b866946001b67d147bfa5642dfe1a7cf059bac0ad07062f
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
@@ -124,7 +121,7 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.38.0
     scopeSpans:
       - scope:
           name: '@opentelemetry/instrumentation-http'
@@ -168,20 +165,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "36352"
+                  intValue: "49962"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1760360036323596306"
+            endTimeUnixNano: "1770199586134807511"
             kind: 2
             name: GET
-            spanId: ef27f994dc53d4f7
-            startTimeUnixNano: "1760360036323000000"
+            spanId: d9ad03c8017a81f1
+            startTimeUnixNano: "1770199586134000000"
             status: {}
-            traceId: 635930a011aff15d0a5de8f13d4b264d
+            traceId: b8bd54c0d1d132d086f6d1df8cfac5b7
           - attributes:
               - key: http.url
                 value:
@@ -221,20 +218,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "58294"
+                  intValue: "49978"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1760360037329767498"
+            endTimeUnixNano: "1770199587142746360"
             kind: 2
             name: GET
-            spanId: f89c9d9f34a7b1e2
-            startTimeUnixNano: "1760360037329000000"
+            spanId: 633f94d257863b70
+            startTimeUnixNano: "1770199587142000000"
             status: {}
-            traceId: 6a98c74d48a14e2d7798b0abfa05898a
+            traceId: 357950035f07887b9469bffce8a06047
           - attributes:
               - key: http.url
                 value:
@@ -274,20 +271,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "58304"
+                  intValue: "49984"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1760360038334575566"
+            endTimeUnixNano: "1770199588149773001"
             kind: 2
             name: GET
-            spanId: f95f3ae9112e4424
-            startTimeUnixNano: "1760360038334000000"
+            spanId: 580cb449e62d2ead
+            startTimeUnixNano: "1770199588149000000"
             status: {}
-            traceId: 10d24df150b43aa28cd9f999a357c4fe
+            traceId: a9d1a42ffee28f62431628288d579e61
           - attributes:
               - key: http.url
                 value:
@@ -327,20 +324,20 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "58308"
+                  intValue: "49988"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1760360039342119813"
+            endTimeUnixNano: "1770199589159295508"
             kind: 2
             name: GET
-            spanId: a381b7183593d86a
-            startTimeUnixNano: "1760360039341000000"
+            spanId: 5a253f284b52dd38
+            startTimeUnixNano: "1770199589158000000"
             status: {}
-            traceId: d869749c8970c0c9412ef02075b2097b
+            traceId: 750966c8e0d823bd53e2a98c43a1c9e1
           - attributes:
               - key: http.url
                 value:
@@ -380,17 +377,17 @@ resourceSpans:
                   stringValue: 127.0.0.1
               - key: net.peer.port
                 value:
-                  intValue: "58314"
+                  intValue: "52794"
               - key: http.status_code
                 value:
                   intValue: "200"
               - key: http.status_text
                 value:
                   stringValue: OK
-            endTimeUnixNano: "1760360040347765355"
+            endTimeUnixNano: "1770199590166834372"
             kind: 2
             name: GET
-            spanId: 8976917b206d8bb9
-            startTimeUnixNano: "1760360040347000000"
+            spanId: 1987fa1379e45047
+            startTimeUnixNano: "1770199590166000000"
             status: {}
-            traceId: 135b7174a69b0b2b24adf322a5dc7a4f
+            traceId: 591d9272866df14ddc74b006aa26f9e0

@@ -72,7 +72,7 @@ kubectl logs -l app.kubernetes.io/name=obi -f
 > OBI only works on Linux nodes. Windows is not supported.
 
 - Kubernetes 1.24+
-- Helm 3.9+
+- Helm 3.9+ / 4.x
 - Linux kernel version 5.8 or later (or 4.18 for Red Hat Enterprise Linux)
 - x86_64 or arm64 processor
 - Runtime support for eBPF (most modern Linux distributions)

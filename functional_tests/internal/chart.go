@@ -5,6 +5,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,11 +16,17 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/kube"
+	releasev1 "helm.sh/helm/v4/pkg/release/v1"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -32,18 +39,22 @@ const (
 )
 
 type ChartOptions struct {
-	ChartNamespace   string
-	ChartReleaseName string
-	ChartWait        bool
-	ChartTimeout     time.Duration
+	ChartNamespace      string
+	ChartReleaseName    string
+	WaitStrategy        kube.WaitStrategy
+	ChartTimeout        time.Duration
+	ForceConflicts      bool
+	UpgradeFromValues   string
+	UpgradeFromChartDir string
 }
 
 func GetDefaultChartOptions() ChartOptions {
 	return ChartOptions{
 		ChartNamespace:   DefaultNamespace,
 		ChartReleaseName: DefaultChartReleaseName,
-		ChartWait:        true,
+		WaitStrategy:     kube.StatusWatcherStrategy,
 		ChartTimeout:     HelmActionTimeout,
+		ForceConflicts:   false,
 	}
 }
 
@@ -63,37 +74,45 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	install := action.NewInstall(actionConfig)
 	install.Namespace = options.ChartNamespace
 	install.ReleaseName = options.ChartReleaseName
-	install.Wait = options.ChartWait
+	install.WaitStrategy = options.WaitStrategy
 	install.Timeout = options.ChartTimeout
+	install.ForceConflicts = options.ForceConflicts
 	install.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 
-	// If UPGRADE_FROM_VALUES env var is set, we install the helm chart using the values. Otherwise, run helm install.
-	// UPGRADE_FROM_CHART_DIR is an optional env var that provides an alternative path for the initial helm chart.
-	upgradeFromValues := os.Getenv("UPGRADE_FROM_VALUES")
+	// Determine upgrade-from values: prefer ChartOptions fields, fall back to env vars.
+	upgradeFromValues := options.UpgradeFromValues
+	if upgradeFromValues == "" {
+		upgradeFromValues = os.Getenv("UPGRADE_FROM_VALUES")
+	}
 	if upgradeFromValues != "" {
-		// install the base chart
+		oldChartDir := options.UpgradeFromChartDir
+		if oldChartDir == "" {
+			oldChartDir = os.Getenv("UPGRADE_FROM_CHART_DIR")
+		}
+		oldChartPath := filepath.Join("..", "..", oldChartDir)
+		newChartPath := filepath.Join("..", "..", defaultChartPath)
+
 		valuesDir := filepath.Dir(valuesFile)
 		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues))
 		require.NoError(t, rfErr)
-		initChart := loadChartFromDir(t, os.Getenv("UPGRADE_FROM_CHART_DIR"))
+		initChart := loadChartFromDir(t, oldChartDir)
 		var initValues map[string]any
 		require.NoError(t, yaml.Unmarshal(initValuesBytes, &initValues))
 		t.Log("Running helm install of the base release")
 		_, err = install.Run(initChart, initValues)
 		require.NoError(t, err)
-		// if install crds option is enabled, try to update the crds
-		t.Logf("Checking if CRD installation is enabled in %s", valuesFile)
-		if update := crdsInstallEnabled(values); update {
-			t.Log("Updating CRDs")
-			UpdateOperatorCRDs(t, filepath.Join("..", "..", os.Getenv("UPGRADE_FROM_CHART_DIR")), filepath.Join("..", "..", defaultChartPath), testKubeConfig)
-		} else {
-			t.Log("Skipping CRDs update")
+
+		// Helm upgrade does not install or update CRDs, so apply them
+		// from the new chart if the CRD version changed.
+		if crdsInstallEnabled(values) {
+			UpdateOperatorCRDs(t, oldChartPath, newChartPath, testKubeConfig)
 		}
-		// test the upgrade
+
 		upgrade := action.NewUpgrade(actionConfig)
 		upgrade.Namespace = options.ChartNamespace
-		upgrade.Wait = options.ChartWait
+		upgrade.WaitStrategy = options.WaitStrategy
 		upgrade.Timeout = options.ChartTimeout
+		upgrade.ForceConflicts = options.ForceConflicts
 		t.Log("Running helm upgrade")
 		_, err = upgrade.Run(options.ChartReleaseName, loadChart(t), values)
 	} else {
@@ -118,19 +137,31 @@ func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 }
 
 func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName, namespace string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
 	secretName := releaseName + "-operator-controller-manager-service-cert"
 	t.Logf("Attempting to delete secret: %s in namespace: %s", secretName, namespace)
-	_, getErr := clientset.CoreV1().Secrets(namespace).Get(t.Context(), secretName, v1.GetOptions{})
-	if getErr == nil {
-		deleteErr := clientset.CoreV1().Secrets(namespace).Delete(t.Context(), secretName, v1.DeleteOptions{})
-		require.NoError(t, deleteErr)
-		t.Logf("Deleted webhook secret: %s (namespace: %s)", secretName, namespace)
-	} else {
+	err := clientset.CoreV1().Secrets(namespace).Delete(ctx, secretName, v1.DeleteOptions{})
+	switch {
+	case k8serrors.IsNotFound(err):
 		t.Logf("Secret %s not found in namespace: %s, nothing to delete", secretName, namespace)
+	case err != nil:
+		require.NoError(t, err)
+	default:
+		t.Logf("Deleted webhook secret: %s (namespace: %s)", secretName, namespace)
 	}
 }
 
 func ChartUninstall(t *testing.T, testKubeConfig string) {
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	crdClient, err := apiextensionsclient.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+	dynClient, err := dynamic.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	client := action.NewList(actionConfig)
 	client.AllNamespaces = true
@@ -138,24 +169,191 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 	client.StateMask = action.ListAll // Include releases in all states
 	releases, err := client.Run()
 	require.NoError(t, err)
-	clientset, err := getKubeClient(testKubeConfig)
-	require.NoError(t, err)
+
+	deleteOperatorCRs(t, crdClient, dynClient)
 
 	if len(releases) == 0 {
 		t.Log("No Helm releases found for uninstall.")
-		// try to delete the cert secret for the default release name/namespace
 		deleteCertSecret(t, clientset, DefaultChartReleaseName, DefaultNamespace)
+		deleteOperatorCRDs(t, crdClient, dynClient)
 		return
 	}
 
 	uninstall := action.NewUninstall(actionConfig)
 	uninstall.IgnoreNotFound = true
-	uninstall.Wait = true
+	uninstall.WaitStrategy = kube.StatusWatcherStrategy
 	uninstall.Timeout = HelmActionTimeout
-	for _, release := range releases {
-		t.Logf("Uninstalling release: %s (namespace: %s)", release.Name, release.Namespace)
-		_, _ = uninstall.Run(release.Name)
-		deleteCertSecret(t, clientset, release.Name, release.Namespace)
+	for _, rel := range releases {
+		r, ok := rel.(*releasev1.Release)
+		require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
+		t.Logf("Uninstalling release: %s (namespace: %s)", r.Name, r.Namespace)
+		resp, uninstallErr := uninstall.Run(r.Name)
+		if uninstallErr != nil {
+			t.Logf("Helm uninstall error for %s: %v", r.Name, uninstallErr)
+		}
+		if resp != nil && resp.Info != "" {
+			t.Logf("Helm uninstall kept resources: %s", resp.Info)
+		}
+		deleteCertSecret(t, clientset, r.Name, r.Namespace)
+	}
+
+	// Log remaining CRs after helm uninstall to diagnose CRD cleanup issues.
+	// Use context.Background because t.Context() is already cancelled during t.Cleanup.
+	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
+	defer diagCancel()
+	postGVRs, _ := otelServedGVRs(diagCtx, crdClient)
+	for _, gvr := range postGVRs {
+		list, listErr := dynClient.Resource(gvr).List(diagCtx, v1.ListOptions{})
+		if listErr != nil {
+			t.Logf("Post-uninstall: failed to list %s CRs: %v", gvr.Resource, listErr)
+			continue
+		}
+		for i := range list.Items {
+			cr := &list.Items[i]
+			t.Logf("Post-uninstall: remaining CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+				gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
+		}
+	}
+
+	deleteOperatorCRDs(t, crdClient, dynClient)
+}
+
+// otelServedGVRs returns the GVR for each opentelemetry.io CRD using its first
+// served version.
+func otelServedGVRs(ctx context.Context, crdClient apiextensionsclient.Interface) ([]schema.GroupVersionResource, error) {
+	crdList, err := crdClient.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var gvrs []schema.GroupVersionResource
+	for _, crd := range crdList.Items {
+		if crd.Spec.Group != "opentelemetry.io" {
+			continue
+		}
+		for _, ver := range crd.Spec.Versions {
+			if ver.Served {
+				gvrs = append(gvrs, schema.GroupVersionResource{
+					Group:    crd.Spec.Group,
+					Version:  ver.Name,
+					Resource: crd.Spec.Names.Plural,
+				})
+				break
+			}
+		}
+	}
+	return gvrs, nil
+}
+
+// deleteOperatorCRs deletes all opentelemetry.io CRs across all namespaces
+// and waits for them to be fully removed.
+func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
+
+	gvrs, err := otelServedGVRs(ctx, crdClient)
+	if err != nil {
+		t.Logf("Failed to list CRDs for CR cleanup: %v", err)
+		return
+	}
+	if len(gvrs) == 0 {
+		return
+	}
+
+	for _, gvr := range gvrs {
+		list, listErr := dynClient.Resource(gvr).List(ctx, v1.ListOptions{})
+		if listErr != nil {
+			t.Logf("Failed to list %s CRs: %v", gvr.Resource, listErr)
+			continue
+		}
+		t.Logf("Found %d %s CRs across all namespaces", len(list.Items), gvr.Resource)
+		for i := range list.Items {
+			cr := &list.Items[i]
+			t.Logf("Deleting %s %s/%s (ns: %s)",
+				cr.GetKind(), gvr.Resource, cr.GetName(), cr.GetNamespace())
+			delErr := dynClient.Resource(gvr).Namespace(cr.GetNamespace()).Delete(ctx, cr.GetName(), v1.DeleteOptions{})
+			if delErr != nil && !k8serrors.IsNotFound(delErr) {
+				t.Logf("Failed to delete %s/%s (ns: %s): %v", gvr.Resource, cr.GetName(), cr.GetNamespace(), delErr)
+			}
+		}
+	}
+
+	for _, gvr := range gvrs {
+		require.Eventually(t, func() bool {
+			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
+			defer pollCancel()
+			list, listErr := dynClient.Resource(gvr).List(pollCtx, v1.ListOptions{})
+			if listErr != nil {
+				return false
+			}
+			return len(list.Items) == 0
+		}, 2*time.Minute, 2*time.Second, "CRs for %s were not removed in time", gvr.Resource)
+		t.Logf("All %s CRs removed", gvr.Resource)
+	}
+}
+
+func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	defer cancel()
+
+	gvrs, err := otelServedGVRs(ctx, crdClient)
+	if err != nil {
+		t.Logf("Failed to list CRDs for CRD cleanup: %v", err)
+		return
+	}
+	if len(gvrs) == 0 {
+		t.Log("No opentelemetry.io CRDs found to delete")
+		return
+	}
+
+	crdAPI := crdClient.ApiextensionsV1().CustomResourceDefinitions()
+	type crdTarget struct {
+		name string
+		gvr  schema.GroupVersionResource
+	}
+	var deleted []crdTarget
+	for _, gvr := range gvrs {
+		crdName := gvr.Resource + "." + gvr.Group
+		delErr := crdAPI.Delete(ctx, crdName, v1.DeleteOptions{})
+		switch {
+		case k8serrors.IsNotFound(delErr):
+			t.Logf("CRD %s already absent", crdName)
+		case delErr != nil:
+			t.Logf("CRD %s not deleted: %v", crdName, delErr)
+		default:
+			t.Logf("Deleted CRD %s, waiting for removal...", crdName)
+			deleted = append(deleted, crdTarget{name: crdName, gvr: gvr})
+		}
+	}
+
+	for _, tgt := range deleted {
+		require.Eventually(t, func() bool {
+			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
+			defer pollCancel()
+			crd, getErr := crdAPI.Get(pollCtx, tgt.name, v1.GetOptions{})
+			if k8serrors.IsNotFound(getErr) {
+				return true
+			}
+			if getErr != nil {
+				t.Logf("CRD %s poll error: %v", tgt.name, getErr)
+				return false
+			}
+			for _, c := range crd.Status.Conditions {
+				if c.Type == "Terminating" {
+					t.Logf("CRD %s still terminating: %s", tgt.name, c.Message)
+				}
+			}
+			// Log remaining CRs that may be blocking CRD removal.
+			list, listErr := dynClient.Resource(tgt.gvr).List(pollCtx, v1.ListOptions{})
+			if listErr == nil && len(list.Items) > 0 {
+				for i := range list.Items {
+					cr := &list.Items[i]
+					t.Logf("CRD %s blocked by CR %s/%s (ns: %s, finalizers: %v, deletionTimestamp: %v)",
+						tgt.name, tgt.gvr.Resource, cr.GetName(), cr.GetNamespace(), cr.GetFinalizers(), cr.GetDeletionTimestamp())
+				}
+			}
+			return false
+		}, 5*time.Minute, 3*time.Second, "CRD %s was not removed in time", tgt.name)
+		t.Logf("CRD %s fully removed", tgt.name)
 	}
 }
 
@@ -164,7 +362,7 @@ func InitHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration
 	cf := genericclioptions.NewConfigFlags(true)
 	cf.Namespace = &DefaultNamespace
 	cf.KubeConfig = &kubeConfig
-	require.NoError(t, actionConfig.Init(cf, DefaultNamespace, os.Getenv("HELM_DRIVER"), t.Logf))
+	require.NoError(t, actionConfig.Init(cf, DefaultNamespace, os.Getenv("HELM_DRIVER")))
 	return actionConfig
 }
 
@@ -178,19 +376,19 @@ func UpdateOperatorCRDs(t *testing.T, oldChartPath string, newChartPath string, 
 	}
 	t.Logf("Updating CRDs from %s to %s", oldCrdsVer, newCrdsVer)
 
-	cmd := exec.Command("kubectl", "apply", "-f", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")) //nolint:gosec
+	crdsDir := filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds")
+	cmd := exec.Command("kubectl", "apply", "-f", crdsDir)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", testKubeConfig))
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err, "failed to apply CRDs: %s", string(output))
-
-	t.Logf("Successfully applied CRDs from %s", filepath.Join(newChartPath, "charts", "opentelemetry-operator-crds", "crds"))
+	t.Logf("Successfully applied CRDs from %s", crdsDir)
 }
 
-func loadChart(t *testing.T) *chart.Chart {
+func loadChart(t *testing.T) chart.Charter {
 	return loadChartFromDir(t, defaultChartPath)
 }
 
-func loadChartFromDir(t *testing.T, dir string) *chart.Chart {
+func loadChartFromDir(t *testing.T, dir string) chart.Charter {
 	chartPath := filepath.Join("..", "..", dir)
 	c, err := loader.Load(chartPath)
 	require.NoError(t, err)

@@ -7,24 +7,24 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.141.0
+    helm.sh/chart: splunk-otel-collector-0.149.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.141.0"
+    app.kubernetes.io/version: "0.149.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.141.0
+    chart: splunk-otel-collector-0.149.0
     release: default
 data:
   relay: |
     exporters:
-      otlphttp:
+      otlp_http:
         auth:
           authenticator: headers_setter
         metrics_endpoint: https://ingest.CHANGEME.signalfx.com/v2/datapoint/otlp
         sending_queue:
           num_consumers: 32
         traces_endpoint: https://ingest.CHANGEME.signalfx.com/v2/trace/otlp
-      otlphttp/entities:
+      otlp_http/entities:
         auth:
           authenticator: headers_setter
         logs_endpoint: https://ingest.CHANGEME.signalfx.com/v3/event
@@ -58,7 +58,7 @@ data:
             resource_attributes:
             - key: splunk.com/exclude
               value: "true"
-      k8sattributes:
+      k8s_attributes:
         extract:
           annotations:
           - from: pod
@@ -159,6 +159,17 @@ data:
           scrape_configs:
           - job_name: otel-collector
             metric_relabel_configs:
+            - source_labels:
+              - service_name
+              target_label: service.name
+            - source_labels:
+              - service_instance_id
+              target_label: service.instance.id
+            - source_labels:
+              - service_version
+              target_label: service.version
+            - action: labeldrop
+              regex: service_name|service_instance_id|service_version
             - action: drop
               regex: promhttp_metric_handler_errors.*
               source_labels:
@@ -167,13 +178,14 @@ data:
               regex: otelcol_processor_batch_.*
               source_labels:
               - __name__
+            - action: drop
+              regex: .*otelcol\.k8s\.pod\.association
+              source_labels:
+              - __name__
             scrape_interval: 10s
             static_configs:
             - targets:
               - localhost:8889
-      signalfx:
-        endpoint: 0.0.0.0:9943
-        include_metadata: true
       zipkin:
         endpoint: 0.0.0.0:9411
     service:
@@ -185,7 +197,7 @@ data:
       pipelines:
         logs/entities:
           exporters:
-          - otlphttp/entities
+          - otlp_http/entities
           processors:
           - memory_limiter
           - batch
@@ -214,11 +226,11 @@ data:
           - prometheus/collector
         traces:
           exporters:
-          - otlphttp
+          - otlp_http
           - signalfx
           processors:
           - memory_limiter
-          - k8sattributes
+          - k8s_attributes
           - batch
           - resource/add_cluster_name
           receivers:

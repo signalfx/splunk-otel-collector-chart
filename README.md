@@ -63,7 +63,7 @@ however, only the Splunk distributions are in scope for official Splunk support 
 This distribution currently supports:
 
 - [Splunk APM](https://www.splunk.com/en_us/products/apm-application-performance-monitoring.html) via the
-  [`otlphttp`
+  [`otlp_http`
   exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter).
 - [Splunk Infrastructure
   Monitoring](https://www.splunk.com/en_us/products/infrastructure-monitoring.html)
@@ -99,9 +99,9 @@ require additional configurations applied to
 
 The following prerequisites are required to use the helm chart:
 
-- [Helm 3](https://helm.sh/docs/intro/install/)
-  - Helm 3 version support may vary depending on the [supported Kubernetes version](#supported-kubernetes-distributions) you are using and the [Helm supported Kubernetes versions skew](https://helm.sh/docs/topics/version_skew/#supported-version-skew).
-  - This project is maintained using Helm v3.18.0.
+- [Helm 3.9+ or Helm 4.x](https://helm.sh/docs/intro/install/)
+  - Helm version support may vary depending on the [supported Kubernetes version](#supported-kubernetes-distributions) you are using and the [Helm supported Kubernetes versions skew](https://helm.sh/docs/topics/version_skew/#supported-version-skew).
+  - This project is tested with Helm v3.20.0 and v4.1.1.
   - Please note that Helm 2 is not supported.
 - Administrator access to your [Kubernetes cluster](https://kubernetes.io/) and familiarity with your Kubernetes configuration. You must know where your log information is being collected in your Kubernetes deployment.
 
@@ -197,7 +197,7 @@ To upgrade a deployment follow the instructions for installing
 but use `upgrade` instead of `install`, for example:
 
 ```bash
-helm upgrade my-splunk-otel-collector --values my_values.yaml
+helm upgrade my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 ### How to uninstall
@@ -205,7 +205,7 @@ helm upgrade my-splunk-otel-collector --values my_values.yaml
 To uninstall/delete a deployment with name `my-splunk-otel-collector`:
 
 ```bash
-helm delete my-splunk-otel-collector
+helm uninstall my-splunk-otel-collector
 ```
 
 ## Advanced Configuration

@@ -74,7 +74,7 @@ resourceLogs:
                 value:
                   stringValue: Normal
             body:
-              stringValue: create Pod k8sevents-test-0 in StatefulSet k8sevents-test successful
+              stringValue: Create Pod k8sevents-test-0 in StatefulSet k8sevents-test successful
             timeUnixNano: "1759215206000000000"
           - attributes:
               - key: deployment.environment
@@ -327,7 +327,7 @@ resourceLogs:
                 value:
                   stringValue: Normal
             body:
-              stringValue: 'Created container: container-1'
+              stringValue: Container created
             timeUnixNano: "1759215210000000000"
           - attributes:
               - key: deployment.environment
@@ -391,7 +391,7 @@ resourceLogs:
                 value:
                   stringValue: Normal
             body:
-              stringValue: Started container container-1
+              stringValue: Container started
             timeUnixNano: "1759215210000000000"
           - attributes:
               - key: deployment.environment
@@ -583,7 +583,7 @@ resourceLogs:
                 value:
                   stringValue: Normal
             body:
-              stringValue: 'Created container: container-2'
+              stringValue: Container created
             timeUnixNano: "1759215213000000000"
           - attributes:
               - key: deployment.environment
@@ -647,6 +647,6 @@ resourceLogs:
                 value:
                   stringValue: Normal
             body:
-              stringValue: Started container container-2
+              stringValue: Container started
             timeUnixNano: "1759215213000000000"
         scope: {}

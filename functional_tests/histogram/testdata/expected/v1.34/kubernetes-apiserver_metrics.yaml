@@ -1,0 +1,597 @@
+resourceMetrics:
+  - resource: {}
+    scopeMetrics:
+      - metrics:
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: resource
+                      value:
+                        stringValue: endpoints
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                    - key: version
+                      value:
+                        stringValue: v1
+                  timeUnixNano: "1000000"
+            name: apiserver_requested_deprecated_apis
+          - gauge:
+              dataPoints:
+                - asDouble: 22333
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_samples_scraped
+          - gauge:
+              dataPoints:
+                - asDouble: 5194
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_series_added
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: component
+                      value:
+                        stringValue: apiserver
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: resource
+                      value:
+                        stringValue: configmaps
+                    - key: scope
+                      value:
+                        stringValue: cluster
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                    - key: verb
+                      value:
+                        stringValue: WATCH
+                    - key: version
+                      value:
+                        stringValue: v1
+                  timeUnixNano: "1000000"
+            name: apiserver_longrunning_requests
+          - gauge:
+              dataPoints:
+                - asDouble: 21
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: resource
+                      value:
+                        stringValue: apiservices.apiregistration.k8s.io
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: apiserver_storage_objects
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: build_date
+                      value:
+                        stringValue: "2025-12-09T14:59:13Z"
+                    - key: compiler
+                      value:
+                        stringValue: gc
+                    - key: git_commit
+                      value:
+                        stringValue: df11db1c0f08fab3c0baee1e5ce6efbf816af7f1
+                    - key: git_tree_state
+                      value:
+                        stringValue: clean
+                    - key: git_version
+                      value:
+                        stringValue: v1.34.3
+                    - key: go_version
+                      value:
+                        stringValue: go1.24.11
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: major
+                      value:
+                        stringValue: "1"
+                    - key: minor
+                      value:
+                        stringValue: "34"
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: platform
+                      value:
+                        stringValue: linux/arm64
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: kubernetes_build_info
+          - gauge:
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: up
+          - gauge:
+              dataPoints:
+                - asDouble: 0.165889125
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_duration_seconds
+          - gauge:
+              dataPoints:
+                - asDouble: 5194
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: scrape_samples_post_metric_relabeling
+          - name: apiserver_request_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 1
+                  attributes:
+                    - key: code
+                      value:
+                        stringValue: "0"
+                    - key: component
+                      value:
+                        stringValue: apiserver
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: resource
+                      value:
+                        stringValue: pods
+                    - key: scope
+                      value:
+                        stringValue: resource
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: subresource
+                      value:
+                        stringValue: attach
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                    - key: verb
+                      value:
+                        stringValue: CONNECT
+                    - key: version
+                      value:
+                        stringValue: v1
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+          - gauge:
+              dataPoints:
+                - asDouble: 1.560576e+06
+                  attributes:
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: storage_cluster_id
+                      value:
+                        stringValue: etcd-0
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+            name: apiserver_storage_size_bytes
+          - name: rest_client_requests_total
+            sum:
+              aggregationTemporality: 2
+              dataPoints:
+                - asDouble: 115
+                  attributes:
+                    - key: code
+                      value:
+                        stringValue: "200"
+                    - key: host
+                      value:
+                        stringValue: '[::1]:6443'
+                    - key: host.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: sock
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: kube-system
+                    - key: k8s.node.name
+                      value:
+                        stringValue: kind-control-plane
+                    - key: k8s.pod.name
+                      value:
+                        stringValue: kube-apiserver-kind-control-plane
+                    - key: k8s.pod.uid
+                      value:
+                        stringValue: 35e42c38-6a8d-46f4-a336-7bd217e56c38
+                    - key: method
+                      value:
+                        stringValue: GET
+                    - key: os.type
+                      value:
+                        stringValue: linux
+                    - key: server.address
+                      value:
+                        stringValue: 172.18.0.2
+                    - key: server.port
+                      value:
+                        stringValue: "6443"
+                    - key: service.instance.id
+                      value:
+                        stringValue: 172.18.0.2:6443
+                    - key: service.name
+                      value:
+                        stringValue: kubernetes-apiserver
+                    - key: url.scheme
+                      value:
+                        stringValue: https
+                  timeUnixNano: "1000000"
+              isMonotonic: true
+        scope: {}

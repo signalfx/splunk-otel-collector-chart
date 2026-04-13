@@ -126,22 +126,15 @@ splunkPlatform:
 Splunk OpenTelemetry Collector for Kubernetes supports collection of metrics,
 traces and logs (using OTel native logs collection only) from Windows nodes.
 
-All windows images are available in a separate `quay.io` repository:
-`quay.io/signalfx/splunk-otel-collector-windows` with two release tracking tags
-available: `latest` (Server 2019) and `latest-2022` (Server 2022). Version tags
-follow the convention of `<appVersion>` (2019) and `<appVersion>-2022` (2022).
-The digests for each release are detailed at
-https://github.com/signalfx/splunk-otel-collector/releases.
+The default collector image is a multi-arch manifest that supports Linux and Windows.
+The container runtime automatically pulls the correct image for the node's
+OS and architecture, so no separate image repository override is needed.
 
 Use the following values.yaml configuration to install the helm chart on Windows
 worker nodes:
 
 ```yaml
 isWindows: true
-image:
-  otelcol:
-    repository: quay.io/signalfx/splunk-otel-collector-windows
-    tag: <appVersion>-2022
 logsEngine: otel
 readinessProbe:
   initialDelaySeconds: 60
@@ -413,24 +406,19 @@ end user, collecting metrics from these distributions is not supported.
   * openshift v4.9
 * Unsupported Distributions:
   * aks
-  * eks
+  * eks (API server metrics are collected separately, see below)
   * eks/fargate
   * gke
   * gke/autopilot
 
+For EKS clusters, although the control plane pods are not directly accessible, API server metrics
+can still be collected via `featureGates.enableEKSApiServerMetrics` (enabled by default). This
+configures a Prometheus receiver in the cluster receiver that scrapes the Kubernetes API server
+endpoint. The scrape interval for this receiver is controlled by
+`agent.controlPlaneMetrics.scrapeInterval` (default: `10s`).
+
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
-
-### Receiver documentation
-
-Here are the documentation links that contain configuration options and supported metrics information for each receiver
-used to collect metrics from the control plane.
-* [smartagent/coredns](https://docs.splunk.com/Observability/gdi/coredns/coredns.html)
-* [smartagent/etcd](https://docs.splunk.com/Observability/gdi/etcd/etcd.html)
-* [smartagent/kube-controller-manager](https://docs.splunk.com/Observability/gdi/kube-controller-manager/kube-controller-manager.html)
-* [smartagent/kubernetes-apiserver](https://docs.splunk.com/Observability/gdi/kubernetes-apiserver/kubernetes-apiserver.html)
-* [smartagent/kubernetes-proxy](https://docs.splunk.com/Observability/gdi/kubernetes-proxy/kubernetes-proxy.html)
-* [smartagent/kubernetes-scheduler](https://docs.splunk.com/Observability/gdi/kubernetes-scheduler/kubernetes-scheduler.html)
 
 ### Setting up etcd metrics
 
@@ -540,18 +528,25 @@ agent:
       receiver_creator:
         receivers:
           # Template for overriding the discovery rule and config.
-          # smartagent/{control_plane_receiver}:
+          # prometheus/{control_plane_receiver}:
           #   rule: {rule_value}
           #   config:
           #     {config_value}
-          smartagent/kubernetes-apiserver:
+          prometheus/kubernetes-apiserver:
             rule: type == "port" && port == 3443 && pod.labels["k8s-app"] == "kube-apiserver"
             config:
-              clientCertPath: /etc/myapiserver/clients-ca.crt
-              clientKeyPath: /etc/myapiserver/clients-ca.key
-              skipVerify: true
-              useHTTPS: true
-              useServiceAccount: false
+              config:
+                scrape_configs:
+                - job_name: "kubernetes-apiserver"
+                  static_configs:
+                    - targets: ["`endpoint`:3443"]
+                  scheme: https
+                  authorization:
+                    credentials_file: "/etc/myapiserver/clients-ca.key"
+                    type: Bearer
+                  tls_config:
+                    ca_file: "/etc/myapiserver/clients-ca.crt"
+                    insecure_skip_verify: true
 ```
 
 ### Known issues
@@ -650,6 +645,36 @@ logsCollection:
     # Route journald logs to its own Splunk Index by specifying the index value below, else leave it blank. Please make sure the index exist in Splunk and is configured to receive HEC traffic (Not applicable to Splunk Observability).
     index: ""
 ```
+
+#### Use the Host Journalctl binary
+
+By default, the Splunk OpenTelemetry Collector for Kubernetes uses its own `journalctl` binary to read journald events.
+However, in some environments, the bundled binary may not be compatible with the version that generated the journald events.
+In such cases, you can configure the collector to use the host's `journalctl` binary to read journald events.
+This can be done by setting the `useHostJournalctl` option to `true` in the `logsCollection.journald` section of the values.yaml file.
+
+```yaml
+logsCollection:
+  journald:
+    useHostJournalctl: true
+    enabled: true
+```
+
+The chart exposes the following options to additionally configure the use of the host's `journalctl` binary:
+- `root_path`: Path to the host filesystem root where the libraries needed by journalctl are mounted, default `/hostfs`
+- `journalctl_path`: Path to the host journalctl binary, default `/usr/bin/journalctl`
+- `mnts`: List of host lib mounts needed to run the host's journalctl binary. default mounts are:
+```
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
+```
+
+For details on how this feature works, please refer to the upstream OpenTelemetry Collector Contrib documentation on
+[Journald Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver#docker--kubernetes)
 
 ### Managing Log Ingestion by Using Annotations
 

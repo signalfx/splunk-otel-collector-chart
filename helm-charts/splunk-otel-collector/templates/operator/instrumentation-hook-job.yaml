@@ -1,0 +1,155 @@
+{{- if (and .Values.operator.enabled .Values.instrumentation.enabled .Values.instrumentation.installationJob.enabled) }}
+{{- include "splunk-otel-collector.operator.validation-rules" . -}}
+{{- $name := printf "%s-inst-hook" (include "splunk-otel-collector.fullname" .) }}
+{{- $ns := include "splunk-otel-collector.namespace" . }}
+{{- $operatorDeploy := include "splunk-otel-collector.operator.deploymentName" . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: {{ .Values.featureGates.explicitMountServiceAccountToken | ternary false true }}
+{{- if .Values.image.imagePullSecrets }}
+imagePullSecrets:
+{{- range .Values.image.imagePullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
+metadata:
+  name: {{ $name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: instrumentation-job
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: instrumentation-job
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["opentelemetry.io"]
+    resources: ["instrumentations"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: instrumentation-job
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ $ns }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/component: instrumentation-job
+data:
+  instrumentation.yaml: |
+    {{- include "splunk-otel-collector.operator.instrumentation-cr" . | nindent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ $ns }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.instrumentation.installationJob.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "splunk-otel-collector.name" . }}-inst-hook
+    spec:
+      serviceAccountName: {{ $name }}
+      restartPolicy: OnFailure
+      {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+      automountServiceAccountToken: false
+      {{- end }}
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-operator
+          image: "{{ .Values.instrumentation.installationJob.image.repository }}:{{ .Values.instrumentation.installationJob.image.tag }}"
+          command: ["kubectl", "wait", "--for=condition=Available", "--timeout=120s", "deployment/{{ $operatorDeploy }}", "-n", "{{ $ns }}"]
+          {{- with .Values.instrumentation.installationJob.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+          volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: serviceaccount-token
+              readOnly: true
+          {{- end }}
+      containers:
+        - name: apply-cr
+          image: "{{ .Values.instrumentation.installationJob.image.repository }}:{{ .Values.instrumentation.installationJob.image.tag }}"
+          command: ["kubectl", "apply", "-f", "/config/instrumentation.yaml"]
+          volumeMounts:
+            - name: cr-config
+              mountPath: /config
+              readOnly: true
+            {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: serviceaccount-token
+              readOnly: true
+            {{- end }}
+          {{- with .Values.instrumentation.installationJob.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: cr-config
+          configMap:
+            name: {{ $name }}
+        {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+        - name: serviceaccount-token
+          projected:
+            defaultMode: 0444
+            sources:
+            - serviceAccountToken:
+                path: token
+            - configMap:
+                name: kube-root-ca.crt
+                items:
+                - key: ca.crt
+                  path: ca.crt
+            - downwardAPI:
+                items:
+                - path: namespace
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.namespace
+        {{- end }}
+{{- end }}

@@ -12,7 +12,7 @@ splunkPlatform:
 agent:
   config:
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
@@ -22,7 +22,7 @@ agent:
       pipelines:
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
         metrics/agent:
           exporters:
             - file
@@ -36,11 +36,17 @@ clusterReceiver:
           insecure: true
       file:
         path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
     service:
       pipelines:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - signalfx
+            - file/k8s_cluster
 
   k8sObjects:
     - name: pods
@@ -67,16 +73,16 @@ extraAttributes:
    - name: "customfield2"
      value: "customvalue2"
 
-clusterName: test
 environment: test
 cloudProvider: gcp
 distribution: gke
+instrumentation:
+  installationJob:
+    enabled: true
 operatorcrds:
   install: true
 operator:
   enabled: true
-  admissionWebhooks:
-    certManager:
-      enabled: false
-    autoGenerateCert:
-      enabled: true
+  manager:
+    image:
+      imagePullPolicy: Always

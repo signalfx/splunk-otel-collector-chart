@@ -1,0 +1,98 @@
+---
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   ingestUrl: {{ .AgentEndpoint }}
+   apiUrl: {{ .ApiURLEndpoint }}
+
+splunkPlatform:
+  token: foobar
+  endpoint: {{ .LogHecEndpoint }}
+  metricsEnabled: true
+  metricsIndex: myMetricsIndex
+
+autodetect:
+  prometheus: true
+
+logsCollection:
+  journald:
+    enabled: false
+
+agent:
+  config:
+    receivers:
+      kubeletstats:
+        insecure_skip_verify: true
+    exporters:
+      file:
+        path: /tmp/metrics.json
+      otlp_grpc:
+        endpoint: {{ .OtlpEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
+    service:
+      pipelines:
+        metrics/agent:
+          exporters:
+            - file
+        traces:
+          exporters:
+            - otlp_grpc
+clusterReceiver:
+  eventsEnabled: true
+  config:
+    exporters:
+      file:
+        path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
+      signalfx:
+        ingest_url: {{ .K8sClusterEndpoint }}
+        tls:
+          insecure: true
+      splunk_hec/platform_logs:
+        endpoint: {{ .LogObjectsHecEndpoint }}
+    service:
+      pipelines:
+        metrics/collector:
+          exporters:
+            - file
+        metrics:
+          exporters:
+            - signalfx
+            - file/k8s_cluster
+
+  k8sObjects:
+    - name: pods
+    - name: namespaces
+    - name: nodes
+    - name: events
+      mode: watch
+
+extraAttributes:
+  fromAnnotations:
+    - key: splunk.com/customField
+      tag_name: customField
+  fromLabels:
+    - key: app
+      from: pod
+    - key: app
+      from: namespace
+
+  custom:
+   - name: "cluster_name"
+     value: "ci-k8s-cluster"
+   - name: "customfield1"
+     value: "customvalue1"
+   - name: "customfield2"
+     value: "customvalue2"
+
+environment: dev
+cloudProvider: aws
+distribution: openshift
+operatorcrds:
+  install: false
+operator:
+  enabled: false

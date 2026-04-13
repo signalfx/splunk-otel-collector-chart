@@ -1,6 +1,6 @@
-FROM node:18-alpine
+FROM node:18-slim
 
-RUN apk add --no-cache bash curl
+RUN apt-get update && apt-get install -y --no-install-recommends bash curl && rm -rf /var/lib/apt/lists/*
 
 COPY index.js start.sh /
 

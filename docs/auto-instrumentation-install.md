@@ -55,23 +55,31 @@ these frameworks often have pre-built instrumentation capabilities already avail
 
   - **Alternative Methods**
     - **Instrumentation Spec**
-      - `operator.instrumentation.spec.env`: Use with the `OTEL_RESOURCE_ATTRIBUTES` environment variable to specify the deployment environment.
+      - `instrumentation.spec.env`: Use with the `OTEL_RESOURCE_ATTRIBUTES` environment variable to specify the deployment environment.
 
 - **Auto-instrumentation Configuration Overrides (Optional)**
   - **[Default Instrumentation](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/examples/enable-operator-and-auto-instrumentation/rendered_manifests/operator/instrumentation.yaml) Object Deployment**
     - Automatically deploys with `operator.enabled=true`.
-    - Supports AlwaysOn Profiling when `splunkObservability.profilingEnabled=true`.
+    - Supports AlwaysOn Profiling when `splunkObservability.profilingEnabled=true`. When enabled, the chart:
+      - Configures the collector's logs pipeline and `splunk_hec/o11y` exporter to forward profiling data to Splunk Observability Cloud.
+      - Automatically injects `SPLUNK_PROFILER_ENABLED=true` and `SPLUNK_PROFILER_MEMORY_ENABLED=true` into the Instrumentation CR's global `spec.env`, unless already defined there.
+      - To disable profiling for specific languages, override these vars in the per-language env (e.g. `instrumentation.spec.java.env`). See the [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml) example.
+      - To disable profiling globally while keeping the pipeline active, set `SPLUNK_PROFILER_ENABLED=false` and `SPLUNK_PROFILER_MEMORY_ENABLED=false` in `instrumentation.spec.env`.
   - **Customizing Instrumentation**
-    - `operator.instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
+    - `instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
       - **Examples**
-        - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation_add_custom_environment_span_tag.yaml)
+        - [Custom environment span tags](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-custom-environment-span-tag.yaml)
         - [trace sampler](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-add-trace-sampler.yaml)
+        - [enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling.yaml)
         - [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml)
         - [enable useLabelsForResourceAttributes](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-use-labels-for-resource-attributes.yaml).
 
 ```bash
 helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
+
+> **Note:** On **Helm v4**, the default resource mode can fail on first install — see
+> [Instrumentation CR Management](#instrumentation-cr-management) for details and workarounds.
 
 ### 2. Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully
 
@@ -463,18 +471,18 @@ When deploying the operator, the required Custom Resource Definitions (CRDs) mus
 #### Recommended Approach: Automated CRD Deployment
 
 Set the Helm chart value `operatorcrds.install=true` to allow the chart to handle CRD installation automatically.
-_This option deploys the CRDs using a local subchart, available at [opentelemetry-operator-crds](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds)._
+By default, the Splunk chart installs only the Instrumentation CRD via a local subchart, available at [opentelemetry-operator-crds](https://github.com/signalfx/splunk-otel-collector-chart/tree/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds).
 _Please note, helm will not update or delete these CRDs after initial install as noted in their [documentation](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/#some-caveats-and-explanations)._
 
 #### Alternative Approach: Manual CRD Deployment
 
-If you prefer to manage CRD deployment manually, apply the CRDs using the commands below before installing the Helm chart:
+If you prefer to manage CRD deployment manually, apply the CRD using the command below before installing the Helm chart:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/signalfx/splunk-otel-collector-chart/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml | kubectl apply -f -
 ```
 
-You can also use below helm template command to get the CRD yamls from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
+You can also use below helm template command to get the CRD yaml from the helm chart. This method can be helpful in keeping CRDs in-sync with the version bundled with our helm chart.
 
 ```bash
 helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
@@ -490,12 +498,15 @@ Refer to the [Helm Documentation on CRDs](https://helm.sh/docs/chart_best_practi
 
 #### CRD Cleanup
 
-When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following commands:
+When uninstalling this chart, the OpenTelemetry CRDs are not removed automatically. To delete them manually, use the following command:
 
 ```bash
 kubectl delete crd instrumentations.opentelemetry.io
 ```
-You can use below combination of helm and kubectl command to delete CRDs.
+
+_These commands apply to the Instrumentation CRD installed by this chart (e.g. with `operatorcrds.install=true`). If you installed other OpenTelemetry CRDs from upstream (such as OpenTelemetryCollector or OpAMPBridge), delete those separately in the same way: `kubectl delete crd <crd-name>`._
+
+You can also use below combination of helm and kubectl command to delete CRDs.
 
 ```bash
 helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
@@ -503,6 +514,149 @@ helm template splunk-otel-collector-chart/splunk-otel-collector --include-crds \
 | yq e '. | select(.kind == "CustomResourceDefinition")' \
 | kubectl delete --dry-run=client -f -
 ```
+
+### Instrumentation CR Management
+
+The Instrumentation Custom Resource (CR) tells the operator which applications to instrument and
+how (languages, exporters, propagators, etc.). When `operator.enabled=true`, the chart registers
+[admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+that validate and default the Instrumentation CR, and inject auto-instrumentation init containers
+into Pods.
+
+#### Disabling the Instrumentation CR
+
+Set `instrumentation.enabled=false` to skip deploying the CR entirely. This is useful if you
+want to manage the CR outside of Helm (e.g. via GitOps or `kubectl apply`).
+
+#### Recommended: Installation Job
+
+We recommend enabling the installation Job. It deploys the CR via a Kubernetes Job that
+handles webhook readiness automatically — no manual workarounds needed regardless of Helm
+version. The Job:
+
+1. Waits for the operator Deployment to become `Available`.
+2. Applies the CR via `kubectl apply`.
+3. Retries automatically (up to `backoffLimit`) if the apply fails.
+
+Enable it by adding `--set instrumentation.installationJob.enabled=true` to your
+`helm install` / `helm upgrade` command.
+
+```bash
+helm install splunk-otel-collector \
+  -f ./my_values.yaml \
+  --set operatorcrds.install=true,operator.enabled=true,environment=dev \
+  --set instrumentation.installationJob.enabled=true \
+  splunk-otel-collector-chart/splunk-otel-collector
+```
+
+- Works reliably across Helm v3 and v4.
+- On upgrade, patches the CR in-place (via `kubectl apply`).
+- Requires the `registry.k8s.io/kubectl` image to be pullable in your cluster.
+- On uninstall, the CR is **not** deleted by Helm — see [Uninstall cleanup](#uninstall-cleanup-job-mode) below.
+
+> **Note:** The operator's current readiness probe may pass before the webhook TLS listener
+> is fully accepting connections. The Job's retry mechanism (`backoffLimit`) covers this gap.
+> This will be fully resolved when the operator ships a webhook-aware readiness check
+> ([opentelemetry-operator#4778](https://github.com/open-telemetry/opentelemetry-operator/pull/4778)).
+
+| Value | Default | Description |
+|---|---|---|
+| `instrumentation.installationJob.enabled` | `false` | Enable Job-based CR deployment. |
+| `instrumentation.installationJob.image.repository` | `registry.k8s.io/kubectl` | Official kubectl image (distroless). |
+| `instrumentation.installationJob.image.tag` | `v1.35.1` | Image tag — should match your cluster version. |
+| `instrumentation.installationJob.backoffLimit` | `6` | Maximum retries before the Job is marked failed. |
+| `instrumentation.installationJob.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 100m, memory: 128Mi}}` | Resource requests/limits applied to **both** the `wait-operator` init container and the `apply-cr` container. |
+
+---
+
+#### Uninstall cleanup (job mode)
+
+When using the installation Job, the CR is not managed by Helm's lifecycle. Delete it
+**before** uninstalling so the CRD still exists:
+
+```bash
+kubectl delete otelinst <release-name>-splunk-otel-collector -n <namespace>
+helm uninstall <release-name> -n <namespace>
+```
+
+If the CRD is already gone, remove the finalizer first:
+
+```bash
+kubectl patch otelinst <release-name>-splunk-otel-collector -n <namespace> \
+  --type=merge -p '{"metadata":{"finalizers":null}}'
+kubectl delete otelinst <release-name>-splunk-otel-collector -n <namespace>
+```
+
+> **Note:** Successful Jobs are cleaned up automatically. Failed Jobs are **not** removed
+> by `helm uninstall` (Helm hooks are not part of the release). They are cleaned up on the next
+> `helm install` or `helm upgrade`. To manually remove a failed Job:
+> ```bash
+> kubectl delete job <release-name>-splunk-otel-collector-inst-hook -n <namespace>
+> ```
+
+---
+
+#### Resource mode (default)
+
+Without the installation Job, the CR is deployed as a regular Helm resource. This is simpler but
+has Helm-version-dependent behavior on first install:
+
+- **Helm v3** — the CR is applied before webhook configurations are registered, so it skips
+  webhook validation. Functionally correct — defaults are filled in on the next `helm upgrade`.
+- **Helm v4** — webhook configurations are
+  [registered first](https://github.com/helm/helm/blob/v4.1.1/pkg/release/v1/util/kind_sorter.go),
+  and since the operator is not ready yet (`failurePolicy: Fail`), **`helm install` will fail**.
+
+If you cannot use the installation Job, use a two-step install:
+
+```bash
+# Step 1: deploy without the CR.
+# Helm v4: use --wait=watcher (the default --wait only waits for hooks).
+# Helm v3: use --wait (it already waits for all resources).
+helm install splunk-otel-collector --wait=watcher \
+  -f ./my_values.yaml \
+  --set operatorcrds.install=true,operator.enabled=true \
+  --set instrumentation.enabled=false \
+  splunk-otel-collector-chart/splunk-otel-collector
+```
+
+> **Webhook readiness caveat:** The operator's readiness probe currently passes before the
+> webhook TLS listener is fully accepting connections, so `--wait` alone may not be enough.
+> If step 2 fails, verify the webhook is ready before retrying:
+>
+> ```bash
+> until kubectl apply --dry-run=server -f - <<'EOF' 2>/dev/null
+> apiVersion: opentelemetry.io/v1alpha1
+> kind: Instrumentation
+> metadata:
+>   name: webhook-check
+> spec:
+>   exporter:
+>     endpoint: http://localhost:4317
+> EOF
+> do
+>   echo "Waiting for webhook to accept connections..."
+>   sleep 10
+> done
+> echo "Webhook is ready!"
+> ```
+>
+> This extra check will no longer be needed once the operator ships a webhook-aware
+> readiness probe
+> ([opentelemetry-operator#4778](https://github.com/open-telemetry/opentelemetry-operator/pull/4778)).
+
+```bash
+# Step 2: enable the CR (webhook is now ready).
+helm upgrade --install splunk-otel-collector \
+  -f ./my_values.yaml \
+  --set operatorcrds.install=true,operator.enabled=true,environment=dev \
+  splunk-otel-collector-chart/splunk-otel-collector
+```
+
+- `helm uninstall` deletes the CR automatically.
+- On upgrade, Helm patches the CR in-place.
+
+---
 
 ### TLS Certificate Requirement for Kubernetes Operator Webhooks
 
@@ -514,21 +668,47 @@ In Kubernetes, the API server communicates with operator webhook components over
 
 This is the default and simplest method for generating a TLS certificate. It automatically creates a self-signed certificate for the webhook, making it suitable for internal environments or testing purposes. However, it may not be trusted by clients outside your cluster.
 
-**Note**: The following settings reflect the default values starting in **v1.20.0** of this chart. You only need to update them if using a **previous chart version** or if additional customization is required.
+**Note**: The following settings are the chart defaults. You only need to change them if your environment requires different certificate management.
 
 ```yaml
 operator:
   admissionWebhooks:
     autoGenerateCert:
       enabled: true
+      recreate: false
       certPeriodDays: 3650
     certManager:
       enabled: false
 ```
 
 - Setting `operator.admissionWebhooks.certManager.enabled` to `false` and `operator.admissionWebhooks.autoGenerateCert.enabled` to `true` ensures that Helm generates a self-signed TLS certificate.
-- Helm generates a self-signed certificate that is valid for 10 years (3650 days) and stores it in a secret for the Operator webhook. The certificate's validity period can be adjusted using `operator.admissionWebhooks.autoGenerateCert.certPeriodDays`.
-- The certificate is **automatically regenerated** on every Helm upgrade. To disable this behavior, set `operator.admissionWebhooks.autoGenerateCert.recreate` to `false`.
+- Helm generates a self-signed certificate that is valid for **10 years** (3650 days) and stores it in a Kubernetes Secret for the operator webhook. The validity period can be adjusted using `operator.admissionWebhooks.autoGenerateCert.certPeriodDays`.
+- By default, the certificate is **reused across upgrades** (`recreate: false`). This means upgrades are fast and do not trigger unnecessary operator pod restarts.
+
+##### Certificate rotation (`recreate: true`)
+
+Setting `recreate: true` regenerates the CA and certificate on every `helm upgrade`.
+You **must** pair this with `operator.manager.rolling: true` so the pod restarts and loads
+the new certificate; otherwise the running pod serves the old cert while the webhook
+configuration already references the new CA, causing `x509: certificate signed by unknown
+authority` errors.
+
+With the default `certPeriodDays: 3650` (10 years), rotation is unnecessary for most
+deployments. If your security policy requires it, set:
+
+```yaml
+operator:
+  manager:
+    rolling: true
+  admissionWebhooks:
+    autoGenerateCert:
+      recreate: true
+      certPeriodDays: 365   # or your required maximum validity period
+```
+
+> **Note:** `rolling: true` forces a pod restart on **every** `helm upgrade`, even when the
+> certificate has not changed. For cert-change-only restarts, consider using
+> [cert-manager](#2-using-a-cert-manager-certificate) instead.
 
 ---
 
@@ -721,6 +901,16 @@ Test API Server to Operator Webhook Connection
   - [Cilium Issue #21959 How to use an admission webhook with Cilium?](https://github.com/cilium/cilium/issues/21959)
   - [OpenTelemetry Operator Issue #2260 Webhook "address is not allowed" when creating an Instrumentation on EKS](https://github.com/open-telemetry/opentelemetry-operator/issues/2260)
   - [Cilium Issue  #30111 EKS Cilium in Overlay with ALB and webhooks: Address is not allowed](https://github.com/cilium/cilium/issues/30111)
+
+**[GKE Private Cluster] Webhook timeout: "context deadline exceeded"**
+- **Cause:** On GKE private clusters, the default firewall rules only allow the
+  control plane to reach nodes on TCP ports **443** and **10250**. The operator webhook
+  pod listens on port **9443**, which is blocked by default. This causes webhook
+  calls to time out when creating the Instrumentation resource.
+- **Resolution:** Add a GCP firewall rule allowing the control plane to reach
+  TCP port 9443 on cluster nodes. Follow the instructions in the GKE
+  documentation:
+  [Add firewall rules for specific use cases](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/latest/network-isolation#add_firewall_rules).
 
 ### Documentation Resources
 

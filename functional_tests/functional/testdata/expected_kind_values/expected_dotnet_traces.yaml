@@ -12,7 +12,7 @@ resourceSpans:
             stringValue: 1.11.0
         - key: container.id
           value:
-            stringValue: 2ed2e1ddb3fa29529390c1d61b6579631f0a959e0c9d762c267b6186ae1e518e
+            stringValue: df0eb3da3afb8589c96ae58c10c34dd9f3b134141ce10b4172cdc90bd95d5a51
         - key: telemetry.sdk.name
           value:
             stringValue: opentelemetry
@@ -42,28 +42,25 @@ resourceSpans:
             stringValue: kind-control-plane
         - key: k8s.pod.name
           value:
-            stringValue: dotnet-test-696489b659-5cscb
+            stringValue: dotnet-test-696489b659-dzc5c
         - key: k8s.replicaset.name
           value:
             stringValue: dotnet-test-696489b659
         - key: service.instance.id
           value:
-            stringValue: default.dotnet-test-696489b659-5cscb.dotnet-test
+            stringValue: default.dotnet-test-696489b659-dzc5c.dotnet-test
         - key: service.namespace
           value:
             stringValue: default
         - key: service.version
           value:
             stringValue: latest
-        - key: k8s.pod.ip
-          value:
-            stringValue: 10.244.0.18
         - key: k8s.pod.labels.app
           value:
             stringValue: dotnet-test
         - key: k8s.pod.uid
           value:
-            stringValue: 4f448ce9-6fd3-4130-99fe-d03519631b9d
+            stringValue: cb914065-3f8b-426f-a8f7-f50eaba5feb0
         - key: container.image.name
           value:
             stringValue: quay.io/splunko11ytest/dotnet_test
@@ -91,146 +88,8 @@ resourceSpans:
         - key: deployment.environment
           value:
             stringValue: dev
-    schemaUrl: https://opentelemetry.io/schemas/1.6.1
+    schemaUrl: https://opentelemetry.io/schemas/1.38.0
     scopeSpans:
-      - scope:
-          name: System.Net.Http
-        spans:
-          - attributes:
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: server.port
-                value:
-                  intValue: "3000"
-              - key: url.full
-                value:
-                  stringValue: http://localhost:3000/
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-            endTimeUnixNano: "1762146272372083200"
-            flags: 257
-            kind: 3
-            name: GET
-            spanId: 12c2df2110d290af
-            startTimeUnixNano: "1762146272370764100"
-            status: {}
-            traceId: 35ec5f8510999d0329d023cf4ecec3d6
-          - attributes:
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: server.port
-                value:
-                  intValue: "3000"
-              - key: url.full
-                value:
-                  stringValue: http://localhost:3000/
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-            endTimeUnixNano: "1762146273373237000"
-            flags: 257
-            kind: 3
-            name: GET
-            spanId: b6c13f82728648e7
-            startTimeUnixNano: "1762146273372497200"
-            status: {}
-            traceId: 6535a2fecaaed9c8be817efbe8200ccb
-          - attributes:
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: server.port
-                value:
-                  intValue: "3000"
-              - key: url.full
-                value:
-                  stringValue: http://localhost:3000/
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-            endTimeUnixNano: "1762146274374271800"
-            flags: 257
-            kind: 3
-            name: GET
-            spanId: 11633d29d41976e9
-            startTimeUnixNano: "1762146274373687800"
-            status: {}
-            traceId: 81b341172b06f2eac793a46200b75902
-          - attributes:
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: server.port
-                value:
-                  intValue: "3000"
-              - key: url.full
-                value:
-                  stringValue: http://localhost:3000/
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-            endTimeUnixNano: "1762146275375227000"
-            flags: 257
-            kind: 3
-            name: GET
-            spanId: 15cc1fa796e34c8e
-            startTimeUnixNano: "1762146275374636800"
-            status: {}
-            traceId: 24ab5201632c9758f850ddc6fe4aa925
-          - attributes:
-              - key: http.request.method
-                value:
-                  stringValue: GET
-              - key: server.address
-                value:
-                  stringValue: localhost
-              - key: server.port
-                value:
-                  intValue: "3000"
-              - key: url.full
-                value:
-                  stringValue: http://localhost:3000/
-              - key: network.protocol.version
-                value:
-                  stringValue: "1.1"
-              - key: http.response.status_code
-                value:
-                  intValue: "200"
-            endTimeUnixNano: "1762146276376413000"
-            flags: 257
-            kind: 3
-            name: GET
-            spanId: ff01a011d4624be3
-            startTimeUnixNano: "1762146276375640000"
-            status: {}
-            traceId: 7a8a3faa097a63a67adce5a599b413ef
       - scope:
           name: Microsoft.AspNetCore
         spans:
@@ -259,14 +118,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1762146272372379000"
+            endTimeUnixNano: "1770199607482974600"
             flags: 769
             kind: 2
             name: GET /
-            spanId: bef3742f0962a83e
-            startTimeUnixNano: "1762146272371544000"
+            spanId: cfcc88c394d07bf3
+            startTimeUnixNano: "1770199607482643100"
             status: {}
-            traceId: 35ec5f8510999d0329d023cf4ecec3d6
+            traceId: 39d676b7ccc2b1c35ab16ff28f0a264c
           - attributes:
               - key: server.address
                 value:
@@ -292,14 +151,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1762146273373145400"
+            endTimeUnixNano: "1770199608485445900"
             flags: 769
             kind: 2
             name: GET /
-            spanId: 80ca7a72a6982de6
-            startTimeUnixNano: "1762146273372823400"
+            spanId: 5585263960eab3d1
+            startTimeUnixNano: "1770199608484274500"
             status: {}
-            traceId: 6535a2fecaaed9c8be817efbe8200ccb
+            traceId: 914e28662aa6e52b4f0b1ab1a8936060
           - attributes:
               - key: server.address
                 value:
@@ -325,14 +184,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1762146274374240500"
+            endTimeUnixNano: "1770199609486563400"
             flags: 769
             kind: 2
             name: GET /
-            spanId: 49d3ce8363e90532
-            startTimeUnixNano: "1762146274373946100"
+            spanId: 13d8b846f4920bd4
+            startTimeUnixNano: "1770199609486272400"
             status: {}
-            traceId: 81b341172b06f2eac793a46200b75902
+            traceId: fb689047976b0290320b8fbcb5095505
           - attributes:
               - key: server.address
                 value:
@@ -358,14 +217,14 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1762146275375195600"
+            endTimeUnixNano: "1770199610487708300"
             flags: 769
             kind: 2
             name: GET /
-            spanId: 10b1554aaedf9511
-            startTimeUnixNano: "1762146275374897600"
+            spanId: a087096db9a895ad
+            startTimeUnixNano: "1770199610487472300"
             status: {}
-            traceId: 24ab5201632c9758f850ddc6fe4aa925
+            traceId: 61762842a5b4a8ff7335d6afe411c7e1
           - attributes:
               - key: server.address
                 value:
@@ -391,11 +250,149 @@ resourceSpans:
               - key: http.response.status_code
                 value:
                   intValue: "200"
-            endTimeUnixNano: "1762146276376286300"
+            endTimeUnixNano: "1770199611488634600"
             flags: 769
             kind: 2
             name: GET /
-            spanId: 1f954c0bf265d342
-            startTimeUnixNano: "1762146276375889000"
+            spanId: 5ea03ee42e91ab7a
+            startTimeUnixNano: "1770199611488353800"
             status: {}
-            traceId: 7a8a3faa097a63a67adce5a599b413ef
+            traceId: a3f098605a8fb3ca56c1cd07a4e8c520
+      - scope:
+          name: System.Net.Http
+        spans:
+          - attributes:
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: url.full
+                value:
+                  stringValue: http://localhost:3000/
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+            endTimeUnixNano: "1770199607483145800"
+            flags: 257
+            kind: 3
+            name: GET
+            spanId: b7c0d468e6ba3e02
+            startTimeUnixNano: "1770199607482338200"
+            status: {}
+            traceId: 39d676b7ccc2b1c35ab16ff28f0a264c
+          - attributes:
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: url.full
+                value:
+                  stringValue: http://localhost:3000/
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+            endTimeUnixNano: "1770199608485262300"
+            flags: 257
+            kind: 3
+            name: GET
+            spanId: 3fe95b0dee9c175b
+            startTimeUnixNano: "1770199608483754500"
+            status: {}
+            traceId: 914e28662aa6e52b4f0b1ab1a8936060
+          - attributes:
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: url.full
+                value:
+                  stringValue: http://localhost:3000/
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+            endTimeUnixNano: "1770199609486678500"
+            flags: 257
+            kind: 3
+            name: GET
+            spanId: b470c6f62fa7fbb6
+            startTimeUnixNano: "1770199609485965700"
+            status: {}
+            traceId: fb689047976b0290320b8fbcb5095505
+          - attributes:
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: url.full
+                value:
+                  stringValue: http://localhost:3000/
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+            endTimeUnixNano: "1770199610487753800"
+            flags: 257
+            kind: 3
+            name: GET
+            spanId: 0bc447e90c68fe9a
+            startTimeUnixNano: "1770199610487070700"
+            status: {}
+            traceId: 61762842a5b4a8ff7335d6afe411c7e1
+          - attributes:
+              - key: http.request.method
+                value:
+                  stringValue: GET
+              - key: server.address
+                value:
+                  stringValue: localhost
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: url.full
+                value:
+                  stringValue: http://localhost:3000/
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: http.response.status_code
+                value:
+                  intValue: "200"
+            endTimeUnixNano: "1770199611488803600"
+            flags: 257
+            kind: 3
+            name: GET
+            spanId: 522f7b7cffaa165a
+            startTimeUnixNano: "1770199611488064300"
+            status: {}
+            traceId: a3f098605a8fb3ca56c1cd07a4e8c520

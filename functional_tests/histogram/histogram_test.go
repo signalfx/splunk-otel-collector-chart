@@ -5,10 +5,12 @@ package histogram
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -25,8 +27,7 @@ import (
 
 const (
 	signalFxReceiverPort = 4317
-
-	valuesDir = "values"
+	valuesDir            = "values"
 )
 
 func deployChart(t *testing.T) {
@@ -38,7 +39,7 @@ func deployChart(t *testing.T) {
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"IngestURL": fmt.Sprintf("http://%s:%d", hostEp, signalFxReceiverPort),
+		"IngestURL": internal.HostPortHTTP(hostEp, signalFxReceiverPort),
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -119,11 +120,39 @@ func Test_ControlPlaneMetrics(t *testing.T) {
 	}
 }
 
+// latestExpectedDir returns the path to the expected metrics directory for the
+// given k8s major.minor version. If no directory exists for that version, it
+// falls back to the latest available version directory so that new k8s versions
+// are still validated against the closest known-good baseline.
+func latestExpectedDir(t *testing.T, majorMinor string) string {
+	t.Helper()
+	baseDir := filepath.Join("testdata", "expected")
+	exact := filepath.Join(baseDir, majorMinor)
+	if _, err := os.Stat(exact); err == nil {
+		return exact
+	}
+
+	entries, err := os.ReadDir(baseDir)
+	require.NoError(t, err, "failed to list expected metrics directories")
+
+	var versions []string
+	for _, e := range entries {
+		if e.IsDir() && strings.HasPrefix(e.Name(), "v") {
+			versions = append(versions, e.Name())
+		}
+	}
+	require.NotEmpty(t, versions, "no expected metrics directories found in %s", baseDir)
+	slices.SortFunc(versions, cmp.Compare)
+	fallback := filepath.Join(baseDir, versions[len(versions)-1])
+	t.Logf("No expected metrics directory for %s, falling back to %s", majorMinor, fallback)
+	return fallback
+}
+
 func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.MetricsSink, input TestInput) {
 	k8sVersion := os.Getenv("K8S_VERSION")
 	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
 
-	testDir := filepath.Join("testdata", "expected", majorMinor)
+	testDir := latestExpectedDir(t, majorMinor)
 
 	internal.WaitForMetrics(t, 5, metricsSink)
 
@@ -131,34 +160,40 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if isHistogram {
 		fileName = input.ServiceName + "_histogram_metrics.yaml"
 	}
-	expected, errReadGolden := golden.ReadMetrics(filepath.Join(testDir, fileName))
+	expectedFilePath := filepath.Join(testDir, fileName)
+	expected, errReadGolden := golden.ReadMetrics(expectedFilePath)
 	if errReadGolden != nil && os.IsNotExist(errReadGolden) {
-		t.Logf("Metrics file %q does not exist, assuming that the expected metrics are empty", filepath.Join(testDir, fileName))
-		expected = pmetric.NewMetrics()
+		if os.Getenv("GENERATE_EXPECTED") == "true" {
+			t.Logf("Metrics file %q does not exist, will generate it", expectedFilePath)
+			expected = pmetric.NewMetrics()
+		} else {
+			require.NoError(t, errReadGolden, "Expected metrics file %q does not exist", expectedFilePath)
+		}
 	}
 	expectedMetrics := &expected
 
 	var actualMetrics *pmetric.Metrics
 
+	metricName := input.NonHistogramMetricName
+	if isHistogram {
+		metricName = input.HistogramMetricName
+	}
+
 	t.Logf("checking for metrics matching component %s", input.ServiceName)
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 		for h := len(metricsSink.AllMetrics()) - 1; h >= 0; h-- {
 			m := metricsSink.AllMetrics()[h]
-		OUTER:
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				for j := 0; j < m.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-					for k := 0; k < m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-						metricToConsider := m.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-						metricName := input.NonHistogramMetricName
-						if isHistogram {
-							metricName = input.HistogramMetricName
-						}
-						if metricToConsider.Name() == metricName {
-							actualMetrics = &m
-							break OUTER
-						}
-					}
+				rm := m.ResourceMetrics().At(i)
+				if resourceMetricsContains(rm, metricName) {
+					filtered := pmetric.NewMetrics()
+					rm.CopyTo(filtered.ResourceMetrics().AppendEmpty())
+					actualMetrics = &filtered
+					break
 				}
+			}
+			if actualMetrics != nil {
+				break
 			}
 		}
 
@@ -182,6 +217,17 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if err != nil {
 		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
 	}
+}
+
+func resourceMetricsContains(rm pmetric.ResourceMetrics, name string) bool {
+	for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+		for k := 0; k < rm.ScopeMetrics().At(j).Metrics().Len(); k++ {
+			if rm.ScopeMetrics().At(j).Metrics().At(k).Name() == name {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func performDNSQueries(t *testing.T) {
@@ -277,6 +323,31 @@ func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, comp
 			return fmt.Errorf("metric name %s not found in received metrics for component %s", name, component)
 		}
 	}
+
+	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
+		expectedRm := expected.ResourceMetrics().At(i)
+		for j := 0; j < expectedRm.ScopeMetrics().Len(); j++ {
+			sm := expectedRm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				expectedMetric := sm.Metrics().At(k)
+				if expectedMetric.Type() != pmetric.MetricTypeHistogram {
+					continue
+				}
+
+				actualMetric, found := internal.GetMetric(actual, expectedMetric.Name())
+				if !found {
+					return fmt.Errorf("metric %s not found in received metrics for component %s", expectedMetric.Name(), component)
+				}
+				if actualMetric.Type() != pmetric.MetricTypeHistogram {
+					return fmt.Errorf("expected metric is %v but actual metric received is %v", pmetric.MetricTypeHistogram.String(), actualMetric.Type().String())
+				}
+				if err := internal.CompareHistograms(expectedMetric.Histogram(), actualMetric.Histogram()); err != nil {
+					return fmt.Errorf("metric %s hit error: %w", expectedMetric.Name(), err)
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -335,7 +406,10 @@ func checkNonHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, c
 
 func checkAttributes(t *testing.T, attrs pcommon.Map, expectedAttrs map[string]string, component string) error {
 	for key, regex := range expectedAttrs {
-		val, _ := attrs.Get(key)
+		val, found := attrs.Get(key)
+		if !found {
+			return fmt.Errorf("attribute %s not found", key)
+		}
 		if !assert.Regexp(t, regex, val.AsString(), "Attribute %s does not match regex %s for component %s", key, regex, component) {
 			return fmt.Errorf("attribute %s does not match regex %s for component %s", key, regex, component)
 		}

@@ -278,6 +278,15 @@ The name of the gateway service.
 {{- end }}
 {{- end -}}
 
+{{/*
+Determines whether the k8s events pipeline will be enabled in the k8s cluster receiver config
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" -}}
+{{- and .Values.clusterReceiver.eventsEnabled
+        (or
+          (eq (include "splunk-otel-collector.logsEnabled" .) "true")
+          (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true")) }}
+{{- end -}}
 
 {{/*
 Whether object collection by k8s object receiver is enabled
@@ -287,10 +296,35 @@ Whether object collection by k8s object receiver is enabled
 {{- end -}}
 
 {{/*
+Determines whether the k8s object pipeline will be enabled in the k8s cluster receiver config
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.objectsEnabled" .) "true")
+        (or
+          (eq (include "splunk-otel-collector.logsEnabled" .) "true")
+          (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true")) }}
+{{- end -}}
+
+{{/*
 Whether object collection by k8s object receiver or/and event collection by k8s event receiver is enabled
 */}}
 {{- define "splunk-otel-collector.objectsOrEventsEnabled" -}}
 {{- or .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.objectsEnabled" .) "true") -}}
+{{- end -}}
+
+{{/*
+Whether sending to Splunk Observability v3/event endpoint is enabled
+*/}}
+{{- define "splunk-otel-collector.splunkO11yEventsEndpointEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.sendK8sEventsToSplunkO11y -}}
+{{- end -}}
+
+{{/*
+[EXPERIMENTAL] Whether the k8s entities pipeline is enabled.
+Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via otlp_http.
+*/}}
+{{- define "splunk-otel-collector.k8sEntitiesEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.enableK8sEntities -}}
 {{- end -}}
 
 
@@ -298,7 +332,7 @@ Whether object collection by k8s object receiver or/and event collection by k8s 
 Whether clusterReceiver should be enabled
 */}}
 {{- define "splunk-otel-collector.clusterReceiverEnabled" -}}
-{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true")) -}}
+{{- and .Values.clusterReceiver.enabled (or (eq (include "splunk-otel-collector.metricsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") (eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true")) -}}
 {{- end -}}
 
 
@@ -326,7 +360,7 @@ Build the securityContext for Linux and Windows
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
-{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+{{- or (hasPrefix "gke" .Values.distribution) (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") (eq .Values.distribution "openshift") }}
 {{- end -}}
 
 {{/*
@@ -381,12 +415,12 @@ Returns true if the distribution is eks but not eks/fargate.
 {{- end -}}
 
 {{/*
-Identifies K8s clutser running on AWS but they are not EKS.
-Returns true if the cloud provider is aws and distribution is not set.
-example: Vanilla K8s on AWS EC2
+Identifies K8s cluster running on AWS but not EKS.
+Returns true if the cloud provider is aws and the distribution is not EKS-based.
+Examples: Vanilla K8s on AWS EC2, OpenShift on AWS (ROSA)
 */}}
 {{- define "splunk-otel-collector.isNonEKSonAWS" -}}
-{{- and (eq .Values.cloudProvider "aws") (eq .Values.distribution "") -}}
+{{- and (eq .Values.cloudProvider "aws") (not (hasPrefix "eks" .Values.distribution)) -}}
 {{- end -}}
 
 {{/*
@@ -412,4 +446,66 @@ If distribution is eks/auto-mode and hostNetwork is not explicitly set, it will 
 {{- $values := .context.Values }}
 {{- $useOldService := and (hasKey $values "service") (gt (len $values.service) 0) }}
 {{- toYaml (ternary $values.service $svc $useOldService) -}}
+{{- end -}}
+
+{{/*
+Return the journald directory path based on useHostJournalctl value.
+If useHostJournalctl is true, concatenate root_path and directory.
+Otherwise, return directory only.
+*/}}
+{{- define "splunk-otel-collector.journaldDirectory" -}}
+{{- if .Values.logsCollection.journald.useHostJournalctl -}}
+  {{- printf "%s%s" .Values.logsCollection.journald.root_path .Values.logsCollection.journald.directory -}}
+{{- else -}}
+  {{- .Values.logsCollection.journald.directory -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Fail if a collector config override uses deprecated component names.
+Checks exporter/processor definitions and pipeline references.
+
+To add a new deprecation, add an entry to $depExporters or $depProcessors.
+
+Usage:
+  include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config")
+*/}}
+{{- define "splunk-otel-collector.failOnDeprecatedNames" -}}
+{{- if .config -}}
+{{- $source := .source -}}
+{{- $depExporters := dict "otlp" "otlp_grpc" "otlphttp" "otlp_http" -}}
+{{- $depProcessors := dict "k8sattributes" "k8s_attributes" -}}
+{{- range $key, $_ := (dig "exporters" (dict) .config) -}}
+  {{- range $old, $new := $depExporters -}}
+    {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
+      {{- fail (printf "%s.exporters.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $key, $_ := (dig "processors" (dict) .config) -}}
+  {{- range $old, $new := $depProcessors -}}
+    {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
+      {{- fail (printf "%s.processors.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $pname, $p := (dig "service" "pipelines" (dict) .config) -}}
+  {{- if $p -}}
+  {{- range $item := (dig "exporters" (list) $p) -}}
+    {{- range $old, $new := $depExporters -}}
+      {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
+        {{- fail (printf "%s.service.pipelines.%s.exporters references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $item := (dig "processors" (list) $p) -}}
+    {{- range $old, $new := $depProcessors -}}
+      {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
+        {{- fail (printf "%s.service.pipelines.%s.processors references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
 {{- end -}}

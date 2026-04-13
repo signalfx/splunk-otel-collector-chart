@@ -4,7 +4,6 @@
 package nodroplogs
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,7 +89,7 @@ func deployChart(t *testing.T, testKubeConfig string, clientset *kubernetes.Clie
 		require.Fail(t, "host endpoint not found")
 	}
 	replacements := map[string]any{
-		"LogURL": fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
+		"LogURL": internal.HostPortHTTP(hostEp, internal.HECLogsReceiverPort),
 	}
 	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
 

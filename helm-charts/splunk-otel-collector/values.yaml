@@ -14,9 +14,10 @@ namespaceOverride: ""
 # clusterName is an optional parameter that is used as the "k8s.cluster.name" attribute
 # for all traces, metrics, and logs.
 #
-# For EKS and GKE clusters, excluding EKS/Fargate:
-#   - Do NOT set this field if you have 'distribution' set to values starting with 'eks' or 'gke'.
-#     The cluster name is auto-discovered from the cloud provider.
+# For EKS, GKE, and OpenShift clusters, excluding EKS/Fargate:
+#   - Do NOT set this field if you have 'distribution' set to values starting with
+#     'eks', 'gke', or set to 'openshift'.
+#     The cluster name is auto-discovered from the cloud provider or platform API.
 #     Note: In EKS, the collector should be able to assume the node's IAM role, as it requires
 #     the EC2:DescribeInstances permission, which is available by default unless disabled manually.
 #
@@ -92,7 +93,7 @@ splunkPlatform:
   tracesEnabled: false
   # Field name conventions to use. (Only for those who are migrating from Splunk Connect for Kubernetes helm chart)
   fieldNameConvention:
-    # Boolean for renaming pod metadata fields to match to Splunk Connect for Kubernetes helm chart.
+    # Boolean for renaming pod logs metadata fields to match to Splunk Connect for Kubernetes helm chart.
     renameFieldsSck: false
     # Boolean for keeping Otel convention fields after renaming it
     keepOtelConvention: true
@@ -167,10 +168,13 @@ splunkObservability:
   # Consider using `clusterReceiver.eventsEnabled` option instead.
   infrastructureMonitoringEventsEnabled: false
 
-  # This option just enables the shared pipeline for logs and profiling data.
-  # There is no active collection of profiling data.
-  # Instrumentation libraries must be configured to send it to the collector.
-  # If you don't use AlwaysOn Profiling for Splunk APM, you can disable it.
+  # Enables the shared logs pipeline and the splunk_hec/o11y exporter for profiling data.
+  # This does not actively collect profiling data on its own.
+  # Instrumentation libraries must be configured to send profiling data to the collector
+  # via the OTLP receiver (ports 4317/4318).
+  # When the operator is enabled, setting this to true also injects SPLUNK_PROFILER_ENABLED
+  # and SPLUNK_PROFILER_MEMORY_ENABLED into the Instrumentation CR's global environment.
+  # If you don't use AlwaysOn Profiling for Splunk APM, you can leave this disabled.
   profilingEnabled: false
 
   # Enables Secure Application features
@@ -294,6 +298,11 @@ agent:
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
+    # Scrape interval for Prometheus receivers collecting control plane metrics.
+    # This value is also used by the EKS apiserver Prometheus receiver in the
+    # cluster receiver when featureGates.enableEKSApiServerMetrics is enabled.
+    # Accepts Prometheus duration strings (e.g. 10s, 1m).
+    scrapeInterval: 10s
     apiserver:
       # Specifies whether to collect apiserver metrics.
       enabled: true
@@ -490,7 +499,9 @@ clusterReceiver:
   # This flag enables collection of Kubernetes events as logs using OpenTelemetry k8s events receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
   # The receiver currently is in "Alpha" state which means that events format might change over time.
-  # This option requires `splunkPlatform.logsEnabled` to be set to `true'.
+  # This option requires at least one of the following:
+  #   - `splunkPlatform.logsEnabled` to be true
+  #   - `featureGates.sendK8sEventsToSplunkO11y` to be true and splunkObservability to be configured.
   eventsEnabled: true
 
   # Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
@@ -540,6 +551,10 @@ clusterReceiver:
   #
   # The configuration format in details is described here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
+  #
+  # NOTE: Adding custom object types here may require additional RBAC permissions
+  # beyond what the chart grants by default. Use `rbac.customRules` to add the
+  # necessary "get", "list", and "watch" permissions for any extra resources.
   k8sObjects:
     - name: pods
       mode: pull
@@ -642,6 +657,20 @@ logsCollection:
 # Configuration for collecting journald logs using otel collector
   journald:
     enabled: false
+    # Set useHostJournalctl to true to read journald logs using the host's journalctl binary.
+    useHostJournalctl: false
+    # Path to the host filesystem root where the libraries needed by journalctl are mounted. Effective only if useHostJournalctl is set to true.
+    root_path: /hostfs
+    # Path to the host journalctl binary. Effective only if useHostJournalctl is set to true.
+    journalctl_path: /usr/bin/journalctl
+    # Host lib mounts needed to read journald logs using host's journalctl binary. Effective only if useHostJournalctl is set to true.
+    mnts:
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
     # Please update directory path for journald if it's different from below default value "/run/log/journal"
     directory: /run/log/journal
     # List of service units to collect journald logs for and configuration for each.
@@ -775,13 +804,14 @@ affinity: {}
 # Defines priorityClassName to assign a priority class to pods.
 priorityClassName: ""
 
-# This tells the kubelet that it should wait for x seconds before performing the first probe.
-# This is required in case you are using windows worker nodes.
-# It is recommended to keep it a 60-second window but it depends on cluster specification.
-readinessProbe:
-  initialDelaySeconds: 0
-livenessProbe:
-  initialDelaySeconds: 0
+# Probe configuration for the collector pods. All standard K8s probe
+# fields are supported except the action (httpGet is managed by the chart;
+# httpGet, exec, tcpSocket, and grpc are rejected). For Windows worker nodes
+# it is recommended to set initialDelaySeconds to 60. For EKS Auto Mode
+# clusters, consider increasing timeoutSeconds (e.g. 3-5) to handle network
+# delay.
+readinessProbe: {}
+livenessProbe: {}
 
 # Specifies whether to apply for k8s cluster with windows worker node.
 isWindows: false
@@ -822,11 +852,11 @@ gateway:
     otlp:
       containerPort: 4317
       protocol: TCP
-      enabled_for: [metrics, traces, logs]
+      enabled_for: [metrics, traces, logs, profiling]
     otlp-http:
       containerPort: 4318
       protocol: TCP
-      enabled_for: [metrics, traces, logs]
+      enabled_for: [metrics, traces, logs, profiling]
     jaeger-thrift:
       containerPort: 14268
       protocol: TCP
@@ -839,12 +869,6 @@ gateway:
       containerPort: 9411
       protocol: TCP
       enabled_for: [traces]
-    signalfx:
-      containerPort: 9943
-      protocol: TCP
-      # SignalFx metrics enabled in gateway for all telemetry types since there may be
-      # bundled metrics.
-      enabled_for: [metrics, traces, logs]
     http-forwarder:
       containerPort: 6060
       protocol: TCP
@@ -870,6 +894,7 @@ gateway:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  topologySpreadConstraints: []
 
   # Pod configurations
   podSecurityContext: {}
@@ -924,6 +949,9 @@ operatorcrds:
 # Not available in EKS Add-on.
 operator:
   enabled: false
+  # To pull the operator image from a private registry, set imagePullSecrets as follows:
+  #   imagePullSecrets:
+  #     - name: my-registry-secret
   manager:
     ignoreMissingCollectorCRDs: true
   # This is disabled by default in favor of using `operatorcrds.install=true`, as doing so creates
@@ -938,6 +966,8 @@ operator:
   admissionWebhooks:
     autoGenerateCert:
       enabled: true
+      # See docs/auto-instrumentation-install.md#certificate-rotation-recreate-true
+      recreate: false
       certPeriodDays: 3650
     certManager:
       enabled: false
@@ -948,7 +978,31 @@ operator:
 # - OpenTelemetry Documentation: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api.md#instrumentation
 # - For all the supported properties spec, see the operator CRDS: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml
 # Not available in EKS Add-on.
+# For Instrumentation CR deployment details and Helm version caveats, see:
+# https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management
 instrumentation:
+  # Set to false to skip deploying the Instrumentation CR entirely.
+  # Useful if you want to manage the CR outside of Helm or apply it manually.
+  enabled: true
+
+  # Deploy the Instrumentation CR via a Kubernetes Job instead of a regular Helm resource.
+  # The Job waits for the operator Deployment to become Available, then applies the CR.
+  # See docs/auto-instrumentation-install.md#instrumentation-cr-management
+  installationJob:
+    enabled: false
+    image:
+      repository: registry.k8s.io/kubectl
+      # Should match your cluster's Kubernetes minor version (±1 supported).
+      tag: "v1.35.1"
+    backoffLimit: 6
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
   spec:
     # Optional "defaults" parameter for configuring default instrumentation behavior across all libraries.
     # See: https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md#instrumentationspecdefaults
@@ -1006,7 +1060,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.11.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
@@ -1015,12 +1069,12 @@ instrumentation:
         - name: OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED
           value: false
     go:
-      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.22.1
+      image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.23.0
       # env:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.20.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.26.1
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1039,7 +1093,7 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v3.3.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.4.0
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
@@ -1048,7 +1102,6 @@ instrumentation:
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
           value: ""
-
   # Auto-instrumentation Libraries (End)
 
 # Note - Installing certmanager as a subchart is deprecated and will be removed in the future.
@@ -1085,7 +1138,7 @@ obi:
   image:
     # Image configuration for eBPF instrumentation.
     # NOTE: Keep this tag in sync with the OBI chart version specified in Chart.yaml.
-    tag: "v0.3.0"
+    tag: "v0.6.0"
 
   podSecurityContext:
     # Pod Security Context - Required for eBPF to access kernel capabilities
@@ -1282,6 +1335,7 @@ obi:
 targetAllocator:
   enabled: false
   image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
+  resources: {}
   serviceAccount:
     # Specifies whether a ServiceAccount should be created
     create: true
@@ -1339,4 +1393,16 @@ featureGates:
   useMemoryLimitPercentage: false
   # This feature gate introduces a prometheus receiver to collect metrics from the EKS Apiserver for Splunk Observability.
   # NOTE - OTLP histograms are sent as histograms to Splunk Observability for this feature.
+  # The scrape interval for this receiver is controlled by agent.controlPlaneMetrics.scrapeInterval.
   enableEKSApiServerMetrics: true
+  # This feature gate enables sending Kubernetes objects and events to the Splunk Observability v3/event endpoint.
+  # Requires Splunk Observability to be configured and at least one of the following:
+  #   - clusterReceiver.eventsEnabled to be true
+  #   - clusterReceiver.k8sObjects to be configured
+  # Does not require splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
+  sendK8sEventsToSplunkO11y: false
+  # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
+  # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlp_http.
+  # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
+  # This feature is experimental and may change or be removed in future releases.
+  enableK8sEntities: false

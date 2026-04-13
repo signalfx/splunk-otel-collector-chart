@@ -14,11 +14,11 @@ memory_limiter:
 {{- end }}
 
 {{/*
-Common config for the otel-collector otlphttp exporter
+Common config for the otel-collector otlp_http exporter
 */}}
 {{- define "splunk-otel-collector.otlpHttpExporter" -}}
 {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}
-otlphttp:
+otlp_http:
   metrics_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/datapoint/otlp
   traces_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v2/trace/otlp
   auth:
@@ -62,15 +62,23 @@ resourcedetection:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
     - env
-    {{- if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
-    - gcp
-    {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
-    - eks
+    {{- if eq .Values.distribution "openshift" }}
+    - openshift
     {{- else if eq .Values.distribution "aks" }}
     - aks
+    {{- else if or (hasPrefix "gke" .Values.distribution) (eq .Values.cloudProvider "gcp") }}
+    - gcp
+    {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
+    - eks
     {{- end }}
     {{- if eq .Values.cloudProvider "azure" }}
     - azure
+    {{- end }}
+    {{- if and (eq .Values.distribution "openshift") (eq .Values.cloudProvider "gcp") }}
+    - gcp
+    {{- end }}
+    {{- if eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true" }}
+    - ec2
     {{- end }}
     # The `system` detector goes last so it can't preclude cloud detectors from setting host/os info.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#ordering
@@ -80,7 +88,7 @@ resourcedetection:
     resource_attributes:
       k8s.cluster.name:
         enabled: true
-  {{- else if or (eq (include "splunk-otel-collector.isNonEKSonAWS" .) "true") (eq (include "splunk-otel-collector.isNonFargateEKS" .) "true") }}
+  {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
   eks:
     node_from_env_var: K8S_NODE_NAME
     resource_attributes:
@@ -117,6 +125,8 @@ resourcedetection/k8s_cluster_name:
     - gcp
     {{- else if eq (include "splunk-otel-collector.isNonFargateEKS" .) "true" }}
     - eks
+    {{- else if eq .Values.distribution "openshift" }}
+    - openshift
     {{- end }}
   {{- if hasPrefix "gke" .Values.distribution }}
   gcp:
@@ -143,8 +153,6 @@ resourcedetection/k8s_cluster_name:
         enabled: false
       faas.version:
         enabled: false
-      faas.id:
-        enabled: false
       faas.instance:
         enabled: false
       gcp.cloud_run.job.execution:
@@ -165,6 +173,17 @@ resourcedetection/k8s_cluster_name:
         enabled: false
       cloud.platform:
         enabled: false
+  {{- else if eq .Values.distribution "openshift" }}
+  openshift:
+    resource_attributes:
+      k8s.cluster.name:
+        enabled: true
+      cloud.provider:
+        enabled: false
+      cloud.platform:
+        enabled: false
+      cloud.region:
+        enabled: false
   {{- end }}
   override: true
   timeout: 15s
@@ -174,7 +193,7 @@ resourcedetection/k8s_cluster_name:
 Common config for K8s attributes processor adding k8s metadata to resource attributes.
 */}}
 {{- define "splunk-otel-collector.k8sAttributesProcessor" -}}
-k8sattributes:
+k8s_attributes:
   pod_association:
     - sources:
       - from: resource_attribute
@@ -222,7 +241,7 @@ k8sattributes:
 Common config for K8s attributes processor adding k8s metadata to metrics resource attributes.
 */}}
 {{- define "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" -}}
-k8sattributes/metrics:
+k8s_attributes/metrics:
   pod_association:
     - sources:
       - from: resource_attribute
@@ -532,12 +551,24 @@ prometheus/{{ $receiver }}:
     scrape_configs:
     - job_name: "otel-{{ $job }}"
       metric_relabel_configs:
+      - source_labels: [ service_name ]
+        target_label: service.name
+      - source_labels: [ service_instance_id ]
+        target_label: service.instance.id
+      - source_labels: [ service_version ]
+        target_label: service.version
+      - regex: service_name|service_instance_id|service_version
+        action: labeldrop
       - action: drop
         regex: "promhttp_metric_handler_errors.*"
         source_labels:
         - __name__
       - action: drop
         regex: "otelcol_processor_batch_.*"
+        source_labels:
+        - __name__
+      - action: drop
+        regex: ".*otelcol\\.k8s\\.pod\\.association"
         source_labels:
         - __name__
       scrape_interval: 10s

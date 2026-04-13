@@ -6,18 +6,19 @@ splunkObservability:
 agent:
   config:
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: 192.168.0.10:4317
-        insecure: true
+        tls:
+          insecure: true
       signalfx:
         ingest_url: http://192.168.0.10:9943
         api_url: http://192.168.0.10:6060
     service:
       pipelines:
         traces:
-          exporters: [otlp, signalfx]
+          exporters: [otlp_grpc, signalfx]
         metrics:
-          exporters: [otlp]
+          exporters: [otlp_grpc]
 
 clusterReceiver:
   config:

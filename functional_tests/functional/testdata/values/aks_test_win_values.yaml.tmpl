@@ -21,7 +21,7 @@ agent:
       memory: 1Gi
   config:
     exporters:
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
@@ -31,7 +31,7 @@ agent:
       pipelines:
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
         metrics/agent:
           exporters:
             - file
@@ -47,11 +47,17 @@ clusterReceiver:
           insecure: true
       file:
         path: C:\metrics.json
+      file/k8s_cluster:
+        path: C:\k8s_cluster_metrics.json
     service:
       pipelines:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - signalfx
+            - file/k8s_cluster
 
   k8sObjects:
     - name: pods
@@ -83,17 +89,20 @@ environment: test
 cloudProvider: azure
 distribution: aks
 isWindows: true
-image:
-  otelcol:
-    repository: quay.io/signalfx/splunk-otel-collector-windows
 readinessProbe:
   initialDelaySeconds: 60
 livenessProbe:
   initialDelaySeconds: 60
+instrumentation:
+  installationJob:
+    enabled: true
 operatorcrds:
   install: true
 operator:
   enabled: true
+  manager:
+    image:
+      imagePullPolicy: Always
   automountServiceAccountToken: false
   admissionWebhooks:
     certManager:

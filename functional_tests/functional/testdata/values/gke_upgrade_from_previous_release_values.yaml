@@ -1,5 +1,13 @@
 cloudProvider: gcp
 distribution: gke
+environment: dev
 splunkObservability:
   realm: us0
   accessToken: xxxxx
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+instrumentation:
+  installationJob:
+    enabled: true

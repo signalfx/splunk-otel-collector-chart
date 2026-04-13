@@ -26,7 +26,7 @@ agent:
     exporters:
       file:
         path: /tmp/metrics.json
-      otlp:
+      otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
           insecure: true
@@ -36,7 +36,7 @@ agent:
       pipelines:
         traces:
           exporters:
-            - otlp
+            - otlp_grpc
         metrics/agent:
           exporters:
             - file
@@ -46,6 +46,8 @@ clusterReceiver:
     exporters:
       file:
         path: /tmp/metrics.json
+      file/k8s_cluster:
+        path: /tmp/k8s_cluster_metrics.json
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
@@ -57,6 +59,10 @@ clusterReceiver:
         metrics/collector:
           exporters:
             - file
+        metrics:
+          exporters:
+            - signalfx
+            - file/k8s_cluster
 
   k8sObjects:
     - name: pods
@@ -84,6 +90,9 @@ extraAttributes:
      value: "customvalue2"
 
 environment: dev
+instrumentation:
+  installationJob:
+    enabled: true
 operatorcrds:
   install: true
 operator:

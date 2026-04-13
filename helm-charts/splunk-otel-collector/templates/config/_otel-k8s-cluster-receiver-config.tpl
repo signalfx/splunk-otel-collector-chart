@@ -43,12 +43,12 @@ receivers:
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
     {{- end }}
-  {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
   k8sobjects:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
@@ -92,6 +92,7 @@ receivers:
     config:
       scrape_configs:
         - job_name: 'kubernetes-apiserver'
+          scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
           tls_config:
             ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           authorization:
@@ -108,8 +109,11 @@ receivers:
                 apiserver_storage_objects|\
                 apiserver_response_sizes|\
                 apiserver_request_total|\
+                kubernetes_build_info|\
                 rest_client_requests_total|\
-                rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?"
+                rest_client_request_duration_seconds|\
+                apiserver_storage_size_bytes|\
+                apiserver_requested_deprecated_apis)(?:_sum|_count|_bucket)?"
   {{- end }}
 
 processors:
@@ -152,7 +156,7 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
-  {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
   transform/k8sevents:
@@ -185,7 +189,7 @@ processors:
         action: delete
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
   transform/add_sourcetype:
     log_statements:
       - context: log
@@ -271,6 +275,21 @@ exporters:
     {{- end}}
   {{- end }}
 
+  {{- if eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true" }}
+  otlp_http/o11y_events:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-Splunk-Instrumentation-Library": o11yevents
+  {{- end }}
+
+  {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+  otlp_http/o11y_entities:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    headers:
+      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  {{- end }}
+
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
@@ -327,7 +346,7 @@ service:
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -352,7 +371,7 @@ service:
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -377,7 +396,7 @@ service:
         - resource
         - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
-        - k8sattributes/metrics
+        - k8s_attributes/metrics
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
@@ -391,7 +410,7 @@ service:
         {{- end }}
     {{- end }}
 
-    {{- if and .Values.clusterReceiver.eventsEnabled (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
     logs:
       receivers:
         - k8s_events
@@ -409,9 +428,12 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
+        {{- if eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true" }}
+        - otlp_http/o11y_events
+        {{- end }}
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.objectsEnabled" .) "true") (eq (include "splunk-otel-collector.logsEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
     logs/objects:
       receivers:
         - k8sobjects
@@ -425,9 +447,12 @@ service:
         - resource/add_environment
         {{- end }}
       exporters:
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
-        {{- end }}
+      {{- end }}
+      {{- if (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true") }}
+        - otlp_http/o11y_events
+      {{- end }}
     {{- end }}
 
     {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
@@ -459,6 +484,22 @@ service:
         - resource
       exporters:
         - signalfx/histograms
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+    # [EXPERIMENTAL] k8s entities pipeline: sends k8s_cluster receiver data to Splunk Observability v3/event endpoint.
+    logs/k8s_entities:
+      receivers:
+        - k8s_cluster
+      processors:
+        - memory_limiter
+        - batch
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        - resource
+      exporters:
+        - otlp_http/o11y_entities
     {{- end }}
 
 {{- end }}

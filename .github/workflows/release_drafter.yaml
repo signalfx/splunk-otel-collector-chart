@@ -20,10 +20,22 @@ on:
         description: 'Optionally overrides the app version in Chart.yaml.'
         required: false
         default: ''
+      OVERWRITE_EXISTING_PR:
+        description: 'Allow updating an existing update-release PR if changes differ.'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
       DEBUG:
         description: 'Enable debug mode for the script.'
         required: false
         default: 'false'
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   prepare_release:
@@ -31,38 +43,56 @@ jobs:
     env:
       CHART_VERSION: ${{ github.event.inputs.CHART_VERSION }}
       APP_VERSION: ${{ github.event.inputs.APP_VERSION }}
+      OVERWRITE_EXISTING_PR: ${{ github.event.inputs.OVERWRITE_EXISTING_PR }}
       DEBUG: ${{ github.event.inputs.DEBUG }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Install tools
-        run: make install-tools
+      - name: Install chloggen
+        run: make install-chloggen
 
       - name: Prepare Release
         id: prepare_release
         run: |
-          make prepare-release CHART_VERSION=$CHART_VERSION APP_VERSION=$APP_VERSION CREATE_BRANCH=false DEBUG=$DEBUG
+          make prepare-release CHART_VERSION="$CHART_VERSION" APP_VERSION="$APP_VERSION" CREATE_BRANCH=false DEBUG="$DEBUG"
 
       - name: Check if PR is already open
         id: check_if_pr_open
         run: |
           echo "PR_NEEDED=1" >> "$GITHUB_OUTPUT"
           git fetch origin
-          # Directly check if the feature branch exists and has the same changes in the remote repository
-          if git ls-remote --heads origin update-release > /dev/null; then
-            if git diff --no-ext-diff --quiet origin/update-release -- helm-charts; then
+
+          # Check if update-release branch exists
+          if [ -n "$(git ls-remote --heads origin update-release)" ]; then
+            if [ "$OVERWRITE_EXISTING_PR" = "true" ]; then
+              # Overwrite mode: Only skip if changes are identical
+              echo "OVERWRITE_EXISTING_PR is enabled - checking for changes"
+              if git diff --no-ext-diff --quiet origin/update-release -- helm-charts; then
+                echo "PR_NEEDED=0" >> "$GITHUB_OUTPUT"
+                echo "Skipping PR creation - no changes detected"
+              else
+                echo "Changes detected - will update existing PR"
+              fi
+            else
+              # Default mode: Skip if branch exists
               echo "PR_NEEDED=0" >> "$GITHUB_OUTPUT"
+              echo "Skipping PR creation - update-release branch already exists"
+              echo "Use OVERWRITE_EXISTING_PR=true to allow updating if changes differ"
             fi
           fi
 
       - name: Run pre-commit to fix formatting
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: ./.github/actions/run-precommit
+        run: |
+          pip install pre-commit==4.5.1
+          pre-commit run --all-files || true
+        env:
+          SKIP: actionlint,render,go-fmt,go-lint,go-mod-tidy
 
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}

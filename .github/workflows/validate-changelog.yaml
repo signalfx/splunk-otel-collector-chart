@@ -7,21 +7,29 @@ name: Ensure valid and up-to-date Changelog
 
 on: pull_request
 
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: 1.26.2
+
 jobs:
   validate-changelog:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'Skip Changelog') && !contains(github.event.pull_request.title, '[chore]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install chloggen
-        run: make install-tools
+        run: make install-chloggen
 
       - name: Run make chlog-validate
         run: |
@@ -36,14 +44,15 @@ jobs:
 
       - name: Read current version of the Chart
         id: read-chart
-        uses: cumulusds/get-yaml-paths-action@v1
-        with:
-          file: helm-charts/splunk-otel-collector/Chart.yaml
-          version: version
+        run: |
+          version=$(yq e '.version' helm-charts/splunk-otel-collector/Chart.yaml)
+          echo "Current version is ${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Ensure that CHANGELOG.md has an entry for the current version
         id: read-changelog
-        uses: mindsers/changelog-reader-action@v2
-        with:
-          version: ${{ steps.read-chart.outputs.version }}
-          path: ./CHANGELOG.md
+        run: |
+          if ! grep "${{ steps.read-chart.outputs.version }}" ./CHANGELOG.md ; then
+            echo "Missing changelog entry for ${{ steps.read-chart.outputs.version }}"
+            exit 1
+          fi

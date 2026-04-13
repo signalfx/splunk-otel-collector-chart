@@ -46,8 +46,8 @@ func deployChartsAndApps(t *testing.T, valuesFileName string, repl map[string]an
 		require.Fail(t, "Host endpoint not found")
 	}
 	replacements := map[string]any{
-		"LogHecEndpoint":    fmt.Sprintf("http://%s:%d", hostEp, internal.HECLogsReceiverPort),
-		"MetricHecEndpoint": fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECMetricsReceiverPort),
+		"LogHecEndpoint":    internal.HostPortHTTP(hostEp, internal.HECLogsReceiverPort),
+		"MetricHecEndpoint": internal.HostPortHTTP(hostEp, internal.HECMetricsReceiverPort) + "/services/collector",
 	}
 	for k, v := range repl {
 		replacements[k] = v
@@ -261,7 +261,7 @@ func testClusterReceiverEnabledOrDisabled(t *testing.T) {
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
-	logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
+	logsObjectsHecEndpoint := internal.HostPortHTTP(hostEp, internal.HECObjectsReceiverPort) + "/services/collector"
 
 	t.Run("check cluster receiver disabled", func(t *testing.T) {
 		replacements := map[string]any{
@@ -305,7 +305,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	t.Run("verify cluster receiver attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		logsObjectsConsumer := globalSinks.logsObjectsConsumer
-		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
+		logsObjectsHecEndpoint := internal.HostPortHTTP(hostEp, internal.HECObjectsReceiverPort) + "/services/collector"
 
 		replacements := map[string]any{
 			"ClusterReceiverEnabled": true,
@@ -328,7 +328,7 @@ func testVerifyLogsAndMetricsAttributes(t *testing.T) {
 	t.Run("verify cluster receiver metrics attributes", func(t *testing.T) {
 		valuesFileName := "values_cluster_receiver_only.yaml.tmpl"
 		hecMetricsConsumer := globalSinks.hecMetricsConsumer
-		logsObjectsHecEndpoint := fmt.Sprintf("http://%s:%d/services/collector", hostEp, internal.HECObjectsReceiverPort)
+		logsObjectsHecEndpoint := internal.HostPortHTTP(hostEp, internal.HECObjectsReceiverPort) + "/services/collector"
 
 		replacements := map[string]any{
 			"ClusterReceiverEnabled": true,

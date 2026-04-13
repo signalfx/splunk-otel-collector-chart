@@ -4,6 +4,339 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.149.0] - 2026-04-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.149.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.149.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Rename all `k8sattributes` processor references to `k8s_attributes` ([#2326](https://github.com/signalfx/splunk-otel-collector-chart/pull/2326))
+  The `k8sattributes` alias has been deprecated in favor of `k8s_attributes` in the chart-generated configuration.
+  Any Helm values or overrides that reference `k8sattributes` (for example, `*.config.processors.k8sattributes`
+  or pipelines that list `k8sattributes` as a processor) must be updated to use `k8s_attributes`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+- `chart`: Rename all `otlp` exporter references to `otlp_grpc` ([#2326](https://github.com/signalfx/splunk-otel-collector-chart/pull/2326))
+  The `otlp` alias has been deprecated in favor of `otlp_grpc` in the chart-generated configuration.
+  Any Helm values or overrides that reference `otlp` (for example, `*.config.exporters.otlp`
+  or pipelines that list `otlp` as an exporter) must be updated to use `otlp_grpc`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+- `chart`: Rename all `otlphttp` exporter references to `otlp_http` ([#2326](https://github.com/signalfx/splunk-otel-collector-chart/pull/2326))
+  The `otlphttp` alias has been deprecated in favor of `otlp_http` in the chart-generated configuration.
+  Any Helm values or overrides that reference `otlphttp` (for example, `*.config.exporters.otlphttp`
+  or pipelines that list `otlphttp` as an exporter) must be updated to use `otlp_http`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver, gateway`: Add OpenShift resource detection support ([#2330](https://github.com/signalfx/splunk-otel-collector-chart/pull/2330))
+  When distribution is set to "openshift", the openshift resource detector is now enabled
+  in the resourcedetection processor. Previously, OpenShift clusters only had cloud-provider
+  detectors (azure for cloudProvider=azure, gcp for cloudProvider=gcp) but no
+  OpenShift-specific detector, and no detector at all for cloudProvider=aws (see the
+  ec2 bug fix in this release). The openshift detector auto-discovers `k8s.cluster.name`,
+  `cloud.provider`, `cloud.platform`, and `cloud.region` via the OpenShift API
+  (`config.openshift.io/v1/infrastructures`). The `cloud.platform` value reflects the
+  actual hosting environment (e.g., `aws_openshift`, `gcp_openshift`, `azure.openshift`).
+  
+  Cloud-provider-specific detectors remain enabled alongside the openshift detector to
+  collect instance-level metadata: ec2 on AWS, gcp on GCP, and azure on Azure. The
+  openshift detector is listed first to ensure the correct `cloud.platform` is set before
+  cloud-provider detectors run.
+  
+  The `clusterName` Helm value is now optional for OpenShift (same as EKS and GKE). When
+  not set, the openshift detector auto-discovers it from the cluster API. When explicitly
+  set, the static value takes precedence.
+  
+- `chart`: Support all standard K8s probe fields (timeoutSeconds, periodSeconds, failureThreshold, successThreshold) in readinessProbe and livenessProbe configuration ([#2341](https://github.com/signalfx/splunk-otel-collector-chart/pull/2341))
+  Previously only initialDelaySeconds was applied from readinessProbe and livenessProbe
+  values. All other fields like timeoutSeconds were ignored. The probe templates
+  now pass through all user-provided fields via toYaml.
+  
+- `chart`: Add configurable resource requests and limits for the Target Allocator container ([#2349](https://github.com/signalfx/splunk-otel-collector-chart/pull/2349))
+  Users can now set `targetAllocator.resources` in values.yaml to configure CPU/memory
+  requests and limits for the Target Allocator container.
+  
+- `chart`: Bump the OBI subchart to upstream opentelemetry-ebpf-instrumentation 0.6.0 ([#2300](https://github.com/signalfx/splunk-otel-collector-chart/pull/2300))
+  Updates the vendored OBI dependency and rendered eBPF instrumentation example
+  manifests to the upstream 0.6.0 chart release.
+  
+- `operator`: Bump operator to 0.109.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2347](https://github.com/signalfx/splunk-otel-collector-chart/pull/2347))
+
+### 🧰 Bug fixes 🧰
+
+- `agent, clusterReceiver, gateway`: Fix resource detection for non-EKS Kubernetes clusters on AWS ([#2330](https://github.com/signalfx/splunk-otel-collector-chart/pull/2330))
+  For non-EKS Kubernetes clusters on AWS (cloudProvider=aws with distribution unset or
+  set to openshift), EC2 instance metadata (host.id, cloud.account.id,
+  cloud.availability_zone, etc.) was never collected. Two issues contributed to this:
+  1. The chart used the eks detector, which only works on actual EKS clusters — it checks
+     for EKS-specific signals (IRSA/Pod Identity token paths, OIDC issuer, Kubernetes
+     version string) and returns an empty resource when those are absent. Switched to the
+     ec2 detector, which works on any AWS instance with IMDS access.
+  2. This code path only matched when distribution was unset (empty string), so OpenShift
+     clusters on AWS (distribution=openshift, cloudProvider=aws) were excluded entirely.
+     Broadened the condition to also match the openshift distribution.
+  
+- `clusterReceiver`: Set dnsPolicy to ClusterFirstWithHostNet for cluster receiver when clusterReceiver.hostNetwork is enabled ([#2348](https://github.com/signalfx/splunk-otel-collector-chart/pull/2348))
+  When clusterReceiver.hostNetwork is enabled (e.g. for EKS Auto mode), the cluster receiver
+  pod was unable to resolve in-cluster DNS names. Pods running with
+  hostNetwork fall back to the node's DNS configuration unless dnsPolicy is explicitly set
+  to ClusterFirstWithHostNet. This matches the existing daemonset behavior.
+  
+
+## [0.148.0] - 2026-03-26
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.148.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.148.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add feature gate to send Kubernetes entities to Splunk Observability v3/event endpoint ([#2284](https://github.com/signalfx/splunk-otel-collector-chart/pull/2284))
+  When enabled via `featureGates.enableK8sEntities`, the cluster receiver routes
+  Kubernetes entity data (from the k8s_cluster receiver) to the Splunk Observability
+  /v3/event endpoint via otlphttp. Requires Splunk Observability configuration.
+  This feature is experimental and may change or be removed in future releases.
+
+- `operator`: Bump java to v2.26.1 in helm-charts/splunk-otel-collector/values.yaml ([#2299](https://github.com/signalfx/splunk-otel-collector-chart/pull/2299))
+
+- `operator`: Bump nodejs to v4.4.0 in helm-charts/splunk-otel-collector/values.yaml ([#2276](https://github.com/signalfx/splunk-otel-collector-chart/pull/2276))
+
+### 🧰 Bug fixes 🧰
+
+- `config`: Updated default configuration to use dot-notation attributes for internal metrics,
+  addressing the upstream change in ([#14815](https://github.com/open-telemetry/opentelemetry-collector/pull/14815))
+
+- `agent`: Add configurable scrapeInterval for control plane Prometheus receivers and default to 10s ([#2302](https://github.com/signalfx/splunk-otel-collector-chart/pull/2302))
+  The Prometheus receivers that replaced SmartAgent receivers for control plane components
+  (apiserver, controller-manager, scheduler, proxy, coredns, etcd) were using the Prometheus
+  default scrape interval of 60s instead of the SmartAgent default of 10s. A new
+  `agent.controlPlaneMetrics.scrapeInterval` config option has been added (default: `10s`)
+  to allow users to tune the interval. This also applies to the EKS apiserver metrics
+  collected by the cluster receiver.
+
+- `operator`: Fix instrumentation hook job ServiceAccount missing imagePullSecrets from image.imagePullSecrets ([#2321](https://github.com/signalfx/splunk-otel-collector-chart/pull/2321))
+  When instrumentation.installationJob.enabled=true and image.imagePullSecrets is set,
+  the dedicated ServiceAccount created for the hook job now receives the pull secrets,
+  allowing the job's kubectl image to be pulled from a private registry.
+
+
+## [0.147.1] - 2026-03-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`, `clusterReceiver`, `gateway`: Remove reference to a removed Google Kubernetes Engine (GKE) attribute in the resource detection processor ([#2282](https://github.com/signalfx/splunk-otel-collector-chart/pull/2282))
+  The `faas.id` attribute has been removed in favor of `faas.instance`. Referencing this
+  attribute in the processor configuration was causing upgrades to fail in GKE environments
+  when `clusterName` is not set in `values.yaml`.
+- `agent`: Revert change in `v0.147.0` that dropped `destination_service_namespace` from Istio metric attributes ([#2279](https://github.com/signalfx/splunk-otel-collector-chart/pull/2279))
+
+## [0.147.0] - 2026-03-10
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.147.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.147.0).
+
+### ❗ Known Issues ❗
+
+- `GKE`: This version is broken in GKE environments when `clusterName` is not set in `values.yaml`. For this distribution,
+  please skip this release in favor of `v0.147.1`.
+
+### 🛑 Breaking changes 🛑
+
+- `operator`: Change default `operator.admissionWebhooks.autoGenerateCert.recreate` from `true` to `false`. ([#2261](https://github.com/signalfx/splunk-otel-collector-chart/pull/2261))
+  The self-signed webhook certificate is now reused across helm upgrades instead of being
+  regenerated every time. The default certificate validity is 10 years (certPeriodDays: 3650),
+  so rotation per-upgrade is not required for most deployments.
+
+  To restore the previous behavior (regenerate certificate on every upgrade), set:
+
+  ```yaml
+  operator:
+    manager:
+      rolling: true # recommended
+    admissionWebhooks:
+      autoGenerateCert:
+        recreate: true
+  ```
+
+  Note: `manager.rolling: true` is recommended with `recreate: true` — it restarts the operator
+  pod so it loads the new certificate promptly. Without it, there is a delay before the
+  webhook server picks up the new cert, during which Instrumentation CR requests may fail
+  with x509 errors.
+
+- `agent`: Drop `destination_service_namespace` from Istio metric attributes ([#2275](https://github.com/signalfx/splunk-otel-collector-chart/pull/2275))
+  Users running the chart with `autodetect` enabled have hit the dimension limit
+  for Istio metrics. This fix drops the `destination_service_namespace` metric
+  dimension to avoid hitting the dimension limit and dropping the data point entirely.
+
+
+### 💡 Enhancements 💡
+
+- `operator`: Add Job-based Instrumentation CR installation Job. ([#2261](https://github.com/signalfx/splunk-otel-collector-chart/pull/2261))
+  The Instrumentation CR is deployed as a regular Helm resource by default. A new option
+  `instrumentation.installationJob.enabled` deploys the CR via a Kubernetes Job that waits
+  for webhook readiness before applying the CR, with built-in retry. This is the recommended
+  option for Helm v4 or environments with slow operator startup.
+
+  See [Auto-instrumentation Install](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/auto-instrumentation-install.md#instrumentation-cr-management) for details.
+
+
+### 🧰 Bug fixes 🧰
+
+- `eks_addon`: Fixed journald receiver issues in the EKS Add-on by mounting required shared library paths used by journalctl and aligning the directory structure with EKS node conventions. ([#2260](https://github.com/signalfx/splunk-otel-collector-chart/pull/2260))
+
+## [0.146.0] - 2026-03-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.146.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.146.0).
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add feature gate to send Kubernetes events to Splunk Observability /v3/event endpoint ([#2263](https://github.com/signalfx/splunk-otel-collector-chart/pull/2263))
+  When enabled via `featureGates.sendK8sEventsToSplunkO11y`, the cluster receiver routes
+  Kubernetes events to the Splunk Observability /v3/event endpoint with the
+  `X-Splunk-Instrumentation-Library` header. Requires `clusterReceiver.eventsEnabled` and
+  Splunk Observability configuration.
+
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.6. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using  option. ([#2244](https://github.com/signalfx/splunk-otel-collector-chart/pull/2244))
+- `operator`: Bump java to v2.25.1 in helm-charts/splunk-otel-collector/values.yaml ([#2258](https://github.com/signalfx/splunk-otel-collector-chart/pull/2258))
+- `operator`: Bump operator to 0.106.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2244](https://github.com/signalfx/splunk-otel-collector-chart/pull/2244))
+
+## [0.145.1] - 2026-02-23
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.145.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.145.1).
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver`: Scrape `kubernetes_build_info` metric from Kubernetes apiserver ([#2216](https://github.com/signalfx/splunk-otel-collector-chart/pull/2216))
+- `operator`: Bump java to v2.25.0 in helm-charts/splunk-otel-collector/values.yaml ([#2248](https://github.com/signalfx/splunk-otel-collector-chart/pull/2248))
+
+## [0.145.0] - 2026-02-10
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.145.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.145.0).
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump dotnet to v1.13.0 in helm-charts/splunk-otel-collector/values.yaml ([#2187](https://github.com/signalfx/splunk-otel-collector-chart/pull/2187))
+- `operator`: Bump java to v2.24.0 in helm-charts/splunk-otel-collector/values.yaml ([#2177](https://github.com/signalfx/splunk-otel-collector-chart/pull/2177))
+- `operator`: Bump nodejs to v4.3.0 in helm-charts/splunk-otel-collector/values.yaml ([#2098](https://github.com/signalfx/splunk-otel-collector-chart/pull/2098))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix bug causing property updates to fail when the gateway is enabled ([#2234](https://github.com/signalfx/splunk-otel-collector-chart/pull/2234))
+  The SignalFx exporter's property updates coming from the agent were failing to properly be
+  sent when the gateway was enabled, due to a misconfigured realm value introduced in `v0.142.0`.
+
+
+## [0.144.2] - 2026-02-05
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix Prometheus autodetect metric filtering ([#2222](https://github.com/signalfx/splunk-otel-collector-chart/pull/2222))
+  A [change](https://github.com/signalfx/splunk-otel-collector-chart/pull/2141) was introduced in `v0.138.0` that
+  incorrectly set filters to only keep Istio and Envoy related metrics when `autodetect.prometheus` is enabled.
+  The filtering should keep all Prometheus metrics and only filter when `autodetect.prometheus` is disabled, and
+  `autodetect.istio` is enabled.
+
+
+## [0.144.1] - 2026-02-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver`: Add additional Kubernetes API server metrics ([#2223](https://github.com/signalfx/splunk-otel-collector-chart/pull/2223))
+  Collect `apiserver_storage_size_bytes` and `apiserver_requested_deprecated_apis` metrics from the API server.
+
+
+## [0.144.0] - 2026-02-04
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.144.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.144.0).
+
+### 🛑 Breaking changes 🛑
+
+- `gateway`: Remove `signalfx` receiver from gateway ([#2191](https://github.com/signalfx/splunk-otel-collector-chart/pull/2191))
+  The `signalfx` receiver was removed from all default gateway pipelines in #2172. This change removes the
+  receiver's declaration in the gateway config. If the `signalfx` receiver is still needed, the following
+  section can be added to your values.yaml file:
+  ```
+  gateway:
+    config:
+      receivers:
+        signalfx:
+          endpoint: 0.0.0.0:9943
+          include_metadata: true
+    ports:
+      signalfx:
+        containerPort: 9943
+        protocol: TCP
+        enabled_for: [metrics, traces, logs]
+  ```
+  Please note that the `signalfx` receiver will eventually be deprecated and removed.
+
+
+### 💡 Enhancements 💡
+
+- `agent`: Enable `container.cpu.usage` metric by default ([#1962](https://github.com/signalfx/splunk-otel-collector-chart/pull/1962))
+- `agent (logsCollection-journald)`: Allow users to configure the chart so the `journald` receiver can use the host's journalctl binary. ([#2211](https://github.com/signalfx/splunk-otel-collector-chart/pull/2211))
+  To enable this, set the `logsCollection.journald.useHostJournalctl` option to true.
+  By default, this option is false, so the collector uses the bundled journalctl binary.
+  For more details, see [Advanced Configuration](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#use-the-host-journalctl-binary).
+
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Skip token passthrough if Splunk Observability is disabled ([#2219](https://github.com/signalfx/splunk-otel-collector-chart/pull/2219))
+
+## [0.143.0] - 2026-01-14
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.143.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.143.0).
+
+## [0.142.0] - 2026-01-14
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.142.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.142.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, gateway`: Send metrics collected about the agent pod itself via OTLP from agent to the gateway ([#2172](https://github.com/signalfx/splunk-otel-collector-chart/pull/2172))
+  Previously, metrics were being sent via SignalFx exporter to SignalFx receiver. This change removes
+  the SignalFx receiver from the gateway's metric pipelines. The SignalFx receiver is on the path towards
+  deprecation. The SignalFx exporter remains in the agent's `metrics` pipeline even when the gateway is enabled, but
+  its only purpose is to sync host metadata, it does not send any metrics.
+
+- `gateway`: Include metadata coming from connections to the OTLP receiver ([#2171](https://github.com/signalfx/splunk-otel-collector-chart/pull/2171))
+  This is part of an effort to remove the `signalfx` receiver from the default gateway configuration. This change
+  will allow access tokens to be passed from agents to the gateway through the OTLP receiver.
+  To revert this change to previous behavior, please add the following to your `values.yaml` file:
+  ```
+  gateway:
+    config:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              include_metadata: false
+            http:
+              include_metadata: false
+  ```
+
+
+### 🚀 New components 🚀
+
+- `OBI subchart`: Add the OpenTelemetry eBPF Instrumentation sub-chart ([#2190](https://github.com/signalfx/splunk-otel-collector-chart/pull/2190))
+  OpenTelemetry eBPF Instrumentation (OBI) is auto-instrumentation that generates trace and metric telemetry for your application using eBPF technology. OBI inspects application executables and the OS networking layer to automatically instrument network communication, application operation, and more.
+
+  The OBI sub-chart deploys OBI as a daemonset within your Kubernetes cluster. All applications within your cluster that are not already instrumented with OpenTelemetry will be instrumented. See the OBI documentation on how to customize this.
+
+  The OBI project, and this sub-chart, are still evolving. This functionality is in an alpha stage of release. Please direct any feedback or questions through Splunk support services.
+
+
+### 💡 Enhancements 💡
+
+- `gateway`: Make replicaCount optional for the gateway deployment to allow HPA to manage replicas without conflicts ([#2198](https://github.com/signalfx/splunk-otel-collector-chart/pull/2198))
+
 ## [0.141.0] - 2025-12-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.141.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.141.0).

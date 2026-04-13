@@ -1,0 +1,25 @@
+clusterName: test
+cloudProvider: azure
+distribution: aks
+environment: dev
+isWindows: true
+splunkObservability:
+  realm: us0
+  accessToken: xxxxx
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+  automountServiceAccountToken: false
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true
+  nodeSelector:
+    kubernetes.io/os: "linux"
+instrumentation:
+  installationJob:
+    enabled: true
+featureGates:
+  explicitMountServiceAccountToken: true

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -e
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 
 #Make sure to check and clean previously failed deployment
 echo "Checking if previous deployment exist..."
 if [ "`helm ls --short`" == "" ]; then
    echo "Nothing to clean, ready for deployment"
 else
-   helm delete $(helm ls --short)
+   helm uninstall $(helm ls --short)
 fi
 echo "Deploying Splunk OTel Collector for Kubernetes"
 helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
