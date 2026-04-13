@@ -36,6 +36,9 @@ agent:
         endpoint: {{ .LogHecEndpoint }}
     service:
       pipelines:
+        metrics:
+          receivers:
+            - receiver_creator
         {{ if (eq .KubeTestEnv "eks") }}
         metrics/agent:
           exporters:
