@@ -252,6 +252,14 @@ data:
           id: container-parser
           max_log_size: 1048576
           type: container
+        - combine_field: body
+          combine_with: ""
+          id: docker-recombine
+          if: attributes.logtag == nil
+          is_last_entry: body endsWith "\n"
+          max_log_size: 1048576
+          source_identifier: attributes["log.file.path"]
+          type: recombine
         - field: body
           id: handle_empty_log
           if: body == nil

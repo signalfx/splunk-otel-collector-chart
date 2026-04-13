@@ -641,6 +641,15 @@ receivers:
         {{- end }}
         add_metadata_from_filepath: true
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
+      # Recombine Docker partial log lines (no logtag means Docker format)
+      - type: recombine
+        id: docker-recombine
+        if: attributes.logtag == nil
+        combine_field: body
+        source_identifier: attributes["log.file.path"]
+        is_last_entry: body endsWith "\n"
+        combine_with: ""
+        max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
       - type: add
         id: handle_empty_log
         if: body == nil
