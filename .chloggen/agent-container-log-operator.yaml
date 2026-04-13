@@ -1,0 +1,9 @@
+change_type: enhancement
+component: agent
+note: Replace filelog container log parsing operators with the `container` operator
+issues: [2370]
+subtext: |
+  Replaces the manual `router` + `regex_parser`/`json_parser` + `recombine` chain for Docker/CRI-O/containerd
+  log parsing with the single `container` operator.
+  The operator handles format auto-detection, timestamp parsing, multiline P/F log recombination,
+  and k8s metadata extraction from the file path natively, for both Linux and Windows nodes.
