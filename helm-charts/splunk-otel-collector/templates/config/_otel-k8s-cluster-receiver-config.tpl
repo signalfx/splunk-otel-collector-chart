@@ -247,6 +247,17 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  # Set host.name for the Splunk HEC "host" indexed field, which Splunk
+  # defines as "the network host from which the event originated"
+  # (https://docs.splunk.com/Documentation/Splunk/latest/Data/Aboutdefaultfields).
+  # Cluster-scoped data has no originating host; use the node running
+  # the cluster receiver as the closest physical device.
+  resource/add_cluster_host:
+    attributes:
+      - action: insert
+        key: host.name
+        value: "${K8S_NODE_NAME}"
+
   # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
   resource/add_mode:
     attributes:
@@ -422,6 +433,7 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        - resource/add_cluster_host
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -446,6 +458,7 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        - resource/add_cluster_host
         - transform/add_sourcetype
         {{- if .Values.environment }}
         - resource/add_environment
@@ -470,6 +483,7 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        - resource/add_cluster_host
         {{- if .Values.clusterName }}
         - resource/add_event_k8s
         {{- end }}

@@ -73,6 +73,11 @@ data:
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
+      resource/add_cluster_host:
+        attributes:
+        - action: insert
+          key: host.name
+          value: ${K8S_NODE_NAME}
       resource/add_collector_k8s:
         attributes:
         - action: insert
@@ -220,6 +225,7 @@ data:
           - batch
           - attributes/drop_event_attrs
           - resource
+          - resource/add_cluster_host
           - resource/add_environment
           - transform/k8sevents
           receivers:
@@ -231,6 +237,7 @@ data:
           - memory_limiter
           - batch
           - resource
+          - resource/add_cluster_host
           - transform/add_sourcetype
           - resource/add_environment
           receivers:

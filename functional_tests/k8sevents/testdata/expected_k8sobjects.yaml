@@ -1,6 +1,9 @@
 resourceLogs:
   - resource:
       attributes:
+        - key: host.name
+          value:
+            stringValue: kind-control-plane
         - key: com.splunk.source
           value:
             stringValue: kubernetes

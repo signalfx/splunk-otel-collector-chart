@@ -11,8 +11,8 @@ issues: [2369]
 # Use pipe (|) for multiline entries.
 subtext: |
   The cluster receiver's `logs` (k8s_events), `logs/objects`, and `logs/events` pipelines
-  incorrectly used the full `resourcedetection` processor, which added host and
+  previously used the `resourcedetection` processor, which added host and
   cloud-provider attributes (host.id, host.name, cloud.provider, cloud.platform,
-  cloud.account.id, cloud.region, etc.) to cluster-scoped data. These attributes reflected
-  the cluster receiver pod rather than the source of the event or object, making them
-  misleading.
+  cloud.account.id, cloud.region, etc.) from the cluster receiver pod itself.
+  These pipelines now only add `k8s.cluster.name`. The Splunk HEC `host` field for these pipelines
+  is now set to the node name of the cluster receiver pod.

@@ -44,6 +44,11 @@ data:
         - action: insert
           key: metric_source
           value: kubernetes
+      resource/add_cluster_host:
+        attributes:
+        - action: insert
+          key: host.name
+          value: ${K8S_NODE_NAME}
       resource/add_collector_k8s:
         attributes:
         - action: insert
