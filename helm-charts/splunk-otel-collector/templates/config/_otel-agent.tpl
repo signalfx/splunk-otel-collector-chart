@@ -624,37 +624,8 @@ receivers:
         {{- if .Values.logsCollection.containers.containerRuntime }}
         format: {{ .Values.logsCollection.containers.containerRuntime }}
         {{- end }}
-        {{- if not .Values.isWindows }}
         add_metadata_from_filepath: true
-        {{- else }}
-        add_metadata_from_filepath: false
-        {{- end }}
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- if .Values.isWindows }}
-      # Extract metadata from file path (Windows)
-      - type: regex_parser
-        {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
-        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
-        {{- else }}
-        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log'
-        {{- end }}
-        parse_from: attributes["log.file.path"]
-      - type: move
-        from: attributes.uid
-        to: resource["k8s.pod.uid"]
-      - type: move
-        from: attributes.restart_count
-        to: resource["k8s.container.restart_count"]
-      - type: move
-        from: attributes.container_name
-        to: resource["k8s.container.name"]
-      - type: move
-        from: attributes.namespace
-        to: resource["k8s.namespace.name"]
-      - type: move
-        from: attributes.pod_name
-        to: resource["k8s.pod.name"]
-      {{- end }}
       - type: add
         id: handle_empty_log
         if: body == nil
@@ -676,11 +647,9 @@ receivers:
           - output: {{ include "splunk-otel-collector.newlineKey" . | quote }}
             expr: {{ include "splunk-otel-collector.newlineExpr" . | quote }}
         {{- end }}
-        default: clean-up-log-record
       {{- range $.Values.logsCollection.containers.multilineConfigs }}
       - type: recombine
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
-        output: clean-up-log-record
         source_identifier: resource["com.splunk.source"]
         combine_field: body
         is_first_entry: 'body matches {{ .firstEntryRegex | quote }}'
@@ -693,10 +662,6 @@ receivers:
         {{- end }}
       {{- end }}
       {{- end }}
-      # Clean up log record
-      - type: remove
-        id: clean-up-log-record
-        field: attributes.time
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}

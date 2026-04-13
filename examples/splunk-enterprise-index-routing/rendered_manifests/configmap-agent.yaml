@@ -182,9 +182,6 @@ data:
         - from: resource["k8s.namespace.name"]
           to: resource["com.splunk.index"]
           type: copy
-        - field: attributes.time
-          id: clean-up-log-record
-          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true

@@ -205,9 +205,6 @@ data:
         - from: attributes["log.file.path"]
           to: resource["com.splunk.source"]
           type: move
-        - field: attributes.time
-          id: clean-up-log-record
-          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true

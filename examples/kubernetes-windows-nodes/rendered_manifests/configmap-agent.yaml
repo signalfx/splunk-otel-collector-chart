@@ -189,28 +189,10 @@ data:
         max_concurrent_files: 1024
         max_log_size: 1MiB
         operators:
-        - add_metadata_from_filepath: false
+        - add_metadata_from_filepath: true
           id: container-parser
           max_log_size: 1048576
           type: container
-        - parse_from: attributes["log.file.path"]
-          regex: ^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$
-          type: regex_parser
-        - from: attributes.uid
-          to: resource["k8s.pod.uid"]
-          type: move
-        - from: attributes.restart_count
-          to: resource["k8s.container.restart_count"]
-          type: move
-        - from: attributes.container_name
-          to: resource["k8s.container.name"]
-          type: move
-        - from: attributes.namespace
-          to: resource["k8s.namespace.name"]
-          type: move
-        - from: attributes.pod_name
-          to: resource["k8s.pod.name"]
-          type: move
         - field: body
           id: handle_empty_log
           if: body == nil
@@ -222,9 +204,6 @@ data:
         - from: attributes["log.file.path"]
           to: resource["com.splunk.source"]
           type: move
-        - field: attributes.time
-          id: clean-up-log-record
-          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true

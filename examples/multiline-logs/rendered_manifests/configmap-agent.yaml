@@ -179,8 +179,7 @@ data:
         - from: attributes["log.file.path"]
           to: resource["com.splunk.source"]
           type: move
-        - default: clean-up-log-record
-          routes:
+        - routes:
           - expr: (resource["k8s.namespace.name"]) == "default" && (resource["k8s.pod.name"])
               matches "buttercup-app-.*" && (resource["k8s.container.name"]) == "server"
             output: default_buttercup-app-.*_server
@@ -196,7 +195,6 @@ data:
           id: default_buttercup-app-.*_server
           is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
-          output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine
         - combine_field: body
@@ -204,19 +202,14 @@ data:
           id: k8s-nm2_foo-app-.*_client
           is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
-          output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine
         - combine_field: body
           id: k8s-nm3_foo-app-.*_server
           is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
-          output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine
-        - field: attributes.time
-          id: clean-up-log-record
-          type: remove
         poll_interval: 200ms
         retry_on_failure:
           enabled: true
