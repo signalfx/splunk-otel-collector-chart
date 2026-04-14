@@ -1245,6 +1245,7 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	checkMetrics(t, agentMetricsConsumer, metricNames, "", func(attrs pcommon.Map, _ pmetric.Metric) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
+		t.Logf("Pod monitor: pod label present: %v, service monitor present: %v", podLabelPresent, serviceLabelPresent)
 		return podLabelPresent && !serviceLabelPresent
 	})
 	t.Logf("Checking via service monitor")
@@ -1253,6 +1254,7 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	checkMetrics(t, agentMetricsConsumer, metricNames, "", func(attrs pcommon.Map, _ pmetric.Metric) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
+		t.Logf("Service monitor: pod label present: %v, service monitor present: %v", podLabelPresent, serviceLabelPresent)
 		return podLabelPresent && serviceLabelPresent
 	})
 }
@@ -1302,6 +1304,7 @@ func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []stri
 					for k := 0; k < sm.Metrics().Len(); k++ {
 						metric := sm.Metrics().At(k)
 						if match == nil || match(resAttrs, metric) {
+							t.Logf("Found metric: %s", metric.Name())
 							metricsToFind[metric.Name()] = true
 						}
 					}
