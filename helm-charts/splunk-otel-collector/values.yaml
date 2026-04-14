@@ -650,7 +650,7 @@ logsCollection:
     # Set useSplunkIncludeAnnotation flag to `true` to collect logs from pods with `splunk.com/include: true` annotation and ignore others.
     # All other logs will be ignored.
     useSplunkIncludeAnnotation: false
-    # maxRecombineLogsSize sets the maximum size in bytes of a message recombined from crio, containerd and docker log entries.
+    # maxRecombineLogSize sets the maximum size in bytes of a message recombined from crio, containerd and docker log entries.
     # Set to 0 to remove any size limit.
     maxRecombineLogSize: 1048576
 
