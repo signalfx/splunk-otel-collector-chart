@@ -1,0 +1,21 @@
+clusterName: multiline-test-cluster
+
+clusterReceiver:
+  enabled: false
+
+splunkPlatform:
+  endpoint: {{ .LogURL }}
+  token: "00000000-0000-0000-0000-000000000000"
+  logsEnabled: true
+
+logsCollection:
+  containers:
+    multilineConfigs:
+      - namespaceName:
+          value: multiline-test
+        podName:
+          value: multiline-test-.*
+          useRegexp: true
+        containerName:
+          value: multiline-test
+        firstEntryRegex: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}'
