@@ -1316,7 +1316,7 @@ func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []stri
 		if label != "" {
 			t.Logf("[%s] found=%d missing=%d (%s)", label, len(found), len(stillMissing), strings.Join(stillMissing, ", "))
 		} else {
-			t.Logf("found=%d missing=%d (%s)", len(found), len(stillMissing), strings.Join(stillMissing, ", "))
+			t.Logf("found=%d missing=%d (%s) (%s)", len(found), len(stillMissing), strings.Join(found, ", "), strings.Join(stillMissing, ", "))
 		}
 		return len(stillMissing) == 0
 	}, 3*time.Minute, 10*time.Second,
