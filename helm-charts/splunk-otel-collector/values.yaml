@@ -599,7 +599,7 @@ logsCollection:
   # Container logs collection
   containers:
     enabled: true
-    # Container runtime. One of `docker`, `cri-o`, or `containerd`
+    # Container runtime. One of `docker`, `crio`, or `containerd`
     # Automatically discovered if not set.
     containerRuntime: ""
     # Paths of logfiles to exclude. object type is array:
