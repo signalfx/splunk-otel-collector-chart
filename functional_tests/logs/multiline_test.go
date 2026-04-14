@@ -1,7 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package multilinelogs
+package logs
 
 import (
 	"os"
@@ -21,23 +21,23 @@ import (
 )
 
 const (
-	testNamespace      = "multiline-test"
-	containerName      = "multiline-test"
-	valuesTemplateFile = "multiline_values.yaml.tmpl"
-	testdataDir        = "testdata"
-	manifestsDir       = "testdata/testobjects"
+	multilineTestNamespace      = "multiline-test"
+	multilineContainerName      = "multiline-test"
+	multilineValuesTemplateFile = "multiline_values.yaml.tmpl"
+	multilineTestdataDir        = "testdata"
+	multilineManifestsDir       = "testdata/multiline_testobjects"
 
-	// expectedTotalRecords is the number of distinct logical log records in input.log:
-	//   5 single-line entries + 3 multiline blocks (Java NPE, Python traceback, Go panic).
-	expectedTotalRecords = 8
+	// multilineExpectedTotalRecords is the number of distinct logical log records in the
+	// ConfigMap: 5 single-line entries + 3 multiline blocks (Java NPE, Python traceback, Go panic).
+	multilineExpectedTotalRecords = 8
 )
 
-// Env vars to control the test behavior:
+// Env vars to control the test behavior
 // TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
-// SKIP_SETUP:            if set to true, the test will skip setup
-// SKIP_TEARDOWN:         if set to true, the test will skip teardown
-// SKIP_TESTS:            if set to true, the test will skip the test assertions
-// KUBECONFIG:            path to the kubeconfig file
+// SKIP_SETUP: if set to true, the test will skip setup
+// SKIP_TEARDOWN: if set to true, the test will skip teardown
+// SKIP_TESTS: if set to true, the test will skip the test
+// KUBECONFIG: the path to the kubeconfig file
 func Test_MultilineLogs(t *testing.T) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
@@ -52,7 +52,7 @@ func Test_MultilineLogs(t *testing.T) {
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-		teardown(t, k8sClient)
+		multilineTeardown(t, k8sClient)
 	}
 
 	logsConsumer := internal.SetupHECLogsSink(t)
@@ -60,16 +60,13 @@ func Test_MultilineLogs(t *testing.T) {
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	} else {
-		deployWorkloadAndCollector(t, testKubeConfig, clientset, k8sClient)
+		multilineDeployWorkloadAndCollector(t, testKubeConfig, clientset, k8sClient)
 	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
-
-	// Wait for at least one log batch to arrive before running sub-tests.
-	internal.WaitForLogs(t, 1, logsConsumer)
 
 	t.Run("MultilineRecombinedAsOneRecord", func(t *testing.T) {
 		checkMultilineRecombined(t, logsConsumer)
@@ -85,7 +82,7 @@ func Test_MultilineLogs(t *testing.T) {
 func checkMultilineRecombined(t *testing.T, logsConsumer *consumertest.LogsSink) {
 	t.Helper()
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		bodies := collectBodiesFromContainer(logsConsumer, containerName)
+		bodies := collectBodiesFromContainer(logsConsumer, multilineContainerName)
 
 		// Java NPE block: first line begins with a timestamp, continuation lines
 		// start with whitespace ("at com.example..."). All four lines must be in
@@ -130,18 +127,18 @@ func checkSingleLinePassthrough(t *testing.T, logsConsumer *consumertest.LogsSin
 	}
 
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		bodies := collectBodiesFromContainer(logsConsumer, containerName)
+		bodies := collectBodiesFromContainer(logsConsumer, multilineContainerName)
 
 		for _, marker := range singleLineMarkers {
 			assert.NotNilf(tt, findBodyContaining(bodies, marker),
 				"single-line entry %q must pass through as its own record", marker)
 		}
 
-		// Sanity check: total distinct records must be at least expectedTotalRecords.
+		// Sanity check: total distinct records must be at least multilineExpectedTotalRecords.
 		// input.log repeats every 30 s so there may be more than 8 over time — use >=.
-		assert.GreaterOrEqualf(tt, len(bodies), expectedTotalRecords,
+		assert.GreaterOrEqualf(tt, len(bodies), multilineExpectedTotalRecords,
 			"expected at least %d distinct log records (5 single-line + 3 multiline stacks), got %d",
-			expectedTotalRecords, len(bodies))
+			multilineExpectedTotalRecords, len(bodies))
 	}, 3*time.Minute, 5*time.Second)
 }
 
@@ -179,10 +176,10 @@ func findBodyContaining(bodies []string, substr string) *string {
 	return nil
 }
 
-func deployWorkloadAndCollector(t *testing.T, testKubeConfig string, clientset *kubernetes.Clientset, k8sClient *k8stest.K8sClient) {
+func multilineDeployWorkloadAndCollector(t *testing.T, testKubeConfig string, clientset *kubernetes.Clientset, k8sClient *k8stest.K8sClient) {
 	t.Helper()
 
-	valuesFile, err := filepath.Abs(filepath.Join(testdataDir, valuesTemplateFile))
+	valuesFile, err := filepath.Abs(filepath.Join(multilineTestdataDir, multilineValuesTemplateFile))
 	require.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
@@ -198,27 +195,25 @@ func deployWorkloadAndCollector(t *testing.T, testKubeConfig string, clientset *
 	internal.CheckPodsReady(t, clientset, internal.DefaultNamespace, "component=otel-collector-agent", 3*time.Minute, 5*time.Second)
 
 	// Deploy the workload into its own namespace.
-	// 1-namespace.yaml creates the namespace, so CreateObjects must run first.
-	createdObjs, err := k8stest.CreateObjects(k8sClient, manifestsDir)
+	internal.CreateNamespace(t, clientset, multilineTestNamespace)
+	internal.WaitForDefaultServiceAccount(t, clientset, multilineTestNamespace)
+
+	createdObjs, err := k8stest.CreateObjects(k8sClient, multilineManifestsDir)
 	require.NoError(t, err)
 	require.NotEmpty(t, createdObjs)
 
-	// Wait for the namespace controller to provision the default ServiceAccount
-	// before pods are scheduled (required on K8s 1.35+).
-	internal.WaitForDefaultServiceAccount(t, clientset, testNamespace)
-
-	internal.CheckPodsReady(t, clientset, testNamespace, "app=multiline-test", 2*time.Minute, 0)
+	internal.CheckPodsReady(t, clientset, multilineTestNamespace, "app=multiline-test", 2*time.Minute, 0)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		teardown(t, k8sClient)
+		multilineTeardown(t, k8sClient)
 	})
 }
 
-func teardown(t *testing.T, k8sClient *k8stest.K8sClient) {
+func multilineTeardown(t *testing.T, k8sClient *k8stest.K8sClient) {
 	t.Helper()
 	testKubeConfig := os.Getenv("KUBECONFIG")
 	internal.ChartUninstall(t, testKubeConfig)
