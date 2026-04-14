@@ -1233,18 +1233,21 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
 		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
 	}
+	t.Logf("Checking via prometheus.io/scrape")
 	// when scraping via prometheus.io/scrape annotation, no additional attributes are present.
 	checkMetrics(t, agentMetricsConsumer, metricNames, "", func(attrs pcommon.Map, _ pmetric.Metric) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
 		return !podLabelPresent && !serviceLabelPresent
 	})
+	t.Logf("Checking via pod monitor")
 	// when scraping via pod monitor, the pod attribute refers to the pod the metric is scraped from.
 	checkMetrics(t, agentMetricsConsumer, metricNames, "", func(attrs pcommon.Map, _ pmetric.Metric) bool {
 		_, podLabelPresent := attrs.Get("pod")
 		_, serviceLabelPresent := attrs.Get("service")
 		return podLabelPresent && !serviceLabelPresent
 	})
+	t.Logf("Checking via service monitor")
 	// when scraping via service monitor, the pod attribute refers to the pod the metric is scraped from,
 	// and the servicelabel attribute is added by the serviceMonitor definition.
 	checkMetrics(t, agentMetricsConsumer, metricNames, "", func(attrs pcommon.Map, _ pmetric.Metric) bool {
