@@ -5,6 +5,7 @@ package functional
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -63,7 +64,6 @@ const (
 	gkeValuesDir                           = "expected_gke_values"
 	rosaValuesDir                          = "expected_rosa_values"
 	gceValuesDir                           = "expected_gce_values"
-	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
@@ -587,6 +587,7 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
+	t.Run("test target allocator", testTargetAllocator)
 	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
 	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 
@@ -598,7 +599,7 @@ func runLocalClusterTests(t *testing.T) {
 		client, err := kubernetes.NewForConfig(kubeConfig)
 		require.NoError(t, err)
 
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 	})
 }
@@ -626,17 +627,17 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 
 		t.Run("component error logs checks", func(t *testing.T) {
 			if kubeTestEnv == eksTestKubeEnv {
-				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, journaldReceiverName)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName)
 			}
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 		})
 	case autopilotTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
-			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 		})
 	default:
@@ -666,7 +667,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	switch role {
 	case roleAgent:
-		labelSelector = agentLabelSelector
+		labelSelector = internal.AgentLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_agent.yaml")
 	case roleClusterReceiver:
 		labelSelector = clusterReceiverLabelSelector
@@ -678,7 +679,8 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 		require.Failf(t, "failed to run validateResourceAttributes", "unknown role %q", role)
 	}
 
-	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	pods, err := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	require.NoError(t, err)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
@@ -996,6 +998,72 @@ func testK8sObjects(t *testing.T) {
 
 	assert.True(t, foundCustomField1)
 	assert.True(t, foundCustomField2)
+}
+
+func testTargetAllocator(t *testing.T) {
+	if !requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+		t.Fatalf("Required Prometheus CRDs are not installed")
+	}
+
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	// check target allocator logs
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		var taPodList *corev1.PodList
+		taPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.TargetAllocatorLabelSelector)
+		assert.NoError(c, err)
+		containsReadyTAPod := false
+
+		for _, pod := range taPodList.Items {
+			if pod.Status.Phase != "Running" {
+				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
+				continue
+			}
+			containsReadyTAPod = true
+			var podLogs string
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.TargetAllocatorContainerName, 100)
+			assert.NoError(c, err)
+			assert.Contains(c, podLogs, "Service Discovery watch event received", "Target allocator pod logs failed to successfully discover targets. Received logs: %v", podLogs)
+		}
+		assert.True(c, containsReadyTAPod, "No target allocator pod found ready")
+	}, 3*time.Minute, 3*time.Second, "Failed to find required target allocator pod logs")
+
+	// check agent logs
+	serviceMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "serviceMonitor/default/prometheus-service-monitor/0"`)
+	podMonitorRegex := regexp.MustCompile(`Scrape job added.*"otelcol\.component\.id": "prometheus/ta.*"jobName": "podMonitor/default/pod-monitor/0"`)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		var agentPodList *corev1.PodList
+		agentPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+		assert.NoError(c, err)
+		containsReadyAgentPod := false
+		var combinedPodLogs strings.Builder
+
+		for i, pod := range agentPodList.Items {
+			if pod.Status.Phase != "Running" {
+				t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
+				continue
+			}
+			containsReadyAgentPod = true
+			var podLogs string
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			assert.NoError(c, err)
+			assert.Contains(c, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
+
+			if i > 0 {
+				combinedPodLogs.WriteString("\n")
+			}
+			combinedPodLogs.WriteString(fmt.Sprintf("%v\n%v", pod.Name, podLogs))
+		}
+		assert.True(c, containsReadyAgentPod, "No OTel Collector agent pod found ready")
+		// NOTE: The target allocator distributes scrape jobs across agents when there are more than one.
+		// Compile all logs from agents first, then ensure that altogether they have the required logs.
+		assert.Regexp(c, serviceMonitorRegex, combinedPodLogs.String(), "Collector failed to start scrape job for serviceMonitor. Received logs: %v", combinedPodLogs.String())
+		assert.Regexp(c, podMonitorRegex, combinedPodLogs.String(), "Collector failed to start scrape job for podMonitor. Received logs: %v", combinedPodLogs.String())
+	}, 3*time.Minute, 3*time.Second, "Failed to find required agent pod logs")
 }
 
 // Internal telemetry metrics are only sent when an event occurs. Due to cluster
