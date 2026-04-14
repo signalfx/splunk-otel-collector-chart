@@ -671,9 +671,11 @@ receivers:
           - output: {{ include "splunk-otel-collector.newlineKey" . | quote }}
             expr: {{ include "splunk-otel-collector.newlineExpr" . | quote }}
         {{- end }}
+        default: post-multiline
       {{- range $.Values.logsCollection.containers.multilineConfigs }}
       - type: recombine
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
+        output: post-multiline
         source_identifier: resource["com.splunk.source"]
         combine_field: body
         is_first_entry: 'body matches {{ .firstEntryRegex | quote }}'
@@ -685,6 +687,8 @@ receivers:
         max_batch_size: {{ .maxNumOfLinesToCombine }}
         {{- end }}
       {{- end }}
+      - type: noop
+        id: post-multiline
       {{- end }}
   {{- end }}
 
