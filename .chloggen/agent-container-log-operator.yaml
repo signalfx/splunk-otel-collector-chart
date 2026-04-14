@@ -1,9 +1,10 @@
-change_type: enhancement
+change_type: breaking
 component: agent
 note: Replace filelog container log parsing operators with the `container` operator
 issues: [2370]
 subtext: |
-  Replaces the manual `router` + `regex_parser`/`json_parser` + `recombine` chain for Docker/CRI-O/containerd
-  log parsing with the single `container` operator.
-  The operator handles format auto-detection, timestamp parsing, multiline P/F log recombination,
-  and k8s metadata extraction from the file path natively, for both Linux and Windows nodes.
+  Replaces the manual `router` + `regex_parser`/`json_parser` + `recombine` chain for Docker/CRI-O/containerd log parsing with the single `container` operator.
+  The operator handles format auto-detection, timestamp parsing, multiline P/F log recombination, and k8s metadata extraction from the file path natively, for both Linux and Windows nodes.
+
+  The accepted value of `logsCollection.containers.containerRuntime` for CRI-O has changed from `cri-o` to `crio` to match the `container` operator's expected format.
+  Users who have set `logsCollection.containers.containerRuntime: cri-o` must update their values to `crio`.
