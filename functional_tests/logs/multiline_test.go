@@ -23,6 +23,7 @@ import (
 const (
 	multilineTestNamespace      = "multiline-test"
 	multilineContainerName      = "multiline-test"
+	unmatchedContainerName      = "unmatched-logger"
 	multilineValuesTemplateFile = "multiline_values.yaml.tmpl"
 	multilineTestdataDir        = "testdata"
 	multilineManifestsDir       = "testdata/multiline_testobjects"
@@ -75,6 +76,10 @@ func Test_MultilineLogs(t *testing.T) {
 	t.Run("SingleLinePassthrough", func(t *testing.T) {
 		checkSingleLinePassthrough(t, logsConsumer)
 	})
+
+	t.Run("DefaultRoutePassthrough", func(t *testing.T) {
+		checkDefaultRoutePassthrough(t, logsConsumer)
+	})
 }
 
 // checkMultilineRecombined asserts that each multiline stack trace in input.log
@@ -113,9 +118,7 @@ func checkMultilineRecombined(t *testing.T, logsConsumer *consumertest.LogsSink)
 }
 
 // checkSingleLinePassthrough asserts that every single-line entry in input.log
-// arrives as its own individual log record. This acts as a regression test for
-// the "missing default route" issue: if the default route were absent, single-line
-// entries that don't match the multilineConfigs selector would be silently dropped.
+// arrives as its own individual log record from the multiline-test container.
 func checkSingleLinePassthrough(t *testing.T, logsConsumer *consumertest.LogsSink) {
 	t.Helper()
 	singleLineMarkers := []string{
@@ -130,15 +133,35 @@ func checkSingleLinePassthrough(t *testing.T, logsConsumer *consumertest.LogsSin
 		bodies := collectBodiesFromContainer(logsConsumer, multilineContainerName)
 
 		for _, marker := range singleLineMarkers {
-			assert.NotNilf(tt, findBodyContaining(bodies, marker),
-				"single-line entry %q must pass through as its own record", marker)
+			record := findBodyContaining(bodies, marker)
+			if assert.NotNilf(tt, record, "single-line entry %q must pass through as its own record", marker) {
+				assert.NotContainsf(tt, *record, "\n",
+					"single-line entry %q must not be recombined into a multiline record, got body: %q", marker, *record)
+			}
 		}
 
-		// Sanity check: total distinct records must be at least multilineExpectedTotalRecords.
-		// input.log repeats every 30 s so there may be more than 8 over time — use >=.
+		// Sanity check: the sink accumulates records across loop iterations (input.log
+		// repeats every 30s), so the count grows over time. Assert at least one full
+		// cycle worth of records has arrived.
 		assert.GreaterOrEqualf(tt, len(bodies), multilineExpectedTotalRecords,
-			"expected at least %d distinct log records (5 single-line + 3 multiline stacks), got %d",
+			"expected at least %d log records (one full cycle: 5 single-line + 3 multiline stacks), got %d",
 			multilineExpectedTotalRecords, len(bodies))
+	}, 3*time.Minute, 5*time.Second)
+}
+
+// checkDefaultRoutePassthrough asserts that logs from a container that does NOT
+// match any multilineConfigs rule still arrive at the HEC sink. This is the true
+// regression test for a missing router default: route — if it were absent, logs
+// from unmatched containers would be silently dropped.
+func checkDefaultRoutePassthrough(t *testing.T, logsConsumer *consumertest.LogsSink) {
+	t.Helper()
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		bodies := collectBodiesFromContainer(logsConsumer, unmatchedContainerName)
+		assert.NotEmptyf(tt, bodies,
+			"logs from container %q (not matching any multilineConfigs rule) must reach the sink via the default route",
+			unmatchedContainerName)
+		assert.NotNil(tt, findBodyContaining(bodies, "UNMATCHED_LOG_MARKER"),
+			"expected UNMATCHED_LOG_MARKER in logs from %q", unmatchedContainerName)
 	}, 3*time.Minute, 5*time.Second)
 }
 
@@ -203,6 +226,7 @@ func multilineDeployWorkloadAndCollector(t *testing.T, testKubeConfig string, cl
 	require.NotEmpty(t, createdObjs)
 
 	internal.CheckPodsReady(t, clientset, multilineTestNamespace, "app=multiline-test", 2*time.Minute, 0)
+	internal.CheckPodsReady(t, clientset, multilineTestNamespace, "app=unmatched-logger", 2*time.Minute, 0)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
