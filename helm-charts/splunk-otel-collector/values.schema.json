@@ -813,7 +813,12 @@
             },
             "containerRuntime": {
               "type": "string",
-              "enum": ["", "docker", "containerd", "crio"]
+              "enum": [
+                "",
+                "docker",
+                "containerd",
+                "crio"
+              ]
             },
             "excludePaths": {
               "type": "array",

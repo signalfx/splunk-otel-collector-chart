@@ -10,7 +10,7 @@
 ## Setup local environment
 
 #### Start Minikube
-    # Set environment variable for container runtime. Options are: docker, cri-o and containerd
+    # Set environment variable for container runtime. Options are: docker, crio and containerd
       export CONTAINER_RUNTIME=docker
 
     # Start minikube
