@@ -623,7 +623,7 @@ logsCollection:
     # At some cases it may turn out that default number of lines to combine (1000) is not enough
     # for some multiline logs. In that case maxNumOfLinesToCombine can be used to increase that limit.
     # Use maxUnmatchedBatchSize to limit how many consecutive lines that don't match firstEntryRegex
-    # are combined into a single record. Defaults to 1 (each unmatched line emitted individually).
+    # are combined into a single record. Defaults to 1 (each unmatched line is emitted individually).
     # Increase this value if you intentionally want to batch unmatched lines together.
     # The following example shows how to setup multiline log processing for logs having subsequent
     # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
