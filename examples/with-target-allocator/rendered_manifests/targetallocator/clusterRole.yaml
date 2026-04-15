@@ -1,10 +1,17 @@
 ---
-# Source: splunk-otel-collector/templates/targetAllocator-clusterRole.yaml
+# Source: splunk-otel-collector/charts/targetallocator/templates/clusterRole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   namespace: default
-  name: default-splunk-otel-collector-ta-clusterRole
+  name: default-targetallocator-ta-clusterRole
+  labels:
+    helm.sh/chart: targetallocator-0.127.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: opentelemetry-target-allocator
+    app.kubernetes.io/version: "0.126.0"
+    app.kubernetes.io/name: targetallocator
+    app.kubernetes.io/instance: default
 rules:
   - apiGroups:
       - monitoring.coreos.com
@@ -15,9 +22,9 @@ rules:
       - alertmanagers/finalizers
       - servicemonitors
       - podmonitors
+      - prometheusrules
       - probes
       - scrapeconfigs
-      - prometheusrules
     verbs:
       - '*'
   - apiGroups:
