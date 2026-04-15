@@ -380,34 +380,6 @@ Helper used to define a namspace.
 {{- end -}}
 
 {{/*
-Create the name of the target allocator service account to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorServiceAccountName" -}}
-{{- default (printf "%s-ta" ( include "splunk-otel-collector.fullname" .) | trunc 63 | trimSuffix "-") .Values.targetAllocator.serviceAccount.name -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster role to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorClusterRoleName" -}}
-{{- printf "%s-ta-clusterRole" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster config map to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorConfigMapName" -}}
-{{- printf "%s-ta-configmap" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster role binding to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorClusterRoleBindingName" -}}
-{{- printf "%s-ta-clusterRoleBinding" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Returns true if the distribution is eks but not eks/fargate.
 */}}
 {{- define "splunk-otel-collector.isNonFargateEKS" -}}

@@ -1,0 +1,16 @@
+---
+# Source: splunk-otel-collector/charts/targetallocator/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: default-targetallocator-ta
+spec:
+  selector:
+    app.kubernetes.io/name: targetallocator
+    app.kubernetes.io/instance: default
+  ports:
+    - name: http-port
+      protocol: TCP
+      port: 80
+      targetPort: http-port

@@ -217,7 +217,7 @@ data:
             scrape_interval: 30s
         target_allocator:
           collector_id: ${env:K8S_POD_NAME}
-          endpoint: http://default-splunk-otel-collector-ta.default.svc.cluster.local:80
+          endpoint: http://default-targetallocator-ta.default.svc.cluster.local:80
           interval: 30s
       receiver_creator:
         receivers:
