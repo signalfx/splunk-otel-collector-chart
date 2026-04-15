@@ -125,9 +125,13 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+	_, crErr := dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
+	if k8serrors.IsAlreadyExists(crErr) {
+		_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Update(t.Context(),
+			podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+	}
+	require.NoError(t, crErr)
 
 	// Prometheus service monitor
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
@@ -139,9 +143,13 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+	_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
+	if k8serrors.IsAlreadyExists(crErr) {
+		_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Update(t.Context(),
+			serviceMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
+	}
+	require.NoError(t, crErr)
 }
 
 // prometheusCRDResources are the GVRs for PodMonitor and ServiceMonitor CRs
@@ -152,7 +160,7 @@ var prometheusCRDResources = []schema.GroupVersionResource{
 }
 
 func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
-	// 1. Delete CRs first so finalizers don't block CRD removal.
+	// 1. Delete CRs first and wait for removal so finalizers don't block CRD deletion.
 	for _, gvr := range prometheusCRDResources {
 		list, listErr := dynamicClient.Resource(gvr).Namespace(internal.DefaultNamespace).List(ctx, metav1.ListOptions{})
 		if listErr != nil {
@@ -166,6 +174,10 @@ func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsCl
 				t.Logf("Failed to delete %s/%s: %v", gvr.Resource, cr.GetName(), delErr)
 			}
 		}
+		assert.Eventually(t, func() bool {
+			remaining, e := dynamicClient.Resource(gvr).Namespace(internal.DefaultNamespace).List(ctx, metav1.ListOptions{})
+			return e != nil || len(remaining.Items) == 0
+		}, 1*time.Minute, 2*time.Second, "%s CRs not fully removed", gvr.Resource)
 	}
 
 	// 2. Delete the CRDs themselves.

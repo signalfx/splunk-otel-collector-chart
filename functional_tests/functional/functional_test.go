@@ -197,6 +197,19 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute, chartOption)
 	}
 
+	// ConfigMap for prometheus test metrics (must exist before the deployment that mounts it)
+	cmStream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_test_configmap.yaml"))
+	require.NoError(t, err)
+	cm, _, err := decode(cmStream, nil, nil)
+	require.NoError(t, err)
+	_, cmErr := client.CoreV1().ConfigMaps(internal.DefaultNamespace).Create(t.Context(), cm.(*corev1.ConfigMap),
+		metav1.CreateOptions{})
+	if k8serrors.IsAlreadyExists(cmErr) {
+		_, cmErr = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Update(t.Context(), cm.(*corev1.ConfigMap),
+			metav1.UpdateOptions{})
+	}
+	require.NoError(t, cmErr)
+
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
 	deployApp := func(filePath string) {
@@ -222,15 +235,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	} {
 		deployApp(f)
 	}
-
-	// ConfigMap for prometheus test metrics
-	cmStream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_test_configmap.yaml"))
-	require.NoError(t, err)
-	cm, _, err := decode(cmStream, nil, nil)
-	require.NoError(t, err)
-	_, err = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Create(t.Context(), cm.(*corev1.ConfigMap),
-		metav1.CreateOptions{})
-	require.NoError(t, err)
 
 	// Service
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
