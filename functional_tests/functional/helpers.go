@@ -79,9 +79,9 @@ func hasAttrMatch(attrs pcommon.Map, key, expected string) bool {
 	return ok && v.Str() == expected
 }
 
-// anyDataPoint returns true if predicate matches the attributes of any data
-// point inside metric, regardless of the metric type.
-func anyDataPoint(metric pmetric.Metric, predicate func(pcommon.Map) bool) bool {
+// anyDataPointMatches returns true if predicate matches the attributes of any
+// data point inside metric, regardless of the metric type.
+func anyDataPointMatches(metric pmetric.Metric, predicate func(pcommon.Map) bool) bool {
 	switch metric.Type() {
 	case pmetric.MetricTypeGauge:
 		for i := 0; i < metric.Gauge().DataPoints().Len(); i++ {
@@ -119,7 +119,7 @@ func anyDataPoint(metric pmetric.Metric, predicate func(pcommon.Map) bool) bool 
 
 // metricDataPointsHaveKey checks whether any data point in a metric has the given attribute key.
 func metricDataPointsHaveKey(metric pmetric.Metric, key string) bool {
-	return anyDataPoint(metric, func(attrs pcommon.Map) bool {
+	return anyDataPointMatches(metric, func(attrs pcommon.Map) bool {
 		_, ok := attrs.Get(key)
 		return ok
 	})
@@ -128,7 +128,7 @@ func metricDataPointsHaveKey(metric pmetric.Metric, key string) bool {
 // metricDataPointsHaveAttrs checks whether any data point in a metric carries
 // all of the given key/value pairs. Pairs are passed as alternating key, value strings.
 func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
-	return anyDataPoint(metric, func(attrs pcommon.Map) bool {
+	return anyDataPointMatches(metric, func(attrs pcommon.Map) bool {
 		for i := 0; i < len(kvPairs)-1; i += 2 {
 			if !hasAttrMatch(attrs, kvPairs[i], kvPairs[i+1]) {
 				return false

@@ -125,10 +125,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	if requiresPrometheusCRD(kubeTestEnv) {
-		deployPrometheusResources(t, extensionsClient, dynamicClient)
+		deployPrometheusResources(t, client, extensionsClient, dynamicClient)
 	}
 
-	var stream []byte
 	chartInfo := map[string]internal.ChartOptions{}
 	addChartInfo := func(fileName string, chartOption internal.ChartOptions) {
 		valuesFile, errAbs := filepath.Abs(filepath.Join(testDir, valuesDir, fileName))
@@ -197,19 +196,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute, chartOption)
 	}
 
-	// ConfigMap for prometheus test metrics (must exist before the deployment that mounts it)
-	cmStream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_test_configmap.yaml"))
-	require.NoError(t, err)
-	cm, _, err := decode(cmStream, nil, nil)
-	require.NoError(t, err)
-	_, cmErr := client.CoreV1().ConfigMaps(internal.DefaultNamespace).Create(t.Context(), cm.(*corev1.ConfigMap),
-		metav1.CreateOptions{})
-	if k8serrors.IsAlreadyExists(cmErr) {
-		_, cmErr = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Update(t.Context(), cm.(*corev1.ConfigMap),
-			metav1.UpdateOptions{})
-	}
-	require.NoError(t, cmErr)
-
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
 	deployApp := func(filePath string) {
@@ -231,19 +217,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		filepath.Join(testDir, "dotnet", "deployment.yaml"),
 		filepath.Join(testDir, "python", "deployment.yaml"),
 		filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"),
-		filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"),
 	} {
 		deployApp(f)
 	}
-
-	// Service
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
-	require.NoError(t, err)
-	service, _, err := decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), service.(*corev1.Service),
-		metav1.CreateOptions{})
-	require.NoError(t, err)
 
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
@@ -335,20 +311,9 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	_ = deployments.Delete(ctx, "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
-		GracePeriodSeconds: &waitTime,
-	})
 	_ = deployments.Delete(ctx, "log-attr-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
-		metav1.DeleteOptions{
-			GracePeriodSeconds: &waitTime,
-		})
-	_ = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Delete(ctx, "prometheus-test-metrics",
-		metav1.DeleteOptions{
-			GracePeriodSeconds: &waitTime,
-		})
 
 	var groupVersionKind *schema.GroupVersionKind
 	var obj k8sruntime.Object
@@ -389,7 +354,7 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	}
 
 	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
-		teardownPrometheusResources(ctx, t, extensionsClient, dynamicClient)
+		teardownPrometheusResources(ctx, t, client, extensionsClient, dynamicClient)
 	}
 
 	for _, nm := range namespaces {

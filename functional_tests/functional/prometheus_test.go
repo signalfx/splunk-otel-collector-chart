@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -38,7 +39,7 @@ func requiresPrometheusCRD(kubeTestEnv string) bool {
 	return kubeTestEnv == kindTestKubeEnv
 }
 
-func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
+func deployPrometheusResources(t *testing.T, client kubernetes.Interface, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
 	t.Log("Deploying Prometheus Operator CRDs (re-generate with: make update-prometheus-crds)")
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
@@ -125,13 +126,9 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 		Version:  "v1",
 		Resource: "podmonitors",
 	}
-	_, crErr := dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	if k8serrors.IsAlreadyExists(crErr) {
-		_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Update(t.Context(),
-			podMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-	}
-	require.NoError(t, crErr)
+	require.NoError(t, err)
 
 	// Prometheus service monitor
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
@@ -143,13 +140,36 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
-	_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
+	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
 		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	if k8serrors.IsAlreadyExists(crErr) {
-		_, crErr = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Update(t.Context(),
-			serviceMonitor.(*unstructured.Unstructured), metav1.UpdateOptions{})
-	}
-	require.NoError(t, crErr)
+	require.NoError(t, err)
+
+	// ConfigMap (must exist before the deployment that mounts it)
+	cmStream, cmErr := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_test_configmap.yaml"))
+	require.NoError(t, cmErr)
+	cm, _, cmErr := decode(cmStream, nil, nil)
+	require.NoError(t, cmErr)
+	_, cmErr = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Create(t.Context(), cm.(*corev1.ConfigMap),
+		metav1.CreateOptions{})
+	require.NoError(t, cmErr)
+
+	// Deployment
+	depStream, depErr := os.ReadFile(filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"))
+	require.NoError(t, depErr)
+	dep, _, depErr := decode(depStream, nil, nil)
+	require.NoError(t, depErr)
+	_, depErr = client.AppsV1().Deployments(internal.DefaultNamespace).Create(t.Context(), dep.(*appsv1.Deployment),
+		metav1.CreateOptions{})
+	require.NoError(t, depErr)
+
+	// Service
+	svcStream, svcErr := os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
+	require.NoError(t, svcErr)
+	svc, _, svcErr := decode(svcStream, nil, nil)
+	require.NoError(t, svcErr)
+	_, svcErr = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), svc.(*corev1.Service),
+		metav1.CreateOptions{})
+	require.NoError(t, svcErr)
 }
 
 // prometheusCRDResources are the GVRs for PodMonitor and ServiceMonitor CRs
@@ -159,7 +179,16 @@ var prometheusCRDResources = []schema.GroupVersionResource{
 	{Group: "monitoring.coreos.com", Version: "v1", Resource: "servicemonitors"},
 }
 
-func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
+func teardownPrometheusResources(ctx context.Context, t *testing.T, client kubernetes.Interface, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
+	// 0. Delete app resources (deployment, service, configmap).
+	waitTime := int64(0)
+	_ = client.AppsV1().Deployments(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-test",
+		metav1.DeleteOptions{GracePeriodSeconds: &waitTime})
+	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
+		metav1.DeleteOptions{GracePeriodSeconds: &waitTime})
+	_ = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Delete(ctx, "prometheus-test-metrics",
+		metav1.DeleteOptions{GracePeriodSeconds: &waitTime})
+
 	// 1. Delete CRs first and wait for removal so finalizers don't block CRD deletion.
 	for _, gvr := range prometheusCRDResources {
 		list, listErr := dynamicClient.Resource(gvr).Namespace(internal.DefaultNamespace).List(ctx, metav1.ListOptions{})
@@ -176,7 +205,14 @@ func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsCl
 		}
 		assert.Eventually(t, func() bool {
 			remaining, e := dynamicClient.Resource(gvr).Namespace(internal.DefaultNamespace).List(ctx, metav1.ListOptions{})
-			return e != nil || len(remaining.Items) == 0
+			if e != nil {
+				if k8serrors.IsNotFound(e) {
+					return true
+				}
+				t.Logf("Retrying list for %s CRs during teardown: %v", gvr.Resource, e)
+				return false
+			}
+			return len(remaining.Items) == 0
 		}, 1*time.Minute, 2*time.Second, "%s CRs not fully removed", gvr.Resource)
 	}
 
