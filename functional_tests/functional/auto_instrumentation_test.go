@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
@@ -310,8 +311,16 @@ func testDotNetTraces(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// Metrics tests — match by telemetry.sdk.language + service.name via the
-// default metrics pipeline (signalfx exporter).
+// checkMetricsFromApp waits until all named metrics appear in the sink from a
+// specific application identified by telemetry.sdk.language + service.name.
+func checkMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName string, metricNames []string) {
+	checkMetrics(t, mc, metricNames, sdkLanguage+"/"+serviceName, func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
+		if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
+			return true
+		}
+		return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
+	})
+}
 
 func testJavaMetrics(t *testing.T) {
 	checkMetricsFromApp(t, globalSinks.agentMetricsConsumer, "java", "java-test", []string{
