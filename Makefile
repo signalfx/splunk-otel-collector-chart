@@ -235,6 +235,22 @@ prepare-release: ## Prepares for a new release of the helm chart. Optionally spe
 update-operator-crds: ## Update CRDs in the opentelemetry-operator-crds subchart
 	ci_scripts/update-crds.sh
 
+# Prometheus Operator CRD version used for functional tests (PodMonitor/ServiceMonitor).
+PROMETHEUS_OPERATOR_CRD_VERSION ?= 0.90.0
+PROMETHEUS_CRD_BASE_URL := https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v$(PROMETHEUS_OPERATOR_CRD_VERSION)/example/prometheus-operator-crd
+PROMETHEUS_CRD_OUTPUT := functional_tests/functional/testdata/manifests/prometheus_operator_crds.yaml
+
+.PHONY: update-prometheus-crds
+update-prometheus-crds: ## Re-vendor Prometheus Operator CRDs (PodMonitor + ServiceMonitor) for functional tests
+	@echo "Downloading Prometheus Operator CRDs v$(PROMETHEUS_OPERATOR_CRD_VERSION)..."
+	@{ \
+	echo "# Prometheus Operator CRDs v$(PROMETHEUS_OPERATOR_CRD_VERSION)"; \
+	echo "# Re-generate with: make update-prometheus-crds PROMETHEUS_OPERATOR_CRD_VERSION=<version>"; \
+	curl -sfL "$(PROMETHEUS_CRD_BASE_URL)/monitoring.coreos.com_podmonitors.yaml"; \
+	curl -sfL "$(PROMETHEUS_CRD_BASE_URL)/monitoring.coreos.com_servicemonitors.yaml"; \
+	} > $(PROMETHEUS_CRD_OUTPUT)
+	@echo "Written to $(PROMETHEUS_CRD_OUTPUT) ($$(wc -l < $(PROMETHEUS_CRD_OUTPUT)) lines)"
+
 # Define a delegation target for each module
 .PHONY: $(ALL_MODS)
 $(ALL_MODS):
