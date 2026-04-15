@@ -271,18 +271,11 @@ func testTargetAllocator(t *testing.T) {
 func testPrometheusAnnotationMetrics(t *testing.T) {
 	agentMetricsConsumer := globalSinks.agentMetricsConsumer
 
+	// metrics from the local prometheus_test_app.
 	metricNames := []string{
-		"istio_agent_cert_expiry_seconds",
-		"istio_agent_endpoint_no_pod",
-		"istio_agent_go_gc_cycles_automatic_gc_cycles_total",
-		"istio_agent_go_gc_cycles_forced_gc_cycles_total",
-		"istio_agent_go_gc_cycles_total_gc_cycles_total",
-		"istio_agent_go_gc_duration_seconds_sum",
-		"istio_agent_go_gc_duration_seconds_count",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_bucket",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_sum",
-		"istio_agent_go_gc_heap_allocs_by_size_bytes_total_count",
-		"istio_requests_total",
+		"test_requests_total",
+		"test_connections_active",
+		"test_uptime_seconds_total",
 	}
 	// The "pod" and "service" labels are Prometheus target labels added by
 	// k8s SD relabeling in the TA-generated scrape configs.

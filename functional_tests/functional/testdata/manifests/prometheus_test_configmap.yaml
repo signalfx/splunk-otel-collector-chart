@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-test-metrics
+data:
+  metrics.txt: |
+    # HELP test_requests_total Total request count.
+    # TYPE test_requests_total counter
+    test_requests_total{method="GET"} 42
+    test_requests_total{method="POST"} 7
+    # HELP test_connections_active Number of active connections.
+    # TYPE test_connections_active gauge
+    test_connections_active 3
+    # HELP test_uptime_seconds_total Total uptime in seconds.
+    # TYPE test_uptime_seconds_total counter
+    test_uptime_seconds_total 100
+  nginx.conf: |
+    server {
+        listen 8080;
+        location /metrics {
+            default_type text/plain;
+            alias /etc/nginx/metrics.txt;
+        }
+    }
