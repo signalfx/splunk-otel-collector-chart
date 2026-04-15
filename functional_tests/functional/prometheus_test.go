@@ -50,7 +50,7 @@ func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clients
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
 	for _, resourceYAML := range strings.Split(string(stream), "---") {
-		if len(resourceYAML) == 0 {
+		if len(strings.TrimSpace(resourceYAML)) == 0 {
 			continue
 		}
 
@@ -176,7 +176,7 @@ func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsCl
 	apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
 	var crdNames []string
 	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
-		if len(resourceYAML) == 0 {
+		if len(strings.TrimSpace(resourceYAML)) == 0 {
 			continue
 		}
 		obj, gvk, decErr := decode([]byte(resourceYAML), nil, nil)

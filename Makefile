@@ -244,9 +244,10 @@ PROMETHEUS_CRD_OUTPUT := functional_tests/functional/testdata/manifests/promethe
 update-prometheus-crds: ## Re-vendor Prometheus Operator CRDs (PodMonitor + ServiceMonitor) for functional tests
 	@echo "Downloading Prometheus Operator CRDs v$(PROMETHEUS_OPERATOR_CRD_VERSION)..."
 	@{ \
+	echo "---"; \
 	echo "# Prometheus Operator CRDs v$(PROMETHEUS_OPERATOR_CRD_VERSION)"; \
 	echo "# Re-generate with: make update-prometheus-crds PROMETHEUS_OPERATOR_CRD_VERSION=<version>"; \
-	curl -sfL "$(PROMETHEUS_CRD_BASE_URL)/monitoring.coreos.com_podmonitors.yaml"; \
+	curl -sfL "$(PROMETHEUS_CRD_BASE_URL)/monitoring.coreos.com_podmonitors.yaml" | tail -n +2; \
 	curl -sfL "$(PROMETHEUS_CRD_BASE_URL)/monitoring.coreos.com_servicemonitors.yaml"; \
 	} > $(PROMETHEUS_CRD_OUTPUT)
 	@echo "Written to $(PROMETHEUS_CRD_OUTPUT) ($$(wc -l < $(PROMETHEUS_CRD_OUTPUT)) lines)"
