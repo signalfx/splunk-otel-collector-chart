@@ -25,5 +25,11 @@ spec:
           volumeMounts:
             - name: testdata
               mountPath: /testdata
+        - name: sidecar-proxy
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do cat /testdata/access.log; sleep 30; done"]
+          volumeMounts:
+            - name: testdata
+              mountPath: /testdata
       nodeSelector:
         kubernetes.io/os: "linux"

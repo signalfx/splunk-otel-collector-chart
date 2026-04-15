@@ -24,6 +24,7 @@ const (
 	multilineTestNamespace      = "multiline-test"
 	multilineContainerName      = "multiline-test"
 	unmatchedContainerName      = "unmatched-logger"
+	sidecarContainerName        = "sidecar-proxy"
 	multilineValuesTemplateFile = "multiline_values.yaml.tmpl"
 	multilineTestdataDir        = "testdata"
 	multilineManifestsDir       = "testdata/multiline_testobjects"
@@ -79,6 +80,10 @@ func Test_MultilineLogs(t *testing.T) {
 
 	t.Run("DefaultRoutePassthrough", func(t *testing.T) {
 		checkDefaultRoutePassthrough(t, logsConsumer)
+	})
+
+	t.Run("SidecarUnmatchedLinesNotBatched", func(t *testing.T) {
+		checkSidecarUnmatchedLinesNotBatched(t, logsConsumer)
 	})
 }
 
@@ -162,6 +167,34 @@ func checkDefaultRoutePassthrough(t *testing.T, logsConsumer *consumertest.LogsS
 			unmatchedContainerName)
 		assert.NotNil(tt, findBodyContaining(bodies, "UNMATCHED_LOG_MARKER"),
 			"expected UNMATCHED_LOG_MARKER in logs from %q", unmatchedContainerName)
+	}, 3*time.Minute, 5*time.Second)
+}
+
+// checkSidecarUnmatchedLinesNotBatched reproduces the mixed-container scenario
+// where a namespace-scoped multilineConfigs rule (no containerName filter) is
+// applied to a pod that has both a java-style app container and a sidecar emitting
+// JSON access logs. JSON lines don't match firstEntryRegex, so the recombine
+// operator treats them as continuations. With the default max_unmatched_batch_size
+// of 100 those lines would be silently merged into a single record.
+// This test asserts that each JSON access log line arrives as its own record,
+// documenting the expected behavior and catching regressions if max_unmatched_batch_size
+// is ever wired up in the chart.
+func checkSidecarUnmatchedLinesNotBatched(t *testing.T, logsConsumer *consumertest.LogsSink) {
+	t.Helper()
+	accessLogMarkers := []string{
+		`"path":"/api/users"`,
+		`"path":"/api/orders"`,
+		`"path":"/healthz"`,
+	}
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		bodies := collectBodiesFromContainer(logsConsumer, sidecarContainerName)
+		for _, marker := range accessLogMarkers {
+			record := findBodyContaining(bodies, marker)
+			if assert.NotNilf(tt, record, "access log line containing %q must arrive as its own record", marker) {
+				assert.NotContainsf(tt, *record, "\n",
+					"access log line %q must not be batched with other lines, got body: %q", marker, *record)
+			}
+		}
 	}, 3*time.Minute, 5*time.Second)
 }
 

@@ -4,6 +4,10 @@ metadata:
   name: multiline-test-input
   namespace: multiline-test
 data:
+  access.log: |
+    {"start_time":"2026-01-15T10:00:00.000Z","method":"GET","path":"/api/users","response_code":200,"duration":5}
+    {"start_time":"2026-01-15T10:00:01.000Z","method":"POST","path":"/api/orders","response_code":503,"duration":30004}
+    {"start_time":"2026-01-15T10:00:02.000Z","method":"GET","path":"/healthz","response_code":200,"duration":1}
   input.log: |
     2024-01-15 10:00:00 INFO  Application started successfully
     2024-01-15 10:00:01 ERROR Unhandled exception in request handler
