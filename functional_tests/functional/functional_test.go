@@ -124,8 +124,8 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
-	if requiresPrometheusCRD(kubeTestEnv) {
-		deployPrometheusResources(t, client, extensionsClient, dynamicClient)
+	if requiresPrometheusResources(kubeTestEnv) {
+		deployPrometheusCRDs(t, extensionsClient)
 	}
 
 	chartInfo := map[string]internal.ChartOptions{}
@@ -219,6 +219,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"),
 	} {
 		deployApp(f)
+	}
+
+	if requiresPrometheusResources(kubeTestEnv) {
+		deployPrometheusTestResources(t, client, dynamicClient)
 	}
 
 	var obj k8sruntime.Object
@@ -353,7 +357,7 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+	if requiresPrometheusResources(os.Getenv("KUBE_TEST_ENV")) {
 		teardownPrometheusResources(ctx, t, client, extensionsClient, dynamicClient)
 	}
 

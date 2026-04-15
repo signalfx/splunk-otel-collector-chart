@@ -35,18 +35,18 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
-func requiresPrometheusCRD(kubeTestEnv string) bool {
+func requiresPrometheusResources(kubeTestEnv string) bool {
 	return kubeTestEnv == kindTestKubeEnv
 }
 
-func deployPrometheusResources(t *testing.T, client kubernetes.Interface, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
+// deployPrometheusCRDs installs the Prometheus Operator CRDs required by the
+// helm chart's target allocator configuration. Must be called before chart install.
+func deployPrometheusCRDs(t *testing.T, extensionsClient *clientset.Clientset) {
 	t.Log("Deploying Prometheus Operator CRDs (re-generate with: make update-prometheus-crds)")
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
-	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
 	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
 	require.NoError(t, err)
-	sch := k8sruntime.NewScheme()
 
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
@@ -76,7 +76,6 @@ func deployPrometheusResources(t *testing.T, client kubernetes.Interface, extens
 			}
 
 			crdName := crd.Name
-			crdSpec := crd.Spec
 			created, createErr := apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
 			if createErr != nil {
 				if k8serrors.IsAlreadyExists(createErr) {
@@ -99,27 +98,49 @@ func deployPrometheusResources(t *testing.T, client kubernetes.Interface, extens
 				}
 				assert.True(tt, established)
 			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crdName)
+		}
+	}
+}
 
-			for _, version := range crdSpec.Versions {
+// deployPrometheusTestResources creates the CRs (PodMonitor, ServiceMonitor)
+// and the test app (ConfigMap, Deployment, Service).
+func deployPrometheusTestResources(t *testing.T, client kubernetes.Interface, dynamicClient dynamic.Interface) {
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	// Build a scheme that knows about PodMonitor/ServiceMonitor so we can decode them.
+	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
+	require.NoError(t, err)
+	sch := k8sruntime.NewScheme()
+	crdDecode := scheme.Codecs.UniversalDeserializer().Decode
+	for _, resourceYAML := range strings.Split(string(stream), "---") {
+		if len(strings.TrimSpace(resourceYAML)) == 0 {
+			continue
+		}
+		obj, gvk, decErr := crdDecode([]byte(resourceYAML), nil, nil)
+		if decErr != nil {
+			continue
+		}
+		if gvk.Group == "apiextensions.k8s.io" && gvk.Version == "v1" && gvk.Kind == "CustomResourceDefinition" {
+			crd := obj.(*appextensionsv1.CustomResourceDefinition)
+			for _, version := range crd.Spec.Versions {
 				sch.AddKnownTypeWithName(
 					schema.GroupVersionKind{
-						Group:   crdSpec.Group,
+						Group:   crd.Spec.Group,
 						Version: version.Name,
-						Kind:    crdSpec.Names.Kind,
+						Kind:    crd.Spec.Names.Kind,
 					},
 					&unstructured.Unstructured{},
 				)
 			}
 		}
 	}
-
 	codecs := serializer.NewCodecFactory(sch)
-	crdDecode := codecs.UniversalDeserializer().Decode
+	crDecode := codecs.UniversalDeserializer().Decode
 
-	// Prometheus pod monitor
+	// PodMonitor
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
 	require.NoError(t, err)
-	podMonitor, _, err := crdDecode(stream, nil, nil)
+	podMonitor, _, err := crDecode(stream, nil, nil)
 	require.NoError(t, err)
 	g := schema.GroupVersionResource{
 		Group:    "monitoring.coreos.com",
@@ -130,10 +151,10 @@ func deployPrometheusResources(t *testing.T, client kubernetes.Interface, extens
 		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
 	require.NoError(t, err)
 
-	// Prometheus service monitor
+	// ServiceMonitor
 	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
 	require.NoError(t, err)
-	serviceMonitor, _, err := crdDecode(stream, nil, nil)
+	serviceMonitor, _, err := crDecode(stream, nil, nil)
 	require.NoError(t, err)
 	g = schema.GroupVersionResource{
 		Group:    "monitoring.coreos.com",
@@ -251,7 +272,7 @@ func teardownPrometheusResources(ctx context.Context, t *testing.T, client kuber
 }
 
 func testTargetAllocator(t *testing.T) {
-	if !requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
+	if !requiresPrometheusResources(os.Getenv("KUBE_TEST_ENV")) {
 		t.Fatalf("Required Prometheus CRDs are not installed")
 	}
 
