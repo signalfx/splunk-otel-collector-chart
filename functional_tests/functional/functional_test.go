@@ -341,6 +341,10 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		metav1.DeleteOptions{
 			GracePeriodSeconds: &waitTime,
 		})
+	_ = client.CoreV1().ConfigMaps(internal.DefaultNamespace).Delete(ctx, "prometheus-test-metrics",
+		metav1.DeleteOptions{
+			GracePeriodSeconds: &waitTime,
+		})
 
 	var groupVersionKind *schema.GroupVersionKind
 	var obj k8sruntime.Object
