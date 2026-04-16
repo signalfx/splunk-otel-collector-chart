@@ -36,8 +36,8 @@ data:
         sync_host_metadata: true
       signalfx/histograms:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
-        api_url: https://api.CHANGEME.signalfx.com
-        ingest_url: https://ingest.CHANGEME.signalfx.com
+        api_url: https://api.CHANGEME.observability.splunkcloud.com
+        ingest_url: https://ingest.CHANGEME.observability.splunkcloud.com
         send_otlp_histograms: true
       signalfx/host_metadata:
         access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}

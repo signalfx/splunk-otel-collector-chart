@@ -24,14 +24,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	appextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -63,7 +60,6 @@ const (
 	gkeValuesDir                           = "expected_gke_values"
 	rosaValuesDir                          = "expected_rosa_values"
 	gceValuesDir                           = "expected_gce_values"
-	agentLabelSelector                     = "component=otel-collector-agent"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
@@ -115,147 +111,6 @@ func setupSinks(t *testing.T) {
 	}
 }
 
-func requiresPrometheusCRD(kubeTestEnv string) bool {
-	return kubeTestEnv == kindTestKubeEnv
-}
-
-func deployPrometheusResources(t *testing.T, extensionsClient *clientset.Clientset, dynamicClient dynamic.Interface) {
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-
-	// load up Prometheus PodMonitor and ServiceMonitor CRDs:
-	stream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	sch := k8sruntime.NewScheme()
-
-	var obj k8sruntime.Object
-	var groupVersionKind *schema.GroupVersionKind
-	for _, resourceYAML := range strings.Split(string(stream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err = decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-
-			existing, getErr := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
-			if getErr == nil && existing.DeletionTimestamp != nil {
-				t.Logf("CRD %s is terminating, waiting for removal...", crd.Name)
-				require.EventuallyWithT(t, func(tt *assert.CollectT) {
-					_, e := apiExtensions.Get(t.Context(), crd.Name, metav1.GetOptions{})
-					assert.True(tt, k8serrors.IsNotFound(e), "CRD %s still exists", crd.Name)
-				}, 3*time.Minute, 3*time.Second, "CRD %s stuck in Terminating", crd.Name)
-			}
-
-			crdName := crd.Name
-			crdSpec := crd.Spec
-			created, createErr := apiExtensions.Create(t.Context(), crd, metav1.CreateOptions{})
-			if createErr != nil {
-				if k8serrors.IsAlreadyExists(createErr) {
-					t.Logf("CRD %s already exists, skipping creation", crdName)
-				} else {
-					require.NoError(t, createErr)
-				}
-			} else {
-				t.Logf("Deployed CRD %s", created.Name)
-			}
-
-			require.EventuallyWithT(t, func(tt *assert.CollectT) {
-				latest, latestErr := apiExtensions.Get(t.Context(), crdName, metav1.GetOptions{})
-				assert.NoError(tt, latestErr)
-				established := false
-				for _, cond := range latest.Status.Conditions {
-					if cond.Type == appextensionsv1.Established && cond.Status == appextensionsv1.ConditionTrue {
-						established = true
-					}
-				}
-				assert.True(tt, established)
-			}, 3*time.Minute, 3*time.Second, "CRD %s not established", crdName)
-
-			for _, version := range crdSpec.Versions {
-				sch.AddKnownTypeWithName(
-					schema.GroupVersionKind{
-						Group:   crdSpec.Group,
-						Version: version.Name,
-						Kind:    crdSpec.Names.Kind,
-					},
-					&unstructured.Unstructured{},
-				)
-			}
-		}
-	}
-
-	codecs := serializer.NewCodecFactory(sch)
-	crdDecode := codecs.UniversalDeserializer().Decode
-
-	// Prometheus pod monitor
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "pod_monitor.yaml"))
-	require.NoError(t, err)
-	podMonitor, _, err := crdDecode(stream, nil, nil)
-	require.NoError(t, err)
-	g := schema.GroupVersionResource{
-		Group:    "monitoring.coreos.com",
-		Version:  "v1",
-		Resource: "podmonitors",
-	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
-		podMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
-
-	// Prometheus service monitor
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service_monitor.yaml"))
-	require.NoError(t, err)
-	serviceMonitor, _, err := crdDecode(stream, nil, nil)
-	require.NoError(t, err)
-	g = schema.GroupVersionResource{
-		Group:    "monitoring.coreos.com",
-		Version:  "v1",
-		Resource: "servicemonitors",
-	}
-	_, err = dynamicClient.Resource(g).Namespace(internal.DefaultNamespace).Create(t.Context(),
-		serviceMonitor.(*unstructured.Unstructured), metav1.CreateOptions{})
-	assert.NoError(t, err)
-}
-
-func teardownPrometheusResources(ctx context.Context, t *testing.T, extensionsClient *clientset.Clientset) {
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-	waitTime := int64(0)
-	crdstream, err := os.ReadFile(filepath.Join(testDir, manifestsDir, "prometheus_operator_crds.yaml"))
-	require.NoError(t, err)
-	var obj k8sruntime.Object
-	var groupVersionKind *schema.GroupVersionKind
-	for _, resourceYAML := range strings.Split(string(crdstream), "---") {
-		if len(resourceYAML) == 0 {
-			continue
-		}
-
-		obj, groupVersionKind, err = decode(
-			[]byte(resourceYAML),
-			nil,
-			nil)
-		require.NoError(t, err)
-		if groupVersionKind.Group == "apiextensions.k8s.io" &&
-			groupVersionKind.Version == "v1" &&
-			groupVersionKind.Kind == "CustomResourceDefinition" {
-			crd := obj.(*appextensionsv1.CustomResourceDefinition)
-			apiExtensions := extensionsClient.ApiextensionsV1().CustomResourceDefinitions()
-			err = apiExtensions.Delete(ctx, crd.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: &waitTime,
-			})
-			if err != nil && !k8serrors.IsNotFound(err) {
-				t.Logf("Failed to delete CRD %s during teardown: %v", crd.Name, err)
-			}
-		}
-	}
-}
-
 func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
@@ -269,11 +124,10 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
-	if requiresPrometheusCRD(kubeTestEnv) {
-		deployPrometheusResources(t, extensionsClient, dynamicClient)
+	if requiresPrometheusResources(kubeTestEnv) {
+		deployPrometheusCRDs(t, extensionsClient)
 	}
 
-	var stream []byte
 	chartInfo := map[string]internal.ChartOptions{}
 	addChartInfo := func(fileName string, chartOption internal.ChartOptions) {
 		valuesFile, errAbs := filepath.Abs(filepath.Join(testDir, valuesDir, fileName))
@@ -363,19 +217,13 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 		filepath.Join(testDir, "dotnet", "deployment.yaml"),
 		filepath.Join(testDir, "python", "deployment.yaml"),
 		filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"),
-		filepath.Join(testDir, manifestsDir, "deployment_with_prometheus_annotations.yaml"),
 	} {
 		deployApp(f)
 	}
 
-	// Service
-	stream, err = os.ReadFile(filepath.Join(testDir, manifestsDir, "service.yaml"))
-	require.NoError(t, err)
-	service, _, err := decode(stream, nil, nil)
-	require.NoError(t, err)
-	_, err = client.CoreV1().Services(internal.DefaultNamespace).Create(t.Context(), service.(*corev1.Service),
-		metav1.CreateOptions{})
-	require.NoError(t, err)
+	if requiresPrometheusResources(kubeTestEnv) {
+		deployPrometheusTestResources(t, client, dynamicClient)
+	}
 
 	var obj k8sruntime.Object
 	var groupVersionKind *schema.GroupVersionKind
@@ -450,6 +298,8 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	require.NoError(t, err)
 	extensionsClient, err := clientset.NewForConfig(kubeConfig)
 	require.NoError(t, err)
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+	require.NoError(t, err)
 	waitTime := int64(0)
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 	require.NoError(t, err)
@@ -465,16 +315,9 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	_ = deployments.Delete(ctx, "dotnet-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = deployments.Delete(ctx, "prometheus-annotation-test", metav1.DeleteOptions{
-		GracePeriodSeconds: &waitTime,
-	})
 	_ = deployments.Delete(ctx, "log-attr-test", metav1.DeleteOptions{
 		GracePeriodSeconds: &waitTime,
 	})
-	_ = client.CoreV1().Services(internal.DefaultNamespace).Delete(ctx, "prometheus-annotation-service",
-		metav1.DeleteOptions{
-			GracePeriodSeconds: &waitTime,
-		})
 
 	var groupVersionKind *schema.GroupVersionKind
 	var obj k8sruntime.Object
@@ -514,8 +357,8 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		})
 	}
 
-	if requiresPrometheusCRD(os.Getenv("KUBE_TEST_ENV")) {
-		teardownPrometheusResources(ctx, t, extensionsClient)
+	if requiresPrometheusResources(os.Getenv("KUBE_TEST_ENV")) {
+		teardownPrometheusResources(ctx, t, client, extensionsClient, dynamicClient)
 	}
 
 	for _, nm := range namespaces {
@@ -587,8 +430,8 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test HEC metrics", testHECMetrics)
 	t.Run("test k8s objects", testK8sObjects)
 	t.Run("test agent metrics", testAgentMetrics)
-	// TODO: re-enable this test in 0.129.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/40788
-	// t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
+	t.Run("test target allocator", testTargetAllocator)
+	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 
 	// Test component health - verify no RBAC or connection errors
 	t.Run("component error logs checks", func(t *testing.T) {
@@ -598,7 +441,7 @@ func runLocalClusterTests(t *testing.T) {
 		client, err := kubernetes.NewForConfig(kubeConfig)
 		require.NoError(t, err)
 
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 	})
 }
@@ -626,17 +469,17 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 
 		t.Run("component error logs checks", func(t *testing.T) {
 			if kubeTestEnv == eksTestKubeEnv {
-				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, journaldReceiverName)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName)
 			}
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 		})
 	case autopilotTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
-			internal.CheckPodsReady(t, client, internal.DefaultNamespace, agentLabelSelector, 3*time.Minute, 10*time.Second)
+			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, agentLabelSelector, kubeletstatsReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
 		})
 	default:
@@ -666,7 +509,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 
 	switch role {
 	case roleAgent:
-		labelSelector = agentLabelSelector
+		labelSelector = internal.AgentLabelSelector
 		expectedResourceAttributesFile = filepath.Join(testDir, expectedValuesDir, "expected_resource_attributes_agent.yaml")
 	case roleClusterReceiver:
 		labelSelector = clusterReceiverLabelSelector
@@ -678,7 +521,8 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 		require.Failf(t, "failed to run validateResourceAttributes", "unknown role %q", role)
 	}
 
-	pods := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	pods, err := internal.GetPods(t, clientset, internal.DefaultNamespace, labelSelector)
+	require.NoError(t, err)
 	require.NotEmpty(t, pods.Items, "no pods found for label %s", labelSelector)
 
 	podName := pods.Items[0].Name
@@ -742,12 +586,6 @@ func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys 
 	}
 	require.Failf(t, "resource not found", "no ResourceMetrics with attribute %q in %s", attrKey, filePath)
 	return pcommon.NewMap()
-}
-
-func requireEnv(t *testing.T, key string) string {
-	value, set := os.LookupEnv(key)
-	require.True(t, set, "the environment variable %s must be set", key)
-	return value
 }
 
 func containerImageShorten(value string) string {
@@ -1229,111 +1067,4 @@ func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset)
 		}
 		return true
 	}, 5*time.Minute, 10*time.Second)
-}
-
-// metricMatchFn decides whether a given metric (with its resource attributes)
-// should be counted. Return true to accept the metric.
-type metricMatchFn func(resAttrs pcommon.Map, metric pmetric.Metric) bool
-
-func checkMetricsAreEmitted(t *testing.T, mc *consumertest.MetricsSink, metricNames []string) {
-	checkMetrics(t, mc, metricNames, "", nil)
-}
-
-func checkMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName string, metricNames []string) {
-	checkMetrics(t, mc, metricNames, sdkLanguage+"/"+serviceName, func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
-		if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
-			return true
-		}
-		return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
-	})
-}
-
-func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []string, label string, match metricMatchFn) {
-	metricsToFind := map[string]bool{}
-	for _, name := range metricNames {
-		metricsToFind[name] = false
-	}
-	require.Eventuallyf(t, func() bool {
-		for _, m := range mc.AllMetrics() {
-			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				rm := m.ResourceMetrics().At(i)
-				resAttrs := rm.Resource().Attributes()
-				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-					sm := rm.ScopeMetrics().At(j)
-					for k := 0; k < sm.Metrics().Len(); k++ {
-						metric := sm.Metrics().At(k)
-						if match == nil || match(resAttrs, metric) {
-							metricsToFind[metric.Name()] = true
-						}
-					}
-				}
-			}
-		}
-		var stillMissing, found []string
-		for _, name := range metricNames {
-			if metricsToFind[name] {
-				found = append(found, name)
-			} else {
-				stillMissing = append(stillMissing, name)
-			}
-		}
-		if label != "" {
-			t.Logf("[%s] found=%d missing=%d (%s)", label, len(found), len(stillMissing), strings.Join(stillMissing, ", "))
-		} else {
-			t.Logf("found=%d missing=%d (%s)", len(found), len(stillMissing), strings.Join(stillMissing, ", "))
-		}
-		return len(stillMissing) == 0
-	}, 3*time.Minute, 10*time.Second,
-		"failed to receive all metrics %s in 3 minutes", label)
-}
-
-func hasAttrMatch(attrs pcommon.Map, key, expected string) bool {
-	v, ok := attrs.Get(key)
-	return ok && v.Str() == expected
-}
-
-// metricDataPointsHaveAttrs checks whether any data point in a metric carries
-// all of the given key/value pairs. Pairs are passed as alternating key, value strings.
-func metricDataPointsHaveAttrs(metric pmetric.Metric, kvPairs ...string) bool {
-	check := func(attrs pcommon.Map) bool {
-		for i := 0; i < len(kvPairs)-1; i += 2 {
-			if !hasAttrMatch(attrs, kvPairs[i], kvPairs[i+1]) {
-				return false
-			}
-		}
-		return true
-	}
-	switch metric.Type() {
-	case pmetric.MetricTypeGauge:
-		for i := 0; i < metric.Gauge().DataPoints().Len(); i++ {
-			if check(metric.Gauge().DataPoints().At(i).Attributes()) {
-				return true
-			}
-		}
-	case pmetric.MetricTypeSum:
-		for i := 0; i < metric.Sum().DataPoints().Len(); i++ {
-			if check(metric.Sum().DataPoints().At(i).Attributes()) {
-				return true
-			}
-		}
-	case pmetric.MetricTypeHistogram:
-		for i := 0; i < metric.Histogram().DataPoints().Len(); i++ {
-			if check(metric.Histogram().DataPoints().At(i).Attributes()) {
-				return true
-			}
-		}
-	case pmetric.MetricTypeSummary:
-		for i := 0; i < metric.Summary().DataPoints().Len(); i++ {
-			if check(metric.Summary().DataPoints().At(i).Attributes()) {
-				return true
-			}
-		}
-	case pmetric.MetricTypeExponentialHistogram:
-		for i := 0; i < metric.ExponentialHistogram().DataPoints().Len(); i++ {
-			if check(metric.ExponentialHistogram().DataPoints().At(i).Attributes()) {
-				return true
-			}
-		}
-	}
-	return false
 }
