@@ -14,16 +14,27 @@ spec:
         app: prometheus-annotation-test
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "80"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: quay.io/splunko11ytest/httpd:latest
+        - image: nginx:stable-alpine3.23
           name: prometheus-annotation-test
           imagePullPolicy: IfNotPresent
           ports:
             - name: web
-              containerPort: 80
+              containerPort: 8080
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: nginx.conf
+            - name: metrics-config
+              mountPath: /etc/nginx/metrics.txt
+              subPath: metrics.txt
+      volumes:
+        - name: metrics-config
+          configMap:
+            name: prometheus-test-metrics
       nodeSelector:
         kubernetes.io/os: "linux"

@@ -632,7 +632,7 @@ clusterReceiver:
   config:
     exporters:
       splunk_hec/events:
-        endpoint: https://ingest.<SPLUNK_OBSERVABILITY_REALM>.signalfx.com/v1/log
+        endpoint: https://ingest.<SPLUNK_OBSERVABILITY_REALM>.observability.splunkcloud.com/v1/log
         log_data_enabled: true
         profiling_data_enabled: false
         source: kubelet
