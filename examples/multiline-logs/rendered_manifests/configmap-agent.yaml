@@ -268,7 +268,6 @@ data:
           id: k8s-nm2_foo-app-.*_client
           is_first_entry: (attributes.log) matches "^[^\\s].*"
           max_log_size: 1048576
-          max_unmatched_batch_size: 1
           output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine
@@ -276,7 +275,6 @@ data:
           id: k8s-nm3_foo-app-.*_server
           is_first_entry: (attributes.log) matches "^[^\\s].*"
           max_log_size: 1048576
-          max_unmatched_batch_size: 1
           output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine

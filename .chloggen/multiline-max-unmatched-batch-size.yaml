@@ -10,7 +10,5 @@ issues: [2379]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The chart now defaults `max_unmatched_batch_size` setting in `multilineConfig` to `1`, so each line that does not match
-  `firstEntryRegex` is emitted as its own record. The previous operator default of 100 could
-  silently merge up to 100 unmatched lines (e.g. from a sidecar container) into a single log
-  record. Set `maxUnmatchedBatchSize` to a higher value to restore batching if needed.
+  The chart now supports `maxUnmatchedBatchSize` in `multilineConfigs`, which controls how many
+  consecutive lines not matching `firstEntryRegex` are batched into a single log record.

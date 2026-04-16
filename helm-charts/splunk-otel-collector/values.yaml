@@ -622,9 +622,8 @@ logsCollection:
     # identifier has to be specified in for each multiline config.
     # At some cases it may turn out that default number of lines to combine (1000) is not enough
     # for some multiline logs. In that case maxNumOfLinesToCombine can be used to increase that limit.
-    # Use maxUnmatchedBatchSize to limit how many consecutive lines that don't match firstEntryRegex
-    # are combined into a single record. Defaults to 1 (each unmatched line is emitted individually).
-    # Increase this value if you intentionally want to batch unmatched lines together.
+    # If you expect some logs not to match firstEntryRegex (e.g. from a sidecar container),
+    # set maxUnmatchedBatchSize to 1 so that each unmatched line is emitted as its own event.
     # The following example shows how to setup multiline log processing for logs having subsequent
     # log lines written with an offset. Let's say a k8s deployment called "buttercup-app" is
     # scheduled to run in "default" namespace with a java container called "server", and the
