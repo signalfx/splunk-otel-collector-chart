@@ -320,7 +320,7 @@ func testTargetAllocator(t *testing.T) {
 			}
 			containsReadyAgentPod = true
 			var podLogs string
-			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 5000)
 			assert.NoError(c, err)
 			assert.Contains(c, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
 
