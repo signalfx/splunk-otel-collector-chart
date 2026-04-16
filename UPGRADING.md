@@ -11,12 +11,12 @@ directly as a subchart. This will help keep up to date with upstream features an
 
 This resulted in breaking changes to the helm chart's configuration for the target allocator, as outlined below.
 
-| Old option                     | New option                                                                   |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| targetAllocator                | targetallocator                                                              |
-| targetAllocator.image          | targetallocator.targetAllocator.image.repository + targetAllocator.image.tag |
-| targetAllocator.serviceAccount | targetallocator.targetAllocator.serviceAccount                               |
-| targetAllocator.config         | targetallocator.targetAllocator.config
+| Old option                       | New option                                                                        |
+|----------------------------------|-----------------------------------------------------------------------------------|
+| `targetAllocator`                | `targetallocator`                                                                 |
+| `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetAllocator.image.tag`  |
+| `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                  |
+| `targetAllocator.config`         | `targetallocator.targetAllocator.config`
 
 Example old config:
 ```
