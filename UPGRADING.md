@@ -1,5 +1,55 @@
 # Upgrade guidelines
 
+## 0.150.0 to 0.151.0
+
+### Target allocator functionality now uses upstream chart as subchart
+
+Instead of relying on local versioning and implementation of target allocator functionality, the
+chart has moved to using the
+[upstream Target Allocator helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator)
+directly as a subchart. This will help keep up to date with upstream features and functionality.
+
+This resulted in breaking changes to the helm chart's configuration for the target allocator, as outlined below.
+
+| Old option                     | New option                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| targetAllocator                | targetallocator                                                              |
+| targetAllocator.image          | targetallocator.targetAllocator.image.repository + targetAllocator.image.tag |
+| targetAllocator.serviceAccount | targetallocator.targetAllocator.serviceAccount                               |
+| targetAllocator.config         | targetallocator.targetAllocator.config
+
+Example old config:
+```
+targetAllocator:
+  enabled: true
+  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
+  config:
+    allocation_strategy: per-node
+    prometheus_cr:
+      enabled: true
+    filter_strategy: relabel-config
+```
+
+New config equivalent:
+
+```
+targetallocator:
+  enabled: true
+  targetAllocator:
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
+      tag: v0.132.0
+    config:
+      allocation_strategy: per-node
+      prometheus_cr:
+        enabled: true
+      filter_strategy: relabel-config
+```
+
+The only existing option whose default value changes as a result of this change is the allocation strategy. The new default
+value is `consistent-hashing` when it was previosuly `per-node`.
+Refer to the upstream target allocator helm chart's [values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-target-allocator/values.yaml) for more configuration options.
+
 ## 0.137.0 to 0.138.0
 
 ### Fluentd sidecar has been removed
