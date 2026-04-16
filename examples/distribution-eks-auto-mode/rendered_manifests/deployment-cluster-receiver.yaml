@@ -30,11 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-<<<<<<< HEAD
-        checksum/config: 5afb581cfc55b75fc1272ea5bc1d356bddaa1e1082ba6fdfa8f1963b75820afa
-=======
-        checksum/config: 6a06570fa4ee0c72e7f95781ba4d316a1831806b1f776786589d97c460df186a
->>>>>>> ab68bd09 (host.name as node name)
+        checksum/config: 380720d3803166a559f80e01f78542ee57be45d423514dff5f3c2a6025a2a2d7
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet

@@ -31,15 +31,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-<<<<<<< HEAD
-<<<<<<< HEAD
-        checksum/config: b1289aa628be17944bc917da48778b5a183fe80e8fdcb2db1054910b51cb3e5e
-=======
-        checksum/config: 118312ee496d5219fa804f491b74f1117654ab57a2fe27297bf9247f695cc361
->>>>>>> 7e3b01a1 (Remove full resourcedetection from cluster receiver event/object pipelines)
-=======
-        checksum/config: 91e0732f5343ed0d0841ff7d7e5ddcb721f9e625f74cf1ba167d19c821a70ec1
->>>>>>> ab68bd09 (host.name as node name)
+        checksum/config: 6f163b6817dc03250b5a981bc8a5c866c109dbec48d24eb0a1ed2b93e61670d7
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
