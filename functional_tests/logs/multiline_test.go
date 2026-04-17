@@ -165,7 +165,7 @@ func checkDefaultRoutePassthrough(t *testing.T, logsConsumer *consumertest.LogsS
 		assert.NotEmptyf(tt, bodies,
 			"logs from container %q (not matching any multilineConfigs rule) must reach the sink via the default route",
 			unmatchedContainerName)
-		assert.NotNil(tt, findBodyContaining(bodies, "UNMATCHED_LOG_MARKER"),
+		assert.NotNilf(tt, findBodyContaining(bodies, "UNMATCHED_LOG_MARKER"),
 			"expected UNMATCHED_LOG_MARKER in logs from %q", unmatchedContainerName)
 	}, 3*time.Minute, 5*time.Second)
 }
