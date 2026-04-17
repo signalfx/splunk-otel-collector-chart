@@ -88,7 +88,17 @@ func Test_ContainerRecombine(t *testing.T) {
 	})
 
 	t.Run("DockerSingleLineEntryPassthrough", func(t *testing.T) {
-		checkSingleLineNotBatched(t, logsConsumer, containerRecombineDockerContainerDir, "DOCKER_SINGLE_LINE_MARKER")
+		// Docker log bodies always end with \n — that is how the runtime signals a
+		// complete line. We assert the entry arrived as its own record by checking
+		// it was not merged with the partial entries that follow it.
+		require.EventuallyWithT(t, func(tt *assert.CollectT) {
+			bodies := collectBodiesFromSource(logsConsumer, containerRecombineDockerContainerDir)
+			record := findBodyContaining(bodies, "DOCKER_SINGLE_LINE_MARKER")
+			if assert.NotNil(tt, record, "Docker single-line entry must arrive as its own record") {
+				assert.NotContains(tt, *record, "DOCKER_PARTIAL_START",
+					"single-line entry must not be merged with partial entries, got: %q", *record)
+			}
+		}, 3*time.Minute, 5*time.Second)
 	})
 
 	t.Run("DockerPartialEntriesRecombinedIntoOneRecord", func(t *testing.T) {
