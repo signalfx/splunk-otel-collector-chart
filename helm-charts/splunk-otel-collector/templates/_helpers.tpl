@@ -483,7 +483,7 @@ Usage:
 {{- end -}}
 
 {{/*
-Create the target allocator endpoint to match sub-chart's naming logic
+Create the target allocator endpoint to match subchart's naming logic
 */}}
 {{- define "splunk-otel-collector.targetAllocatorFullname" -}}
 {{- if .Values.targetallocator.fullnameOverride -}}
