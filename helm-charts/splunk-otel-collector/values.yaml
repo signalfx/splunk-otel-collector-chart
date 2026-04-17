@@ -1342,10 +1342,10 @@ targetallocator:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
       # The tag of the Target Allocator image, default value is the chart appVersion
       tag: "v0.132.0"
-    collector_namespace: ""
-    collector_selector:
-      matchlabels:
-        component: otel-collector-agent
+    config:
+      collector_selector:
+        matchlabels:
+          component: otel-collector-agent
 
 ################################################################################
 # Helm Chart Feature Gates.
