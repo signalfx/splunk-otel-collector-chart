@@ -372,7 +372,7 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	}
 
 	cms, err := client.CoreV1().ConfigMaps("default").List(t.Context(), metav1.ListOptions{
-		LabelSelector: "soc-chart-targetallocator-ta-configmap",
+		LabelSelector: internal.TargetAllocatorLabelSelector,
 	})
 	assert.NoError(t, err)
 	for _, cm := range cms.Items {

@@ -16,6 +16,9 @@ data:
   targetallocator.yaml: |
     allocation_strategy: consistent-hashing
     collector_namespace: default
+    collector_selector:
+      matchlabels:
+        component: otel-collector-agent
     config:
       scrape_configs: []
     filter_strategy: relabel-config
