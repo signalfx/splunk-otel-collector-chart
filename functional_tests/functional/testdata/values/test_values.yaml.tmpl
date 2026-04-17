@@ -109,8 +109,6 @@ operator:
       imagePullPolicy: Always
 targetallocator:
   enabled: true
-  targetAllocator:
-    enabled: true
 
 {{ if (eq .KubeTestEnv "eks") }}
 cloudProvider: aws
