@@ -95,7 +95,7 @@ func Test_ContainerRecombine(t *testing.T) {
 			bodies := collectBodiesFromSource(logsConsumer, containerRecombineDockerContainerDir)
 			record := findBodyContaining(bodies, "DOCKER_SINGLE_LINE_MARKER")
 			if assert.NotNil(tt, record, "Docker single-line entry must arrive as its own record") {
-				assert.NotContains(tt, *record, "DOCKER_PARTIAL_START",
+				assert.NotContainsf(tt, *record, "DOCKER_PARTIAL_START",
 					"single-line entry must not be merged with partial entries, got: %q", *record)
 			}
 		}, 3*time.Minute, 5*time.Second)

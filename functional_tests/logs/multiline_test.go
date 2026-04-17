@@ -154,17 +154,16 @@ func checkSingleLinePassthrough(t *testing.T, logsConsumer *consumertest.LogsSin
 	}, 3*time.Minute, 5*time.Second)
 }
 
-// checkDefaultRoutePassthrough asserts that logs from a container that does NOT
-// match any multilineConfigs rule still arrive at the HEC sink. This is the true
-// regression test for a missing router default: route — if it were absent, logs
-// from unmatched containers would be silently dropped.
+// checkDefaultRoutePassthrough asserts that logs from a pod that does NOT match
+// any multilineConfigs rule (unmatched-logger pods don't match the podName regexp
+// '^multiline-test-.*') still arrive at the HEC sink via the router default route.
+// If the default route were absent those logs would be silently dropped.
 func checkDefaultRoutePassthrough(t *testing.T, logsConsumer *consumertest.LogsSink) {
 	t.Helper()
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 		bodies := collectBodiesFromContainer(logsConsumer, unmatchedContainerName)
 		assert.NotEmptyf(tt, bodies,
-			"logs from container %q (not matching any multilineConfigs rule) must reach the sink via the default route",
-			unmatchedContainerName)
+			"logs from container %q must reach the sink via the default route", unmatchedContainerName)
 		assert.NotNilf(tt, findBodyContaining(bodies, "UNMATCHED_LOG_MARKER"),
 			"expected UNMATCHED_LOG_MARKER in logs from %q", unmatchedContainerName)
 	}, 3*time.Minute, 5*time.Second)
@@ -174,11 +173,9 @@ func checkDefaultRoutePassthrough(t *testing.T, logsConsumer *consumertest.LogsS
 // where a namespace-scoped multilineConfigs rule (no containerName filter) is
 // applied to a pod that has both a java-style app container and a sidecar emitting
 // JSON access logs. JSON lines don't match firstEntryRegex, so the recombine
-// operator treats them as continuations. With the default max_unmatched_batch_size
-// of 100 those lines would be silently merged into a single record.
-// This test asserts that each JSON access log line arrives as its own record,
-// documenting the expected behavior and catching regressions if max_unmatched_batch_size
-// is ever wired up in the chart.
+// operator treats them as continuations. This test verifies that maxUnmatchedBatchSize: 1
+// prevents those lines from being merged — each JSON access log line must arrive
+// as its own record.
 func checkSidecarUnmatchedLinesNotBatched(t *testing.T, logsConsumer *consumertest.LogsSink) {
 	t.Helper()
 	accessLogMarkers := []string{
