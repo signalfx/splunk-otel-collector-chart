@@ -1340,7 +1340,6 @@ targetallocator:
   targetAllocator:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
-      # The tag of the Target Allocator image, default value is the chart appVersion
       tag: "v0.132.0"
     config:
       collector_selector:
