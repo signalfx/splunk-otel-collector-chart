@@ -231,7 +231,7 @@ tests:
           path: data["relay"]
           pattern: "metrics/agent:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "agent — logs/host pipeline includes resourcedetection"
+  - it: "agent — logs/host pipeline includes resourcedetection and k8s_cluster_name when clusterName is unset"
     set:
       distribution: openshift
       cloudProvider: aws
@@ -244,6 +244,26 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "agent — logs/host pipeline includes resourcedetection but not k8s_cluster_name when clusterName is set"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
+      logsCollection:
+        journald:
+          enabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "agent — metrics/histograms pipeline includes resourcedetection"
     set:

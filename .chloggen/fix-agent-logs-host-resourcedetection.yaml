@@ -10,6 +10,12 @@ issues: [2384]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  The agent's `logs/host` pipeline (journald system logs, extra file logs) was missing
-  cloud and host attributes (cloud.provider, host.id, host.name, etc.) that every other
-  agent pipeline already included.
+  The agent's `logs/host` pipeline was missing the `resourcedetection` processor, so
+  journald system logs and extra file logs lacked cloud and host attributes
+  (cloud.provider, host.id, host.name, etc.) that other agent logs pipeline already
+  included.
+
+  This pipeline is rendered when `logsCollection.journald.enabled: true` or when
+  `logsCollection.extraFileLogs` entries are defined. On distributions that support
+  automatic cluster-name detection (EKS, GKE, OpenShift) with `clusterName` left
+  unset, the pipeline also includes `resourcedetection/k8s_cluster_name`.
