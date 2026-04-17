@@ -380,11 +380,11 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	}
 
 	t.Logf("Checking via pod monitor")
-	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(resAttr pcommon.Map, metric pmetric.Metric) bool {
+	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "default/pod-monitor")
 	})
 	t.Logf("Checking via service monitor")
-	checkMetrics(t, agentMetricsConsumer, metricNames, "serviceMonitor", func(resAttr pcommon.Map, metric pmetric.Metric) bool {
+	checkMetrics(t, agentMetricsConsumer, metricNames, "serviceMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "prometheus-annotation-service")
 	})
 }
