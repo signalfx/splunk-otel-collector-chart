@@ -352,6 +352,26 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	checkMetrics(t, agentMetricsConsumer, metricNames, "annotation", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return !metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
 	})
+
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	var agentPodList *corev1.PodList
+	agentPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+	assert.NoError(t, err)
+
+	for _, pod := range agentPodList.Items {
+		if pod.Status.Phase != "Running" {
+			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
+			continue
+		}
+		podLogs, _ := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 5000)
+		t.Logf("Agent pod logs for prometheus testing: %v", podLogs)
+	}
+
 	t.Logf("Checking via pod monitor")
 	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
