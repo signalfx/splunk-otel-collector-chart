@@ -573,7 +573,7 @@ receivers:
       global:
         scrape_interval: 30s
     target_allocator:
-      endpoint: http://{{ .Release.Name }}-targetallocator-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      endpoint: http://{{ include "splunk-otel-collector.targetAllocatorFullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
       interval: 30s
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}

@@ -481,3 +481,19 @@ Usage:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create the target allocator endpoint to match sub-chart's naming logic
+*/}}
+{{- define "splunk-otel-collector.targetAllocatorFullname" -}}
+{{- if .Values.targetallocator.fullnameOverride -}}
+{{- .Values.targetallocator.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "targetallocator" .Values.targetallocator.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
