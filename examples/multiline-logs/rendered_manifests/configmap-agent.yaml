@@ -259,6 +259,7 @@ data:
           id: default_buttercup-app-.*_server
           is_first_entry: (attributes.log) matches "^[^\\s].*"
           max_log_size: 1048576
+          max_unmatched_batch_size: 5
           output: clean-up-log-record
           source_identifier: resource["com.splunk.source"]
           type: recombine

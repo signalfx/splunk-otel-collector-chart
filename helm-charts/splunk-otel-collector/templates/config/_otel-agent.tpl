@@ -768,6 +768,9 @@ receivers:
         {{- if hasKey . "maxNumOfLinesToCombine" }}
         max_batch_size: {{ .maxNumOfLinesToCombine }}
         {{- end }}
+        {{- if hasKey . "maxUnmatchedBatchSize" }}
+        max_unmatched_batch_size: {{ .maxUnmatchedBatchSize }}
+        {{- end }}
       {{- end }}
       {{- end }}
       # Clean up log record

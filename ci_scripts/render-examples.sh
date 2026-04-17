@@ -19,11 +19,12 @@ source "$SCRIPT_DIR/base_util.sh"
 
 render_task() {
   example_dir=$1
+  example_name=$(basename "${example_dir}")
   rendered_manifests_dir="${example_dir}rendered_manifests"
   default_values_yaml=$(ls "${example_dir}" | grep -m 1 'values.yaml')
 
   if [ -z "$default_values_yaml" ]; then
-    echo "No default values.yaml found in ${example_dir}"
+    echo "[${example_name}] No default values.yaml found in ${example_dir}"
     exit 1
   fi
 
@@ -43,9 +44,9 @@ render_task() {
     --namespace default \
     "${helm_values[@]}" \
     --output-dir "${rendered_manifests_dir}" \
-    default helm-charts/splunk-otel-collector)
+    default helm-charts/splunk-otel-collector 2>&1)
   if [ $? -ne 0 ]; then
-    echo "$default_values_yaml FAIL - helm template: $out"
+    echo "[${example_name}] FAIL - helm template: $out"
     exit 1
   fi
 
@@ -62,7 +63,7 @@ render_task() {
   # Move the chart renders
   cp -rp "${rendered_manifests_dir}/splunk-otel-collector/templates/"* "$rendered_manifests_dir"
   if [ $? -ne 0 ]; then
-    echo "${default_values_yaml} FAIL - Move the chart renders"
+    echo "[${example_name}] FAIL - Move the chart renders"
     exit 1
   fi
 
@@ -74,41 +75,55 @@ render_task() {
       mkdir -p "${rendered_manifests_dir}/${subchart}"
       mv "${subcharts_dir}/${subchart}/templates/"* "${rendered_manifests_dir}/${subchart}"
       if [ $? -ne 0 ]; then
-        echo "${default_values_yaml} FAIL - Move subchart renders"
+        echo "[${example_name}] FAIL - Move subchart renders"
         exit 1
       fi
     done
   fi
 
-  echo "${default_values_yaml} SUCCESS"
+  echo "[${example_name}] SUCCESS"
 }
 
 # Collect additional values files passed as arguments
 values_files=("$@")
 
+pids=()
 for example_dir in $EXAMPLES_DIR/*/; do
   render_task "${example_dir}" &
+  pids+=("$!:${example_dir}")
 done
-wait # Let all the render tasks finish
 
+failed_dirs=()
+for entry in "${pids[@]}"; do
+  pid="${entry%%:*}"
+  dir="${entry#*:}"
+  if ! wait "$pid"; then
+    failed_dirs+=("${dir}")
+  fi
+done
+
+# Always clean up temporary helm output directories, even if some renders failed.
 for example_dir in $EXAMPLES_DIR/*/; do
   rendered_manifests_dir="${example_dir}rendered_manifests"
-  if [ ! -d "${rendered_manifests_dir}" ]; then
-    echo "Examples were rendered, failure occurred"
-    exit 1
-  else
-    # Temporary space cleanup
+  if [ -d "${rendered_manifests_dir}" ]; then
     if ls "${example_dir}" | grep -q ".norender."; then
         rm -rf "${rendered_manifests_dir}"
     else
         rm -rf "${rendered_manifests_dir}/splunk-otel-collector"
     fi
-    if [ $? -ne 0 ]; then
-        echo "${default_values_yaml} FAIL - Temporary space cleanup"
-        exit 1
-    fi
   fi
 done
+
+if [ "${#failed_dirs[@]}" -ne 0 ]; then
+  echo ""
+  echo "========================================"
+  echo "ERROR: ${#failed_dirs[@]} example(s) failed to render:"
+  for dir in "${failed_dirs[@]}"; do
+    echo "  - ${dir}"
+  done
+  echo "========================================"
+  exit 1
+fi
 
 echo "Examples were rendered successfully"
 exit 0
