@@ -51,13 +51,6 @@ func checkMetrics(t *testing.T, mc *consumertest.MetricsSink, metricNames []stri
 						if match == nil || match(resAttrs, metric) {
 							metricsToFind[metric.Name()] = true
 						}
-						if metric.Name() == "test_connections_active" {
-							t.Logf("Metric %s is found, resource attrs: %v", metric.Name(), rm.Resource().Attributes().AsRaw())
-							for l := 0; l < metric.Gauge().DataPoints().Len(); l++ {
-								dp := metric.Gauge().DataPoints().At(l)
-								t.Logf("\tdatapoint attributes: %v", dp.Attributes().AsRaw())
-							}
-						}
 					}
 				}
 			}

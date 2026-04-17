@@ -353,32 +353,6 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		return !metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
 	})
 
-	testKubeConfig := requireEnv(t, "KUBECONFIG")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-
-	var agentPodList *corev1.PodList
-	agentPodList, err = internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
-	assert.NoError(t, err)
-
-	for _, pod := range agentPodList.Items {
-		if pod.Status.Phase != "Running" {
-			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
-			continue
-		}
-		t.Logf("Agent pod (%s) labels for prometheus testing: %v", pod.Name, pod.Labels)
-	}
-
-	cms, err := client.CoreV1().ConfigMaps("default").List(t.Context(), metav1.ListOptions{
-		LabelSelector: internal.TargetAllocatorLabelSelector,
-	})
-	assert.NoError(t, err)
-	for _, cm := range cms.Items {
-		t.Logf("ConfigMap (%s) labels for prometheus testing: %v, data: %v", cm.Name, cm.Labels, cm.Data)
-	}
-
 	t.Logf("Checking via pod monitor")
 	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "default/pod-monitor")
