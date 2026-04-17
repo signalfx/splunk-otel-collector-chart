@@ -11,11 +11,12 @@ directly as a subchart. This will help keep up to date with upstream features an
 
 This resulted in breaking changes to the helm chart's configuration for the target allocator, as outlined below.
 
-| Old option                       | New option                                                                        |
-|----------------------------------|-----------------------------------------------------------------------------------|
-| `targetAllocator`                | `targetallocator`                                                                 |
-| `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetAllocator.image.tag`  |
-| `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                  |
+| Old option                       | New option                                                                       |
+|----------------------------------|----------------------------------------------------------------------------------|
+| `targetAllocator`                | `targetallocator`                                                                |
+| `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetAllocator.image.tag` |
+| `targetAllocator.resources`      | `targetallocator.targetAllocator.resources`                                      |
+| `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                 |
 | `targetAllocator.config`         | `targetallocator.targetAllocator.config`
 
 Example old config:
@@ -47,7 +48,8 @@ targetallocator:
 
 The only existing option whose default value changes as a result of this change is the allocation strategy. The new default
 value is `consistent-hashing` when it was previously `per-node`.
-Refer to the upstream target allocator helm chart's [values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-target-allocator/values.yaml) for more configuration options.
+Refer to the upstream target allocator helm chart's [values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-target-allocator/values.yaml)
+for the full list of valid configuration options.
 
 ## 0.137.0 to 0.138.0
 
