@@ -32,23 +32,23 @@ func CheckComponentHealth(t *testing.T, clientset *kubernetes.Clientset, namespa
 			continue
 		}
 
-		containerName := "otel-collector"
 		found := false
 		for _, container := range pod.Spec.Containers {
-			if container.Name == containerName {
+			if container.Name == CollectorContainerName {
 				found = true
 				break
 			}
 		}
 		if !found {
-			t.Logf("Skipping pod %s - no container named %s", pod.Name, containerName)
+			t.Logf("Skipping pod %s - no container named %s", pod.Name, CollectorContainerName)
 			continue
 		}
 
-		t.Logf("Checking logs for pod: %s, container: %s", pod.Name, containerName)
+		t.Logf("Checking logs for pod: %s, container: %s", pod.Name, CollectorContainerName)
 
-		logs := GetPodLogs(t, clientset, namespace, pod.Name, containerName, 500)
-
+		var logs string
+		logs, err = GetPodLogs(t, clientset, namespace, pod.Name, CollectorContainerName, 500)
+		require.NoError(t, err, "failed to get logs for pod: %s", pod.Name)
 		// Debug: count total error lines and lines mentioning the component
 		totalLines := len(strings.Split(logs, "\n"))
 		errorCount := strings.Count(strings.ToLower(logs), "\terror\t")

@@ -5,7 +5,7 @@ repos:
     hooks:
     - id: render
       name: Create the rendered Kubernetes manifest resources for the project examples
-      entry: make render
+      entry: bash ci_scripts/check-render.sh
       language: system
       pass_filenames: false
     - id: go-fmt

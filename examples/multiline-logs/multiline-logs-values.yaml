@@ -17,6 +17,7 @@ logsCollection:
          value: server
        firstEntryRegex: ^[^\s].*
        combineWith: "\t" # Recombine entries together with a tab character.
+       maxUnmatchedBatchSize: 5
      - namespaceName:
          value: k8s-nm2
        podName:
