@@ -1337,6 +1337,10 @@ obi:
 
 targetallocator:
   enabled: false
+  targetAllocator:
+    collector_selector:
+      matchlabels:
+        component: otel-collector-agent
 
 ################################################################################
 # Helm Chart Feature Gates.
