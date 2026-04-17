@@ -367,7 +367,7 @@ Whether the clusterName configuration option is optional
 Whether the helm chart should detect the cluster name automatically
 */}}
 {{- define "splunk-otel-collector.autoDetectClusterName" -}}
-{{- and (include "splunk-otel-collector.clusterNameOptional" .) (not .Values.clusterName) }}
+{{- and (eq (include "splunk-otel-collector.clusterNameOptional" .) "true") (not .Values.clusterName) }}
 {{- end -}}
 
 {{/*

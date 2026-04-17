@@ -1,0 +1,20 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: bug_fix
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: clusterReceiver
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Remove resourcedetection processor from cluster-scoped event and object pipelines
+# One or more tracking issues related to the change
+issues: [2369]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  The cluster receiver's `logs` (k8s_events), `logs/objects`, and `logs/events` pipelines
+  previously used the `resourcedetection` processor, which added host and
+  cloud-provider attributes (host.id, host.name, cloud.provider, cloud.platform,
+  cloud.account.id, cloud.region, etc.) from the cluster receiver pod itself.
+  These host-level attributes were misleading because cluster-scoped events and objects are not
+  tied to any single host; they should reflect the cluster. These pipelines now only add `k8s.cluster.name`.
+  A `host.name` resource attribute is still set to the node name of the cluster receiver pod (`K8S_NODE_NAME`)
+  for use as the Splunk HEC `host` field.
