@@ -1328,16 +1328,17 @@ obi:
 # maturity level and be experimental. There may be breaking changes or Operator
 # features may be replaced entirely with a better alternative in the future.
 #
-# The Target Allocator is running as a deployment with a replica count of 1.
+# The Target Allocator is run as a deployment with a replica count of 1.
 # It discovers scraping configurations from ServiceMonitor and PodMonitor CRDs and
 # assigns them to collectors.
-# Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+# Related documentation: https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator
 # Not available in EKS Add-on.
 ################################################################################
 
 targetallocator:
   enabled: false
   targetAllocator:
+    allocation_strategy: per-node
     collector_selector:
       matchlabels:
         component: otel-collector-agent

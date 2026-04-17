@@ -109,7 +109,11 @@ operator:
       imagePullPolicy: Always
 targetallocator:
   enabled: true
-
+  targetAllocator:
+    allocation_strategy: per-node
+    collector_selector:
+      matchlabels:
+        component: otel-collector-agent
 
 {{ if (eq .KubeTestEnv "eks") }}
 cloudProvider: aws

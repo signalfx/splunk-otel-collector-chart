@@ -368,8 +368,7 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 			t.Logf("Skipping pod %s in phase %s", pod.Name, pod.Status.Phase)
 			continue
 		}
-		podLogs, _ := internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 5000)
-		t.Logf("Agent pod logs for prometheus testing: %v", podLogs)
+		t.Logf("Agent pod (%s) labels for prometheus testing: %v", pod.Name, pod.Labels)
 	}
 
 	t.Logf("Checking via pod monitor")
