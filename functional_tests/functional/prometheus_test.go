@@ -371,6 +371,14 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 		t.Logf("Agent pod (%s) labels for prometheus testing: %v", pod.Name, pod.Labels)
 	}
 
+	cms, err := client.CoreV1().ConfigMaps("default").List(t.Context(), metav1.ListOptions{
+		LabelSelector: "soc-chart-targetallocator-ta-configmap",
+	})
+	assert.NoError(t, err)
+	for _, cm := range cms.Items {
+		t.Logf("ConfigMap (%s) labels for prometheus testing: %v, data: %v", cm.Name, cm.Labels, cm.Data)
+	}
+
 	t.Logf("Checking via pod monitor")
 	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")

@@ -113,9 +113,7 @@ operator:
 targetallocator:
   enabled: true
   targetAllocator:
-    collector_selector:
-      matchlabels:
-        component: otel-collector-agent
+    enabled: true
 
 {{ if (eq .KubeTestEnv "eks") }}
 cloudProvider: aws
