@@ -980,9 +980,10 @@ processors:
       - action: delete
         key: destination_canonical_revision
 
-  # This processor is used to remove excessive attributes from Istio metrics to avoid running into the dimensions limit.
+  # This processor is used to remove excessive attributes from Prometheus metrics to avoid running into the dimensions limit.
   # These attributes are resource attributes coming from Prometheus scraping, which are eventually converted into
   # data point attributes in the SignalFx exporter, counting against the dimension limit.
+  # The dimension limit is being hit most frequently in Istio environments.
   transform/drop_server_attrs:
     error_mode: ignore
     metric_statements:
