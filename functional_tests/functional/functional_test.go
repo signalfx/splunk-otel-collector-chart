@@ -567,6 +567,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
+	require.Positive(t, metrics.ResourceMetrics().Len(), "metrics file %s contains no ResourceMetrics", filePath)
 	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
 }
