@@ -8,6 +8,13 @@ autodetect:
   istio: true
 
 agent:
+  config:
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - receiver_creator
+
   controlPlaneMetrics:
     apiserver:
       enabled: false
@@ -28,6 +35,3 @@ clusterReceiver:
 
 environment: dev
 clusterName: dev-operator
-
-featureGates:
-  useControlPlaneMetricsHistogramData: false
