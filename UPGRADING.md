@@ -46,8 +46,14 @@ targetallocator:
       filter_strategy: relabel-config
 ```
 
-The only existing option whose default value changes as a result of this change is the allocation strategy. The new default
-value is `consistent-hashing` when it was previously `per-node`.
+Changed chart defaults
+
+| Old option default                                   | New option default                                                             | Notes                                                                                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| targetAllocator.config.allocation_strategy: per-node | targetallocator.targetAllocator.config.allocation_strategy: consistent-hashing | [Documentation reference](https://github.com/open-telemetry/opentelemetry-operator/blob/main/cmd/otel-allocator/README.md#allocation-strategies)                             |
+| N/A                                                  | targetallocator.targetAllocator.livenessProbe                                  | [Reference](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/c738eda8d0bfa36513acdc9601165a308d9f506b/charts/opentelemetry-target-allocator/values.yaml#L77) |
+| N/A                                                  | targetallocator.targetAllocator.readinessProbe                                 | [Reference](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/c738eda8d0bfa36513acdc9601165a308d9f506b/charts/opentelemetry-target-allocator/values.yaml#L86) |
+
 Refer to the upstream target allocator helm chart's [values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-target-allocator/values.yaml)
 for the full list of valid configuration options.
 
