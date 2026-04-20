@@ -192,8 +192,8 @@ data:
       transform/drop_server_attrs:
         error_mode: ignore
         metric_statements:
-        - delete_key(resource.attributes, "server.address")
-        - delete_key(resource.attributes, "server.port")
+        - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+        - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
       transform/istio_service_name:
         error_mode: ignore
         log_statements:
@@ -565,6 +565,8 @@ data:
           processors:
           - memory_limiter
           - batch
+          - attributes/istio
+          - transform/drop_server_attrs
           - resourcedetection
           - resource
           receivers:
