@@ -4,7 +4,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.109.0
+    helm.sh/chart: operator-0.110.0
     app.kubernetes.io/name: operator
     app.kubernetes.io/version: "0.148.0"
     app.kubernetes.io/managed-by: Helm
@@ -373,7 +373,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    helm.sh/chart: operator-0.109.0
+    helm.sh/chart: operator-0.110.0
     app.kubernetes.io/name: operator
     app.kubernetes.io/version: "0.148.0"
     app.kubernetes.io/managed-by: Helm
@@ -386,24 +386,3 @@ rules:
       - /metrics
     verbs:
       - get
----
-# Source: splunk-otel-collector/charts/operator/templates/clusterrole.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    helm.sh/chart: operator-0.109.0
-    app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.148.0"
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/part-of: opentelemetry-operator
-    app.kubernetes.io/instance: default
-    app.kubernetes.io/component: controller-manager
-  name: default-operator-proxy
-rules:
-  - apiGroups:
-      - authentication.k8s.io
-    resources:
-      - tokenreviews
-    verbs:
-      - create
