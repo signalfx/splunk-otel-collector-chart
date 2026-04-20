@@ -18,4 +18,5 @@ subtext: |
   This pipeline is rendered when `logsCollection.journald.enabled: true` or when
   `logsCollection.extraFileLogs` entries are defined. On distributions that support
   automatic cluster-name detection (EKS, GKE, OpenShift) with `clusterName` left
-  unset, the pipeline also includes `resourcedetection/k8s_cluster_name`.
+  unset, a second resource-detection instance is also added to automatically
+  discover `k8s.cluster.name`.
