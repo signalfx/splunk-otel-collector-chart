@@ -1,0 +1,22 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: agent
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Add resourcedetection processor to the agent logs/host pipeline
+# One or more tracking issues related to the change
+issues: [2385]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  The agent's `logs/host` pipeline was missing the `resourcedetection` processor, so
+  journald system logs and extra file logs lacked cloud and host attributes
+  (cloud.provider, host.id, host.name, etc.) that other agent logs pipeline already
+  included.
+
+  This pipeline is rendered when `logsCollection.journald.enabled: true` or when
+  `logsCollection.extraFileLogs` entries are defined. On distributions that support
+  automatic cluster-name detection (EKS, GKE, OpenShift) with `clusterName` left
+  unset, a second resource-detection instance is also added to automatically
+  discover `k8s.cluster.name`.
