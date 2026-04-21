@@ -13,4 +13,5 @@ subtext: |
   Prometheus metrics (especially coming from Istio) can run into dimension limits.
   To avoid data points being rejected due to exceeding the dimension limit, these
   dimensions will now be dropped when either `autodetect.prometheus` or `autodetect.istio`
-  is enabled.
+  is enabled. Users may reference the data point attribute `service.instance.id` as an
+  alternate source of the server address and port.
