@@ -1,8 +1,8 @@
 name: Dev Image Tests
 
 on:
-  schedule:
-    - cron: "0 6 * * *"
+  pull_request:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       collector_image:
@@ -27,6 +27,9 @@ env:
 
 jobs:
   get-test-matrix:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-dev-image-test')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -42,62 +45,25 @@ jobs:
     name: K8s ${{ matrix.k8s-kind-version }} / ${{ matrix.test-job }}
     runs-on: ubuntu-latest
     needs: get-test-matrix
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
-      KUBE_TEST_ENV: kind
-      KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
 
-      - name: Set collector image overrides
+      - name: Parse collector image input
+        id: parse-image
         run: |
           IMAGE="${{ github.event.inputs.collector_image || 'quay.io/signalfx/splunk-otel-collector-dev:latest' }}"
-          echo "OTELCOL_IMAGE_REPO=${IMAGE%:*}" >> "$GITHUB_ENV"
-          echo "OTELCOL_IMAGE_TAG=${IMAGE##*:}" >> "$GITHUB_ENV"
+          echo "repo=${IMAGE%:*}" >> "$GITHUB_OUTPUT"
+          echo "tag=${IMAGE##*:}" >> "$GITHUB_OUTPUT"
 
-      - name: Create kind cluster
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+      - uses: ./.github/actions/functional-test
         with:
-          node_image: kindest/node:${{ matrix.k8s-kind-version }}
-          kubectl_version: ${{ matrix.k8s-kind-version }}
-          cluster_name: kind
-          config: ./.github/workflows/configs/kind-config.yaml
-
-      - name: Fix kubelet TLS server certificates
-        run: |
-          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-
-      - name: Update dependencies
-        run: make dep-update
-
-      - name: Build and load test images into kind
-        run: make kind-build-test-images
-
-      - name: Run functional tests
-        id: run-functional-tests
-        env:
-          K8S_VERSION: ${{ matrix.k8s-kind-version }}
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=${{ matrix.test-job }} make functionaltest
-
-      - name: Collect Kubernetes Cluster debug info on failure
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        id: collect-debug-info
-        run: |
-          cd tools
-          ./splunk_kubernetes_debug_info.sh
-
-      - name: Upload Kubernetes Cluster debug info
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: tools/splunk_kubernetes_debug_info_*
-          retention-days: 5
+          k8s-version: ${{ matrix.k8s-kind-version }}
+          suite: ${{ matrix.test-job }}
+          go-version: ${{ env.GO_VERSION }}
+          kubernetes-debug-info: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
+          artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
+          otelcol-image-repo: ${{ steps.parse-image.outputs.repo }}
+          otelcol-image-tag: ${{ steps.parse-image.outputs.tag }}

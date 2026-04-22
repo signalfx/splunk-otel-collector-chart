@@ -49,7 +49,6 @@ jobs:
 
   kubernetes-test:
     env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
       KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
@@ -61,53 +60,14 @@ jobs:
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      - uses: ./.github/actions/functional-test
         with:
+          k8s-version: ${{ matrix.k8s-kind-version }}
+          suite: ${{ matrix.test-job }}
           go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Create kind cluster
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
-        with:
-          node_image: kindest/node:${{ matrix.k8s-kind-version }}
-          kubectl_version: ${{ matrix.k8s-kind-version }}
-          cluster_name: kind
-          config: ./.github/workflows/configs/kind-config.yaml
-      - name: Fix kubelet TLS server certificates
-        run: |
-          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: Build and load test images into kind
-        run: |
-          make kind-build-test-images
-      - name: run functional tests
-        id: run-functional-tests
-        env:
-          K8S_VERSION: ${{ matrix.k8s-kind-version }}
-        run: |
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
-      - name: Collect Kubernetes Cluster debug info on failure
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        id: collect-debug-info
-        run: |
-          echo "Functional tests failed. Collecting debug info for current state of the Kubernetes cluster..."
-          cd tools
-          ./splunk_kubernetes_debug_info.sh
-      - name: Upload Kubernetes Cluster debug info
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: tools/splunk_kubernetes_debug_info_*
-          retention-days: 5
-      - name: Upload updated files artifact
-        if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: updated_expected_results-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: ./functional_tests/**/*.yaml
-          retention-days: 5
+          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
+          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
+          artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
 
   eks-test:
     name: Test helm install in EKS - credentials needed
