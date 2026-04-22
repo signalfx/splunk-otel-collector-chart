@@ -346,6 +346,7 @@ data:
           processors:
           - memory_limiter
           - batch
+          - resourcedetection
           - resource
           receivers:
           - filelog/example-with-storage

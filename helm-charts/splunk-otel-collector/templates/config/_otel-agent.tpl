@@ -1218,6 +1218,7 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
+        - resourcedetection
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
