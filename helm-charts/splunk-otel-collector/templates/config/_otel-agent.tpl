@@ -979,6 +979,16 @@ processors:
         key: source_canonical_revision
       - action: delete
         key: destination_canonical_revision
+
+  # This processor is used to remove excessive attributes from Prometheus metrics to avoid running into the dimensions limit.
+  # These attributes are resource attributes coming from Prometheus scraping, which are eventually converted into
+  # data point attributes in the SignalFx exporter, counting against the dimension limit.
+  # The dimension limit is being hit most frequently in Istio environments.
+  transform/drop_server_attrs:
+    error_mode: ignore
+    metric_statements:
+      - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+      - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
@@ -1288,6 +1298,7 @@ service:
         - batch
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
+        - transform/drop_server_attrs
         {{- end }}
         - resourcedetection
         - resource
@@ -1376,6 +1387,10 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        - transform/drop_server_attrs
+        {{- end }}
       exporters:
         - signalfx/histograms
     {{- end }}
