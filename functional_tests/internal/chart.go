@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"helm.sh/helm/v4/pkg/chart/loader"
 	"helm.sh/helm/v4/pkg/kube"
 	releasev1 "helm.sh/helm/v4/pkg/release/v1"
+	"helm.sh/helm/v4/pkg/strvals"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,6 +71,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	var values map[string]any
 	err = yaml.Unmarshal(buf.Bytes(), &values)
 	require.NoError(t, err)
+	applyEnvOverrides(t, values)
 
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	install := action.NewInstall(actionConfig)
@@ -126,6 +129,34 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	require.NoError(t, err)
 	labelSelector := "release=" + options.ChartReleaseName
 	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
+}
+
+// applyEnvOverrides merges environment-driven value overrides into the helm values map.
+//
+// Supported env vars:
+//
+//	OTELCOL_IMAGE_REPO  - overrides image.otelcol.repository
+//	OTELCOL_IMAGE_TAG   - overrides image.otelcol.tag
+//	HELM_EXTRA_SET      - comma-separated key=value pairs, applied last (same syntax as helm --set)
+func applyEnvOverrides(t *testing.T, values map[string]any) {
+	if repo := os.Getenv("OTELCOL_IMAGE_REPO"); repo != "" {
+		t.Logf("OTELCOL_IMAGE_REPO override: image.otelcol.repository=%s", repo)
+		require.NoError(t, strvals.ParseInto("image.otelcol.repository="+repo, values))
+	}
+	if tag := os.Getenv("OTELCOL_IMAGE_TAG"); tag != "" {
+		t.Logf("OTELCOL_IMAGE_TAG override: image.otelcol.tag=%s", tag)
+		require.NoError(t, strvals.ParseInto("image.otelcol.tag="+tag, values))
+	}
+	if extra := os.Getenv("HELM_EXTRA_SET"); extra != "" {
+		for pair := range strings.SplitSeq(extra, ",") {
+			pair = strings.TrimSpace(pair)
+			if pair == "" {
+				continue
+			}
+			t.Logf("HELM_EXTRA_SET override: %s", pair)
+			require.NoError(t, strvals.ParseInto(pair, values))
+		}
+	}
 }
 
 func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {

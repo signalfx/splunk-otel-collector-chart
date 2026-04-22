@@ -24,32 +24,8 @@ permissions:
 env:
   GO_VERSION: 1.26.2
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
-  COLLECTOR_IMAGE: ${{ github.event.inputs.collector_image || 'quay.io/signalfx/splunk-otel-collector-dev:latest' }}
 
 jobs:
-  # ── Step 1: patch values.yaml with the dev image ───────────────────────────
-  set-image:
-    runs-on: ubuntu-latest
-    outputs:
-      image_repository: ${{ steps.parse.outputs.image_repository }}
-      image_tag: ${{ steps.parse.outputs.image_tag }}
-    steps:
-      - name: Parse image into repository and tag
-        id: parse
-        run: |
-          IMAGE="${COLLECTOR_IMAGE}"
-          # Split on the last colon to separate repo from tag
-          IMAGE_REPOSITORY="${IMAGE%:*}"
-          IMAGE_TAG="${IMAGE##*:}"
-          # If no colon was found (no tag), treat the whole string as repo with latest tag
-          if [[ "$IMAGE_REPOSITORY" == "$IMAGE_TAG" ]]; then
-            IMAGE_TAG="latest"
-          fi
-          echo "image_repository=${IMAGE_REPOSITORY}" >> "$GITHUB_OUTPUT"
-          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "Using repository=${IMAGE_REPOSITORY} tag=${IMAGE_TAG}"
-
-  # ── Step 2: functional tests (kind) ────────────────────────────────────────
   get-test-matrix:
     runs-on: ubuntu-latest
     steps:
@@ -65,7 +41,7 @@ jobs:
   functional-test:
     name: K8s ${{ matrix.k8s-kind-version }} / ${{ matrix.test-job }}
     runs-on: ubuntu-latest
-    needs: [set-image, get-test-matrix]
+    needs: get-test-matrix
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
@@ -80,10 +56,11 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
 
-      - name: Update chart image to dev image
+      - name: Set collector image overrides
         run: |
-          yq e '.image.otelcol.repository = "${{ needs.set-image.outputs.image_repository }}"' -i helm-charts/splunk-otel-collector/values.yaml
-          yq e '.image.otelcol.tag = "${{ needs.set-image.outputs.image_tag }}"' -i helm-charts/splunk-otel-collector/values.yaml
+          IMAGE="${{ github.event.inputs.collector_image || 'quay.io/signalfx/splunk-otel-collector-dev:latest' }}"
+          echo "OTELCOL_IMAGE_REPO=${IMAGE%:*}" >> "$GITHUB_ENV"
+          echo "OTELCOL_IMAGE_TAG=${IMAGE##*:}" >> "$GITHUB_ENV"
 
       - name: Create kind cluster
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
