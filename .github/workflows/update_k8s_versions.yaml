@@ -41,12 +41,11 @@ jobs:
 
       - name: Open PR for matrix version update
         if: steps.git-check.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        uses: ./.github/actions/create-pr
         with:
+          branch: update-matrix-test-versions
           commit-message: Update matrix test versions
           title: Update matrix versions used for testing
           body: Use latest supported matrix versions
-          branch: update-matrix-test-versions
-          base: main
-          delete-branch: true
-          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+          author-name: ${{ github.event_name == 'schedule' && 'github-actions[bot]' || github.actor }}
+          author-email: ${{ github.event_name == 'schedule' && '41898282+github-actions[bot]@users.noreply.github.com' || format('{1}+{0}@users.noreply.github.com', github.actor, github.actor_id) }}
