@@ -398,7 +398,7 @@ jobs:
           aws-region: us-west-2
       - name: Install kubeconfig
         run: |
-          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
       - name: Update dependencies
         run: |
           make dep-update
@@ -438,7 +438,7 @@ jobs:
           aws-region: us-west-2
       - name: Install kubeconfig
         run: |
-          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
       - name: Update dependencies
         run: |
           make dep-update
