@@ -52,7 +52,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - `agent`: Add resourcedetection processor to the agent logs/host pipeline ([#2385](https://github.com/signalfx/splunk-otel-collector-chart/pull/2385))
   The agent's `logs/host` pipeline was missing the `resourcedetection` processor, so
   journald system logs and extra file logs lacked cloud and host attributes
-  (cloud.provider, host.id, host.name, etc.) that other agent logs pipeline already
+  (cloud.provider, host.id, host.name, etc.) that other agent log pipelines already
   included.
 
   This pipeline is rendered when `logsCollection.journald.enabled: true` or when
