@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 7978e954a379327dc8434ede6bb0e97fe92e9409f754f55b9980ac318141d41c
+        checksum/config: 4fc0d15c8909d6c68ca381459445ea57347e82aaa3ce34fe9260e5871ecb7d62
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -52,7 +52,6 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
-      initContainers:
       containers:
       - name: otel-collector
         args:
@@ -80,8 +79,6 @@ spec:
           protocol: TCP
         image: quay.io/signalfx/splunk-otel-collector:0.150.0
         imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 0
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             valueFrom:
@@ -114,11 +111,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SPLUNK_PLATFORM_HEC_TOKEN
+          - name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: default-splunk-otel-collector
-                key: splunk_platform_hec_token
+                key: splunk_observability_access_token
+          - name: SPLUNK_DEBUG_CONFIG_SERVER
+            value: "true"
 
         readinessProbe:
           httpGet:
@@ -156,16 +155,9 @@ spec:
         - mountPath: /hostfs/usr/lib/os-release
           name: host-usr-lib-osrelease
           readOnly: true
-        - name: varlog
-          mountPath: /var/log
+        - name: etcd-secret
+          mountPath: /otel/etc/etcd
           readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: checkpoint
-          mountPath: /var/addon/splunk/otel_pos
-        - name: persistent-queue
-          mountPath: /var/addon/splunk/exporter_queue/agent
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -174,20 +166,6 @@ spec:
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: checkpoint
-        hostPath:
-          path: /var/addon/splunk/otel_pos
-          type: DirectoryOrCreate
-      - name: persistent-queue
-        hostPath:
-          path: /var/addon/splunk/exporter_queue/agent
-          type: DirectoryOrCreate
       - name: host-dev
         hostPath:
           path: /dev
@@ -209,6 +187,9 @@ spec:
       - name: host-usr-lib-osrelease
         hostPath:
           path: /usr/lib/os-release
+      - name: etcd-secret
+        secret:
+          secretName: foo
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent
