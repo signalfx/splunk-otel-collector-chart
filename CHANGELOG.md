@@ -14,26 +14,33 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   The default endpoints have been updated as follows:
   - `https://ingest.<realm>.signalfx.com` → `https://ingest.<realm>.observability.splunkcloud.com`
   - `https://api.<realm>.signalfx.com` → `https://api.<realm>.observability.splunkcloud.com`
-  
+
   The new endpoints resolve to different IP addresses. Review the
   [domain transition guide](https://help.splunk.com/en/splunk-observability-cloud/reference/splunk-observability-cloud-domain-transition-guide)
   for the full list of network and security controls to update before upgrading,
   or the collector will fail to send data.
-  
+
   **To keep using the legacy `*.signalfx.com` endpoints**, set these values explicitly:
   ```yaml
   splunkObservability:
     ingestUrl: "https://ingest.<realm>.signalfx.com"
     apiUrl: "https://api.<realm>.signalfx.com"
   ```
-  
+
+- `agent`: Drop `server.address` and `server.port` dimensions from Prometheus metrics ([#2288](https://github.com/signalfx/splunk-otel-collector-chart/pull/2288))
+  Prometheus metrics (especially coming from Istio) can run into dimension limits.
+  To avoid data points being rejected due to exceeding the dimension limit, these
+  dimensions will now be dropped when either `autodetect.prometheus` or `autodetect.istio`
+  is enabled. Users may reference the data point attribute `service.instance.id` as an
+  alternate source of the server address and port.
+
 
 ### 💡 Enhancements 💡
 
 - `agent`: Add `maxUnmatchedBatchSize` option to `logsCollection.containers.multilineConfigs` ([#2379](https://github.com/signalfx/splunk-otel-collector-chart/pull/2379))
   The chart now supports `maxUnmatchedBatchSize` in `multilineConfigs`, which controls how many
   consecutive lines not matching `firstEntryRegex` are batched into a single log record.
-  
+
 - `gateway`: Add topologySpreadConstraints support for gateway deployment ([#2361](https://github.com/signalfx/splunk-otel-collector-chart/pull/2361))
   The gateway deployment now supports `gateway.topologySpreadConstraints` to control how
   gateway pods are distributed across topology domains (e.g., availability zones). When
@@ -41,7 +48,19 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   or `PreferClose` on older versions), this enables zone-aware routing where clients prefer
   sending traffic to gateways in the same zone. Together, these options ensure gateways are
   evenly spread across zones while minimizing cross-AZ network traffic and costs.
-  
+
+- `agent`: Add resourcedetection processor to the agent logs/host pipeline ([#2385](https://github.com/signalfx/splunk-otel-collector-chart/pull/2385))
+  The agent's `logs/host` pipeline was missing the `resourcedetection` processor, so
+  journald system logs and extra file logs lacked cloud and host attributes
+  (cloud.provider, host.id, host.name, etc.) that other agent log pipelines already
+  included.
+
+  This pipeline is rendered when `logsCollection.journald.enabled: true` or when
+  `logsCollection.extraFileLogs` entries are defined. On distributions that support
+  automatic cluster-name detection (EKS, GKE, OpenShift) with `clusterName` left
+  unset, a second resource-detection instance is also added to automatically
+  discover `k8s.cluster.name`.
+
 
 ### 🧰 Bug fixes 🧰
 
@@ -51,12 +70,12 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   to avoid this metric being dropped entirely. This change is relevant when both the
   `useControlPlaneMetricsHistogramData` feature gate and `agent.controlPlaneMetrics.proxy`
   config option are both enabled.
-  
+
 - `chart`: Add probes and scrapeconfigs RBAC permissions to Target Allocator ClusterRole ([#2359](https://github.com/signalfx/splunk-otel-collector-chart/pull/2359))
   The Target Allocator ClusterRole was missing permissions for `probes` and `scrapeconfigs`
   resources in the `monitoring.coreos.com` API group. This caused the allocator to fail with
   forbidden errors when attempting to list and watch these resources.
-  
+
 - `clusterReceiver`: Remove resourcedetection processor from cluster-scoped event and object pipelines ([#2369](https://github.com/signalfx/splunk-otel-collector-chart/pull/2369))
   The cluster receiver's `logs` (k8s_events), `logs/objects`, and `logs/events` pipelines
   previously used the `resourcedetection` processor, which added host and
@@ -66,12 +85,12 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   tied to any single host; they should reflect the cluster. These pipelines now only add `k8s.cluster.name`.
   A `host.name` resource attribute is still set to the node name of the cluster receiver pod (`K8S_NODE_NAME`)
   for use as the Splunk HEC `host` field.
-  
+
 - `gateway`: Add `profiling` to gateway OTLP port `enabled_for` lists ([#2365](https://github.com/signalfx/splunk-otel-collector-chart/pull/2365))
   The gateway OTLP ports (4317, 4318) were missing `profiling` in their `enabled_for`
   lists, unlike the agent ports which already included it. This meant the profiling signal
   alone could not enable the gateway OTLP ports.
-  
+
 - `operator`: Respect user-defined SPLUNK_PROFILER_ENABLED and SPLUNK_PROFILER_MEMORY_ENABLED in `instrumentation.spec.env` ([#2365](https://github.com/signalfx/splunk-otel-collector-chart/pull/2365))
   When `splunkObservability.profilingEnabled` is true, the chart auto-injects
   `SPLUNK_PROFILER_ENABLED=true` and `SPLUNK_PROFILER_MEMORY_ENABLED=true` into
@@ -79,7 +98,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   `instrumentation.spec.env` to globally disable profiling while keeping the
   pipeline active was silently overridden. The chart now correctly honors
   user-defined values and skips injection when they are already present.
-  
+
 
 ## [0.149.0] - 2026-04-07
 
@@ -92,19 +111,19 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   Any Helm values or overrides that reference `k8sattributes` (for example, `*.config.processors.k8sattributes`
   or pipelines that list `k8sattributes` as a processor) must be updated to use `k8s_attributes`.
   The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
-  
+
 - `chart`: Rename all `otlp` exporter references to `otlp_grpc` ([#2326](https://github.com/signalfx/splunk-otel-collector-chart/pull/2326))
   The `otlp` alias has been deprecated in favor of `otlp_grpc` in the chart-generated configuration.
   Any Helm values or overrides that reference `otlp` (for example, `*.config.exporters.otlp`
   or pipelines that list `otlp` as an exporter) must be updated to use `otlp_grpc`.
   The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
-  
+
 - `chart`: Rename all `otlphttp` exporter references to `otlp_http` ([#2326](https://github.com/signalfx/splunk-otel-collector-chart/pull/2326))
   The `otlphttp` alias has been deprecated in favor of `otlp_http` in the chart-generated configuration.
   Any Helm values or overrides that reference `otlphttp` (for example, `*.config.exporters.otlphttp`
   or pipelines that list `otlphttp` as an exporter) must be updated to use `otlp_http`.
   The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
-  
+
 
 ### 💡 Enhancements 💡
 
@@ -117,29 +136,29 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   `cloud.provider`, `cloud.platform`, and `cloud.region` via the OpenShift API
   (`config.openshift.io/v1/infrastructures`). The `cloud.platform` value reflects the
   actual hosting environment (e.g., `aws_openshift`, `gcp_openshift`, `azure.openshift`).
-  
+
   Cloud-provider-specific detectors remain enabled alongside the openshift detector to
   collect instance-level metadata: ec2 on AWS, gcp on GCP, and azure on Azure. The
   openshift detector is listed first to ensure the correct `cloud.platform` is set before
   cloud-provider detectors run.
-  
+
   The `clusterName` Helm value is now optional for OpenShift (same as EKS and GKE). When
   not set, the openshift detector auto-discovers it from the cluster API. When explicitly
   set, the static value takes precedence.
-  
+
 - `chart`: Support all standard K8s probe fields (timeoutSeconds, periodSeconds, failureThreshold, successThreshold) in readinessProbe and livenessProbe configuration ([#2341](https://github.com/signalfx/splunk-otel-collector-chart/pull/2341))
   Previously only initialDelaySeconds was applied from readinessProbe and livenessProbe
   values. All other fields like timeoutSeconds were ignored. The probe templates
   now pass through all user-provided fields via toYaml.
-  
+
 - `chart`: Add configurable resource requests and limits for the Target Allocator container ([#2349](https://github.com/signalfx/splunk-otel-collector-chart/pull/2349))
   Users can now set `targetAllocator.resources` in values.yaml to configure CPU/memory
   requests and limits for the Target Allocator container.
-  
+
 - `chart`: Bump the OBI subchart to upstream opentelemetry-ebpf-instrumentation 0.6.0 ([#2300](https://github.com/signalfx/splunk-otel-collector-chart/pull/2300))
   Updates the vendored OBI dependency and rendered eBPF instrumentation example
   manifests to the upstream 0.6.0 chart release.
-  
+
 - `operator`: Bump operator to 0.109.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2347](https://github.com/signalfx/splunk-otel-collector-chart/pull/2347))
 
 ### 🧰 Bug fixes 🧰
@@ -155,13 +174,13 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   2. This code path only matched when distribution was unset (empty string), so OpenShift
      clusters on AWS (distribution=openshift, cloudProvider=aws) were excluded entirely.
      Broadened the condition to also match the openshift distribution.
-  
+
 - `clusterReceiver`: Set dnsPolicy to ClusterFirstWithHostNet for cluster receiver when clusterReceiver.hostNetwork is enabled ([#2348](https://github.com/signalfx/splunk-otel-collector-chart/pull/2348))
   When clusterReceiver.hostNetwork is enabled (e.g. for EKS Auto mode), the cluster receiver
   pod was unable to resolve in-cluster DNS names. Pods running with
   hostNetwork fall back to the node's DNS configuration unless dnsPolicy is explicitly set
   to ClusterFirstWithHostNet. This matches the existing daemonset behavior.
-  
+
 
 ## [0.148.0] - 2026-03-26
 
