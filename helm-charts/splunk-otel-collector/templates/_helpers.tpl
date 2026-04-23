@@ -513,7 +513,6 @@ Usage:
       {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- end -}}
     {{- range $item := (dig "receivers" (list) $p) -}}
     {{- range $old, $new := $depReceivers -}}
       {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
