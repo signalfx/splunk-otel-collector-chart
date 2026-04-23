@@ -34,6 +34,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   is enabled. Users may reference the data point attribute `service.instance.id` as an
   alternate source of the server address and port.
 
+
 ### 💡 Enhancements 💡
 
 - `agent`: Add `maxUnmatchedBatchSize` option to `logsCollection.containers.multilineConfigs` ([#2379](https://github.com/signalfx/splunk-otel-collector-chart/pull/2379))
@@ -59,6 +60,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
   automatic cluster-name detection (EKS, GKE, OpenShift) with `clusterName` left
   unset, a second resource-detection instance is also added to automatically
   discover `k8s.cluster.name`.
+
 
 ### 🧰 Bug fixes 🧰
 
