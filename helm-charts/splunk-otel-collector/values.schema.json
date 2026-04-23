@@ -160,6 +160,29 @@
         },
         "fsyncEnabled": {
           "type": "boolean"
+        },
+        "otlpIngest": {
+          "description": "Send logs via OTLP to Splunk Connect for OTLP instead of HEC",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "protocol": {
+              "type": "string",
+              "enum": [
+                "grpc",
+                "http"
+              ]
+            },
+            "insecure": {
+              "type": "boolean"
+            }
+          }
         }
       },
       "anyOf": [

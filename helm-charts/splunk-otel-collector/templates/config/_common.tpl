@@ -384,6 +384,23 @@ filter/logs:
 {{- end }}
 
 {{/*
+Splunk Platform Logs exporter via OTLP (Splunk Connect for OTLP)
+*/}}
+{{- define "splunk-otel-collector.otlpPlatformLogsExporter" -}}
+{{- if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}
+otlp_http/platform_logs:
+  logs_endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
+  tls:
+    insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
+{{- else }}
+otlp/platform_logs:
+  endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
+  tls:
+    insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Splunk Platform Logs exporter
 */}}
 {{- define "splunk-otel-collector.splunkPlatformLogsExporter" -}}

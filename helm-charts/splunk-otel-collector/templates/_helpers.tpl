@@ -36,7 +36,14 @@ Create chart name and version as used by the chart label.
 Whether to send data to Splunk Platform endpoint
 */}}
 {{- define "splunk-otel-collector.splunkPlatformEnabled" -}}
-{{- not (eq .Values.splunkPlatform.endpoint "") }}
+{{- or (not (eq .Values.splunkPlatform.endpoint "")) .Values.splunkPlatform.otlpIngest.enabled }}
+{{- end -}}
+
+{{/*
+Whether logs should be sent via OTLP to Splunk Connect for OTLP instead of HEC.
+*/}}
+{{- define "splunk-otel-collector.platformLogsViaOtlpEnabled" -}}
+{{- and .Values.splunkPlatform.otlpIngest.enabled .Values.splunkPlatform.logsEnabled }}
 {{- end -}}
 
 {{/*

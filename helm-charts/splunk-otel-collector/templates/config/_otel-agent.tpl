@@ -1030,7 +1030,9 @@ exporters:
       "X-Splunk-Instrumentation-Library": secureapp
   {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-  {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsExporter" . | nindent 2 }}
+  {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -1205,7 +1207,9 @@ service:
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}otlp_http{{- else }}otlp{{- end }}/platform_logs
+        {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
@@ -1240,7 +1244,9 @@ service:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
         {{- else }}
-        {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}otlp_http{{- else }}otlp{{- end }}/platform_logs
+        {{- else if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}

@@ -84,6 +84,20 @@ splunkPlatform:
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
 
+  # Optional: send logs directly to a Splunk Connect for OTLP endpoint instead of HEC.
+  # Splunk Connect for OTLP is a Splunk Technical Add-on that exposes an OTLP gRPC/HTTP
+  # receiver inside Splunk Enterprise/Cloud. See https://github.com/splunk/splunk-connect-for-otlp
+  # When enabled, splunkPlatform.endpoint and splunkPlatform.token are not required for logs.
+  otlpIngest:
+    enabled: false
+    # Required when enabled. OTLP endpoint exposed by Splunk Connect for OTLP.
+    # Use gRPC (e.g. "splunk-host:4317") or HTTP (e.g. "http://splunk-host:4318").
+    endpoint: ""
+    # Protocol to use: "grpc" or "http".
+    protocol: grpc
+    # Whether to disable TLS verification. Set to true for self-signed certs or plaintext.
+    insecure: true
+
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.
   logsEnabled: true
