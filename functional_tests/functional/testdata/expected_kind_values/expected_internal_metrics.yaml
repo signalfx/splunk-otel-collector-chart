@@ -39,6 +39,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -92,6 +95,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -143,6 +149,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -199,6 +208,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -255,6 +267,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -314,6 +329,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: filelog
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -365,6 +383,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/containerd
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -416,6 +437,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/kubelet
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -467,6 +491,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -526,6 +553,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: filelog
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -577,6 +607,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/containerd
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -628,6 +661,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/kubelet
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -679,6 +715,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -741,6 +780,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: cpu
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -795,6 +837,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: disk
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -849,6 +894,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: filesystem
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -903,6 +951,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: load
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -957,6 +1008,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: memory
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1011,6 +1065,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: network
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1065,6 +1122,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: paging
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1119,6 +1179,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: processes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1173,6 +1236,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: kubeletstats
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1230,6 +1296,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1284,6 +1353,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1338,6 +1410,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1392,6 +1467,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1446,6 +1524,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1500,6 +1581,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1556,6 +1640,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1609,6 +1696,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1662,6 +1752,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1721,6 +1814,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: cpu
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1775,6 +1871,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: disk
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1829,6 +1928,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: filesystem
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1883,6 +1985,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: load
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1937,6 +2042,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: memory
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -1991,6 +2099,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: network
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2045,6 +2156,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: paging
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2099,6 +2213,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: processes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2153,6 +2270,9 @@ resourceMetrics:
                     - key: scraper
                       value:
                         stringValue: kubeletstats
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2209,6 +2329,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2260,6 +2383,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2311,6 +2437,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2367,6 +2496,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2423,6 +2555,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2482,6 +2617,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: filter/logs
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2536,6 +2674,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2590,6 +2731,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2644,6 +2788,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2698,6 +2845,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2752,6 +2902,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/logs
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2806,6 +2959,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2860,6 +3016,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: attributes/istio
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2914,6 +3073,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes/metrics
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -2968,6 +3130,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3022,6 +3187,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3076,6 +3244,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_agent_k8s
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3130,6 +3301,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3184,6 +3358,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_mode
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3238,6 +3415,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3292,6 +3472,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3346,6 +3529,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3400,6 +3586,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3454,6 +3643,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3508,6 +3700,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3564,6 +3759,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3618,6 +3816,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3669,6 +3870,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3722,6 +3926,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3775,6 +3982,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3826,6 +4036,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3882,6 +4095,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3939,6 +4155,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -3993,6 +4212,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4047,6 +4269,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4101,6 +4326,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4155,6 +4383,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4209,6 +4440,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4262,6 +4496,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4318,6 +4555,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: hostmetrics
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4369,6 +4609,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: kubeletstats
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4420,6 +4663,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4474,6 +4720,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4528,6 +4777,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/autodetect/receiver_creator{endpoint="10.244.0.42"}/k8s_observer/a1dfcd3f-aca9-47f2-909d-05c7c7c1143c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4582,6 +4834,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.3"}/k8s_observer/4ef1a124-e0a3-4749-bfbe-217f99e3330c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4636,6 +4891,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.5"}/k8s_observer/a34ba84a-4c8b-4efd-8961-170228d6d130
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4690,6 +4948,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kube-controller-manager/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/f0b461a9-b6a0-4032-bd58-4a038124f8a7
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4744,6 +5005,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-proxy/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/af5f6179-77e2-43bd-a5f9-0e9d779eb8f0
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4798,6 +5062,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-scheduler/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/cc23dbed-a095-49e3-9422-caf3466b82c1
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4852,6 +5119,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/ta
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4911,6 +5181,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: hostmetrics
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -4962,6 +5235,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: kubeletstats
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5013,6 +5289,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5067,6 +5346,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5121,6 +5403,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/autodetect/receiver_creator{endpoint="10.244.0.42"}/k8s_observer/a1dfcd3f-aca9-47f2-909d-05c7c7c1143c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5175,6 +5460,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.3"}/k8s_observer/4ef1a124-e0a3-4749-bfbe-217f99e3330c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5229,6 +5517,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.5"}/k8s_observer/a34ba84a-4c8b-4efd-8961-170228d6d130
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5283,6 +5574,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kube-controller-manager/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/f0b461a9-b6a0-4032-bd58-4a038124f8a7
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5337,6 +5631,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-proxy/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/af5f6179-77e2-43bd-a5f9-0e9d779eb8f0
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5391,6 +5688,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-scheduler/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/cc23dbed-a095-49e3-9422-caf3466b82c1
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5445,6 +5745,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/ta
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5504,6 +5807,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: hostmetrics
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5555,6 +5861,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: kubeletstats
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5606,6 +5915,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5660,6 +5972,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5714,6 +6029,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/autodetect/receiver_creator{endpoint="10.244.0.42"}/k8s_observer/a1dfcd3f-aca9-47f2-909d-05c7c7c1143c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5768,6 +6086,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.3"}/k8s_observer/4ef1a124-e0a3-4749-bfbe-217f99e3330c
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5822,6 +6143,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/coredns/receiver_creator{endpoint="10.244.0.5"}/k8s_observer/a34ba84a-4c8b-4efd-8961-170228d6d130
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5876,6 +6200,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kube-controller-manager/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/f0b461a9-b6a0-4032-bd58-4a038124f8a7
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5930,6 +6257,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-proxy/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/af5f6179-77e2-43bd-a5f9-0e9d779eb8f0
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -5984,6 +6314,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/kubernetes-scheduler/receiver_creator{endpoint="172.18.0.2"}/k8s_observer/cc23dbed-a095-49e3-9422-caf3466b82c1
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6038,6 +6371,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: prometheus/ta
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6097,6 +6433,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6153,6 +6492,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6204,6 +6546,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6257,6 +6602,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6316,6 +6664,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: filter/logs
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6370,6 +6721,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6424,6 +6778,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6478,6 +6835,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6532,6 +6892,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6586,6 +6949,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/logs
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6640,6 +7006,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6694,6 +7063,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: attributes/istio
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6748,6 +7120,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes/metrics
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6802,6 +7177,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6856,6 +7234,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6910,6 +7291,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_agent_k8s
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -6964,6 +7348,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7018,6 +7405,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_mode
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7072,6 +7462,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7126,6 +7519,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: k8s_attributes
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7180,6 +7576,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: memory_limiter
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7234,6 +7633,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7288,6 +7690,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resource/add_environment
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7342,6 +7747,9 @@ resourceMetrics:
                     - key: processor
                       value:
                         stringValue: resourcedetection
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7398,6 +7806,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: filelog
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7449,6 +7860,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/containerd
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7500,6 +7914,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: journald/kubelet
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7551,6 +7968,9 @@ resourceMetrics:
                     - key: receiver
                       value:
                         stringValue: otlp
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7605,6 +8025,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7658,6 +8081,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7711,6 +8137,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7762,6 +8191,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7813,6 +8245,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7864,6 +8299,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7920,6 +8358,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de
@@ -7971,6 +8412,9 @@ resourceMetrics:
                     - key: otelcol.service.mode
                       value:
                         stringValue: agent
+                    - key: server.port
+                      value:
+                        stringValue: "8889"
                     - key: service.instance.id
                       value:
                         stringValue: dc428c29-b1f4-4c8c-9d7b-22cff08538de

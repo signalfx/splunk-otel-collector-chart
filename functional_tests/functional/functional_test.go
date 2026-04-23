@@ -947,8 +947,6 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("server.port", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("otel.signal", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("processor", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
 		pmetrictest.IgnoreMetricAttributeValue("service.version", metricNames...),
