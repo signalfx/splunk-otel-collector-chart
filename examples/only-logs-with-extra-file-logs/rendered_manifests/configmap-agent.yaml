@@ -253,7 +253,7 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      filelog/example-with-storage:
+      file_log/example-with-storage:
         include:
         - /tmp/directory_one/*.log
         include_file_name: false
@@ -269,7 +269,7 @@ data:
           host.name: EXPR(env("K8S_NODE_NAME"))
         start_at: beginning
         storage: file_storage
-      filelog/example-without-storage:
+      file_log/example-without-storage:
         include:
         - /var/log/catalina/catalina*.log
         include_file_name: false
@@ -338,8 +338,8 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - filelog/example-with-storage
-          - filelog/example-without-storage
+          - file_log/example-with-storage
+          - file_log/example-without-storage
       telemetry:
         metrics:
           readers:
