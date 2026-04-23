@@ -92,15 +92,14 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        uses: ./.github/actions/create-pr
         with:
+          branch: update-release
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           body: |
             Description
             - Release Helm chart version ${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
             - Includes collector version ${{ steps.prepare_release.outputs.LATEST_APP_VERSION }}
-          branch: update-release
-          base: main
-          delete-branch: true
-          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+          author-name: ${{ github.event_name == 'schedule' && 'github-actions[bot]' || github.actor }}
+          author-email: ${{ github.event_name == 'schedule' && '41898282+github-actions[bot]@users.noreply.github.com' || format('{1}+{0}@users.noreply.github.com', github.actor, github.actor_id) }}
