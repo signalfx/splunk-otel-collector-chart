@@ -11,6 +11,6 @@ issues: [2396]
 # Use pipe (|) for multiline entries.
 subtext: |
   The `filelog` alias has been deprecated in favor of `file_log` in the chart-generated configuration.
-  Any Helm values or overrides that reference `filelog` (for example, *.config.receivers.filelog
+  Any Helm values or overrides that reference `filelog` (for example, `*.config.receivers.filelog`
   or pipelines that list `filelog` as a receiver) must be updated to use `file_log`.
   The chart will fail to be installed or upgraded if the deprecated alias is still referenced.

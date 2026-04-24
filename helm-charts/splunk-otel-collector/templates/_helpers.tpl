@@ -463,9 +463,9 @@ Otherwise, return directory only.
 
 {{/*
 Fail if a collector config override uses deprecated component names.
-Checks exporter/processor definitions and pipeline references.
+Checks exporter/processor/receiver definitions and pipeline references.
 
-To add a new deprecation, add an entry to $depExporters or $depProcessors.
+To add a new deprecation, add an entry to $depExporters, $depProcessors, or $depReceivers.
 
 Usage:
   include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config")
