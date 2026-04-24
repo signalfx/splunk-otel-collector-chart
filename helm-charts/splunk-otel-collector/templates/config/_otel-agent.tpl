@@ -934,6 +934,10 @@ processors:
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
 
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsResourceProcessor" . | nindent 2 }}
+  {{- end }}
+
   {{- if .Values.environment }}
   resource/add_environment:
     attributes:
@@ -1196,6 +1200,9 @@ service:
         - transform/istio_service_name
         {{- end }}
         - resource/logs
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
         {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
@@ -1208,7 +1215,7 @@ service:
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
-        - {{ if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}otlp_http{{- else }}otlp{{- end }}/platform_logs
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
         {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
@@ -1237,6 +1244,9 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -1245,7 +1255,7 @@ service:
         - otlp_grpc
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
-        - {{ if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}otlp_http{{- else }}otlp{{- end }}/platform_logs
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
         {{- else if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
         {{- end }}

@@ -87,7 +87,8 @@ splunkPlatform:
   # Optional: send logs directly to a Splunk Connect for OTLP endpoint instead of HEC.
   # Splunk Connect for OTLP is a Splunk Technical Add-on that exposes an OTLP gRPC/HTTP
   # receiver inside Splunk Enterprise/Cloud. See https://github.com/splunk/splunk-connect-for-otlp
-  # When enabled, splunkPlatform.endpoint and splunkPlatform.token are not required for logs.
+  # When enabled, splunkPlatform.endpoint and splunkPlatform.token are not required for logs,
+  # unless metrics or traces are also sent to Splunk Platform via HEC.
   otlpIngest:
     enabled: false
     # Required when enabled. OTLP endpoint exposed by Splunk Connect for OTLP.
@@ -95,8 +96,8 @@ splunkPlatform:
     endpoint: ""
     # Protocol to use: "grpc" or "http".
     protocol: grpc
-    # Whether to disable TLS verification. Set to true for self-signed certs or plaintext.
-    insecure: true
+    # Whether to disable TLS for the OTLP exporter. Set to true for plaintext endpoints.
+    insecure: false
 
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.

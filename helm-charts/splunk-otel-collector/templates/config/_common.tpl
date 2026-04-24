@@ -334,6 +334,17 @@ resource/logs:
 {{- end }}
 
 {{/*
+Resource processor for Splunk Platform log defaults when logs are sent via OTLP.
+*/}}
+{{- define "splunk-otel-collector.otlpPlatformLogsResourceProcessor" -}}
+resource/otlp_platform_logs:
+  attributes:
+    - key: com.splunk.index
+      value: {{ .Values.splunkPlatform.index | quote }}
+      action: insert
+{{- end }}
+
+{{/*
 Resource processor for metrics manipulations
 */}}
 {{- define "splunk-otel-collector.resourceMetricsProcessor" -}}
@@ -389,7 +400,7 @@ Splunk Platform Logs exporter via OTLP (Splunk Connect for OTLP)
 {{- define "splunk-otel-collector.otlpPlatformLogsExporter" -}}
 {{- if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}
 otlp_http/platform_logs:
-  logs_endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
+  endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
   tls:
     insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
 {{- else }}
@@ -398,6 +409,28 @@ otlp/platform_logs:
   tls:
     insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
 {{- end }}
+  retry_on_failure:
+    enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}
+    initial_interval: {{ .Values.splunkPlatform.retryOnFailure.initialInterval }}
+    max_interval: {{ .Values.splunkPlatform.retryOnFailure.maxInterval }}
+    {{- if .Values.featureGates.noDropLogsPipeline }}
+    max_elapsed_time: 0s
+    {{- else }}
+    max_elapsed_time: {{ .Values.splunkPlatform.retryOnFailure.maxElapsedTime }}
+    {{- end }}
+  sending_queue:
+    enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- if .addPersistentStorage }}
+    storage: file_storage/persistent_queue
+    {{- end }}
+    num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
+    {{- if .Values.featureGates.noDropLogsPipeline }}
+    batch:
+      flush_timeout: 200ms
+      min_size: 2048
+      sizer: items
+    {{- end }}
 {{- end -}}
 
 {{/*

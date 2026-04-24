@@ -2,7 +2,7 @@
 change_type: enhancement
 
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: agent, gateway
+component: agent, gateway, clusterReceiver
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: Add OTLP log ingest option to send logs to Splunk Connect for OTLP instead of HEC
@@ -25,10 +25,13 @@ subtext: |
       enabled: true
       endpoint: "<splunk-connect-for-otlp-endpoint>"
       protocol: grpc   # or "http"
-      insecure: true
+      insecure: false
   ```
 
-  When `otlpIngest.enabled` is true and `logsEnabled` is true, the agent and gateway
-  will use `otlp/platform_logs` (gRPC) or `otlp_http/platform_logs` (HTTP) exporters
-  instead of `splunk_hec/platform_logs`. The `splunkPlatform.endpoint` field is not
-  required when using OTLP ingest.
+  When `otlpIngest.enabled` is true and `logsEnabled` is true, the agent, gateway,
+  and cluster receiver log pipelines will use `otlp/platform_logs` (gRPC) or
+  `otlp_http/platform_logs` (HTTP) exporters instead of `splunk_hec/platform_logs`.
+  Use a base endpoint for HTTP, for example `http://splunk-host:4318`.
+  The `splunkPlatform.endpoint` field is not required for logs when using OTLP
+  ingest, but it is still required when `splunkPlatform.metricsEnabled` or
+  `splunkPlatform.tracesEnabled` sends metrics or traces to Splunk Platform via HEC.

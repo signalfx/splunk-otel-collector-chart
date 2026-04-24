@@ -156,6 +156,10 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
 
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsResourceProcessor" . | nindent 2 }}
+  {{- end }}
+
   {{- if eq (include "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" $) "true" }}
 
   # Add k8s event attributes - k8s.<kind>.name and k8s.<kind>.uid
@@ -177,6 +181,14 @@ processors:
         statements:
           - merge_maps(resource.cache, ExtractPatterns(resource.attributes["k8s.object.fieldpath"], "spec.containers\\{(?P<k8s_container_name>[^\\}]+)\\}"), "insert")
           - set(resource.attributes["k8s.container.name"], resource.cache["k8s_container_name"])
+
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  transform/add_events_sourcetype:
+    log_statements:
+      - context: log
+        statements:
+          - set(resource.attributes["com.splunk.sourcetype"], "kube:events")
+  {{- end }}
 
   # Drop high cardinality k8s event attributes
   attributes/drop_event_attrs:
@@ -305,7 +317,9 @@ exporters:
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
+  {{- if and (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsExporter" . | nindent 2 }}
+  {{- else if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.objectsOrEventsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- if .Values.clusterReceiver.eventsEnabled }}
     sourcetype: kube:events
@@ -437,9 +451,15 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        - transform/add_events_sourcetype
+        {{- end }}
         - transform/k8sevents
       exporters:
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
+        {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- if eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true" }}
@@ -460,11 +480,16 @@ service:
         - resource
         - resource/add_cluster_host
         - transform/add_sourcetype
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
       exporters:
-      {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+      {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
+      {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
       {{- end }}
       {{- if (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true") }}

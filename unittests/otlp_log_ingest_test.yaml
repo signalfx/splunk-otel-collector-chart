@@ -1,0 +1,365 @@
+suite: splunk-otel-collector.otlpLogIngest
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+  - configmap-cluster-receiver.yaml
+  - secret-splunk.yaml
+  - secret-splunk-validation-hook.yaml
+
+tests:
+  - it: should use OTLP gRPC platform logs exporter in agent, gateway, and cluster receiver
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+      clusterReceiver:
+        eventsEnabled: true
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 5s
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+otlp/platform_logs:\\n\\s+endpoint: otlp-logs\\.example\\.com:4317"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\nsplunk_hec/platform_logs:"
+
+  - it: should use OTLP gRPC platform logs exporter in gateway
+    set:
+      splunkObservability:
+        realm: ""
+      gateway:
+        enabled: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+otlp/platform_logs:\\n\\s+endpoint: otlp-logs\\.example\\.com:4317"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\nsplunk_hec/platform_logs:"
+
+  - it: should add kube events sourcetype via processor when platform logs are sent via OTLP
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+      clusterReceiver:
+        eventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/add_events_sourcetype:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "set\\(resource.attributes\\[\"com.splunk.sourcetype\"\\], \"kube:events\"\\)"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "- transform/add_events_sourcetype\\n\\s+- transform/k8sevents"
+
+  - it: should use OTLP HTTP platform logs exporter when protocol is http
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: http://otlp-logs.example.com:4318
+          protocol: http
+      clusterReceiver:
+        eventsEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+otlp_http/platform_logs:\\n\\s+endpoint: http://otlp-logs\\.example\\.com:4318"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\notlp/platform_logs:"
+
+  - it: should not include HEC token in generated secret when logs are OTLP-only
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: true
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: secret-splunk.yaml
+    asserts:
+      - isKind:
+          of: Secret
+      - isNull:
+          path: data.splunk_platform_hec_token
+
+  - it: should not validate custom secret for HEC token when logs are OTLP-only
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: false
+        validateSecret: true
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: secret-splunk-validation-hook.yaml
+    asserts:
+      - matchRegex:
+          path: spec.containers[0].args[0]
+          pattern: "if \\[ \"false\" = \"true\" \\] && \\[ ! -f /otel/secret/splunk_platform_hec_token \\]"
+
+  - it: should validate custom secret for HEC token when metrics are sent to platform HEC
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: false
+        validateSecret: true
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: secret-splunk-validation-hook.yaml
+    asserts:
+      - matchRegex:
+          path: spec.containers[0].args[0]
+          pattern: "if \\[ \"true\" = \"true\" \\] && \\[ ! -f /otel/secret/splunk_platform_hec_token \\]"
+
+  - it: should include HEC token in generated secret when metrics are sent to platform HEC
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: true
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: abc
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: secret-splunk.yaml
+    asserts:
+      - equal:
+          path: data.splunk_platform_hec_token
+          value: YWJj
+
+  - it: should use OTLP HTTP exporter in gateway when protocol is http
+    set:
+      splunkObservability:
+        realm: ""
+      gateway:
+        enabled: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: http://otlp-logs.example.com:4318
+          protocol: http
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+otlp_http/platform_logs:\\n\\s+endpoint: http://otlp-logs\\.example\\.com:4318"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\notlp/platform_logs:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\nsplunk_hec/platform_logs:"
+
+  - it: should use OTLP exporter for logs and HEC exporter for metrics when both are enabled
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: abc
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+otlp/platform_logs:\\n\\s+endpoint: otlp-logs\\.example\\.com:4317"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+splunk_hec/platform_metrics:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\nsplunk_hec/platform_logs:"
+
+  - it: should route k8sObjects logs to OTLP exporter when OTLP ingest is enabled
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+      clusterReceiver:
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 5s
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:[\\s\\S]+?- otlp/platform_logs"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:[\\s\\S]+?- splunk_hec/platform_logs"
+
+  - it: should use insecure false by default for OTLP exporter
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "tls:\\n\\s+insecure: false"
+
+  - it: should add default platform index for OTLP logs without overriding annotations
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        index: custom_logs
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "resource/otlp_platform_logs:\\n\\s+attributes:\\n\\s+- action: insert\\n\\s+key: com\\.splunk\\.index\\n\\s+value: custom_logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "- resource/logs\\n\\s+- resource/otlp_platform_logs"
+
+  - it: should attach persistent queue storage to OTLP platform logs exporter
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        sendingQueue:
+          persistentQueue:
+            enabled: true
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?sending_queue:[\\s\\S]+?storage: file_storage/persistent_queue"

@@ -171,7 +171,7 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_observability_access_token
           {{- end }}
-          {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
+          {{- if (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true") }}
           - name: SPLUNK_PLATFORM_HEC_TOKEN
             valueFrom:
               secretKeyRef:

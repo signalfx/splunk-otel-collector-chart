@@ -1,0 +1,11 @@
+clusterName: CHANGEME
+splunkPlatform:
+  index: CHANGEME
+  logsEnabled: true
+  metricsEnabled: false
+  tracesEnabled: false
+  otlpIngest:
+    enabled: true
+    endpoint: CHANGEME:4317
+    protocol: grpc
+    insecure: false

@@ -36,14 +36,33 @@ Create chart name and version as used by the chart label.
 Whether to send data to Splunk Platform endpoint
 */}}
 {{- define "splunk-otel-collector.splunkPlatformEnabled" -}}
-{{- or (not (eq .Values.splunkPlatform.endpoint "")) .Values.splunkPlatform.otlpIngest.enabled }}
+{{- not (eq .Values.splunkPlatform.endpoint "") }}
 {{- end -}}
 
 {{/*
 Whether logs should be sent via OTLP to Splunk Connect for OTLP instead of HEC.
 */}}
 {{- define "splunk-otel-collector.platformLogsViaOtlpEnabled" -}}
-{{- and .Values.splunkPlatform.otlpIngest.enabled .Values.splunkPlatform.logsEnabled }}
+{{- and ((.Values.splunkPlatform.otlpIngest).enabled) .Values.splunkPlatform.logsEnabled }}
+{{- end -}}
+
+{{/*
+The exporter name for platform logs sent via OTLP (otlp/platform_logs or otlp_http/platform_logs).
+*/}}
+{{- define "splunk-otel-collector.otlpPlatformLogsExporterName" -}}
+{{- if eq .Values.splunkPlatform.otlpIngest.protocol "http" }}otlp_http{{- else }}otlp{{- end }}/platform_logs
+{{- end -}}
+
+{{/*
+Whether Splunk Platform HEC token is required.
+*/}}
+{{- define "splunk-otel-collector.platformHecTokenRequired" -}}
+{{- or
+      (and
+        (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true")
+        (not (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true")))
+      (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true")
+      (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
 {{- end -}}
 
 {{/*
@@ -113,7 +132,7 @@ Whether traces enabled for any destination.
 Whether logs enabled for any destination.
 */}}
 {{- define "splunk-otel-collector.logsEnabled" -}}
-{{- include "splunk-otel-collector.platformLogsEnabled" . }}
+{{- or (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
 {{- end -}}
 
 {{/*

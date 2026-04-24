@@ -1574,6 +1574,33 @@
               }
             }
           }
+        },
+        {
+          "properties": {
+            "splunkPlatform": {
+              "type": "object",
+              "required": [
+                "logsEnabled",
+                "otlpIngest"
+              ],
+              "properties": {
+                "logsEnabled": {
+                  "const": true
+                },
+                "otlpIngest": {
+                  "type": "object",
+                  "required": [
+                    "enabled"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     },
@@ -1652,11 +1679,57 @@
           },
           "splunkPlatform": {
             "if": {
-              "properties": {
-                "endpoint": {
-                  "minLength": 1
+              "allOf": [
+                {
+                  "properties": {
+                    "endpoint": {
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "metricsEnabled": {
+                          "const": true
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "tracesEnabled": {
+                          "const": true
+                        }
+                      }
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "logsEnabled": {
+                              "const": true
+                            }
+                          }
+                        },
+                        {
+                          "not": {
+                            "properties": {
+                              "otlpIngest": {
+                                "properties": {
+                                  "enabled": {
+                                    "const": true
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
                 }
-              }
+              ]
             },
             "then": {
               "properties": {
@@ -1671,32 +1744,51 @@
     },
     {
       "if": {
-        "$comment": "if splunkPlatform.metricsEnabled is true and splunkPlatform.endpoint is provided",
+        "$comment": "if OTLP ingest for platform logs is enabled, require OTLP endpoint",
         "properties": {
           "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
             "properties": {
-              "endpoint": {
-                "minLength": 1
+              "logsEnabled": {
+                "const": true
+              },
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                }
               }
             }
           }
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.metricsIndex must be provided",
         "properties": {
           "splunkPlatform": {
-            "if": {
-              "properties": {
-                "metricsEnabled": {
-                  "const": true
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "metricsIndex": {
-                  "minLength": 1
+            "required": [
+              "index",
+              "otlpIngest"
+            ],
+            "properties": {
+              "index": {
+                "minLength": 1
+              },
+              "otlpIngest": {
+                "required": [
+                  "endpoint"
+                ],
+                "properties": {
+                  "endpoint": {
+                    "minLength": 1
+                  }
                 }
               }
             }
@@ -1706,7 +1798,81 @@
     },
     {
       "if": {
-        "$comment": "if splunkPlatform.logsEnabled is true and splunkPlatform.endpoint is provided",
+        "$comment": "if splunkPlatform.metricsEnabled is true",
+        "required": [
+          "splunkPlatform"
+        ],
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "metricsEnabled"
+            ],
+            "properties": {
+              "metricsEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.endpoint and splunkPlatform.metricsIndex must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "endpoint",
+              "metricsIndex"
+            ],
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              },
+              "metricsIndex": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.tracesEnabled is true",
+        "required": [
+          "splunkPlatform"
+        ],
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "tracesEnabled"
+            ],
+            "properties": {
+              "tracesEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.endpoint must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "endpoint"
+            ],
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform endpoint is provided",
         "properties": {
           "splunkPlatform": {
             "properties": {
@@ -1718,15 +1884,32 @@
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.index must be provided",
+        "$comment": "then splunkPlatform.index must be provided only when logs are sent via HEC",
         "properties": {
           "splunkPlatform": {
             "if": {
-              "properties": {
-                "logsEnabled": {
-                  "const": true
+              "allOf": [
+                {
+                  "properties": {
+                    "logsEnabled": {
+                      "const": true
+                    }
+                  }
+                },
+                {
+                  "not": {
+                    "properties": {
+                      "otlpIngest": {
+                        "properties": {
+                          "enabled": {
+                            "const": true
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
-              }
+              ]
             },
             "then": {
               "properties": {
