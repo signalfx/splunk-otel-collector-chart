@@ -47,6 +47,7 @@ agent:
           exporters:
             - otlp_grpc
 clusterReceiver:
+  hostNetwork: true
   eventsEnabled: true
   config:
     exporters:
