@@ -131,6 +131,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-1
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
@@ -170,6 +171,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-1
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
@@ -396,6 +398,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
@@ -436,6 +439,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
@@ -472,6 +476,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2
@@ -511,6 +516,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2
