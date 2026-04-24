@@ -19,6 +19,18 @@ logsCollection:
     useHostJournalctl: true
     enabled: true
     directory: /var/log/journal
+    # EKS nodes run Amazon Linux 2023, where a required shared library for journalctl
+    # lives under /usr/lib64. The chart's default mnts only mount /lib64, /lib and
+    # /usr/lib, so journalctl fails to start unless /usr/lib64 is mounted as well.
+    mnts:
+      - name: host-lib64
+        path: /lib64
+      - name: host-lib
+        path: /lib
+      - name: host-usr-lib
+        path: /usr/lib
+      - name: host-usr-lib64
+        path: /usr/lib64
     units:
       - name: kubelet
         priority: info
