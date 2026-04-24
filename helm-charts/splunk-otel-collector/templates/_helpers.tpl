@@ -463,9 +463,9 @@ Otherwise, return directory only.
 
 {{/*
 Fail if a collector config override uses deprecated component names.
-Checks exporter/processor definitions and pipeline references.
+Checks exporter/processor/receiver definitions and pipeline references.
 
-To add a new deprecation, add an entry to $depExporters or $depProcessors.
+To add a new deprecation, add an entry to $depExporters, $depProcessors, or $depReceivers.
 
 Usage:
   include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config")
@@ -475,6 +475,7 @@ Usage:
 {{- $source := .source -}}
 {{- $depExporters := dict "otlp" "otlp_grpc" "otlphttp" "otlp_http" -}}
 {{- $depProcessors := dict "k8sattributes" "k8s_attributes" -}}
+{{- $depReceivers := dict "filelog" "file_log" -}}
 {{- range $key, $_ := (dig "exporters" (dict) .config) -}}
   {{- range $old, $new := $depExporters -}}
     {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
@@ -486,6 +487,13 @@ Usage:
   {{- range $old, $new := $depProcessors -}}
     {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
       {{- fail (printf "%s.processors.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $key, $_ := (dig "receivers" (dict) .config) -}}
+  {{- range $old, $new := $depReceivers -}}
+    {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
+      {{- fail (printf "%s.receivers.%s: \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $key $old $new) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
@@ -502,6 +510,13 @@ Usage:
     {{- range $old, $new := $depProcessors -}}
       {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
         {{- fail (printf "%s.service.pipelines.%s.processors references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+    {{- range $item := (dig "receivers" (list) $p) -}}
+    {{- range $old, $new := $depReceivers -}}
+      {{- if or (eq $item $old) (hasPrefix (printf "%s/" $old) $item) -}}
+        {{- fail (printf "%s.service.pipelines.%s.receivers references \"%s\": \"%s\" has been renamed to \"%s\". Please update your custom configuration." $source $pname $item $old $new) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

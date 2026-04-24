@@ -694,7 +694,7 @@ logsCollection:
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:
-  #   filelog/audit-log:
+  #   file_log/audit-log:
   #     include: [/var/log/kubernetes/apiserver/audit.log]
   #     start_at: beginning
   #     include_file_path: true

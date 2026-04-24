@@ -177,7 +177,7 @@ data:
         override: true
         timeout: 15s
     receivers:
-      filelog:
+      file_log:
         encoding: utf-8
         exclude:
         - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
@@ -481,7 +481,7 @@ data:
           - resource/logs
           - resource/add_environment
           receivers:
-          - filelog
+          - file_log
           - otlp
         logs/entities:
           exporters:

@@ -580,7 +580,7 @@ receivers:
 
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   {{- if .Values.logsCollection.containers.enabled }}
-  filelog:
+  file_log:
     {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
     {{- if .Values.isWindows }}
     include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
@@ -1168,7 +1168,7 @@ service:
     logs:
       receivers:
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.containers.enabled }}
-        - filelog
+        - file_log
         {{- end }}
         {{- if .Values.splunkObservability.secureAppEnabled }}
         - routing/logs
