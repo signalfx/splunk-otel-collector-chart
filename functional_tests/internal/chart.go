@@ -135,10 +135,12 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 //
 // Supported env vars:
 //
+//	OTELCOL_IMAGE       - collector image reference to parse into OTELCOL_IMAGE_REPO/TAG
 //	OTELCOL_IMAGE_REPO  - overrides image.otelcol.repository
 //	OTELCOL_IMAGE_TAG   - overrides image.otelcol.tag
-//	HELM_EXTRA_SET      - comma-separated key=value pairs, applied last (same syntax as helm --set)
 func applyEnvOverrides(t *testing.T, values map[string]any) {
+	setCollectorImageOverrideEnv(t)
+
 	if repo := os.Getenv("OTELCOL_IMAGE_REPO"); repo != "" {
 		t.Logf("OTELCOL_IMAGE_REPO override: image.otelcol.repository=%s", repo)
 		require.NoError(t, strvals.ParseInto("image.otelcol.repository="+repo, values))
@@ -147,16 +149,30 @@ func applyEnvOverrides(t *testing.T, values map[string]any) {
 		t.Logf("OTELCOL_IMAGE_TAG override: image.otelcol.tag=%s", tag)
 		require.NoError(t, strvals.ParseInto("image.otelcol.tag="+tag, values))
 	}
-	if extra := os.Getenv("HELM_EXTRA_SET"); extra != "" {
-		for pair := range strings.SplitSeq(extra, ",") {
-			pair = strings.TrimSpace(pair)
-			if pair == "" {
-				continue
-			}
-			t.Logf("HELM_EXTRA_SET override: %s", pair)
-			require.NoError(t, strvals.ParseInto(pair, values))
-		}
+}
+
+func setCollectorImageOverrideEnv(t *testing.T) {
+	image := os.Getenv("OTELCOL_IMAGE")
+	if image == "" {
+		return
 	}
+
+	repo, tag := parseCollectorImage(image)
+	t.Logf("OTELCOL_IMAGE override: repo=%s tag=%s", repo, tag)
+	t.Setenv("OTELCOL_IMAGE_REPO", repo)
+	t.Setenv("OTELCOL_IMAGE_TAG", tag)
+}
+
+func parseCollectorImage(image string) (string, string) {
+	repo := image
+	tag := "latest"
+
+	if idx := strings.LastIndex(image, ":"); idx >= 0 {
+		repo = image[:idx]
+		tag = image[idx+1:]
+	}
+
+	return repo, tag
 }
 
 func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {

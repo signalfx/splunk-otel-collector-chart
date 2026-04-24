@@ -48,7 +48,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 #v4
         with:
-          version: v4.1.1
+          version: v4.1.4
 
       - name: Check for Version Updates
         id: check_for_update
@@ -126,22 +126,21 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        uses: ./.github/actions/create-pr
         with:
+          branch: update-${{ matrix.name }}
           commit-message: ${{ steps.pr_messages.outputs.commit_message_open }}
           title: ${{ steps.pr_messages.outputs.title }}
           body: ${{ steps.pr_messages.outputs.body_open }}
-          branch: "update-${{ matrix.name }}"
-          base: main
-          delete-branch: true
-          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+          author-name: ${{ github.event_name == 'schedule' && 'github-actions[bot]' || github.actor }}
+          author-email: ${{ github.event_name == 'schedule' && '41898282+github-actions[bot]@users.noreply.github.com' || format('{1}+{0}@users.noreply.github.com', github.actor, github.actor_id) }}
 
 
       - name: Apply Version Update and Generate Changelog
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
-          # We run `make update-chart-dep` again here because the open_pr peter-evans/create-pull-request step before clears out the update changes locally
+          # Re-run the update before rendering/changelog generation to keep derived files in sync.
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
           make render
           make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
@@ -171,12 +170,11 @@ jobs:
 
       - name: Finalize PR with updates
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 || steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        uses: ./.github/actions/create-pr
         with:
+          branch: update-${{ matrix.name }}
           commit-message: ${{ steps.pr_messages.outputs.commit_message_finalize }}
           title: ${{ steps.pr_messages.outputs.title }}
           body: ${{ steps.pr_messages.outputs.body_finalize }}
-          branch: "update-${{ matrix.name }}"
-          base: main
-          delete-branch: true
-          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+          author-name: ${{ github.event_name == 'schedule' && 'github-actions[bot]' || github.actor }}
+          author-email: ${{ github.event_name == 'schedule' && '41898282+github-actions[bot]@users.noreply.github.com' || format('{1}+{0}@users.noreply.github.com', github.actor, github.actor_id) }}

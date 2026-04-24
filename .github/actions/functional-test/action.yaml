@@ -34,12 +34,8 @@ inputs:
     description: 'Suffix for the k8s debug info artifact name'
     required: false
     default: ''
-  otelcol-image-repo:
-    description: 'Override for the collector image repository'
-    required: false
-    default: ''
-  otelcol-image-tag:
-    description: 'Override for the collector image tag'
+  otelcol-image:
+    description: 'Override for the collector image reference (repository[:tag])'
     required: false
     default: ''
 
@@ -85,13 +81,11 @@ runs:
       env:
         KUBE_TEST_ENV: kind
         K8S_VERSION: ${{ inputs.k8s-version }}
-        OTELCOL_IMAGE_REPO: ${{ inputs.otelcol-image-repo }}
-        OTELCOL_IMAGE_TAG: ${{ inputs.otelcol-image-tag }}
+        OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
+        UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
+        SUITE: ${{ inputs.suite }}
       run: |
-        TEARDOWN_BEFORE_SETUP=true \
-          UPDATE_EXPECTED_RESULTS=${{ inputs.update-expected-results }} \
-          SUITE=${{ inputs.suite }} \
-          make functionaltest
+        TEARDOWN_BEFORE_SETUP=true make functionaltest
 
     - name: Collect Kubernetes Cluster debug info
       if: always() && (steps.run-functional-tests.outcome == 'failure' || inputs.kubernetes-debug-info == 'true')
