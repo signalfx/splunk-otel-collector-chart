@@ -1,0 +1,33 @@
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+# The cluster name is auto-discovered for eks and eks/auto-mode.
+# Set to eks/auto-mode if using EKS Auto Mode.
+distribution: eks
+cloudProvider: aws
+
+# Helm replaces list values entirely on upgrade, so include all tolerations you
+# need, both the chart defaults below and the AWS Batch additions at the end.
+tolerations:
+  # Chart defaults - keep these to collect from control-plane and infra nodes.
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+    operator: Exists
+  - key: kubernetes.io/system-node
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+    operator: Exists
+  # AWS Batch node taint - allows the agent daemonset to schedule on
+  # Batch-managed nodes.
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoSchedule
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoExecute

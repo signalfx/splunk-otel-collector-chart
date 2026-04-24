@@ -348,6 +348,52 @@ aws eks create-pod-identity-association \
 --region $AWS_REGION
 ````
 
+## EKS: Running on AWS Batch nodes
+
+AWS Batch on EKS taints its managed nodes with `batch.amazonaws.com/batch-node`
+to prevent general workloads from scheduling there. The Collector agent daemonset
+must tolerate this taint to collect logs and metrics from those nodes.
+This configuration is for EKS clusters that run the agent daemonset; it does not
+apply to `eks/fargate`.
+
+The top-level [`tolerations`](../helm-charts/splunk-otel-collector/values.yaml)
+value controls the agent daemonset tolerations only (not the cluster receiver,
+gateway, or operator; each has its own `tolerations` sub-key). Because Helm
+replaces list values entirely on upgrade, your custom `tolerations` list must
+include **both** the chart's default tolerations and the new Batch entries:
+
+```yaml
+# Set distribution to match your cluster type (eks or eks/auto-mode).
+distribution: eks
+cloudProvider: aws
+
+tolerations:
+  # Chart defaults - keep these to continue collecting from control-plane and
+  # infra nodes.
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+    operator: Exists
+  - key: kubernetes.io/system-node
+    effect: NoSchedule
+    operator: Exists
+  - key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+    operator: Exists
+  # AWS Batch node taint - allows scheduling on Batch-managed nodes.
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoSchedule
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoExecute
+```
+
+See the [eks-batch-nodes example](../examples/eks-batch-nodes/README.md) for a
+ready-to-use values file.
+
 ## EKS Fargate support
 
 If you want to run the Splunk OpenTelemetry Collector in [Amazon Elastic Kubernetes Service
