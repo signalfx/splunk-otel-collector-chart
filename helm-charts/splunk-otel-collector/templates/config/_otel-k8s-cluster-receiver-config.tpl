@@ -32,12 +32,20 @@ receivers:
         enabled: true
       k8s.pod.qos_class:
         enabled: true
+      k8s.service.publish_not_ready_addresses:
+        enabled: true
+      k8s.service.traffic_distribution:
+        enabled: true
     metrics:
       k8s.container.status.reason:
         enabled: true
       k8s.node.condition:
         enabled: true
       k8s.pod.status_reason:
+        enabled: true
+      k8s.service.endpoint.count:
+        enabled: true
+      k8s.service.load_balancer.ingress.count:
         enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}

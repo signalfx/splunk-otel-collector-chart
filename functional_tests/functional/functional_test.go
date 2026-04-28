@@ -644,8 +644,17 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
 	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
-	metricNames := internal.GetMetricNames(&expectedMetrics)
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
+	expectedMetricsForComparison := pmetric.NewMetrics()
+	expectedMetrics.CopyTo(expectedMetricsForComparison)
+	selectedMetricsForComparison := pmetric.NewMetrics()
+	selectedMetrics.CopyTo(selectedMetricsForComparison)
+	deleteMetricDataPointAttributes(expectedMetricsForComparison, "k8s.service.endpoint.count", "k8s.service.traffic_distribution")
+	deleteMetricDataPointAttributes(selectedMetricsForComparison, "k8s.service.endpoint.count", "k8s.service.traffic_distribution")
+	retainKubernetesServiceEndpointDataPoint(expectedMetricsForComparison)
+	retainKubernetesServiceEndpointDataPoint(selectedMetricsForComparison)
+
+	metricNames := internal.GetMetricNames(&expectedMetricsForComparison)
+	err = pmetrictest.CompareMetrics(expectedMetricsForComparison, selectedMetricsForComparison,
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
@@ -662,6 +671,8 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.service.uid", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.service.endpoint.zone", metricNames...),
 		pmetrictest.IgnoreMetricValues(metricNames...),
 		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreResourceMetricsOrder(),
@@ -679,6 +690,73 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	}
 
 	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", selectedMetrics.MetricCount())
+}
+
+func deleteMetricDataPointAttributes(metrics pmetric.Metrics, metricName string, attributeNames ...string) {
+	attributeNamesSet := make(map[string]struct{}, len(attributeNames))
+	for _, attributeName := range attributeNames {
+		attributeNamesSet[attributeName] = struct{}{}
+	}
+
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		scopeMetrics := metrics.ResourceMetrics().At(i).ScopeMetrics()
+		for j := 0; j < scopeMetrics.Len(); j++ {
+			metricSlice := scopeMetrics.At(j).Metrics()
+			for k := 0; k < metricSlice.Len(); k++ {
+				metric := metricSlice.At(k)
+				if metric.Name() != metricName {
+					continue
+				}
+
+				switch metric.Type() {
+				case pmetric.MetricTypeGauge:
+					deleteNumberDataPointAttributes(metric.Gauge().DataPoints(), attributeNamesSet)
+				case pmetric.MetricTypeSum:
+					deleteNumberDataPointAttributes(metric.Sum().DataPoints(), attributeNamesSet)
+				}
+			}
+		}
+	}
+}
+
+func deleteNumberDataPointAttributes(dataPoints pmetric.NumberDataPointSlice, attributeNamesSet map[string]struct{}) {
+	for i := 0; i < dataPoints.Len(); i++ {
+		attributes := dataPoints.At(i).Attributes()
+		for attributeName := range attributeNamesSet {
+			attributes.Remove(attributeName)
+		}
+	}
+}
+
+func retainKubernetesServiceEndpointDataPoint(metrics pmetric.Metrics) {
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		scopeMetrics := metrics.ResourceMetrics().At(i).ScopeMetrics()
+		for j := 0; j < scopeMetrics.Len(); j++ {
+			metricSlice := scopeMetrics.At(j).Metrics()
+			for k := 0; k < metricSlice.Len(); k++ {
+				metric := metricSlice.At(k)
+				if metric.Name() != "k8s.service.endpoint.count" {
+					continue
+				}
+
+				switch metric.Type() {
+				case pmetric.MetricTypeGauge:
+					retainKubernetesReadyNumberDataPoints(metric.Gauge().DataPoints())
+				case pmetric.MetricTypeSum:
+					retainKubernetesReadyNumberDataPoints(metric.Sum().DataPoints())
+				}
+			}
+		}
+	}
+}
+
+func retainKubernetesReadyNumberDataPoints(dataPoints pmetric.NumberDataPointSlice) {
+	dataPoints.RemoveIf(func(dataPoint pmetric.NumberDataPoint) bool {
+		serviceName, hasServiceName := dataPoint.Attributes().Get("k8s.service.name")
+		endpointCondition, hasEndpointCondition := dataPoint.Attributes().Get("k8s.service.endpoint.condition")
+		return !hasServiceName || serviceName.AsString() != "kubernetes" ||
+			!hasEndpointCondition || endpointCondition.AsString() != "ready"
+	})
 }
 
 func testAgentLogs(t *testing.T) {
