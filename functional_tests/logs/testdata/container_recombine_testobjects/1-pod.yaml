@@ -24,7 +24,7 @@ spec:
         - |
           # CRI-O format: timestamp has no Z suffix on the timezone offset.
           # Matched by parser-crio (regex: '^(?P<time>[^ Z]+) ...').
-          CRIO_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_fake-uid/crio-container
+          CRIO_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_a1b2c3d4-e5f6-7890-abcd-ef1234567890/crio-container
           mkdir -p "$CRIO_DIR"
           printf '2026-01-01T00:00:00.000000000+00:00 stdout F CRIO_SINGLE_LINE_MARKER\n'   >> "$CRIO_DIR/0.log"
           printf '2026-01-01T00:00:01.000000000+00:00 stdout P CRIO_PARTIAL_START '         >> "$CRIO_DIR/0.log"
@@ -33,7 +33,7 @@ spec:
 
           # Containerd format: timestamp ends with Z.
           # Matched by parser-containerd (regex: '^(?P<time>[^ ]+) ...').
-          CTR_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_fake-uid/containerd-container
+          CTR_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_a1b2c3d4-e5f6-7890-abcd-ef1234567890/containerd-container
           mkdir -p "$CTR_DIR"
           printf '2026-01-01T00:00:02.000000000Z stdout F CONTAINERD_SINGLE_LINE_MARKER\n' >> "$CTR_DIR/0.log"
           printf '2026-01-01T00:00:03.000000000Z stdout P CONTAINERD_PARTIAL_START '       >> "$CTR_DIR/0.log"
@@ -43,7 +43,7 @@ spec:
           # Docker format: each entry is a JSON object with "log", "stream", and "time" fields.
           # Partial entries have a "log" value without a trailing newline; the final entry ends with \n.
           # Matched by parser-docker (body starts with '{').
-          DOCKER_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_fake-uid/docker-container
+          DOCKER_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_a1b2c3d4-e5f6-7890-abcd-ef1234567890/docker-container
           mkdir -p "$DOCKER_DIR"
           printf '{"log":"DOCKER_SINGLE_LINE_MARKER\\n","stream":"stdout","time":"2026-01-01T00:00:04.000000000Z"}\n' >> "$DOCKER_DIR/0.log"
           printf '{"log":"DOCKER_PARTIAL_START ","stream":"stdout","time":"2026-01-01T00:00:05.000000000Z"}\n'        >> "$DOCKER_DIR/0.log"
