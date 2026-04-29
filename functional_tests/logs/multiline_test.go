@@ -94,10 +94,11 @@ func checkMultilineRecombined(t *testing.T, logsConsumer *consumertest.LogsSink)
 		bodies := collectBodiesFromContainer(logsConsumer, multilineContainerName)
 
 		// Java NPE block: first line begins with a timestamp, continuation lines
-		// start with whitespace ("at com.example..."). All four lines must be in
+		// start with whitespace ("at com.example..."). All five lines must be in
 		// one record body.
 		javaRecord := findBodyContaining(bodies, "com.example.service.UserService.getUser")
 		if assert.NotNil(tt, javaRecord, "Java stack trace must arrive as a single record") {
+			assert.Contains(tt, *javaRecord, "Unhandled exception in request handler")
 			assert.Contains(tt, *javaRecord, "java.lang.NullPointerException")
 			assert.Contains(tt, *javaRecord, "at com.example.controller.UserController")
 			assert.Contains(tt, *javaRecord, "at com.example.app.DispatcherServlet")
@@ -107,6 +108,7 @@ func checkMultilineRecombined(t *testing.T, logsConsumer *consumertest.LogsSink)
 		// continuation; the OperationalError closes it.
 		pyRecord := findBodyContaining(bodies, "sqlite3.OperationalError")
 		if assert.NotNil(tt, pyRecord, "Python traceback must arrive as a single record") {
+			assert.Contains(tt, *pyRecord, "Python traceback captured")
 			assert.Contains(tt, *pyRecord, "Traceback (most recent call last):")
 			assert.Contains(tt, *pyRecord, `File "/app/worker.py"`)
 			assert.Contains(tt, *pyRecord, `File "/app/db.py"`)
@@ -115,6 +117,7 @@ func checkMultilineRecombined(t *testing.T, logsConsumer *consumertest.LogsSink)
 		// Go panic block: "goroutine 1 [running]:" is the continuation header.
 		goRecord := findBodyContaining(bodies, "goroutine 1 [running]:")
 		if assert.NotNil(tt, goRecord, "Go panic must arrive as a single record") {
+			assert.Contains(tt, *goRecord, "Go panic recovered")
 			assert.Contains(tt, *goRecord, "runtime/debug.Stack()")
 			assert.Contains(tt, *goRecord, "main.recoverPanic")
 		}
