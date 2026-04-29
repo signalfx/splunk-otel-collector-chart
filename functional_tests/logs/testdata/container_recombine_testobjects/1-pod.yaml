@@ -27,8 +27,8 @@ spec:
           CRIO_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_a1b2c3d4-e5f6-7890-abcd-ef1234567890/crio-container
           mkdir -p "$CRIO_DIR"
           printf '2026-01-01T00:00:00.000000000+00:00 stdout F CRIO_SINGLE_LINE_MARKER\n'   >> "$CRIO_DIR/0.log"
-          printf '2026-01-01T00:00:01.000000000+00:00 stdout P CRIO_PARTIAL_START '         >> "$CRIO_DIR/0.log"
-          printf '2026-01-01T00:00:01.000000001+00:00 stdout P middle_chunk '               >> "$CRIO_DIR/0.log"
+          printf '2026-01-01T00:00:01.000000000+00:00 stdout P CRIO_PARTIAL_START \n'       >> "$CRIO_DIR/0.log"
+          printf '2026-01-01T00:00:01.000000001+00:00 stdout P middle_chunk \n'             >> "$CRIO_DIR/0.log"
           printf '2026-01-01T00:00:01.000000002+00:00 stdout F CRIO_PARTIAL_END\n'          >> "$CRIO_DIR/0.log"
 
           # Containerd format: timestamp ends with Z.
@@ -36,8 +36,8 @@ spec:
           CTR_DIR=/var/log/pods/container-recombine-test_container-recombine-writer_a1b2c3d4-e5f6-7890-abcd-ef1234567890/containerd-container
           mkdir -p "$CTR_DIR"
           printf '2026-01-01T00:00:02.000000000Z stdout F CONTAINERD_SINGLE_LINE_MARKER\n' >> "$CTR_DIR/0.log"
-          printf '2026-01-01T00:00:03.000000000Z stdout P CONTAINERD_PARTIAL_START '       >> "$CTR_DIR/0.log"
-          printf '2026-01-01T00:00:03.000000001Z stdout P middle_chunk '                   >> "$CTR_DIR/0.log"
+          printf '2026-01-01T00:00:03.000000000Z stdout P CONTAINERD_PARTIAL_START \n'     >> "$CTR_DIR/0.log"
+          printf '2026-01-01T00:00:03.000000001Z stdout P middle_chunk \n'                 >> "$CTR_DIR/0.log"
           printf '2026-01-01T00:00:03.000000002Z stdout F CONTAINERD_PARTIAL_END\n'        >> "$CTR_DIR/0.log"
 
           # Docker format: each entry is a JSON object with "log", "stream", and "time" fields.
