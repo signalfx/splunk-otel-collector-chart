@@ -1,0 +1,25 @@
+name: Configure Kubernetes Context from Secret
+description: Configure kubeconfig from secret content for cloud functional tests.
+
+inputs:
+  kubeconfig-path:
+    description: Kubeconfig path to export as KUBECONFIG.
+    required: true
+  kubeconfig-content:
+    description: Raw kubeconfig content.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Export kubeconfig path
+      shell: bash
+      run: echo "KUBECONFIG=${{ inputs.kubeconfig-path }}" >> "$GITHUB_ENV"
+
+    - name: Install kubeconfig from secret
+      shell: bash
+      env:
+        KUBECONFIG_CONTENT: ${{ inputs.kubeconfig-content }}
+      run: |
+        echo "$KUBECONFIG_CONTENT" > "${{ inputs.kubeconfig-path }}"
+        chmod 600 "${{ inputs.kubeconfig-path }}"
