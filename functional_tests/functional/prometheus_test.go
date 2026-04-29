@@ -320,7 +320,7 @@ func testTargetAllocator(t *testing.T) {
 			}
 			containsReadyAgentPod = true
 			var podLogs string
-			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 500)
+			podLogs, err = internal.GetPodLogs(t, client, internal.DefaultNamespace, pod.Name, internal.CollectorContainerName, 5000)
 			assert.NoError(c, err)
 			assert.Contains(c, podLogs, "Starting target allocator discovery", "Collector failed to start target allocator discovery. Received logs: %v", podLogs)
 
@@ -352,12 +352,13 @@ func testPrometheusAnnotationMetrics(t *testing.T) {
 	checkMetrics(t, agentMetricsConsumer, metricNames, "annotation", func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return !metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
 	})
+
 	t.Logf("Checking via pod monitor")
 	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
-		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
+		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "default/pod-monitor")
 	})
 	t.Logf("Checking via service monitor")
 	checkMetrics(t, agentMetricsConsumer, metricNames, "serviceMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
-		return metricDataPointsHaveKey(metric, "pod") && metricDataPointsHaveKey(metric, "service")
+		return metricDataPointsHaveKey(metric, "pod") && metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "prometheus-annotation-service")
 	})
 }

@@ -60,7 +60,7 @@ EOF" > "${tmp_file}"
     "instrumentation"
     "certmanager"
     "cert-manager"
-    "targetAllocator"
+    "targetallocator"
   )
   for prop in "${disabled_properties[@]}"; do
       yq e "del(.properties.\"${prop}\")" -i "${EKS_CHART_DIR}/aws_mp_configuration_schema.json"

@@ -1337,42 +1337,23 @@ obi:
 # maturity level and be experimental. There may be breaking changes or Operator
 # features may be replaced entirely with a better alternative in the future.
 #
-# The Target Allocator is running as a deployment with a replica count of 1.
+# The Target Allocator is run as a deployment with a replica count of 1.
 # It discovers scraping configurations from ServiceMonitor and PodMonitor CRDs and
 # assigns them to collectors.
-# Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+# Related documentation: https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator
 # Not available in EKS Add-on.
 ################################################################################
 
-targetAllocator:
+targetallocator:
   enabled: false
-  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
-  resources: {}
-  serviceAccount:
-    # Specifies whether a ServiceAccount should be created
-    create: true
-    # The name of the ServiceAccount to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-
-    # Service account annotations
-    annotations: {}
-  config:
-    allocation_strategy: per-node
-    # Optional: Namespace where the collector pods are running. Defaults to the release namespace,
-    collector_namespace: ""
-    collector_selector:
-      matchlabels:
-        component: otel-collector-agent
-    prometheus_cr:
-      enabled: true
-      scrapeInterval: 30s
-      # An empty value means any service monitor will be accepted.
-      service_monitor_selector: {}
-      # An empty value means any pod monitor will be accepted.
-      pod_monitor_selector: {}
-
-    filter_strategy: relabel-config
+  targetAllocator:
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
+      tag: "v0.132.0"
+    config:
+      collector_selector:
+        matchlabels:
+          component: otel-collector-agent
 
 ################################################################################
 # Helm Chart Feature Gates.

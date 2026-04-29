@@ -591,13 +591,13 @@ receivers:
     {{- end }}
   {{- end }}
 
-  {{- if .Values.targetAllocator.enabled  }}
+  {{- if .Values.targetallocator.enabled  }}
   prometheus/ta:
     config:
       global:
         scrape_interval: 30s
     target_allocator:
-      endpoint: http://{{ template "splunk-otel-collector.fullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      endpoint: http://{{ include "splunk-otel-collector.targetAllocatorFullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
       interval: 30s
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
@@ -1314,7 +1314,7 @@ service:
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
-        {{- if .Values.targetAllocator.enabled  }}
+        {{- if .Values.targetallocator.enabled  }}
         - prometheus/ta
         {{- end }}
       processors:
