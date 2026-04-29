@@ -245,9 +245,9 @@ receivers:
           skipVerify: false
           {{- end }}
           {{- if eq .Values.distribution "openshift" }}
-          port: 9979
+          port: {{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}
           {{- else }}
-          port: 4001
+          port: {{ .Values.agent.controlPlaneMetrics.etcd.port | default 4001 }}
           {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
@@ -389,8 +389,32 @@ receivers:
             scrape_configs:
             - job_name: "etcd"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              {{- if and (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) (eq .Values.distribution "openshift") }}
               static_configs:
-                - targets: ["`endpoint`:2381"]
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}"]
+              scheme: https
+              tls_config:
+                insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                cert_file: /otel/etc/etcd/tls.crt
+                key_file: /otel/etc/etcd/tls.key
+                {{- if not .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                ca_file: /otel/etc/etcd/cacert.pem
+                {{- end }}
+              {{- else if or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name }}
+              static_configs:
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }}"]
+              scheme: https
+              tls_config:
+                insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                cert_file: /otel/etc/etcd/tls.crt
+                key_file: /otel/etc/etcd/tls.key
+                {{- if not .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                ca_file: /otel/etc/etcd/cacert.pem
+                {{- end }}
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }}"]
+              {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   action: keep
