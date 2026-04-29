@@ -1,5 +1,54 @@
 # Upgrade guidelines
 
+## 0.150.0 to 0.151.0
+
+### Container log parsing now uses the `container` operator
+
+The filelog operator chain for container log parsing has been replaced with the single `container` operator.
+This affects users who use `logsCollection.containers.extraOperators` or `logsCollection.containers.multilineConfigs`.
+
+#### `containerRuntime: cri-o` must be changed to `crio`
+
+The accepted value for CRI-O has changed:
+
+```yaml
+# Before
+logsCollection:
+  containers:
+    containerRuntime: cri-o
+
+# After
+logsCollection:
+  containers:
+    containerRuntime: crio
+```
+
+#### `extraOperators` referencing `attributes.log` must use `body`
+
+Previously the parsed log line was available as `attributes.log`. It is now set directly as `body`:
+
+```yaml
+# Before
+logsCollection:
+  containers:
+    extraOperators:
+      - type: filter
+        expr: 'attributes.log matches "health_check"'
+
+# After
+logsCollection:
+  containers:
+    extraOperators:
+      - type: filter
+        expr: 'body matches "health_check"'
+```
+
+#### `extraOperators` using old operator IDs as `output` targets
+
+The following operator IDs no longer exist: `get-format`, `parser-docker`, `parser-crio`, `parser-containerd`,
+`crio-recombine`, `containerd-recombine`, `docker-recombine`, `handle_empty_log`, `clean-up-log-record`.
+Remove any `output:` references to these IDs from your `extraOperators`.
+
 ## 0.137.0 to 0.138.0
 
 ### Fluentd sidecar has been removed

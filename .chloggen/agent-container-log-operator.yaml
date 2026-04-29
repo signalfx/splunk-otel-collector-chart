@@ -8,3 +8,8 @@ subtext: |
 
   The accepted value of `logsCollection.containers.containerRuntime` for CRI-O has changed from `cri-o` to `crio` to match the `container` operator's expected format.
   Users who have set `logsCollection.containers.containerRuntime: cri-o` must update their values to `crio`.
+
+  Users of `logsCollection.containers.extraOperators` are affected: `attributes.log` is no longer available
+  and must be replaced with `body`.
+
+  For full migration details see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01500-to-01510).
