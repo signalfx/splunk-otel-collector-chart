@@ -231,7 +231,7 @@ tests:
           path: data["relay"]
           pattern: "metrics/agent:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "agent — logs/host pipeline uses only resourcedetection/k8s_cluster_name (not full resourcedetection)"
+  - it: "agent — logs/host pipeline includes resourcedetection and k8s_cluster_name when clusterName is unset"
     set:
       distribution: openshift
       cloudProvider: aws
@@ -243,10 +243,27 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
+          pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
           pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
-      - notMatchRegex:
+
+  - it: "agent — logs/host pipeline includes resourcedetection but not k8s_cluster_name when clusterName is set"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
+      logsCollection:
+        journald:
+          enabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
           path: data["relay"]
           pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/host:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "agent — metrics/histograms pipeline includes resourcedetection"
     set:
@@ -258,15 +275,33 @@ tests:
           path: data["relay"]
           pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "cluster receiver — metrics pipeline has no resourcedetection"
+  - it: "cluster receiver — metrics pipeline has no full resourcedetection and no k8s_cluster_name when clusterName is set"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: my-cluster
     template: configmap-cluster-receiver.yaml
     asserts:
       - notMatchRegex:
           path: data["relay"]
           pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — metrics pipeline has k8s_cluster_name but no full resourcedetection when clusterName is unset"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "cluster receiver — metrics/collector pipeline includes resourcedetection"
     set:
@@ -278,10 +313,11 @@ tests:
           path: data["relay"]
           pattern: "metrics/collector:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "cluster receiver — logs/objects pipeline includes resourcedetection"
+  - it: "cluster receiver — logs/objects pipeline has only k8s_cluster_name, not full resourcedetection (cluster-scoped data)"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: ""
       clusterReceiver:
         k8sObjects:
           - name: pods
@@ -289,33 +325,95 @@ tests:
             interval: 60s
     template: configmap-cluster-receiver.yaml
     asserts:
-      - matchRegex:
+      - notMatchRegex:
           path: data["relay"]
           pattern: "logs/objects:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "cluster receiver — logs (k8s_events) pipeline includes resourcedetection"
+  - it: "cluster receiver — logs (k8s_events) pipeline has only k8s_cluster_name, not full resourcedetection (cluster-scoped data)"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: ""
       clusterReceiver:
         eventsEnabled: true
     template: configmap-cluster-receiver.yaml
     asserts:
-      - matchRegex:
+      - notMatchRegex:
           path: data["relay"]
           pattern: "logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "cluster receiver — logs/events (smartagent) pipeline includes resourcedetection"
+  - it: "cluster receiver — logs (k8s_events) with explicit clusterName has neither resourcedetection nor k8s_cluster_name"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: my-cluster
+      clusterReceiver:
+        eventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — logs/events (smartagent) pipeline has only k8s_cluster_name, not full resourcedetection (cluster-scoped data)"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
       splunkObservability:
         infrastructureMonitoringEventsEnabled: true
     template: configmap-cluster-receiver.yaml
     asserts:
-      - matchRegex:
+      - notMatchRegex:
           path: data["relay"]
           pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — logs/events (smartagent) with explicit clusterName has neither resourcedetection nor k8s_cluster_name"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
+      splunkObservability:
+        infrastructureMonitoringEventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — logs/objects with explicit clusterName has neither resourcedetection nor resourcedetection/k8s_cluster_name"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
+      clusterReceiver:
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 60s
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/objects:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "gateway — metrics/collector pipeline includes resourcedetection"
     set:
@@ -328,27 +426,65 @@ tests:
           path: data["relay"]
           pattern: "metrics/collector:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "gateway — forwarding traces pipeline has no resourcedetection"
+  - it: "gateway — forwarding traces pipeline has no full resourcedetection and no k8s_cluster_name when clusterName is set"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: my-cluster
       gateway.enabled: true
     template: configmap-gateway.yaml
     asserts:
       - notMatchRegex:
           path: data["relay"]
           pattern: "traces:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "traces:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "gateway — forwarding metrics pipeline has no resourcedetection"
+  - it: "gateway — forwarding traces pipeline has k8s_cluster_name but no full resourcedetection when clusterName is unset"
     set:
       distribution: openshift
       cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "traces:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "traces:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "gateway — forwarding metrics pipeline has no full resourcedetection and no k8s_cluster_name when clusterName is set"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
       gateway.enabled: true
     template: configmap-gateway.yaml
     asserts:
       - notMatchRegex:
           path: data["relay"]
           pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "gateway — forwarding metrics pipeline has k8s_cluster_name but no full resourcedetection when clusterName is unset"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "gateway — forwarding logs pipeline has no resourcedetection"
     set:
@@ -371,3 +507,260 @@ tests:
       - notMatchRegex:
           path: data["relay"]
           pattern: "logs/entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — metrics/histograms (EKS apiserver) has only k8s_cluster_name, not full resourcedetection"
+    set:
+      distribution: eks
+      cloudProvider: aws
+      clusterName: ""
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — metrics/histograms (EKS apiserver) with explicit clusterName has no k8s_cluster_name"
+    set:
+      distribution: eks
+      cloudProvider: aws
+      clusterName: my-cluster
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — logs/k8s_entities pipeline has only k8s_cluster_name, not full resourcedetection"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      featureGates:
+        enableK8sEntities: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "cluster receiver — logs/k8s_entities with explicit clusterName has no k8s_cluster_name"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: my-cluster
+      featureGates:
+        enableK8sEntities: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "agent — logs/secureapp pipeline has no resourcedetection"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      splunkObservability:
+        secureAppEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: "gateway — logs/secureapp pipeline has no resourcedetection"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      gateway.enabled: true
+      splunkObservability:
+        secureAppEnabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  # ============================================================================
+  # Pipeline inventory guards
+  #
+  # These tests use yq to extract the exact set of pipeline names from the
+  # rendered configmap and assert an exact match. Any new, removed, or renamed
+  # pipeline will cause a failure. If you add a new pipeline:
+  #   1. Add an explicit resourcedetection test for the new pipeline above.
+  #   2. Add the new pipeline name to the appropriate guard test below.
+  # ============================================================================
+
+  - it: "GUARD — agent pipeline names"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: false
+      logsCollection:
+        journald:
+          enabled: true
+    template: configmap-agent.yaml
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/entities,logs/host,metrics,metrics/agent,metrics/histograms,traces"
+
+  - it: "GUARD — agent pipeline names with secureAppEnabled"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: false
+      splunkObservability:
+        secureAppEnabled: true
+      logsCollection:
+        journald:
+          enabled: true
+    template: configmap-agent.yaml
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/entities,logs/host,logs/secureapp,logs/split,metrics,metrics/agent,metrics/histograms,traces"
+
+  - it: "GUARD — cluster receiver pipeline names"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      clusterReceiver:
+        eventsEnabled: true
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 60s
+      splunkObservability:
+        infrastructureMonitoringEventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    documentIndex: 0
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/events,logs/objects,metrics,metrics/collector"
+
+  - it: "GUARD — cluster receiver EKS pipeline names"
+    set:
+      distribution: eks
+      cloudProvider: aws
+      clusterName: ""
+      clusterReceiver:
+        eventsEnabled: true
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 60s
+      splunkObservability:
+        infrastructureMonitoringEventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    documentIndex: 0
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/events,logs/objects,metrics,metrics/collector,metrics/histograms"
+
+  - it: "GUARD — cluster receiver pipeline names with enableK8sEntities"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      featureGates:
+        enableK8sEntities: true
+      clusterReceiver:
+        eventsEnabled: true
+        k8sObjects:
+          - name: pods
+            mode: pull
+            interval: 60s
+      splunkObservability:
+        infrastructureMonitoringEventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    documentIndex: 0
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/events,logs/k8s_entities,logs/objects,metrics,metrics/collector"
+
+  - it: "GUARD — gateway pipeline names"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/entities,logs/split,metrics,metrics/collector,traces"
+
+  - it: "GUARD — gateway pipeline names with secureAppEnabled"
+    set:
+      distribution: openshift
+      cloudProvider: aws
+      clusterName: ""
+      gateway.enabled: true
+      splunkObservability:
+        secureAppEnabled: true
+    template: configmap-gateway.yaml
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "logs,logs/entities,logs/secureapp,logs/split,metrics,metrics/collector,traces"

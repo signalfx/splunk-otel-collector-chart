@@ -567,6 +567,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
+	require.Positive(t, metrics.ResourceMetrics().Len(), "metrics file %s contains no ResourceMetrics", filePath)
 	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
 }
@@ -946,9 +947,8 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("processor", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("service.version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
@@ -970,7 +970,6 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
 		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
 		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
 		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),

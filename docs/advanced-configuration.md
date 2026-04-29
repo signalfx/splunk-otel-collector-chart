@@ -582,7 +582,7 @@ Example of adding audit logs from Kubernetes host machines
 ```yaml
 logsCollection:
   extraFileLogs:
-    filelog/audit-log:
+    file_log/audit-log:
       include: [/var/log/kubernetes/apiserver/audit.log]
       start_at: beginning
       include_file_path: true
