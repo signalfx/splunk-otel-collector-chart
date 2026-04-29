@@ -3,4 +3,19 @@ splunkObservability:
   realm: CHANGEME
   accessToken: CHANGEME
 
-
+agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
+      # port: 4001  # set port for non-standard etcd ports
+      secret:
+        create: true
+        name: etcd-secret
+        clientCert: |
+          -----BEGIN CERTIFICATE-----
+          ...
+          -----END CERTIFICATE-----
+        clientKey: |
+          -----BEGIN RSA PRIVATE KEY-----
+          ...
+          -----END RSA PRIVATE KEY-----
