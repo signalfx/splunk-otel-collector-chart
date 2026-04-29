@@ -15,35 +15,10 @@ jobs:
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      - uses: ./.github/actions/functional-test
         with:
+          k8s-version: v1.34.3
+          suite: instrumentation_cr
           go-version-file: functional_tests/go.mod
-          cache-dependency-path: functional_tests/go.sum
-      - name: Create kind cluster
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
-        with:
-          node_image: kindest/node:v1.34.3
-          kubectl_version: v1.34.3
-          cluster_name: kind
-          config: ./.github/workflows/configs/kind-config.yaml
-      - name: Fix kubelet TLS server certificates
-        run: |
-          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-      - name: Update Helm dependencies
-        run: make dep-update
-      - name: Run instrumentation CR e2e tests
-        id: run-e2e
-        run: make functionaltest SUITE=instrumentation_cr
-      - name: Collect Kubernetes Cluster debug info on failure
-        if: always() && steps.run-e2e.outcome == 'failure'
-        run: |
-          echo "Instrumentation CR tests failed. Collecting debug info..."
-          cd tools
-          ./splunk_kubernetes_debug_info.sh
-      - name: Upload Kubernetes Cluster debug info
-        if: always() && steps.run-e2e.outcome == 'failure'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: k8s-debug-info-instrumentation-cr
-          path: tools/splunk_kubernetes_debug_info_*
-          retention-days: 5
+          build-test-images: 'false'
+          artifact-suffix: instrumentation-cr

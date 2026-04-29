@@ -392,6 +392,12 @@
                 "enabled": {
                   "type": "boolean"
                 },
+                "port": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                },
                 "secret": {
                   "type": "object",
                   "additionalProperties": false,
@@ -423,49 +429,26 @@
               "allOf": [
                 {
                   "if": {
-                    "$comment": "if etcd metrics are enabled",
+                    "$comment": "if secret.create is true, require clientCert and clientKey",
                     "properties": {
-                      "enabled": {
-                        "const": true
+                      "secret": {
+                        "properties": {
+                          "create": {
+                            "const": true
+                          }
+                        }
                       }
                     }
                   },
                   "then": {
-                    "if": {
-                      "$comment": "if the helm chart will create the etcd k8s secret",
-                      "properties": {
-                        "secret": {
-                          "properties": {
-                            "create": {
-                              "const": true
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "then": {
-                      "$comment": "then require a clientCert and clientKey that are not empty strings",
-                      "properties": {
-                        "secret": {
-                          "properties": {
-                            "clientCert": {
-                              "minLength": 1
-                            },
-                            "clientKey": {
-                              "minLength": 1
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "else": {
-                      "$comment": "then require a k8s secret name for a secret the user created that is not an empty string",
-                      "properties": {
-                        "secret": {
-                          "properties": {
-                            "name": {
-                              "minLength": 1
-                            }
+                    "properties": {
+                      "secret": {
+                        "properties": {
+                          "clientCert": {
+                            "minLength": 1
+                          },
+                          "clientKey": {
+                            "minLength": 1
                           }
                         }
                       }

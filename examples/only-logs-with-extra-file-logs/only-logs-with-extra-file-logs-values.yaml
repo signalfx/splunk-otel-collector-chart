@@ -20,7 +20,7 @@ agent:
       mountPath: /var/log/catalina
 logsCollection:
   extraFileLogs:
-    filelog/example-with-storage:
+    file_log/example-with-storage:
       include:
       - /tmp/directory_one/*.log
       start_at: beginning
@@ -36,7 +36,7 @@ logsCollection:
       - from: attributes.volume_name
         to: resource["k8s.volume.name"]
         type: move
-    filelog/example-without-storage:
+    file_log/example-without-storage:
       include:
         - /var/log/catalina/catalina*.log
       start_at: beginning

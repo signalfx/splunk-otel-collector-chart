@@ -228,6 +228,27 @@ data:
                   - targets:
                     - '`endpoint`:9153'
             rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+          prometheus/etcd:
+            config:
+              config:
+                scrape_configs:
+                - job_name: etcd
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (etcd_server_is_leader|etcd_server_leader_changes_seen_total|etcd_server_proposals_applied_total|etcd_server_proposals_committed_total|etcd_server_proposals_failed_total|etcd_server_proposals_pending|etcd_disk_wal_fsync_duration_seconds)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  scheme: https
+                  scrape_interval: 10s
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:2379'
+                  tls_config:
+                    cert_file: /otel/etc/etcd/tls.crt
+                    insecure_skip_verify: true
+                    key_file: /otel/etc/etcd/tls.key
+            rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"]
+              == "etcd-manager-main" || labels["component"] == "etcd")
           prometheus/kube-controller-manager:
             config:
               config:

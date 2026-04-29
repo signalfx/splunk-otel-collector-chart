@@ -317,7 +317,15 @@ agent:
     etcd:
       # Specifies whether to collect etcd metrics.
       # For set up etcd metrics details see: docs/advanced-configuration.md#setting-up-etcd-metrics
+      #
+      # The chart auto-detects the scraping mode for the prometheus/etcd receiver
+      # (used when featureGates.useControlPlaneMetricsHistogramData is enabled, the default):
+      #   - If a TLS secret is configured on OpenShift: mTLS to <pod-ip>:9979
+      #   - Else if a TLS secret is configured: mTLS to <pod-ip>:2379
+      #   - Otherwise (default): plain HTTP to <pod-ip>:2381 (requires agent.hostNetwork: true)
+      # Set port to override the auto-detected default (e.g. 4001 for kops).
       enabled: false
+      port: ""
       secret:
         # The name of the secret the helm chart will create (if name is empty the default name is used) or the name
         # of a secret that the user created (empty names are not valid for user created secrets).
@@ -325,7 +333,8 @@ agent:
         # Option for creating a new secret or using an existing one.
         # When secret.create=true, a new kubernetes secret will be created by the helm chart that will contain the
         # values from clientCert, clientKey, and caFile.
-        # When secret.create=false, the user must set secret.name to a name of a k8s secret the user created.
+        # When secret.create=false and secret.name is set, the chart uses an existing k8s secret.
+        # When both secret.create=false and secret.name is empty, no TLS secret is mounted (HTTP mode).
         create: false
         # Used when secret.create=true. The PEM-format CA certificate for the etcd client.
         # NOTE: The content of the certificate itself should be used here, not the
@@ -694,7 +703,7 @@ logsCollection:
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:
-  #   filelog/audit-log:
+  #   file_log/audit-log:
   #     include: [/var/log/kubernetes/apiserver/audit.log]
   #     start_at: beginning
   #     include_file_path: true
@@ -796,6 +805,13 @@ tolerations:
   - key: node-role.kubernetes.io/infra
     effect: NoSchedule
     operator: Exists
+  # AWS Batch node taint - allows scheduling on Batch-managed nodes.
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoSchedule
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoExecute
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.
 nodeSelector: {}
@@ -1063,7 +1079,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.14.0
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
@@ -1077,7 +1093,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.26.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
