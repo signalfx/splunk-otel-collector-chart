@@ -23,7 +23,7 @@ on:
           - false
           - true
       COLLECTOR_IMAGE:
-        description: 'COLLECTOR_IMAGE: Dev collector image to test (e.g. quay.io/signalfx/splunk-otel-collector-dev:latest). Cloud jobs only run when this contains ''-dev''.'
+        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must be a quay.io/signalfx/* image.'
         required: false
         default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
         type: string
@@ -63,12 +63,19 @@ jobs:
       COLLECTOR_IMAGE: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
     outputs:
       cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
+      gke-autopilot-allowed: ${{ steps.config.outputs.gke-autopilot-allowed }}
       otelcol-image: ${{ steps.config.outputs.otelcol-image }}
     steps:
       - name: Resolve collector image and cloud-test gating
         id: config
         run: |
           cloud_tests_enabled=false
+          # GKE Autopilot's admission webhook will reject the agent
+          # DaemonSet (hostNetwork / hostPath) unless the container
+          # image matches Splunk's registered Autopilot WorkloadAllowlist,
+          # which is keyed on the quay.io/signalfx/splunk-otel-collector
+          # repository.
+          gke_autopilot_allowed=true
 
           case "$EVENT_NAME" in
             workflow_dispatch)
@@ -90,8 +97,18 @@ jobs:
               ;;
           esac
 
+          # When COLLECTOR_IMAGE is empty the chart default is used, so leave gke_autopilot_allowed=true.
+          if [[ -n "$COLLECTOR_IMAGE" ]]; then
+            collector_repo="${COLLECTOR_IMAGE%:*}"
+            if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
+              gke_autopilot_allowed=false
+              echo "::notice::GKE Autopilot tests will be skipped because COLLECTOR_IMAGE='${COLLECTOR_IMAGE}' is not the stable quay.io/signalfx/splunk-otel-collector image."
+            fi
+          fi
+
           {
             echo "cloud-tests-enabled=${cloud_tests_enabled}"
+            echo "gke-autopilot-allowed=${gke_autopilot_allowed}"
             echo "otelcol-image=${COLLECTOR_IMAGE}"
           } >> "$GITHUB_OUTPUT"
 
@@ -201,7 +218,7 @@ jobs:
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
     env:
       KUBE_TEST_ENV: gke/autopilot
       OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -237,7 +254,7 @@ jobs:
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
