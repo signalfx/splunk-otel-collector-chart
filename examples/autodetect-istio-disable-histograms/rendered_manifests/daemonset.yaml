@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: a7af5b6b799029a652f27d4d3ad6bb873ead7c7f39459a1be934f8a703c3ab69
+        checksum/config: 661f2f6da63106e5cacfa0e49377ca9354173af62d71f906e79e58b502eef478
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
