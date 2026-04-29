@@ -29,8 +29,7 @@ const (
 	multilineTestdataDir        = "testdata"
 	multilineManifestsDir       = "testdata/multiline_testobjects"
 
-	// multilineExpectedTotalRecords is the number of distinct logical log records in the
-	// ConfigMap: 5 single-line entries + 3 multiline blocks (Java NPE, Python traceback, Go panic).
+	// 5 single-line entries + 3 multiline blocks (Java NPE, Python traceback, Go panic).
 	multilineExpectedTotalRecords = 8
 )
 

@@ -6,10 +6,8 @@ metadata:
   labels:
     app: container-recombine-writer
 spec:
-  # The init container runs as privileged so it can write into /var/log/pods on
-  # the host. It creates raw log files in cri-o, containerd, and docker formats,
-  # each containing partial (P/no-newline) and final (F/newline) entries that the
-  # filelog receiver's recombine operators must stitch back into single log records.
+  # Privileged init container writes raw cri-o, containerd, and docker format log files
+  # directly to /var/log/pods/ to exercise the filelog receiver's recombine operators.
   initContainers:
     - name: log-writer
       image: busybox:latest
