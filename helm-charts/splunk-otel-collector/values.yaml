@@ -694,7 +694,7 @@ logsCollection:
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:
-  #   filelog/audit-log:
+  #   file_log/audit-log:
   #     include: [/var/log/kubernetes/apiserver/audit.log]
   #     start_at: beginning
   #     include_file_path: true
@@ -1063,7 +1063,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.14.0
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
@@ -1077,7 +1077,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.26.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args

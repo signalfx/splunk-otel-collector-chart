@@ -1,0 +1,50 @@
+name: Create PR
+description: Commit local changes, push a branch, and create or update a pull request with gh
+
+inputs:
+  branch:
+    description: Branch to push
+    required: true
+  commit-message:
+    description: Commit message
+    required: true
+  title:
+    description: Pull request title
+    required: true
+  body:
+    description: Pull request body
+    required: true
+  author-name:
+    description: Git author name
+    required: true
+  author-email:
+    description: Git author email
+    required: true
+
+outputs:
+  pull-request-number:
+    description: Created pull request number
+    value: ${{ steps.create.outputs.pull-request-number }}
+
+runs:
+  using: composite
+  steps:
+    - id: create
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        git config user.name "${{ inputs.author-name }}"
+        git config user.email "${{ inputs.author-email }}"
+        git checkout -B "${{ inputs.branch }}"
+        git add -A
+        git commit -m "${{ inputs.commit-message }}"
+        git push --force-with-lease --set-upstream origin "${{ inputs.branch }}"
+        pr_number="$(gh pr list --head "${{ inputs.branch }}" --base main --state open --json number --jq '.[0].number // empty')"
+        if [ -n "$pr_number" ]; then
+          gh pr edit "$pr_number" --title "${{ inputs.title }}" --body "${{ inputs.body }}"
+        else
+          gh pr create --base main --head "${{ inputs.branch }}" --title "${{ inputs.title }}" --body "${{ inputs.body }}"
+          pr_number="$(gh pr view "${{ inputs.branch }}" --json number --jq .number)"
+        fi
+        echo "pull-request-number=$pr_number" >> "$GITHUB_OUTPUT"

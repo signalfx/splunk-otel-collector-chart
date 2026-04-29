@@ -131,6 +131,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-1
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
@@ -170,6 +171,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-1
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks --region us-west-1
@@ -179,7 +181,7 @@ jobs:
       - name: run functional tests
         env:
           HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: aws_upgrade_from_previous_release_values.yaml
+          UPGRADE_FROM_VALUES: eks_upgrade_from_previous_release_values.yaml
           UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
@@ -396,9 +398,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
-          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
       - name: Update dependencies
         run: |
           make dep-update
@@ -436,9 +439,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
-          aws eks update-kubeconfig --name github-gdi-fargate --region us-west-2
+          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
       - name: Update dependencies
         run: |
           make dep-update
@@ -472,6 +476,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2
@@ -511,6 +516,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: us-west-2
+          mask-aws-account-id: true
       - name: Install kubeconfig
         run: |
           aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.149.0
+    helm.sh/chart: splunk-otel-collector-0.150.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.149.0"
+    app.kubernetes.io/version: "0.150.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.149.0
+    chart: splunk-otel-collector-0.150.0
     release: default
 data:
   relay: |
@@ -57,7 +57,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector
-        splunk_app_version: 0.149.0
+        splunk_app_version: 0.150.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -189,6 +189,11 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/drop_server_attrs:
+        error_mode: ignore
+        metric_statements:
+        - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+        - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
       transform/istio_service_name:
         error_mode: ignore
         log_statements:
@@ -207,7 +212,7 @@ data:
             ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil
             and attributes["k8s.namespace.name"] != nil
     receivers:
-      filelog:
+      file_log:
         encoding: utf-8
         exclude:
         - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
@@ -297,17 +302,6 @@ data:
           scrape_configs:
           - job_name: otel-agent
             metric_relabel_configs:
-            - source_labels:
-              - service_name
-              target_label: service.name
-            - source_labels:
-              - service_instance_id
-              target_label: service.instance.id
-            - source_labels:
-              - service_version
-              target_label: service.version
-            - action: labeldrop
-              regex: service_name|service_instance_id|service_version
             - action: drop
               regex: promhttp_metric_handler_errors.*
               source_labels:
@@ -475,7 +469,7 @@ data:
           - transform/istio_service_name
           - resource/logs
           receivers:
-          - filelog
+          - file_log
           - otlp
         logs/entities:
           exporters:
@@ -494,6 +488,7 @@ data:
           - memory_limiter
           - batch
           - attributes/istio
+          - transform/drop_server_attrs
           - resourcedetection
           - resource
           receivers:
@@ -521,6 +516,8 @@ data:
           - resource/add_agent_k8s
           - resourcedetection
           - resource
+          - attributes/istio
+          - transform/drop_server_attrs
           receivers:
           - receiver_creator
         traces:

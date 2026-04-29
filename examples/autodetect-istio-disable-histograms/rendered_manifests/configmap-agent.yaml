@@ -1,0 +1,539 @@
+---
+# Source: splunk-otel-collector/templates/configmap-agent.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-otel-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.150.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.150.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.150.0
+    release: default
+data:
+  relay: |
+    exporters:
+      otlp_http:
+        auth:
+          authenticator: headers_setter
+        metrics_endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v2/datapoint/otlp
+        traces_endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v2/trace/otlp
+      otlp_http/entities:
+        auth:
+          authenticator: headers_setter
+        logs_endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v3/event
+      signalfx:
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+        api_url: https://api.CHANGEME.observability.splunkcloud.com
+        correlation: null
+        ingest_url: https://ingest.CHANGEME.observability.splunkcloud.com
+        root_path: /hostfs
+        sync_host_metadata: true
+      splunk_hec/platform_logs:
+        disable_compression: true
+        endpoint: CHANGEME
+        idle_conn_timeout: 10s
+        index: main
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 300s
+          max_interval: 30s
+        sending_queue:
+          enabled: true
+          num_consumers: 10
+          queue_size: 1000
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector
+        splunk_app_version: 0.150.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+    extensions:
+      file_storage:
+        directory: /var/addon/splunk/otel_pos
+      headers_setter:
+        headers:
+        - action: upsert
+          default_value: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+          from_context: X-SF-TOKEN
+          key: X-SF-TOKEN
+      health_check:
+        endpoint: 0.0.0.0:13133
+      k8s_observer:
+        auth_type: serviceAccount
+        node: ${K8S_NODE_NAME}
+      zpages: null
+    processors:
+      attributes/istio:
+        actions:
+        - action: delete
+          key: source_cluster
+        - action: delete
+          key: destination_cluster
+        - action: delete
+          key: source_canonical_service
+        - action: delete
+          key: destination_canonical_service
+        - action: delete
+          key: source_canonical_revision
+        - action: delete
+          key: destination_canonical_revision
+        include:
+          match_type: regexp
+          metric_names:
+          - istio_.*
+      batch:
+        metadata_keys:
+        - X-SF-Token
+      filter/logs:
+        logs:
+          exclude:
+            match_type: strict
+            resource_attributes:
+            - key: splunk.com/exclude
+              value: "true"
+      k8s_attributes:
+        extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: pod
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          labels:
+          - key: app
+          metadata:
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - container.id
+          - container.image.name
+          - container.image.tag
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+      resource:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: upsert
+          key: k8s.cluster.name
+          value: CHANGEME
+      resource/add_agent_k8s:
+        attributes:
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resource/add_mode:
+        attributes:
+        - action: insert
+          key: otelcol.service.mode
+          value: agent
+      resource/logs:
+        attributes:
+        - action: upsert
+          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          key: com.splunk.sourcetype
+        - action: delete
+          key: k8s.pod.annotations.splunk.com/sourcetype
+        - action: delete
+          key: splunk.com/exclude
+      resourcedetection:
+        detectors:
+        - env
+        - system
+        override: true
+        timeout: 15s
+      transform/drop_server_attrs:
+        error_mode: ignore
+        metric_statements:
+        - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+        - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+      transform/istio_service_name:
+        error_mode: ignore
+        log_statements:
+        - context: resource
+          statements:
+          - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"],
+            attributes["k8s.namespace.name"]], ".")) where attributes["service.name"]
+            == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"]
+            != nil
+          - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"]
+            == nil and attributes["k8s.pod.name"] != nil
+          - replace_pattern(cache["owner_name"], "^(.+?)-(?:(?:[0-9bcdf]+-)?[bcdfghjklmnpqrstvwxz2456789]{5}|[0-9]+)$$",
+            "$$1") where attributes["service.name"] == nil and cache["owner_name"] !=
+            nil
+          - set(attributes["service.name"], Concat([cache["owner_name"], attributes["k8s.namespace.name"]],
+            ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil
+            and attributes["k8s.namespace.name"] != nil
+    receivers:
+      file_log:
+        encoding: utf-8
+        exclude:
+        - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
+        fingerprint_size: 1kb
+        force_flush_period: "0"
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        max_concurrent_files: 1024
+        max_log_size: 1MiB
+        operators:
+        - id: get-format
+          routes:
+          - expr: body matches "^\\{"
+            output: parser-docker
+          - expr: body matches "^[^ Z]+ "
+            output: parser-crio
+          - expr: body matches "^[^ ]+ "
+            output: parser-containerd
+          type: router
+        - id: parser-crio
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: 2006-01-02T15:04:05.999999999Z07:00
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: crio-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-containerd
+          regex: ^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: 2006-01-02T15:04:05.999999999Z07:00
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: containerd-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-docker
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: json_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: docker-recombine
+          is_last_entry: attributes.log endsWith "\n"
+          max_log_size: 1048576
+          output: handle_empty_log
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - field: attributes.log
+          id: handle_empty_log
+          if: attributes.log == nil
+          type: add
+          value: ""
+        - parse_from: attributes["log.file.path"]
+          regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
+          type: regex_parser
+        - from: attributes.uid
+          to: resource["k8s.pod.uid"]
+          type: move
+        - from: attributes.restart_count
+          to: resource["k8s.container.restart_count"]
+          type: move
+        - from: attributes.container_name
+          to: resource["k8s.container.name"]
+          type: move
+        - from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+          type: move
+        - from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+          type: move
+        - field: resource["com.splunk.sourcetype"]
+          type: add
+          value: EXPR("kube:container:"+resource["k8s.container.name"])
+        - from: attributes.stream
+          to: attributes["log.iostream"]
+          type: move
+        - from: attributes["log.file.path"]
+          to: resource["com.splunk.source"]
+          type: move
+        - from: attributes.log
+          id: clean-up-log-record
+          to: body
+          type: move
+        - field: attributes.time
+          type: remove
+        poll_interval: 200ms
+        retry_on_failure:
+          enabled: true
+        start_at: beginning
+        storage: file_storage
+      hostmetrics:
+        collection_interval: 10s
+        root_path: /hostfs
+        scrapers:
+          cpu: null
+          disk: null
+          filesystem:
+            include_mount_points:
+              match_type: strict
+              mount_points:
+              - /
+          load: null
+          memory: null
+          network: null
+          paging: null
+          processes: null
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+      kubeletstats:
+        auth_type: serviceAccount
+        collection_interval: 10s
+        endpoint: ${K8S_NODE_IP}:10250
+        extra_metadata_labels:
+        - container.id
+        metric_groups:
+        - container
+        - pod
+        - node
+        metrics:
+          k8s.node.cpu.usage:
+            enabled: false
+          k8s.pod.cpu.usage:
+            enabled: false
+      nop: null
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      prometheus/agent:
+        config:
+          scrape_configs:
+          - job_name: otel-agent
+            metric_relabel_configs:
+            - action: drop
+              regex: promhttp_metric_handler_errors.*
+              source_labels:
+              - __name__
+            - action: drop
+              regex: otelcol_processor_batch_.*
+              source_labels:
+              - __name__
+            - action: drop
+              regex: .*otelcol\.k8s\.pod\.association
+              source_labels:
+              - __name__
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - localhost:8889
+      receiver_creator:
+        receivers:
+          prometheus/autodetect:
+            config:
+              config:
+                scrape_configs:
+                - job_name: autodetect-metrics
+                  metric_relabel_configs:
+                  - action: keep
+                    regex: (envoy_cluster_lb_healthy_panic|envoy_cluster_manager_warming_clusters|envoy_cluster_membership_healthy|envoy_cluster_membership_total|envoy_cluster_ssl_handshake|envoy_cluster_ssl_session_reused|envoy_cluster_ssl_versions_TLSv1_2|envoy_cluster_ssl_versions_TLSv1_3|envoy_cluster_upstream_cx_active|envoy_cluster_upstream_cx_close_notify|envoy_cluster_upstream_cx_connect_attempts_exceeded|envoy_cluster_upstream_cx_connect_ms|envoy_cluster_upstream_cx_connect_timeout|envoy_cluster_upstream_cx_destroy_local_with_active_rq|envoy_cluster_upstream_cx_http1_total|envoy_cluster_upstream_cx_http2_total|envoy_cluster_upstream_cx_idle_timeout|envoy_cluster_upstream_cx_max_requests|envoy_cluster_upstream_cx_none_healthy|envoy_cluster_upstream_cx_pool_overflow|envoy_cluster_upstream_cx_protocol_error|envoy_cluster_upstream_cx_total|envoy_cluster_upstream_rq_4xx|envoy_cluster_upstream_rq_5xx|envoy_cluster_upstream_rq_active|envoy_cluster_upstream_rq_cancelled|envoy_cluster_upstream_rq_completed|envoy_cluster_upstream_rq_pending_active|envoy_cluster_upstream_rq_retry|envoy_cluster_upstream_rq_retry_limit_exceeded|envoy_cluster_upstream_rq_timeout|envoy_cluster_upstream_rq_tx_reset|envoy_cluster_upstream_rq_time|envoy_cluster_upstream_rq_xx|envoy_listener_downstream_cx_total|envoy_listener_ssl_versions_TLSv1_2|envoy_listener_ssl_versions_TLSv1_3|envoy_server_live|envoy_server_memory_allocated|envoy_server_memory_heap_size|envoy_server_total_connections|envoy_server_uptime|istio_mesh_connections_from_logs|istio_monitor_pods_without_sidecars|istio_request_bytes|istio_request_duration_milliseconds|istio_request_messages_total|istio_requests_total|istio_response_messages_total|istio_tcp_connections_closed_total|istio_tcp_connections_opened_total|istio_tcp_received_bytes_total|istio_tcp_response_bytes_total|pilot_conflict_inbound_listener|pilot_eds_no_instances|pilot_k8s_cfg_events|pilot_k8s_endpoints_pending_pod|pilot_k8s_endpoints_with_no_pods|pilot_no_ip|pilot_proxy_convergence_time|pilot_proxy_queue_time|pilot_services|pilot_xds_cds_reject|pilot_xds_eds_reject|pilot_xds_expired_nonce|pilot_xds_lds_reject|pilot_xds_push_context_errors|pilot_xds_push_time|pilot_xds_rds_reject|pilot_xds_send_time|pilot_xds_write_timeout)(?:_sum|_count|_bucket)?
+                    source_labels:
+                    - __name__
+                  metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
+                    : "/metrics"`'
+                  scrape_interval: 10s
+                  static_configs:
+                  - targets:
+                    - '`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"]
+                      : 9090`'
+            rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev"
+              in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot"
+              or name matches "istio.*")
+          smartagent/coredns:
+            config:
+              extraDimensions:
+                metric_source: k8s-coredns
+              port: 9153
+              type: coredns
+            rule: type == "pod" && labels["k8s-app"] == "kube-dns"
+          smartagent/kube-controller-manager:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-controller-manager
+              port: 10257
+              skipVerify: true
+              type: kube-controller-manager
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
+          smartagent/kubernetes-apiserver:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-apiserver
+              skipVerify: true
+              type: kubernetes-apiserver
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
+          smartagent/kubernetes-proxy:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-proxy
+              port: 10249
+              scrapeFailureLogLevel: debug
+              type: kubernetes-proxy
+            rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
+          smartagent/kubernetes-scheduler:
+            config:
+              extraDimensions:
+                metric_source: kubernetes-scheduler
+              port: 10259
+              skipVerify: true
+              type: kubernetes-scheduler
+              useHTTPS: true
+              useServiceAccount: true
+            rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
+        watch_observers:
+        - k8s_observer
+      zipkin:
+        endpoint: 0.0.0.0:9411
+    service:
+      extensions:
+      - file_storage
+      - health_check
+      - headers_setter
+      - k8s_observer
+      - zpages
+      pipelines:
+        logs:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - memory_limiter
+          - k8s_attributes
+          - filter/logs
+          - batch
+          - resourcedetection
+          - resource
+          - transform/istio_service_name
+          - resource/logs
+          receivers:
+          - file_log
+          - otlp
+        logs/entities:
+          exporters:
+          - otlp_http/entities
+          processors:
+          - memory_limiter
+          - batch
+          - resourcedetection
+          - resource
+          receivers:
+          - nop
+        metrics:
+          exporters:
+          - signalfx
+          processors:
+          - memory_limiter
+          - batch
+          - attributes/istio
+          - transform/drop_server_attrs
+          - resourcedetection
+          - resource
+          receivers:
+          - hostmetrics
+          - kubeletstats
+          - otlp
+          - receiver_creator
+        metrics/agent:
+          exporters:
+          - signalfx
+          processors:
+          - memory_limiter
+          - batch
+          - resource/add_agent_k8s
+          - resourcedetection
+          - resource
+          - resource/add_mode
+          receivers:
+          - prometheus/agent
+        traces:
+          exporters:
+          - otlp_http
+          - signalfx
+          processors:
+          - memory_limiter
+          - k8s_attributes
+          - batch
+          - resourcedetection
+          - resource
+          receivers:
+          - otlp
+          - jaeger
+          - zipkin
+      telemetry:
+        metrics:
+          readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: localhost
+                  port: 8889
+                  without_scope_info: true
+                  without_type_suffix: true
+                  without_units: true
+        resource:
+          service.name: otel-agent
