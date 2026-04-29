@@ -138,9 +138,9 @@ func checkPartialEntriesRecombined(t *testing.T, logsConsumer *consumertest.Logs
 
 // collectBodiesFromSource returns the body string of every log record whose
 // com.splunk.source attribute contains the given container directory name.
-// We filter by source path rather than k8s.container.name because the log files
-// are written by an init container directly to the host — there is no live
-// container the k8s_attributes processor can attach a container name to.
+// We filter by source path rather than k8s.container.name so this test keys off
+// the host log file path directly and does not depend on Kubernetes metadata
+// enrichment behavior to identify records for a given container directory.
 func collectBodiesFromSource(logsConsumer *consumertest.LogsSink, containerDir string) []string {
 	var bodies []string
 	for _, logs := range logsConsumer.AllLogs() {
