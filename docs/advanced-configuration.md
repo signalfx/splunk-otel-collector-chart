@@ -26,6 +26,109 @@ splunkObservability:
 clusterName: my-k8s-cluster
 ```
 
+## Send logs to Splunk Platform with Splunk Connect for OTLP
+
+By default, this chart sends logs to Splunk Enterprise or Splunk Cloud Platform with
+the HEC exporter configured by `splunkPlatform.endpoint` and `splunkPlatform.token`.
+To send logs to the Splunk Connect for OTLP Technical Add-on instead, enable
+`splunkPlatform.otlpIngest` and point `splunkPlatform.otlpIngest.endpoint` at the
+OTLP receiver exposed by the add-on. See the
+[Splunk Connect for OTLP example](../examples/splunk-connect-for-otlp/) for a
+complete rendered configuration.
+
+For a Splunk Connect for OTLP gRPC receiver:
+
+```yaml
+clusterName: my-k8s-cluster
+splunkPlatform:
+  index: main
+  logsEnabled: true
+  metricsEnabled: false
+  tracesEnabled: false
+  otlpIngest:
+    enabled: true
+    endpoint: splunk-connect-for-otlp.example.com:4317
+    protocol: grpc
+    insecure: false
+```
+
+For an HTTP receiver, use the base OTLP HTTP endpoint and set `protocol` to `http`:
+
+```yaml
+splunkPlatform:
+  otlpIngest:
+    enabled: true
+    endpoint: http://splunk-connect-for-otlp.example.com:4318
+    protocol: http
+```
+
+The HEC endpoint and token are not required when logs are the only data sent to
+Splunk Platform through OTLP. If metrics or traces are also sent to Splunk Platform,
+keep the HEC settings for those signals:
+
+```diff
+ splunkPlatform:
++  endpoint: https://splunk.example.com:8088/services/collector/event
++  token: xxxxxx
+   index: main
++  metricsIndex: k8s-metrics
+   logsEnabled: true
++  metricsEnabled: true
+   otlpIngest:
+     enabled: true
+     endpoint: splunk-connect-for-otlp.example.com:4317
+     protocol: grpc
+```
+
+For review, the log destination changes from HEC to OTLP like this:
+
+```diff
+ splunkPlatform:
+-  endpoint: https://splunk.example.com:8088/services/collector/event
+-  token: xxxxxx
+   index: main
+   logsEnabled: true
++  metricsEnabled: false
++  tracesEnabled: false
++  otlpIngest:
++    enabled: true
++    endpoint: splunk-connect-for-otlp.example.com:4317
++    protocol: grpc
++    insecure: false
+```
+
+The rendered Collector log pipeline changes from `splunk_hec/platform_logs` to the
+OTLP exporter selected by `splunkPlatform.otlpIngest.protocol`:
+
+```diff
+ processors:
++  resource/otlp_platform_logs:
++    attributes:
++      - key: com.splunk.index
++        value: main
++        action: insert
+ exporters:
+-  splunk_hec/platform_logs:
+-    endpoint: https://splunk.example.com:8088/services/collector/event
+-    token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
++  otlp/platform_logs:
++    endpoint: splunk-connect-for-otlp.example.com:4317
++    tls:
++      insecure: false
+ service:
+   pipelines:
+     logs:
+       processors:
+         - resource/logs
++        - resource/otlp_platform_logs
+       exporters:
+-        - splunk_hec/platform_logs
++        - otlp/platform_logs
+```
+
+When `protocol: http` is configured, the exporter name in the rendered pipeline is
+`otlp_http/platform_logs` instead of `otlp/platform_logs`.
+
 ## Provide tokens as a secret
 
 Instead of having the tokens as clear text in the values, those can be provided via a secret that is created before deploying the chart. See [secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml) for the required fields.

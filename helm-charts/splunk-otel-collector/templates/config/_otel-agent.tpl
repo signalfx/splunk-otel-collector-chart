@@ -958,6 +958,10 @@ processors:
         key: k8s.namespace.name
         value: "${K8S_NAMESPACE}"
 
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsResourceProcessor" . | nindent 2 }}
+  {{- end }}
+
   {{- if .Values.environment }}
   resource/add_environment:
     attributes:
@@ -1054,7 +1058,9 @@ exporters:
       "X-Splunk-Instrumentation-Library": secureapp
   {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
-  {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsExporter" . | nindent 2 }}
+  {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -1218,6 +1224,9 @@ service:
         - transform/istio_service_name
         {{- end }}
         - resource/logs
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
         {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
@@ -1229,7 +1238,9 @@ service:
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
+        {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
@@ -1257,6 +1268,9 @@ service:
         - resourcedetection/k8s_cluster_name
         {{- end }}
         - resource
+        {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
@@ -1264,7 +1278,9 @@ service:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
         {{- else }}
-        {{- if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
+        {{- else if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
