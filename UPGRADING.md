@@ -4,7 +4,7 @@
 
 ### Container log parsing now uses the `container` operator
 
-The filelog operator chain for container log parsing has been replaced with the single `container` operator.
+The filelog operator chain for container log parsing now uses the `container` operator in place of the runtime-specific parser chain, with a small docker recombine step and optional multiline handling still present where applicable.
 This affects users who use `logsCollection.containers.extraOperators` or `logsCollection.containers.multilineConfigs`.
 
 #### `containerRuntime: cri-o` must be changed to `crio`
@@ -52,7 +52,7 @@ set `attributes.time`. Remove any references to `attributes.time` from your `ext
 #### `extraOperators` using old operator IDs as `output` targets
 
 The following operator IDs no longer exist: `get-format`, `parser-docker`, `parser-crio`, `parser-containerd`,
-`crio-recombine`, `containerd-recombine`, `docker-recombine`, `handle_empty_log`, `clean-up-log-record`.
+`crio-recombine`, `containerd-recombine`, `clean-up-log-record`.
 Remove any `output:` references to these IDs from your `extraOperators`.
 
 ## 0.137.0 to 0.138.0
