@@ -20,6 +20,7 @@ runs:
       shell: bash
       env:
         KUBECONFIG_CONTENT: ${{ inputs.kubeconfig-content }}
+        KUBECONFIG_PATH: ${{ inputs.kubeconfig-path }}
       run: |
-        echo "$KUBECONFIG_CONTENT" > "${{ inputs.kubeconfig-path }}"
-        chmod 600 "${{ inputs.kubeconfig-path }}"
+        printf '%s' "$KUBECONFIG_CONTENT" > "$KUBECONFIG_PATH"
+        chmod 600 "$KUBECONFIG_PATH"

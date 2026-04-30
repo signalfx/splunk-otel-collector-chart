@@ -34,5 +34,8 @@ runs:
         mask-aws-account-id: true
 
     - name: Install EKS kubeconfig
+      env:
+        AWS_CLUSTER_NAME: ${{ inputs.aws-cluster-name }}
+        AWS_REGION: ${{ inputs.aws-region }}
       shell: bash
-      run: aws eks update-kubeconfig --name "${{ inputs.aws-cluster-name }}" --region "${{ inputs.aws-region }}"
+      run: aws eks update-kubeconfig --name "$AWS_CLUSTER_NAME" --region "$AWS_REGION"
