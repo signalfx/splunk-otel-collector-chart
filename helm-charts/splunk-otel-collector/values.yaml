@@ -805,6 +805,13 @@ tolerations:
   - key: node-role.kubernetes.io/infra
     effect: NoSchedule
     operator: Exists
+  # AWS Batch node taint - allows scheduling on Batch-managed nodes.
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoSchedule
+  - key: batch.amazonaws.com/batch-node
+    operator: Exists
+    effect: NoExecute
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.
 nodeSelector: {}
