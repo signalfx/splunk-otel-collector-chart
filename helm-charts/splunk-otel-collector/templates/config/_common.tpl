@@ -567,3 +567,21 @@ prometheus/{{ $receiver }}:
       static_configs:
       - targets: [localhost:{{ $port }}]
 {{- end }}
+
+{{/*
+Common config for OpMAP extension
+*/}}
+{{- define "splunk-otel-collector.opmapExtension" -}}
+{{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
+opamp/splunk_o11y:
+  server:
+    http:
+      {{- if and .Values.gateway.enabled (not $forceDirectEndpoint) }}
+      endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:9943/v1/opamp
+      {{- else }}
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/opamp
+      {{- end }}
+      polling_interval: 30s
+      headers:
+        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+{{- end }}

@@ -43,6 +43,13 @@ data:
     extensions:
       health_check:
         endpoint: 0.0.0.0:13134
+      opamp/splunk_o11y:
+        server:
+          http:
+            endpoint: https://ingest..observability.splunkcloud.com/v1/opamp
+            headers:
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+            polling_interval: 30s
     processors:
       batch:
         send_batch_max_size: 32768
@@ -168,6 +175,7 @@ data:
     service:
       extensions:
       - health_check
+      - opamp/splunk_o11y
       pipelines:
         metrics:
           exporters:

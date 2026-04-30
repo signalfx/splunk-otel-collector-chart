@@ -4,6 +4,7 @@ The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opmapExtension" . | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13134
 
@@ -338,10 +339,11 @@ service:
                 without_scope_info: true
                 without_units: true
                 without_type_suffix: true
+  extensions:
+    - health_check
+    - opamp/splunk_o11y
   {{- if eq .Values.distribution "eks/fargate" }}
-  extensions: [health_check, k8s_observer]
-  {{- else }}
-  extensions: [health_check]
+    - k8s_observer
   {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}

@@ -4,6 +4,7 @@ The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opmapExtension" (merge (dict "forceDirectEndpoint" true) .) }}
   health_check:
     endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -206,6 +207,7 @@ service:
   extensions:
     - health_check
     - headers_setter
+    - opamp/splunk_o11y
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder

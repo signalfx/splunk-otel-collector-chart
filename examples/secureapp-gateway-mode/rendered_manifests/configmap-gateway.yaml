@@ -52,7 +52,8 @@ data:
         ingest_url: https://ingest.CHANGEME.observability.splunkcloud.com
         sending_queue:
           num_consumers: 32
-    extensions:
+    extensions: null
+    opamp/splunk_o11y:
       headers_setter:
         headers:
         - action: upsert
@@ -64,6 +65,12 @@ data:
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.observability.splunkcloud.com
+      server:
+        http:
+          endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
+          headers:
+            X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+          polling_interval: 30s
       zpages: null
     processors:
       batch:
@@ -199,6 +206,7 @@ data:
       extensions:
       - health_check
       - headers_setter
+      - opamp/splunk_o11y
       - zpages
       - http_forwarder
       pipelines:
