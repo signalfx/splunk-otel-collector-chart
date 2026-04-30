@@ -184,7 +184,7 @@ func testIndexSwitch(t *testing.T) {
 		// This is to avoid flaky test failures as logs are also coming from cluster receiver events
 		eventPrefix := "kube:event:"
 		for _, element := range sourcetypes {
-			if !strings.HasPrefix(element, containerPrefix) || !strings.HasPrefix(element, eventPrefix) {
+			if !strings.HasPrefix(element, containerPrefix) && !strings.HasPrefix(element, eventPrefix) {
 				t.Errorf("Element does not start with an expected prefix (%q or %q): %s", containerPrefix, eventPrefix, element)
 			}
 		}
