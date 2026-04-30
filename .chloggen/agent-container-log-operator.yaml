@@ -1,0 +1,16 @@
+change_type: breaking
+component: agent
+note: Replace manual filelog container log parsing operators with a `container`-operator-based pipeline
+issues: [2370]
+subtext: |
+  Replaces the manual `router` + `regex_parser`/`json_parser` + `recombine` chain for Docker/CRI-O/containerd log parsing with a simpler pipeline centered on the `container` operator.
+  This pipeline provides format auto-detection, timestamp parsing, P/F log recombination, and k8s metadata extraction from the file path for both Linux and Windows nodes.
+
+  The accepted value of `logsCollection.containers.containerRuntime` for CRI-O has changed from `cri-o` to `crio` to match the `container` operator's expected format.
+  Users who have set `logsCollection.containers.containerRuntime: cri-o` must update their values to `crio`.
+
+  Users of `logsCollection.containers.extraOperators` are affected: `attributes.log` is no longer available
+  and must be replaced with `body`. Additionally, `attributes.time` is no longer set and should be removed
+  from any `extraOperators` referencing it.
+
+  For full migration details see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01500-to-01510).

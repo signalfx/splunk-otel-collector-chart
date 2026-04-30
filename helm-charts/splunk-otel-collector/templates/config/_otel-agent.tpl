@@ -658,112 +658,30 @@ receivers:
       max_elapsed_time: 0s
       {{- end }}
     operators:
-      {{- if not .Values.logsCollection.containers.containerRuntime }}
-      - type: router
-        id: get-format
-        routes:
-          - output: parser-docker
-            expr: 'body matches "^\\{"'
-          - output: parser-crio
-            expr: 'body matches "^[^ Z]+ "'
-          - output: parser-containerd
-            expr: 'body matches "^[^ ]+ "'
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "cri-o") }}
-      # Parse CRI-O format
-      - type: regex_parser
-        id: parser-crio
-        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
-        timestamp:
-          parse_from: attributes.time
-          layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999Z07:00'
-      - type: recombine
-        id: crio-recombine
-        output: handle_empty_log
-        combine_field: attributes.log
-        source_identifier: attributes["log.file.path"]
-        is_last_entry: "attributes.logtag == 'F'"
-        combine_with: ""
+      - type: container
+        id: container-parser
+        {{- if .Values.logsCollection.containers.containerRuntime }}
+        format: {{ .Values.logsCollection.containers.containerRuntime }}
+        {{- end }}
+        add_metadata_from_filepath: true
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "containerd") }}
-      # Parse CRI-Containerd format
-      - type: regex_parser
-        id: parser-containerd
-        regex: '^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
-        timestamp:
-          parse_from: attributes.time
-          layout_type: gotime
-          layout: '2006-01-02T15:04:05.999999999Z07:00'
-      - type: recombine
-        id: containerd-recombine
-        output: handle_empty_log
-        combine_field: attributes.log
-        source_identifier: attributes["log.file.path"]
-        is_last_entry: "attributes.logtag == 'F'"
-        combine_with: ""
-        max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
-      {{- if or (not .Values.logsCollection.containers.containerRuntime) (eq .Values.logsCollection.containers.containerRuntime "docker") }}
-      # Parse Docker format
-      - type: json_parser
-        id: parser-docker
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      # Recombine Docker partial log lines (no logtag means Docker format)
       - type: recombine
         id: docker-recombine
-        output: handle_empty_log
-        combine_field: attributes.log
+        if: attributes.logtag == nil
+        combine_field: body
         source_identifier: attributes["log.file.path"]
-        is_last_entry: attributes.log endsWith "\n"
+        is_last_entry: body endsWith "\n"
         combine_with: ""
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
-      {{- end }}
       - type: add
         id: handle_empty_log
-        if: attributes.log == nil
-        field: attributes.log
+        if: body == nil
+        field: body
         value: ""
-      # Extract metadata from file path
-      - type: regex_parser
-        {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
-        {{- if .Values.isWindows }}
-        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log$'
-        {{- else }}
-        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
-        {{- end }}
-        {{- else }}
-        {{- if .Values.isWindows }}
-        regex: '^C:\\var\\log\\pods\\(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\\(?P<container_name>[^\._]+)\\(?P<restart_count>\d+)\.log'
-        {{- else }}
-        regex: '^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log'
-        {{- end }}
-        {{- end }}
-        parse_from: attributes["log.file.path"]
-      # Move out attributes to Attributes
-      - type: move
-        from: attributes.uid
-        to: resource["k8s.pod.uid"]
-      - type: move
-        from: attributes.restart_count
-        to: resource["k8s.container.restart_count"]
-      - type: move
-        from: attributes.container_name
-        to: resource["k8s.container.name"]
-      - type: move
-        from: attributes.namespace
-        to: resource["k8s.namespace.name"]
-      - type: move
-        from: attributes.pod_name
-        to: resource["k8s.pod.name"]
       - type: add
         field: resource["com.splunk.sourcetype"]
         value: EXPR("kube:container:"+resource["k8s.container.name"])
-      - type: move
-        from: attributes.stream
-        to: attributes["log.iostream"]
       - type: move
         from: attributes["log.file.path"]
         to: resource["com.splunk.source"]
@@ -777,14 +695,14 @@ receivers:
           - output: {{ include "splunk-otel-collector.newlineKey" . | quote }}
             expr: {{ include "splunk-otel-collector.newlineExpr" . | quote }}
         {{- end }}
-        default: clean-up-log-record
+        default: post-multiline
       {{- range $.Values.logsCollection.containers.multilineConfigs }}
       - type: recombine
         id: {{ include "splunk-otel-collector.newlineKey" . | quote}}
-        output: clean-up-log-record
+        output: post-multiline
         source_identifier: resource["com.splunk.source"]
-        combine_field: attributes.log
-        is_first_entry: '(attributes.log) matches {{ .firstEntryRegex | quote }}'
+        combine_field: body
+        is_first_entry: 'body matches {{ .firstEntryRegex | quote }}'
         max_log_size: {{ $.Values.logsCollection.containers.maxRecombineLogSize }}
         {{- if hasKey . "combineWith" }}
         combine_with: {{ .combineWith | quote }}
@@ -796,14 +714,9 @@ receivers:
         max_unmatched_batch_size: {{ .maxUnmatchedBatchSize }}
         {{- end }}
       {{- end }}
+      - type: noop
+        id: post-multiline
       {{- end }}
-      # Clean up log record
-      - type: move
-        id: clean-up-log-record
-        from: attributes.log
-        to: body
-      - type: remove
-        field: attributes.time
   {{- end }}
 
   {{- if .Values.logsCollection.extraFileLogs }}
