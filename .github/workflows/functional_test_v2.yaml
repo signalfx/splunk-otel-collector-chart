@@ -139,6 +139,7 @@ jobs:
           update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
 
   kubernetes-upgrade-test:
+    name: Test helm upgrade in kind
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
