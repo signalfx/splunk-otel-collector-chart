@@ -699,60 +699,63 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
 
 	targetMetric := "k8s.pod.phase"
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
-	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
-	for i := 0; i < selectedMetrics.ResourceMetrics().Len(); i++ {
-		for j := 0; j < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-			for k := 0; k < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-				m := selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-				if m.Name() == "k8s.replicaset.available" {
-					t.Logf("metrics %s is available", m.Name())
-					for l := 0; l < m.Gauge().DataPoints().Len(); l++ {
-						dp := m.Gauge().DataPoints().At(l)
-						t.Log(fmt.Sprintf("Datapoint %v attributes: %v", l, dp.Attributes().AsRaw()))
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(tt, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
+		assert.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
+
+		for i := 0; i < selectedMetrics.ResourceMetrics().Len(); i++ {
+			for j := 0; j < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+				for k := 0; k < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+					m := selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+					if m.Name() == "k8s.replicaset.available" {
+						t.Logf("metrics %s is available", m.Name())
+						for l := 0; l < m.Gauge().DataPoints().Len(); l++ {
+							dp := m.Gauge().DataPoints().At(l)
+							t.Log(fmt.Sprintf("Datapoint %v attributes: %v", l, dp.Attributes().AsRaw()))
+						}
 					}
 				}
 			}
 		}
 
-	}
-
-	metricNames := internal.GetMetricNames(&expectedMetrics)
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
-	)
-	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
+		metricNames := internal.GetMetricNames(&expectedMetrics)
+		err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
+			pmetrictest.IgnoreTimestamp(),
+			pmetrictest.IgnoreStartTimestamp(),
+			pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
+			pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
+			pmetrictest.IgnoreMetricValues(metricNames...),
+			pmetrictest.IgnoreScopeVersion(),
+			pmetrictest.IgnoreResourceMetricsOrder(),
+			pmetrictest.IgnoreMetricsOrder(),
+			pmetrictest.IgnoreScopeMetricsOrder(),
+			pmetrictest.IgnoreMetricDataPointsOrder(),
+			pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
+		)
+		if err != nil {
+			if !exactMatch {
+				t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
+			}
+			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
+			assert.NoError(tt, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
 		}
-		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
-	}
 
-	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", selectedMetrics.MetricCount())
+	}, 3*time.Minute, 5*time.Second, "No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount())
+
+	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", expectedMetrics.MetricCount())
 }
 
 func testAgentLogs(t *testing.T) {
