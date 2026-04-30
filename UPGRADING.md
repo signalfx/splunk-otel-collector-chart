@@ -1,5 +1,71 @@
 # Upgrade guidelines
 
+## 0.150.0 to 0.151.0
+
+### New feature gate: `component` label in agent DaemonSet selector
+
+A new feature gate `featureGates.daemonSetComponentSelector` (disabled by
+default) adds `component: otel-collector-agent` to the agent DaemonSet's
+`spec.selector.matchLabels`. This prevents workload-management tools from incorrectly grouping gateway and cluster-receiver pods under the
+agent daemonset.
+
+The feature gate is **disabled by default** so that `helm upgrade` works
+without any manual steps. To opt in, set:
+
+```yaml
+featureGates:
+  daemonSetComponentSelector: true
+```
+
+Because `selector.matchLabels` is **immutable** on DaemonSets, enabling this
+on an existing installation requires deleting the DaemonSet first. Choose one
+of the options below.
+
+#### Option A: Zero-downtime upgrade (recommended)
+
+Delete the existing agent DaemonSet with `--cascade=orphan` before upgrading.
+This removes the DaemonSet object but **keeps all agent pods running**, so
+there is no gap in data collection:
+
+```bash
+kubectl delete daemonset \
+  -l app=splunk-otel-collector,component=otel-collector-agent,release=<release> \
+  --cascade=orphan \
+  -n <namespace>
+helm upgrade <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --set featureGates.daemonSetComponentSelector=true ... -n <namespace>
+```
+
+Helm creates the new DaemonSet with the three-label selector and adopts the
+orphaned pods (they already carry `component: otel-collector-agent` in their
+labels). The DaemonSet controller reconciles: pods on nodes that already have a
+matching pod are left alone; any missing nodes get new pods scheduled.
+
+#### Option B: Delete the DaemonSet and upgrade (brief data-collection gap)
+
+Delete the agent DaemonSet (without `--cascade=orphan`) before upgrading.
+This is simpler than Option A but **terminates existing agent pods** — there
+will be a brief data-collection gap on each node while new pods start:
+
+```bash
+kubectl delete daemonset \
+  -l app=splunk-otel-collector,component=otel-collector-agent,release=<release> \
+  -n <namespace>
+helm upgrade <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --set featureGates.daemonSetComponentSelector=true ... -n <namespace>
+```
+
+#### Option C: Uninstall and reinstall (simple environments)
+
+```bash
+helm uninstall <release> -n <namespace>
+helm install <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --set featureGates.daemonSetComponentSelector=true ... -n <namespace>
+```
+
+This removes **all** chart-managed resources (agent, gateway, cluster receiver,
+RBAC, etc.) and recreates them from scratch.
+
 ## 0.137.0 to 0.138.0
 
 ### Fluentd sidecar has been removed

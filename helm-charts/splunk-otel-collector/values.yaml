@@ -1418,3 +1418,8 @@ featureGates:
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false
+  # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.
+  # Because selector.matchLabels is immutable, enabling this on an existing installation
+  # requires additional steps. See:
+  # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#new-feature-gate-component-label-in-agent-daemonset-selector
+  daemonSetComponentSelector: false
