@@ -1,0 +1,20 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: clusterReceiver
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Enable k8s.service metrics and resource attributes in the Kubernetes cluster receiver configuration.
+# One or more tracking issues related to the change
+issues: [2401]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  The following metrics are now enabled by default in the k8s_cluster receiver when sending to
+  Splunk Observability (splunkObservability):
+    - k8s.service.endpoint.count
+    - k8s.service.load_balancer.ingress.count
+  The following resource attributes are also enabled to provide additional context for these metrics:
+    - k8s.service.publish_not_ready_addresses
+    - k8s.service.traffic_distribution
+  These metrics and resource attributes are used by the Splunk Infrastructure Monitoring content.
