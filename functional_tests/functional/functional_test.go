@@ -434,15 +434,19 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 
 	// Test component health - verify no RBAC or connection errors
-	t.Run("component error logs checks", func(t *testing.T) {
-		testKubeConfig := requireEnv(t, "KUBECONFIG")
-		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-		require.NoError(t, err)
-		client, err := kubernetes.NewForConfig(kubeConfig)
-		require.NoError(t, err)
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
 
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+	t.Run("component error logs checks", func(t *testing.T) {
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+	})
+
+	t.Run("control plane receiver checks", func(t *testing.T) {
+		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
 	})
 }
 
@@ -469,21 +473,74 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 
 		t.Run("component error logs checks", func(t *testing.T) {
 			if kubeTestEnv == eksTestKubeEnv {
-				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName, 500)
 			}
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
 		})
+
+		if kubeTestEnv == rosaTestKubeEnv || kubeTestEnv == gceTestKubeEnv {
+			t.Run("control plane receiver checks", func(t *testing.T) {
+				runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kubeTestEnv))
+			})
+		}
 	case autopilotTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
 		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
+	}
+}
+
+// controlPlaneReceiversForEnv returns the receiver names that should be discovered and
+// scraping for the given cluster environment.
+func controlPlaneReceiversForEnv(kubeTestEnv string) []string {
+	switch kubeTestEnv {
+	case kindTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-scheduler",
+		}
+	case rosaTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-apiserver",
+			"prometheus/kubernetes-scheduler",
+		}
+	case gceTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-apiserver",
+			"prometheus/kubernetes-scheduler",
+		}
+	default:
+		return nil
+	}
+}
+
+// runControlPlaneReceiverChecks verifies that control-plane receivers are discovered
+// and scraping without errors.
+func runControlPlaneReceiverChecks(t *testing.T, client *kubernetes.Clientset, receivers []string) {
+	cpAgentPods := internal.GetControlPlaneAgentPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+	require.NotEmpty(t, cpAgentPods, "no agent pods found on control-plane nodes")
+
+	internal.WaitForScrapeInterval(t, 3*time.Minute)
+
+	for _, receiver := range receivers {
+		t.Run("receiver started: "+receiver, func(t *testing.T) {
+			internal.CheckReceiverStarted(t, client, internal.DefaultNamespace, cpAgentPods, receiver)
+		})
+		t.Run("no errors: "+receiver, func(t *testing.T) {
+			internal.CheckComponentHealthForPods(t, client, internal.DefaultNamespace, cpAgentPods, receiver, 10000)
+		})
 	}
 }
 

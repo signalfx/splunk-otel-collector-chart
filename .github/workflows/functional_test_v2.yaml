@@ -22,6 +22,11 @@ on:
         options:
           - false
           - true
+      COLLECTOR_IMAGE:
+        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must be a quay.io/signalfx/* image.'
+        required: false
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        type: string
 
 permissions:
   contents: read
@@ -47,13 +52,74 @@ jobs:
     outputs:
       matrix: ${{ steps.test_matrix.outputs.matrix }}
 
+  collector-image-config:
+    runs-on: ubuntu-latest
+    env:
+      EVENT_NAME: ${{ github.event_name }}
+      REPOSITORY: ${{ github.repository }}
+      REF: ${{ github.ref }}
+      PR_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name || '' }}
+      PR_USER_LOGIN: ${{ github.event.pull_request.user.login || '' }}
+      COLLECTOR_IMAGE: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
+    outputs:
+      cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
+      gke-autopilot-allowed: ${{ steps.config.outputs.gke-autopilot-allowed }}
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
+    steps:
+      - name: Resolve collector image and cloud-test gating
+        id: config
+        run: |
+          cloud_tests_enabled=false
+          # GKE Autopilot's admission webhook will reject the agent
+          # DaemonSet (hostNetwork / hostPath) unless the container
+          # image matches Splunk's registered Autopilot WorkloadAllowlist,
+          # which is keyed on the quay.io/signalfx/splunk-otel-collector
+          # repository.
+          gke_autopilot_allowed=true
+
+          case "$EVENT_NAME" in
+            workflow_dispatch)
+              if [[ -n "$COLLECTOR_IMAGE" && "$COLLECTOR_IMAGE" != quay.io/signalfx/* ]]; then
+                echo "::error::COLLECTOR_IMAGE must be a quay.io/signalfx/* image"
+                exit 1
+              fi
+              cloud_tests_enabled=true
+              ;;
+            pull_request)
+              if [[ "$PR_REPO_FULL_NAME" == "$REPOSITORY" && "$PR_USER_LOGIN" != "dependabot[bot]" ]]; then
+                cloud_tests_enabled=true
+              fi
+              ;;
+            *)
+              if [[ "$REF" == "refs/heads/main" ]]; then
+                cloud_tests_enabled=true
+              fi
+              ;;
+          esac
+
+          # When COLLECTOR_IMAGE is empty the chart default is used, so leave gke_autopilot_allowed=true.
+          if [[ -n "$COLLECTOR_IMAGE" ]]; then
+            collector_repo="${COLLECTOR_IMAGE%:*}"
+            if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
+              gke_autopilot_allowed=false
+              echo "::notice::GKE Autopilot tests will be skipped because COLLECTOR_IMAGE='${COLLECTOR_IMAGE}' is not the stable quay.io/signalfx/splunk-otel-collector image."
+            fi
+          fi
+
+          {
+            echo "cloud-tests-enabled=${cloud_tests_enabled}"
+            echo "gke-autopilot-allowed=${gke_autopilot_allowed}"
+            echo "otelcol-image=${COLLECTOR_IMAGE}"
+          } >> "$GITHUB_OUTPUT"
+
   kubernetes-test:
     env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
       KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
-    needs: get-test-matrix
+    needs:
+      - get-test-matrix
+      - collector-image-config
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
@@ -61,62 +127,25 @@ jobs:
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/functional-test
         with:
+          k8s-version: ${{ matrix.k8s-kind-version }}
+          suite: ${{ matrix.test-job }}
           go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Create kind cluster
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
-        with:
-          node_image: kindest/node:${{ matrix.k8s-kind-version }}
-          kubectl_version: ${{ matrix.k8s-kind-version }}
-          cluster_name: kind
-          config: ./.github/workflows/configs/kind-config.yaml
-      - name: Fix kubelet TLS server certificates
-        run: |
-          kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: Build and load test images into kind
-        run: |
-          make kind-build-test-images
-      - name: run functional tests
-        id: run-functional-tests
-        env:
-          K8S_VERSION: ${{ matrix.k8s-kind-version }}
-        run: |
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
-      - name: Collect Kubernetes Cluster debug info on failure
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        id: collect-debug-info
-        run: |
-          echo "Functional tests failed. Collecting debug info for current state of the Kubernetes cluster..."
-          cd tools
-          ./splunk_kubernetes_debug_info.sh
-      - name: Upload Kubernetes Cluster debug info
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: k8s-debug-info-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: tools/splunk_kubernetes_debug_info_*
-          retention-days: 5
-      - name: Upload updated files artifact
-        if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: updated_expected_results-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: ./functional_tests/**/*.yaml
-          retention-days: 5
+          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
+          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
+          artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   eks-test:
     name: Test helm install in EKS - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -146,12 +175,12 @@ jobs:
 
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
       KUBE_TEST_ENV: eks
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -188,11 +217,11 @@ jobs:
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
     env:
       KUBE_TEST_ENV: gke/autopilot
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -224,12 +253,12 @@ jobs:
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
     env:
       KUBE_TEST_ENV: gke/autopilot
       SKIP_TESTS: "true"
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -268,11 +297,11 @@ jobs:
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBE_TEST_ENV: aks
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -305,11 +334,11 @@ jobs:
 
   aks-windows-upgrade-test:
     name: Test helm upgrade in AKS - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBE_TEST_ENV: aks
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -348,11 +377,11 @@ jobs:
 
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBE_TEST_ENV: gce
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -377,13 +406,13 @@ jobs:
 
   eks-fargate-test:
     name: Test helm install in EKS Fargate - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
       KUBE_TEST_ENV: "eks/fargate"
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -413,13 +442,13 @@ jobs:
 
   eks-fargate-upgrade-test:
     name: Test helm upgrade in EKS Fargate - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
       KUBE_TEST_ENV: "eks/fargate"
       SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -456,12 +485,12 @@ jobs:
 
   eks-auto-mode-test:
     name: Test helm install in EKS Auto Mode - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
       KUBE_TEST_ENV: eks/auto-mode
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -491,12 +520,12 @@ jobs:
 
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
       KUBE_TEST_ENV: eks/auto-mode
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -533,12 +562,12 @@ jobs:
 
   rosa-test:
     name: Test helm install in ROSA - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
       KUBE_TEST_ENV: rosa
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -564,12 +593,12 @@ jobs:
 
   rosa-upgrade-test:
     name: Test helm upgrade in ROSA - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
       KUBE_TEST_ENV: rosa
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -602,11 +631,11 @@ jobs:
 
   gke-test:
     name: Test helm install in GKE - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBE_TEST_ENV: gke
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -638,12 +667,12 @@ jobs:
 
   gke-upgrade-test:
     name: Test helm upgrade in GKE - credentials needed
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') ||
-      (github.ref == 'refs/heads/main')
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     env:
       KUBE_TEST_ENV: gke
       SKIP_TESTS: "true"
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:

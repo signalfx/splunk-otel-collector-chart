@@ -1,0 +1,111 @@
+name: Run Functional Tests
+description: >
+  Sets up a kind cluster, installs dependencies, and runs a functional test
+  suite. Optionally overrides the collector image and uploads debug artifacts.
+
+inputs:
+  k8s-version:
+    description: 'Kubernetes version for the kind cluster (e.g. v1.34.3)'
+    required: true
+  suite:
+    description: 'Test suite to run (passed as SUITE= to make functionaltest)'
+    required: true
+  go-version:
+    description: 'Go version to install'
+    required: false
+    default: ''
+  go-version-file:
+    description: 'Path to go.mod to determine Go version (used when go-version is not set)'
+    required: false
+    default: ''
+  build-test-images:
+    description: 'Whether to build and load test images into kind'
+    required: false
+    default: 'true'
+  update-expected-results:
+    description: 'Whether to update golden file expected test results'
+    required: false
+    default: 'false'
+  kubernetes-debug-info:
+    description: 'Whether to collect and upload k8s debug info'
+    required: false
+    default: 'false'
+  artifact-suffix:
+    description: 'Suffix for the k8s debug info artifact name'
+    required: false
+    default: ''
+  otelcol-image:
+    description: 'Override for the collector image reference (repository[:tag])'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Set KUBECONFIG for all steps
+      shell: bash
+      run: echo "KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing" >> "$GITHUB_ENV"
+
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      with:
+        go-version: ${{ inputs.go-version != '' && inputs.go-version || '' }}
+        go-version-file: ${{ inputs.go-version-file != '' && inputs.go-version-file || '' }}
+        cache-dependency-path: '**/go.sum'
+
+    - name: Create kind cluster
+      uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+      with:
+        node_image: kindest/node:${{ inputs.k8s-version }}
+        kubectl_version: ${{ inputs.k8s-version }}
+        cluster_name: kind
+        config: ./.github/workflows/configs/kind-config.yaml
+
+    - name: Fix kubelet TLS server certificates
+      shell: bash
+      run: |
+        kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
+
+    - name: Update dependencies
+      shell: bash
+      run: make dep-update
+
+    - name: Build and load test images into kind
+      if: inputs.build-test-images == 'true'
+      shell: bash
+      run: make kind-build-test-images
+
+    - name: Run functional tests
+      id: run-functional-tests
+      shell: bash
+      env:
+        KUBE_TEST_ENV: kind
+        K8S_VERSION: ${{ inputs.k8s-version }}
+        OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
+        UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
+        SUITE: ${{ inputs.suite }}
+      run: |
+        TEARDOWN_BEFORE_SETUP=true make functionaltest
+
+    - name: Collect Kubernetes Cluster debug info
+      if: always() && (steps.run-functional-tests.outcome == 'failure' || inputs.kubernetes-debug-info == 'true')
+      shell: bash
+      run: |
+        cd tools
+        ./splunk_kubernetes_debug_info.sh
+
+    - name: Upload Kubernetes Cluster debug info
+      if: always() && (steps.run-functional-tests.outcome == 'failure' || inputs.kubernetes-debug-info == 'true')
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      with:
+        name: k8s-debug-info${{ inputs.artifact-suffix != '' && format('-{0}', inputs.artifact-suffix) || '' }}
+        path: tools/splunk_kubernetes_debug_info_*
+        retention-days: 5
+
+    - name: Upload updated expected results
+      if: always() && inputs.update-expected-results == 'true'
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      with:
+        name: updated_expected_results${{ inputs.artifact-suffix != '' && format('-{0}', inputs.artifact-suffix) || '' }}
+        path: ./functional_tests/**/*.yaml
+        retention-days: 5

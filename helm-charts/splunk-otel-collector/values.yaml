@@ -317,7 +317,15 @@ agent:
     etcd:
       # Specifies whether to collect etcd metrics.
       # For set up etcd metrics details see: docs/advanced-configuration.md#setting-up-etcd-metrics
+      #
+      # The chart auto-detects the scraping mode for the prometheus/etcd receiver
+      # (used when featureGates.useControlPlaneMetricsHistogramData is enabled, the default):
+      #   - If a TLS secret is configured on OpenShift: mTLS to <pod-ip>:9979
+      #   - Else if a TLS secret is configured: mTLS to <pod-ip>:2379
+      #   - Otherwise (default): plain HTTP to <pod-ip>:2381 (requires agent.hostNetwork: true)
+      # Set port to override the auto-detected default (e.g. 4001 for kops).
       enabled: false
+      port: ""
       secret:
         # The name of the secret the helm chart will create (if name is empty the default name is used) or the name
         # of a secret that the user created (empty names are not valid for user created secrets).
@@ -325,7 +333,8 @@ agent:
         # Option for creating a new secret or using an existing one.
         # When secret.create=true, a new kubernetes secret will be created by the helm chart that will contain the
         # values from clientCert, clientKey, and caFile.
-        # When secret.create=false, the user must set secret.name to a name of a k8s secret the user created.
+        # When secret.create=false and secret.name is set, the chart uses an existing k8s secret.
+        # When both secret.create=false and secret.name is empty, no TLS secret is mounted (HTTP mode).
         create: false
         # Used when secret.create=true. The PEM-format CA certificate for the etcd client.
         # NOTE: The content of the certificate itself should be used here, not the
