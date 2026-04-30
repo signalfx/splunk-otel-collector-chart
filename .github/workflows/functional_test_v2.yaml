@@ -144,7 +144,6 @@ jobs:
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
       KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
-    needs: get-test-matrix
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
