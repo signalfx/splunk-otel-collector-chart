@@ -43,6 +43,12 @@ logsCollection:
         expr: 'body matches "health_check"'
 ```
 
+#### `attributes.time` is no longer available in `extraOperators`
+
+Previously `attributes.time` contained the raw timestamp string and was available to `extraOperators`.
+The `container` operator sets the timestamp directly on the log record's `Timestamp` field and does not
+set `attributes.time`. Remove any references to `attributes.time` from your `extraOperators`.
+
 #### `extraOperators` using old operator IDs as `output` targets
 
 The following operator IDs no longer exist: `get-format`, `parser-docker`, `parser-crio`, `parser-containerd`,

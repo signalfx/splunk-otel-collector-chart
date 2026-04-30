@@ -10,6 +10,7 @@ subtext: |
   Users who have set `logsCollection.containers.containerRuntime: cri-o` must update their values to `crio`.
 
   Users of `logsCollection.containers.extraOperators` are affected: `attributes.log` is no longer available
-  and must be replaced with `body`.
+  and must be replaced with `body`. Additionally, `attributes.time` is no longer set and should be removed
+  from any `extraOperators` referencing it.
 
   For full migration details see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01500-to-01510).
