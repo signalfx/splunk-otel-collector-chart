@@ -2,17 +2,17 @@ name: Configure GKE Kubernetes Context
 description: Configure kubeconfig for GKE cloud functional tests.
 
 inputs:
-  gke-project-id:
-    description: GKE project ID.
+  gke-cluster-name:
+    description: GKE cluster name.
     required: true
   gke-credentials-json:
     description: GKE service account credentials JSON.
     required: true
-  gke-cluster-name:
-    description: GKE cluster name.
-    required: true
   gke-location:
     description: GKE cluster location.
+    required: true
+  gke-project-id:
+    description: GKE project ID.
     required: true
 
 runs:

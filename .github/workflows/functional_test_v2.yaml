@@ -130,13 +130,13 @@ jobs:
 
       - uses: ./.github/actions/functional-test
         with:
-          k8s-version: ${{ matrix.k8s-kind-version }}
-          suite: ${{ matrix.test-job }}
-          go-version: ${{ env.GO_VERSION }}
-          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
-          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
           artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
+          go-version: ${{ env.GO_VERSION }}
+          k8s-version: ${{ matrix.k8s-kind-version }}
+          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          suite: ${{ matrix.test-job }}
+          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
 
   eks-test:
     name: Test helm install in EKS - credentials needed
@@ -149,15 +149,14 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-1
           aws-cluster-name: rotel-eks
+          aws-region: us-west-1
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -172,17 +171,16 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-1
           aws-cluster-name: rotel-eks
+          aws-region: us-west-1
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: eks
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           upgrade-from-values: eks_upgrade_from_previous_release_values.yaml
 
@@ -197,14 +195,13 @@ jobs:
 
       - uses: ./.github/actions/gke-kube-context
         with:
-          gke-project-id: ${{ secrets.GKE_PROJECT }}
-          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-cluster-name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke/autopilot
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -219,16 +216,15 @@ jobs:
 
       - uses: ./.github/actions/gke-kube-context
         with:
-          gke-project-id: ${{ secrets.GKE_PROJECT }}
-          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-cluster-name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: gke/autopilot
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           skip-tests: "true"
           upgrade-from-values: gke_autopilot_upgrade_from_previous_release_values.yaml
@@ -244,13 +240,12 @@ jobs:
 
       - uses: ./.github/actions/aks-kube-context
         with:
-          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           aks-cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: aks
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -265,15 +260,14 @@ jobs:
 
       - uses: ./.github/actions/aks-kube-context
         with:
-          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           aks-cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: aks
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   gce-autopilot-test:
@@ -287,12 +281,11 @@ jobs:
 
       - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          kubeconfig-path: /tmp/kubeconfig
           kubeconfig-content: ${{ secrets.GCE_KUBECONFIG }}
+          kubeconfig-path: /tmp/kubeconfig
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gce
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -307,15 +300,14 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-2
           aws-cluster-name: gdi-github-eks-fargate
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/fargate
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
@@ -331,17 +323,16 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-2
           aws-cluster-name: gdi-github-eks-fargate
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: eks/fargate
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
           upgrade-from-values: eks_fargate_upgrade_from_previous_release_values.yaml
@@ -357,15 +348,14 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-2
           aws-cluster-name: rotel-eks-autotest
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/auto-mode
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -380,17 +370,16 @@ jobs:
 
       - uses: ./.github/actions/eks-kube-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: us-west-2
           aws-cluster-name: rotel-eks-autotest
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: eks/auto-mode
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
 
@@ -405,12 +394,11 @@ jobs:
 
       - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
           kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: rosa
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -425,14 +413,13 @@ jobs:
 
       - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
           kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: rosa
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           upgrade-from-values: rosa_upgrade_from_previous_release_values.yaml
 
@@ -447,14 +434,13 @@ jobs:
 
       - uses: ./.github/actions/gke-kube-context
         with:
-          gke-project-id: ${{ secrets.GKE_PROJECT }}
-          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-cluster-name: ${{ secrets.GKE_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -469,16 +455,15 @@ jobs:
 
       - uses: ./.github/actions/gke-kube-context
         with:
-          gke-project-id: ${{ secrets.GKE_PROJECT }}
-          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-cluster-name: ${{ secrets.GKE_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
           gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
 
       - uses: ./.github/actions/cloud-functional-test
         with:
-          go-version: ${{ env.GO_VERSION }}
-          mode: upgrade
           kube-test-env: gke
+          mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           skip-tests: "true"
           upgrade-from-values: gke_upgrade_from_previous_release_values.yaml

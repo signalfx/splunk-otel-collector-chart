@@ -2,19 +2,15 @@ name: Configure AKS Kubernetes Context
 description: Configure kubeconfig for AKS cloud functional tests.
 
 inputs:
-  azure-credentials:
-    description: Azure credentials JSON.
+  aks-cluster-name:
+    description: AKS cluster name.
     required: true
   aks-resource-group:
     description: AKS resource group.
     required: true
-  aks-cluster-name:
-    description: AKS cluster name.
+  azure-credentials:
+    description: Azure credentials JSON.
     required: true
-  kubelogin-version:
-    description: kubelogin version for AKS authentication.
-    required: false
-    default: v0.0.24
 
 runs:
   using: composite
@@ -22,7 +18,7 @@ runs:
     - name: Set up kubelogin for non-interactive login
       uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
       with:
-        kubelogin-version: ${{ inputs.kubelogin-version }}
+        kubelogin-version: v0.0.24
 
     - name: Authenticate to Azure
       uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0

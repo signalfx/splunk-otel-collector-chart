@@ -2,20 +2,20 @@ name: Configure EKS Kubernetes Context
 description: Configure kubeconfig for EKS cloud functional tests.
 
 inputs:
-  kubeconfig-path:
-    description: Kubeconfig path to export as KUBECONFIG.
-    required: true
   aws-access-key-id:
     description: AWS access key ID.
     required: true
-  aws-secret-access-key:
-    description: AWS secret access key.
+  aws-cluster-name:
+    description: EKS cluster name.
     required: true
   aws-region:
     description: AWS region.
     required: true
-  aws-cluster-name:
-    description: EKS cluster name.
+  aws-secret-access-key:
+    description: AWS secret access key.
+    required: true
+  kubeconfig-path:
+    description: Kubeconfig path to export as KUBECONFIG.
     required: true
 
 runs:

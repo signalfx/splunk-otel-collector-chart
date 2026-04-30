@@ -2,11 +2,11 @@ name: Configure Kubernetes Context from Secret
 description: Configure kubeconfig from secret content for cloud functional tests.
 
 inputs:
-  kubeconfig-path:
-    description: Kubeconfig path to export as KUBECONFIG.
-    required: true
   kubeconfig-content:
     description: Raw kubeconfig content.
+    required: true
+  kubeconfig-path:
+    description: Kubeconfig path to export as KUBECONFIG.
     required: true
 
 runs:
