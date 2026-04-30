@@ -702,7 +702,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 		selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
-		assert.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
+		assert.NotNil(tt, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
 		for i := 0; i < selectedMetrics.ResourceMetrics().Len(); i++ {
 			for j := 0; j < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {

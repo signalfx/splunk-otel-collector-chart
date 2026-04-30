@@ -1397,9 +1397,6 @@ obi:
 targetallocator:
   enabled: false
   targetAllocator:
-    image:
-      repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
-      tag: "v0.132.0"
     config:
       allocation_strategy: per-node
       collector_selector:
