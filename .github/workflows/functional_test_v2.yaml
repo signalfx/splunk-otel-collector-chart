@@ -138,15 +138,12 @@ jobs:
           suite: ${{ matrix.test-job }}
           update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
 
-  kubernetes-uprade-test:
+  kubernetes-upgrade-test:
     env:
       KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
       KUBERNETES_DEBUG_INFO: ${{ github.event.inputs.KUBERNETES_DEBUG_INFO || 'false' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -164,8 +161,8 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
         with:
-          node_image: kindest/node:${{ matrix.k8s-kind-version }}
-          kubectl_version: ${{ matrix.k8s-kind-version }}
+          node_image: kindest/node:v1.35.1
+          kubectl_version: v1.35.1
           cluster_name: kind
           config: ./.github/workflows/configs/kind-config.yaml
       - name: Fix kubelet TLS server certificates
@@ -180,8 +177,7 @@ jobs:
       - name: run functional tests
         id: run-functional-tests
         env:
-          K8S_VERSION: ${{ matrix.k8s-kind-version }}
-          UPGRADE_FROM_VALUES: upgrade_from_previous_test_values.yaml
+          UPGRADE_FROM_VALUES: kind_upgrade_from_previous_release_values.yaml
           UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
           TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
