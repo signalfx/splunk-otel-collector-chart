@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: bbd9b2f8d9c29066b623bb1907ff84f68af40dcc87b50dc1c8f3eff6319e833a
+        checksum/config: f91e053cc1f1e3aea2b5cc25c8ccca539076f6bea47d977bbfda90c91cba761c
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -57,6 +57,9 @@ spec:
         args:
         - --config=/conf/relay.yaml
         ports:
+        - name: ingestforwarder
+          containerPort: 4320
+          protocol: TCP
         - name: jaeger-grpc
           containerPort: 14250
           hostPort: 14250

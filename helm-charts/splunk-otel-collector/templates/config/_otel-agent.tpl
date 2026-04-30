@@ -4,6 +4,8 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" . | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -1156,6 +1158,8 @@ service:
     - health_check
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    - http_forwarder/splunk_o11y_ingest
+    - opamp/splunk_o11y
     {{- end }}
     - k8s_observer
     - zpages

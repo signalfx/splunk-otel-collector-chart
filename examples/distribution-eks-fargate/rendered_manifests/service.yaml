@@ -23,6 +23,10 @@ spec:
     port: 6060
     targetPort: http-forwarder
     protocol: TCP
+  - name: ingestforwarder
+    port: 4320
+    targetPort: ingestforwarder
+    protocol: TCP
   - name: jaeger-grpc
     port: 14250
     targetPort: jaeger-grpc
