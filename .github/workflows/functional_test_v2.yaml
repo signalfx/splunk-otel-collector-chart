@@ -311,7 +311,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Set up kubelogin for non-interactive login
-        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
+        uses: azure/use-kubelogin@0ce7c36141aa27d4934872cf00b0120804c98a29 # v1.3
         with:
           kubelogin-version: "v0.0.24"
       - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
@@ -353,7 +353,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: '**/go.sum'
       - name: Set up kubelogin for non-interactive login
-        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
+        uses: azure/use-kubelogin@0ce7c36141aa27d4934872cf00b0120804c98a29 # v1.3
         with:
           kubelogin-version: "v0.0.24"
       - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
