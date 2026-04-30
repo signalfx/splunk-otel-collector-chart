@@ -5,6 +5,7 @@ package functional
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -700,6 +701,22 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	targetMetric := "k8s.pod.phase"
 	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
 	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
+
+	for i := 0; i < selectedMetrics.ResourceMetrics().Len(); i++ {
+		for j := 0; j < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			for k := 0; k < selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
+				m := selectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
+				if m.Name() == "k8s.replicaset.available" {
+					t.Logf("metrics %s is available", m.Name())
+					for l := 0; l < m.Gauge().DataPoints().Len(); l++ {
+						dp := m.Gauge().DataPoints().At(l)
+						t.Log(fmt.Sprintf("Datapoint %v attributes: %v", l, dp.Attributes().AsRaw()))
+					}
+				}
+			}
+		}
+
+	}
 
 	metricNames := internal.GetMetricNames(&expectedMetrics)
 	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
