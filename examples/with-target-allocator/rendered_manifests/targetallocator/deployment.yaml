@@ -59,6 +59,13 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: config-volume
           configMap:
