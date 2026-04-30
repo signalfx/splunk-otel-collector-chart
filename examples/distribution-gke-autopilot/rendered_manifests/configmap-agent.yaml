@@ -50,6 +50,13 @@ data:
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
+      opamp/splunk_o11y:
+        server:
+          http:
+            endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
+            headers:
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+            polling_interval: 30s
       zpages: null
     processors:
       batch:
@@ -368,6 +375,7 @@ data:
       - headers_setter
       - k8s_observer
       - zpages
+      - opamp/splunk_o11y
       pipelines:
         logs/entities:
           exporters:

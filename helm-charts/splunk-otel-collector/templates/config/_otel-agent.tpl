@@ -4,6 +4,7 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opmapExtension" . | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -1159,6 +1160,7 @@ service:
     {{- end }}
     - k8s_observer
     - zpages
+    - opamp/splunk_o11y
 
   # By default there are two pipelines sending metrics and traces to standalone otel-collector otlp format
   # or directly to signalfx backend depending on gateway.enabled configuration.
