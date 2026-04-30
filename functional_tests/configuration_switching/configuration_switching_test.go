@@ -174,21 +174,28 @@ func testIndexSwitch(t *testing.T) {
 		internal.WaitForMetrics(t, 3, hecMetricsConsumer)
 		internal.WaitForLogs(t, 3, agentLogsConsumer)
 
-		var sourcetypes []string
+		var sourceTypes, originalSourceTypes []string
 		var indices []string
 		logs := agentLogsConsumer.AllLogs()
-		sourcetypes, indices = getLogsIndexAndSourceType(logs)
-		assert.Greater(t, len(sourcetypes), 1) // we are receiving logs from different containers
-		// check sourcetypes have same prefix
-		containerPrefix := "kube:container:"
+		originalSourceTypes, indices = getLogsIndexAndSourceType(logs)
+
 		// This is to avoid flaky test failures as logs are also coming from cluster receiver events
-		eventPrefix := "kube:event:"
-		for _, element := range sourcetypes {
-			if !strings.HasPrefix(element, containerPrefix) && !strings.HasPrefix(element, eventPrefix) {
-				t.Errorf("Element does not start with an expected prefix (%q or %q): %s", containerPrefix, eventPrefix, element)
+		eventPrefix := "kube:event"
+		for _, sourceType := range originalSourceTypes {
+			if !strings.HasPrefix(sourceType, eventPrefix) {
+				sourceTypes = append(sourceTypes, sourceType)
 			}
 		}
-		assert.NotContains(t, sourcetypes, nonDefaultSourcetype)
+
+		assert.Greater(t, len(sourceTypes), 1) // we are receiving logs from different containers
+		// check sourcetypes have same prefix
+		containerPrefix := "kube:container:"
+		for _, element := range sourceTypes {
+			if !strings.HasPrefix(element, containerPrefix) {
+				t.Errorf("Element does not start with the prefix %q: %s", containerPrefix, element)
+			}
+		}
+		assert.NotContains(t, sourceTypes, nonDefaultSourcetype)
 		assert.Len(t, indices, 1)
 		assert.Equal(t, logsIndex, indices[0])
 
