@@ -185,28 +185,7 @@ jobs:
           UPGRADE_FROM_VALUES: upgrade_from_previous_test_values.yaml
           UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
         run: |
-          TEARDOWN_BEFORE_SETUP=true UPDATE_EXPECTED_RESULTS=${{ env.UPDATE_EXPECTED_RESULTS }} SUITE=${{ matrix.test-job }} make functionaltest
-      - name: Collect Kubernetes Cluster debug info on failure
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        id: collect-debug-info
-        run: |
-          echo "Functional tests failed. Collecting debug info for current state of the Kubernetes cluster..."
-          cd tools
-          ./splunk_kubernetes_debug_info.sh
-      - name: Upload Kubernetes Cluster debug info
-        if: always() && (steps.run-functional-tests.outcome == 'failure' || env.KUBERNETES_DEBUG_INFO == 'true')
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: k8s-debug-info-upgrade-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: tools/splunk_kubernetes_debug_info_*
-          retention-days: 5
-      - name: Upload updated files artifact
-        if: always() && env.UPDATE_EXPECTED_RESULTS == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
-        with:
-          name: updated_expected_results-upgrade-${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
-          path: ./functional_tests/**/*.yaml
-          retention-days: 5
+          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
 
   eks-test:
     name: Test helm install in EKS - credentials needed
