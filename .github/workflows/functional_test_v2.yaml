@@ -157,6 +157,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -179,6 +180,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -202,6 +204,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke/autopilot
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -223,6 +226,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke/autopilot
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -246,6 +250,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: aks
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -266,6 +271,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: aks
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -286,6 +292,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gce
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -308,6 +315,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/fargate
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
@@ -331,6 +339,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/fargate
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -356,6 +365,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/auto-mode
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -378,6 +388,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/auto-mode
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -399,6 +410,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: rosa
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -418,6 +430,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: rosa
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
@@ -441,6 +454,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
@@ -462,6 +476,7 @@ jobs:
 
       - uses: ./.github/actions/cloud-functional-test
         with:
+          go-version: ${{ env.GO_VERSION }}
           kube-test-env: gke
           mode: upgrade
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}

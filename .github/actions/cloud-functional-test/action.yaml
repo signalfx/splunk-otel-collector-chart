@@ -2,6 +2,9 @@ name: Run Cloud Functional Tests
 description: Run install or upgrade functional tests against an existing cloud Kubernetes cluster.
 
 inputs:
+  go-version:
+    description: Go version to install for functional tests.
+    required: true
   kube-test-env:
     description: KUBE_TEST_ENV value for functional tests.
     required: true
@@ -36,7 +39,7 @@ runs:
     - name: Set up Go
       uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
       with:
-        go-version: 1.26.2
+        go-version: ${{ inputs.go-version }}
         cache-dependency-path: '**/go.sum'
 
     - name: Update dependencies
