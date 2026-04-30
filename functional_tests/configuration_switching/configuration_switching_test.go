@@ -180,10 +180,12 @@ func testIndexSwitch(t *testing.T) {
 		sourcetypes, indices = getLogsIndexAndSourceType(logs)
 		assert.Greater(t, len(sourcetypes), 1) // we are receiving logs from different containers
 		// check sourcetypes have same prefix
-		prefix := "kube:container:"
+		containerPrefix := "kube:container:"
+		// This is to avoid flaky test failures as logs are also coming from cluster receiver events
+		eventPrefix := "kube:event:"
 		for _, element := range sourcetypes {
-			if !strings.HasPrefix(element, prefix) {
-				t.Errorf("Element does not start with the prefix %q: %s", prefix, element)
+			if !strings.HasPrefix(element, containerPrefix) || !strings.HasPrefix(element, eventPrefix) {
+				t.Errorf("Element does not start with an expected prefix (%q or %q): %s", containerPrefix, eventPrefix, element)
 			}
 		}
 		assert.NotContains(t, sourcetypes, nonDefaultSourcetype)
