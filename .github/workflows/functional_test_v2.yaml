@@ -130,581 +130,340 @@ jobs:
 
       - uses: ./.github/actions/functional-test
         with:
-          k8s-version: ${{ matrix.k8s-kind-version }}
-          suite: ${{ matrix.test-job }}
-          go-version: ${{ env.GO_VERSION }}
-          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
-          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
           artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
+          go-version: ${{ env.GO_VERSION }}
+          k8s-version: ${{ matrix.k8s-kind-version }}
+          kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          suite: ${{ matrix.test-job }}
+          update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
 
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
-      KUBE_TEST_ENV: eks
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: rotel-eks
           aws-region: us-west-1
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name rotel-eks --region us-west-1
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
-      KUBE_TEST_ENV: eks
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: rotel-eks
           aws-region: us-west-1
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name rotel-eks --region us-west-1
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: eks_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: eks_upgrade_from_previous_release_values.yaml
 
   gke-autopilot-test:
     name: Test helm install in GKE/Autopilot - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
-    env:
-      KUBE_TEST_ENV: gke/autopilot
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/gke-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+          gke-cluster-name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
+          gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@3da1e46a907576cefaa90c484278bb5b259dd395 # v3.0.0
-        with:
-          cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
-          location: ${{ secrets.GKE_REGION }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: gke/autopilot
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   gke-autopilot-upgrade-test:
     name: Test helm upgrade in GKE/Autopilot - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.gke-autopilot-allowed == 'true' }}
-    env:
-      KUBE_TEST_ENV: gke/autopilot
-      SKIP_TESTS: "true"
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/gke-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+          gke-cluster-name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
+          gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@3da1e46a907576cefaa90c484278bb5b259dd395 # v3.0.0
-        with:
-          cluster_name: ${{ secrets.GKE_AUTOPILOT_CLUSTER }}
-          location: ${{ secrets.GKE_REGION }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: gke_autopilot_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: gke/autopilot
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true"
+          upgrade-from-values: gke_autopilot_upgrade_from_previous_release_values.yaml
 
   aks-windows-test:
     name: Test helm install in AKS - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBE_TEST_ENV: aks
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/aks-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Set up kubelogin for non-interactive login
-        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
+          aks-cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          kubelogin-version: "v0.0.24"
-      - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: azure/aks-set-context@c7eb093e5a5d47caa333f64974d5fd1cd4bf069d # v4
-        with:
-          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
-          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
-          admin: false
-          use-kubelogin: true
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: aks
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   aks-windows-upgrade-test:
     name: Test helm upgrade in AKS - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBE_TEST_ENV: aks
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/aks-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Set up kubelogin for non-interactive login
-        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1.2
+          aks-cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          aks-resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          kubelogin-version: "v0.0.24"
-      - uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: azure/aks-set-context@c7eb093e5a5d47caa333f64974d5fd1cd4bf069d # v4
-        with:
-          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
-          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
-          admin: false
-          use-kubelogin: true
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: aks
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   gce-autopilot-test:
     name: Test helm install in GCE (kops) - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBE_TEST_ENV: gce
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: Set kubeconfig
-        run: echo "$GCE_KUBECONFIG" > /tmp/kubeconfig
-        env:
-          GCE_KUBECONFIG: ${{ secrets.GCE_KUBECONFIG }}
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          KUBECONFIG: /tmp/kubeconfig
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kubeconfig-content: ${{ secrets.GCE_KUBECONFIG }}
+          kubeconfig-path: /tmp/kubeconfig
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: gce
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   eks-fargate-test:
     name: Test helm install in EKS Fargate - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-      KUBE_TEST_ENV: "eks/fargate"
-      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: gdi-github-eks-fargate
           aws-region: us-west-2
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks/fargate
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
 
   eks-fargate-upgrade-test:
     name: Test helm upgrade in EKS Fargate - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-      KUBE_TEST_ENV: "eks/fargate"
-      SKIP_TESTS: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: gdi-github-eks-fargate
           aws-region: us-west-2
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name gdi-github-eks-fargate --region us-west-2
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: eks_fargate_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks/fargate
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+          upgrade-from-values: eks_fargate_upgrade_from_previous_release_values.yaml
 
   eks-auto-mode-test:
     name: Test helm install in EKS Auto Mode - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
-      KUBE_TEST_ENV: eks/auto-mode
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: rotel-eks-autotest
           aws-region: us-west-2
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks/auto-mode
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
-      KUBE_TEST_ENV: eks/auto-mode
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+
+      - uses: ./.github/actions/eks-kube-context
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-cluster-name: rotel-eks-autotest
           aws-region: us-west-2
-          mask-aws-account-id: true
-      - name: Install kubeconfig
-        run: |
-          aws eks update-kubeconfig --name rotel-eks-autotest --region us-west-2
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: eks_auto_mode_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: eks/auto-mode
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
 
   rosa-test:
     name: Test helm install in ROSA - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
-      KUBE_TEST_ENV: rosa
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Set kubeconfig
-        run: |
-          echo "$ROSA_KUBECONFIG" > ${{ env.KUBECONFIG }}
-          chmod 600 ${{ env.KUBECONFIG }}
-        env:
-          ROSA_KUBECONFIG: ${{ secrets.ROSA_KUBECONFIG }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: rosa
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   rosa-upgrade-test:
     name: Test helm upgrade in ROSA - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBECONFIG: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
-      KUBE_TEST_ENV: rosa
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/kubeconfig-secret-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - name: Set kubeconfig
-        run: |
-          echo "$ROSA_KUBECONFIG" > ${{ env.KUBECONFIG }}
-          chmod 600 ${{ env.KUBECONFIG }}
-        env:
-          ROSA_KUBECONFIG: ${{ secrets.ROSA_KUBECONFIG }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: rosa_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          kube-test-env: rosa
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: rosa_upgrade_from_previous_release_values.yaml
 
   gke-test:
     name: Test helm install in GKE - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBE_TEST_ENV: gke
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/gke-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+          gke-cluster-name: ${{ secrets.GKE_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
+          gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@3da1e46a907576cefaa90c484278bb5b259dd395 # v3.0.0
-        with:
-          cluster_name: ${{ secrets.GKE_CLUSTER }}
-          location: ${{ secrets.GKE_REGION }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: gke
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   gke-upgrade-test:
     name: Test helm upgrade in GKE - credentials needed
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
-    env:
-      KUBE_TEST_ENV: gke
-      SKIP_TESTS: "true"
-      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Download the latest published release to use as a base for the upgrade
-        run: |
-          helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
-          helm repo update
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+
+      - uses: ./.github/actions/gke-kube-context
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: '**/go.sum'
-      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+          gke-cluster-name: ${{ secrets.GKE_CLUSTER }}
+          gke-credentials-json: ${{ secrets.GKE_SA_KEY }}
+          gke-location: ${{ secrets.GKE_REGION }}
+          gke-project-id: ${{ secrets.GKE_PROJECT }}
+
+      - uses: ./.github/actions/cloud-functional-test
         with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        with:
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - uses: google-github-actions/get-gke-credentials@3da1e46a907576cefaa90c484278bb5b259dd395 # v3.0.0
-        with:
-          cluster_name: ${{ secrets.GKE_CLUSTER }}
-          location: ${{ secrets.GKE_REGION }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-      - name: Update dependencies
-        run: |
-          make dep-update
-      - name: run functional tests
-        env:
-          HOST_ENDPOINT: 0.0.0.0
-          UPGRADE_FROM_VALUES: gke_upgrade_from_previous_release_values.yaml
-          UPGRADE_FROM_CHART_DIR: base/splunk-otel-collector
-        run: |
-          TEARDOWN_BEFORE_SETUP=true SUITE=functional make functionaltest
+          kube-test-env: gke
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true"
+          upgrade-from-values: gke_upgrade_from_previous_release_values.yaml

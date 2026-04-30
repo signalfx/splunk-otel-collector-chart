@@ -1,0 +1,38 @@
+name: Configure EKS Kubernetes Context
+description: Configure kubeconfig for EKS cloud functional tests.
+
+inputs:
+  aws-access-key-id:
+    description: AWS access key ID.
+    required: true
+  aws-cluster-name:
+    description: EKS cluster name.
+    required: true
+  aws-region:
+    description: AWS region.
+    required: true
+  aws-secret-access-key:
+    description: AWS secret access key.
+    required: true
+  kubeconfig-path:
+    description: Kubeconfig path to export as KUBECONFIG.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Export kubeconfig path
+      shell: bash
+      run: echo "KUBECONFIG=${{ inputs.kubeconfig-path }}" >> "$GITHUB_ENV"
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        mask-aws-account-id: true
+
+    - name: Install EKS kubeconfig
+      shell: bash
+      run: aws eks update-kubeconfig --name "${{ inputs.aws-cluster-name }}" --region "${{ inputs.aws-region }}"

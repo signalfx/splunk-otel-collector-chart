@@ -1,0 +1,56 @@
+name: Run Cloud Functional Tests
+description: Run install or upgrade functional tests against an existing cloud Kubernetes cluster.
+
+inputs:
+  kube-test-env:
+    description: KUBE_TEST_ENV value for functional tests.
+    required: true
+  mode:
+    description: 'Test mode: install or upgrade.'
+    required: false
+    default: install
+  otelcol-image:
+    description: Override for the collector image reference.
+    required: false
+    default: ''
+  skip-tests:
+    description: SKIP_TESTS value for environments that only validate install or upgrade wiring.
+    required: false
+    default: ''
+  upgrade-from-values:
+    description: UPGRADE_FROM_VALUES value for upgrade tests.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Download the latest published release to use as a base for the upgrade
+      if: inputs.mode == 'upgrade'
+      shell: bash
+      run: |
+        helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+        helm repo update
+        helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
+
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      with:
+        go-version: 1.26.2
+        cache-dependency-path: '**/go.sum'
+
+    - name: Update dependencies
+      shell: bash
+      run: make dep-update
+
+    - name: Run functional tests
+      shell: bash
+      env:
+        HOST_ENDPOINT: 0.0.0.0
+        KUBE_TEST_ENV: ${{ inputs.kube-test-env }}
+        OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
+        SKIP_TESTS: ${{ inputs.skip-tests }}
+        UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
+        UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}
+        SUITE: functional
+      run: TEARDOWN_BEFORE_SETUP=true make functionaltest
