@@ -824,7 +824,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
 
 	targetMetric := "k8s.pod.phase"
-
 	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
 	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
 
