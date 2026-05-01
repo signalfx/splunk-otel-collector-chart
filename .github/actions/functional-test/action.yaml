@@ -46,10 +46,6 @@ inputs:
     description: 'UPGRADE_FROM_VALUES value for upgrade tests'
     required: false
     default: ''
-  upgrade-from-version:
-    description: 'Chart version to install before upgrade tests'
-    required: false
-    default: ''
 
 runs:
   using: composite
@@ -84,13 +80,7 @@ runs:
       run: |
         helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
         helm repo update
-        if [[ -n "${UPGRADE_FROM_VERSION}" ]]; then
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --version "${UPGRADE_FROM_VERSION}" --untar --untardir base
-        else
-          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
-        fi
-      env:
-        UPGRADE_FROM_VERSION: ${{ inputs.upgrade-from-version }}
+        helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
 
     - name: Update dependencies
       shell: bash

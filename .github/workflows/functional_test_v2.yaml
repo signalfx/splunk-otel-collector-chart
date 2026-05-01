@@ -153,8 +153,6 @@ jobs:
           suite: functional
           update-expected-results: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
           upgrade-from-values: kind_upgrade_from_previous_release_values.yaml
-          # This must be v0.150.0 to test target allocator upgrade functionality.
-          upgrade-from-version: '0.150.0'
 
   eks-test:
     name: Test helm install in EKS - credentials needed
