@@ -27,6 +27,10 @@ inputs:
     description: 'Whether to collect and upload k8s debug info'
     required: false
     default: 'false'
+  mode:
+    description: 'Test mode: install or upgrade.'
+    required: false
+    default: install
   otelcol-image:
     description: 'Override for the collector image reference (repository[:tag])'
     required: false
@@ -38,6 +42,14 @@ inputs:
     description: 'Whether to update golden file expected test results'
     required: false
     default: 'false'
+  upgrade-from-values:
+    description: 'UPGRADE_FROM_VALUES value for upgrade tests'
+    required: false
+    default: ''
+  upgrade-from-version:
+    description: 'Chart version to install before upgrade tests'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -66,6 +78,20 @@ runs:
       run: |
         kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/kubelet-serving")]}{.metadata.name}{" "}{end}' | xargs kubectl certificate approve
 
+    - name: Download chart to use as a base for the upgrade
+      if: inputs.mode == 'upgrade'
+      shell: bash
+      run: |
+        helm repo add splunk-otel-collector-chart https://signalfx.github.io/splunk-otel-collector-chart
+        helm repo update
+        if [[ -n "${UPGRADE_FROM_VERSION}" ]]; then
+          helm pull splunk-otel-collector-chart/splunk-otel-collector --version "${UPGRADE_FROM_VERSION}" --untar --untardir base
+        else
+          helm pull splunk-otel-collector-chart/splunk-otel-collector --untar --untardir base
+        fi
+      env:
+        UPGRADE_FROM_VERSION: ${{ inputs.upgrade-from-version }}
+
     - name: Update dependencies
       shell: bash
       run: make dep-update
@@ -84,6 +110,8 @@ runs:
         OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
         UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
         SUITE: ${{ inputs.suite }}
+        UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
+        UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}
       run: |
         TEARDOWN_BEFORE_SETUP=true make functionaltest
 
