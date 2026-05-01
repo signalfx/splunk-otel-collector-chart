@@ -21,5 +21,7 @@ operator:
 instrumentation:
   installationJob:
     enabled: true
+targetAllocator:
+  enabled: true
 featureGates:
   explicitMountServiceAccountToken: true
