@@ -14,13 +14,22 @@ This resulted in breaking changes to the helm chart's configuration for the targ
 | Old option                       | New option                                                                                                  |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------|
 | `targetAllocator`                | `targetallocator`                                                                                           |
+| `image.imagePullSecrets`         | `targetallocator.targetAllocator.serviceAccount.imagePullSecrets`                                           |
 | `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetallocator.targetAllocator.image.tag`           |
 | `targetAllocator.resources`      | `targetallocator.targetAllocator.resources`                                                                 |
 | `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                                            |
 | `targetAllocator.config`         | `targetallocator.targetAllocator.config`                                                                    |
 
+> [!NOTE]
+> The `image.imagePullSecrets` option is still valid for non-target allocator service accounts, but the
+> new option must ALSO be configured to attach secrets to the target allocator's service account.
+
 Example old config:
 ```
+image:
+  imagePullSecrets:
+    - name: my-registry-secret
+
 targetAllocator:
   enabled: true
   image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
@@ -33,10 +42,16 @@ targetAllocator:
 
 New config equivalent:
 ```
+image:
+  imagePullSecrets:
+    - name: my-registry-secret
+
 targetallocator:
   enabled: true
   targetAllocator:
     image:
+      imagePullSecrets:
+        - name: my-registry-secret
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
       tag: v0.132.0
     config:
