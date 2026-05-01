@@ -726,7 +726,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		podList, err := internal.GetPods(t, client, "default", "*")
 		assert.NoError(tt, err)
 		for _, pod := range podList.Items {
-			t.Log("Pod: ", pod.GetName(), ", deletion timestamp: ", pod.GetDeletionTimestamp().String())
+			t.Logf("Pod: %v, deletion timestamp: %v", pod.GetName(), pod.GetDeletionTimestamp())
 		}
 
 		metricNames := internal.GetMetricNames(&expectedMetrics)
