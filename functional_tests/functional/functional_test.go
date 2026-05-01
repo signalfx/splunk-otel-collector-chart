@@ -62,6 +62,9 @@ const (
 	rosaValuesDir                          = "expected_rosa_values"
 	gceValuesDir                           = "expected_gce_values"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
+	splunkOtelCollectorLabelSelector       = "app.kubernetes.io/name=splunk-otel-collector"
+	targetAllocatorLabelSelector           = "app.kubernetes.io/name=targetallocator"
+	targetAllocatorResourceNameMarker      = "-ta-"
 	linuxPodMetricsPath                    = "/tmp/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
 	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
@@ -401,10 +404,224 @@ func Test_Functions(t *testing.T) {
 
 	if kubeTestEnv == kindTestKubeEnv {
 		expectedValuesDir = kindValuesDir
-		runLocalClusterTests(t)
+		if os.Getenv("UPGRADE_FROM_VALUES") != "" {
+			runLocalClusterUpgradeTests(t)
+		} else {
+			runLocalClusterTests(t)
+		}
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
+
+func runLocalClusterUpgradeTests(t *testing.T) {
+	t.Run("test target allocator resources cleaned up and installed", testTargetAllocatorUpgrade)
+	t.Run("test component health", testLocalClusterComponentHealth)
+}
+
+func testTargetAllocatorUpgrade(t *testing.T) {
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	require.NoError(t, testTargetAllocatorClusterRoleUpgrade(t.Context(), client))
+	require.NoError(t, testTargetAllocatorClusterRoleBindingUpgrade(t.Context(), client))
+	require.NoError(t, testTargetAllocatorConfigMapUpgrade(t.Context(), client))
+	require.NoError(t, testTargetAllocatorDeploymentUpgrade(t.Context(), client))
+	require.NoError(t, testTargetAllocatorServiceUpgrade(t.Context(), client))
+	require.NoError(t, testTargetAllocatorServiceAccountUpgrade(t.Context(), client))
+}
+
+func testTargetAllocatorClusterRoleUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	clusterRoles, err := client.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorClusterRoles, err := client.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(clusterRoles.Items))
+	for _, clusterRole := range clusterRoles.Items {
+		oldResourceNames = append(oldResourceNames, clusterRole.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorClusterRoles.Items))
+	for _, clusterRole := range targetAllocatorClusterRoles.Items {
+		newResourceNames = append(newResourceNames, clusterRole.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("ClusterRole", oldResourceNames, newResourceNames)
+}
+
+func testTargetAllocatorClusterRoleBindingUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	clusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorClusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(clusterRoleBindings.Items))
+	for _, clusterRoleBinding := range clusterRoleBindings.Items {
+		oldResourceNames = append(oldResourceNames, clusterRoleBinding.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorClusterRoleBindings.Items))
+	for _, clusterRoleBinding := range targetAllocatorClusterRoleBindings.Items {
+		newResourceNames = append(newResourceNames, clusterRoleBinding.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("ClusterRoleBinding", oldResourceNames, newResourceNames)
+}
+
+func testTargetAllocatorConfigMapUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	configMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorConfigMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(configMaps.Items))
+	for _, configMap := range configMaps.Items {
+		oldResourceNames = append(oldResourceNames, configMap.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorConfigMaps.Items))
+	for _, configMap := range targetAllocatorConfigMaps.Items {
+		newResourceNames = append(newResourceNames, configMap.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("ConfigMap", oldResourceNames, newResourceNames)
+}
+
+func testTargetAllocatorDeploymentUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	deployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorDeployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(deployments.Items))
+	for _, deployment := range deployments.Items {
+		oldResourceNames = append(oldResourceNames, deployment.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorDeployments.Items))
+	for _, deployment := range targetAllocatorDeployments.Items {
+		newResourceNames = append(newResourceNames, deployment.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("Deployment", oldResourceNames, newResourceNames)
+}
+
+func testTargetAllocatorServiceUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	services, err := client.CoreV1().Services(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorServices, err := client.CoreV1().Services(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(services.Items))
+	for _, service := range services.Items {
+		oldResourceNames = append(oldResourceNames, service.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorServices.Items))
+	for _, service := range targetAllocatorServices.Items {
+		newResourceNames = append(newResourceNames, service.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("Service", oldResourceNames, newResourceNames)
+}
+
+func testTargetAllocatorServiceAccountUpgrade(ctx context.Context, client *kubernetes.Clientset) error {
+	serviceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: splunkOtelCollectorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	targetAllocatorServiceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
+		LabelSelector: targetAllocatorLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+
+	oldResourceNames := make([]string, 0, len(serviceAccounts.Items))
+	for _, serviceAccount := range serviceAccounts.Items {
+		oldResourceNames = append(oldResourceNames, serviceAccount.Name)
+	}
+	newResourceNames := make([]string, 0, len(targetAllocatorServiceAccounts.Items))
+	for _, serviceAccount := range targetAllocatorServiceAccounts.Items {
+		newResourceNames = append(newResourceNames, serviceAccount.Name)
+	}
+
+	return validateTargetAllocatorResourceUpgrade("ServiceAccount", oldResourceNames, newResourceNames)
+}
+
+func validateTargetAllocatorResourceUpgrade(resourceKind string, oldResourceNames, newResourceNames []string) error {
+	for _, resourceName := range oldResourceNames {
+		if strings.Contains(resourceName, targetAllocatorResourceNameMarker) {
+			return fmt.Errorf("expected old %s resource %q with label %q to no longer exist", resourceKind, resourceName, splunkOtelCollectorLabelSelector)
+		}
+	}
+
+	for _, resourceName := range newResourceNames {
+		if strings.Contains(resourceName, targetAllocatorResourceNameMarker) {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("expected at least one new %s resource with label %q and %q in the name", resourceKind, targetAllocatorLabelSelector, targetAllocatorResourceNameMarker)
+}
+
+func testLocalClusterComponentHealth(t *testing.T) {
+	// Test component health - verify no RBAC or connection errors
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	t.Run("component error logs checks", func(t *testing.T) {
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+	})
+
+	t.Run("control plane receiver checks", func(t *testing.T) {
+		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
+	})
 }
 
 // runLocalClusterTests runs tests that are expected to pass on local clusters like kind, minikube, etc.
@@ -433,22 +650,7 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	t.Run("test target allocator", testTargetAllocator)
 	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
-
-	// Test component health - verify no RBAC or connection errors
-	testKubeConfig := requireEnv(t, "KUBECONFIG")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-
-	t.Run("component error logs checks", func(t *testing.T) {
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
-	})
-
-	t.Run("control plane receiver checks", func(t *testing.T) {
-		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
-	})
+	t.Run("test component health", testLocalClusterComponentHealth)
 }
 
 // runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
