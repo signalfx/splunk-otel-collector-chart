@@ -594,7 +594,7 @@ Common config for Splunk O11Y Ingest HTTP Forwarder extension
 {{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
-http_forwarder/splunk_o11y_ingest:
+http_forwarder/opamp_splunk_o11y:
   ingress:
       endpoint: "0.0.0.0:4320"
   egress:

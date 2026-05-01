@@ -392,7 +392,7 @@ agent:
       hostPort: 14250
       protocol: TCP
       enabled_for: [traces]
-    ingestforwarder:
+    opampforwarder:
       containerPort: 4320
       protocol: TCP
       enabled_for: [metrics, traces, logs]
@@ -890,7 +890,7 @@ gateway:
       protocol: TCP
       # Enabled for all because SignalFx exporter will always send metadata updates when enabled.
       enabled_for: [metrics, traces, logs]
-    ingestforwarder:
+    opampforwarder:
       containerPort: 4320
       protocol: TCP
       enabled_for: [metrics, traces, logs]

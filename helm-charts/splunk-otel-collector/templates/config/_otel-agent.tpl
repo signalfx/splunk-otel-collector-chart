@@ -1158,7 +1158,7 @@ service:
     - health_check
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
-    - http_forwarder/splunk_o11y_ingest
+    - http_forwarder/opamp_splunk_o11y
     - opamp/splunk_o11y
     {{- end }}
     - k8s_observer

@@ -57,7 +57,7 @@ data:
           key: X-SF-TOKEN
       health_check:
         endpoint: 0.0.0.0:13133
-      http_forwarder/splunk_o11y_ingest:
+      http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: http://default-splunk-otel-collector:4320
         ingress:
@@ -332,7 +332,7 @@ data:
       extensions:
       - health_check
       - headers_setter
-      - http_forwarder/splunk_o11y_ingest
+      - http_forwarder/opamp_splunk_o11y
       - opamp/splunk_o11y
       - k8s_observer
       - zpages

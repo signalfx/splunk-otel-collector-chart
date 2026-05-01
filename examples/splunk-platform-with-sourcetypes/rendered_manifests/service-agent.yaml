@@ -19,9 +19,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: ingestforwarder
+  - name: opampforwarder
     port: 4320
-    targetPort: ingestforwarder
+    targetPort: opampforwarder
     protocol: TCP
   - name: otlp
     port: 4317

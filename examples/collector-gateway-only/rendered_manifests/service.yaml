@@ -25,10 +25,6 @@ spec:
     port: 6060
     targetPort: http-forwarder
     protocol: TCP
-  - name: ingestforwarder
-    port: 4320
-    targetPort: ingestforwarder
-    protocol: TCP
   - name: jaeger-grpc
     port: 14250
     targetPort: jaeger-grpc
@@ -36,6 +32,10 @@ spec:
   - name: jaeger-thrift
     port: 14268
     targetPort: jaeger-thrift
+    protocol: TCP
+  - name: opampforwarder
+    port: 4320
+    targetPort: opampforwarder
     protocol: TCP
   - name: otlp
     port: 4317

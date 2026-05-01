@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: af58a37f1c53fae321126d9bbb444bf5d008c270c164ea9c212c981a618d1460
+        checksum/config: d62c7c87e6d5e235da43316583d96ba0c121d527ad13b937863249aa5cec7ce3
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -77,14 +77,14 @@ spec:
         - name: http-forwarder
           containerPort: 6060
           protocol: TCP
-        - name: ingestforwarder
-          containerPort: 4320
-          protocol: TCP
         - name: jaeger-grpc
           containerPort: 14250
           protocol: TCP
         - name: jaeger-thrift
           containerPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317

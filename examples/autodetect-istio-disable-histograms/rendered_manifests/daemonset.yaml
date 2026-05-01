@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: 38f29935085e3737d0c585a7c875dae9cc85b8079dedc004d09a50dab244e51b
+        checksum/config: 9459f272f241d59573e30714fd66927fe2ce9280066cce7ed71740ffdf0cc99c
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -59,9 +59,6 @@ spec:
         args:
         - --config=/conf/relay.yaml
         ports:
-        - name: ingestforwarder
-          containerPort: 4320
-          protocol: TCP
         - name: jaeger-grpc
           containerPort: 14250
           hostPort: 14250
@@ -69,6 +66,9 @@ spec:
         - name: jaeger-thrift
           containerPort: 14268
           hostPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317
