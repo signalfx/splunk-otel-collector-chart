@@ -712,7 +712,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 						t.Logf("metrics %s is available", m.Name())
 						for l := 0; l < m.Gauge().DataPoints().Len(); l++ {
 							dp := m.Gauge().DataPoints().At(l)
-							t.Log(fmt.Sprintf("Datapoint %v attributes: %v", l, dp.Attributes().AsRaw()))
+							t.Log(fmt.Sprintf("Datapoint %v, value: %v, attributes: %v", l, dp.IntValue(), dp.Attributes().AsRaw()))
 						}
 					}
 				}
