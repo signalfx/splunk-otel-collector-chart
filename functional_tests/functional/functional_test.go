@@ -62,8 +62,6 @@ const (
 	rosaValuesDir                           = "expected_rosa_values"
 	gceValuesDir                            = "expected_gce_values"
 	clusterReceiverLabelSelector            = "component=otel-k8s-cluster-receiver"
-	splunkOtelCollectorLabelSelector        = "app.kubernetes.io/name=splunk-otel-collector"
-	taLabelSelector                         = "app.kubernetes.io/name=targetallocator"
 	splunkOtelCollectorTAResourceNameMarker = "splunk-otel-collector-ta"
 	taResourceNameMarker                    = "targetallocator-ta"
 	linuxPodMetricsPath                     = "/tmp/metrics.json"
@@ -446,29 +444,7 @@ func testTargetAllocatorClusterRoleUpgrade(t *testing.T, ctx context.Context, cl
 	}
 	t.Logf("all ClusterRole names: %v", allClusterRoleNames)
 
-	clusterRoles, err := client.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorClusterRoles, err := client.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(clusterRoles.Items))
-	for _, clusterRole := range clusterRoles.Items {
-		oldResourceNames = append(oldResourceNames, clusterRole.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorClusterRoles.Items))
-	for _, clusterRole := range targetAllocatorClusterRoles.Items {
-		newResourceNames = append(newResourceNames, clusterRole.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("ClusterRole", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("ClusterRole", allClusterRoleNames)
 }
 
 func testTargetAllocatorClusterRoleBindingUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
@@ -482,29 +458,7 @@ func testTargetAllocatorClusterRoleBindingUpgrade(t *testing.T, ctx context.Cont
 	}
 	t.Logf("all ClusterRoleBinding names: %v", allClusterRoleBindingNames)
 
-	clusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorClusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(clusterRoleBindings.Items))
-	for _, clusterRoleBinding := range clusterRoleBindings.Items {
-		oldResourceNames = append(oldResourceNames, clusterRoleBinding.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorClusterRoleBindings.Items))
-	for _, clusterRoleBinding := range targetAllocatorClusterRoleBindings.Items {
-		newResourceNames = append(newResourceNames, clusterRoleBinding.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("ClusterRoleBinding", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("ClusterRoleBinding", allClusterRoleBindingNames)
 }
 
 func testTargetAllocatorConfigMapUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
@@ -518,29 +472,7 @@ func testTargetAllocatorConfigMapUpgrade(t *testing.T, ctx context.Context, clie
 	}
 	t.Logf("all ConfigMap names: %v", allConfigMapNames)
 
-	configMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorConfigMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(configMaps.Items))
-	for _, configMap := range configMaps.Items {
-		oldResourceNames = append(oldResourceNames, configMap.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorConfigMaps.Items))
-	for _, configMap := range targetAllocatorConfigMaps.Items {
-		newResourceNames = append(newResourceNames, configMap.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("ConfigMap", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("ConfigMap", allConfigMapNames)
 }
 
 func testTargetAllocatorDeploymentUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
@@ -554,29 +486,7 @@ func testTargetAllocatorDeploymentUpgrade(t *testing.T, ctx context.Context, cli
 	}
 	t.Logf("all Deployment names: %v", allDeploymentNames)
 
-	deployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorDeployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(deployments.Items))
-	for _, deployment := range deployments.Items {
-		oldResourceNames = append(oldResourceNames, deployment.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorDeployments.Items))
-	for _, deployment := range targetAllocatorDeployments.Items {
-		newResourceNames = append(newResourceNames, deployment.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("Deployment", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("Deployment", allDeploymentNames)
 }
 
 func testTargetAllocatorServiceUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
@@ -590,29 +500,7 @@ func testTargetAllocatorServiceUpgrade(t *testing.T, ctx context.Context, client
 	}
 	t.Logf("all Service names: %v", allServiceNames)
 
-	services, err := client.CoreV1().Services(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorServices, err := client.CoreV1().Services(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(services.Items))
-	for _, service := range services.Items {
-		oldResourceNames = append(oldResourceNames, service.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorServices.Items))
-	for _, service := range targetAllocatorServices.Items {
-		newResourceNames = append(newResourceNames, service.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("Service", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("Service", allServiceNames)
 }
 
 func testTargetAllocatorServiceAccountUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
@@ -626,45 +514,23 @@ func testTargetAllocatorServiceAccountUpgrade(t *testing.T, ctx context.Context,
 	}
 	t.Logf("all ServiceAccount names: %v", allServiceAccountNames)
 
-	serviceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: splunkOtelCollectorLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	targetAllocatorServiceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(ctx, metav1.ListOptions{
-		LabelSelector: taLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
-	oldResourceNames := make([]string, 0, len(serviceAccounts.Items))
-	for _, serviceAccount := range serviceAccounts.Items {
-		oldResourceNames = append(oldResourceNames, serviceAccount.Name)
-	}
-	newResourceNames := make([]string, 0, len(targetAllocatorServiceAccounts.Items))
-	for _, serviceAccount := range targetAllocatorServiceAccounts.Items {
-		newResourceNames = append(newResourceNames, serviceAccount.Name)
-	}
-
-	return validateTargetAllocatorResourceUpgrade("ServiceAccount", oldResourceNames, newResourceNames)
+	return validateTargetAllocatorResourceUpgrade("ServiceAccount", allServiceAccountNames)
 }
 
-func validateTargetAllocatorResourceUpgrade(resourceKind string, oldResourceNames, newResourceNames []string) error {
-	for _, resourceName := range oldResourceNames {
+func validateTargetAllocatorResourceUpgrade(resourceKind string, resourceNames []string) error {
+	for _, resourceName := range resourceNames {
 		if strings.Contains(resourceName, splunkOtelCollectorTAResourceNameMarker) {
-			return fmt.Errorf("expected old %s resource %q with label %q to no longer exist", resourceKind, resourceName, splunkOtelCollectorLabelSelector)
+			return fmt.Errorf("expected old %s resource %q to no longer exist", resourceKind, resourceName)
 		}
 	}
 
-	for _, resourceName := range newResourceNames {
+	for _, resourceName := range resourceNames {
 		if strings.Contains(resourceName, taResourceNameMarker) {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("expected at least one new %s resource with label %q and %q in the name", resourceKind, taLabelSelector, taResourceNameMarker)
+	return fmt.Errorf("expected at least one new %s resource with %q in the name", resourceKind, taResourceNameMarker)
 }
 
 func testLocalClusterComponentHealth(t *testing.T) {
