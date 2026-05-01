@@ -718,6 +718,16 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 				}
 			}
 		}
+		testKubeConfig := requireEnv(t, "KUBECONFIG")
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		assert.NoError(tt, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(tt, err)
+		podList, err := internal.GetPods(t, client, "default", "*")
+		assert.NoError(tt, err)
+		for _, pod := range podList.Items {
+			t.Log("Pod: ", pod.GetName(), ", deletion timestamp: ", pod.GetDeletionTimestamp().String())
+		}
 
 		metricNames := internal.GetMetricNames(&expectedMetrics)
 		err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
@@ -752,7 +762,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
 			assert.NoError(tt, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
 		}
-
 	}, 3*time.Minute, 5*time.Second, "No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount())
 
 	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", expectedMetrics.MetricCount())
