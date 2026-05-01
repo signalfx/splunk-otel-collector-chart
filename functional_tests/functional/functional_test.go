@@ -41,33 +41,33 @@ import (
 )
 
 const (
-	signalFxReceiverK8sClusterReceiverPort  = 19443
-	kindTestKubeEnv                         = "kind"
-	eksTestKubeEnv                          = "eks"
-	eksAutoModeTestKubeEnv                  = "eks/auto-mode"
-	eksFargateTestKubeEnv                   = "eks/fargate"
-	gkeTestKubeEnv                          = "gke"
-	autopilotTestKubeEnv                    = "gke/autopilot"
-	aksTestKubeEnv                          = "aks"
-	rosaTestKubeEnv                         = "rosa"
-	gceTestKubeEnv                          = "gce"
-	testDir                                 = "testdata"
-	valuesDir                               = "values"
-	manifestsDir                            = "manifests"
-	kindValuesDir                           = "expected_kind_values"
-	eksValuesDir                            = "expected_eks_values"
-	eksAutoModeValuesDir                    = "expected_eks_auto_mode_values"
-	aksValuesDir                            = "expected_aks_values"
-	gkeValuesDir                            = "expected_gke_values"
-	rosaValuesDir                           = "expected_rosa_values"
-	gceValuesDir                            = "expected_gce_values"
-	clusterReceiverLabelSelector            = "component=otel-k8s-cluster-receiver"
-	splunkOtelCollectorTAResourceNameMarker = "splunk-otel-collector-ta"
-	taResourceNameMarker                    = "targetallocator-ta"
-	linuxPodMetricsPath                     = "/tmp/metrics.json"
-	winPodMetricsPath                       = "C:\\metrics.json"
-	linuxPodK8sClusterMetricsPath           = "/tmp/k8s_cluster_metrics.json"
-	winPodK8sClusterMetricsPath             = "C:\\k8s_cluster_metrics.json"
+	signalFxReceiverK8sClusterReceiverPort = 19443
+	kindTestKubeEnv                        = "kind"
+	eksTestKubeEnv                         = "eks"
+	eksAutoModeTestKubeEnv                 = "eks/auto-mode"
+	eksFargateTestKubeEnv                  = "eks/fargate"
+	gkeTestKubeEnv                         = "gke"
+	autopilotTestKubeEnv                   = "gke/autopilot"
+	aksTestKubeEnv                         = "aks"
+	rosaTestKubeEnv                        = "rosa"
+	gceTestKubeEnv                         = "gce"
+	testDir                                = "testdata"
+	valuesDir                              = "values"
+	manifestsDir                           = "manifests"
+	kindValuesDir                          = "expected_kind_values"
+	eksValuesDir                           = "expected_eks_values"
+	eksAutoModeValuesDir                   = "expected_eks_auto_mode_values"
+	aksValuesDir                           = "expected_aks_values"
+	gkeValuesDir                           = "expected_gke_values"
+	rosaValuesDir                          = "expected_rosa_values"
+	gceValuesDir                           = "expected_gce_values"
+	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
+	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
+	taResourceName                         = "targetallocator-ta"
+	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	winPodMetricsPath                      = "C:\\metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
 )
 
 type collectorRole string
@@ -425,112 +425,108 @@ func testTargetAllocatorUpgrade(t *testing.T) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 
-	require.NoError(t, testTargetAllocatorClusterRoleUpgrade(t, t.Context(), client))
-	require.NoError(t, testTargetAllocatorClusterRoleBindingUpgrade(t, t.Context(), client))
-	require.NoError(t, testTargetAllocatorConfigMapUpgrade(t, t.Context(), client))
-	require.NoError(t, testTargetAllocatorDeploymentUpgrade(t, t.Context(), client))
-	require.NoError(t, testTargetAllocatorServiceUpgrade(t, t.Context(), client))
-	require.NoError(t, testTargetAllocatorServiceAccountUpgrade(t, t.Context(), client))
+	require.NoError(t, testTargetAllocatorClusterRoleUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorClusterRoleBindingUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorConfigMapUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorDeploymentUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorServiceUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorServiceAccountUpgrade(t, client))
 }
 
-func testTargetAllocatorClusterRoleUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allClusterRoles, err := client.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+func testTargetAllocatorClusterRoleUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allClusterRoles, err := client.RbacV1().ClusterRoles().List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allClusterRoleNames := make([]string, 0, len(allClusterRoles.Items))
-	for _, clusterRole := range allClusterRoles.Items {
-		allClusterRoleNames = append(allClusterRoleNames, clusterRole.Name)
-	}
-	t.Logf("all ClusterRole names: %v", allClusterRoleNames)
 
-	return validateTargetAllocatorResourceUpgrade("ClusterRole", allClusterRoleNames)
+	return validateTargetAllocatorResourceUpgrade(allClusterRoles.Kind, allClusterRoles.Items)
 }
 
-func testTargetAllocatorClusterRoleBindingUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allClusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{})
+func testTargetAllocatorClusterRoleBindingUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allClusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allClusterRoleBindingNames := make([]string, 0, len(allClusterRoleBindings.Items))
-	for _, clusterRoleBinding := range allClusterRoleBindings.Items {
-		allClusterRoleBindingNames = append(allClusterRoleBindingNames, clusterRoleBinding.Name)
-	}
-	t.Logf("all ClusterRoleBinding names: %v", allClusterRoleBindingNames)
 
-	return validateTargetAllocatorResourceUpgrade("ClusterRoleBinding", allClusterRoleBindingNames)
+	return validateTargetAllocatorResourceUpgrade(allClusterRoleBindings.Kind, allClusterRoleBindings.Items)
 }
 
-func testTargetAllocatorConfigMapUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allConfigMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+func testTargetAllocatorConfigMapUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allConfigMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allConfigMapNames := make([]string, 0, len(allConfigMaps.Items))
-	for _, configMap := range allConfigMaps.Items {
-		allConfigMapNames = append(allConfigMapNames, configMap.Namespace+"/"+configMap.Name)
-	}
-	t.Logf("all ConfigMap names: %v", allConfigMapNames)
 
-	return validateTargetAllocatorResourceUpgrade("ConfigMap", allConfigMapNames)
+	return validateTargetAllocatorResourceUpgrade(allConfigMaps.Kind, allConfigMaps.Items)
 }
 
-func testTargetAllocatorDeploymentUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allDeployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+func testTargetAllocatorDeploymentUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allDeployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allDeploymentNames := make([]string, 0, len(allDeployments.Items))
-	for _, deployment := range allDeployments.Items {
-		allDeploymentNames = append(allDeploymentNames, deployment.Namespace+"/"+deployment.Name)
-	}
-	t.Logf("all Deployment names: %v", allDeploymentNames)
 
-	return validateTargetAllocatorResourceUpgrade("Deployment", allDeploymentNames)
+	return validateTargetAllocatorResourceUpgrade(allDeployments.Kind, allDeployments.Items)
 }
 
-func testTargetAllocatorServiceUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allServices, err := client.CoreV1().Services(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+func testTargetAllocatorServiceUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allServices, err := client.CoreV1().Services(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allServiceNames := make([]string, 0, len(allServices.Items))
-	for _, service := range allServices.Items {
-		allServiceNames = append(allServiceNames, service.Namespace+"/"+service.Name)
-	}
-	t.Logf("all Service names: %v", allServiceNames)
 
-	return validateTargetAllocatorResourceUpgrade("Service", allServiceNames)
+	return validateTargetAllocatorResourceUpgrade(allServices.Kind, allServices.Items)
 }
 
-func testTargetAllocatorServiceAccountUpgrade(t *testing.T, ctx context.Context, client *kubernetes.Clientset) error {
-	allServiceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+func testTargetAllocatorServiceAccountUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allServiceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	allServiceAccountNames := make([]string, 0, len(allServiceAccounts.Items))
-	for _, serviceAccount := range allServiceAccounts.Items {
-		allServiceAccountNames = append(allServiceAccountNames, serviceAccount.Namespace+"/"+serviceAccount.Name)
-	}
-	t.Logf("all ServiceAccount names: %v", allServiceAccountNames)
 
-	return validateTargetAllocatorResourceUpgrade("ServiceAccount", allServiceAccountNames)
+	return validateTargetAllocatorResourceUpgrade(allServiceAccounts.Kind, allServiceAccounts.Items)
 }
 
-func validateTargetAllocatorResourceUpgrade(resourceKind string, resourceNames []string) error {
-	for _, resourceName := range resourceNames {
-		if strings.Contains(resourceName, splunkOtelCollectorTAResourceNameMarker) {
+type namedK8sResource interface {
+	GetName() string
+}
+
+func validateTargetAllocatorResourceUpgrade[T any](resourceKind string, resources []T) error {
+	if err := validateOldTargetAllocatorResourceDoesNotExist(resourceKind, resources); err != nil {
+		return err
+	}
+
+	return validateNewTargetAllocatorResourceExists(resourceKind, resources)
+}
+
+func validateOldTargetAllocatorResourceDoesNotExist[T any](resourceKind string, resources []T) error {
+	for i := range resources {
+		resource, ok := any(&resources[i]).(namedK8sResource)
+		if !ok {
+			return fmt.Errorf("expected %s resource to expose a Kubernetes name", resourceKind)
+		}
+		resourceName := resource.GetName()
+		if strings.Contains(resourceName, splunkOtelCollectorTAResourceName) {
 			return fmt.Errorf("expected old %s resource %q to no longer exist", resourceKind, resourceName)
 		}
 	}
 
-	for _, resourceName := range resourceNames {
-		if strings.Contains(resourceName, taResourceNameMarker) {
+	return nil
+}
+
+func validateNewTargetAllocatorResourceExists[T any](resourceKind string, resources []T) error {
+	for i := range resources {
+		resource, ok := any(&resources[i]).(namedK8sResource)
+		if !ok {
+			return fmt.Errorf("expected %s resource to expose a Kubernetes name", resourceKind)
+		}
+		resourceName := resource.GetName()
+		if strings.Contains(resourceName, taResourceName) {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("expected at least one new %s resource with %q in the name", resourceKind, taResourceNameMarker)
+	return fmt.Errorf("expected at least one new %s resource with %q in the name", resourceKind, taResourceName)
 }
 
 func testLocalClusterComponentHealth(t *testing.T) {
