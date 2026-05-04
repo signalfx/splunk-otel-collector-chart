@@ -10598,4 +10598,55 @@ resourceMetrics:
                         stringValue: k8scluster
                   timeUnixNano: "1000000"
             name: k8s.node.condition_ready
+          - gauge:
+              dataPoints:
+                - asInt: "0"
+                  attributes:
+                    - key: cluster_name
+                      value:
+                        stringValue: ci-k8s-cluster
+                    - key: customfield1
+                      value:
+                        stringValue: customvalue1
+                    - key: customfield2
+                      value:
+                        stringValue: customvalue2
+                    - key: k8s.cluster.name
+                      value:
+                        stringValue: dev-operator
+                    - key: k8s.namespace.name
+                      value:
+                        stringValue: default
+                    - key: k8s.service.endpoint.address_type
+                      value:
+                        stringValue: IPv4
+                    - key: k8s.service.endpoint.condition
+                      value:
+                        stringValue: ready
+                    - key: k8s.service.endpoint.zone
+                      value:
+                        stringValue: ""
+                    - key: k8s.service.name
+                      value:
+                        stringValue: kubernetes
+                    - key: k8s.service.publish_not_ready_addresses
+                      value:
+                        stringValue: "false"
+                    - key: k8s.service.traffic_distribution
+                      value:
+                        stringValue: ""
+                    - key: k8s.service.type
+                      value:
+                        stringValue: ClusterIP
+                    - key: k8s.service.uid
+                      value:
+                        stringValue: 00000000-0000-0000-0000-000000000001
+                    - key: metric_source
+                      value:
+                        stringValue: kubernetes
+                    - key: receiver
+                      value:
+                        stringValue: k8scluster
+                  timeUnixNano: "1000000"
+            name: k8s.service.endpoint.count
         scope: {}
