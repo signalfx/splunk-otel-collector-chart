@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: fe5a2c86d2db4c2316bd2f6211005e0d98141d036cccc3cffbadf645796c6c20
+        checksum/config: 0ebce39d1638b24ccf64c1ad58adf42dc5f5388b7e2f77a44c993cfebd614f0a
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -52,11 +52,7 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
-        - effect: NoSchedule
-          key: batch.amazonaws.com/batch-node
-          operator: Exists
-        - effect: NoExecute
-          key: batch.amazonaws.com/batch-node
+        - key: batch.amazonaws.com/batch-node
           operator: Exists
       containers:
       - name: otel-collector
@@ -70,6 +66,9 @@ spec:
         - name: jaeger-thrift
           containerPort: 14268
           hostPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317

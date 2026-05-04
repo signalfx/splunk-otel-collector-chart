@@ -52,17 +52,16 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
-        - effect: NoSchedule
-          key: batch.amazonaws.com/batch-node
-          operator: Exists
-        - effect: NoExecute
-          key: batch.amazonaws.com/batch-node
+        - key: batch.amazonaws.com/batch-node
           operator: Exists
       containers:
       - name: otel-collector
         args:
         - --config=/conf/relay.yaml
         ports:
+        - name: opampforwarder
+          containerPort: 4320
+          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317

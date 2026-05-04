@@ -4,12 +4,14 @@ description: >
   suite. Optionally overrides the collector image and uploads debug artifacts.
 
 inputs:
-  k8s-version:
-    description: 'Kubernetes version for the kind cluster (e.g. v1.34.3)'
-    required: true
-  suite:
-    description: 'Test suite to run (passed as SUITE= to make functionaltest)'
-    required: true
+  artifact-suffix:
+    description: 'Suffix for the k8s debug info artifact name'
+    required: false
+    default: ''
+  build-test-images:
+    description: 'Whether to build and load test images into kind'
+    required: false
+    default: 'true'
   go-version:
     description: 'Go version to install'
     required: false
@@ -18,26 +20,24 @@ inputs:
     description: 'Path to go.mod to determine Go version (used when go-version is not set)'
     required: false
     default: ''
-  build-test-images:
-    description: 'Whether to build and load test images into kind'
-    required: false
-    default: 'true'
-  update-expected-results:
-    description: 'Whether to update golden file expected test results'
-    required: false
-    default: 'false'
+  k8s-version:
+    description: 'Kubernetes version for the kind cluster (e.g. v1.34.3)'
+    required: true
   kubernetes-debug-info:
     description: 'Whether to collect and upload k8s debug info'
     required: false
     default: 'false'
-  artifact-suffix:
-    description: 'Suffix for the k8s debug info artifact name'
-    required: false
-    default: ''
   otelcol-image:
     description: 'Override for the collector image reference (repository[:tag])'
     required: false
     default: ''
+  suite:
+    description: 'Test suite to run (passed as SUITE= to make functionaltest)'
+    required: true
+  update-expected-results:
+    description: 'Whether to update golden file expected test results'
+    required: false
+    default: 'false'
 
 runs:
   using: composite

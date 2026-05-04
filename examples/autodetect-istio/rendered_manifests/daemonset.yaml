@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: 27029e296eabd5387c0598974608f274bd1f472f77f28947a14e1d5ae9588fef
+        checksum/config: ab719a9c0700e9b1b74fc5bf34ef76a4b74ce86d8cedc51c28cbbe06ac78cb66
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -53,11 +53,7 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
-        - effect: NoSchedule
-          key: batch.amazonaws.com/batch-node
-          operator: Exists
-        - effect: NoExecute
-          key: batch.amazonaws.com/batch-node
+        - key: batch.amazonaws.com/batch-node
           operator: Exists
       initContainers:
       containers:
@@ -72,6 +68,9 @@ spec:
         - name: jaeger-thrift
           containerPort: 14268
           hostPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317
