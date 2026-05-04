@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: a7af5b6b799029a652f27d4d3ad6bb873ead7c7f39459a1be934f8a703c3ab69
+        checksum/config: 9459f272f241d59573e30714fd66927fe2ce9280066cce7ed71740ffdf0cc99c
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -66,6 +66,9 @@ spec:
         - name: jaeger-thrift
           containerPort: 14268
           hostPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317

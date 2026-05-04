@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 88181741ad7dbb7c2feed371a5c2fa868234dbefe62e59abaa4f993cdfd6bcbd
+        checksum/config: 7b9c0585cbcc624d0df80a89e6be6785b2709209ed5ec5c0382846a9f2d959fa
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -64,6 +64,9 @@ spec:
         - name: jaeger-thrift
           containerPort: 14268
           hostPort: 14268
+          protocol: TCP
+        - name: opampforwarder
+          containerPort: 4320
           protocol: TCP
         - name: otlp
           containerPort: 4317

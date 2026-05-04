@@ -4,6 +4,8 @@ The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -214,6 +216,8 @@ service:
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - http_forwarder
+    - http_forwarder/opamp_splunk_o11y
+    - opamp/splunk_o11y
     {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
