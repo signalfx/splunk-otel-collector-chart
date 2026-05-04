@@ -27,6 +27,10 @@ spec:
     port: 14268
     targetPort: jaeger-thrift
     protocol: TCP
+  - name: opampforwarder
+    port: 4320
+    targetPort: opampforwarder
+    protocol: TCP
   - name: otlp
     port: 4317
     targetPort: otlp
