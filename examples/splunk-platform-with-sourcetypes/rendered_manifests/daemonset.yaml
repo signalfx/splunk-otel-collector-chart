@@ -58,6 +58,9 @@ spec:
         args:
         - --config=/conf/relay.yaml
         ports:
+        - name: opampforwarder
+          containerPort: 4320
+          protocol: TCP
         - name: otlp
           containerPort: 4317
           hostPort: 4317

@@ -73,9 +73,21 @@ data:
           key: X-SF-TOKEN
       health_check:
         endpoint: 0.0.0.0:13133
+      http_forwarder/opamp_splunk_o11y:
+        egress:
+          endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
+        ingress:
+          endpoint: 0.0.0.0:4320
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
+      opamp/splunk_o11y:
+        server:
+          http:
+            endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
+            headers:
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+            polling_interval: 30s
       zpages: null
     processors:
       batch:
@@ -511,6 +523,8 @@ data:
       - file_storage
       - health_check
       - headers_setter
+      - http_forwarder/opamp_splunk_o11y
+      - opamp/splunk_o11y
       - k8s_observer
       - zpages
       pipelines:

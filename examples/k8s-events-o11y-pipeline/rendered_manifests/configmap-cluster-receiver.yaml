@@ -31,6 +31,13 @@ data:
     extensions:
       health_check:
         endpoint: 0.0.0.0:13134
+      opamp/splunk_o11y:
+        server:
+          http:
+            endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
+            headers:
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+            polling_interval: 30s
     processors:
       attributes/drop_event_attrs:
         actions:
@@ -180,6 +187,7 @@ data:
     service:
       extensions:
       - health_check
+      - opamp/splunk_o11y
       pipelines:
         logs:
           exporters:

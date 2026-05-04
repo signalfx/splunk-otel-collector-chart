@@ -1,0 +1,22 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: agent, clusterReceiver, gateway
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Add OpAMP extension support to the default agent, clusterReceiver and gateway configuration.
+# One or more tracking issues related to the change
+issues: [2406]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  The OpAMP extension is included in the default configuration but disabled by default behind a feature gate.
+  Use the feature gate ID `splunk.opamp.enabled` to enable the OpAMP extension.
+  Example:
+  For the `agent`: `--set agent.featureGates=+splunk.opamp.enabled`
+  For the `clusterReceiver`: `--set clusterReceiver.featureGates=+splunk.opamp.enabled`
+  For the `gateway`: `--set gateway.featureGates=+splunk.opamp.enabled`
+
+  Note: a new `http_forwarder` extension binds to port 4320 and forwards requests to Splunk O11y ingest.
+  When running on the gateway, the extension is intended as a forwarding mechanism for sending data to the gateway from the agent and clusterReceiver.
+  When running on the agent, the extension is intended as an entry point for receiving OpAMP data from instrumentation agents that support OpAMP, such as the Splunk OpenTelemetry Java agent.
