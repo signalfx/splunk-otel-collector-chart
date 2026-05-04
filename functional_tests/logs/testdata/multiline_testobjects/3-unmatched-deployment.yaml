@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unmatched-logger
+  namespace: multiline-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unmatched-logger
+  template:
+    metadata:
+      labels:
+        app: unmatched-logger
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: unmatched-logger
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do echo UNMATCHED_LOG_MARKER; sleep 10; done"]
+      nodeSelector:
+        kubernetes.io/os: "linux"

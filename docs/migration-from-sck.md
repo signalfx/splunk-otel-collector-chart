@@ -235,7 +235,7 @@ If you are using the `resources` option in SCK to limit/increase the CPU and mem
 
 #### Extra files from host
 
-For tailing files other than container or journald logs (that is, kube audit logs), configure `logsCollection.extraFileLogs` using this [filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) receiver configuration.
+For tailing files other than container or journald logs (that is, kube audit logs), configure `logsCollection.extraFileLogs` using this [file_log](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) receiver configuration.
 
 [SCK values.yaml snippet]
 
@@ -255,7 +255,7 @@ logs:
 ```yaml
 logsCollection:
   extraFileLogs:
-    filelog/kube-audit:
+    file_log/kube-audit:
       include: [/var/log/kube-apiserver-audit.log]
       start_at: beginning
       include_file_path: true

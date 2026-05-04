@@ -19,6 +19,16 @@ logsCollection:
     enabled: false
 
 agent:
+  resources:
+    limits:
+      memory: 1Gi
+  controlPlaneMetrics:
+    scrapeInterval: 30s
+    etcd:
+      enabled: true
+      skipVerify: true
+      secret:
+        name: splunk-etcd-client-certs
   config:
     receivers:
       kubeletstats:

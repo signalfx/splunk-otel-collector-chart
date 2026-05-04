@@ -207,7 +207,7 @@ data:
             ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil
             and attributes["k8s.namespace.name"] != nil
     receivers:
-      filelog:
+      file_log:
         encoding: utf-8
         exclude:
         - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
@@ -471,7 +471,7 @@ data:
           - transform/istio_service_name
           - resource/logs
           receivers:
-          - filelog
+          - file_log
           - otlp
         logs/entities:
           exporters:

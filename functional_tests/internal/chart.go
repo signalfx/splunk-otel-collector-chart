@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"helm.sh/helm/v4/pkg/chart/loader"
 	"helm.sh/helm/v4/pkg/kube"
 	releasev1 "helm.sh/helm/v4/pkg/release/v1"
+	"helm.sh/helm/v4/pkg/strvals"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,6 +71,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	var values map[string]any
 	err = yaml.Unmarshal(buf.Bytes(), &values)
 	require.NoError(t, err)
+	applyEnvOverrides(t, values)
 
 	actionConfig := InitHelmActionConfig(t, testKubeConfig)
 	install := action.NewInstall(actionConfig)
@@ -126,6 +129,50 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	require.NoError(t, err)
 	labelSelector := "release=" + options.ChartReleaseName
 	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
+}
+
+// applyEnvOverrides merges environment-driven value overrides into the helm values map.
+//
+// Supported env vars:
+//
+//	OTELCOL_IMAGE       - collector image reference to parse into OTELCOL_IMAGE_REPO/TAG
+//	OTELCOL_IMAGE_REPO  - overrides image.otelcol.repository
+//	OTELCOL_IMAGE_TAG   - overrides image.otelcol.tag
+func applyEnvOverrides(t *testing.T, values map[string]any) {
+	setCollectorImageOverrideEnv(t)
+
+	if repo := os.Getenv("OTELCOL_IMAGE_REPO"); repo != "" {
+		t.Logf("OTELCOL_IMAGE_REPO override: image.otelcol.repository=%s", repo)
+		require.NoError(t, strvals.ParseInto("image.otelcol.repository="+repo, values))
+	}
+	if tag := os.Getenv("OTELCOL_IMAGE_TAG"); tag != "" {
+		t.Logf("OTELCOL_IMAGE_TAG override: image.otelcol.tag=%s", tag)
+		require.NoError(t, strvals.ParseInto("image.otelcol.tag="+tag, values))
+	}
+}
+
+func setCollectorImageOverrideEnv(t *testing.T) {
+	image := os.Getenv("OTELCOL_IMAGE")
+	if image == "" {
+		return
+	}
+
+	repo, tag := parseCollectorImage(image)
+	t.Logf("OTELCOL_IMAGE override: repo=%s tag=%s", repo, tag)
+	t.Setenv("OTELCOL_IMAGE_REPO", repo)
+	t.Setenv("OTELCOL_IMAGE_TAG", tag)
+}
+
+func parseCollectorImage(image string) (string, string) {
+	repo := image
+	tag := "latest"
+
+	if idx := strings.LastIndex(image, ":"); idx >= 0 {
+		repo = image[:idx]
+		tag = image[idx+1:]
+	}
+
+	return repo, tag
 }
 
 func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {

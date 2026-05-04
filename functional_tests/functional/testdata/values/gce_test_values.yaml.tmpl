@@ -20,6 +20,14 @@ logsCollection:
     directory: /run/log/journal
 
 agent:
+  controlPlaneMetrics:
+    scrapeInterval: 30s
+    etcd:
+      enabled: true
+      port: 4001
+      skipVerify: true
+      secret:
+        name: splunk-etcd-client-certs
   config:
     exporters:
       file:
