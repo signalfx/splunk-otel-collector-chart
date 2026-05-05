@@ -14,7 +14,7 @@ This resulted in breaking changes to the helm chart's configuration for the targ
 | Old option                       | New option                                                                                                  |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------|
 | `targetAllocator`                | `targetallocator`                                                                                           |
-| `image.imagePullSecrets`         | `targetallocator.targetAllocator.serviceAccount.imagePullSecrets`                                           |
+| `image.imagePullSecrets`         | `targetallocator.targetAllocator.imagePullSecrets`                                           |
 | `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetallocator.targetAllocator.image.tag`           |
 | `targetAllocator.resources`      | `targetallocator.targetAllocator.resources`                                                                 |
 | `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                                            |
@@ -49,9 +49,9 @@ image:
 targetallocator:
   enabled: true
   targetAllocator:
+    imagePullSecrets:
+      - name: my-registry-secret
     image:
-      imagePullSecrets:
-        - name: my-registry-secret
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
       tag: v0.132.0
     config:
