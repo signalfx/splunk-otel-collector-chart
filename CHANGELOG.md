@@ -4,6 +4,21 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.151.1] - 2026-05-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.151.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.151.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Add AWS Batch node taints to the default Collector agent tolerations list ([#2398](https://github.com/signalfx/splunk-otel-collector-chart/pull/2398))
+  The default agent tolerations now include `batch.amazonaws.com/batch-node` for both
+  `NoSchedule` and `NoExecute`, allowing the daemonset to run on AWS Batch-managed EKS nodes.
+  
+
+### 🧰 Bug fixes 🧰
+
+- `operator`: Bump deprecated cert-manager subchart to [v1.19.5](https://github.com/cert-manager/cert-manager/releases/tag/v1.19.5) ([#2413](https://github.com/signalfx/splunk-otel-collector-chart/pull/2413))
+
 ## [0.151.0] - 2026-05-06
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.151.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.151.0).
