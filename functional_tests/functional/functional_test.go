@@ -1010,6 +1010,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("com.splunk.sourcetype", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("device", metricNames...),
 		pmetrictest.IgnoreMetricValues(),
