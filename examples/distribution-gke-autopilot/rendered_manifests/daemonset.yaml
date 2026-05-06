@@ -52,6 +52,8 @@ spec:
         - effect: NoSchedule
           key: node-role.kubernetes.io/infra
           operator: Exists
+        - key: batch.amazonaws.com/batch-node
+          operator: Exists
       containers:
       - name: otel-collector
         command:
