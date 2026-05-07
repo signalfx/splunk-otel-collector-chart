@@ -75,7 +75,7 @@ receivers:
         # doesn't have access to all filesystems on the host by default. To collect metrics from
         # other devices, ensure that they are mounted to the collector container using
         # agent.extraVolumeMounts and agent.extraVolumes helm values options and override this list
-        # using agent.config.host_metrics.filesystem.include_mount_points.mount_points helm value.
+        # using agent.config.receivers.host_metrics.filesystem.include_mount_points.mount_points helm value.
         include_mount_points:
           match_type: strict
           mount_points:
