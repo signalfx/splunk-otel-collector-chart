@@ -131,6 +131,25 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_platform_hec_token
           {{- end }}
+          {{- if eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true" }}
+          {{- range $_, $t := .Values.splunkPlatform.additionalLogsExporters }}
+          {{- if eq (default "hec" $t.protocol) "hec" }}
+          {{- if and (hasKey $t "token") (ne (toString $t.token) "") }}
+          - name: {{ include "splunk-otel-collector.tenantEnvVarName" $t.name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "splunk-otel-collector.secret" $ }}
+                key: {{ include "splunk-otel-collector.tenantInlineSecretKey" $t.name }}
+          {{- else if and (hasKey $t "tokenSecret") $t.tokenSecret (hasKey $t.tokenSecret "name") }}
+          - name: {{ include "splunk-otel-collector.tenantEnvVarName" $t.name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $t.tokenSecret.name | quote }}
+                key: {{ $t.tokenSecret.key | quote }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           {{- with .Values.gateway.extraEnvs }}
           {{- . | toYaml | nindent 10 }}
           {{- end }}

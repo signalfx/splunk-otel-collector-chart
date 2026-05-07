@@ -135,6 +135,133 @@ splunkPlatform:
   # Refer to: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage#file-storage
   # fsyncEnabled: true
 
+  # [EXPERIMENTAL] Additional log exporters for multi-tenant routing.
+  #
+  # Each entry declares another destination that logs can be routed to in
+  # addition to the default splunk_hec/platform_logs (or otlp/platform_logs).
+  # When combined with splunkPlatform.logsRouting below, a routing connector
+  # splits log records between the default destination and these additional
+  # exporters based on a resource attribute of your choice.
+  #
+  # Per-tenant overrides merge onto splunkPlatform.* defaults: unset fields
+  # (empty string, null, or zero) inherit the default from the top-level
+  # splunkPlatform section. Explicit values win.
+  #
+  # IMPORTANT: The chart does NOT add any new resource attributes to the HEC
+  # otel_attrs_to_hec_metadata mapping. The routing attribute you choose is
+  # used only by the routing connector; it does not become an indexed HEC
+  # field, so it does not contribute to strings.data cardinality in Splunk.
+  #
+  # Example (full shape, all fields shown with defaults):
+  # additionalLogsExporters:
+  #   - name: team-a                 # REQUIRED. Must match ^[a-z][a-z0-9-]{0,62}$
+  #                                  # and be unique within this list. Reserved
+  #                                  # names are disallowed: default,
+  #                                  # platform_logs, platform_metrics,
+  #                                  # platform_traces, o11y.
+  #     protocol: hec                # hec | otlp_grpc | otlp_http
+  #     endpoint: ""                 # REQUIRED. Full URL including scheme.
+  #                                  # HEC: https://host:8088/services/collector
+  #                                  # OTLP gRPC: host:4317 (no scheme)
+  #                                  # OTLP HTTP: http(s)://host:4318 (base URL)
+  #
+  #     # HEC-only fields (ignored for OTLP protocols):
+  #     index: ""                    # Default index for this tenant. Empty
+  #                                  # inherits splunkPlatform.index. Pod/namespace
+  #                                  # splunk.com/index annotations still win
+  #                                  # per-record above this default.
+  #     sourcetype: ""               # Default sourcetype for this tenant.
+  #     source: ""                   # Default source field for this tenant.
+  #
+  #     # Token delivery (HEC only; exactly one of the two must be set):
+  #     token: ""                    # Inline token. Recommended only for
+  #                                  # dev/test. In production, prefer
+  #                                  # tokenSecret. If set, the chart-managed
+  #                                  # Secret is extended with a
+  #                                  # SPLUNK_PLATFORM_HEC_TOKEN_<NAME> key
+  #                                  # whose value is this token.
+  #     tokenSecret:                 # Reference to an existing Kubernetes
+  #                                  # Secret whose key holds the token. Works
+  #                                  # with ExternalSecrets, SealedSecrets,
+  #                                  # SOPS, or any Secret-producing pipeline.
+  #       name: ""
+  #       key: ""
+  #
+  #     # Optional per-tenant tuning. Unset fields inherit from splunkPlatform.*.
+  #     maxConnections: 0            # 0 = inherit splunkPlatform.maxConnections
+  #     timeout: ""                  # "" = inherit splunkPlatform.timeout
+  #     idleConnTimeout: ""          # "" = inherit splunkPlatform.idleConnTimeout
+  #     disableCompression: null     # null = inherit
+  #     insecureSkipVerify: null     # null = inherit splunkPlatform.insecureSkipVerify
+  #     sendingQueue:
+  #       enabled: null              # null = inherit splunkPlatform.sendingQueue.enabled
+  #       queueSize: 0               # 0 = inherit
+  #       numConsumers: 0            # 0 = inherit
+  #     retryOnFailure:
+  #       enabled: null              # null = inherit
+  #       initialInterval: ""
+  #       maxInterval: ""
+  #       maxElapsedTime: ""
+  #
+  # If splunkPlatform.sendingQueue.persistentQueue.enabled is true, each
+  # additional exporter gets its own isolated file_storage extension and
+  # directory under splunkPlatform.sendingQueue.persistentQueue.storagePath
+  # (subdirectory: exporter_queue_<tenant-name>). This prevents one noisy
+  # tenant from filling the disk for the others.
+  additionalLogsExporters: []
+
+  # [EXPERIMENTAL] Routing for logs across additionalLogsExporters.
+  #
+  # When enabled, a routing/tenants connector is inserted at the end of the
+  # logs pipeline (after all processors, before exporters). Each log record
+  # is routed to one exporter based on the value of a resource or log-context
+  # attribute that you supply. Records whose attribute value does not match
+  # any table entry go to defaultExporter.
+  #
+  # Backward compatibility: when disabled (the default), the logs pipeline
+  # renders exactly as it does today (single splunk_hec/platform_logs or
+  # otlp/platform_logs exporter).
+  #
+  # This feature is logs-only in v1. Metrics and traces continue to use the
+  # default single-exporter pipeline.
+  logsRouting:
+    # Set to true to enable routing to additionalLogsExporters.
+    enabled: false
+
+    # Where the routing key is read from.
+    #   resource - (default) read from resource.attributes
+    #   log      - read from the log record (body/attributes/severity via OTTL)
+    attributeSource: resource
+
+    # REQUIRED when enabled. Name of the attribute whose value drives routing.
+    # Examples:
+    #   k8s.namespace.labels.team
+    #   k8s.pod.labels.product
+    #   k8s.pod.annotations.routing-tenant
+    #   k8s.namespace.name
+    #
+    # Whatever attribute you choose must already be present on the record by
+    # the time the routing connector runs. Resource attributes extracted by
+    # the k8s_attributes processor (pod/namespace labels and annotations,
+    # workload name, etc.) are all available.
+    fromAttribute: ""
+
+    # Name of the exporter used when the attribute value does not match any
+    # entry in `table`. Either "default" (the existing platform_logs exporter)
+    # or a name from additionalLogsExporters[].
+    defaultExporter: default
+
+    # Ordered list of attribute-value-to-exporter mappings. All entries must
+    # reference an additionalLogsExporters[].name or "default".
+    #
+    # Example:
+    # table:
+    #   - value: "a"
+    #     exporter: team-a
+    #   - value: "b"
+    #     exporter: team-b
+    table: []
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################
@@ -669,6 +796,18 @@ logsCollection:
     # maxRecombineLogsSize sets the maximum size in bytes of a message recombined from cri-o, containerd and docker log entries.
     # Set to 0 to remove any size limit.
     maxRecombineLogSize: 1048576
+
+    # OTTL value expression that overrides the default container log sourcetype
+    # of "kube:container:<container_name>". When set, the chart inserts a
+    # transform processor after k8s_attributes that sets the com.splunk.sourcetype
+    # resource attribute to this expression. All resource attributes enriched by
+    # k8s_attributes are available (pod labels and annotations only when promoted
+    # via extraAttributes.fromLabels / fromAnnotations). The pod
+    # splunk.com/sourcetype annotation still takes precedence per record.
+    # Examples:
+    #   sourcetype: 'Concat(["kube", resource.attributes["k8s.namespace.name"], resource.attributes["k8s.container.name"]], ":")'
+    #   sourcetype: 'Concat(["app", resource.attributes["k8s.pod.labels.team"], resource.attributes["k8s.container.name"]], ":")'
+    sourcetype: ""
 
 # Configuration for collecting journald logs using otel collector
   journald:

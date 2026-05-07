@@ -23,6 +23,7 @@ extensions:
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
         default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  {{- include "splunk-otel-collector.renderTenantFileStorage" . | nindent 2 }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -56,6 +57,9 @@ processors:
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
   {{- if .Values.autodetect.istio }}
   {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
+  {{- end }}
+  {{- if eq (include "splunk-otel-collector.containerSourcetypeEnabled" .) "true" }}
+  {{- include "splunk-otel-collector.transformSourcetypeProcessor" . | nindent 2 }}
   {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
 
@@ -172,11 +176,24 @@ exporters:
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
 
-{{- if and
+  {{- if eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true" }}
+  {{- include "splunk-otel-collector.validateTenants" . }}
+  {{- range $_, $t := .Values.splunkPlatform.additionalLogsExporters }}
+  {{- if eq (default "hec" $t.protocol) "hec" }}
+  {{- include "splunk-otel-collector.renderAdditionalHecExporter" (dict "context" $ "tenant" $t) | nindent 2 }}
+  {{- else }}
+  {{- include "splunk-otel-collector.renderAdditionalOtlpExporter" (dict "context" $ "tenant" $t) | nindent 2 }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+
+{{- $gwO11yRouting := and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled))
-  (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
-}}
+  (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") -}}
+{{- $gwMultiTenant := eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true" -}}
+{{- if or $gwO11yRouting $gwMultiTenant }}
 connectors:
+  {{- if $gwO11yRouting }}
   # Routing connector to separate entity events from regular logs
   routing/logs:
     default_pipelines: [logs]
@@ -189,6 +206,23 @@ connectors:
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
       {{- end }}
+  {{- end }}
+  {{- if $gwMultiTenant }}
+  {{- $routing := .Values.splunkPlatform.logsRouting }}
+  {{- $attrSrc := default "resource" $routing.attributeSource }}
+  routing/tenants:
+    default_pipelines: [logs/export_{{ replace "-" "_" (default "default" $routing.defaultExporter) }}]
+    table:
+      {{- range $i, $e := default (list) $routing.table }}
+      - context: {{ $attrSrc }}
+        {{- if eq $attrSrc "resource" }}
+        condition: 'attributes["{{ $routing.fromAttribute }}"] == "{{ $e.value }}"'
+        {{- else }}
+        condition: 'resource.attributes["{{ $routing.fromAttribute }}"] == "{{ $e.value }}"'
+        {{- end }}
+        pipelines: [logs/export_{{ replace "-" "_" $e.exporter }}]
+      {{- end }}
+  {{- end }}
 {{- end }}
 
 service:
@@ -213,6 +247,11 @@ service:
     - http_forwarder
     - http_forwarder/opamp_splunk_o11y
     - opamp/splunk_o11y
+    {{- end }}
+    {{- if and (eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true") .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
+    {{- range $_, $t := .Values.splunkPlatform.additionalLogsExporters }}
+    - file_storage/persistent_queue_{{ replace "-" "_" $t.name }}
+    {{- end }}
     {{- end }}
 
   # The default pipelines should not need to be changed. You can add any custom pipeline instead.
@@ -328,14 +367,35 @@ service:
         {{- if .Values.autodetect.istio }}
         - transform/istio_service_name
         {{- end }}
+        {{- if eq (include "splunk-otel-collector.containerSourcetypeEnabled" .) "true" }}
+        - transform/sourcetype
+        {{- end }}
         - resource/logs
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true" }}
+        - routing/tenants
+        {{- else }}
         - splunk_hec/platform_logs
         {{- end }}
+        {{- end }}
+    {{- end }}
+
+    {{- if eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true" }}
+    {{- /* Per-tenant export pipelines fed by the routing/tenants connector. */}}
+    logs/export_default:
+      receivers: [routing/tenants]
+      processors: [memory_limiter]
+      exporters: [splunk_hec/platform_logs]
+    {{- range $_, $t := .Values.splunkPlatform.additionalLogsExporters }}
+    logs/export_{{ replace "-" "_" $t.name }}:
+      receivers: [routing/tenants]
+      processors: [memory_limiter]
+      exporters: [{{ include "splunk-otel-collector.tenantExporterName" $t }}]
+    {{- end }}
     {{- end }}
 
     {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}

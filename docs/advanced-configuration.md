@@ -781,6 +781,86 @@ The sourcetype for metrics is selected based on the following precedence:
 6. If only `.Values.splunkPlatform.sourcetype` is set, it applies to all data types.
 7. If none of the above are set, the default `sourcetype` is `httpevent`.
 
+### Customizing the sourcetype of container logs
+
+By default, container logs are assigned `com.splunk.sourcetype = kube:container:<container_name>`. Set
+`logsCollection.containers.sourcetype` to an OTTL value expression to override that cluster-wide. The chart inserts a
+transform processor after `k8s_attributes` that runs:
+
+```
+set(resource.attributes["com.splunk.sourcetype"], <your value>)
+```
+
+Any resource attribute enriched by `k8s_attributes` is available, including pod labels and annotations promoted via
+`extraAttributes.fromLabels` / `extraAttributes.fromAnnotations`.
+
+```yaml
+logsCollection:
+  containers:
+    sourcetype: 'Concat(["kube", resource.attributes["k8s.namespace.name"], resource.attributes["k8s.container.name"]], ":")'
+```
+
+The pod `splunk.com/sourcetype` annotation is evaluated after this transform and continues to take precedence
+per record. `sourcetype` is indexed by Splunk Enterprise/Cloud, so prefer attributes with bounded cardinality
+(team, product, environment) over high-cardinality values such as request IDs or timestamps.
+
+### Multi-tenant log routing
+
+The helm chart can route container logs to multiple HEC or OTLP exporters, each with its own endpoint, token, index,
+and processing overrides. This is useful when different teams or products require isolated credentials, separate
+retention, or distinct queue capacity. The design is intent-based: you declare tenants and a routing table, and the
+chart generates the exporters, pipelines, and routing connector internally.
+
+Minimal example — two HEC tenants plus the default destination:
+
+```yaml
+splunkPlatform:
+  endpoint: https://default.example.splunkcloud.com:8088/services/collector
+  token: "<default-hec-token>"
+  index: default-index
+
+  additionalLogsExporters:
+    - name: team-a
+      protocol: hec
+      endpoint: https://a.example.splunkcloud.com:8088/services/collector
+      index: team-a-index
+      sourcetype: app:team-a
+      tokenSecret:
+        name: team-a-hec-token
+        key: token
+    - name: team-b
+      protocol: otlp
+      endpoint: otlp.team-b.svc.cluster.local:4317
+
+  logsRouting:
+    enabled: true
+    fromAttribute: k8s.namespace.labels.team
+    defaultExporter: default
+    table:
+      - value: "a"
+        exporter: team-a
+      - value: "b"
+        exporter: team-b
+```
+
+Notes:
+
+* **`additionalLogsExporters`** — each entry has a `name`, a `protocol` (`hec`, `otlp`, or `otlp_http`), and any
+  per-tenant overrides for `index`, `sourcetype`, `source`, `sendingQueue`, and `retryOnFailure`. Unset fields
+  inherit from `splunkPlatform.*`. HEC tenants must set exactly one of `token` (inline, stored in the
+  chart-managed Secret) or `tokenSecret` (reference an existing Kubernetes Secret). OTLP/OTLP-HTTP tenants do
+  not expose a token field in v1; configure auth via `agent.config` overrides if required.
+* **`logsRouting.table`** — ordered match list. `defaultExporter` names the fallback, which can be `default`
+  (the baseline `splunkPlatform` exporter) or any tenant.
+* **HEC metadata precedence is unchanged.** Routing only selects the exporter; pod
+  `splunk.com/index` and `splunk.com/sourcetype` annotations still override the tenant defaults per record.
+* **Persistent-queue isolation.** When `splunkPlatform.sendingQueue.persistentQueue.enabled` is true, each tenant
+  gets its own `file_storage/persistent_queue_<tenant>` extension rooted at
+  `<storagePath>/exporter_queue_<tenant>`. A backlogged tenant cannot stall other tenants' on-disk queues.
+* The `k8s_cluster` receiver's logs (Kubernetes events) always flow to the default exporter and are not routed.
+* The routing key is evaluated for every record, so prefer bounded label values (team, product, tier) over
+  high-cardinality ones.
+
 ### Performance of native OpenTelemetry logs collection
 
 Some configurations used with the OpenTelemetry Collector (as set using the Splunk OpenTelemetry Collector for Kubernetes helm chart) can have an impact on overall performance of log ingestion. The more receivers, processors, exporters, and extensions that are added to any of the pipelines, the greater the performance impact.
