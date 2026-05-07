@@ -475,7 +475,7 @@ Usage:
 {{- $source := .source -}}
 {{- $depExporters := dict "otlp" "otlp_grpc" "otlphttp" "otlp_http" -}}
 {{- $depProcessors := dict "k8sattributes" "k8s_attributes" -}}
-{{- $depReceivers := dict "filelog" "file_log" "hostmetrics" "host_metrics" "k8sobjects" "k8s_objects"-}}
+{{- $depReceivers := dict "filelog" "file_log" "hostmetrics" "host_metrics" "k8sobjects" "k8s_objects" -}}
 {{- range $key, $_ := (dig "exporters" (dict) .config) -}}
   {{- range $old, $new := $depExporters -}}
     {{- if or (eq $key $old) (hasPrefix (printf "%s/" $old) $key) -}}
