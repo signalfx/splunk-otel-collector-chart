@@ -296,7 +296,7 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      hostmetrics:
+      host_metrics:
         collection_interval: 10s
         scrapers:
           cpu: null
@@ -514,7 +514,7 @@ data:
           - resource
           - metricstransform
           receivers:
-          - hostmetrics
+          - host_metrics
           - kubeletstats
           - otlp
         metrics/agent:

@@ -238,7 +238,7 @@ data:
             enabled: true
       k8s_events:
         auth_type: serviceAccount
-      k8sobjects:
+      k8s_objects:
         auth_type: serviceAccount
         objects:
         - interval: 6h
@@ -292,7 +292,7 @@ data:
           - resource/add_cluster_host
           - transform/add_sourcetype
           receivers:
-          - k8sobjects
+          - k8s_objects
         metrics:
           exporters:
           - signalfx

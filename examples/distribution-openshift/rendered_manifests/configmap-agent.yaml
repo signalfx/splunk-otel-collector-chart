@@ -159,7 +159,7 @@ data:
         override: true
         timeout: 15s
     receivers:
-      hostmetrics:
+      host_metrics:
         collection_interval: 10s
         root_path: /hostfs
         scrapers:
@@ -375,7 +375,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - hostmetrics
+          - host_metrics
           - kubeletstats
           - otlp
         metrics/agent:

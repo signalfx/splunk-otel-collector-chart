@@ -327,7 +327,7 @@ data:
           enabled: true
         start_at: beginning
         storage: file_storage
-      hostmetrics:
+      host_metrics:
         collection_interval: 10s
         root_path: /hostfs
         scrapers:
@@ -508,7 +508,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - hostmetrics
+          - host_metrics
           - kubeletstats
           - otlp
           - receiver_creator
