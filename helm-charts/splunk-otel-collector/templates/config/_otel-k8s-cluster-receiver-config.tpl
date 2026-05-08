@@ -4,6 +4,7 @@ The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13134
 
@@ -44,7 +45,7 @@ receivers:
     distribution: openshift
     {{- end }}
   {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
-  k8sobjects:
+  k8s_objects:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
@@ -338,10 +339,13 @@ service:
                 without_scope_info: true
                 without_units: true
                 without_type_suffix: true
+  extensions:
+    - health_check
+    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    - opamp/splunk_o11y
+    {{- end }}
   {{- if eq .Values.distribution "eks/fargate" }}
-  extensions: [health_check, k8s_observer]
-  {{- else }}
-  extensions: [health_check]
+    - k8s_observer
   {{- end }}
   pipelines:
     {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -450,7 +454,7 @@ service:
     {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
     logs/objects:
       receivers:
-        - k8sobjects
+        - k8s_objects
       processors:
         - memory_limiter
         - batch

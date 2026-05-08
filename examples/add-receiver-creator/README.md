@@ -13,7 +13,7 @@ By default, the receiver_creator receiver is part of the metrics pipeline, for e
 pipelines:
   metrics:
     receivers:
-      - hostmetrics
+      - host_metrics
       - kubeletstats
       - otlp
       - receiver_creator

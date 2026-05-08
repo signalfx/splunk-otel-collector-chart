@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.150.0
+    helm.sh/chart: splunk-otel-collector-0.151.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.150.0"
+    app.kubernetes.io/version: "0.151.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.150.0
+    chart: splunk-otel-collector-0.151.1
     release: default
 data:
   relay: |
@@ -47,9 +47,21 @@ data:
           key: X-SF-TOKEN
       health_check:
         endpoint: 0.0.0.0:13133
+      http_forwarder/opamp_splunk_o11y:
+        egress:
+          endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
+        ingress:
+          endpoint: 0.0.0.0:4320
       k8s_observer:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
+      opamp/splunk_o11y:
+        server:
+          http:
+            endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
+            headers:
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+            polling_interval: 30s
       zpages: null
     processors:
       batch:
@@ -187,7 +199,7 @@ data:
         override: true
         timeout: 15s
     receivers:
-      hostmetrics:
+      host_metrics:
         collection_interval: 10s
         root_path: /hostfs
         scrapers:
@@ -366,6 +378,8 @@ data:
       extensions:
       - health_check
       - headers_setter
+      - http_forwarder/opamp_splunk_o11y
+      - opamp/splunk_o11y
       - k8s_observer
       - zpages
       pipelines:
@@ -388,7 +402,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - hostmetrics
+          - host_metrics
           - kubeletstats
           - otlp
         metrics/agent:

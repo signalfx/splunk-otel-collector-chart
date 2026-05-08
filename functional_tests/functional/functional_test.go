@@ -948,8 +948,8 @@ func testAgentMetrics(t *testing.T) {
 		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubeletstats_metrics.yaml", "container.memory.usage")
 	})
 
-	t.Run("hostmetrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_hostmetrics.yaml", "system.memory.usage")
+	t.Run("host_metrics", func(t *testing.T) {
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_host_metrics.yaml", "system.memory.usage")
 	})
 }
 
@@ -1010,6 +1010,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("com.splunk.sourcetype", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("device", metricNames...),
 		pmetrictest.IgnoreMetricValues(),

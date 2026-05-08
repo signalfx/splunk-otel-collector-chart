@@ -4,6 +4,67 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.151.1] - 2026-05-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.151.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.151.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Add AWS Batch node taints to the default Collector agent tolerations list ([#2398](https://github.com/signalfx/splunk-otel-collector-chart/pull/2398))
+  The default agent tolerations now include `batch.amazonaws.com/batch-node` for both
+  `NoSchedule` and `NoExecute`, allowing the daemonset to run on AWS Batch-managed EKS nodes.
+  
+
+### 🧰 Bug fixes 🧰
+
+- `operator`: Bump deprecated cert-manager subchart to [v1.19.5](https://github.com/cert-manager/cert-manager/releases/tag/v1.19.5) ([#2413](https://github.com/signalfx/splunk-otel-collector-chart/pull/2413))
+
+## [0.151.0] - 2026-05-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.151.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.151.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Rename all `filelog` receiver references to `file_log` ([#2396](https://github.com/signalfx/splunk-otel-collector-chart/pull/2396))
+  The `filelog` alias has been deprecated in favor of `file_log` in the chart-generated configuration.
+  Any Helm values or overrides that reference `filelog` (for example, `*.config.receivers.filelog`
+  or pipelines that list `filelog` as a receiver) must be updated to use `file_log`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent`: Add `port` option for etcd receivers to support non-standard etcd ports ([#2402](https://github.com/signalfx/splunk-otel-collector-chart/pull/2402))
+  Set `agent.controlPlaneMetrics.etcd.port` to override the auto-detected default.
+  
+- `agent, clusterReceiver, gateway`: Add OpAMP extension support to the default agent, clusterReceiver and gateway configuration. ([#2406](https://github.com/signalfx/splunk-otel-collector-chart/pull/2406))
+  The OpAMP extension is included in the default configuration but disabled by default behind a feature gate.
+  Use the feature gate ID `splunk.opamp.enabled` to enable the OpAMP extension.
+  Example:
+  For the `agent`: `--set agent.featureGates=+splunk.opamp.enabled`
+  For the `clusterReceiver`: `--set clusterReceiver.featureGates=+splunk.opamp.enabled`
+  For the `gateway`: `--set gateway.featureGates=+splunk.opamp.enabled`
+  
+  Note: a new `http_forwarder` extension binds to port 4320 and forwards requests to Splunk O11y ingest.
+  When running on the gateway, the extension is intended as a forwarding mechanism for sending data to the gateway from the agent and clusterReceiver.
+  When running on the agent, the extension is intended as an entry point for receiving OpAMP data from instrumentation agents that support OpAMP, such as the Splunk OpenTelemetry Java agent.
+  
+- `operator`: Bump dotnet to v1.14.0 in helm-charts/splunk-otel-collector/values.yaml ([#2377](https://github.com/signalfx/splunk-otel-collector-chart/pull/2377))
+- `operator`: Bump java to v2.27.0 in helm-charts/splunk-otel-collector/values.yaml ([#2391](https://github.com/signalfx/splunk-otel-collector-chart/pull/2391))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix `prometheus/etcd` receiver to respect TLS secret and auto-detect scraping mode ([#2402](https://github.com/signalfx/splunk-otel-collector-chart/pull/2402))
+  When a TLS secret was configured for etcd metrics, the `prometheus/etcd` receiver ignored it
+  and still scraped port 2381 over plain HTTP. It now correctly uses the configured client
+  certificates to scrape via mTLS. This fix applies to the `prometheus/etcd` receiver only
+  (used when `featureGates.useControlPlaneMetricsHistogramData` is enabled, which is the default).
+  
+  Enabling etcd metrics no longer requires a TLS secret for environments that don't need
+  mTLS (e.g. kubeadm defaults to HTTP on port 2381). See
+  [Setting up etcd metrics](docs/advanced-configuration.md#setting-up-etcd-metrics) for details.
+  
+
 ## [0.150.0] - 2026-04-21
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.150.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.150.0).
