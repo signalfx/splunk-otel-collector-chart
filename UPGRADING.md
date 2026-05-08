@@ -6,7 +6,7 @@
 
 A new feature gate `featureGates.daemonSetComponentSelector` (disabled by
 default) adds `component: otel-collector-agent` to the agent DaemonSet's
-`spec.selector.matchLabels`. This prevents workload-management tools from incorrectly grouping gateway and cluster-receiver pods under the
+`spec.selector.matchLabels`. This prevents workload management tools from incorrectly grouping gateway and cluster receiver pods under the
 agent daemonset.
 
 The feature gate is **disabled by default** so that `helm upgrade` works
