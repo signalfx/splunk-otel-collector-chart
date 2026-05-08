@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.150.0 to 0.151.0
+## 0.151.0 to 0.152.0
 
 ### New feature gate: `component` label in agent DaemonSet selector
 
