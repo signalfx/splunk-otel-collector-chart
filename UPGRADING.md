@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.150.0 to 0.151.0
+## 0.151.0 to 0.152.0
 
 ### Container log parsing now uses the `container` operator
 
@@ -47,7 +47,18 @@ logsCollection:
 
 Previously `attributes.time` contained the raw timestamp string and was available to `extraOperators`.
 The `container` operator sets the timestamp directly on the log record's `Timestamp` field and does not
-set `attributes.time`. Remove any references to `attributes.time` from your `extraOperators`.
+set `attributes.time`. Replace any references to `attributes.time` with `timestamp`, which accesses the
+log record's `Timestamp` field directly in stanza expressions. For example:
+
+```yaml
+# Before
+- type: filter
+  expr: 'attributes.time < "2026-01-01"'
+
+# After
+- type: filter
+  expr: 'timestamp.Before(date("2026-01-01T00:00:00Z"))'
+```
 
 #### `extraOperators` using old operator IDs as `output` targets
 
