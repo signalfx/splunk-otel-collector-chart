@@ -43,6 +43,8 @@ logsCollection:
         expr: 'body matches "health_check"'
 ```
 
+If `attributes.log` is still referenced, no error is raised — the value silently evaluates to `null`.
+
 #### `attributes.time` is no longer available in `extraOperators`
 
 Previously `attributes.time` contained the raw timestamp string and was available to `extraOperators`.
@@ -59,6 +61,8 @@ log record's `Timestamp` field directly in stanza expressions. For example:
 - type: filter
   expr: 'timestamp.Before(date("2026-01-01T00:00:00Z"))'
 ```
+
+If `attributes.time` is still referenced, no error is raised — the value silently evaluates to `null`.
 
 #### `extraOperators` using old operator IDs as `output` targets
 
