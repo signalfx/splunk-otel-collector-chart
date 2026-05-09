@@ -160,6 +160,207 @@
         },
         "fsyncEnabled": {
           "type": "boolean"
+        },
+        "additionalLogsExporters": {
+          "description": "Additional log exporters for multi-tenant routing. Each entry declares a destination (HEC or OTLP) that log records can be routed to based on splunkPlatform.logsRouting.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "protocol",
+              "endpoint"
+            ],
+            "properties": {
+              "name": {
+                "description": "Unique identifier for this exporter. Becomes the second element of the OpenTelemetry exporter name (e.g. splunk_hec/<name>). Must match ^[a-z][a-z0-9-]{0,62}$.",
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "protocol": {
+                "description": "Wire protocol used by this exporter.",
+                "type": "string",
+                "enum": [
+                  "hec",
+                  "otlp_grpc",
+                  "otlp_http"
+                ]
+              },
+              "endpoint": {
+                "description": "Destination endpoint URL.",
+                "type": "string",
+                "minLength": 1
+              },
+              "index": {
+                "description": "Default Splunk index for this tenant. HEC only. Pod/namespace splunk.com/index annotations still win per-record above this default.",
+                "type": "string"
+              },
+              "sourcetype": {
+                "description": "Default sourcetype for this tenant. HEC only.",
+                "type": "string"
+              },
+              "source": {
+                "description": "Default source field for this tenant. HEC only.",
+                "type": "string"
+              },
+              "token": {
+                "description": "Inline HEC token. Dev/test only. Mutually exclusive with tokenSecret.",
+                "type": "string"
+              },
+              "tokenSecret": {
+                "description": "Reference to an existing Kubernetes Secret containing the HEC token. Mutually exclusive with token.",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name",
+                  "key"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "maxConnections": {
+                "description": "Per-tenant override for HEC max connections. 0 inherits splunkPlatform.maxConnections.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "timeout": {
+                "type": "string"
+              },
+              "idleConnTimeout": {
+                "type": "string"
+              },
+              "disableCompression": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "insecureSkipVerify": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "sendingQueue": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "numConsumers": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  },
+                  "queueSize": {
+                    "description": "Per-tenant queueSize (in number of batches). 0 inherits splunkPlatform.sendingQueue.queueSize. Bounded [100, 50000] to prevent misconfiguration.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  }
+                }
+              },
+              "retryOnFailure": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "initialInterval": {
+                    "type": "string"
+                  },
+                  "maxInterval": {
+                    "type": "string"
+                  },
+                  "maxElapsedTime": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "allOf": [
+              {
+                "not": {
+                  "properties": {
+                    "name": {
+                      "enum": [
+                        "default",
+                        "platform_logs",
+                        "platform_metrics",
+                        "platform_traces",
+                        "o11y"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "logsRouting": {
+          "description": "Routing for logs across splunkPlatform.additionalLogsExporters. Disabled by default; when disabled the existing single-exporter pipeline is preserved.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "attributeSource": {
+              "type": "string",
+              "enum": [
+                "resource",
+                "log"
+              ]
+            },
+            "fromAttribute": {
+              "description": "Name of the attribute whose value drives routing. Required when enabled.",
+              "type": "string"
+            },
+            "defaultExporter": {
+              "description": "Name of the exporter used when no table entry matches. 'default' means the existing platform_logs exporter; otherwise must name an entry in splunkPlatform.additionalLogsExporters.",
+              "type": "string",
+              "minLength": 1
+            },
+            "table": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "value",
+                  "exporter"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  },
+                  "exporter": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "anyOf": [
@@ -823,6 +1024,10 @@
             },
             "maxRecombineLogSize": {
               "type": "integer"
+            },
+            "sourcetype": {
+              "description": "OTTL value expression for the container log sourcetype. Empty string uses the default kube:container:<container_name>. The chart wraps the value in set(resource.attributes[\"com.splunk.sourcetype\"], <value>) inside a transform processor inserted after k8s_attributes.",
+              "type": "string"
             }
           }
         },

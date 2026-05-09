@@ -462,6 +462,161 @@ Otherwise, return directory only.
 {{- end -}}
 
 {{/*
+Whether logsCollection.containers.sourcetype is set and should drive a
+transform/sourcetype processor in the logs pipeline. The user-supplied value is
+a raw OTTL value expression and is wrapped by the chart in
+  set(resource.attributes["com.splunk.sourcetype"], <value>)
+inside a transform processor inserted after k8s_attributes.
+*/}}
+{{- define "splunk-otel-collector.containerSourcetypeEnabled" -}}
+{{- if (default "" .Values.logsCollection.containers.sourcetype) -}}true{{- else -}}false{{- end -}}
+{{- end -}}
+
+{{/*
+Whether multi-tenant logs routing is enabled. True only when
+splunkPlatform.logsRouting.enabled is true AND logs are enabled to the
+Splunk Platform destination.
+*/}}
+{{- define "splunk-otel-collector.multiTenantLogsEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (default false .Values.splunkPlatform.logsRouting.enabled) -}}
+{{- end -}}
+
+{{/*
+Translate a tenant name like "team-a" into the name of the environment variable
+that holds its HEC token, e.g. "SPLUNK_PLATFORM_HEC_TOKEN_TEAM_A".
+*/}}
+{{- define "splunk-otel-collector.tenantEnvVarName" -}}
+{{- printf "SPLUNK_PLATFORM_HEC_TOKEN_%s" (upper (replace "-" "_" .)) -}}
+{{- end -}}
+
+{{/*
+Translate a tenant name into a Kubernetes Secret data key for inline tokens
+that the chart stores in its managed secret, e.g. "hec_token_team_a".
+*/}}
+{{- define "splunk-otel-collector.tenantInlineSecretKey" -}}
+{{- printf "hec_token_%s" (lower (replace "-" "_" .)) -}}
+{{- end -}}
+
+{{/*
+Directory name (not full path) for a tenant's isolated persistent-queue
+file_storage subdirectory.
+*/}}
+{{- define "splunk-otel-collector.tenantPersistentQueueSubdir" -}}
+{{- printf "exporter_queue_%s" (replace "-" "_" .) -}}
+{{- end -}}
+
+{{/*
+Validate splunkPlatform.additionalLogsExporters and splunkPlatform.logsRouting.
+Fails helm-template invocation with a clear message on any of the following:
+  - Duplicate tenant name.
+  - HEC tenant that does not provide exactly one of token/tokenSecret.
+  - OTLP tenant that mis-uses HEC-only fields.
+  - logsRouting.enabled without a fromAttribute.
+  - logsRouting.table entry that references an unknown exporter.
+Usage: {{- include "splunk-otel-collector.validateTenants" . -}}
+*/}}
+{{- define "splunk-otel-collector.validateTenants" -}}
+{{- $tenants := default (list) .Values.splunkPlatform.additionalLogsExporters -}}
+{{- $routing := default (dict) .Values.splunkPlatform.logsRouting -}}
+{{- $seen := dict -}}
+{{- $validNames := list "default" -}}
+{{- range $i, $t := $tenants -}}
+  {{- if not (hasKey $t "name") -}}
+    {{- fail (printf "splunkPlatform.additionalLogsExporters[%d]: 'name' is required" $i) -}}
+  {{- end -}}
+  {{- $name := $t.name -}}
+  {{- if hasKey $seen $name -}}
+    {{- fail (printf "splunkPlatform.additionalLogsExporters: duplicate tenant name %q" $name) -}}
+  {{- end -}}
+  {{- $seen = merge $seen (dict $name true) -}}
+  {{- $validNames = append $validNames $name -}}
+  {{- $protocol := default "hec" $t.protocol -}}
+  {{- if not (has $protocol (list "hec" "otlp_grpc" "otlp_http")) -}}
+    {{- fail (printf "splunkPlatform.additionalLogsExporters[%q].protocol must be one of hec, otlp_grpc, otlp_http; got %q" $name $protocol) -}}
+  {{- end -}}
+  {{- if eq $protocol "hec" -}}
+    {{- $tokenModes := 0 -}}
+    {{- if and (hasKey $t "token") (ne (toString $t.token) "") -}}{{- $tokenModes = add1 $tokenModes -}}{{- end -}}
+    {{- if hasKey $t "tokenSecret" -}}
+      {{- $ts := $t.tokenSecret -}}
+      {{- if and $ts (hasKey $ts "name") (ne (toString $ts.name) "") -}}{{- $tokenModes = add1 $tokenModes -}}{{- end -}}
+    {{- end -}}
+    {{- if ne $tokenModes 1 -}}
+      {{- fail (printf "splunkPlatform.additionalLogsExporters[%q]: HEC tenants must set exactly one of token or tokenSecret.name+key (got %d)" $name $tokenModes) -}}
+    {{- end -}}
+  {{- else -}}
+    {{- range $field := list "token" "tokenSecret" "index" "sourcetype" "source" -}}
+      {{- if hasKey $t $field -}}
+        {{- $v := index $t $field -}}
+        {{- if and $v (ne (toString $v) "") (ne (toString $v) "map[]") -}}
+          {{- fail (printf "splunkPlatform.additionalLogsExporters[%q]: field %q is HEC-only and must not be set for protocol %q" $name $field $protocol) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if default false $routing.enabled -}}
+  {{- if eq (toString (default "" $routing.fromAttribute)) "" -}}
+    {{- fail "splunkPlatform.logsRouting.enabled=true requires splunkPlatform.logsRouting.fromAttribute to be set" -}}
+  {{- end -}}
+  {{- $defaultExp := default "default" $routing.defaultExporter -}}
+  {{- if not (has $defaultExp $validNames) -}}
+    {{- fail (printf "splunkPlatform.logsRouting.defaultExporter=%q does not resolve to 'default' or an entry in splunkPlatform.additionalLogsExporters" $defaultExp) -}}
+  {{- end -}}
+  {{- $tableValues := dict -}}
+  {{- range $i, $entry := default (list) $routing.table -}}
+    {{- if not (has $entry.exporter $validNames) -}}
+      {{- fail (printf "splunkPlatform.logsRouting.table[%d].exporter=%q does not resolve to 'default' or an entry in splunkPlatform.additionalLogsExporters" $i $entry.exporter) -}}
+    {{- end -}}
+    {{- if hasKey $tableValues $entry.value -}}
+      {{- fail (printf "splunkPlatform.logsRouting.table[%d]: duplicate value %q" $i $entry.value) -}}
+    {{- end -}}
+    {{- $tableValues = merge $tableValues (dict $entry.value true) -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve a single tenant's value for a field, falling back to the supplied
+default when the tenant value is missing or zero. Returns the resolved value.
+Args: (dict "tenant" $t "field" "<key>" "default" <defaultValue>)
+*/}}
+{{- define "splunk-otel-collector.tenantField" -}}
+{{- $t := .tenant -}}
+{{- $field := .field -}}
+{{- $default := .default -}}
+{{- if hasKey $t $field -}}
+  {{- $v := index $t $field -}}
+  {{- if eq (kindOf $v) "string" -}}
+    {{- if ne $v "" -}}{{- $v -}}{{- else -}}{{- $default -}}{{- end -}}
+  {{- else if eq (kindOf $v) "int" -}}
+    {{- if ne (int $v) 0 -}}{{- $v -}}{{- else -}}{{- $default -}}{{- end -}}
+  {{- else if eq (kindOf $v) "float64" -}}
+    {{- if ne (float64 $v) 0.0 -}}{{- $v -}}{{- else -}}{{- $default -}}{{- end -}}
+  {{- else if eq (kindOf $v) "bool" -}}
+    {{- $v -}}
+  {{- else if eq (kindOf $v) "invalid" -}}
+    {{- $default -}}
+  {{- else -}}
+    {{- $v -}}
+  {{- end -}}
+{{- else -}}
+{{- $default -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render the "token" field value for a HEC tenant in the exporter config.
+References an env var (${env:<NAME>}) on the collector container so that
+secrets are never embedded in the rendered config map. The env var is
+populated by the chart from either the inline token (chart-managed Secret)
+or the user-supplied tokenSecret reference.
+*/}}
+{{- define "splunk-otel-collector.tenantTokenRef" -}}
+{{- printf "${env:%s}" (include "splunk-otel-collector.tenantEnvVarName" .name) -}}
+{{- end -}}
+
+{{/*
 Fail if a collector config override uses deprecated component names.
 Checks exporter/processor/receiver definitions and pipeline references.
 

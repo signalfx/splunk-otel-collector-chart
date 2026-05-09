@@ -370,6 +370,21 @@ transform/istio_service_name:
 {{- end }}
 
 {{/*
+Transform processor that overrides com.splunk.sourcetype with the OTTL value
+expression supplied via logsCollection.containers.sourcetype. The processor is
+inserted in the logs pipeline AFTER k8s_attributes and BEFORE resource/logs, so
+namespace and pod splunk.com/sourcetype annotations continue to win above it.
+*/}}
+{{- define "splunk-otel-collector.transformSourcetypeProcessor" -}}
+transform/sourcetype:
+  error_mode: ignore
+  log_statements:
+    - context: resource
+      statements:
+        - set(resource.attributes["com.splunk.sourcetype"], {{ .Values.logsCollection.containers.sourcetype }})
+{{- end }}
+
+{{/*
 Filter logs processor
 */}}
 {{- define "splunk-otel-collector.filterLogsProcessors" -}}
@@ -433,6 +448,178 @@ splunk_hec/platform_logs:
       min_size: 2048
       sizer: items
     {{- end }}
+{{- end }}
+
+{{/*
+Render one additional HEC exporter for a multi-tenant log route. Each tenant
+field falls back to the corresponding splunkPlatform.* default when unset/zero.
+Usage: {{ include "splunk-otel-collector.renderAdditionalHecExporter" (dict "context" . "tenant" $t) }}
+*/}}
+{{- define "splunk-otel-collector.renderAdditionalHecExporter" -}}
+{{- $ctx := .context -}}
+{{- $t := .tenant -}}
+{{- $sp := $ctx.Values.splunkPlatform -}}
+{{- $endpoint := default $sp.endpoint $t.endpoint -}}
+{{- $index := default $sp.index $t.index -}}
+{{- $source := default $sp.source $t.source -}}
+{{- $sourcetype := default $sp.sourcetype $t.sourcetype -}}
+{{- $maxConn := $sp.maxConnections -}}
+{{- if and (hasKey $t "maxConnections") (ne (int (default 0 $t.maxConnections)) 0) -}}{{- $maxConn = $t.maxConnections -}}{{- end -}}
+{{- $timeout := default $sp.timeout $t.timeout -}}
+{{- $idle := default $sp.idleConnTimeout $t.idleConnTimeout -}}
+{{- $disableCompression := $sp.disableCompression -}}
+{{- if and (hasKey $t "disableCompression") (ne (toString $t.disableCompression) "<nil>") -}}{{- $disableCompression = $t.disableCompression -}}{{- end -}}
+{{- $insecureSkip := $sp.insecureSkipVerify -}}
+{{- if and (hasKey $t "insecureSkipVerify") (ne (toString $t.insecureSkipVerify) "<nil>") -}}{{- $insecureSkip = $t.insecureSkipVerify -}}{{- end -}}
+{{- $tSQ := default (dict) $t.sendingQueue -}}
+{{- $sqEnabled := $sp.sendingQueue.enabled -}}
+{{- if and (hasKey $tSQ "enabled") (ne (toString $tSQ.enabled) "<nil>") -}}{{- $sqEnabled = $tSQ.enabled -}}{{- end -}}
+{{- $sqSize := $sp.sendingQueue.queueSize -}}
+{{- if and (hasKey $tSQ "queueSize") (ne (int (default 0 $tSQ.queueSize)) 0) -}}{{- $sqSize = $tSQ.queueSize -}}{{- end -}}
+{{- $sqConsumers := $sp.sendingQueue.numConsumers -}}
+{{- if and (hasKey $tSQ "numConsumers") (ne (int (default 0 $tSQ.numConsumers)) 0) -}}{{- $sqConsumers = $tSQ.numConsumers -}}{{- end -}}
+{{- $tRetry := default (dict) $t.retryOnFailure -}}
+{{- $retryEnabled := $sp.retryOnFailure.enabled -}}
+{{- if and (hasKey $tRetry "enabled") (ne (toString $tRetry.enabled) "<nil>") -}}{{- $retryEnabled = $tRetry.enabled -}}{{- end -}}
+{{- $retryInitial := default $sp.retryOnFailure.initialInterval $tRetry.initialInterval -}}
+{{- $retryMax := default $sp.retryOnFailure.maxInterval $tRetry.maxInterval -}}
+{{- $retryElapsed := default $sp.retryOnFailure.maxElapsedTime $tRetry.maxElapsedTime -}}
+splunk_hec/{{ $t.name }}:
+  endpoint: {{ $endpoint | quote }}
+  token: {{ include "splunk-otel-collector.tenantTokenRef" $t | quote }}
+  index: {{ $index | quote }}
+  source: {{ $source | quote }}
+  {{- if $sourcetype }}
+  sourcetype: {{ $sourcetype | quote }}
+  {{- end }}
+  max_idle_conns: {{ $maxConn }}
+  max_idle_conns_per_host: {{ $maxConn }}
+  disable_compression: {{ $disableCompression }}
+  timeout: {{ $timeout }}
+  idle_conn_timeout: {{ $idle }}
+  splunk_app_name: {{ $ctx.Chart.Name }}
+  splunk_app_version: {{ $ctx.Chart.Version }}
+  profiling_data_enabled: false
+  tls:
+    insecure_skip_verify: {{ $insecureSkip }}
+  retry_on_failure:
+    enabled: {{ $retryEnabled }}
+    initial_interval: {{ $retryInitial }}
+    max_interval: {{ $retryMax }}
+    {{- if $ctx.Values.featureGates.noDropLogsPipeline }}
+    max_elapsed_time: 0s
+    {{- else }}
+    max_elapsed_time: {{ $retryElapsed }}
+    {{- end }}
+  sending_queue:
+    enabled: {{ $sqEnabled }}
+    queue_size: {{ $sqSize }}
+    num_consumers: {{ $sqConsumers }}
+    {{- if $sp.sendingQueue.persistentQueue.enabled }}
+    storage: file_storage/persistent_queue_{{ replace "-" "_" $t.name }}
+    {{- end }}
+    {{- if $ctx.Values.featureGates.noDropLogsPipeline }}
+    batch:
+      flush_timeout: 200ms
+      min_size: 2048
+      sizer: items
+    {{- end }}
+{{- end }}
+
+{{/*
+Render one additional OTLP (gRPC or HTTP) exporter for a multi-tenant log
+route. Fields default to reasonable values; token/index/sourcetype/source are
+HEC-only and not emitted here.
+Usage: {{ include "splunk-otel-collector.renderAdditionalOtlpExporter" (dict "context" . "tenant" $t) }}
+*/}}
+{{- define "splunk-otel-collector.renderAdditionalOtlpExporter" -}}
+{{- $ctx := .context -}}
+{{- $t := .tenant -}}
+{{- $sp := $ctx.Values.splunkPlatform -}}
+{{- $tSQ := default (dict) $t.sendingQueue -}}
+{{- $sqEnabled := $sp.sendingQueue.enabled -}}
+{{- if and (hasKey $tSQ "enabled") (ne (toString $tSQ.enabled) "<nil>") -}}{{- $sqEnabled = $tSQ.enabled -}}{{- end -}}
+{{- $sqSize := $sp.sendingQueue.queueSize -}}
+{{- if and (hasKey $tSQ "queueSize") (ne (int (default 0 $tSQ.queueSize)) 0) -}}{{- $sqSize = $tSQ.queueSize -}}{{- end -}}
+{{- $sqConsumers := $sp.sendingQueue.numConsumers -}}
+{{- if and (hasKey $tSQ "numConsumers") (ne (int (default 0 $tSQ.numConsumers)) 0) -}}{{- $sqConsumers = $tSQ.numConsumers -}}{{- end -}}
+{{- $tRetry := default (dict) $t.retryOnFailure -}}
+{{- $retryEnabled := $sp.retryOnFailure.enabled -}}
+{{- if and (hasKey $tRetry "enabled") (ne (toString $tRetry.enabled) "<nil>") -}}{{- $retryEnabled = $tRetry.enabled -}}{{- end -}}
+{{- $retryInitial := default $sp.retryOnFailure.initialInterval $tRetry.initialInterval -}}
+{{- $retryMax := default $sp.retryOnFailure.maxInterval $tRetry.maxInterval -}}
+{{- $retryElapsed := default $sp.retryOnFailure.maxElapsedTime $tRetry.maxElapsedTime -}}
+{{- $insecureSkip := $sp.insecureSkipVerify -}}
+{{- if and (hasKey $t "insecureSkipVerify") (ne (toString $t.insecureSkipVerify) "<nil>") -}}{{- $insecureSkip = $t.insecureSkipVerify -}}{{- end -}}
+{{- if eq $t.protocol "otlp_grpc" -}}
+otlp/{{ $t.name }}:
+  endpoint: {{ $t.endpoint | quote }}
+  tls:
+    insecure_skip_verify: {{ $insecureSkip }}
+  retry_on_failure:
+    enabled: {{ $retryEnabled }}
+    initial_interval: {{ $retryInitial }}
+    max_interval: {{ $retryMax }}
+    max_elapsed_time: {{ $retryElapsed }}
+  sending_queue:
+    enabled: {{ $sqEnabled }}
+    queue_size: {{ $sqSize }}
+    num_consumers: {{ $sqConsumers }}
+    {{- if $sp.sendingQueue.persistentQueue.enabled }}
+    storage: file_storage/persistent_queue_{{ replace "-" "_" $t.name }}
+    {{- end }}
+{{- else }}
+otlp_http/{{ $t.name }}:
+  logs_endpoint: {{ printf "%s/v1/logs" (trimSuffix "/" $t.endpoint) | quote }}
+  tls:
+    insecure_skip_verify: {{ $insecureSkip }}
+  retry_on_failure:
+    enabled: {{ $retryEnabled }}
+    initial_interval: {{ $retryInitial }}
+    max_interval: {{ $retryMax }}
+    max_elapsed_time: {{ $retryElapsed }}
+  sending_queue:
+    enabled: {{ $sqEnabled }}
+    queue_size: {{ $sqSize }}
+    num_consumers: {{ $sqConsumers }}
+    {{- if $sp.sendingQueue.persistentQueue.enabled }}
+    storage: file_storage/persistent_queue_{{ replace "-" "_" $t.name }}
+    {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return the OTel component name (what the pipeline references) for a tenant
+given its protocol. E.g. "team-a" with protocol hec => "splunk_hec/team-a".
+*/}}
+{{- define "splunk-otel-collector.tenantExporterName" -}}
+{{- $protocol := default "hec" .protocol -}}
+{{- if eq $protocol "hec" -}}
+splunk_hec/{{ .name }}
+{{- else if eq $protocol "otlp_grpc" -}}
+otlp/{{ .name }}
+{{- else -}}
+otlp_http/{{ .name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render file_storage extensions for each tenant when persistent queues are enabled.
+Each tenant gets an isolated subdirectory under splunkPlatform.sendingQueue.persistentQueue.storagePath
+so one tenant's queue cannot fill the disk for the others.
+Usage: {{ include "splunk-otel-collector.renderTenantFileStorage" . }}
+*/}}
+{{- define "splunk-otel-collector.renderTenantFileStorage" -}}
+{{- if and (eq (include "splunk-otel-collector.multiTenantLogsEnabled" .) "true") .Values.splunkPlatform.sendingQueue.persistentQueue.enabled -}}
+{{- $basePath := .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath -}}
+{{- range $_, $t := .Values.splunkPlatform.additionalLogsExporters }}
+file_storage/persistent_queue_{{ replace "-" "_" $t.name }}:
+  directory: {{ printf "%s/%s" (trimSuffix "/" $basePath) (include "splunk-otel-collector.tenantPersistentQueueSubdir" $t.name) | quote }}
+  {{- if hasKey $.Values.splunkPlatform "fsyncEnabled" }}
+  fsync: {{ $.Values.splunkPlatform.fsyncEnabled }}
+  {{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{/*
