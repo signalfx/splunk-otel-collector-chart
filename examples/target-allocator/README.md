@@ -41,7 +41,7 @@ agent:
       pipelines:
         metrics:
           receivers:
-            - hostmetrics
+            - host_metrics
             - kubeletstats
             - otlp
             - prometheus/crd

@@ -20,6 +20,9 @@ logsCollection:
     enabled: true
     directory: /run/log/journal
 agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
   config:
     exporters:
       {{ if (eq .KubeTestEnv "eks") }}

@@ -48,6 +48,11 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 #v4
+        with:
+          version: v4.1.4
+
       - name: Install chloggen
         run: make install-chloggen
 
@@ -92,15 +97,14 @@ jobs:
       - name: Open PR for Version Update
         id: open_pr
         if: ${{ steps.prepare_release.outputs.NEED_UPDATE == 1 && steps.check_if_pr_open.outputs.PR_NEEDED == 1 }}
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        uses: ./.github/actions/create-pr
         with:
+          branch: update-release
           commit-message: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           title: Prepare release v${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
           body: |
             Description
             - Release Helm chart version ${{ steps.prepare_release.outputs.LATEST_CHART_VERSION }}
             - Includes collector version ${{ steps.prepare_release.outputs.LATEST_APP_VERSION }}
-          branch: update-release
-          base: main
-          delete-branch: true
-          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
+          author-name: ${{ github.event_name == 'schedule' && 'github-actions[bot]' || github.actor }}
+          author-email: ${{ github.event_name == 'schedule' && '41898282+github-actions[bot]@users.noreply.github.com' || format('{1}+{0}@users.noreply.github.com', github.actor, github.actor_id) }}

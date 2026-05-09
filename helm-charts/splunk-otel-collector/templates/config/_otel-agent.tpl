@@ -4,6 +4,8 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
+  {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" . | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -60,7 +62,7 @@ receivers:
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "agent") | nindent 2}}
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
-  hostmetrics:
+  host_metrics:
     collection_interval: 10s
     {{- if not .Values.isWindows }}
     root_path: "/hostfs"
@@ -73,7 +75,7 @@ receivers:
         # doesn't have access to all filesystems on the host by default. To collect metrics from
         # other devices, ensure that they are mounted to the collector container using
         # agent.extraVolumeMounts and agent.extraVolumes helm values options and override this list
-        # using agent.config.hostmetrics.filesystem.include_mount_points.mount_points helm value.
+        # using agent.config.receivers.host_metrics.filesystem.include_mount_points.mount_points helm value.
         include_mount_points:
           match_type: strict
           mount_points:
@@ -245,9 +247,9 @@ receivers:
           skipVerify: false
           {{- end }}
           {{- if eq .Values.distribution "openshift" }}
-          port: 9979
+          port: {{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}
           {{- else }}
-          port: 4001
+          port: {{ .Values.agent.controlPlaneMetrics.etcd.port | default 4001 }}
           {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.controllerManager.enabled }}
@@ -389,8 +391,32 @@ receivers:
             scrape_configs:
             - job_name: "etcd"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              {{- if and (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) (eq .Values.distribution "openshift") }}
               static_configs:
-                - targets: ["`endpoint`:2381"]
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}"]
+              scheme: https
+              tls_config:
+                insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                cert_file: /otel/etc/etcd/tls.crt
+                key_file: /otel/etc/etcd/tls.key
+                {{- if not .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                ca_file: /otel/etc/etcd/cacert.pem
+                {{- end }}
+              {{- else if or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name }}
+              static_configs:
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }}"]
+              scheme: https
+              tls_config:
+                insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                cert_file: /otel/etc/etcd/tls.crt
+                key_file: /otel/etc/etcd/tls.key
+                {{- if not .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
+                ca_file: /otel/etc/etcd/cacert.pem
+                {{- end }}
+              {{- else }}
+              static_configs:
+                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }}"]
+              {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   action: keep
@@ -580,7 +606,7 @@ receivers:
 
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   {{- if .Values.logsCollection.containers.enabled }}
-  filelog:
+  file_log:
     {{- if not .Values.featureGates.fixMissedLogsDuringLogRotation }}
     {{- if .Values.isWindows }}
     include: ["C:\\var\\log\\pods\\*\\*\\*.log"]
@@ -979,6 +1005,16 @@ processors:
         key: source_canonical_revision
       - action: delete
         key: destination_canonical_revision
+
+  # This processor is used to remove excessive attributes from Prometheus metrics to avoid running into the dimensions limit.
+  # These attributes are resource attributes coming from Prometheus scraping, which are eventually converted into
+  # data point attributes in the SignalFx exporter, counting against the dimension limit.
+  # The dimension limit is being hit most frequently in Istio environments.
+  transform/drop_server_attrs:
+    error_mode: ignore
+    metric_statements:
+      - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+      - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
@@ -1122,6 +1158,8 @@ service:
     - health_check
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    - http_forwarder/opamp_splunk_o11y
+    - opamp/splunk_o11y
     {{- end }}
     - k8s_observer
     - zpages
@@ -1158,7 +1196,7 @@ service:
     logs:
       receivers:
         {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") .Values.logsCollection.containers.enabled }}
-        - filelog
+        - file_log
         {{- end }}
         {{- if .Values.splunkObservability.secureAppEnabled }}
         - routing/logs
@@ -1218,6 +1256,7 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
+        - resourcedetection
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resourcedetection/k8s_cluster_name
         {{- end }}
@@ -1273,7 +1312,7 @@ service:
     # Default metrics pipeline.
     metrics:
       receivers:
-        - hostmetrics
+        - host_metrics
         - kubeletstats
         - otlp
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
@@ -1287,6 +1326,7 @@ service:
         - batch
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
+        - transform/drop_server_attrs
         {{- end }}
         - resourcedetection
         - resource
@@ -1375,6 +1415,10 @@ service:
         - resource/add_agent_k8s
         - resourcedetection
         - resource
+        {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
+        - attributes/istio
+        - transform/drop_server_attrs
+        {{- end }}
       exporters:
         - signalfx/histograms
     {{- end }}

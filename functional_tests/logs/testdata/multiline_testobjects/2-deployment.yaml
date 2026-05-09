@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multiline-test
+  namespace: multiline-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multiline-test
+  template:
+    metadata:
+      labels:
+        app: multiline-test
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+        - name: testdata
+          configMap:
+            name: multiline-test-input
+      containers:
+        - name: multiline-test
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do cat /testdata/input.log; sleep 30; done"]
+          volumeMounts:
+            - name: testdata
+              mountPath: /testdata
+        - name: sidecar-proxy
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do cat /testdata/access.log; sleep 30; done"]
+          volumeMounts:
+            - name: testdata
+              mountPath: /testdata
+      nodeSelector:
+        kubernetes.io/os: "linux"

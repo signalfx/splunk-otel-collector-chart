@@ -1,0 +1,17 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+  metricsEnabled: true
+  tracesEnabled: true
+
+splunkPlatform:
+  endpoint: CHANGEME
+  token: CHANGEME
+  logsEnabled: true
+
+autodetect:
+  istio: true
+
+featureGates:
+  useControlPlaneMetricsHistogramData: false

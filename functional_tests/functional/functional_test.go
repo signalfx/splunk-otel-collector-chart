@@ -434,15 +434,19 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
 
 	// Test component health - verify no RBAC or connection errors
-	t.Run("component error logs checks", func(t *testing.T) {
-		testKubeConfig := requireEnv(t, "KUBECONFIG")
-		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-		require.NoError(t, err)
-		client, err := kubernetes.NewForConfig(kubeConfig)
-		require.NoError(t, err)
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
 
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+	t.Run("component error logs checks", func(t *testing.T) {
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+	})
+
+	t.Run("control plane receiver checks", func(t *testing.T) {
+		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
 	})
 }
 
@@ -469,21 +473,74 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 
 		t.Run("component error logs checks", func(t *testing.T) {
 			if kubeTestEnv == eksTestKubeEnv {
-				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, journaldReceiverName, 500)
 			}
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
 		})
+
+		if kubeTestEnv == rosaTestKubeEnv || kubeTestEnv == gceTestKubeEnv {
+			t.Run("control plane receiver checks", func(t *testing.T) {
+				runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kubeTestEnv))
+			})
+		}
 	case autopilotTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName)
-			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
 		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
+	}
+}
+
+// controlPlaneReceiversForEnv returns the receiver names that should be discovered and
+// scraping for the given cluster environment.
+func controlPlaneReceiversForEnv(kubeTestEnv string) []string {
+	switch kubeTestEnv {
+	case kindTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-scheduler",
+		}
+	case rosaTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-apiserver",
+			"prometheus/kubernetes-scheduler",
+		}
+	case gceTestKubeEnv:
+		return []string{
+			"prometheus/etcd",
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-apiserver",
+			"prometheus/kubernetes-scheduler",
+		}
+	default:
+		return nil
+	}
+}
+
+// runControlPlaneReceiverChecks verifies that control-plane receivers are discovered
+// and scraping without errors.
+func runControlPlaneReceiverChecks(t *testing.T, client *kubernetes.Clientset, receivers []string) {
+	cpAgentPods := internal.GetControlPlaneAgentPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+	require.NotEmpty(t, cpAgentPods, "no agent pods found on control-plane nodes")
+
+	internal.WaitForScrapeInterval(t, 3*time.Minute)
+
+	for _, receiver := range receivers {
+		t.Run("receiver started: "+receiver, func(t *testing.T) {
+			internal.CheckReceiverStarted(t, client, internal.DefaultNamespace, cpAgentPods, receiver)
+		})
+		t.Run("no errors: "+receiver, func(t *testing.T) {
+			internal.CheckComponentHealthForPods(t, client, internal.DefaultNamespace, cpAgentPods, receiver, 10000)
+		})
 	}
 }
 
@@ -567,6 +624,7 @@ func validateResourceAttributes(t *testing.T, clientset *kubernetes.Clientset, k
 func readAndNormalizeMetrics(t *testing.T, filePath string, skipKeys ...string) pmetric.Metrics {
 	metrics, err := golden.ReadMetrics(filePath)
 	require.NoError(t, err)
+	require.Positive(t, metrics.ResourceMetrics().Len(), "metrics file %s contains no ResourceMetrics", filePath)
 	internal.NormalizeAttributes(metrics.ResourceMetrics().At(0).Resource().Attributes(), skipKeys...)
 	return metrics
 }
@@ -890,8 +948,8 @@ func testAgentMetrics(t *testing.T) {
 		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubeletstats_metrics.yaml", "container.memory.usage")
 	})
 
-	t.Run("hostmetrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_hostmetrics.yaml", "system.memory.usage")
+	t.Run("host_metrics", func(t *testing.T) {
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_host_metrics.yaml", "system.memory.usage")
 	})
 }
 
@@ -946,13 +1004,13 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("processor", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_instance_id"),
-		pmetrictest.IgnoreMetricAttributeValue("service_version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("service.version", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
+		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("com.splunk.sourcetype", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("device", metricNames...),
 		pmetrictest.IgnoreMetricValues(),
@@ -970,7 +1028,6 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
 		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
 		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("service_instance_id", replaceWithStar),
 		pmetrictest.IgnoreScopeVersion(),
 		pmetrictest.IgnoreResourceMetricsOrder(),
 		pmetrictest.IgnoreMetricsOrder(),

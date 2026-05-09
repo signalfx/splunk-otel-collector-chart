@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: multiline-test-input
+  namespace: multiline-test
+data:
+  access.log: |
+    {"start_time":"2026-01-15T10:00:00.000Z","method":"GET","path":"/api/users","response_code":200,"duration":5}
+    {"start_time":"2026-01-15T10:00:01.000Z","method":"POST","path":"/api/orders","response_code":503,"duration":30004}
+    {"start_time":"2026-01-15T10:00:02.000Z","method":"GET","path":"/healthz","response_code":200,"duration":1}
+  input.log: |
+    2024-01-15 10:00:00 INFO  Application started successfully
+    2024-01-15 10:00:01 ERROR Unhandled exception in request handler
+    java.lang.NullPointerException: Cannot invoke method on null object
+    	at com.example.service.UserService.getUser(UserService.java:42)
+    	at com.example.controller.UserController.handleRequest(UserController.java:87)
+    	at com.example.app.DispatcherServlet.doDispatch(DispatcherServlet.java:1067)
+    2024-01-15 10:00:02 INFO  Retrying database connection
+    2024-01-15 10:00:03 ERROR Python traceback captured
+    Traceback (most recent call last):
+      File "/app/worker.py", line 34, in process_task
+        result = db.query(sql)
+      File "/app/db.py", line 12, in query
+        return self.conn.execute(sql)
+    sqlite3.OperationalError: no such table: tasks
+    2024-01-15 10:00:04 WARN  Cache miss for key user-profile-99
+    2024-01-15 10:00:05 ERROR Go panic recovered
+    goroutine 1 [running]:
+    runtime/debug.Stack()
+    	/usr/local/go/src/runtime/debug/stack.go:24 +0x5b
+    main.recoverPanic(0xc000014780)
+    	/app/main.go:55 +0x38
+    2024-01-15 10:00:06 INFO  Health check passed
+    2024-01-15 10:00:07 INFO  Scheduled job completed

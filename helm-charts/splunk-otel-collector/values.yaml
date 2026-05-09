@@ -317,7 +317,15 @@ agent:
     etcd:
       # Specifies whether to collect etcd metrics.
       # For set up etcd metrics details see: docs/advanced-configuration.md#setting-up-etcd-metrics
+      #
+      # The chart auto-detects the scraping mode for the prometheus/etcd receiver
+      # (used when featureGates.useControlPlaneMetricsHistogramData is enabled, the default):
+      #   - If a TLS secret is configured on OpenShift: mTLS to <pod-ip>:9979
+      #   - Else if a TLS secret is configured: mTLS to <pod-ip>:2379
+      #   - Otherwise (default): plain HTTP to <pod-ip>:2381 (requires agent.hostNetwork: true)
+      # Set port to override the auto-detected default (e.g. 4001 for kops).
       enabled: false
+      port: ""
       secret:
         # The name of the secret the helm chart will create (if name is empty the default name is used) or the name
         # of a secret that the user created (empty names are not valid for user created secrets).
@@ -325,7 +333,8 @@ agent:
         # Option for creating a new secret or using an existing one.
         # When secret.create=true, a new kubernetes secret will be created by the helm chart that will contain the
         # values from clientCert, clientKey, and caFile.
-        # When secret.create=false, the user must set secret.name to a name of a k8s secret the user created.
+        # When secret.create=false and secret.name is set, the chart uses an existing k8s secret.
+        # When both secret.create=false and secret.name is empty, no TLS secret is mounted (HTTP mode).
         create: false
         # Used when secret.create=true. The PEM-format CA certificate for the etcd client.
         # NOTE: The content of the certificate itself should be used here, not the
@@ -383,6 +392,10 @@ agent:
       hostPort: 14250
       protocol: TCP
       enabled_for: [traces]
+    opampforwarder:
+      containerPort: 4320
+      protocol: TCP
+      enabled_for: [metrics, traces, logs]
 
   resources:
     limits:
@@ -694,7 +707,7 @@ logsCollection:
   extraFileLogs: {}
   # Sample configuration to collect Audit logs. Please note hostPath can vary depending on the audit-policy.yaml configuration.
   # extraFileLogs:
-  #   filelog/audit-log:
+  #   file_log/audit-log:
   #     include: [/var/log/kubernetes/apiserver/audit.log]
   #     start_at: beginning
   #     include_file_path: true
@@ -782,7 +795,8 @@ secret:
   annotations: {}
 
 # The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
-# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
+# AWS Batch-managed, and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics
+# collection from nodes.
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule
@@ -795,6 +809,8 @@ tolerations:
     operator: Exists
   - key: node-role.kubernetes.io/infra
     effect: NoSchedule
+    operator: Exists
+  - key: batch.amazonaws.com/batch-node
     operator: Exists
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.
@@ -876,6 +892,10 @@ gateway:
       containerPort: 6060
       protocol: TCP
       # Enabled for all because SignalFx exporter will always send metadata updates when enabled.
+      enabled_for: [metrics, traces, logs]
+    opampforwarder:
+      containerPort: 4320
+      protocol: TCP
       enabled_for: [metrics, traces, logs]
 
   resources:
@@ -1063,7 +1083,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.13.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.14.0
       env:
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
@@ -1077,7 +1097,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.26.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1096,7 +1116,7 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.4.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.1
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
@@ -1409,3 +1429,8 @@ featureGates:
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false
+  # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.
+  # Because selector.matchLabels is immutable, enabling this on an existing installation
+  # requires additional steps. See:
+  # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#new-feature-gate-component-label-in-agent-daemonset-selector
+  daemonSetComponentSelector: false

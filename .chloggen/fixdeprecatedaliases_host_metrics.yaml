@@ -1,17 +1,16 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: bug_fix
+change_type: breaking
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: agent
+component: chart
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Fix histogram bucket count for `kubeproxy_network_programming_duration_seconds` metric
+note: Rename all `hostmetrics` receiver references to `host_metrics`
 # One or more tracking issues related to the change
-issues: [2328]
+issues: [2414]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Splunk Observability Cloud has a limit of 32 buckets for histograms. By default this histogram
-  has more than 32 buckets, so the config will now merge buckets to meet the required limit
-  to avoid this metric being dropped entirely. This change is relevant when both the
-  `useControlPlaneMetricsHistogramData` feature gate and `agent.controlPlaneMetrics.proxy`
-  config option are both enabled.
+  The `hostmetrics` alias has been deprecated in favor of `host_metrics` in the chart-generated configuration.
+  Any Helm values or overrides that reference `hostmetrics` (for example, `*.config.receivers.hostmetrics`
+  or pipelines that list `hostmetrics` as a receiver) must be updated to use `host_metrics`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.

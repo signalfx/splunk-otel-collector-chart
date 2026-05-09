@@ -235,7 +235,7 @@ If you are using the `resources` option in SCK to limit/increase the CPU and mem
 
 #### Extra files from host
 
-For tailing files other than container or journald logs (that is, kube audit logs), configure `logsCollection.extraFileLogs` using this [filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) receiver configuration.
+For tailing files other than container or journald logs (that is, kube audit logs), configure `logsCollection.extraFileLogs` using this [file_log](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) receiver configuration.
 
 [SCK values.yaml snippet]
 
@@ -255,7 +255,7 @@ logs:
 ```yaml
 logsCollection:
   extraFileLogs:
-    filelog/kube-audit:
+    file_log/kube-audit:
       include: [/var/log/kube-apiserver-audit.log]
       start_at: beginning
       include_file_path: true
@@ -271,7 +271,7 @@ Use the `kube-audit` keyword to continue reading from the translated checkpoint 
 
 ### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for objects
 
-For collecting Kubernetes objects, configure `clusterReceiver.k8sObjects` using the [k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) receiver configurations.
+For collecting Kubernetes objects, configure `clusterReceiver.k8sObjects` using the [k8s_objects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) receiver configurations.
 
 If you are using the following values for objects in `splunk-kubernetes-objects`:
 
@@ -309,7 +309,7 @@ clusterReceiver:
       label_selector: environment=production
 ```
 
-[k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) pulls objects every 60m by default. But, SCK pulls at every 15m. If you wish to use the same interval, you can define the `interval` config. The important change in `k8sObjects` is that you don't need to specify resource group and version. It automatically detects it.
+[k8s_objects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) pulls objects every 60m by default. But, SCK pulls at every 15m. If you wish to use the same interval, you can define the `interval` config. The important change in `k8sObjects` is that you don't need to specify resource group and version. It automatically detects it.
 
 
 ### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for metrics

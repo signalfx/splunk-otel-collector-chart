@@ -551,14 +551,6 @@ prometheus/{{ $receiver }}:
     scrape_configs:
     - job_name: "otel-{{ $job }}"
       metric_relabel_configs:
-      - source_labels: [ service_name ]
-        target_label: service.name
-      - source_labels: [ service_instance_id ]
-        target_label: service.instance.id
-      - source_labels: [ service_version ]
-        target_label: service.version
-      - regex: service_name|service_instance_id|service_version
-        action: labeldrop
       - action: drop
         regex: "promhttp_metric_handler_errors.*"
         source_labels:
@@ -574,4 +566,42 @@ prometheus/{{ $receiver }}:
       scrape_interval: 10s
       static_configs:
       - targets: [localhost:{{ $port }}]
+{{- end }}
+
+{{/*
+Common config for OpAMP extension
+*/}}
+{{- define "splunk-otel-collector.opampExtension" -}}
+{{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+{{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
+opamp/splunk_o11y:
+  server:
+    http:
+      {{- if and .Values.gateway.enabled (not $forceDirectEndpoint) }}
+      endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4320/v1/opamp
+      {{- else }}
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/opamp
+      {{- end }}
+      polling_interval: 30s
+      headers:
+        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+{{- end }}
+{{- end }}
+
+{{/*
+Common config for Splunk O11Y Ingest HTTP Forwarder extension
+*/}}
+{{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
+{{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+{{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
+http_forwarder/opamp_splunk_o11y:
+  ingress:
+      endpoint: "0.0.0.0:4320"
+  egress:
+      {{- if and .Values.gateway.enabled (not $forceDirectEndpoint) }}
+      endpoint: http://{{ include "splunk-otel-collector.fullname" . }}:4320
+      {{- else }}
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+      {{- end }}
+{{- end }}
 {{- end }}

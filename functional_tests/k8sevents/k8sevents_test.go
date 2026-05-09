@@ -111,7 +111,7 @@ func Test_K8SEvents(t *testing.T) {
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "time"}, "2025-03-04T01:59:10Z")
 		k8sObjectsLogs = updateLogRecordBody(k8sObjectsLogs, []string{"object", "metadata", "managedFields", "0", "manager"}, "k8sevents.test") // changes when the test name which runs k8s client changes
 
-		expectedObjectsLogsFile := "testdata/expected_k8sobjects.yaml"
+		expectedObjectsLogsFile := "testdata/expected_k8s_objects.yaml"
 		expectedObjectsLogs, err := golden.ReadLogs(expectedObjectsLogsFile)
 		require.NoError(t, err, "failed to read expected objects logs from file")
 

@@ -1,9 +1,11 @@
 cloudProvider: aws
-distribution: eks
 environment: dev
 splunkObservability:
   realm: us0
   accessToken: xxxxx
+distribution: eks
+clusterReceiver:
+  hostNetwork: true
 operatorcrds:
   install: true
 operator:

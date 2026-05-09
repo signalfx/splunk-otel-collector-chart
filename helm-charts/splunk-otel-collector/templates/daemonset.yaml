@@ -27,8 +27,9 @@ spec:
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
-      {{- /* component: otel-collector-agent - needs to be added when label names are standardised
-*/}}
+      {{- if .Values.featureGates.daemonSetComponentSelector }}
+      component: otel-collector-agent
+      {{- end }}
       release: {{ .Release.Name }}
   template:
     metadata:
@@ -277,7 +278,7 @@ spec:
           mountPath: /otel/etc
           readOnly: true
         {{- end }}
-        {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+        {{- if and .Values.agent.controlPlaneMetrics.etcd.enabled (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) }}
         - name: etcd-secret
           mountPath: /otel/etc/etcd
           readOnly: true
@@ -438,7 +439,7 @@ spec:
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
       {{- end }}
-      {{- if .Values.agent.controlPlaneMetrics.etcd.enabled }}
+      {{- if and .Values.agent.controlPlaneMetrics.etcd.enabled (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) }}
       - name: etcd-secret
         secret:
           secretName: {{ template "splunk-otel-collector.etcdSecret" . }}
