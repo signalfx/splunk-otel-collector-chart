@@ -45,7 +45,7 @@ logsCollection:
 
 If `attributes.log` is still referenced, no error is raised — the value silently evaluates to `null`.
 
-#### `attributes.time` is no longer available in `extraOperators`
+#### `attributes.time` is no longer available in `extraOperators`, use field `timestamp` instead
 
 Previously `attributes.time` contained the raw timestamp string and was available to `extraOperators`.
 The `container` operator sets the timestamp directly on the log record's `Timestamp` field and does not
