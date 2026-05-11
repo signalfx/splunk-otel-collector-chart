@@ -27,8 +27,9 @@ spec:
   selector:
     matchLabels:
       app: {{ template "splunk-otel-collector.name" . }}
-      {{- /* component: otel-collector-agent - needs to be added when label names are standardised
-*/}}
+      {{- if .Values.featureGates.daemonSetComponentSelector }}
+      component: otel-collector-agent
+      {{- end }}
       release: {{ .Release.Name }}
   template:
     metadata:

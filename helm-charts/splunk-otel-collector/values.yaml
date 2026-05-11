@@ -810,7 +810,8 @@ secret:
   annotations: {}
 
 # The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
-# and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics collection from nodes.
+# AWS Batch-managed, and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics
+# collection from nodes.
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule
@@ -823,6 +824,8 @@ tolerations:
     operator: Exists
   - key: node-role.kubernetes.io/infra
     effect: NoSchedule
+    operator: Exists
+  - key: batch.amazonaws.com/batch-node
     operator: Exists
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.
@@ -1128,7 +1131,7 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.4.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.1
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
@@ -1441,3 +1444,8 @@ featureGates:
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false
+  # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.
+  # Because selector.matchLabels is immutable, enabling this on an existing installation
+  # requires additional steps. See:
+  # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#new-feature-gate-component-label-in-agent-daemonset-selector
+  daemonSetComponentSelector: false

@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.150.0
+    helm.sh/chart: splunk-otel-collector-0.151.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.150.0"
+    app.kubernetes.io/version: "0.151.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.150.0
+    chart: splunk-otel-collector-0.151.1
     release: default
 data:
   relay: |
@@ -158,7 +158,7 @@ data:
         override: true
         timeout: 15s
     receivers:
-      hostmetrics:
+      host_metrics:
         collection_interval: 10s
         root_path: /hostfs
         scrapers:
@@ -361,7 +361,7 @@ data:
           - resourcedetection
           - resource
           receivers:
-          - hostmetrics
+          - host_metrics
           - kubeletstats
           - otlp
         metrics/agent:

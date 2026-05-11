@@ -271,7 +271,7 @@ Use the `kube-audit` keyword to continue reading from the translated checkpoint 
 
 ### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for objects
 
-For collecting Kubernetes objects, configure `clusterReceiver.k8sObjects` using the [k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) receiver configurations.
+For collecting Kubernetes objects, configure `clusterReceiver.k8sObjects` using the [k8s_objects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) receiver configurations.
 
 If you are using the following values for objects in `splunk-kubernetes-objects`:
 
@@ -309,7 +309,7 @@ clusterReceiver:
       label_selector: environment=production
 ```
 
-[k8sobjects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) pulls objects every 60m by default. But, SCK pulls at every 15m. If you wish to use the same interval, you can define the `interval` config. The important change in `k8sObjects` is that you don't need to specify resource group and version. It automatically detects it.
+[k8s_objects](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver) pulls objects every 60m by default. But, SCK pulls at every 15m. If you wish to use the same interval, you can define the `interval` config. The important change in `k8sObjects` is that you don't need to specify resource group and version. It automatically detects it.
 
 
 ### Translating custom configurations from SCK to Splunk OpenTelemetry Collector for Kubernetes for metrics

@@ -45,7 +45,7 @@ receivers:
     distribution: openshift
     {{- end }}
   {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
-  k8sobjects:
+  k8s_objects:
     auth_type: serviceAccount
     objects: {{ .Values.clusterReceiver.k8sObjects | toYaml | nindent 6 }}
   {{- end }}
@@ -474,7 +474,7 @@ service:
     {{- if (eq (include "splunk-otel-collector.clusterReceiverObjectsPipelineEnabled" .) "true") }}
     logs/objects:
       receivers:
-        - k8sobjects
+        - k8s_objects
       processors:
         - memory_limiter
         - batch
