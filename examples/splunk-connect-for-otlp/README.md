@@ -15,3 +15,7 @@ for example `splunk-connect-for-otlp.example.com:4317` for gRPC or
 With this configuration, logs use the rendered `otlp/platform_logs` exporter.
 The `splunkPlatform.endpoint` and `splunkPlatform.token` HEC settings are not
 required unless metrics or traces are also sent to Splunk Platform.
+
+For custom OTLP TLS trust or mTLS, configure
+`splunkPlatform.otlpIngest.insecureSkipVerify`, `clientCert`, `clientKey`, or
+`caFile`.

@@ -1,3 +1,6 @@
+{{- if eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true" }}
+Splunk OpenTelemetry Collector is installed and configured to send Splunk Platform logs to OTLP endpoint "{{ .Values.splunkPlatform.otlpIngest.endpoint }}".
+{{ end }}
 {{- if eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true" }}
 Splunk OpenTelemetry Collector is installed and configured to send data to Splunk Platform endpoint "{{ .Values.splunkPlatform.endpoint }}".
 {{ end }}

@@ -1,0 +1,213 @@
+suite: splunk-otel-collector.otlpLogIngestSchemaValidation
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+
+tests:
+  - it: should fail when OTLP ingest is enabled but logs are disabled
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        logsEnabled: false
+        metricsEnabled: true
+        metricsIndex: metrics
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/logsEnabled"
+
+  - it: should pass with OTLP logs only and no platform endpoint or token
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should pass with OTLP logs when platform endpoint is set and token is empty
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail without token when platform endpoint is set and metrics are enabled
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/token"
+
+  - it: should fail when metrics are enabled without platform endpoint
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/endpoint"
+
+  - it: should fail when traces are enabled without platform endpoint
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: true
+        tracesIndex: traces
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/endpoint"
+
+  - it: should fail when OTLP ingest is enabled but otlpIngest endpoint is empty
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/endpoint"
+
+  - it: should pass with OTLP TLS options
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          insecure: false
+          insecureSkipVerify: true
+          clientCert: cert
+          clientKey: key
+          caFile: ca
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when OTLP ingest sets insecure and insecureSkipVerify
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          insecure: true
+          insecureSkipVerify: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/insecureSkipVerify"
+
+  - it: should fail when OTLP ingest clientCert is set without clientKey
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          clientCert: cert
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/clientKey"
+
+  - it: should fail when OTLP ingest clientKey is set without clientCert
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          clientKey: key
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/clientCert"

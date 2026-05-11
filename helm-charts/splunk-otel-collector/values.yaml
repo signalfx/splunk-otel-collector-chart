@@ -98,6 +98,23 @@ splunkPlatform:
     protocol: grpc
     # Whether to disable TLS for the OTLP exporter. Set to true for plaintext endpoints.
     insecure: false
+    # Whether to skip checking the certificate of the OTLP endpoint when sending logs over TLS.
+    # Cannot be set to true when insecure is true.
+    insecureSkipVerify: false
+    # The PEM-format client certificate for the OTLP exporter.
+    # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
+    # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
+    # NOTE: The content of the certificate itself should be used here, not the
+    #       file path. The certificate will be stored as a secret in kubernetes.
+    clientCert: ""
+    # The private key for the OTLP exporter client certificate.
+    # NOTE: The content of the key itself should be used here, not the file path.
+    #       The key will be stored as a secret in kubernetes.
+    clientKey: ""
+    # The PEM-format CA certificate for the OTLP exporter.
+    # NOTE: The content of the file itself should be used here, not the file path.
+    #       The file will be stored as a secret in kubernetes.
+    caFile: ""
 
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.

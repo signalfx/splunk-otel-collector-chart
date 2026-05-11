@@ -54,6 +54,34 @@ The exporter name for platform logs sent via OTLP (otlp/platform_logs or otlp_ht
 {{- end -}}
 
 {{/*
+Whether the Splunk Platform secret must be mounted as files for HEC or OTLP TLS.
+*/}}
+{{- define "splunk-otel-collector.platformTlsSecretMountRequired" -}}
+{{- if or
+      .Values.splunkPlatform.clientCert
+      .Values.splunkPlatform.clientKey
+      .Values.splunkPlatform.caFile
+      .Values.splunkPlatform.otlpIngest.clientCert
+      .Values.splunkPlatform.otlpIngest.clientKey
+      .Values.splunkPlatform.otlpIngest.caFile }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Whether the Splunk Secret should be created by the chart.
+*/}}
+{{- define "splunk-otel-collector.secretCreateRequired" -}}
+{{- if and .Values.secret.create (or
+      (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
+      .Values.splunkPlatform.clientCert
+      .Values.splunkPlatform.clientKey
+      .Values.splunkPlatform.caFile
+      .Values.splunkPlatform.otlpIngest.clientCert
+      .Values.splunkPlatform.otlpIngest.clientKey
+      .Values.splunkPlatform.otlpIngest.caFile) }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
 Whether Splunk Platform HEC token is required.
 */}}
 {{- define "splunk-otel-collector.platformHecTokenRequired" -}}

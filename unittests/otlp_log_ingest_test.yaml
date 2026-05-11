@@ -10,6 +10,9 @@ templates:
   - configmap-cluster-receiver.yaml
   - secret-splunk.yaml
   - secret-splunk-validation-hook.yaml
+  - daemonset.yaml
+  - deployment-gateway.yaml
+  - deployment-cluster-receiver.yaml
 
 tests:
   - it: should use OTLP gRPC platform logs exporter in agent, gateway, and cluster receiver
@@ -119,7 +122,7 @@ tests:
           path: data["relay"]
           pattern: "\\notlp/platform_logs:"
 
-  - it: should not include HEC token in generated secret when logs are OTLP-only
+  - it: should not generate Splunk secret when logs are OTLP-only and no secret data is configured
     set:
       splunkObservability:
         realm: ""
@@ -137,10 +140,8 @@ tests:
           protocol: grpc
     template: secret-splunk.yaml
     asserts:
-      - isKind:
-          of: Secret
-      - isNull:
-          path: data.splunk_platform_hec_token
+      - hasDocuments:
+          count: 0
 
   - it: should not validate custom secret for HEC token when logs are OTLP-only
     set:
@@ -210,6 +211,58 @@ tests:
       - equal:
           path: data.splunk_platform_hec_token
           value: YWJj
+
+  - it: should include Observability token in generated secret when Observability is enabled
+    set:
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      secret:
+        create: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: secret-splunk.yaml
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: data.splunk_observability_access_token
+          value: YWJj
+
+  - it: should include HEC TLS files in generated secret when configured without HEC token
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: true
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        clientCert: cert
+        clientKey: key
+        caFile: ca
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: secret-splunk.yaml
+    asserts:
+      - equal:
+          path: data.splunk_platform_hec_client_cert
+          value: Y2VydA==
+      - equal:
+          path: data.splunk_platform_hec_client_key
+          value: a2V5
+      - equal:
+          path: data.splunk_platform_hec_ca_file
+          value: Y2E=
 
   - it: should use OTLP HTTP exporter in gateway when protocol is http
     set:
@@ -363,3 +416,195 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "otlp/platform_logs:[\\s\\S]+?sending_queue:[\\s\\S]+?storage: file_storage/persistent_queue"
+
+  - it: should render OTLP gRPC TLS file options
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          insecureSkipVerify: true
+          clientCert: cert
+          clientKey: key
+          caFile: ca
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?insecure: false"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?insecure_skip_verify: true"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?cert_file: /otel/etc/splunk_platform_otlp_client_cert"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?key_file: /otel/etc/splunk_platform_otlp_client_key"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp/platform_logs:[\\s\\S]+?ca_file: /otel/etc/splunk_platform_otlp_ca_file"
+
+  - it: should render OTLP HTTP TLS file options
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: http://otlp-logs.example.com:4318
+          protocol: http
+          insecureSkipVerify: true
+          clientCert: cert
+          clientKey: key
+          caFile: ca
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/platform_logs:[\\s\\S]+?insecure_skip_verify: true"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/platform_logs:[\\s\\S]+?cert_file: /otel/etc/splunk_platform_otlp_client_cert"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/platform_logs:[\\s\\S]+?key_file: /otel/etc/splunk_platform_otlp_client_key"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/platform_logs:[\\s\\S]+?ca_file: /otel/etc/splunk_platform_otlp_ca_file"
+
+  - it: should include OTLP TLS files in generated secret
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          clientCert: cert
+          clientKey: key
+          caFile: ca
+    template: secret-splunk.yaml
+    asserts:
+      - equal:
+          path: data.splunk_platform_otlp_client_cert
+          value: Y2VydA==
+      - equal:
+          path: data.splunk_platform_otlp_client_key
+          value: a2V5
+      - equal:
+          path: data.splunk_platform_otlp_ca_file
+          value: Y2E=
+
+  - it: should mount Splunk secret on agent when OTLP TLS files are configured
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: secret
+            mountPath: /otel/etc
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              secretName: test-release-splunk-otel-collector
+
+  - it: should mount Splunk secret on gateway when OTLP TLS files are configured
+    set:
+      splunkObservability:
+        realm: ""
+      gateway:
+        enabled: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: deployment-gateway.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: secret
+            mountPath: /otel/etc
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              secretName: test-release-splunk-otel-collector
+
+  - it: should mount Splunk secret on cluster receiver when OTLP TLS files are configured
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: secret
+            mountPath: /otel/etc
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              secretName: test-release-splunk-otel-collector

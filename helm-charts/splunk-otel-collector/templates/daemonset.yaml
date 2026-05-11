@@ -273,7 +273,7 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
-        {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+        {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
         - name: secret
           mountPath: /otel/etc
           readOnly: true
@@ -434,7 +434,7 @@ spec:
       {{- end }}
       {{- end }}
       {{- end }}
-      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+      {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}

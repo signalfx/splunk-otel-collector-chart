@@ -403,11 +403,31 @@ otlp_http/platform_logs:
   endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
   tls:
     insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
+    insecure_skip_verify: {{ .Values.splunkPlatform.otlpIngest.insecureSkipVerify }}
+    {{- if .Values.splunkPlatform.otlpIngest.clientCert }}
+    cert_file: /otel/etc/splunk_platform_otlp_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.otlpIngest.clientKey }}
+    key_file: /otel/etc/splunk_platform_otlp_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.otlpIngest.caFile }}
+    ca_file: /otel/etc/splunk_platform_otlp_ca_file
+    {{- end }}
 {{- else }}
 otlp/platform_logs:
   endpoint: {{ .Values.splunkPlatform.otlpIngest.endpoint | quote }}
   tls:
     insecure: {{ .Values.splunkPlatform.otlpIngest.insecure }}
+    insecure_skip_verify: {{ .Values.splunkPlatform.otlpIngest.insecureSkipVerify }}
+    {{- if .Values.splunkPlatform.otlpIngest.clientCert }}
+    cert_file: /otel/etc/splunk_platform_otlp_client_cert
+    {{- end }}
+    {{- if .Values.splunkPlatform.otlpIngest.clientKey }}
+    key_file: /otel/etc/splunk_platform_otlp_client_key
+    {{- end }}
+    {{- if .Values.splunkPlatform.otlpIngest.caFile }}
+    ca_file: /otel/etc/splunk_platform_otlp_ca_file
+    {{- end }}
 {{- end }}
   retry_on_failure:
     enabled: {{ .Values.splunkPlatform.retryOnFailure.enabled }}

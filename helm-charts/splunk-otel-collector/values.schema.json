@@ -181,6 +181,18 @@
             },
             "insecure": {
               "type": "boolean"
+            },
+            "insecureSkipVerify": {
+              "type": "boolean"
+            },
+            "clientCert": {
+              "type": "string"
+            },
+            "clientKey": {
+              "type": "string"
+            },
+            "caFile": {
+              "type": "string"
             }
           }
         }
@@ -1770,6 +1782,135 @@
                 ],
                 "properties": {
                   "endpoint": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "OTLP insecure disables TLS, so insecureSkipVerify cannot also be true",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "insecure"
+                ],
+                "properties": {
+                  "insecure": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "insecureSkipVerify": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if OTLP client certificate is provided, require its private key",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "clientCert"
+                ],
+                "properties": {
+                  "clientCert": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "required": [
+                  "clientKey"
+                ],
+                "properties": {
+                  "clientKey": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if OTLP client private key is provided, require its certificate",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "clientKey"
+                ],
+                "properties": {
+                  "clientKey": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "required": [
+                  "clientCert"
+                ],
+                "properties": {
+                  "clientCert": {
                     "minLength": 1
                   }
                 }
