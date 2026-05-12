@@ -65,7 +65,7 @@ func Test_OTLPAnnotationPrecedence(t *testing.T) {
 	}
 
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		attrs, found := findResourceAttrsForLog(logsConsumer, otlpAnnotationPrecedenceContainer, otlpAnnotationPrecedenceMarker)
+		attrs, found := findResourceAttrsForLog(logsConsumer, otlpAnnotationPrecedenceMarker)
 		if assert.True(tt, found, "expected OTLP log record with marker %q", otlpAnnotationPrecedenceMarker) {
 			assert.Equal(tt, otlpAnnotationPodIndex, attrs["com.splunk.index"])
 			assert.Equal(tt, otlpAnnotationPodSourcetype, attrs["com.splunk.sourcetype"])
@@ -108,7 +108,7 @@ func otlpAnnotationPrecedenceDeployWorkloadAndCollector(t *testing.T, testKubeCo
 	})
 }
 
-func findResourceAttrsForLog(logsConsumer *consumertest.LogsSink, container, marker string) (map[string]string, bool) {
+func findResourceAttrsForLog(logsConsumer *consumertest.LogsSink, marker string) (map[string]string, bool) {
 	for _, logs := range logsConsumer.AllLogs() {
 		for i := 0; i < logs.ResourceLogs().Len(); i++ {
 			rl := logs.ResourceLogs().At(i)
@@ -116,10 +116,6 @@ func findResourceAttrsForLog(logsConsumer *consumertest.LogsSink, container, mar
 				sl := rl.ScopeLogs().At(j)
 				for k := 0; k < sl.LogRecords().Len(); k++ {
 					lr := sl.LogRecords().At(k)
-					containerName, ok := lr.Attributes().Get("k8s.container.name")
-					if !ok || containerName.AsString() != container {
-						continue
-					}
 					if !strings.Contains(lr.Body().AsString(), marker) {
 						continue
 					}

@@ -24,6 +24,25 @@ tests:
       - failedTemplate:
           errorPattern: "/splunkPlatform/logsEnabled"
 
+  - it: should fail when OTLP ingest is enabled but logs are disabled with Observability configured
+    set:
+      splunkObservability:
+        realm: us0
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: false
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/logsEnabled"
+
   - it: should pass with OTLP logs only and no platform endpoint or token
     set:
       splunkObservability:
@@ -131,6 +150,59 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "/splunkPlatform/otlpIngest/endpoint"
+
+  - it: should fail when OTLP HTTP endpoint does not include a scheme
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4318
+          protocol: http
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/endpoint"
+
+  - it: should fail when OTLP HTTP endpoint has a scheme but no host
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: http://
+          protocol: http
+    asserts:
+      - failedTemplate:
+          errorPattern: "/splunkPlatform/otlpIngest/endpoint"
+
+  - it: should pass with OTLP HTTP endpoint using https scheme
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: https://otlp-logs.example.com:4318
+          protocol: http
+    asserts:
+      - notFailedTemplate: {}
 
   - it: should pass with OTLP TLS options
     set:

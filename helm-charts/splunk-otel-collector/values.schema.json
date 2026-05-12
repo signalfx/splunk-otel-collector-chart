@@ -1739,6 +1739,46 @@
     },
     {
       "if": {
+        "$comment": "if OTLP ingest for platform logs is enabled, require platform logs",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "logsEnabled"
+            ],
+            "properties": {
+              "logsEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
         "$comment": "if OTLP ingest for platform logs is enabled, require OTLP endpoint",
         "properties": {
           "splunkPlatform": {
@@ -1824,6 +1864,51 @@
                 "properties": {
                   "insecureSkipVerify": {
                     "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "OTLP HTTP exporter endpoints must include an http or https scheme",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled",
+                  "protocol"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  },
+                  "protocol": {
+                    "const": "http"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "endpoint": {
+                    "pattern": "^https?://[^\\s/]+(/.*)?$"
                   }
                 }
               }

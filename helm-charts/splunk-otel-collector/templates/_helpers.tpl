@@ -82,15 +82,22 @@ Whether the Splunk Secret should be created by the chart.
 {{- end -}}
 
 {{/*
-Whether Splunk Platform HEC token is required.
+Whether data is sent to the Splunk Platform HEC endpoint.
 */}}
-{{- define "splunk-otel-collector.platformHecTokenRequired" -}}
+{{- define "splunk-otel-collector.platformHecEndpointEnabled" -}}
 {{- or
       (and
         (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true")
         (not (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true")))
       (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true")
       (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
+{{- end -}}
+
+{{/*
+Whether Splunk Platform HEC token is required.
+*/}}
+{{- define "splunk-otel-collector.platformHecTokenRequired" -}}
+{{- include "splunk-otel-collector.platformHecEndpointEnabled" . }}
 {{- end -}}
 
 {{/*

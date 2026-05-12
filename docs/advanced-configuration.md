@@ -37,7 +37,13 @@ OTLP receiver exposed by the add-on. See the
 complete rendered configuration.
 
 When `protocol: grpc` is configured, the log pipeline uses the `otlp/platform_logs`
-exporter. When `protocol: http` is configured, it uses `otlp_http/platform_logs`.
+exporter. Set `splunkPlatform.otlpIngest.endpoint` to a host and port, for example
+`splunk-connect-for-otlp.example.com:4317`.
+
+When `protocol: http` is configured, the log pipeline uses the `otlp_http/platform_logs`
+exporter. Set `splunkPlatform.otlpIngest.endpoint` to a URL with a scheme, for example
+`http://splunk-connect-for-otlp.example.com:4318` for plaintext OTLP/HTTP or
+`https://splunk-connect-for-otlp.example.com:4318` for TLS OTLP/HTTP.
 
 The following table summarizes which `splunkPlatform.*` settings affect HEC
 exporters, OTLP log ingest, or both:
@@ -63,7 +69,7 @@ exporters, OTLP log ingest, or both:
 | `splunkPlatform.otlpIngest.enabled` | No | Yes | Switches Splunk Platform logs from HEC to OTLP. |
 | `splunkPlatform.otlpIngest.endpoint` | No | Yes | Required OTLP receiver endpoint. |
 | `splunkPlatform.otlpIngest.protocol` | No | Yes | Selects `grpc` (`otlp`) or `http` (`otlp_http`). |
-| `splunkPlatform.otlpIngest.insecure` | No | Yes | Sets OTLP `tls.insecure`; use `true` for plaintext endpoints. |
+| `splunkPlatform.otlpIngest.insecure` | No | Yes | Sets OTLP `tls.insecure`. For `protocol: grpc`, use `true` for plaintext endpoints. For `protocol: http`, plaintext or TLS is selected by the `http://` or `https://` endpoint scheme. |
 | `splunkPlatform.otlpIngest.insecureSkipVerify` | No | Yes | Sets OTLP `tls.insecure_skip_verify`; cannot be `true` when `insecure` is `true`. |
 | `splunkPlatform.otlpIngest.clientCert` | No | Yes | PEM client certificate stored in the chart Secret and rendered as OTLP `tls.cert_file`. |
 | `splunkPlatform.otlpIngest.clientKey` | No | Yes | PEM client key stored in the chart Secret and rendered as OTLP `tls.key_file`. |
@@ -82,13 +88,36 @@ the chart stores them in the Splunk Platform Secret, mounts that Secret at
 
 ## Provide tokens as a secret
 
-Instead of having the tokens as clear text in the values, those can be provided via a secret that is created before deploying the chart. See [secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml) for the required fields.
+Instead of having tokens and TLS PEM content as clear text in the values, those
+can be provided via a secret that is created before deploying the chart. See
+[secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml)
+for the rendered fields.
 
 ```yaml
 secret:
   create: false
   name: your-secret
 ```
+
+When a destination is enabled and the chart references a value from the Secret,
+the custom Secret must contain the matching key:
+
+| Key | Used for |
+| --- | --- |
+| `splunk_observability_access_token` | Splunk Observability access token. |
+| `splunk_platform_hec_token` | Splunk Platform HEC token for logs, metrics, or traces sent through HEC. |
+| `splunk_platform_hec_client_cert` | Splunk Platform HEC client certificate. |
+| `splunk_platform_hec_client_key` | Splunk Platform HEC client key. |
+| `splunk_platform_hec_ca_file` | Splunk Platform HEC CA certificate. |
+| `splunk_platform_otlp_client_cert` | OTLP log ingest client certificate. |
+| `splunk_platform_otlp_client_key` | OTLP log ingest client key. |
+| `splunk_platform_otlp_ca_file` | OTLP log ingest CA certificate. |
+
+For TLS files, the chart renders the Collector file reference only when the
+corresponding `splunkPlatform.*` or `splunkPlatform.otlpIngest.*` value is
+non-empty. When `secret.create: false`, provide the actual PEM content in the
+custom Secret and set the corresponding chart value to a non-empty placeholder
+so the Secret is mounted and the Collector config references the file.
 
 ## Cloud provider
 
