@@ -285,4 +285,6 @@ data:
                   without_type_suffix: true
                   without_units: true
         resource:
-          service.name: otel-agent
+          attributes:
+          - name: service.name
+            value: otel-agent

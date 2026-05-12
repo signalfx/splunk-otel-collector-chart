@@ -36,6 +36,8 @@ data:
         observe_nodes: true
         observe_pods: true
       opamp/splunk_o11y:
+        agent_description:
+          include_resource_attributes: true
         server:
           http:
             endpoint: http://default-splunk-otel-collector:4320/v1/opamp
@@ -243,4 +245,6 @@ data:
                   without_type_suffix: true
                   without_units: true
         resource:
-          service.name: otel-k8s-cluster-receiver
+          attributes:
+          - name: service.name
+            value: otel-k8s-cluster-receiver

@@ -655,6 +655,8 @@ opamp/splunk_o11y:
       polling_interval: 30s
       headers:
         X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+  agent_description:
+    include_resource_attributes: true
 {{- end }}
 {{- end }}
 
