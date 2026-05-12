@@ -60,6 +60,15 @@ render_task() {
     {} +
   find "${rendered_manifests_dir}" -type f -name "*webhook.yaml.bak" -delete
 
+  # Fail loudly if any cert/key field slipped past the redaction regex.
+  # `|| true` keeps `set -e` from aborting when grep finds no matches.
+  leaks=$(find "${rendered_manifests_dir}" -type f -name "*webhook.yaml" \
+            -exec grep -lE "^[[:space:]]+(caBundle|tls\.crt|tls\.key|ca\.crt): [^']" {} + || true)
+  if [ -n "$leaks" ]; then
+    echo "[${example_name}] FAIL - redaction left raw cert/key content in: $leaks"
+    exit 1
+  fi
+
   # Move the chart renders
   cp -rp "${rendered_manifests_dir}/splunk-otel-collector/templates/"* "$rendered_manifests_dir"
   if [ $? -ne 0 ]; then
