@@ -25,16 +25,16 @@ webhooks:
     failurePolicy: Fail
     name: minstrumentation.kb.io
     rules:
-      - apiGroups:
-          - opentelemetry.io
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - instrumentations
-        scope: Namespaced
+    - apiGroups:
+        - opentelemetry.io
+      apiVersions:
+        - v1alpha1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - instrumentations
+      scope: Namespaced
     sideEffects: None
     timeoutSeconds: 10
   - admissionReviewVersions:
@@ -108,19 +108,19 @@ webhooks:
         namespace: default
         path: /validate-opentelemetry-io-v1alpha1-instrumentation
         port: 443
-    failurePolicy: Fail
+    failurePolicy:  Fail
     name: vinstrumentationcreateupdate.kb.io
     rules:
-      - apiGroups:
-          - opentelemetry.io
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - instrumentations
-        scope: Namespaced
+    - apiGroups:
+        - opentelemetry.io
+      apiVersions:
+        - v1alpha1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - instrumentations
+      scope: Namespaced
     sideEffects: None
     timeoutSeconds: 10
   - admissionReviewVersions:
@@ -194,13 +194,11 @@ webhooks:
     sideEffects: None
     timeoutSeconds: 10
 ---
-
+# Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
 ---
-
 ---
-
+# Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
 ---
-
 ---
 # Source: splunk-otel-collector/charts/operator/templates/admission-webhooks/operator-webhook.yaml
 apiVersion: v1
