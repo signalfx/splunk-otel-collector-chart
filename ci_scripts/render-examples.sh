@@ -50,15 +50,15 @@ render_task() {
     exit 1
   fi
 
-  # Redact cert/key fields in webhook.yaml while preserving yaml structure
-  find "${rendered_manifests_dir}" -type f -name "*webhook.yaml" | while read -r webhook_file; do
-    yq -i '
-      (.. | select(has("caBundle"))) .caBundle |= "[REDACTED CABUNDLE]" |
-      (.. | select(has("data")) | .data | select(has("tls.crt"))) ."tls.crt" |= "[REDACTED CERTIFICATE]" |
-      (.. | select(has("data")) | .data | select(has("tls.key"))) ."tls.key" |= "[REDACTED PRIVATE KEY]" |
-      (.. | select(has("data")) | .data | select(has("ca.crt"))) ."ca.crt" |= "[REDACTED CA CERTIFICATE]"
-    ' "$webhook_file"
-  done
+  # Redact cert/key fields in webhook.yaml. Line-based on purpose: yq's
+  # version-dependent YAML emitter caused drift between local and CI renders.
+  find "${rendered_manifests_dir}" -type f -name "*webhook.yaml" -exec sed -i.bak -E \
+    -e "s/^([[:space:]]+caBundle): .*/\\1: '[REDACTED CABUNDLE]'/" \
+    -e "s/^([[:space:]]+tls\.crt): .*/\\1: '[REDACTED CERTIFICATE]'/" \
+    -e "s/^([[:space:]]+tls\.key): .*/\\1: '[REDACTED PRIVATE KEY]'/" \
+    -e "s/^([[:space:]]+ca\.crt): .*/\\1: '[REDACTED CA CERTIFICATE]'/" \
+    {} +
+  find "${rendered_manifests_dir}" -type f -name "*webhook.yaml.bak" -delete
 
   # Move the chart renders
   cp -rp "${rendered_manifests_dir}/splunk-otel-collector/templates/"* "$rendered_manifests_dir"
