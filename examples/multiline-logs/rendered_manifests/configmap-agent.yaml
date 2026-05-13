@@ -158,91 +158,30 @@ data:
         max_concurrent_files: 1024
         max_log_size: 1MiB
         operators:
-        - id: get-format
-          routes:
-          - expr: body matches "^\\{"
-            output: parser-docker
-          - expr: body matches "^[^ Z]+ "
-            output: parser-crio
-          - expr: body matches "^[^ ]+ "
-            output: parser-containerd
-          type: router
-        - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: 2006-01-02T15:04:05.999999999Z07:00
-            layout_type: gotime
-            parse_from: attributes.time
-          type: regex_parser
-        - combine_field: attributes.log
-          combine_with: ""
-          id: crio-recombine
-          is_last_entry: attributes.logtag == 'F'
+        - add_metadata_from_filepath: true
+          id: container-parser
           max_log_size: 1048576
-          output: handle_empty_log
-          source_identifier: attributes["log.file.path"]
-          type: recombine
-        - id: parser-containerd
-          regex: ^(?P<time>[^ ]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: 2006-01-02T15:04:05.999999999Z07:00
-            layout_type: gotime
-            parse_from: attributes.time
-          type: regex_parser
-        - combine_field: attributes.log
-          combine_with: ""
-          id: containerd-recombine
-          is_last_entry: attributes.logtag == 'F'
-          max_log_size: 1048576
-          output: handle_empty_log
-          source_identifier: attributes["log.file.path"]
-          type: recombine
-        - id: parser-docker
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: json_parser
-        - combine_field: attributes.log
+          type: container
+        - combine_field: body
           combine_with: ""
           id: docker-recombine
-          is_last_entry: attributes.log endsWith "\n"
+          if: attributes.logtag == nil
+          is_last_entry: body endsWith "\n"
           max_log_size: 1048576
-          output: handle_empty_log
           source_identifier: attributes["log.file.path"]
           type: recombine
-        - field: attributes.log
+        - field: body
           id: handle_empty_log
-          if: attributes.log == nil
+          if: body == nil
           type: add
           value: ""
-        - parse_from: attributes["log.file.path"]
-          regex: ^\/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^\/]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
-          type: regex_parser
-        - from: attributes.uid
-          to: resource["k8s.pod.uid"]
-          type: move
-        - from: attributes.restart_count
-          to: resource["k8s.container.restart_count"]
-          type: move
-        - from: attributes.container_name
-          to: resource["k8s.container.name"]
-          type: move
-        - from: attributes.namespace
-          to: resource["k8s.namespace.name"]
-          type: move
-        - from: attributes.pod_name
-          to: resource["k8s.pod.name"]
-          type: move
         - field: resource["com.splunk.sourcetype"]
           type: add
           value: EXPR("kube:container:"+resource["k8s.container.name"])
-        - from: attributes.stream
-          to: attributes["log.iostream"]
-          type: move
         - from: attributes["log.file.path"]
           to: resource["com.splunk.source"]
           type: move
-        - default: clean-up-log-record
+        - default: post-multiline
           routes:
           - expr: (resource["k8s.namespace.name"]) == "default" && (resource["k8s.pod.name"])
               matches "buttercup-app-.*" && (resource["k8s.container.name"]) == "server"
@@ -254,36 +193,32 @@ data:
               matches "foo-app-.*" && (resource["k8s.container.name"]) == "server"
             output: k8s-nm3_foo-app-.*_server
           type: router
-        - combine_field: attributes.log
+        - combine_field: body
           combine_with: "\t"
           id: default_buttercup-app-.*_server
-          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
           max_unmatched_batch_size: 5
-          output: clean-up-log-record
+          output: post-multiline
           source_identifier: resource["com.splunk.source"]
           type: recombine
-        - combine_field: attributes.log
+        - combine_field: body
           combine_with: ""
           id: k8s-nm2_foo-app-.*_client
-          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
-          output: clean-up-log-record
+          output: post-multiline
           source_identifier: resource["com.splunk.source"]
           type: recombine
-        - combine_field: attributes.log
+        - combine_field: body
           id: k8s-nm3_foo-app-.*_server
-          is_first_entry: (attributes.log) matches "^[^\\s].*"
+          is_first_entry: body matches "^[^\\s].*"
           max_log_size: 1048576
-          output: clean-up-log-record
+          output: post-multiline
           source_identifier: resource["com.splunk.source"]
           type: recombine
-        - from: attributes.log
-          id: clean-up-log-record
-          to: body
-          type: move
-        - field: attributes.time
-          type: remove
+        - id: post-multiline
+          type: noop
         poll_interval: 200ms
         retry_on_failure:
           enabled: true
