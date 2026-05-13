@@ -1880,6 +1880,51 @@
     },
     {
       "if": {
+        "$comment": "OTLP gRPC exporter endpoints must be host:port without a URL scheme",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled",
+                  "protocol"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  },
+                  "protocol": {
+                    "const": "grpc"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "endpoint": {
+                    "pattern": "^[^\\s/]+:[0-9]+$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
         "$comment": "OTLP HTTP exporter endpoints must include an http or https scheme",
         "properties": {
           "splunkPlatform": {

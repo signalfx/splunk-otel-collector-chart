@@ -143,7 +143,7 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: should not validate custom secret for HEC token when logs are OTLP-only
+  - it: should not generate validation hook when logs are OTLP-only and no secret data is configured
     set:
       splunkObservability:
         realm: ""
@@ -162,9 +162,8 @@ tests:
           protocol: grpc
     template: secret-splunk-validation-hook.yaml
     asserts:
-      - matchRegex:
-          path: spec.containers[0].args[0]
-          pattern: "if \\[ \"false\" = \"true\" \\] && \\[ ! -f /otel/secret/splunk_platform_hec_token \\]"
+      - hasDocuments:
+          count: 0
 
   - it: should validate custom secret for HEC token when metrics are sent to platform HEC
     set:
@@ -516,6 +515,38 @@ tests:
       - equal:
           path: data.splunk_platform_otlp_ca_file
           value: Y2E=
+
+  - it: should validate custom secret for OTLP TLS files when configured
+    set:
+      splunkObservability:
+        realm: ""
+      secret:
+        create: false
+        validateSecret: true
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          clientCert: cert
+          clientKey: key
+          caFile: ca
+    template: secret-splunk-validation-hook.yaml
+    asserts:
+      - matchRegex:
+          path: spec.containers[0].args[0]
+          pattern: "splunk_platform_otlp_client_cert"
+      - matchRegex:
+          path: spec.containers[0].args[0]
+          pattern: "splunk_platform_otlp_client_key"
+      - matchRegex:
+          path: spec.containers[0].args[0]
+          pattern: "splunk_platform_otlp_ca_file"
 
   - it: should mount Splunk secret on agent when OTLP TLS files are configured
     set:

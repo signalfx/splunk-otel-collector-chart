@@ -1,0 +1,48 @@
+suite: splunk-otel-collector.notes
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - NOTES.txt
+
+tests:
+  - it: should render OTLP endpoint note without HEC endpoint note when platform logs use OTLP
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    asserts:
+      - matchRegexRaw:
+          pattern: 'Splunk Platform logs to OTLP endpoint "otlp-logs\.example\.com:4317"'
+      - notMatchRegexRaw:
+          pattern: 'Splunk Platform endpoint "https://hec\.example\.com/services/collector/event"'
+
+  - it: should render HEC endpoint note when platform metrics use Splunk Platform endpoint
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: false
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+        otlpIngest:
+          enabled: false
+    asserts:
+      - matchRegexRaw:
+          pattern: 'Splunk Platform endpoint "https://hec\.example\.com/services/collector/event"'
+      - notMatchRegexRaw:
+          pattern: "Splunk Platform logs to OTLP endpoint"
