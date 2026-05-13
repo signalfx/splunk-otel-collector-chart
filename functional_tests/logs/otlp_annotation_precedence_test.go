@@ -25,7 +25,6 @@ const (
 	otlpAnnotationPrecedenceValuesFile   = "otlp_annotation_precedence_values.yaml.tmpl"
 	otlpAnnotationPrecedenceTestdataDir  = "testdata"
 	otlpAnnotationPrecedenceManifestsDir = "testdata/otlp_annotation_precedence_testobjects"
-	otlpAnnotationPrecedenceContainer    = "otlp-annotation-precedence"
 	otlpAnnotationPrecedenceMarker       = "OTLP_ANNOTATION_PRECEDENCE_MARKER"
 	otlpAnnotationPodIndex               = "pod-otlp-index"
 	otlpAnnotationPodSourcetype          = "pod-otlp-sourcetype"
