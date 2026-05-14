@@ -1,4 +1,7 @@
 clusterName: CHANGEME
+secret:
+  create: false
+  validateSecret: true
 splunkPlatform:
   index: CHANGEME
   logsEnabled: true
@@ -10,3 +13,4 @@ splunkPlatform:
     protocol: grpc
     insecure: false
     insecureSkipVerify: false
+    caFile: CHANGEME

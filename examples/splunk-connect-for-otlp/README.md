@@ -19,3 +19,8 @@ required unless metrics or traces are also sent to Splunk Platform.
 For custom OTLP TLS trust or mTLS, configure
 `splunkPlatform.otlpIngest.insecureSkipVerify`, `clientCert`, `clientKey`, or
 `caFile`.
+
+This example uses `secret.create=false` with `secret.validateSecret=true` so the
+chart renders the custom Secret validation hook. Before installing it, create the
+custom Secret named for the chart release and include `splunk_platform_otlp_ca_file`
+with the CA certificate for the OTLP endpoint.

@@ -29,6 +29,7 @@ data:
           num_consumers: 10
           queue_size: 1000
         tls:
+          ca_file: /otel/etc/splunk_platform_otlp_ca_file
           insecure: false
           insecure_skip_verify: false
     extensions:
