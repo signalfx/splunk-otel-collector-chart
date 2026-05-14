@@ -129,6 +129,11 @@ Helper to build entries for instrumentation libraries
     {{- if and (eq (kindOf $.Values.instrumentation.spec) "map") (hasKey $.Values.instrumentation.spec $lib) -}}
       {{- $libSpec := get $.Values.instrumentation.spec $lib }}
 
+      {{- /* When secureAppEnabled=true and processing java, swap image to the CSA variant. */ -}}
+      {{- if and (eq $lib "java") $.Values.splunkObservability.secureAppEnabled -}}
+        {{- $libSpec = merge (dict "image" $.Values.splunkObservability.secureAppCsaImage) $libSpec -}}
+      {{- end -}}
+
       {{- /* Instead of including as a string, use a template function that returns proper data structure */ -}}
       {{- $envData := dict "endpoint" $endpoint "instLibName" $lib "env" $libSpec.env "image" $libSpec.image -}}
       {{- $envVars := include "splunk-otel-collector.operator.extract-instrumentation-env" $envData | fromYaml -}}

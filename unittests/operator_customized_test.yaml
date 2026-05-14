@@ -40,6 +40,56 @@ tests:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "false"
 
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — java image swap (D1)
+  #
+  # When secureAppEnabled=true and lib==java, the Instrumentation CR's
+  # spec.java.image must be replaced with secureAppCsaImage. Other runtimes
+  # and the disabled state must not be affected.
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.java.image replaced with secureAppCsaImage"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
+
+  - it: "secureAppEnabled=false — spec.java.image is NOT replaced"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+
+  - it: "secureAppEnabled=true — spec.dotnet.image is NOT replaced (only java is affected)"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
+      instrumentation:
+        spec:
+          dotnet:
+            image: ghcr.io/signalfx/splunk-otel-dotnet:v1.0.0
+    asserts:
+      - equal:
+          path: spec.dotnet.image
+          value: ghcr.io/signalfx/splunk-otel-dotnet:v1.0.0
+
   - it: should respect user-defined SPLUNK_PROFILER vars in global spec.env and not duplicate them
     set:
       instrumentation.spec.env:

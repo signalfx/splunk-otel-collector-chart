@@ -1,0 +1,256 @@
+suite: splunk-otel-collector.secureapp
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+
+# ============================================================================
+# SecureApp collector config tests
+#
+# Covers all 8 S/L/P combinations (S=secureAppEnabled, L=logsEnabled,
+# P=profilingEnabled) for the agent configmap. Key invariants:
+#   - S=0: routing connector, logs/split, logs/secureapp are all absent
+#   - S=1: routing connector, logs/split, logs/secureapp are always present
+#   - default_pipelines: [] when S=1,L=0,P=0
+#   - default_pipelines: [logs] when S=1 and (L=1 OR P=1)
+#   - logs/secureapp receivers always [routing/logs], never [otlp]
+#   - logs/secureapp processors: [k8s_attributes, resourcedetection,
+#       resource/add_environment, memory_limiter, batch]
+#   - logs/split processors: [memory_limiter, batch] only (no enrichment)
+#   - otlp_http/secureapp.logs_endpoint uses o11yIngestUrl helper (realm-aware)
+# ============================================================================
+
+tests:
+
+  # --------------------------------------------------------------------------
+  # S=0: secureApp disabled — no routing connector, no split, no secureapp
+  # --------------------------------------------------------------------------
+
+  - it: "S=0 — agent: routing/logs connector is absent"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "routing/logs:"
+
+  - it: "S=0 — agent: logs/split pipeline is absent"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/split:"
+
+  - it: "S=0 — agent: logs/secureapp pipeline is absent"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:"
+
+  - it: "S=0 — agent: otlp_http/secureapp exporter is absent"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/secureapp:"
+
+  # --------------------------------------------------------------------------
+  # S=1,L=0,P=0 — routing connector with empty default_pipelines
+  # --------------------------------------------------------------------------
+
+  - it: "S=1,L=0,P=0 — agent: routing/logs connector present with default_pipelines: []"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/logs:\\n\\s+default_pipelines: \\[\\]"
+
+  - it: "S=1,L=0,P=0 — agent: routing table routes secureapp scope to logs/secureapp"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "condition: instrumentation_scope\\.name == \"secureapp\""
+      - matchRegex:
+          path: data["relay"]
+          pattern: "pipelines:\\n\\s+- logs/secureapp"
+
+  - it: "S=1,L=0,P=0 — agent: logs/secureapp receives from [routing/logs] not [otlp]"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- routing/logs"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- otlp"
+
+  - it: "S=1,L=0,P=0 — agent: logs/secureapp has full enrichment processor chain"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n\\s+- k8s_attributes\\n"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n"
+
+  - it: "S=1,L=0,P=0 — agent: logs/split has only [memory_limiter, batch] (no enrichment processors)"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n\\s+- memory_limiter\\n\\s+- batch\\n\\s+receivers:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- k8s_attributes"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment"
+
+  - it: "S=1,L=0,P=0 — agent: logs/split receives from [otlp] and exports to [routing/logs]"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n\\s+- routing/logs\\n"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- otlp"
+
+  - it: "S=1,L=0,P=0 — agent: otlp_http/secureapp exporter uses realm-aware logs_endpoint"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        realm: us1
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/secureapp:\\n\\s+headers:\\n(?:\\s+.+\\n)+\\s+logs_endpoint: https://ingest\\.us1\\."
+      - matchRegex:
+          path: data["relay"]
+          pattern: "X-Splunk-Instrumentation-Library: secureapp"
+
+  # --------------------------------------------------------------------------
+  # S=1,L=1,P=0 — default_pipelines must include [logs]
+  # --------------------------------------------------------------------------
+
+  - it: "S=1,L=1,P=0 — agent: routing/logs default_pipelines includes [logs]"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+      splunkPlatform:
+        endpoint: https://hec.example.com
+        token: test-hec-token
+        logsEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/logs:\\n\\s+default_pipelines:\\n\\s+- logs\\n"
+
+  - it: "S=1,L=1,P=0 — agent: logs pipeline receives from routing/logs not otlp"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+      splunkPlatform:
+        endpoint: https://hec.example.com
+        token: test-hec-token
+        logsEnabled: true
+      logsCollection:
+        containers:
+          enabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\s+logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- routing/logs"
+
+  # --------------------------------------------------------------------------
+  # S=1,L=0,P=1 — profiling enabled drives default_pipelines: [logs]
+  # --------------------------------------------------------------------------
+
+  - it: "S=1,L=0,P=1 — agent: routing/logs default_pipelines includes [logs] when profiling enabled"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/logs:\\n\\s+default_pipelines:\\n\\s+- logs\\n"
+
+  # --------------------------------------------------------------------------
+  # S=1,L=1,P=1 — all three enabled
+  # --------------------------------------------------------------------------
+
+  - it: "S=1,L=1,P=1 — agent: routing/logs present with default_pipelines [logs]"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: true
+      splunkPlatform:
+        endpoint: https://hec.example.com
+        token: test-hec-token
+        logsEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/logs:\\n\\s+default_pipelines:\\n\\s+- logs\\n"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/split:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:"
