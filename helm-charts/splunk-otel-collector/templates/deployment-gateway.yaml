@@ -124,7 +124,7 @@ spec:
                 name: {{ include "splunk-otel-collector.secret" . }}
                 key: splunk_observability_access_token
           {{- end }}
-          {{- if (eq (include "splunk-otel-collector.splunkPlatformEnabled" .) "true") }}
+          {{- if (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true") }}
           - name: SPLUNK_PLATFORM_HEC_TOKEN
             valueFrom:
               secretKeyRef:
@@ -163,7 +163,7 @@ spec:
           name: serviceaccount-token
           readOnly: true
         {{- end }}
-        {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+        {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
         - name: secret
           mountPath: /otel/etc
           readOnly: true
@@ -200,7 +200,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      {{- if or .Values.splunkPlatform.clientCert .Values.splunkPlatform.clientKey .Values.splunkPlatform.caFile }}
+      {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}

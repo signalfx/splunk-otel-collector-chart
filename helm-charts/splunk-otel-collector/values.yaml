@@ -71,6 +71,8 @@ splunkPlatform:
   insecureSkipVerify: false
   # The PEM-format CA certificate for this client.
   # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
+  # When secret.create=false, provide the PEM content in the custom secret and
+  # set the corresponding value to a non-empty placeholder so the chart renders the file reference.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   # NOTE: The content of the certificate itself should be used here, not the
   #       file path. The certificate will be stored as a secret in kubernetes.
@@ -83,6 +85,43 @@ splunkPlatform:
   # NOTE: The content of the file itself should be used here, not the file path.
   #       The file will be stored as a secret in kubernetes.
   caFile: ""
+
+  # Optional: send logs directly to a Splunk Connect for OTLP endpoint instead of HEC.
+  # Splunk Connect for OTLP is a Splunk Technical Add-on that exposes an OTLP gRPC/HTTP
+  # receiver inside Splunk Enterprise/Cloud. See https://github.com/splunk/splunk-connect-for-otlp
+  # When enabled, splunkPlatform.endpoint and splunkPlatform.token are not required for logs,
+  # unless metrics or traces are also sent to Splunk Platform via HEC.
+  otlpIngest:
+    enabled: false
+    # Required when enabled. OTLP endpoint exposed by Splunk Connect for OTLP.
+    # Use a host and port for gRPC (e.g. "splunk-host:4317").
+    # Use a URL with scheme for HTTP (e.g. "http://splunk-host:4318" or "https://splunk-host:4318").
+    endpoint: ""
+    # Protocol to use: "grpc" or "http".
+    protocol: grpc
+    # Whether to disable TLS for the OTLP exporter.
+    # For gRPC, set to true for plaintext endpoints.
+    # For HTTP, plaintext or TLS is selected by the endpoint's http:// or https:// scheme.
+    insecure: false
+    # Whether to skip checking the certificate of the OTLP endpoint when sending logs over TLS.
+    # Cannot be set to true when insecure is true.
+    insecureSkipVerify: false
+    # The PEM-format client certificate for the OTLP exporter.
+    # Alternatively the clientCert, clientKey and caFile can be provided as a secret.
+    # When secret.create=false, provide the PEM content in the custom secret and
+    # set the corresponding value to a non-empty placeholder so the chart renders the file reference.
+    # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
+    # NOTE: The content of the certificate itself should be used here, not the
+    #       file path. The certificate will be stored as a secret in kubernetes.
+    clientCert: ""
+    # The private key for the OTLP exporter client certificate.
+    # NOTE: The content of the key itself should be used here, not the file path.
+    #       The key will be stored as a secret in kubernetes.
+    clientKey: ""
+    # The PEM-format CA certificate for the OTLP exporter.
+    # NOTE: The content of the file itself should be used here, not the file path.
+    #       The file will be stored as a secret in kubernetes.
+    caFile: ""
 
   # Options to disable or enable particular telemetry data types that will be sent to
   # Splunk Platform. Only logs collection is enabled by default.

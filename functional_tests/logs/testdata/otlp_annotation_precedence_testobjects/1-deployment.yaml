@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otlp-annotation-precedence
+  namespace: otlp-annotation-precedence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otlp-annotation-precedence
+  template:
+    metadata:
+      labels:
+        app: otlp-annotation-precedence
+      annotations:
+        splunk.com/index: pod-otlp-index
+        splunk.com/sourcetype: pod-otlp-sourcetype
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: otlp-annotation-precedence
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do echo OTLP_ANNOTATION_PRECEDENCE_MARKER; sleep 5; done"]
+      nodeSelector:
+        kubernetes.io/os: "linux"

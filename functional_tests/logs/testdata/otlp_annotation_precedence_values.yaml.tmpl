@@ -1,0 +1,21 @@
+clusterName: otlp-annotation-precedence
+
+splunkObservability:
+  realm: ""
+
+splunkPlatform:
+  endpoint: ""
+  token: ""
+  index: chart-default-otlp-index
+  sourcetype: chart-default-otlp-sourcetype
+  logsEnabled: true
+  metricsEnabled: false
+  tracesEnabled: false
+  otlpIngest:
+    enabled: true
+    endpoint: "{{ .OtlpEndpoint }}"
+    protocol: grpc
+    insecure: true
+
+clusterReceiver:
+  enabled: false

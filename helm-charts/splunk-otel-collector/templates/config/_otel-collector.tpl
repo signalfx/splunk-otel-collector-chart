@@ -54,6 +54,9 @@ processors:
   {{- end }}
 
   {{- include "splunk-otel-collector.resourceLogsProcessor" . | nindent 2 }}
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsResourceProcessor" . | nindent 2 }}
+  {{- end }}
   {{- if .Values.autodetect.istio }}
   {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
   {{- end }}
@@ -160,7 +163,9 @@ exporters:
     disable_compression: true
   {{- end }}
 
-  {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+  {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.otlpPlatformLogsExporter" . | nindent 2 }}
+  {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
 
@@ -329,11 +334,16 @@ service:
         - transform/istio_service_name
         {{- end }}
         - resource/logs
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - resource/otlp_platform_logs
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
+        - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
+        {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
         - splunk_hec/platform_logs
         {{- end }}
     {{- end }}

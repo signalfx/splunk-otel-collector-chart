@@ -160,6 +160,41 @@
         },
         "fsyncEnabled": {
           "type": "boolean"
+        },
+        "otlpIngest": {
+          "description": "Send logs via OTLP to Splunk Connect for OTLP instead of HEC",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "protocol": {
+              "type": "string",
+              "enum": [
+                "grpc",
+                "http"
+              ]
+            },
+            "insecure": {
+              "type": "boolean"
+            },
+            "insecureSkipVerify": {
+              "type": "boolean"
+            },
+            "clientCert": {
+              "type": "string"
+            },
+            "clientKey": {
+              "type": "string"
+            },
+            "caFile": {
+              "type": "string"
+            }
+          }
         }
       },
       "anyOf": [
@@ -1540,6 +1575,33 @@
               }
             }
           }
+        },
+        {
+          "properties": {
+            "splunkPlatform": {
+              "type": "object",
+              "required": [
+                "logsEnabled",
+                "otlpIngest"
+              ],
+              "properties": {
+                "logsEnabled": {
+                  "const": true
+                },
+                "otlpIngest": {
+                  "type": "object",
+                  "required": [
+                    "enabled"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     },
@@ -1618,11 +1680,57 @@
           },
           "splunkPlatform": {
             "if": {
-              "properties": {
-                "endpoint": {
-                  "minLength": 1
+              "allOf": [
+                {
+                  "properties": {
+                    "endpoint": {
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "metricsEnabled": {
+                          "const": true
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "tracesEnabled": {
+                          "const": true
+                        }
+                      }
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "logsEnabled": {
+                              "const": true
+                            }
+                          }
+                        },
+                        {
+                          "not": {
+                            "properties": {
+                              "otlpIngest": {
+                                "properties": {
+                                  "enabled": {
+                                    "const": true
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
                 }
-              }
+              ]
             },
             "then": {
               "properties": {
@@ -1637,32 +1745,91 @@
     },
     {
       "if": {
-        "$comment": "if splunkPlatform.metricsEnabled is true and splunkPlatform.endpoint is provided",
+        "$comment": "if OTLP ingest for platform logs is enabled, require platform logs",
         "properties": {
           "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
             "properties": {
-              "endpoint": {
-                "minLength": 1
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                }
               }
             }
           }
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.metricsIndex must be provided",
         "properties": {
           "splunkPlatform": {
-            "if": {
-              "properties": {
-                "metricsEnabled": {
-                  "const": true
+            "required": [
+              "logsEnabled"
+            ],
+            "properties": {
+              "logsEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if OTLP ingest for platform logs is enabled, require OTLP endpoint",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "logsEnabled": {
+                "const": true
+              },
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
                 }
               }
-            },
-            "then": {
-              "properties": {
-                "metricsIndex": {
-                  "minLength": 1
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "index",
+              "otlpIngest"
+            ],
+            "properties": {
+              "index": {
+                "minLength": 1
+              },
+              "otlpIngest": {
+                "required": [
+                  "endpoint"
+                ],
+                "properties": {
+                  "endpoint": {
+                    "minLength": 1
+                  }
                 }
               }
             }
@@ -1672,7 +1839,300 @@
     },
     {
       "if": {
-        "$comment": "if splunkPlatform.logsEnabled is true and splunkPlatform.endpoint is provided",
+        "$comment": "OTLP insecure disables TLS, so insecureSkipVerify cannot also be true",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "insecure"
+                ],
+                "properties": {
+                  "insecure": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "insecureSkipVerify": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "OTLP gRPC exporter endpoints must be host:port without a URL scheme",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled",
+                  "protocol"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  },
+                  "protocol": {
+                    "const": "grpc"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "endpoint": {
+                    "pattern": "^[^\\s/]+:[0-9]+$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "OTLP HTTP exporter endpoints must include an http or https scheme",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "enabled",
+                  "protocol"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  },
+                  "protocol": {
+                    "const": "http"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "properties": {
+                  "endpoint": {
+                    "pattern": "^https?://[^\\s/]+(/.*)?$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if OTLP client certificate is provided, require its private key",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "clientCert"
+                ],
+                "properties": {
+                  "clientCert": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "required": [
+                  "clientKey"
+                ],
+                "properties": {
+                  "clientKey": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if OTLP client private key is provided, require its certificate",
+        "properties": {
+          "splunkPlatform": {
+            "type": "object",
+            "required": [
+              "otlpIngest"
+            ],
+            "properties": {
+              "otlpIngest": {
+                "type": "object",
+                "required": [
+                  "clientKey"
+                ],
+                "properties": {
+                  "clientKey": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "splunkPlatform": {
+            "properties": {
+              "otlpIngest": {
+                "required": [
+                  "clientCert"
+                ],
+                "properties": {
+                  "clientCert": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.metricsEnabled is true",
+        "required": [
+          "splunkPlatform"
+        ],
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "metricsEnabled"
+            ],
+            "properties": {
+              "metricsEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.endpoint and splunkPlatform.metricsIndex must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "endpoint",
+              "metricsIndex"
+            ],
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              },
+              "metricsIndex": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform.tracesEnabled is true",
+        "required": [
+          "splunkPlatform"
+        ],
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "tracesEnabled"
+            ],
+            "properties": {
+              "tracesEnabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "$comment": "then splunkPlatform.endpoint must be provided",
+        "properties": {
+          "splunkPlatform": {
+            "required": [
+              "endpoint"
+            ],
+            "properties": {
+              "endpoint": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "$comment": "if splunkPlatform endpoint is provided",
         "properties": {
           "splunkPlatform": {
             "properties": {
@@ -1684,15 +2144,32 @@
         }
       },
       "then": {
-        "$comment": "then splunkPlatform.index must be provided",
+        "$comment": "then splunkPlatform.index must be provided only when logs are sent via HEC",
         "properties": {
           "splunkPlatform": {
             "if": {
-              "properties": {
-                "logsEnabled": {
-                  "const": true
+              "allOf": [
+                {
+                  "properties": {
+                    "logsEnabled": {
+                      "const": true
+                    }
+                  }
+                },
+                {
+                  "not": {
+                    "properties": {
+                      "otlpIngest": {
+                        "properties": {
+                          "enabled": {
+                            "const": true
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
-              }
+              ]
             },
             "then": {
               "properties": {
