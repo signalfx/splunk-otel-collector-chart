@@ -4,6 +4,53 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.152.0] - 2026-05-14
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.152.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.152.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent`: Replace manual filelog container log parsing operators with a `container`-operator-based pipeline ([#2370](https://github.com/signalfx/splunk-otel-collector-chart/pull/2370))
+  Replaces the manual `router` + `regex_parser`/`json_parser` + `recombine` chain for Docker/CRI-O/containerd log parsing with a simpler pipeline centered on the `container` operator.
+  This pipeline provides format auto-detection, timestamp parsing, P/F log recombination, and k8s metadata extraction from the file path for both Linux and Windows nodes.
+  
+  The accepted value of `logsCollection.containers.containerRuntime` for CRI-O has changed from `cri-o` to `crio` to match the `container` operator's expected format.
+  Users who have set `logsCollection.containers.containerRuntime: cri-o` must update their values to `crio`.
+  
+  Users of `logsCollection.containers.extraOperators` are affected: `attributes.log` is no longer available
+  and must be replaced with `body`. Additionally, `attributes.time` is no longer set; use `timestamp` instead
+  to access the log record's `Timestamp` field in stanza expressions.
+  
+  For full migration details see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#container-log-parsing-now-uses-the-container-operator).
+  
+- `chart`: Rename all `hostmetrics` receiver references to `host_metrics` ([#2414](https://github.com/signalfx/splunk-otel-collector-chart/pull/2414))
+  The `hostmetrics` alias has been deprecated in favor of `host_metrics` in the chart-generated configuration.
+  Any Helm values or overrides that reference `hostmetrics` (for example, `*.config.receivers.hostmetrics`
+  or pipelines that list `hostmetrics` as a receiver) must be updated to use `host_metrics`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+- `chart`: Rename all `k8sobjects` receiver references to `k8s_objects` ([#2414](https://github.com/signalfx/splunk-otel-collector-chart/pull/2414))
+  The `k8sobjects` alias has been deprecated in favor of `k8s_objects` in the chart-generated configuration.
+  Any Helm values or overrides that reference `k8sobjects` (for example, `*.config.receivers.k8sobjects`
+  or pipelines that list `k8sobjects` as a receiver) must be updated to use `k8s_objects`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent`: Add `component: otel-collector-agent` to the agent DaemonSet's selector.matchLabels ([#2404](https://github.com/signalfx/splunk-otel-collector-chart/pull/2404))
+  A new feature gate `featureGates.daemonSetComponentSelector` (disabled by default)
+  adds `component: otel-collector-agent` to the agent DaemonSet's selector.
+  To opt in, set
+  `featureGates.daemonSetComponentSelector: true` and delete the DaemonSet before
+  upgrading. See [UPGRADING.md](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#new-feature-gate-component-label-in-agent-daemonset-selector) for details.
+  
+- `chart`: Add OTLP log ingest option to send logs to Splunk Connect for OTLP instead of HEC ([#2392](https://github.com/signalfx/splunk-otel-collector-chart/pull/2392))
+  For more information, see [Send logs to Splunk Platform with Splunk Connect for OTLP](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#send-logs-to-splunk-platform-with-splunk-connect-for-otlp).
+  
+- `chart`: Bump obi to 0.7.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2371](https://github.com/signalfx/splunk-otel-collector-chart/pull/2371))
+- `operator`: Bump nodejs to v4.7.1 in helm-charts/splunk-otel-collector/values.yaml ([#2378](https://github.com/signalfx/splunk-otel-collector-chart/pull/2378))
+
 ## [0.151.1] - 2026-05-06
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.151.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.151.0).
