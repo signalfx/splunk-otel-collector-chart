@@ -40,7 +40,8 @@ splunkPlatform:
   # endpoint for proper extraction of fields.
   endpoint: ""
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
-  # HTTP Event Collector token.
+  # HTTP Event Collector token. The token is stored in a Kubernetes Secret and
+  # mounted as a file in the collector pods.
   # Alternatively the token can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   token: ""

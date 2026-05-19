@@ -42,7 +42,7 @@
           "type": "string"
         },
         "token": {
-          "description": "Splunk Platform HEC Token",
+          "description": "Splunk Platform HEC Token. The token is stored in a Kubernetes Secret and mounted as a file in the collector pods.",
           "type": "string"
         },
         "index": {

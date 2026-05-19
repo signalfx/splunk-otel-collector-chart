@@ -67,6 +67,15 @@ Whether the Splunk Platform secret must be mounted as files for HEC or OTLP TLS.
 {{- end -}}
 
 {{/*
+Whether the Splunk Platform secret must be mounted as files for HEC token or TLS.
+*/}}
+{{- define "splunk-otel-collector.platformSecretMountRequired" -}}
+{{- if or
+      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
+      (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
 Whether the Splunk Secret should be created by the chart.
 */}}
 {{- define "splunk-otel-collector.secretCreateRequired" -}}
