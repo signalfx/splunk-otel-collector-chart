@@ -79,21 +79,13 @@ Whether the Splunk Platform secret must be mounted as files for HEC or OTLP TLS.
 {{- end -}}
 
 {{/*
-Whether the Splunk Platform secret must be mounted as files for HEC token or TLS.
-*/}}
-{{- define "splunk-otel-collector.platformSecretMountRequired" -}}
-{{- if or
-      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
-      (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
-{{- end -}}
-
-{{/*
-Whether the Splunk Secret must be mounted as files for tokens or platform TLS.
+Whether the Splunk Secret must be mounted as files for tokens (i.e. o11y access token or HEC token) or platform TLS.
 */}}
 {{- define "splunk-otel-collector.secretMountRequired" -}}
 {{- if or
       (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
-      (eq (include "splunk-otel-collector.platformSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
+      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
+      (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
 {{- end -}}
 
 {{/*
