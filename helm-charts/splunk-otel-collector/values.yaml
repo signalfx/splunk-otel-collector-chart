@@ -187,7 +187,8 @@ splunkObservability:
   # destination.
   realm: ""
   # Required for Splunk Observability (if `realm` is specified). Splunk
-  # Observability org access token.
+  # Observability org access token. The token is stored in a Kubernetes Secret
+  # and mounted as a file in the collector pods.
   # Alternatively the accessToken can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   accessToken: ""

@@ -26,6 +26,18 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Warn if a collector config override still references Splunk token environment variables.
+*/}}
+{{- define "splunk-otel-collector.warnOnTokenEnvVarRefs" -}}
+{{- if .config -}}
+{{- $source := .source -}}
+{{- if regexMatch "\\$\\{SPLUNK_[A-Z0-9_]*_TOKEN\\}" (toYaml .config) }}
+{{- printf "[WARNING] %s references a Splunk token environment variable (${SPLUNK_*_TOKEN}). Built-in chart configuration now reads tokens from mounted Secret files. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}. Token environment variables are still injected for compatibility but will be removed in a future release.\n" $source }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "splunk-otel-collector.chart" -}}
@@ -73,6 +85,15 @@ Whether the Splunk Platform secret must be mounted as files for HEC token or TLS
 {{- if or
       (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
       (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Whether the Splunk Secret must be mounted as files for tokens or platform TLS.
+*/}}
+{{- define "splunk-otel-collector.secretMountRequired" -}}
+{{- if or
+      (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+      (eq (include "splunk-otel-collector.platformSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
 {{- end -}}
 
 {{/*

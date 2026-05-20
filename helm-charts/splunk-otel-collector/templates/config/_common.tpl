@@ -654,7 +654,7 @@ opamp/splunk_o11y:
       {{- end }}
       polling_interval: 30s
       headers:
-        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        X-SF-Token: "${file:/otel/etc/splunk_observability_access_token}"
 {{- end }}
 {{- end }}
 

@@ -225,7 +225,7 @@
           "type": "string"
         },
         "accessToken": {
-          "description": "Splunk Observability Access Token",
+          "description": "Splunk Observability Access Token. The token is stored in a Kubernetes Secret and mounted as a file in the collector pods.",
           "type": "string"
         },
         "ingestUrl": {
