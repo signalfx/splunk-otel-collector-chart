@@ -25,7 +25,7 @@ data:
           http:
             endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
             headers:
-              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+              X-SF-Token: ${file:/otel/etc/splunk_observability_access_token}
             polling_interval: 30s
     processors:
       batch:

@@ -30,7 +30,7 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 7f594104b8819edd9c0cde14f5adbc976d54444e6fb4f6fb355beeb5cf6a4008
+        checksum/config: 15d8ce63d037c36b2c3fd2f60bbed20289d86efb02e198e40ae854feed132451
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -91,6 +91,9 @@ spec:
             cpu: 200m
             memory: 500Mi
         volumeMounts:
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
         - mountPath: /conf
           name: collector-configmap
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
@@ -107,3 +110,7 @@ spec:
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi
+      - name: secret
+        secret:
+          secretName: default-splunk-otel-collector
+          defaultMode: 0400

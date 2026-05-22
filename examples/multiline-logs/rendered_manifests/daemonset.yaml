@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 99c87c3001483c32bfaca49a65362903537a3e5344b1ad2a848fc8de68d953eb
+        checksum/config: 1a62f7fcafe1c9751eef6f107cf4af71d5d359e55fe4afea23cabfbb823c0030
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -128,6 +128,9 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: otel-configmap
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -154,6 +157,10 @@ spec:
         hostPath:
           path: /var/addon/splunk/otel_pos
           type: DirectoryOrCreate
+      - name: secret
+        secret:
+          secretName: default-splunk-otel-collector
+          defaultMode: 0400
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent
