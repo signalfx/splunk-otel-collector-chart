@@ -467,7 +467,7 @@ splunk_hec/platform_logs:
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
-  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   profiling_data_enabled: false
   tls:
@@ -519,7 +519,7 @@ splunk_hec/platform_metrics:
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
-  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
