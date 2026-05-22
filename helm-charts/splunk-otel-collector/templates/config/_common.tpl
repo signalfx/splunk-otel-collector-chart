@@ -563,7 +563,7 @@ splunk_hec/platform_traces:
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
-  splunk_app_name: {{ .Chart.Name }}
+  splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   tls:
     insecure_skip_verify: {{ .Values.splunkPlatform.insecureSkipVerify }}
