@@ -143,7 +143,7 @@ spec:
       - name: secret
         secret:
           secretName: default-splunk-otel-collector
-          defaultMode: 0400
+          defaultMode: 0644
       - name: init-eks-fargate-cluster-receiver-script
         configMap:
           name: default-splunk-otel-collector-cr-node-discoverer-script

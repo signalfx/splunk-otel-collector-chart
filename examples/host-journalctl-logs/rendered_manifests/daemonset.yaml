@@ -229,7 +229,7 @@ spec:
       - name: secret
         secret:
           secretName: default-splunk-otel-collector
-          defaultMode: 0400
+          defaultMode: 0644
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

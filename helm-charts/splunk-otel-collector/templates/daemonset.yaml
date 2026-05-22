@@ -438,7 +438,7 @@ spec:
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
-          defaultMode: 0400
+          defaultMode: 0644
       {{- end }}
       {{- if and .Values.agent.controlPlaneMetrics.etcd.enabled (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) }}
       - name: etcd-secret

@@ -204,7 +204,7 @@ spec:
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
-          defaultMode: 0400
+          defaultMode: 0644
       {{- end }}
       {{- if .Values.gateway.extraVolumes }}
       {{- toYaml .Values.gateway.extraVolumes | nindent 6 }}

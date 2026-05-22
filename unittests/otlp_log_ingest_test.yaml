@@ -661,7 +661,7 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 256
+              defaultMode: 420
               secretName: test-release-splunk-otel-collector
 
   - it: should mount Splunk secret on gateway when OTLP TLS files are configured
@@ -694,7 +694,7 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 256
+              defaultMode: 420
               secretName: test-release-splunk-otel-collector
 
   - it: should mount Splunk secret on cluster receiver when OTLP TLS files are configured
@@ -725,5 +725,5 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 256
+              defaultMode: 420
               secretName: test-release-splunk-otel-collector
