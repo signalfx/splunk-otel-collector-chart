@@ -232,6 +232,91 @@ tests:
           path: data.splunk_observability_access_token
           value: YWJj
 
+  - it: should use file references for Splunk tokens in agent config
+    set:
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
+  - it: should use file references for Splunk tokens in gateway config
+    set:
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
+  - it: should use file references for Splunk tokens in cluster receiver config
+    set:
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+      clusterReceiver:
+        eventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
   - it: should include HEC TLS files in generated secret when configured without HEC token
     set:
       splunkObservability:
@@ -576,6 +661,7 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 256
               secretName: test-release-splunk-otel-collector
 
   - it: should mount Splunk secret on gateway when OTLP TLS files are configured
@@ -608,6 +694,7 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 256
               secretName: test-release-splunk-otel-collector
 
   - it: should mount Splunk secret on cluster receiver when OTLP TLS files are configured
@@ -638,4 +725,5 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 256
               secretName: test-release-splunk-otel-collector
