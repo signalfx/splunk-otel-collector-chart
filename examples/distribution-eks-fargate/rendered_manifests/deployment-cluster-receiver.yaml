@@ -47,6 +47,8 @@ spec:
                 values:
                 - otel-k8s-cluster-receiver
             topologyKey: kubernetes.io/hostname
+      securityContext:
+        fsGroup: 999
       initContainers:
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest
@@ -143,7 +145,7 @@ spec:
       - name: secret
         secret:
           secretName: default-splunk-otel-collector
-          defaultMode: 0644
+          defaultMode: 0440
       - name: init-eks-fargate-cluster-receiver-script
         configMap:
           name: default-splunk-otel-collector-cr-node-discoverer-script

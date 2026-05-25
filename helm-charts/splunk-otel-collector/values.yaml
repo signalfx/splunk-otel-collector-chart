@@ -830,6 +830,12 @@ rbac:
 secret:
   create: true
   name: ""
+  # File mode for files mounted from the Splunk secret. The default is group
+  # read-only so token files are not readable by other users in the container.
+  defaultMode: "0440"
+  # fsGroup applied to pods that mount the Splunk secret, unless the pod already
+  # defines fsGroup. This lets non-root containers read the group-readable token files.
+  fsGroup: 999
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
   # Secret annotations

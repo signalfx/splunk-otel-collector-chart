@@ -661,8 +661,11 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 420
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
 
   - it: should mount Splunk secret on gateway when OTLP TLS files are configured
     set:
@@ -694,8 +697,11 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 420
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
 
   - it: should mount Splunk secret on cluster receiver when OTLP TLS files are configured
     set:
@@ -725,5 +731,60 @@ tests:
           content:
             name: secret
             secret:
-              defaultMode: 420
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+
+  - it: should allow overriding Splunk secret volume defaultMode
+    set:
+      secret:
+        defaultMode: "0444"
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              defaultMode: 292
+              secretName: test-release-splunk-otel-collector
+
+  - it: should preserve configured pod fsGroup when mounting the Splunk secret
+    set:
+      gateway:
+        enabled: true
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: deployment-gateway.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234

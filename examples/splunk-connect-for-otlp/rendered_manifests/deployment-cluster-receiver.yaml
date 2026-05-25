@@ -35,6 +35,8 @@ spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 999
       containers:
       - name: otel-collector
         args:
@@ -103,4 +105,4 @@ spec:
       - name: secret
         secret:
           secretName: default-splunk-otel-collector
-          defaultMode: 0644
+          defaultMode: 0440

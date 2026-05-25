@@ -64,10 +64,11 @@ spec:
       topologySpreadConstraints:
         {{- toYaml .Values.gateway.topologySpreadConstraints | nindent 8 }}
       {{- end }}
-      {{- $podSecurityContext := .Values.gateway.podSecurityContext | default .Values.gateway.securityContext }}
+      {{- $basePodSecurityContext := .Values.gateway.podSecurityContext | default .Values.gateway.securityContext | default dict }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext "secretMountRequired" (eq (include "splunk-otel-collector.secretMountRequired" .) "true") "secretFsGroup" .Values.secret.fsGroup) }}
       {{- if $podSecurityContext }}
       securityContext:
-        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $podSecurityContext) | nindent 8 }}
+        {{- $podSecurityContext | nindent 8 }}
       {{- end }}
       containers:
       - name: otel-collector
@@ -204,7 +205,7 @@ spec:
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
-          defaultMode: 0644
+          defaultMode: {{ .Values.secret.defaultMode }}
       {{- end }}
       {{- if .Values.gateway.extraVolumes }}
       {{- toYaml .Values.gateway.extraVolumes | nindent 6 }}

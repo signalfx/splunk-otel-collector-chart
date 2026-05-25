@@ -99,6 +99,12 @@ secret:
   name: your-secret
 ```
 
+Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
+default, so token and key files are not readable by other users in the
+container. The chart also applies `secret.fsGroup` to pods that mount the
+Splunk Secret unless the pod already defines `fsGroup`, so non-root Collector
+containers can read those group-readable files.
+
 When a destination is enabled and the chart references a value from the Secret,
 the custom Secret must contain the matching key:
 

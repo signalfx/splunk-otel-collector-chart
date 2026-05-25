@@ -440,6 +440,20 @@ Build the securityContext for Linux and Windows
 {{- end -}}
 
 {{/*
+Build a pod securityContext and add secret fsGroup when needed for mounted
+Splunk Secret files.
+*/}}
+{{- define "splunk-otel-collector.podSecurityContext" -}}
+{{- $podSecurityContext := deepCopy (.podSecurityContext | default dict) -}}
+{{- if and (not .isWindows) .secretMountRequired (ne (toString .secretFsGroup) "<nil>") (not (hasKey $podSecurityContext "fsGroup")) }}
+{{- $_ := set $podSecurityContext "fsGroup" .secretFsGroup }}
+{{- end }}
+{{- if $podSecurityContext }}
+{{- include "splunk-otel-collector.securityContext" (dict "isWindows" .isWindows "securityContext" $podSecurityContext) }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Whether the clusterName configuration option is optional
 */}}
 {{- define "splunk-otel-collector.clusterNameOptional" -}}
