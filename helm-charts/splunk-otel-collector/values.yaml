@@ -410,6 +410,7 @@ agent:
       containerPort: 4317
       hostPort: 4317
       protocol: TCP
+      appProtocol: grpc
       enabled_for: [traces, metrics, logs, profiling]
     otlp-http:
       containerPort: 4318
@@ -910,6 +911,7 @@ gateway:
     otlp:
       containerPort: 4317
       protocol: TCP
+      appProtocol: grpc
       enabled_for: [metrics, traces, logs, profiling]
     otlp-http:
       containerPort: 4318
