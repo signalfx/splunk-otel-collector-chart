@@ -1233,10 +1233,6 @@ service:
         - splunk_hec/platform_traces
         {{- end }}
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
-        # For trace/metric correlation.
-        - signalfx
-        {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
@@ -1261,11 +1257,7 @@ service:
         {{- end }}
         - resourcedetection
         - resource
-        {{/*
-        The attribute `deployment.environment` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
-        More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
-        */}}
-        {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
+        {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
         {{- if .Values.isWindows }}
