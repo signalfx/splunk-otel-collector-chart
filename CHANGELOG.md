@@ -4,6 +4,17 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.153.0] - 2026-05-28
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Change `splunk_app_name` in the `splunk_hec` exporter to `splunk-otel-collector-chart` ([#2426](https://github.com/signalfx/splunk-otel-collector-chart/pull/2426))
+  The `splunk_app_name` reported by the Splunk HEC exporters changed from `splunk-otel-collector` to
+  `splunk-otel-collector-chart`. This label serves for monitoring telemetry emitted by the chart.
+  
+
 ## [0.152.0] - 2026-05-14
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.152.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.152.0).
