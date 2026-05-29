@@ -450,6 +450,7 @@ data:
           - batch
           - resourcedetection
           - resource
+          - resource/add_environment
           receivers:
           - host_metrics
           - kubeletstats
@@ -480,7 +481,6 @@ data:
         traces:
           exporters:
           - otlp_http
-          - signalfx
           processors:
           - memory_limiter
           - k8s_attributes
