@@ -120,8 +120,8 @@ spec:
         {{- else }}
         - --config=/conf/relay.yaml
         {{- end }}
-        {{- if .Values.clusterReceiver.featureGates }}
-        - --feature-gates={{ .Values.clusterReceiver.featureGates }}
+        {{- with include "splunk-otel-collector.clusterReceiverFeatureGates" . }}
+        - --feature-gates={{ . }}
         {{- end }}
         {{- with .Values.clusterReceiver.containerSecurityContext }}
         securityContext:
