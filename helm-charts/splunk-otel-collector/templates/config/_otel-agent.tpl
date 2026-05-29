@@ -1058,7 +1058,7 @@ service:
     resource:
       attributes:
         - name: service.name
-          value: otel-collector
+          value: otel-agent
     metrics:
       readers:
         - pull:
