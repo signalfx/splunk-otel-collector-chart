@@ -450,7 +450,6 @@ data:
           - batch
           - resourcedetection
           - resource
-          - resource/add_environment
           receivers:
           - host_metrics
           - kubeletstats
@@ -506,4 +505,4 @@ data:
         resource:
           attributes:
           - name: service.name
-            value: otel-agent
+            value: otel-collector
