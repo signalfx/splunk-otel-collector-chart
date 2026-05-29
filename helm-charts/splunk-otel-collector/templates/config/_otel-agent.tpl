@@ -1056,7 +1056,9 @@ connectors:
 service:
   telemetry:
     resource:
-      service.name: otel-agent
+      attributes:
+        - name: service.name
+          value: otel-agent
     metrics:
       readers:
         - pull:

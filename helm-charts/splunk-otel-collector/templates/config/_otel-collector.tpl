@@ -199,7 +199,9 @@ connectors:
 service:
   telemetry:
     resource:
-      service.name: otel-collector
+      attributes:
+        - name: service.name
+          value: otel-collector
     metrics:
       readers:
         - pull:

@@ -66,6 +66,8 @@ data:
         auth_type: serviceAccount
         node: ${K8S_NODE_NAME}
       opamp/splunk_o11y:
+        agent_description:
+          include_resource_attributes: true
         server:
           http:
             endpoint: http://default-splunk-otel-collector:4320/v1/opamp
@@ -440,4 +442,6 @@ data:
                   without_type_suffix: true
                   without_units: true
         resource:
-          service.name: otel-agent
+          attributes:
+          - name: service.name
+            value: otel-agent
