@@ -1472,7 +1472,7 @@ featureGates:
   # skips metadata_exporters (PATCH mode) and routes entity events to the signalfx exporter using PUT semantics.
   # Also enables the exporter.signalfx.consumeEntityEvents collector feature gate on the cluster receiver.
   # Requires splunkObservability.metricsEnabled.
-  useK8sEntityEvents: false
+  useEntityEventsForK8sProperties: false
   # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.
   # Because selector.matchLabels is immutable, enabling this on an existing installation
   # requires additional steps. See:

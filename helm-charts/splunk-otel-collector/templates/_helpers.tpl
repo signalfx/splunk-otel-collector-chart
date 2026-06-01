@@ -396,7 +396,7 @@ Build the collector feature gates string for cluster receiver.
 {{- with .Values.clusterReceiver.featureGates -}}
 {{- $gates = append $gates . -}}
 {{- end -}}
-{{- if and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useK8sEntityEvents -}}
+{{- if and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
 {{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
 {{- end -}}
 {{- join "," $gates -}}

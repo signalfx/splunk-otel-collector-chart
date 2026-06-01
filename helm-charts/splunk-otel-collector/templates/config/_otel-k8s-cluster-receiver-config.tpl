@@ -3,7 +3,7 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
-{{- $useK8sEntityEvents := and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useK8sEntityEvents -}}
+{{- $useEntityEventsForK8sProperties := and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
@@ -24,7 +24,7 @@ receivers:
   k8s_cluster:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
-    {{- if not $useK8sEntityEvents }}
+    {{- if not $useEntityEventsForK8sProperties }}
     metadata_exporters: [signalfx]
     {{- end }}
     resource_attributes:
@@ -310,7 +310,7 @@ exporters:
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
-  {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.enableK8sEntities }}
+  {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
   otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
@@ -540,7 +540,7 @@ service:
         - signalfx/histograms
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useK8sEntityEvents) }}
+    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) }}
     logs/k8s_entities:
       receivers:
         - k8s_cluster
@@ -555,7 +555,7 @@ service:
         {{- if .Values.featureGates.enableK8sEntities }}
         - otlp_http/o11y_entities
         {{- end }}
-        {{- if $useK8sEntityEvents }}
+        {{- if $useEntityEventsForK8sProperties }}
         - signalfx
         {{- end }}
     {{- end }}
