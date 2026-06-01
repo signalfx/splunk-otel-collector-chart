@@ -6,10 +6,10 @@ metadata:
   namespace: default
   name: default-targetallocator-ta
   labels:
-    helm.sh/chart: targetallocator-0.127.2
+    helm.sh/chart: targetallocator-0.129.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-target-allocator
-    app.kubernetes.io/version: "0.126.0"
+    app.kubernetes.io/version: "0.152.0"
     app.kubernetes.io/name: targetallocator
     app.kubernetes.io/instance: default
 spec:
@@ -21,12 +21,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 5b39c8f659b8c9b9b84a7cdb5e405d81799ed5c0af95e267d400a3f7995eb536
+        checksum/config: bacb565366453f669fb7f9da58bc7c78031022808a42f6b6cfb27aab4cb0b263
       labels:
-        helm.sh/chart: targetallocator-0.127.2
+        helm.sh/chart: targetallocator-0.129.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: opentelemetry-target-allocator
-        app.kubernetes.io/version: "0.126.0"
+        app.kubernetes.io/version: "0.152.0"
         app.kubernetes.io/name: targetallocator
         app.kubernetes.io/instance: default
     spec:
@@ -34,7 +34,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: targetallocator
-          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.126.0
+          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.152.0
           ports:
             - containerPort: 8080
               name: http-port
@@ -46,7 +46,9 @@ spec:
               readOnly: true
           env: # Workaround for https://github.com/open-telemetry/opentelemetry-operator/pull/3976
             - name: OTELCOL_NAMESPACE
-              value: default
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           livenessProbe:
             httpGet:
               path: /livez
