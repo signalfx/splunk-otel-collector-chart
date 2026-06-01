@@ -395,7 +395,6 @@ data:
         traces:
           exporters:
           - otlp_http
-          - signalfx
           processors:
           - memory_limiter
           - probabilistic_sampler

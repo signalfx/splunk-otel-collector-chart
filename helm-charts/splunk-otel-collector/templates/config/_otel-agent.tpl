@@ -1233,10 +1233,6 @@ service:
         - splunk_hec/platform_traces
         {{- end }}
         {{- end }}
-        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
-        # For trace/metric correlation.
-        - signalfx
-        {{- end }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
