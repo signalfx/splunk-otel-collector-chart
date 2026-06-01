@@ -50,7 +50,7 @@ targetallocator:
   enabled: true
   targetAllocator:
     imagePullSecrets:
-      - name: my-registry-secret
+      - my-registry-secret
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
       tag: v0.132.0

@@ -6,6 +6,10 @@ splunkObservability:
 targetallocator:
   enabled: true
   targetAllocator:
+    serviceAccount:
+      create: true
+    imagePullSecrets:
+      - my-registry-secret
     resources:
       requests:
         cpu: 100m
