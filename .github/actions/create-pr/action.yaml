@@ -36,8 +36,15 @@ runs:
       run: |
         git config user.name "${{ inputs.author-name }}"
         git config user.email "${{ inputs.author-email }}"
+        # Fetch the remote branch (if it already exists from a previous run) so that
+        # --force-with-lease has an up-to-date remote-tracking ref to compare against.
+        git fetch origin "${{ inputs.branch }}" || true
         git checkout -B "${{ inputs.branch }}"
         git add -A
+        if git diff --cached --quiet; then
+          echo "No changes to commit; skipping PR creation."
+          exit 0
+        fi
         git commit -m "${{ inputs.commit-message }}"
         git push --force-with-lease --set-upstream origin "${{ inputs.branch }}"
         pr_number="$(gh pr list --head "${{ inputs.branch }}" --base main --state open --json number --jq '.[0].number // empty')"
