@@ -90,14 +90,14 @@ func SetupOTLPTracesSink(t *testing.T) *consumertest.TracesSink {
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
 
-	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+	cfg.Protocols.GRPC = configoptional.Some(configgrpc.ServerConfig{
 		NetAddr: confignet.AddrConfig{
 			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
 			Transport: "tcp",
 		},
 	})
 
-	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+	cfg.Protocols.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
 			NetAddr: confignet.AddrConfig{
 				Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
@@ -132,7 +132,7 @@ func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort i
 	tc := new(consumertest.TracesSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+	cfg.Protocols.GRPC = configoptional.Some(configgrpc.ServerConfig{
 		NetAddr: confignet.AddrConfig{
 			Endpoint:  fmt.Sprintf("0.0.0.0:%d", grpcPort),
 			Transport: "tcp",
@@ -153,7 +153,7 @@ func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort i
 		},
 	}
 
-	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+	cfg.Protocols.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
 			NetAddr: confignet.AddrConfig{
 				Endpoint:  fmt.Sprintf("0.0.0.0:%d", httpPort),
@@ -187,13 +187,13 @@ func SetupOTLPLogsSink(t *testing.T) *consumertest.LogsSink {
 	ls := new(consumertest.LogsSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC = configoptional.Some(configgrpc.ServerConfig{
+	cfg.Protocols.GRPC = configoptional.Some(configgrpc.ServerConfig{
 		NetAddr: confignet.AddrConfig{
 			Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPGRPCReceiverPort),
 			Transport: "tcp",
 		},
 	})
-	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+	cfg.Protocols.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
 			NetAddr: confignet.AddrConfig{
 				Endpoint:  fmt.Sprintf("0.0.0.0:%d", OTLPHTTPReceiverPort),
@@ -222,8 +222,8 @@ func SetupOTLPLogsSinkOnPort(t *testing.T, port int, logsPath string) *consumert
 	ls := new(consumertest.LogsSink)
 	f := otlpreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC = configoptional.None[configgrpc.ServerConfig]()
-	cfg.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
+	cfg.Protocols.GRPC = configoptional.None[configgrpc.ServerConfig]()
+	cfg.Protocols.HTTP = configoptional.Some(otlpreceiver.HTTPConfig{
 		ServerConfig: confighttp.ServerConfig{
 			NetAddr: confignet.AddrConfig{
 				Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),

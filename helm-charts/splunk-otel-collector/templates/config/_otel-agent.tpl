@@ -1056,7 +1056,9 @@ connectors:
 service:
   telemetry:
     resource:
-      service.name: otel-agent
+      attributes:
+        - name: service.name
+          value: otel-agent
     metrics:
       readers:
         - pull:
@@ -1230,10 +1232,6 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformTracesEnabled" .) "true") }}
         - splunk_hec/platform_traces
         {{- end }}
-        {{- end }}
-        {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") }}
-        # For trace/metric correlation.
-        - signalfx
         {{- end }}
     {{- end }}
 

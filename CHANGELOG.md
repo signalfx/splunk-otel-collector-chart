@@ -4,6 +4,41 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.153.1] - 2026-06-01
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).
+
+### 💡 Enhancements 💡
+
+- `agent, gateway`: Remove `signalfx` exporter from trace pipelines ([#2432](https://github.com/signalfx/splunk-otel-collector-chart/pull/2432))
+  The `signalfx` exporter is no longer required for trace correlation. Sending traces via OTLP will
+  enable all trace correlation functionality.
+  
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.7. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using  option. ([#2436](https://github.com/signalfx/splunk-otel-collector-chart/pull/2436))
+- `operator`: Bump operator to 0.114.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2436](https://github.com/signalfx/splunk-otel-collector-chart/pull/2436))
+
+## [0.153.0] - 2026-05-29
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Change `splunk_app_name` in the `splunk_hec` exporter to `splunk-otel-collector-chart` ([#2426](https://github.com/signalfx/splunk-otel-collector-chart/pull/2426))
+  The `splunk_app_name` reported by the Splunk HEC exporters changed from `splunk-otel-collector` to
+  `splunk-otel-collector-chart`. This label serves for monitoring telemetry emitted by the chart.
+  
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver, gateway`: Enable `include_resource_attributes` for the `opamp/splunk_o11y` extension. ([#2418](https://github.com/signalfx/splunk-otel-collector-chart/pull/2418))
+  This change enables the `include_resource_attributes` configuration for the `opamp/splunk_o11y` component.
+  Resource attributes collected from `service::telemetry::metrics` will now be included in the OpAMP exported data.
+  Additionally, the telemetry resource configuration format is updated to v0.3.0.
+  
+- `chart`: Bump obi to 0.9.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2422](https://github.com/signalfx/splunk-otel-collector-chart/pull/2422))
+- `operator`: Bump java to v2.28.0 in helm-charts/splunk-otel-collector/values.yaml ([#2427](https://github.com/signalfx/splunk-otel-collector-chart/pull/2427))
+- `operator`: Bump nodejs to v4.7.2 in helm-charts/splunk-otel-collector/values.yaml ([#2421](https://github.com/signalfx/splunk-otel-collector-chart/pull/2421))
+
 ## [0.152.0] - 2026-05-14
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.152.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.152.0).

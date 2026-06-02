@@ -993,6 +993,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
+		pmetrictest.IgnoreMetricAttributeValue("k8s.container.name", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("pod_identifier", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("otelcol_signal", metricNames...),
 		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
