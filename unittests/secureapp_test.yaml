@@ -18,8 +18,8 @@ templates:
 #   - default_pipelines: [] when S=1,L=0,P=0
 #   - default_pipelines: [logs] when S=1 and (L=1 OR P=1)
 #   - logs/secureapp receivers always [routing/logs], never [otlp]
-#   - logs/secureapp processors: [k8s_attributes, resourcedetection,
-#       resource/add_environment, memory_limiter, batch]
+#   - logs/secureapp processors: [k8s_attributes, resourcedetection, resource,
+#       resource/add_environment (only if .Values.environment set), memory_limiter, batch]
 #   - logs/split processors: [memory_limiter, batch] only (no enrichment)
 #   - otlp_http/secureapp.logs_endpoint uses o11yIngestUrl helper (realm-aware)
 # ============================================================================
@@ -113,7 +113,7 @@ tests:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- otlp"
 
-  - it: "S=1,L=0,P=0 — agent: logs/secureapp has full enrichment processor chain"
+  - it: "S=1,L=0,P=0 — agent: logs/secureapp has k8s_attributes, resourcedetection, resource processors"
     set:
       splunkObservability:
         secureAppEnabled: true
@@ -126,6 +126,29 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource\\n"
+
+  - it: "S=1,L=0,P=0 — agent: logs/secureapp omits resource/add_environment when environment not set"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n"
+
+  - it: "S=1,L=0,P=0 — agent: logs/secureapp includes resource/add_environment when environment is set"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+        profilingEnabled: false
+      environment: production
+    template: configmap-agent.yaml
+    asserts:
       - matchRegex:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n"

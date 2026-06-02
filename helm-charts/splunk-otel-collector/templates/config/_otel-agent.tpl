@@ -1095,7 +1095,15 @@ service:
     # secure application events — always routed via routing/logs connector
     logs/secureapp:
       receivers: [routing/logs]
-      processors: [k8s_attributes, resourcedetection, resource/add_environment, memory_limiter, batch]
+      processors:
+        - k8s_attributes
+        - resourcedetection
+        - resource
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
+        - memory_limiter
+        - batch
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
