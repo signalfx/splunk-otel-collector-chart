@@ -584,6 +584,7 @@
           "type": "object"
         },
         "podSecurityContext": {
+          "description": "Pod security context applied to the agent. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
           "type": "object"
         },
         "updateStrategy": {
@@ -750,6 +751,7 @@
           "type": "object"
         },
         "podSecurityContext": {
+          "description": "Pod security context applied to the cluster receiver. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
           "type": "object"
         },
         "containerSecurityContext": {
@@ -1351,6 +1353,7 @@
           "type": "object"
         },
         "podSecurityContext": {
+          "description": "Pod security context applied to the gateway. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
           "type": "object"
         },
         "containerSecurityContext": {

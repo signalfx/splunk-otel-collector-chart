@@ -450,8 +450,10 @@ agent:
   # Please note that on uninstallation of the chart, the permissions added to the
   # host log directories for given uid/gid are not reverted.
 
-  # Pod security context applied to the agent daemonset. Set fsGroup here to
-  # override the chart's default group for group-readable Splunk Secret files.
+  # Pod security context applied to the agent daemonset. On Linux, the chart
+  # injects fsGroup: 999 when mounting group-readable Splunk Secret files unless
+  # fsGroup is set here. OpenShift users should set a value allowed by their SCC
+  # if the chart-created SCC is disabled or overridden.
   podSecurityContext: {}
 
   securityContext: {}
@@ -542,7 +544,10 @@ clusterReceiver:
   tolerations: []
   affinity: {}
 
-  # Pod configurations
+  # Pod configurations. On Linux, the chart injects fsGroup: 999 when mounting
+  # group-readable Splunk Secret files unless fsGroup is set here. OpenShift
+  # users should set a value allowed by their SCC if the chart-created SCC is
+  # disabled or overridden.
   podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
@@ -967,7 +972,10 @@ gateway:
   affinity: {}
   topologySpreadConstraints: []
 
-  # Pod configurations
+  # Pod configurations. On Linux, the chart injects fsGroup: 999 when mounting
+  # group-readable Splunk Secret files unless fsGroup is set here. OpenShift
+  # users should set a value allowed by their SCC if the chart-created SCC is
+  # disabled or overridden.
   podSecurityContext: {}
   terminationGracePeriodSeconds: 600
   priorityClassName: ""

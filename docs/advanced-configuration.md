@@ -101,9 +101,32 @@ secret:
 
 Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
 default, so token and key files are not readable by other users in the
-container. The chart also applies `secret.fsGroup` to pods that mount the
-Splunk Secret unless the pod already defines `fsGroup`, so non-root Collector
-containers can read those group-readable files.
+container. On Linux, the chart also applies `fsGroup: 999` to pods that mount
+the Splunk Secret unless the pod already defines `fsGroup`, so non-root
+Collector containers can read those group-readable files.
+
+To override the group, configure the pod security context for the component
+that mounts the Splunk Secret:
+
+```yaml
+agent:
+  podSecurityContext:
+    fsGroup: 1234
+
+clusterReceiver:
+  podSecurityContext:
+    fsGroup: 1234
+
+gateway:
+  podSecurityContext:
+    fsGroup: 1234
+```
+
+On OpenShift, explicit `fsGroup` values are validated by Security Context
+Constraints (SCCs). The chart-created SCC allows any `fsGroup` by default, but
+if you disable or override that SCC, make sure the configured `fsGroup` is
+allowed by the SCC used to admit the pod.
+```
 
 When a destination is enabled and the chart references a value from the Secret,
 the custom Secret must contain the matching key:
