@@ -85,7 +85,7 @@ spec:
         {{- .Values.clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
       {{- $basePodSecurityContext := .Values.clusterReceiver.podSecurityContext | default .Values.clusterReceiver.securityContext | default dict }}
-      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext "secretMountRequired" (eq (include "splunk-otel-collector.secretMountRequired" .) "true") "secretFsGroup" .Values.secret.fsGroup) }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext "secretMountRequired" (eq (include "splunk-otel-collector.secretMountRequired" .) "true")) }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}

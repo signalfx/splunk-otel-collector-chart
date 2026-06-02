@@ -788,3 +788,51 @@ tests:
       - equal:
           path: spec.template.spec.securityContext.fsGroup
           value: 1234
+
+  - it: should preserve configured agent pod fsGroup when mounting the Splunk secret
+    set:
+      agent:
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234
+
+  - it: should preserve configured cluster receiver pod fsGroup when mounting the Splunk secret
+    set:
+      clusterReceiver:
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234

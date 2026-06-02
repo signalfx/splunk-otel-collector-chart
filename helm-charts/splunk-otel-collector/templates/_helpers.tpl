@@ -445,8 +445,8 @@ Splunk Secret files.
 */}}
 {{- define "splunk-otel-collector.podSecurityContext" -}}
 {{- $podSecurityContext := deepCopy (.podSecurityContext | default dict) -}}
-{{- if and (not .isWindows) .secretMountRequired (ne (toString .secretFsGroup) "<nil>") (not (hasKey $podSecurityContext "fsGroup")) }}
-{{- $_ := set $podSecurityContext "fsGroup" .secretFsGroup }}
+{{- if and (not .isWindows) .secretMountRequired (not (hasKey $podSecurityContext "fsGroup")) }}
+{{- $_ := set $podSecurityContext "fsGroup" 999 }}
 {{- end }}
 {{- if $podSecurityContext }}
 {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .isWindows "securityContext" $podSecurityContext) }}

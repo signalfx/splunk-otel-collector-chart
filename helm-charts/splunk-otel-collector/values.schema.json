@@ -583,6 +583,9 @@
         "securityContext": {
           "type": "object"
         },
+        "podSecurityContext": {
+          "type": "object"
+        },
         "updateStrategy": {
           "type": "string",
           "enum": [
@@ -1081,14 +1084,6 @@
               "pattern": "^0[0-7]{3}$"
             }
           ]
-        },
-        "fsGroup": {
-          "description": "fsGroup applied to pods that mount the Splunk secret, unless the pod already defines fsGroup.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
         },
         "validateSecret": {
           "type": "boolean"
