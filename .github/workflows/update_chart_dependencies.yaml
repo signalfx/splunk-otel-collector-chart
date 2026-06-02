@@ -138,21 +138,24 @@ jobs:
 
       - name: Apply Version Update and Generate Changelog
         if: ${{ steps.check_for_update.outputs.NEED_UPDATE == 1 }}
+        env:
+          CHLOG_NOTE_CHART: ${{ steps.pr_messages.outputs.chlog_note_chart }}
         run: |
           # Apply the version update, update the rendered examples with the version update, and create a changelog entry
           # Re-run the update before rendering/changelog generation to keep derived files in sync.
           make update-chart-dep CHART_PATH=${{ matrix.yaml_file_path }} SUBCHART_NAME='${{ matrix.dependency_name }}' DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="${{ steps.pr_messages.outputs.chlog_note_chart }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
+          make chlog-new FILENAME="update-${{ matrix.name }}" CHANGE_TYPE=enhancement COMPONENT=${{ matrix.component }} NOTE="$CHLOG_NOTE_CHART" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Operator CRDs update
         env:
           COMPONENT: opentelemetry-operator-crds
+          CHLOG_NOTE_CRDS: ${{ steps.pr_messages.outputs.chlog_note_crds }}
         if: ${{ steps.check_for_crd_update.outputs.CRDS_NEED_UPDATE == 1 }}
         run: |
           make update-operator-crds DEBUG_MODE="$DEBUG_MODE"
           make render
-          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT="$COMPONENT" NOTE="${{ steps.pr_messages.outputs.chlog_note_crds }}" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
+          make chlog-new FILENAME="update-operator-crds" CHANGE_TYPE=enhancement COMPONENT="$COMPONENT" NOTE="$CHLOG_NOTE_CRDS" ISSUES="[${{ steps.open_pr.outputs.pull-request-number }}]"
 
       - name: Generate CRD Schemas for kubeconform
         # Regenerate schemas when operator chart or operator-crds are updated
