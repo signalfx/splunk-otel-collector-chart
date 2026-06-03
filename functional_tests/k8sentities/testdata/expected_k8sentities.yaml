@@ -864,7 +864,9 @@ resourceLogs:
                       - key: k8s.node.condition_pid_pressure
                         value:
                           stringValue: "false"
-
+                      - key: k8s.node.condition_ready
+                        value:
+                          stringValue: "true"
                       - key: beta.kubernetes.io/arch
                         value:
                           stringValue: arm64
