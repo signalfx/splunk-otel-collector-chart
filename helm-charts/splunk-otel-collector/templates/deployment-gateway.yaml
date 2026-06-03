@@ -65,7 +65,7 @@ spec:
         {{- toYaml .Values.gateway.topologySpreadConstraints | nindent 8 }}
       {{- end }}
       {{- $basePodSecurityContext := .Values.gateway.podSecurityContext | default .Values.gateway.securityContext | default dict }}
-      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext "secretMountRequired" (eq (include "splunk-otel-collector.secretMountRequired" .) "true")) }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext) }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}

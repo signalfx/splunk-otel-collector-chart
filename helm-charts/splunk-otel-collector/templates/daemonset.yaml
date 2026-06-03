@@ -57,7 +57,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
-      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" .Values.agent.podSecurityContext "secretMountRequired" (eq (include "splunk-otel-collector.secretMountRequired" .) "true")) }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" .Values.agent.podSecurityContext) }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}

@@ -101,9 +101,10 @@ secret:
 
 Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
 default, so token and key files are not readable by other users in the
-container. On Linux, the chart also applies `fsGroup: 999` to pods that mount
-the Splunk Secret unless the pod already defines `fsGroup`, so non-root
-Collector containers can read those group-readable files.
+container. The chart sets `fsGroup: 999` by default under the agent, gateway,
+and cluster receiver pod security contexts so non-root Collector containers can
+read those group-readable files. The chart removes `fsGroup` from Windows pods
+because it is Linux-specific.
 
 To override the group, configure the pod security context for the component
 that mounts the Splunk Secret:
@@ -126,6 +127,23 @@ On OpenShift, explicit `fsGroup` values are validated by Security Context
 Constraints (SCCs). The chart-created SCC allows any `fsGroup` by default, but
 if you disable or override that SCC, make sure the configured `fsGroup` is
 allowed by the SCC used to admit the pod.
+
+The chart's built-in large host log and host metrics mounts use `hostPath`.
+If pod startup latency is observed from recursive volume ownership changes on
+user-provided volumes that support `fsGroup`, set
+`fsGroupChangePolicy: OnRootMismatch` in the same pod security context.
+For example:
+
+```yaml
+agent:
+  podSecurityContext:
+    fsGroup: 999
+    fsGroupChangePolicy: OnRootMismatch
+```
+
+Use the matching `gateway.podSecurityContext` or
+`clusterReceiver.podSecurityContext` field when the affected volume is mounted
+by those workloads.
 
 When a destination is enabled and the chart references a value from the Secret,
 the custom Secret must contain the matching key:

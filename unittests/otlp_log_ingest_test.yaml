@@ -764,6 +764,57 @@ tests:
               defaultMode: 292
               secretName: test-release-splunk-otel-collector
 
+  - it: should set default agent pod fsGroup even when the Splunk secret is not mounted
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+
+  - it: should render configured fsGroupChangePolicy on Linux pods
+    set:
+      agent:
+        podSecurityContext:
+          fsGroupChangePolicy: OnRootMismatch
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: OnRootMismatch
+
+  - it: should strip configured pod fsGroup and fsGroupChangePolicy from Windows gateway pods
+    set:
+      isWindows: true
+      gateway:
+        enabled: true
+        podSecurityContext:
+          fsGroup: 1234
+          fsGroupChangePolicy: OnRootMismatch
+    template: deployment-gateway.yaml
+    asserts:
+      - isNull:
+          path: spec.template.spec.securityContext
+
   - it: should preserve configured pod fsGroup when mounting the Splunk secret
     set:
       gateway:

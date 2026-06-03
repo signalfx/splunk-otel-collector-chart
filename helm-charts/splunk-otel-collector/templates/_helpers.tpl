@@ -425,10 +425,12 @@ Build the securityContext for Linux and Windows
 {{- define "splunk-otel-collector.securityContext" -}}
 {{- if .isWindows }}
 {{- $_ := unset .securityContext "runAsUser" }}
-{{- if not (hasKey .securityContext "windowsOptions")}}
+{{- $_ := unset .securityContext "fsGroup" }}
+{{- $_ := unset .securityContext "fsGroupChangePolicy" }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext "windowsOptions"))}}
 {{- $_ := set .securityContext "windowsOptions" dict }}
 {{- end }}
-{{- if and (not (hasKey .securityContext.windowsOptions "runAsUserName")) (.setRunAsUser) }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext.windowsOptions "runAsUserName")) }}
 {{- $_ := set .securityContext.windowsOptions "runAsUserName" "ContainerAdministrator"}}
 {{- end }}
 {{- else }}
@@ -436,21 +438,17 @@ Build the securityContext for Linux and Windows
 {{- $_ := set .securityContext "runAsUser" 0 }}
 {{- end }}
 {{- end }}
+{{- if .securityContext }}
 {{- toYaml .securityContext }}
+{{- end }}
 {{- end -}}
 
 {{/*
-Build a pod securityContext and add secret fsGroup when needed for mounted
-Splunk Secret files.
+Build a pod securityContext for Linux and Windows.
 */}}
 {{- define "splunk-otel-collector.podSecurityContext" -}}
 {{- $podSecurityContext := deepCopy (.podSecurityContext | default dict) -}}
-{{- if and (not .isWindows) .secretMountRequired (not (hasKey $podSecurityContext "fsGroup")) }}
-{{- $_ := set $podSecurityContext "fsGroup" 999 }}
-{{- end }}
-{{- if $podSecurityContext }}
 {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .isWindows "securityContext" $podSecurityContext) }}
-{{- end }}
 {{- end -}}
 
 {{/*
