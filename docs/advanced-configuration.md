@@ -126,7 +126,6 @@ On OpenShift, explicit `fsGroup` values are validated by Security Context
 Constraints (SCCs). The chart-created SCC allows any `fsGroup` by default, but
 if you disable or override that SCC, make sure the configured `fsGroup` is
 allowed by the SCC used to admit the pod.
-```
 
 When a destination is enabled and the chart references a value from the Secret,
 the custom Secret must contain the matching key:

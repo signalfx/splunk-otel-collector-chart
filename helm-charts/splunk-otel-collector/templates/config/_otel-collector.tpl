@@ -17,12 +17,14 @@ extensions:
 
   zpages:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   headers_setter:
     headers:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
         default_value: "${file:/otel/etc/splunk_observability_access_token}"
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -214,9 +216,9 @@ service:
                 without_type_suffix: true
   extensions:
     - health_check
-    - headers_setter
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    - headers_setter
     - http_forwarder
     - http_forwarder/opamp_splunk_o11y
     - opamp/splunk_o11y
