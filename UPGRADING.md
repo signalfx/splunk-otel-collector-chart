@@ -1,5 +1,180 @@
 # Upgrade guidelines
 
+## 0.153.0 to 0.154.0
+
+### cert-manager subchart is deprecated
+
+Installing cert-manager through the Splunk OpenTelemetry Collector chart by
+setting `certmanager.enabled=true` is deprecated and will be removed in a future
+release. Use a separately managed cert-manager installation instead.
+
+This affects deployments that use all of these settings:
+
+- `operator.enabled=true`
+- `operator.admissionWebhooks.certManager.enabled=true`
+- `certmanager.enabled=true`
+
+For new installs that use cert-manager for the operator webhook certificate,
+install cert-manager before installing this chart and leave
+`certmanager.enabled=false`. If you use the default Helm-generated webhook
+certificate, no cert-manager installation is required.
+
+```yaml
+operator:
+  enabled: true
+  admissionWebhooks:
+    autoGenerateCert:
+      enabled: false
+    certManager:
+      enabled: true
+certmanager:
+  enabled: false
+```
+
+The examples in this section show only the values related to cert-manager and the
+operator webhook certificate. Keep your existing required chart values, such as
+`clusterName` and your Splunk destination configuration, when running these
+commands.
+
+#### Why the migration uses a maintenance window
+
+It might seem possible to avoid downtime by first installing a standalone
+cert-manager release, adopting the existing subchart-managed cert-manager
+resources, and then disabling `certmanager.enabled` in the Splunk chart. That
+in-place handoff is not supported with normal Helm commands.
+
+Helm decides which resources to delete during an upgrade by comparing the new
+rendered manifest with the previous manifest stored for the same release. If the
+cert-manager subchart is disabled with `certmanager.enabled=false`, the
+cert-manager controller, cainjector, and webhook resources are removed from the
+Splunk chart's rendered manifest. Helm then prunes those resources from the old
+release, even if their live ownership annotations were changed beforehand.
+
+For that reason, `helm upgrade --install --take-ownership` does not provide a
+zero-downtime migration path for the cert-manager Deployments. `--take-ownership`
+is still useful later in the migration to let the standalone cert-manager release
+adopt retained CRDs, but it does not prevent Helm from deleting resources that
+were removed from the Splunk chart release.
+
+#### Migration steps
+
+Plan a maintenance window. The operator webhook Secret can keep the operator
+running for a short period, but cert-manager will not renew or issue certificates
+while the cert-manager controllers are absent. During this migration, disabling
+the subchart removes the old cert-manager controller, cainjector, and webhook
+Deployments before the standalone cert-manager release is installed.
+
+The examples below use `cert-manager` as the standalone cert-manager release name
+and namespace, which is the common namespace for a cluster-wide cert-manager
+installation. Replace `<release>` and `<namespace>` with the Splunk
+OpenTelemetry Collector Helm release name and namespace. If cert-manager is
+already managed separately in your cluster, use that installation instead of
+installing a second standalone cert-manager release. Adjust or skip the
+cert-manager Helm commands below if your cert-manager installation is not managed
+by Helm.
+
+Upgrade the Splunk chart with the cert-manager subchart disabled, while keeping
+the operator configured to use cert-manager:
+
+```bash
+helm upgrade <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --namespace <namespace> \
+  --reuse-values \
+  --set certmanager.enabled=false \
+  --set operator.admissionWebhooks.autoGenerateCert.enabled=false \
+  --set operator.admissionWebhooks.certManager.enabled=true
+```
+
+Confirm that the old subchart cert-manager Deployments were removed:
+
+```bash
+kubectl get deployment -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component in (controller,cainjector,webhook)"
+```
+
+The command should return no resources.
+
+Install cert-manager as a standalone release. Choose the cert-manager version
+explicitly. To minimize version changes during the migration, use the version
+from this chart's cert-manager dependency, or use the version approved for your
+cluster if cert-manager is managed by your platform team.
+
+If you customized the cert-manager subchart with values under `certmanager.*`,
+apply equivalent values to the standalone `jetstack/cert-manager` release. The
+migration adopts retained CRDs, but it does not copy cert-manager Deployment,
+Service, scheduling, image, monitoring, or security settings from the old
+subchart release:
+
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update jetstack
+
+helm upgrade --install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version <cert-manager-version> \
+  --take-ownership \
+  --set crds.enabled=true \
+  --set crds.keep=true \
+  --wait
+```
+
+`--take-ownership` lets the standalone release adopt cert-manager CRDs that were
+kept from the old subchart release. It is only for retained resources such as
+CRDs. Use a Helm version that supports `--take-ownership`. If cert-manager CRDs
+are managed separately in your cluster, do not adopt them into this standalone
+release. Install cert-manager with `crds.enabled=false` and follow your existing
+CRD management process instead.
+
+If your existing values use `certificateAnnotations` or `issuerAnnotations` with
+Helm hook annotations for the operator webhook certificate resources, keep those
+values during the migration. Remove them later only after testing a separate
+upgrade without the subchart.
+
+#### Validation
+
+After the migration:
+
+```bash
+helm status <release> -n <namespace>
+helm status cert-manager -n cert-manager
+
+kubectl wait --for=condition=Available deployment \
+  -n cert-manager \
+  -l "app.kubernetes.io/instance=cert-manager,app.kubernetes.io/component in (controller,cainjector,webhook)" \
+  --timeout=5m
+
+kubectl wait --for=condition=Available deployment \
+  -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/name=operator" \
+  --timeout=5m
+
+kubectl wait --for=condition=Ready certificate \
+  -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component=webhook" \
+  --timeout=5m
+```
+
+Also verify that the old subchart cert-manager Deployments are still absent from
+the Splunk chart namespace:
+
+```bash
+kubectl get deployment -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component in (controller,cainjector,webhook)"
+```
+
+The command should return no resources. The Splunk chart can still include
+cert-manager API resources such as `Certificate` and `Issuer` for the operator
+webhook certificate; the controller, cainjector, and webhook Deployments should
+come from the standalone cert-manager release.
+
+#### Rollback
+
+If the standalone cert-manager install fails after the Splunk chart upgrade,
+restore cert-manager first. The operator may continue serving webhooks while the
+existing TLS Secret is valid, but certificate renewal will not work until
+cert-manager is healthy again.
+
 ## 0.151.0 to 0.152.0
 
 ### Container log parsing now uses the `container` operator
