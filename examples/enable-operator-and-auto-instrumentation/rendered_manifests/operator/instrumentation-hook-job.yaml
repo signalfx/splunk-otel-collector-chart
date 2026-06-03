@@ -8,7 +8,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.153.0
+    helm.sh/chart: splunk-otel-collector-0.153.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.153.0"
@@ -22,7 +22,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.153.0
+    helm.sh/chart: splunk-otel-collector-0.153.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.153.0"
@@ -39,13 +39,13 @@ data:
         meta.helm.sh/release-namespace: "default"
       labels:
         app.kubernetes.io/name: splunk-otel-collector
-        helm.sh/chart: splunk-otel-collector-0.153.0
+        helm.sh/chart: splunk-otel-collector-0.153.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: default
         app.kubernetes.io/version: "0.153.0"
         app: splunk-otel-collector
         component: otel-operator
-        chart: splunk-otel-collector-0.153.0
+        chart: splunk-otel-collector-0.153.1
         release: default
         app.kubernetes.io/component: otel-operator
     spec:
@@ -76,8 +76,8 @@ data:
       go:
         env:
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: splunk.zc.method=autoinstrumentation-go:v0.23.0
-        image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.23.0
+          value: splunk.zc.method=autoinstrumentation-go:v0.24.0
+        image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:v0.24.0
       java:
         env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
@@ -126,7 +126,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.153.0
+    helm.sh/chart: splunk-otel-collector-0.153.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.153.0"
@@ -147,7 +147,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.153.0
+    helm.sh/chart: splunk-otel-collector-0.153.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "0.153.0"

@@ -388,6 +388,19 @@ Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via ot
 {{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") .Values.featureGates.enableK8sEntities -}}
 {{- end -}}
 
+{{/*
+Build the collector feature gates string for cluster receiver.
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverFeatureGates" -}}
+{{- $gates := list -}}
+{{- with .Values.clusterReceiver.featureGates -}}
+{{- $gates = append $gates . -}}
+{{- end -}}
+{{- if and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
+{{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
+{{- end -}}
+{{- join "," $gates -}}
+{{- end -}}
 
 {{/*
 Whether clusterReceiver should be enabled

@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.153.1] - 2026-06-01
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).
+
+### 💡 Enhancements 💡
+
+- `agent, gateway`: Remove `signalfx` exporter from trace pipelines ([#2432](https://github.com/signalfx/splunk-otel-collector-chart/pull/2432))
+  The `signalfx` exporter is no longer required for trace correlation. Sending traces via OTLP will
+  enable all trace correlation functionality.
+  
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.7. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using  option. ([#2436](https://github.com/signalfx/splunk-otel-collector-chart/pull/2436))
+- `operator`: Bump operator to 0.114.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2436](https://github.com/signalfx/splunk-otel-collector-chart/pull/2436))
+
 ## [0.153.0] - 2026-05-29
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).

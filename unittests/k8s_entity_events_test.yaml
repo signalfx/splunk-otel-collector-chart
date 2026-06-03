@@ -1,0 +1,87 @@
+suite: splunk-otel-collector.k8sEntityEvents
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-cluster-receiver.yaml
+  - deployment-cluster-receiver.yaml
+
+tests:
+  - it: should use metadata_exporters by default
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metadata_exporters:\\n\\s+- signalfx"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities"
+
+  - it: should render k8s entities pipeline to signalfx when featureGates.useEntityEventsForK8sProperties is true
+    set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metadata_exporters:\\n\\s+- signalfx"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/o11y_entities"
+
+  - it: should not render signalfx entity events when Observability metrics are disabled
+    set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
+      splunkObservability:
+        metricsEnabled: false
+        tracesEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metadata_exporters:\\n\\s+- signalfx"
+
+  - it: should enable the collector entity events feature gate
+    set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--feature-gates=exporter.signalfx.consumeEntityEvents"
+
+  - it: should not enable the collector entity events feature gate when Observability metrics are disabled
+    set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
+      splunkObservability:
+        metricsEnabled: false
+        tracesEnabled: true
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: "--feature-gates=exporter.signalfx.consumeEntityEvents"
+
+  - it: should append the collector entity events feature gate to configured cluster receiver gates
+    set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
+      clusterReceiver:
+        featureGates: existing.gate
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--feature-gates=existing.gate,exporter.signalfx.consumeEntityEvents"
