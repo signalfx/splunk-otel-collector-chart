@@ -252,7 +252,9 @@ type entityKeys struct {
 }
 
 // entityRecordKeysByType groups, per entity type, the otel.entity.id and
-// otel.entity.attributes key sets of each individual record.
+// otel.entity.attributes key sets of each entity_state record. Delete events
+// are skipped: they carry no attributes and only the state events are of
+// interest here.
 func entityRecordKeysByType(logs plog.Logs) map[string][]entityKeys {
 	result := make(map[string][]entityKeys)
 	rl := logs.ResourceLogs()
@@ -264,6 +266,9 @@ func entityRecordKeysByType(logs plog.Logs) map[string][]entityKeys {
 				attrs := lr.At(k).Attributes()
 				etypeVal, ok := attrs.Get("otel.entity.type")
 				if !ok {
+					continue
+				}
+				if et, hasEvent := attrs.Get("otel.entity.event.type"); !hasEvent || et.Str() != "entity_state" {
 					continue
 				}
 				result[etypeVal.Str()] = append(result[etypeVal.Str()], entityKeys{
@@ -302,7 +307,7 @@ func aggregateEntityKeys(byType map[string][]entityKeys) map[string]entityKeySet
 }
 
 // intersectAll returns the keys common to all non-empty sets. Empty sets are
-// skipped so records without attributes (e.g. entity deletes) don't erase keys.
+// skipped so a record without attributes can't erase the shared keys.
 func intersectAll(sets []map[string]struct{}) map[string]struct{} {
 	var out map[string]struct{}
 	for _, s := range sets {
