@@ -24,7 +24,7 @@
     kubectl logs splunk -f
 
     # To be able to interact with Splunk pod from local workstation, you need to forward local ports to the ports on the Splunk Pod
-    # Start a new terminal concole, run following command and keep it running in the background
+    # Start a new terminal console, run following command and keep it running in the background
     kubectl port-forward pods/splunk 8089
 
     # Start a new terminal console, forward local port 8000 to the port on Splunk pod (for debugging)
@@ -47,7 +47,7 @@
     kubectl apply -f test/test_setup.yaml
 
 #### Check data on Splunk
-    To see the test events generaged in Splunk, you can visit Splunk web page: https://localhost:8000
+    To see the test events generated in Splunk, you can visit Splunk web page: https://localhost:8000
     Search for events by index.
     For example: `index=ci_events`
 
