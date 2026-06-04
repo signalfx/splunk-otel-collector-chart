@@ -182,7 +182,7 @@ See the following documentation for more details: https://help.splunk.com/en/spl
 ## 0.128.0 to 0.129.0
 
 This release includes a breaking change related to the operator instrumentation configuration.
-- Starting with version 0.129.0, the `operator.instrumentaion.*` configuration has been moved to `operator.instrumentation.spec.*`.
+- Starting with version 0.129.0, the `operator.instrumentation.*` configuration has been moved to `operator.instrumentation.spec.*`.
 - User can now define any spec setting supported by the [OpenTelemetry Operator](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/crds/opentelemetry.io_instrumentations.yaml)
 - The helm chart defines the minimal default spec settings for the operator instrumentation, which can be overridden by the user.
 - If you used custom values under `instrumentation.spec.*` in your `values.yaml`, you will need to migrate them to the new path:
@@ -582,7 +582,7 @@ helm install my-opentelemetry-ebpf -f ./otel-ebpf-values.yaml open-telemetry/ope
 ```
 
 `otel-ebpf-values.yaml` must at least have `endpoint.address` option set to the Splunk OpenTelemetry
-Collector gateway service name captured in the step 2. Additionally, if you had any custom confgurations in the
+Collector gateway service name captured in the step 2. Additionally, if you had any custom configurations in the
 `networkExplorer` section, you need to move them to the `otel-ebpf-values.yaml` file.
 
 ```yaml
@@ -708,7 +708,7 @@ filelog:
 
 ## 0.57.1 to 0.58.0
 [receiver/filelogreceiver] Datatype for `force_flush_period` and `poll_interval` were changed from
-sring to map. Because of that, the default values in Helm Chart were causing problems [#519](https://github.com/signalfx/splunk-otel-collector-chart/issues/519)
+string to map. Because of that, the default values in Helm Chart were causing problems [#519](https://github.com/signalfx/splunk-otel-collector-chart/issues/519)
 
 If you are using custom filelog receiver plugin, you need to change the config from:
 ```yaml

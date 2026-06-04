@@ -47,7 +47,7 @@
     kubectl apply -f test/test_setup.yaml
 
 #### Check data on Splunk
-    To see the test events generaged in Splunk, you can visit Splunk web page: https://localhost:8000
+    To see the test events generated in Splunk, you can visit Splunk web page: https://localhost:8000
     Search for events by index.
     For example: `index=ci_events`
 

@@ -335,7 +335,7 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 			t.Logf("[CheckPodsReady] No pods found for selector '%s' in namespace '%s'", labelSelector, namespace)
 			return false
 		}
-		allReady := true
+		allPodsReady := true
 		for _, pod := range pods.Items {
 			ready := false
 			for _, condition := range pod.Status.Conditions {
@@ -345,11 +345,11 @@ func CheckPodsReady(t *testing.T, clientset *kubernetes.Clientset, namespace, la
 				}
 			}
 			if pod.Status.Phase != v1.PodRunning || !ready {
-				allReady = false
+				allPodsReady = false
 			}
 			t.Logf("[CheckPodsReady] Pod: %s | Phase: %s | Ready: %v", pod.Name, pod.Status.Phase, ready)
 		}
-		if !allReady {
+		if !allPodsReady {
 			readySince = time.Time{}
 			return false
 		}
