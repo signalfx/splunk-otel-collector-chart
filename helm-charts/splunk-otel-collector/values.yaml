@@ -888,7 +888,7 @@ securityContextConstraintsOverwrite: {}
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.
 # This is an additional deployment of OpenTelemetry collector that can be used
-# to pass traces trough it, make k8s metadata enrichment and batching.
+# to pass traces through it, make k8s metadata enrichment and batching.
 # Another use case is to point tracing instrumentation libraries directly to
 # the collector endpoint instead of local agents. The collector running in the
 # passthrough mode is recommended for large k8s clusters, disabled by default.
@@ -1089,7 +1089,7 @@ instrumentation:
       # "b3multi": B3 Multi
       # "jaeger": Jaeger
       # "xray": AWS X-Ray (third party)
-      # "ottrace": OT Trace (third party)
+      # "ottrace": OT Trace (third party) # codespell:ignore
       # "none": No automatically configured propagator.
 
     # Optional "sampler" parameter for enabling trace sampling, see: https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_traces_sampler

@@ -86,7 +86,7 @@ spec:
                 type: boolean
               fallbackScrapeProtocol:
                 description: |-
-                  fallbackScrapeProtocol defines the protocol to use if a scrape returns blank, unparseable, or otherwise invalid Content-Type.
+                  fallbackScrapeProtocol defines the protocol to use if a scrape returns blank, unparsable, or otherwise invalid Content-Type.
 
                   It requires Prometheus >= v3.0.0.
                 enum:
@@ -2472,7 +2472,7 @@ spec:
                 type: array
               fallbackScrapeProtocol:
                 description: |-
-                  fallbackScrapeProtocol defines the protocol to use if a scrape returns blank, unparseable, or otherwise invalid Content-Type.
+                  fallbackScrapeProtocol defines the protocol to use if a scrape returns blank, unparsable, or otherwise invalid Content-Type.
 
                   It requires Prometheus >= v3.0.0.
                 enum:

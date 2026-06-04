@@ -70,5 +70,5 @@ kubectl apply -f /tmp/new-crds.yaml
 kubectl get crds -o jsonpath='{range .items[?(@.spec.group=="opentelemetry.io")]}{.metadata.name}{" - "}{.spec.versions[*].name}{"\n"}{end}'
 ```
 
-#### 5. Continure with splunk-otel-collector Upgrade
+#### 5. Continue with splunk-otel-collector Upgrade
 Once the CRDs are updated, you can proceed with the upgrade of the splunk-otel-collector chart.
