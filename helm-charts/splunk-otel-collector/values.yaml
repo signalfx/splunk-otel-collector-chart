@@ -1489,6 +1489,11 @@ featureGates:
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
   # This feature is experimental and may change or be removed in future releases.
   enableK8sEntities: false
+  # Enable entity events mode for Kubernetes property updates. When enabled, the k8s_cluster receiver
+  # skips metadata_exporters (PATCH mode) and routes entity events to the signalfx exporter using PUT semantics.
+  # Also enables the exporter.signalfx.consumeEntityEvents collector feature gate on the cluster receiver.
+  # Requires splunkObservability.metricsEnabled.
+  useEntityEventsForK8sProperties: false
   # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.
   # Because selector.matchLabels is immutable, enabling this on an existing installation
   # requires additional steps. See:
