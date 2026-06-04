@@ -1,9 +1,0 @@
-change_type: enhancement
-component: agent
-note: Add `resource` processor to `logs/secureapp` pipeline for k8s host attribute enrichment (SECAPP-1072)
-issues: [2440]
-subtext: |
-  The `resource` processor is now included in the `logs/secureapp` pipeline to inject
-  `k8s.cluster.name` and `k8s.node.name` attributes required for vulnerability host mapping.
-  Also fixes a pre-existing issue where `resource/add_environment` was unconditionally
-  referenced but is only defined when `.Values.environment` is set.
