@@ -1,6 +1,7 @@
 [files]
 extend-exclude = [
-  "*.sum",
+  "*.mod",
+  "*.sum"
 ]
 
 [default]
@@ -12,3 +13,4 @@ extend-ignore-re = [
 [default.extend-words]
 # Don't correct these words, they're valid in certain contexts
 AKS = "AKS"
+ANDed = "ANDed"
