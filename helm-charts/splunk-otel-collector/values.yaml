@@ -219,12 +219,6 @@ splunkObservability:
   # Enables Secure Application features
   secureAppEnabled: false
 
-  # CSA init-container image used when secureAppEnabled=true.
-  # Overrides instrumentation.spec.java.image for SecureApp instrumentation.
-  # TODO(naming): Consider whether to auto-derive this from the APM image by appending '-csa'
-  # to the repo name (e.g. splunk-otel-java:v2.27.0 -> splunk-otel-java-csa:v2.27.0).
-  # Requires agent team to confirm lockstep release contract before implementing.
-  secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
 
 ################################################################################
 # Logs collection engine:

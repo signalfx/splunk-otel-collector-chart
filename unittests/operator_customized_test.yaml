@@ -48,11 +48,10 @@ tests:
   # and the disabled state must not be affected.
   # --------------------------------------------------------------------------
 
-  - it: "secureAppEnabled=true — spec.java.image replaced with secureAppCsaImage"
+  - it: "secureAppEnabled=true — spec.java.image replaced with hardcoded CSA image"
     set:
       splunkObservability:
         secureAppEnabled: true
-        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
       instrumentation:
         spec:
           java:
@@ -60,13 +59,12 @@ tests:
     asserts:
       - equal:
           path: spec.java.image
-          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
 
   - it: "secureAppEnabled=false — spec.java.image is NOT replaced"
     set:
       splunkObservability:
         secureAppEnabled: false
-        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
       instrumentation:
         spec:
           java:
@@ -80,7 +78,6 @@ tests:
     set:
       splunkObservability:
         secureAppEnabled: true
-        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
       instrumentation:
         spec:
           dotnet:
@@ -159,11 +156,10 @@ tests:
             name: SPLUNK_SECUREAPP_AGENT_ENABLED
             value: "true"
 
-  - it: "secureAppEnabled=true, nodejs — spec.java.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED (java gets image swap, not env injection)"
+  - it: "secureAppEnabled=true, java — spec.java.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED (java gets image swap, not env injection)"
     set:
       splunkObservability:
         secureAppEnabled: true
-        secureAppCsaImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v1.0.0
       instrumentation:
         spec:
           java:

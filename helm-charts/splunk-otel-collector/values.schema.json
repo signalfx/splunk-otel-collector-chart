@@ -250,10 +250,6 @@
           "description": "Whether Secure Application features are enabled for Splunk Observability",
           "type": "boolean"
         },
-        "secureAppCsaImage": {
-          "description": "CSA init-container image used when secureAppEnabled=true",
-          "type": "string"
-        },
         "infrastructureMonitoringEventsEnabled": {
           "description": "Send Kubernetes events to Splunk Observability Infrastructure Monitoring",
           "type": "boolean"

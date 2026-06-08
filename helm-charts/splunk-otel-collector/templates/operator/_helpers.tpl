@@ -131,7 +131,7 @@ Helper to build entries for instrumentation libraries
 
       {{- /* When secureAppEnabled=true and processing java, swap image to the CSA variant. */ -}}
       {{- if and (eq $lib "java") $.Values.splunkObservability.secureAppEnabled -}}
-        {{- $libSpec = merge (dict "image" $.Values.splunkObservability.secureAppCsaImage) $libSpec -}}
+        {{- $libSpec = merge (dict "image" "ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0") $libSpec -}}
       {{- end -}}
 
       {{- /* When secureAppEnabled=true and processing nodejs, activate the bundled SecureApp agent. */ -}}
