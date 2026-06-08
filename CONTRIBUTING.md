@@ -154,7 +154,7 @@ minikube start --cni calico --vm-driver=virtualbox
 
 ### Troubleshooting
 
-In some local Kubernetes clusters like "minikube" and "kind", you might run into TLS verification issue when callig
+In some local Kubernetes clusters like "minikube" and "kind", you might run into TLS verification issue when calling
 the kubelet API. In order to quickly resolve it add the following section to your values.yaml file:
 
 ```yaml

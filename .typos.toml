@@ -1,0 +1,16 @@
+[files]
+extend-exclude = [
+  "*.mod",
+  "*.sum"
+]
+
+[default]
+extend-ignore-re = [
+    # Ignore lines that are purposely ignored
+    "(?Rm)^.*(#|//|<!--)\\s*codespell:ignore.*$"
+]
+
+[default.extend-words]
+# Don't correct these words, they're valid in certain contexts
+AKS = "AKS"
+Ded = "Ded"

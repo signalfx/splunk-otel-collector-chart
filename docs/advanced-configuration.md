@@ -1069,7 +1069,7 @@ By default, data is persisted in `/var/addon/splunk/exporter_queue` directory.
 Override this behaviour by setting `splunkPlatform.sendingQueue.persistentQueue.storagePath` option.
 
 Check [Data Persistence in the OpenTelemetry Collector
-](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explantion.
+](https://community.splunk.com/t5/Community-Blog/Data-Persistence-in-the-OpenTelemetry-Collector/ba-p/624583) for detailed explanation.
 
 Note: Data Persistence is only applicable for agent daemonset.
 

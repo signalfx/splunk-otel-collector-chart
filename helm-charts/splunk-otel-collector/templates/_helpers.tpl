@@ -479,7 +479,7 @@ Whether the helm chart should detect the cluster name automatically
 {{- end -}}
 
 {{/*
-Helper used to define a namspace.
+Helper used to define a namespace.
 - Returns namespace from a release
 - If namespaceOverride value is filled in it will replace the namespace
 */}}

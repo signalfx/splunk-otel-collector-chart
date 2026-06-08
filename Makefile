@@ -195,7 +195,7 @@ cmctl: ## Downloads and installs cmctl, the CLI for cert-manager, to your local 
 	}
 
 ##@ CI Scripts
-# Tasks related to continous integration
+# Tasks related to continuous integration
 
 # Example Usage:
 #   make update-docker-image FILE_PATH=./path/to/values.yaml QUERY_STRING='.images.splunk' FILTER='v1.0'
