@@ -1,23 +1,34 @@
 ---
-# Source: splunk-otel-collector/templates/deployment-gateway.yaml
+# Source: splunk-otel-collector/templates/gateway-workload.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: default-splunk-otel-collector
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.154.0
+    helm.sh/chart: splunk-otel-collector-0.153.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.154.0"
+    app.kubernetes.io/version: "0.153.0"
     app: splunk-otel-collector
     component: otel-collector
-    chart: splunk-otel-collector-0.154.0
+    chart: splunk-otel-collector-0.153.1
     release: default
     app.kubernetes.io/component: otel-collector
 spec:
-  replicas: 3
+  podManagementPolicy: Parallel
+  serviceName: default-splunk-otel-collector
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+  replicas: 1
   selector:
     matchLabels:
       app: splunk-otel-collector
@@ -30,7 +41,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: e1cafd34275d7fd939b74d0eaa9f712979e62bc02f5cc90cabef22ac12c71b37
+        checksum/config: 9ae4c7fdaa6fe50108966db9d68a2df5eece51e2646d7af4b114c0d5aacd61da
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -39,7 +50,7 @@ spec:
       - name: otel-collector
         args:
         - --config=/conf/relay.yaml
-        image: quay.io/signalfx/splunk-otel-collector:0.154.0
+        image: quay.io/signalfx/splunk-otel-collector:0.153.0
         imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
@@ -105,8 +116,8 @@ spec:
             port: 13133
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 2
+            memory: 4Gi
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap

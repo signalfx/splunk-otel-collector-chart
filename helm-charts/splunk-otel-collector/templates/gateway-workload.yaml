@@ -1,6 +1,7 @@
 {{ if .Values.gateway.enabled }}
+{{- $gatewayMode := default "deployment" .Values.gateway.mode }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ if eq $gatewayMode "statefulset" }}StatefulSet{{ else }}Deployment{{ end }}
 metadata:
   name: {{ template "splunk-otel-collector.fullname" . }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
@@ -16,6 +17,10 @@ metadata:
     {{- toYaml .Values.gateway.annotations | nindent 4 }}
   {{- end }}
 spec:
+  {{- if eq $gatewayMode "statefulset" }}
+  {{- $statefulsetSpec := mustMergeOverwrite (default (dict) .Values.gateway.statefulsetSpec) (dict "serviceName" (include "splunk-otel-collector.fullname" .)) }}
+  {{- toYaml $statefulsetSpec | nindent 2 }}
+  {{- end }}
   {{- if not (kindIs "invalid" .Values.gateway.replicaCount) }}
   replicas: {{ .Values.gateway.replicaCount }}
   {{- end }}
