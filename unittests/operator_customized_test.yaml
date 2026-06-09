@@ -74,6 +74,36 @@ tests:
           path: spec.java.image
           value: ghcr.io/signalfx/splunk-otel-java:v2.27.0
 
+  - it: "secureAppEnabled=true + custom java image set — CSA image takes precedence, other java spec preserved"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/my-registry/my-java:latest
+            env:
+              - name: JAVA_OPTS
+                value: "-Xmx1024m"
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+      - contains:
+          path: spec.java.env
+          content:
+            name: JAVA_OPTS
+            value: "-Xmx1024m"
+
+  - it: "secureAppEnabled=true + no explicit java override — chart default java spec is swapped to CSA image"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+
   - it: "secureAppEnabled=true — spec.dotnet.image is NOT replaced (only java is affected)"
     set:
       splunkObservability:
@@ -216,3 +246,13 @@ tests:
           content:
             name: SPLUNK_SECUREAPP_AGENT_ENABLED
             value: "false"
+
+  - it: "secureAppEnabled=true + instrumentation.enabled=false — Instrumentation CR not rendered"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
