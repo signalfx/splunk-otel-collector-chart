@@ -139,17 +139,17 @@ func SetupOTLPTracesSinkWithTokenAndPorts(t *testing.T, token string, grpcPort i
 		},
 	})
 
-	baFactory := bearertokenauthextension.NewFactory()
-	baCfg := baFactory.CreateDefaultConfig().(*bearertokenauthextension.Config)
-	baCfg.BearerToken = configopaque.String(token)
-	baCfg.Header = "X-Sf-Token"
-	baCfg.Scheme = ""
-	baExt, err := baFactory.Create(t.Context(), extensiontest.NewNopSettings(baFactory.Type()), baCfg)
+	btaFactory := bearertokenauthextension.NewFactory()
+	btaCfg := btaFactory.CreateDefaultConfig().(*bearertokenauthextension.Config)
+	btaCfg.BearerToken = configopaque.String(token)
+	btaCfg.Header = "X-Sf-Token"
+	btaCfg.Scheme = ""
+	btaExt, err := btaFactory.Create(t.Context(), extensiontest.NewNopSettings(btaFactory.Type()), btaCfg)
 	require.NoError(t, err)
 
 	host := &mockHost{
 		extensions: map[component.ID]component.Component{
-			component.MustNewIDWithName("bearertokenauth", "passthroughValidation"): baExt,
+			component.MustNewIDWithName("bearertokenauth", "passthroughValidation"): btaExt,
 		},
 	}
 

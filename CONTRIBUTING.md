@@ -94,6 +94,23 @@ GitHub provides additional documentation on [forking a
 repository](https://help.github.com/articles/fork-a-repo/) and [creating a pull
 request](https://help.github.com/articles/creating-a-pull-request/).
 
+## AI-assisted contributions
+
+AI assistance is welcome for writing code and drafting PRs. The expectations are the
+same as for any contribution: you own the result and can stand behind it.
+
+- You are responsible for understanding every change. Don't leave the first review of
+  AI-assisted code to reviewers. Please read, test, and verify it before opening the PR. If
+  you can't explain why a change was made, it isn't ready.
+- Engage with reviewers directly, in your own words. Don't post AI-generated replies to
+  review comments, and don't auto-reply to automated reviewers (e.g. Copilot) — address
+  the feedback in the code or respond yourself.
+- AI-assisted code must meet the same bar as everything else: follow the coding
+  standards, include tests, and be documented.
+- Disclose significant AI assistance with an `Assisted-by:` commit message trailer (e.g.
+  `Assisted-by: Claude Opus 4.5`). Do NOT use a `Co-authored-by:` trailer as it breaks
+  the EasyCLA check and blocks the PR.
+
 ## Changelog Guidelines
 
 ### When to Add an Entry
@@ -154,7 +171,7 @@ minikube start --cni calico --vm-driver=virtualbox
 
 ### Troubleshooting
 
-In some local Kubernetes clusters like "minikube" and "kind", you might run into TLS verification issue when callig
+In some local Kubernetes clusters like "minikube" and "kind", you might run into TLS verification issue when calling
 the kubelet API. In order to quickly resolve it add the following section to your values.yaml file:
 
 ```yaml
