@@ -895,9 +895,12 @@ securityContextConstraintsOverwrite: {}
 ################################################################################
 
 gateway:
-  # Defines if collector deployment is enabled
+  # Defines if the gateway collector workload is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
+
+  # Gateway workload mode. Supported values: deployment, statefulset.
+  mode: deployment
 
   # Number of collector replicas
   # Set to null if using HorizontalPodAutoscaler to avoid conflicts
@@ -979,6 +982,11 @@ gateway:
   # Extra volumes to be mounted to the OTel Collector container.
   extraVolumes: []
   extraVolumeMounts: []
+
+  # Additional StatefulSet-only spec fields.
+  # These are only applied when gateway.mode is set to statefulset.
+  # Example keys: volumeClaimTemplates, podManagementPolicy, persistentVolumeClaimRetentionPolicy.
+  statefulsetSpec: {}
 
   # Enable or disable features of the gateway.
   featureGates: ""
