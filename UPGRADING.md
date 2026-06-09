@@ -28,7 +28,7 @@ Example old config:
 ```
 image:
   imagePullSecrets:
-    - name: my-registry-secret
+    - my-registry-secret
 
 targetAllocator:
   enabled: true
@@ -44,7 +44,7 @@ New config equivalent:
 ```
 image:
   imagePullSecrets:
-    - name: my-registry-secret
+    - my-registry-secret
 
 targetallocator:
   enabled: true
