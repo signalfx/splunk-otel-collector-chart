@@ -53,7 +53,7 @@ export metric, trace, and log data for:
 
 - The Splunk OpenTelemetry Collector for Kubernetes Helm chart is production tested; it is in use by a number of customers in their production environments
 - Customers using the helm chart can receive direct help from official Splunk support within SLA's
-- The core configuration experience for metrics and traces collection is stable and well supported (OpenTelemetry logs collection configuration is in beta). Please review the [versioning and breaking changes](#versioning-and-breaking-changes) guidance for upgrade best practices.
+- The core configuration experience for metrics, traces and logs collection is stable and well supported. Please review the [versioning and breaking changes](#versioning-and-breaking-changes) guidance for upgrade best practices.
 
 **Installations that use this distribution can receive direct help from
 Splunk's support teams.** Customers are free to use the core OpenTelemetry OSS
