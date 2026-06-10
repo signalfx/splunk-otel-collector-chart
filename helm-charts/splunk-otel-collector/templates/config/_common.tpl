@@ -459,7 +459,7 @@ Splunk Platform Logs exporter
 {{- define "splunk-otel-collector.splunkPlatformLogsExporter" -}}
 splunk_hec/platform_logs:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "${file:/otel/etc/splunk_platform_hec_token}"
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
@@ -511,7 +511,7 @@ Splunk Platform Metrics exporter
 {{- define "splunk-otel-collector.splunkPlatformMetricsExporter" -}}
 splunk_hec/platform_metrics:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "${file:/otel/etc/splunk_platform_hec_token}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
@@ -552,7 +552,7 @@ Splunk Platform Traces exporter
 {{- define "splunk-otel-collector.splunkPlatformTracesExporter" -}}
 splunk_hec/platform_traces:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "${file:/otel/etc/splunk_platform_hec_token}"
   index: {{ .Values.splunkPlatform.tracesIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   {{- if .Values.splunkPlatform.sourcetype }}
@@ -654,7 +654,7 @@ opamp/splunk_o11y:
       {{- end }}
       polling_interval: 30s
       headers:
-        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        X-SF-Token: "${file:/otel/etc/splunk_observability_access_token}"
   agent_description:
     include_resource_attributes: true
 {{- end }}

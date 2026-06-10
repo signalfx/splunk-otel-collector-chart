@@ -84,10 +84,11 @@ spec:
         ` }}
         {{- .Values.clusterReceiver.affinity | mustMergeOverwrite (fromYaml $clusterReceiverPodAntiAffinity) | toYaml | nindent 8 }}
       {{- end }}
-      {{- $podSecurityContext := .Values.clusterReceiver.podSecurityContext | default .Values.clusterReceiver.securityContext }}
+      {{- $basePodSecurityContext := .Values.clusterReceiver.podSecurityContext | default .Values.clusterReceiver.securityContext | default dict }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" $basePodSecurityContext) }}
       {{- if $podSecurityContext }}
       securityContext:
-        {{- include "splunk-otel-collector.securityContext" (dict "isWindows" .Values.isWindows "securityContext" $podSecurityContext) | nindent 8 }}
+        {{- $podSecurityContext | nindent 8 }}
       {{- end }}
       {{- if eq .Values.distribution "eks/fargate" }}
       initContainers:
@@ -203,7 +204,7 @@ spec:
           name: serviceaccount-token
           readOnly: true
         {{- end }}
-        {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.secretMountRequired" .) "true" }}
         - name: secret
           mountPath: /otel/etc
           readOnly: true
@@ -250,10 +251,11 @@ spec:
       - name: run-collectd
         emptyDir:
           sizeLimit: 25Mi
-      {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
+      {{- if eq (include "splunk-otel-collector.secretMountRequired" .) "true" }}
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
+          defaultMode: {{ .Values.secret.defaultMode }}
       {{- end }}
       {{- if eq .Values.distribution "eks/fargate" }}
       - name: init-eks-fargate-cluster-receiver-script

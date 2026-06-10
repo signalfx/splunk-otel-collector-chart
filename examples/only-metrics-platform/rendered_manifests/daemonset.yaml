@@ -31,12 +31,14 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: f1614d5ba7eaed470aaca7d78ecd8e0cbc7adeafbcc1f45c208a87960b08f542
+        checksum/config: 4d509f08f7f1ea20e88cb874921fc73332bdf361e79bbffbf0a084d50ab31bab
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: default-splunk-otel-collector
+      securityContext:
+        fsGroup: 999
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
@@ -146,6 +148,9 @@ spec:
         - mountPath: /hostfs/usr/lib/os-release
           name: host-usr-lib-osrelease
           readOnly: true
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -175,6 +180,10 @@ spec:
       - name: host-usr-lib-osrelease
         hostPath:
           path: /usr/lib/os-release
+      - name: secret
+        secret:
+          secretName: default-splunk-otel-collector
+          defaultMode: 0440
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

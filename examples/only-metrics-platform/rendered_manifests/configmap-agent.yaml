@@ -39,7 +39,7 @@ data:
         timeout: 10s
         tls:
           insecure_skip_verify: false
-        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+        token: ${file:/otel/etc/splunk_platform_hec_token}
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133

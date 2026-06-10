@@ -57,6 +57,11 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       serviceAccountName: {{ template "splunk-otel-collector.serviceAccountName" . }}
+      {{- $podSecurityContext := include "splunk-otel-collector.podSecurityContext" (dict "isWindows" .Values.isWindows "podSecurityContext" .Values.agent.podSecurityContext) }}
+      {{- if $podSecurityContext }}
+      securityContext:
+        {{- $podSecurityContext | nindent 8 }}
+      {{- end }}
       {{- if .Values.featureGates.explicitMountServiceAccountToken }}
       automountServiceAccountToken: false
       {{- end }}
@@ -273,7 +278,7 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
-        {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.secretMountRequired" .) "true" }}
         - name: secret
           mountPath: /otel/etc
           readOnly: true
@@ -434,10 +439,11 @@ spec:
       {{- end }}
       {{- end }}
       {{- end }}
-      {{- if eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true" }}
+      {{- if eq (include "splunk-otel-collector.secretMountRequired" .) "true" }}
       - name: secret
         secret:
           secretName: {{ template "splunk-otel-collector.secret" . }}
+          defaultMode: {{ .Values.secret.defaultMode }}
       {{- end }}
       {{- if and .Values.agent.controlPlaneMetrics.etcd.enabled (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) }}
       - name: etcd-secret

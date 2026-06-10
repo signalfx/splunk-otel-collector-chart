@@ -42,7 +42,7 @@
           "type": "string"
         },
         "token": {
-          "description": "Splunk Platform HEC Token",
+          "description": "Splunk Platform HEC Token. The token is stored in a Kubernetes Secret and mounted as a file in the collector pods.",
           "type": "string"
         },
         "index": {
@@ -225,7 +225,7 @@
           "type": "string"
         },
         "accessToken": {
-          "description": "Splunk Observability Access Token",
+          "description": "Splunk Observability Access Token. The token is stored in a Kubernetes Secret and mounted as a file in the collector pods.",
           "type": "string"
         },
         "ingestUrl": {
@@ -583,6 +583,10 @@
         "securityContext": {
           "type": "object"
         },
+        "podSecurityContext": {
+          "description": "Pod security context applied to the agent. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
+          "type": "object"
+        },
         "updateStrategy": {
           "type": "string",
           "enum": [
@@ -747,6 +751,7 @@
           "type": "object"
         },
         "podSecurityContext": {
+          "description": "Pod security context applied to the cluster receiver. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
           "type": "object"
         },
         "containerSecurityContext": {
@@ -1068,6 +1073,20 @@
         "name": {
           "type": "string"
         },
+        "defaultMode": {
+          "description": "File mode for files mounted from the Splunk secret.",
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 511
+            },
+            {
+              "type": "string",
+              "pattern": "^0[0-7]{3}$"
+            }
+          ]
+        },
         "validateSecret": {
           "type": "boolean"
         },
@@ -1334,6 +1353,7 @@
           "type": "object"
         },
         "podSecurityContext": {
+          "description": "Pod security context applied to the gateway. When mounting group-readable Splunk Secret files on Linux, set fsGroup here to override the chart default. On OpenShift, use an fsGroup allowed by the SCC if the chart-created SCC is disabled or overridden.",
           "type": "object"
         },
         "containerSecurityContext": {

@@ -26,6 +26,18 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Warn if a collector config override still references Splunk token environment variables.
+*/}}
+{{- define "splunk-otel-collector.warnOnTokenEnvVarRefs" -}}
+{{- if .config -}}
+{{- $source := .source -}}
+{{- if regexMatch "\\$\\{SPLUNK_[A-Z0-9_]*_TOKEN\\}" (toYaml .config) }}
+{{- printf "[WARNING] %s references a Splunk token environment variable (${SPLUNK_*_TOKEN}). Built-in chart configuration now reads tokens from mounted Secret files. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}. Token environment variables are still injected for compatibility but will be removed in a future release.\n" $source }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "splunk-otel-collector.chart" -}}
@@ -64,6 +76,16 @@ Whether the Splunk Platform secret must be mounted as files for HEC or OTLP TLS.
       .Values.splunkPlatform.otlpIngest.clientCert
       .Values.splunkPlatform.otlpIngest.clientKey
       .Values.splunkPlatform.otlpIngest.caFile }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Whether the Splunk Secret must be mounted as files for tokens (i.e. o11y access token or HEC token) or platform TLS.
+*/}}
+{{- define "splunk-otel-collector.secretMountRequired" -}}
+{{- if or
+      (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
+      (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
 {{- end -}}
 
 {{/*
@@ -416,10 +438,12 @@ Build the securityContext for Linux and Windows
 {{- define "splunk-otel-collector.securityContext" -}}
 {{- if .isWindows }}
 {{- $_ := unset .securityContext "runAsUser" }}
-{{- if not (hasKey .securityContext "windowsOptions")}}
+{{- $_ := unset .securityContext "fsGroup" }}
+{{- $_ := unset .securityContext "fsGroupChangePolicy" }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext "windowsOptions"))}}
 {{- $_ := set .securityContext "windowsOptions" dict }}
 {{- end }}
-{{- if and (not (hasKey .securityContext.windowsOptions "runAsUserName")) (.setRunAsUser) }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext.windowsOptions "runAsUserName")) }}
 {{- $_ := set .securityContext.windowsOptions "runAsUserName" "ContainerAdministrator"}}
 {{- end }}
 {{- else }}
@@ -427,7 +451,17 @@ Build the securityContext for Linux and Windows
 {{- $_ := set .securityContext "runAsUser" 0 }}
 {{- end }}
 {{- end }}
+{{- if .securityContext }}
 {{- toYaml .securityContext }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Build a pod securityContext for Linux and Windows.
+*/}}
+{{- define "splunk-otel-collector.podSecurityContext" -}}
+{{- $podSecurityContext := deepCopy (.podSecurityContext | default dict) -}}
+{{- include "splunk-otel-collector.securityContext" (dict "isWindows" .isWindows "securityContext" $podSecurityContext) }}
 {{- end -}}
 
 {{/*

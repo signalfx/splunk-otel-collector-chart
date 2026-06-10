@@ -39,7 +39,7 @@ extensions:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
-        default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        default_value: "${file:/otel/etc/splunk_observability_access_token}"
   {{- end }}
 
 receivers:
@@ -959,7 +959,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+    token: "${file:/otel/etc/splunk_observability_access_token}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     # TODO: Performance testing must be done before enabling compression
@@ -969,7 +969,7 @@ exporters:
   otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
-      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-SF-TOKEN": "${file:/otel/etc/splunk_observability_access_token}"
       "X-Splunk-Instrumentation-Library": secureapp
   {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
@@ -998,7 +998,7 @@ exporters:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
     {{- end }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: ${file:/otel/etc/splunk_observability_access_token}
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
@@ -1012,7 +1012,7 @@ exporters:
     # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: ${file:/otel/etc/splunk_observability_access_token}
     sync_host_metadata: true
     {{- if not .Values.isWindows }}
     root_path: /hostfs
@@ -1035,7 +1035,7 @@ exporters:
   signalfx/histograms:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: ${file:/otel/etc/splunk_observability_access_token}
     send_otlp_histograms: true
   {{- end }}
   {{- end }}
