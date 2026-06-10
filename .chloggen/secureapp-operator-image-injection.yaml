@@ -1,0 +1,4 @@
+change_type: enhancement
+component: operator
+note: When `splunkObservability.secureAppEnabled=true`, swap Java auto-instrumentation image to CSA variant and inject `SPLUNK_SECUREAPP_AGENT_ENABLED=true` for Node.js
+issues: [2440]

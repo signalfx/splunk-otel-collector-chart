@@ -40,6 +40,83 @@ tests:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "false"
 
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — java image swap (D1)
+  #
+  # When secureAppEnabled=true and lib==java, the Instrumentation CR's
+  # spec.java.image must be replaced with secureAppCsaImage. Other runtimes
+  # and the disabled state must not be affected.
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.java.image replaced with hardcoded CSA image"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+
+  - it: "secureAppEnabled=false — spec.java.image is NOT replaced"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+
+  - it: "secureAppEnabled=true + custom java image set — CSA image takes precedence, other java spec preserved"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/my-registry/my-java:latest
+            env:
+              - name: JAVA_OPTS
+                value: "-Xmx1024m"
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+      - contains:
+          path: spec.java.env
+          content:
+            name: JAVA_OPTS
+            value: "-Xmx1024m"
+
+  - it: "secureAppEnabled=true + no explicit java override — chart default java spec is swapped to CSA image"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+
+  - it: "secureAppEnabled=true — spec.dotnet.image is NOT replaced (only java is affected)"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          dotnet:
+            image: ghcr.io/signalfx/splunk-otel-dotnet:v1.0.0
+    asserts:
+      - equal:
+          path: spec.dotnet.image
+          value: ghcr.io/signalfx/splunk-otel-dotnet:v1.0.0
+
   - it: should respect user-defined SPLUNK_PROFILER vars in global spec.env and not duplicate them
     set:
       instrumentation.spec.env:
@@ -68,3 +145,114 @@ tests:
           content:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "true"
+
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — nodejs env var injection (D1)
+  #
+  # When secureAppEnabled=true and lib==nodejs, SPLUNK_SECUREAPP_AGENT_ENABLED=true
+  # is injected into spec.nodejs.env. The @splunk/secureapp-agent npm package is
+  # pre-bundled in the standard image (v4.7.0+), so no image swap is needed.
+  # If the customer already set SPLUNK_SECUREAPP_AGENT_ENABLED, it must not be
+  # overridden.
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.nodejs.env includes SPLUNK_SECUREAPP_AGENT_ENABLED=true"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js:v4.7.0
+    asserts:
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=false — spec.nodejs.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js:v4.7.0
+    asserts:
+      - notContains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=true, java — spec.java.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED (java gets image swap, not env injection)"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java:v2.27.0
+    asserts:
+      - notContains:
+          path: spec.java.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=true, customer sets SPLUNK_SECUREAPP_AGENT_ENABLED=false — must NOT be overridden"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js:v4.7.0
+            env:
+              - name: SPLUNK_SECUREAPP_AGENT_ENABLED
+                value: "false"
+    asserts:
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=true, customer sets SPLUNK_SECUREAPP_AGENT_ENABLED=true — must NOT be duplicated"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js:v4.7.0
+            env:
+              - name: SPLUNK_SECUREAPP_AGENT_ENABLED
+                value: "true"
+    asserts:
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+      - notContains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "false"
+
+  - it: "secureAppEnabled=true + instrumentation.enabled=false — Instrumentation CR not rendered"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

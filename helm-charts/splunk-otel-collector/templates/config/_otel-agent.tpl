@@ -1040,13 +1040,14 @@ exporters:
   {{- end }}
   {{- end }}
 
-{{- if and
-  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
-  (.Values.splunkObservability.secureAppEnabled)
-}}
+{{- if .Values.splunkObservability.secureAppEnabled }}
 connectors:
   routing/logs:
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     default_pipelines: [logs]
+    {{- else }}
+    default_pipelines: []
+    {{- end }}
     table:
       - context: log
         condition: instrumentation_scope.name == "secureapp"
@@ -1091,28 +1092,31 @@ service:
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
     {{- if .Values.splunkObservability.secureAppEnabled }}
-    # secure application events
+    # secure application events — always routed via routing/logs connector
     logs/secureapp:
-      receivers:
-        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-        - routing/logs
-        {{- else }}
-        - otlp
+      receivers: [routing/logs]
+      processors:
+        - k8s_attributes
+        - resourcedetection
+        - resource
+        {{- if .Values.environment }}
+        - resource/add_environment
         {{- end }}
-      processors: [memory_limiter, batch]
+        - memory_limiter
+        - batch
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
         {{- else }}
         - otlp_http/secureapp
         {{- end }}
-    {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-    {{- if .Values.splunkObservability.secureAppEnabled }}
+    # receives all OTLP logs; routes secureapp scope to logs/secureapp, rest to default_pipelines
     logs/split:
       receivers: [otlp]
+      processors: [memory_limiter, batch]
       exporters: [routing/logs]
     {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     # default logs + profiling data pipeline
     logs:
       receivers:

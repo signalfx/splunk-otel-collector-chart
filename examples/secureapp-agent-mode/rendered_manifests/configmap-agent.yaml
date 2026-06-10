@@ -391,6 +391,9 @@ data:
           exporters:
           - otlp_http/secureapp
           processors:
+          - k8s_attributes
+          - resourcedetection
+          - resource
           - memory_limiter
           - batch
           receivers:
@@ -398,6 +401,9 @@ data:
         logs/split:
           exporters:
           - routing/logs
+          processors:
+          - memory_limiter
+          - batch
           receivers:
           - otlp
         metrics:

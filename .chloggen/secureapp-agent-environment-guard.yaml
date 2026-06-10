@@ -1,0 +1,4 @@
+change_type: bug_fix
+component: agent
+note: Fix `resource/add_environment` unconditionally referenced in `logs/secureapp` pipeline when it is only defined if `.Values.environment` is set — would cause collector startup failure
+issues: [2440]
