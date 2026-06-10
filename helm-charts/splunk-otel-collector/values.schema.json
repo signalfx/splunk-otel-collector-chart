@@ -1554,6 +1554,11 @@
       "description": "Helm Chart Feature Gates.",
       "type": "object",
       "additionalProperties": true
+    },
+    "opentelemetry-ebpf-instrumentation": {
+      "description": "OpenTelemetry eBPF Instrumentation subchart configuration.",
+      "type": "object",
+      "additionalProperties": true
     }
   },
   "allOf": [
