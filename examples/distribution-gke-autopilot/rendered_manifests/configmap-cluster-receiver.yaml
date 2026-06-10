@@ -148,6 +148,7 @@ data:
             enabled: true
           k8s.pod.status_reason:
             enabled: true
+        node_conditions_to_report: []
         resource_attributes:
           k8s.hpa.scaletargetref.kind:
             enabled: true

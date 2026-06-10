@@ -27,6 +27,7 @@ receivers:
     {{- if not $useEntityEventsForK8sProperties }}
     metadata_exporters: [signalfx]
     {{- end }}
+    node_conditions_to_report: []
     resource_attributes:
       k8s.hpa.scaletargetref.kind:
         enabled: true
