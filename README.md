@@ -96,12 +96,12 @@ require additional configurations applied to
 ## Versioning and breaking changes
 
 > [!IMPORTANT]
-> **The chart version does not follow [SemVer](https://semver.org/). A minor version bump can contain breaking changes.**
+> **Chart versions are SemVer-formatted, but they do not follow SemVer compatibility guarantees; a minor version bump can contain breaking changes.**
 
-The chart `version` mirrors the `MAJOR.MINOR` of the upstream [Splunk OpenTelemetry
-Collector](https://github.com/signalfx/splunk-otel-collector) image (the chart's `appVersion`),
-with the trailing number reserved for chart-only changes. See [RELEASE.md](RELEASE.md#versioning)
-for details. Because of this, breaking changes to chart values, templates, and rendered manifests
+The chart `version` mirrors the bundled [Splunk OpenTelemetry
+Collector](https://github.com/signalfx/splunk-otel-collector) image's `appVersion`: a release starts
+at the same patch as the image, and the patch is then bumped for a chart change or to pick up an image
+patch update. Because of this, breaking changes to chart values, templates, and rendered manifests
 can ship in what looks like a minor bump (for example `0.149.0` → `0.150.0`).
 
 To upgrade safely:
@@ -119,6 +119,10 @@ To upgrade safely:
   [image release notes](https://github.com/signalfx/splunk-otel-collector/releases) for the
   `appVersion` you are moving to (each [CHANGELOG.md](CHANGELOG.md) entry links the image release it
   adopts).
+- **Check bundled dependencies.** The chart ships versioned subcharts and dependencies, such as
+  the OpenTelemetry Operator (and its CRDs). Their upgrades can change operator behavior or injected
+  auto-instrumentation even when your chart values are unchanged, so review their release notes
+  if those features are enabled.
 - **Test the upgrade in a non-production environment first**, and diff the rendered manifests
   (`helm template` / `helm diff upgrade`) to catch unexpected changes.
 
