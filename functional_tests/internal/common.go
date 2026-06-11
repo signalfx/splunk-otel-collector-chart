@@ -44,6 +44,11 @@ const (
 	TargetAllocatorContainerName = "targetallocator"
 	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
+
+	// winControlCExitCode is the decimal form of the Windows NTSTATUS
+	// 0xC000013A (STATUS_CONTROL_C_EXIT) that Windows containers may return when a
+	// console command's stdout pipe is closed.
+	winControlCExitCode = "3221225786"
 )
 
 func HostEndpoint(t *testing.T) string {
@@ -231,11 +236,12 @@ func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.C
 func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, podFilePath, localFilePath string,
 ) {
+	isWindows := !strings.HasPrefix(podFilePath, "/")
 	var command []string
-	if strings.HasPrefix(podFilePath, "/") {
-		command = []string{"cat", podFilePath}
-	} else {
+	if isWindows {
 		command = []string{"cmd.exe", "/c", "type", podFilePath}
+	} else {
+		command = []string{"cat", podFilePath}
 	}
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
@@ -263,6 +269,15 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 		Stderr: os.Stderr, // Direct stderr to local stderr for debugging
 		Tty:    false,
 	})
+
+	// Scope the STATUS_CONTROL_C_EXIT tolerance to the Windows
+	// path so we never mask a genuine failure on the Linux path.
+	if err != nil && isWindows && strings.Contains(err.Error(), winControlCExitCode) {
+		if info, statErr := localFile.Stat(); statErr == nil && info.Size() > 0 {
+			t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
+			err = nil
+		}
+	}
 	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
 }
 
