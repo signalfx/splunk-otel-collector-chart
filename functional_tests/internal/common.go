@@ -46,8 +46,8 @@ const (
 	waitTimeout                  = 3 * time.Minute
 
 	// winControlCExitCode is the decimal form of the Windows NTSTATUS
-	// 0xC000013A (STATUS_CONTROL_C_EXIT) that Windows containers return when a
-	// console command's stdout pipe is closed. See CopyFileFromPod.
+	// 0xC000013A (STATUS_CONTROL_C_EXIT) that Windows containers may return when a
+	// console command's stdout pipe is closed.
 	winControlCExitCode = "3221225786"
 )
 
@@ -236,11 +236,14 @@ func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.C
 func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, podFilePath, localFilePath string,
 ) {
+	// An absolute Unix-style path means a Linux container (use `cat`); otherwise
+	// assume a Windows container (use `cmd.exe /c type`).
+	isWindows := !strings.HasPrefix(podFilePath, "/")
 	var command []string
-	if strings.HasPrefix(podFilePath, "/") {
-		command = []string{"cat", podFilePath}
-	} else {
+	if isWindows {
 		command = []string{"cmd.exe", "/c", "type", podFilePath}
+	} else {
+		command = []string{"cat", podFilePath}
 	}
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
@@ -269,7 +272,9 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 		Tty:    false,
 	})
 
-	if err != nil && strings.Contains(err.Error(), winControlCExitCode) {
+	// Scope the STATUS_CONTROL_C_EXIT tolerance to the Windows
+	// path so we never mask a genuine failure on the Linux path.
+	if err != nil && isWindows && strings.Contains(err.Error(), winControlCExitCode) {
 		if info, statErr := localFile.Stat(); statErr == nil && info.Size() > 0 {
 			t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
 			return
