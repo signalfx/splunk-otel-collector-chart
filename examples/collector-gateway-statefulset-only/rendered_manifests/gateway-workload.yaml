@@ -17,17 +17,21 @@ metadata:
     release: default
     app.kubernetes.io/component: otel-collector
 spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
   podManagementPolicy: Parallel
-  serviceName: default-splunk-otel-collector
+  serviceName: default-splunk-otel-collector-headless
   volumeClaimTemplates:
   - metadata:
-      name: data
+      name: queue
     spec:
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 10Gi
+          storage: 1Gi
+      storageClassName: standard
   replicas: 1
   selector:
     matchLabels:
@@ -121,6 +125,8 @@ spec:
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap
+        - mountPath: /var/addon/splunk/exporter_queue/agent
+          name: queue
       terminationGracePeriodSeconds: 600
       volumes:
       - name: collector-configmap

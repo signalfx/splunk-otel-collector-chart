@@ -308,6 +308,31 @@ The name of the gateway service.
 {{- end -}}
 
 {{/*
+The name of the gateway headless service used for StatefulSet identity.
+*/}}
+{{- define "splunk-otel-collector.gatewayHeadlessServiceName" -}}
+{{ printf "%s-headless" (include "splunk-otel-collector.gatewayServiceName" .) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+Render gateway service ports using the same filtering rules for all gateway services.
+*/}}
+{{- define "splunk-otel-collector.gatewayServicePorts" -}}
+{{- range $key, $port := .Values.gateway.ports }}
+{{- $metricsEnabled := and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for) }}
+{{- $tracesEnabled := and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for) }}
+{{- $logsEnabled := and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for) }}
+{{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
+{{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
+- name: {{ $key }}
+  port: {{ $port.containerPort }}
+  targetPort: {{ $key }}
+  protocol: {{ $port.protocol }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 "clusterReceiverTruncatedName" for the eks/fargate cluster receiver statefulSet name accounting for 11 appended random chars
 */}}
 {{- define "splunk-otel-collector.clusterReceiverTruncatedName" -}}

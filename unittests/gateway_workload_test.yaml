@@ -67,6 +67,21 @@ tests:
           path: spec.serviceName
           value: test-release-splunk-otel-collector
 
+  - it: should use headless service name for statefulset identity when opted in
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+        headlessService:
+          enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: spec.serviceName
+          value: test-release-splunk-otel-collector-headless
+
   - it: should render statefulsetSpec when gateway mode is statefulset
     template: gateway-workload.yaml
     set:

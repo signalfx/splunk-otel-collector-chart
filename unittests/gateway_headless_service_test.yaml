@@ -1,0 +1,55 @@
+suite: splunk-otel-collector.gatewayHeadlessService
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - service-gateway-headless.yaml
+
+tests:
+  - it: should not render by default
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render when statefulset mode and headless service opt-in is enabled
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+        headlessService:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: test-release-splunk-otel-collector-headless
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - contains:
+          path: spec.ports
+          content:
+            name: otlp
+            port: 4317
+            targetPort: otlp
+            protocol: TCP
+
+  - it: should not render in deployment mode even when opt-in is enabled
+    set:
+      gateway:
+        enabled: true
+        mode: deployment
+        headlessService:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

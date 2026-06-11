@@ -955,6 +955,12 @@ gateway:
     # Service annotations
     annotations: {}
 
+  # Optional headless service used for StatefulSet pod identity DNS records.
+  # This only applies when gateway.mode=statefulset.
+  headlessService:
+    enabled: false
+    annotations: {}
+
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
