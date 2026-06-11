@@ -885,13 +885,6 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
-  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
-  resource/add_mode:
-    attributes:
-      - action: insert
-        value: "agent"
-        key: otelcol.service.mode
-
   {{- if .Values.isWindows }}
   metricstransform:
     transforms:
@@ -1059,6 +1052,35 @@ service:
       attributes:
         - name: service.name
           value: otel-agent
+        - name: otelcol.service.mode
+          value: agent
+        - name: k8s.pod.name
+          value: "${K8S_POD_NAME}"
+        - name: k8s.namespace.name
+          value: "${K8S_NAMESPACE}"
+        - name: k8s.pod.uid
+          value: "${K8S_POD_UID}"
+        - name: k8s.node.name
+          value: "${K8S_NODE_NAME}"
+        {{- if and .Values.clusterName .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+        - name: k8s.cluster.name
+          value: {{ .Values.clusterName }}
+        {{- end }}
+        {{- if and .Values.clusterName .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - name: cluster_name
+          value: {{ .Values.clusterName }}
+        {{- end }}
+        {{- range .Values.extraAttributes.custom }}
+        - name: "{{ .name }}"
+          value: "{{ .value }}"
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        {{- $splunkSourcetype := .Values.splunkPlatform.metricsSourcetype | default .Values.splunkPlatform.sourcetype }}
+        {{- if $splunkSourcetype }}
+        - name: com.splunk.sourcetype
+          value: {{ $splunkSourcetype | quote }}
+        {{- end }}
+        {{- end }}
     metrics:
       readers:
         - pull:
@@ -1298,15 +1320,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource/add_agent_k8s
         - resourcedetection
-        - resource
-        - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
-        {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
-        - resource/metrics
-        {{- end }}
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}

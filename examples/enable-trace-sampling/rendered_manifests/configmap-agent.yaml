@@ -140,11 +140,6 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
-      resource/add_mode:
-        attributes:
-        - action: insert
-          key: otelcol.service.mode
-          value: agent
       resource/logs:
         attributes:
         - action: upsert
@@ -222,10 +217,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource/add_agent_k8s
           - resourcedetection
-          - resource
-          - resource/add_mode
           receivers:
           - prometheus/agent
         traces:
@@ -257,3 +249,15 @@ data:
           attributes:
           - name: service.name
             value: otel-agent
+          - name: otelcol.service.mode
+            value: agent
+          - name: k8s.pod.name
+            value: ${K8S_POD_NAME}
+          - name: k8s.namespace.name
+            value: ${K8S_NAMESPACE}
+          - name: k8s.pod.uid
+            value: ${K8S_POD_UID}
+          - name: k8s.node.name
+            value: ${K8S_NODE_NAME}
+          - name: k8s.cluster.name
+            value: CHANGEME
