@@ -44,6 +44,11 @@ const (
 	TargetAllocatorContainerName = "targetallocator"
 	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
+
+	// winControlCExitCode is the decimal form of the Windows NTSTATUS
+	// 0xC000013A (STATUS_CONTROL_C_EXIT) that Windows containers return when a
+	// console command's stdout pipe is closed. See CopyFileFromPod.
+	winControlCExitCode = "3221225786"
 )
 
 func HostEndpoint(t *testing.T) string {
@@ -263,6 +268,13 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 		Stderr: os.Stderr, // Direct stderr to local stderr for debugging
 		Tty:    false,
 	})
+
+	if err != nil && strings.Contains(err.Error(), winControlCExitCode) {
+		if info, statErr := localFile.Stat(); statErr == nil && info.Size() > 0 {
+			t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
+			return
+		}
+	}
 	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
 }
 
