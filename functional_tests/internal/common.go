@@ -236,8 +236,6 @@ func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.C
 func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, podFilePath, localFilePath string,
 ) {
-	// An absolute Unix-style path means a Linux container (use `cat`); otherwise
-	// assume a Windows container (use `cmd.exe /c type`).
 	isWindows := !strings.HasPrefix(podFilePath, "/")
 	var command []string
 	if isWindows {
@@ -277,7 +275,7 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 	if err != nil && isWindows && strings.Contains(err.Error(), winControlCExitCode) {
 		if info, statErr := localFile.Stat(); statErr == nil && info.Size() > 0 {
 			t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
-			return
+			err = nil
 		}
 	}
 	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
