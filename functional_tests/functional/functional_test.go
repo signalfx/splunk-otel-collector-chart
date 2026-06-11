@@ -553,6 +553,7 @@ func testLocalClusterComponentHealth(t *testing.T) {
 func runLocalClusterTests(t *testing.T) {
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
+	t.Run("secureapp java traces captured", testSecureAppJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
 	t.Run("Python traces captured", testPythonTraces)
 	t.Run("java metrics captured", testJavaMetrics)

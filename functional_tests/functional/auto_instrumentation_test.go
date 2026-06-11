@@ -407,3 +407,80 @@ func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, pr
 	}
 	return false
 }
+
+func testSecureAppJavaTraces(t *testing.T) {
+	tracesConsumer := globalSinks.tracesConsumer
+
+	expectedTracesFile := filepath.Join(testDir, expectedValuesDir, "expected_secureapp_java_traces.yaml")
+	expectedTraces, err := golden.ReadTraces(expectedTracesFile)
+	require.NoError(t, err)
+	internal.ClearTraceSchemaURLs(expectedTraces)
+
+	internal.WaitForTraces(t, 10, tracesConsumer)
+
+	var selectedTrace *ptrace.Traces
+
+	require.Eventually(t, func() bool {
+		for i := len(tracesConsumer.AllTraces()) - 1; i >= 0; i-- {
+			trace := tracesConsumer.AllTraces()[i]
+			rs := trace.ResourceSpans()
+			if rs.Len() == 0 {
+				continue
+			}
+			attrs := rs.At(0).Resource().Attributes()
+			lang, hasLang := attrs.Get("telemetry.sdk.language")
+			if !hasLang || !strings.Contains(lang.Str(), "java") {
+				continue
+			}
+			// SecureApp Java traces are produced by the CSA agent;
+			// splunk.zc.method contains "csa" to identify them.
+			zcMethod, hasZC := attrs.Get("splunk.zc.method")
+			if !hasZC || !strings.Contains(zcMethod.Str(), "csa") {
+				continue
+			}
+			if expectedTraces.SpanCount() == trace.SpanCount() && expectedTraces.ResourceSpans().Len() == trace.ResourceSpans().Len() {
+				selectedTrace = &trace
+				break
+			}
+		}
+		return selectedTrace != nil
+	}, 3*time.Minute, 5*time.Second)
+	require.NotNil(t, selectedTrace)
+
+	maskScopeVersion(*selectedTrace)
+	maskScopeVersion(expectedTraces)
+	internal.ClearTraceSchemaURLs(*selectedTrace)
+
+	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
+	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceAttributeValue("container.id"),
+		ptracetest.IgnoreResourceAttributeValue("host.arch"),
+		ptracetest.IgnoreResourceAttributeValue("host.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		ptracetest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		ptracetest.IgnoreResourceAttributeValue("os.description"),
+		ptracetest.IgnoreResourceAttributeValue("os.version"),
+		ptracetest.IgnoreResourceAttributeValue("process.pid"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		ptracetest.IgnoreResourceAttributeValue("service.instance.id"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.auto.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.distro.version"),
+		ptracetest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		ptracetest.IgnoreSpanAttributeValue("net.sock.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("network.peer.port"),
+		ptracetest.IgnoreSpanAttributeValue("thread.id"),
+		ptracetest.IgnoreTraceID(),
+		ptracetest.IgnoreSpanID(),
+		ptracetest.IgnoreStartTimestamp(),
+		ptracetest.IgnoreEndTimestamp(),
+		ptracetest.IgnoreResourceSpansOrder(),
+		ptracetest.IgnoreScopeSpansOrder(),
+		ptracetest.IgnoreScopeSpanInstrumentationScopeVersion(),
+	)
+	require.NoError(t, err)
+}
