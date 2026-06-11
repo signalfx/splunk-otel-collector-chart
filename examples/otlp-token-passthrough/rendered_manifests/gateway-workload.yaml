@@ -1,5 +1,5 @@
 ---
-# Source: splunk-otel-collector/templates/deployment-gateway.yaml
+# Source: splunk-otel-collector/templates/gateway-workload.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +17,7 @@ metadata:
     release: default
     app.kubernetes.io/component: otel-collector
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: splunk-otel-collector
@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 98415873b2b52ad4ee0e188aa9237c2c6471d7467edc0254754d37afb6b7603a
+        checksum/config: 9ae4c7fdaa6fe50108966db9d68a2df5eece51e2646d7af4b114c0d5aacd61da
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -105,8 +105,8 @@ spec:
             port: 13133
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 2
+            memory: 4Gi
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap
