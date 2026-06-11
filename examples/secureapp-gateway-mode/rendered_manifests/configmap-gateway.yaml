@@ -137,25 +137,6 @@ data:
         - action: upsert
           key: k8s.cluster.name
           value: CHANGEME
-      resource/add_collector_k8s:
-        attributes:
-        - action: insert
-          key: k8s.node.name
-          value: ${K8S_NODE_NAME}
-        - action: insert
-          key: k8s.pod.name
-          value: ${K8S_POD_NAME}
-        - action: insert
-          key: k8s.pod.uid
-          value: ${K8S_POD_UID}
-        - action: insert
-          key: k8s.namespace.name
-          value: ${K8S_NAMESPACE}
-      resource/add_mode:
-        attributes:
-        - action: insert
-          key: otelcol.service.mode
-          value: gateway
       resource/logs:
         attributes:
         - action: upsert
@@ -264,10 +245,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource/add_collector_k8s
           - resourcedetection
-          - resource/add_mode
-          - resource/add_cluster_name
           receivers:
           - prometheus/collector
         traces:
@@ -297,3 +275,15 @@ data:
           attributes:
           - name: service.name
             value: otel-collector
+          - name: otelcol.service.mode
+            value: gateway
+          - name: k8s.node.name
+            value: ${K8S_NODE_NAME}
+          - name: k8s.pod.name
+            value: ${K8S_POD_NAME}
+          - name: k8s.pod.uid
+            value: ${K8S_POD_UID}
+          - name: k8s.namespace.name
+            value: ${K8S_NAMESPACE}
+          - name: k8s.cluster.name
+            value: CHANGEME

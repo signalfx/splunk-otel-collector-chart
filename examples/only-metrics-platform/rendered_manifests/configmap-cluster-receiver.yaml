@@ -100,25 +100,6 @@ data:
         - action: insert
           key: host.name
           value: ${K8S_NODE_NAME}
-      resource/add_collector_k8s:
-        attributes:
-        - action: insert
-          key: k8s.node.name
-          value: ${K8S_NODE_NAME}
-        - action: insert
-          key: k8s.pod.name
-          value: ${K8S_POD_NAME}
-        - action: insert
-          key: k8s.pod.uid
-          value: ${K8S_POD_UID}
-        - action: insert
-          key: k8s.namespace.name
-          value: ${K8S_NAMESPACE}
-      resource/add_mode:
-        attributes:
-        - action: insert
-          key: otelcol.service.mode
-          value: clusterReceiver
       resource/k8s_cluster:
         attributes:
         - action: insert
@@ -187,10 +168,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource/add_collector_k8s
           - resourcedetection
-          - resource
-          - resource/add_mode
           - k8s_attributes/metrics
           receivers:
           - prometheus/k8s_cluster_receiver
@@ -209,3 +187,17 @@ data:
           attributes:
           - name: service.name
             value: otel-k8s-cluster-receiver
+          - name: otelcol.service.mode
+            value: clusterReceiver
+          - name: k8s.node.name
+            value: ${K8S_NODE_NAME}
+          - name: k8s.pod.name
+            value: ${K8S_POD_NAME}
+          - name: k8s.pod.uid
+            value: ${K8S_POD_UID}
+          - name: k8s.namespace.name
+            value: ${K8S_NAMESPACE}
+          - name: metric_source
+            value: kubernetes
+          - name: k8s.cluster.name
+            value: CHANGEME
