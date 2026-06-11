@@ -68,3 +68,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.agent.config "source" "agent.config") }}
 {{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.gateway.config "source" "gateway.config") }}
 {{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.clusterReceiver.config "source" "clusterReceiver.config") }}
+
+{{- if not (eq (toString .Values.targetAllocator) "<nil>") }}
+{{- fail (printf "ERROR: `targetAllocator` functionality has been migrated to use the upstream Target Allocator. Please migrate to `targetallocator`. See https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01531-to-01540 for details." ) }}
+{{- end }}
