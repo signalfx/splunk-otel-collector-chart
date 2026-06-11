@@ -1,5 +1,76 @@
 # Upgrade guidelines
 
+## 0.153.1 to 0.154.0
+
+### Target allocator functionality now uses upstream chart as subchart
+
+Instead of relying on local versioning and implementation of target allocator functionality, the
+chart has moved to using the
+[upstream Target Allocator helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator)
+directly as a subchart. This will help keep up to date with upstream features and functionality.
+
+This resulted in breaking changes to the helm chart's configuration for the target allocator, as outlined below.
+
+| Old option                       | New option                                                                                                  |
+|----------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `targetAllocator`                | `targetallocator`                                                                                           |
+| `image.imagePullSecrets`         | `targetallocator.targetAllocator.imagePullSecrets`                                           |
+| `targetAllocator.image`          | `targetallocator.targetAllocator.image.repository` + `targetallocator.targetAllocator.image.tag`           |
+| `targetAllocator.resources`      | `targetallocator.targetAllocator.resources`                                                                 |
+| `targetAllocator.serviceAccount` | `targetallocator.targetAllocator.serviceAccount`                                                            |
+| `targetAllocator.config`         | `targetallocator.targetAllocator.config`                                                                    |
+
+> [!NOTE]
+> The `image.imagePullSecrets` option is still valid for non-target allocator service accounts, but the
+> new option must ALSO be configured to attach secrets to the target allocator's service account.
+
+Example old config:
+```
+image:
+  imagePullSecrets:
+    - my-registry-secret
+
+targetAllocator:
+  enabled: true
+  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
+  config:
+    allocation_strategy: per-node
+    prometheus_cr:
+      enabled: true
+    filter_strategy: relabel-config
+```
+
+New config equivalent:
+```
+image:
+  imagePullSecrets:
+    - my-registry-secret
+
+targetallocator:
+  enabled: true
+  targetAllocator:
+    imagePullSecrets:
+      - my-registry-secret
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
+      tag: v0.132.0
+    config:
+      allocation_strategy: per-node
+      prometheus_cr:
+        enabled: true
+      filter_strategy: relabel-config
+```
+
+Changed target allocator defaults (when enabled):
+
+| Old option default                                       | New option default                                                                     | Notes                                                                                                                                                                        |
+|----------------------------------------------------------|----------------------------------------------------------------------------------------| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N/A                                                      | `targetallocator.targetAllocator.livenessProbe`                                        | [Reference](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/c738eda8d0bfa36513acdc9601165a308d9f506b/charts/opentelemetry-target-allocator/values.yaml#L77) |
+| N/A                                                      | `targetallocator.targetAllocator.readinessProbe`                                       | [Reference](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/c738eda8d0bfa36513acdc9601165a308d9f506b/charts/opentelemetry-target-allocator/values.yaml#L86) |
+
+Refer to the upstream target allocator helm chart's [values.yaml](https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-target-allocator/values.yaml)
+for the full list of valid configuration options.
+
 ## 0.151.0 to 0.152.0
 
 ### Container log parsing now uses the `container` operator

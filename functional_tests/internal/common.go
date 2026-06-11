@@ -42,7 +42,7 @@ const (
 	CollectorContainerName       = "otel-collector"
 	maxHistogramBucketCount      = 32
 	TargetAllocatorContainerName = "targetallocator"
-	TargetAllocatorLabelSelector = "app=targetAllocator"
+	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
 )
 

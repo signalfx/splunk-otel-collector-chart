@@ -138,6 +138,22 @@ jobs:
           suite: ${{ matrix.test-job }}
           update-expected-results: ${{ env.UPDATE_EXPECTED_RESULTS }}
 
+  kubernetes-upgrade-test:
+    name: Test helm upgrade in kind
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: ./.github/actions/functional-test
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          k8s-version: v1.35.1
+          mode: upgrade
+          suite: functional
+          update-expected-results: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
+          upgrade-from-values: kind_upgrade_from_previous_release_values.yaml
+
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: collector-image-config
