@@ -1328,6 +1328,18 @@
             }
           }
         },
+        "headlessService": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          }
+        },
         "nodeSelector": {
           "type": "object"
         },
