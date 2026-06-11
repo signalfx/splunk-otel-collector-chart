@@ -415,7 +415,12 @@ func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, pr
 // OTLP logs with instrumentation_scope.name == "secureapp"; the routing/logs
 // connector in the OTel agent directs those to the logs/secureapp pipeline which
 // exports to otlp_http/secureapp (logs_endpoint: .../v3/event).
+//
+// Requires a kind cluster deployed with secureAppEnabled=true and a Java test app
+// annotated with inject-java under the SecureApp Instrumentation CR.
+// Run with UPDATE_EXPECTED_RESULTS=true on first execution to populate the golden file.
 func testSecureAppJavaEvents(t *testing.T) {
+	t.Skip("requires a SecureApp-enabled cluster deployment — see PR description for wiring plan")
 	lc := globalSinks.secureAppLogsConsumer
 
 	expectedLogsFile := filepath.Join(testDir, expectedValuesDir, "expected_secureapp_java_events.yaml")
