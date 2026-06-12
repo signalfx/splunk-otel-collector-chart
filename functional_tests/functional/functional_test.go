@@ -98,6 +98,7 @@ type sinks struct {
 	agentMetricsConsumer              *consumertest.MetricsSink
 	k8sclusterReceiverMetricsConsumer *consumertest.MetricsSink
 	tracesConsumer                    *consumertest.TracesSink
+	secureAppLogsConsumer             *consumertest.LogsSink
 }
 
 func setupSinks(t *testing.T) {
@@ -110,7 +111,8 @@ func setupSinks(t *testing.T) {
 		agentMetricsConsumer: internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort),
 		k8sclusterReceiverMetricsConsumer: internal.SetupSignalfxReceiver(t,
 			signalFxReceiverK8sClusterReceiverPort),
-		tracesConsumer: internal.SetupOTLPTracesSink(t),
+		tracesConsumer:        internal.SetupOTLPTracesSink(t),
+		secureAppLogsConsumer: internal.SetupOTLPLogsSinkOnPort(t, internal.SecureAppLogsReceiverPort, "/v3/event"),
 	}
 }
 
@@ -553,6 +555,7 @@ func testLocalClusterComponentHealth(t *testing.T) {
 func runLocalClusterTests(t *testing.T) {
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
+	t.Run("secureapp java events captured", testSecureAppJavaEvents)
 	t.Run(".NET traces captured", testDotNetTraces)
 	t.Run("Python traces captured", testPythonTraces)
 	t.Run("java metrics captured", testJavaMetrics)

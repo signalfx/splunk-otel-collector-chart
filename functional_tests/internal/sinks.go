@@ -26,12 +26,13 @@ import (
 )
 
 const (
-	HECLogsReceiverPort    = 8090
-	HECMetricsReceiverPort = 8091
-	HECObjectsReceiverPort = 8092
-	OTLPGRPCReceiverPort   = 4317
-	OTLPHTTPReceiverPort   = 4318
-	SignalFxReceiverPort   = 9943
+	HECLogsReceiverPort        = 8090
+	HECMetricsReceiverPort     = 8091
+	HECObjectsReceiverPort     = 8092
+	OTLPGRPCReceiverPort       = 4317
+	OTLPHTTPReceiverPort       = 4318
+	SignalFxReceiverPort       = 9943
+	SecureAppLogsReceiverPort  = 4320
 )
 
 func SetupHECLogsSink(t *testing.T) *consumertest.LogsSink {

@@ -10,10 +10,12 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
@@ -406,4 +408,72 @@ func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, pr
 		}
 	}
 	return false
+}
+
+// testSecureAppJavaEvents verifies that SecureApp security events emitted by the
+// Java CSA agent arrive on the dedicated /v3/event endpoint. The CSA agent sends
+// OTLP logs with instrumentation_scope.name == "secureapp"; the routing/logs
+// connector in the OTel agent directs those to the logs/secureapp pipeline which
+// exports to otlp_http/secureapp (logs_endpoint: .../v3/event).
+//
+// Requires a kind cluster deployed with secureAppEnabled=true and a Java test app
+// annotated with inject-java under the SecureApp Instrumentation CR.
+// Run with UPDATE_EXPECTED_RESULTS=true on first execution to populate the golden file.
+func testSecureAppJavaEvents(t *testing.T) {
+	t.Skip("requires a SecureApp-enabled cluster deployment — see PR description for wiring plan")
+	lc := globalSinks.secureAppLogsConsumer
+
+	expectedLogsFile := filepath.Join(testDir, expectedValuesDir, "expected_secureapp_java_events.yaml")
+	expectedLogs, err := golden.ReadLogs(expectedLogsFile)
+	require.NoError(t, err)
+
+	internal.WaitForLogs(t, 1, lc)
+
+	var selectedLogs *plog.Logs
+
+	require.Eventually(t, func() bool {
+		for i := len(lc.AllLogs()) - 1; i >= 0; i-- {
+			logs := lc.AllLogs()[i]
+			rl := logs.ResourceLogs()
+			for j := 0; j < rl.Len(); j++ {
+				sl := rl.At(j).ScopeLogs()
+				for k := 0; k < sl.Len(); k++ {
+					// SecureApp events arrive with instrumentation_scope.name == "secureapp"
+					if sl.At(k).Scope().Name() == "secureapp" && sl.At(k).LogRecords().Len() > 0 {
+						selectedLogs = &logs
+						return true
+					}
+				}
+			}
+		}
+		return false
+	}, 3*time.Minute, 5*time.Second)
+	require.NotNil(t, selectedLogs, "no SecureApp log records with instrumentation_scope.name=secureapp received")
+
+	internal.MaybeUpdateExpectedLogsResults(t, expectedLogsFile, selectedLogs)
+	err = plogtest.CompareLogs(expectedLogs, *selectedLogs,
+		plogtest.IgnoreTimestamp(),
+		plogtest.IgnoreObservedTimestamp(),
+		plogtest.IgnoreResourceAttributeValue("container.id"),
+		plogtest.IgnoreResourceAttributeValue("host.arch"),
+		plogtest.IgnoreResourceAttributeValue("host.name"),
+		plogtest.IgnoreResourceAttributeValue("k8s.deployment.name"),
+		plogtest.IgnoreResourceAttributeValue("k8s.node.name"),
+		plogtest.IgnoreResourceAttributeValue("k8s.pod.ip"),
+		plogtest.IgnoreResourceAttributeValue("k8s.pod.name"),
+		plogtest.IgnoreResourceAttributeValue("k8s.pod.uid"),
+		plogtest.IgnoreResourceAttributeValue("k8s.replicaset.name"),
+		plogtest.IgnoreResourceAttributeValue("os.description"),
+		plogtest.IgnoreResourceAttributeValue("os.version"),
+		plogtest.IgnoreResourceAttributeValue("process.pid"),
+		plogtest.IgnoreResourceAttributeValue("splunk.distro.version"),
+		plogtest.IgnoreResourceAttributeValue("splunk.zc.method"),
+		plogtest.IgnoreResourceAttributeValue("service.instance.id"),
+		plogtest.IgnoreResourceAttributeValue("telemetry.distro.version"),
+		plogtest.IgnoreResourceAttributeValue("telemetry.sdk.version"),
+		plogtest.IgnoreResourceLogsOrder(),
+		plogtest.IgnoreScopeLogsOrder(),
+		plogtest.IgnoreLogRecordsOrder(),
+	)
+	require.NoError(t, err)
 }
