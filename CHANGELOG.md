@@ -4,6 +4,29 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.154.0] - 2026-06-13
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.154.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.154.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver, gateway`: Moved internal metrics resource attributes from `resource` processors to telemetry configuration. ([#2456](https://github.com/signalfx/splunk-otel-collector-chart/pull/2456))
+  As part of this change, we removed the following processors as they were only used to set resource attributes on internal metrics:
+  - `resource/add_mode` from the agent, clusterReceiver and gateway configurations
+  - `resource/add_collector_k8s` from the clusterReceiver and gateway configuration
+  
+- `chart`: Use upstream [target allocator helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator) as subchart instead of local custom configuration ([#2381](https://github.com/signalfx/splunk-otel-collector-chart/pull/2381))
+  Please refer to the [upgrade guidelines from 0.153.1 to 0.154.0](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01531-to-01540)
+  for more information. This change is only relevant when the
+  target allocator is enabled.
+  
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add `featureGates.useEntityEventsForK8sProperties` to send Kubernetes entity updates through the signalfx entity events path. ([#2429](https://github.com/signalfx/splunk-otel-collector-chart/pull/2429))
+- `operator`: When secureAppEnabled is set to true, the Instrumentation CR now activates SecureApp for Java (CSA image swap), Node.js (environment variable injection), and Python (secureapp variant image swap).
+ ([#2455](https://github.com/signalfx/splunk-otel-collector-chart/pull/2455))
+
 ## [0.153.1] - 2026-06-01
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).
