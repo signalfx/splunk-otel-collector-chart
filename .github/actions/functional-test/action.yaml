@@ -101,7 +101,7 @@ runs:
           OTELCOL_IMAGE="quay.io/signalfx/splunk-otel-collector:${APP_VERSION}"
         fi
         docker pull "$OTELCOL_IMAGE"
-        printf 'FROM busybox:musl AS busybox\nFROM %s\nCOPY --from=busybox /bin/sh /bin/sh\nCOPY --from=busybox /bin/echo /bin/echo\n' "$OTELCOL_IMAGE" | \
+        printf 'FROM busybox:musl AS busybox\nFROM %s\nCOPY --from=busybox /bin/sh /bin/sh\nCOPY --from=busybox /bin/echo /bin/echo\nCOPY --from=busybox /bin/cat /bin/cat\n' "$OTELCOL_IMAGE" | \
           docker buildx build --load -t "$OTELCOL_IMAGE" -
         kind load docker-image "$OTELCOL_IMAGE" --name=kind
 
