@@ -91,8 +91,8 @@ runs:
       shell: bash
       run: make kind-build-test-images
 
-    - name: Add shell utilities to otelcol image for logs tests
-      if: inputs.suite == 'logs'
+    - name: Add shell utilities to otelcol image for integration tests
+      if: inputs.suite == 'logs' || inputs.suite == 'functional'
       shell: bash
       run: |
         OTELCOL_IMAGE="${{ inputs.otelcol-image }}"
