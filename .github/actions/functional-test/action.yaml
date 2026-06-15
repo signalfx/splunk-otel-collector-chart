@@ -91,6 +91,20 @@ runs:
       shell: bash
       run: make kind-build-test-images
 
+    - name: Add shell utilities to otelcol image for logs tests
+      if: inputs.suite == 'logs'
+      shell: bash
+      run: |
+        OTELCOL_IMAGE="${{ inputs.otelcol-image }}"
+        if [[ -z "$OTELCOL_IMAGE" ]]; then
+          APP_VERSION=$(helm show chart ./helm-charts/splunk-otel-collector | grep '^appVersion:' | awk '{print $2}')
+          OTELCOL_IMAGE="quay.io/signalfx/splunk-otel-collector:${APP_VERSION}"
+        fi
+        docker pull "$OTELCOL_IMAGE"
+        printf 'FROM busybox:musl AS busybox\nFROM %s\nCOPY --from=busybox /bin/sh /bin/sh\nCOPY --from=busybox /bin/echo /bin/echo\n' "$OTELCOL_IMAGE" | \
+          docker buildx build --load -t "$OTELCOL_IMAGE" -
+        kind load docker-image "$OTELCOL_IMAGE" --name=kind
+
     - name: Run functional tests
       id: run-functional-tests
       shell: bash
