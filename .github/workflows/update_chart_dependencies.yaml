@@ -40,7 +40,7 @@ jobs:
           component: 'operator'
           yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
           dependency_name: 'opentelemetry-operator'
-        - name: 'target allocator'
+        - name: 'TargetAllocator'
           component: 'chart'
           yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
           dependency_name: 'opentelemetry-target-allocator'
