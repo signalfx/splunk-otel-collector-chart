@@ -18,7 +18,7 @@ templates:
 #   - default_pipelines: [] when S=1,L=0,P=0
 #   - default_pipelines: [logs] when S=1 and (L=1 OR P=1)
 #   - logs/secureapp receivers always [routing/logs], never [otlp]
-#   - logs/split processors: [memory_limiter, batch]
+#   - logs/split has no processors (batch breaks routing connector)
 # ============================================================================
 
 tests:
@@ -119,10 +119,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/split:\\n\\s+exporters:\\n\\s+- routing/logs\\n"
-      - matchRegex:
-          path: data["relay"]
-          pattern: "logs/split:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)+\\s+receivers:\\n\\s+- otlp"
+          pattern: "logs/split:\\n\\s+exporters:\\n\\s+- routing/logs\\n\\s+receivers:\\n\\s+- otlp"
 
   - it: "S=1,L=0,P=0 — otlp_http/secureapp exporter uses realm-aware logs_endpoint"
     set:

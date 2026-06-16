@@ -1127,7 +1127,6 @@ service:
     # receives all OTLP logs; routes secureapp scope to logs/secureapp, rest to default_pipelines
     logs/split:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
       exporters: [routing/logs]
     {{- end }}
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
