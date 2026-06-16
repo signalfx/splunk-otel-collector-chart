@@ -32,18 +32,18 @@ jobs:
       matrix:
         # Chart dependencies to check for version updates
         include:
-        - name: 'obi'
-          component: 'chart'
-          yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
-          dependency_name: 'opentelemetry-ebpf-instrumentation'
-        - name: 'operator'
-          component: 'operator'
-          yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
-          dependency_name: 'opentelemetry-operator'
-        - name: 'TargetAllocator'
-          component: 'chart'
-          yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
-          dependency_name: 'opentelemetry-target-allocator'
+          - name: 'obi'
+            component: 'chart'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'opentelemetry-ebpf-instrumentation'
+          - name: 'operator'
+            component: 'operator'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'opentelemetry-operator'
+          - name: 'TargetAllocator'
+            component: 'chart'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'opentelemetry-target-allocator'
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:
