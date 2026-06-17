@@ -309,9 +309,12 @@ The name of the gateway service.
 
 {{/*
 The name of the gateway headless service used for StatefulSet identity.
+Truncating the base name to 54 characters to allow for the "-headless" suffix, which is 9 characters long, resulting in a total of 63 characters.
+This guarantees that `-headless` is part of the name and not truncated, which is important for StatefulSet identity.
 */}}
 {{- define "splunk-otel-collector.gatewayHeadlessServiceName" -}}
-{{ printf "%s-headless" (include "splunk-otel-collector.gatewayServiceName" .) | trunc 63 | trimSuffix "-" }}
+{{- $base := (include "splunk-otel-collector.gatewayServiceName" .) | trunc 54 | trimSuffix "-" -}}
+{{ printf "%s-headless" $base | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{/*
