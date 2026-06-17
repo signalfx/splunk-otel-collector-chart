@@ -85,55 +85,37 @@ This affects deployments that use all of these settings:
 - `operator.admissionWebhooks.certManager.enabled=true`
 - `certmanager.enabled=true`
 
-For new installs that use cert-manager for the operator webhook certificate,
-install cert-manager before installing this chart and leave
-`certmanager.enabled=false`. If you use the default Helm-generated webhook
-certificate, no cert-manager installation is required.
-
-```yaml
-operator:
-  enabled: true
-  admissionWebhooks:
-    autoGenerateCert:
-      enabled: false
-    certManager:
-      enabled: true
-certmanager:
-  enabled: false
-```
+For new installs, follow the operator webhook certificate guidance in the
+[auto-instrumentation install guide](docs/auto-instrumentation-install.md#2-using-a-cert-manager-certificate).
+Do not enable the deprecated cert-manager subchart.
 
 The examples in this section show only the values related to cert-manager and the
 operator webhook certificate. Keep your existing required chart values, such as
 `clusterName` and your Splunk destination configuration, when running these
 commands.
 
-#### Why the migration uses a maintenance window
+#### Before you migrate
 
-It might seem possible to avoid downtime by first installing a standalone
-cert-manager release, adopting the existing subchart-managed cert-manager
-resources, and then disabling `certmanager.enabled` in the Splunk chart. That
-in-place handoff is not supported with normal Helm commands.
+The operator webhook keeps serving with its current certificate throughout the
+migration. cert-manager cannot issue or renew certificates in the short gap
+between disabling the subchart and installing standalone cert-manager, so only
+proceed if the webhook certificate is not close to expiry:
 
-Helm decides which resources to delete during an upgrade by comparing the new
-rendered manifest with the previous manifest stored for the same release. If the
-cert-manager subchart is disabled with `certmanager.enabled=false`, the
-cert-manager controller, cainjector, and webhook resources are removed from the
-Splunk chart's rendered manifest. Helm then prunes those resources from the old
-release, even if their live ownership annotations were changed beforehand.
+```bash
+kubectl get certificate -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component=webhook" \
+  -o jsonpath='{.items[0].status.notAfter}'
+```
 
-For that reason, `helm upgrade --install --take-ownership` does not provide a
-zero-downtime migration path for the cert-manager Deployments. `--take-ownership`
-is still useful later in the migration to let the standalone cert-manager release
-adopt retained CRDs, but it does not prevent Helm from deleting resources that
-were removed from the Splunk chart release.
+An in-place handoff of the cert-manager Deployments is not supported with normal
+Helm commands. `--take-ownership` is still useful later in the migration to let
+the standalone cert-manager release adopt retained CRDs.
 
 #### Migration steps
 
-Plan a maintenance window. The operator webhook Secret can keep the operator
-running for a short period, but cert-manager will not renew or issue certificates
-while the cert-manager controllers are absent. During this migration, disabling
-the subchart removes the old cert-manager controller, cainjector, and webhook
-Deployments before the standalone cert-manager release is installed.
+During this migration, disabling the subchart removes the old cert-manager
+controller, cainjector, and webhook Deployments before the standalone
+cert-manager release is installed.
 
 The examples below use `cert-manager` as the standalone cert-manager release name
 and namespace, which is the common namespace for a cluster-wide cert-manager
@@ -197,10 +179,26 @@ are managed separately in your cluster, do not adopt them into this standalone
 release. Install cert-manager with `crds.enabled=false` and follow your existing
 CRD management process instead.
 
-If your existing values use `certificateAnnotations` or `issuerAnnotations` with
-Helm hook annotations for the operator webhook certificate resources, keep those
-values during the migration. Remove them later only after testing a separate
-upgrade without the subchart.
+This migration relies on the cert-manager CRDs being retained. Do not change
+`crds.keep=true` to `crds.keep=false` when installing the standalone
+cert-manager release. Deleting cert-manager CRDs also deletes cert-manager
+custom resources, including the operator webhook `Issuer` and `Certificate`.
+
+If your existing values use the deprecated
+[hook workaround](docs/auto-instrumentation-install.md#option-2-deploy-cert-manager-and-the-operator-together-deprecated)
+with `certificateAnnotations` or `issuerAnnotations`, the `--reuse-values`
+upgrade keeps those annotations during the migration. Helm may delete and
+recreate the operator webhook `Certificate` and `Issuer` during that upgrade.
+This is expected. The webhook serving Secret normally remains in place, and the
+delete does not normally wait for the cert-manager controller. The webhook keeps
+serving with the existing Secret and injected CA bundle until the recreated
+resources are reconciled by the standalone cert-manager release.
+
+If cert-manager was installed with `enableCertificateOwnerRef=true`, deleting
+the `Certificate` may also delete the serving Secret. The operator should
+continue serving the certificate it already loaded, but do not restart the
+operator pod until standalone cert-manager is running and has reissued the
+Secret.
 
 #### Validation
 
@@ -238,6 +236,37 @@ The command should return no resources. The Splunk chart can still include
 cert-manager API resources such as `Certificate` and `Issuer` for the operator
 webhook certificate; the controller, cainjector, and webhook Deployments should
 come from the standalone cert-manager release.
+
+#### Optional: remove the hook workaround
+
+After cert-manager is healthy, you can remove the deprecated Helm hook
+annotations from the operator webhook `Certificate` and `Issuer`. Hook-created
+resources do not have Helm's normal ownership annotations, so add those
+annotations before upgrading without the hook values:
+
+```bash
+kubectl annotate certificate,issuer -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component=webhook" \
+  meta.helm.sh/release-name=<release> \
+  meta.helm.sh/release-namespace=<namespace> \
+  --overwrite
+
+kubectl label certificate,issuer -n <namespace> \
+  -l "app.kubernetes.io/instance=<release>,app.kubernetes.io/component=webhook" \
+  app.kubernetes.io/managed-by=Helm \
+  --overwrite
+```
+
+Then remove `certificateAnnotations` and `issuerAnnotations` from your values
+file, or override them with empty maps:
+
+```bash
+helm upgrade <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --namespace <namespace> \
+  --reuse-values \
+  --set-json 'operator.admissionWebhooks.certManager.certificateAnnotations={}' \
+  --set-json 'operator.admissionWebhooks.certManager.issuerAnnotations={}'
+```
 
 #### Rollback
 
