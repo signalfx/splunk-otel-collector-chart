@@ -10,6 +10,12 @@ splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}
 
 agent:
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   config:
     exporters:
       otlp_grpc:
@@ -17,7 +23,7 @@ agent:
         tls:
           insecure: true
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
     service:
       pipelines:
         traces:
@@ -28,6 +34,12 @@ agent:
             - file
 clusterReceiver:
   eventsEnabled: true
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   config:
     exporters:
       signalfx:
@@ -35,9 +47,9 @@ clusterReceiver:
         tls:
           insecure: true
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       file/k8s_cluster:
-        path: /tmp/k8s_cluster_metrics.json
+        path: /splunk-metrics/k8s_cluster_metrics.json
     service:
       pipelines:
         metrics/collector:

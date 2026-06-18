@@ -64,9 +64,9 @@ const (
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
 	taResourceName                         = "targetallocator-ta"
-	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	linuxPodMetricsPath                    = "/splunk-metrics/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
-	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
 	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
 )
 
