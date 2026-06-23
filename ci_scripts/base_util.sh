@@ -300,7 +300,8 @@ get_latest_tag() {
         local repo_name="${BASH_REMATCH[2]}"
         local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=1&onlyActiveTags=true"
         if [ -n "$filter" ]; then
-            latest_api+="&filter_tag_name=$filter"
+            # quay.io requires filter_tag_name in "<op>:<value>" form; a bare value is rejected.
+            latest_api+="&filter_tag_name=like:$filter"
         fi
         local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name')
         if [ -z "$tag_name" ]; then
@@ -387,8 +388,9 @@ update_version() {
 
     # TODO: use yq to update the tag after adapting the yq formatting requirements in values.yaml
     # This is a workaround to avoid reformatting the entire YAML file.
-    # We match the last segment of the yq query as the key, and the current value, then replace the tag part.
-    local key_name=$(basename "$yq_query_string" | sed 's/\..*//')
+    # Use the trailing path segment (e.g. "secureAppImage") as the key so the awk below
+    # scopes the edit to the targeted line instead of any line sharing the current tag.
+    local key_name="${yq_query_string##*.}"
     if awk -v KEY="$key_name" -v CURRENT_TAG="$current_tag" -v LATEST_TAG="$latest_tag" '
         {
             # Match lines with the key (e.g., image: or tag:) and the current tag value
