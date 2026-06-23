@@ -568,7 +568,7 @@ tests:
           path: data["relay"]
           pattern: "logs/k8s_entities:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "agent — logs/secureapp pipeline has no resourcedetection"
+  - it: "agent — logs/secureapp pipeline includes resourcedetection"
     set:
       distribution: openshift
       cloudProvider: aws
@@ -576,7 +576,7 @@ tests:
         secureAppEnabled: true
     template: configmap-agent.yaml
     asserts:
-      - notMatchRegex:
+      - matchRegex:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
