@@ -146,6 +146,12 @@ data:
         - interval: 6h
           mode: pull
           name: pods
+        - group: networking.k8s.io
+          mode: watch
+          name: networkpolicies
+        - group: apiextensions.k8s.io
+          mode: watch
+          name: customresourcedefinitions
       prometheus/k8s_cluster_receiver:
         config:
           scrape_configs:
