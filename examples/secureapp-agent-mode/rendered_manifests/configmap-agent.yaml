@@ -387,6 +387,9 @@ data:
           - otlp_http/secureapp
           processors:
           - memory_limiter
+          - k8s_attributes
+          - resourcedetection
+          - resource
           - batch
           receivers:
           - routing/logs
