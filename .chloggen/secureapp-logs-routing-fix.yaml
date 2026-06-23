@@ -1,0 +1,8 @@
+change_type: bug_fix
+component: agent
+note: >
+  Fix SecureApp log routing so that only logs from SecureApp-instrumented
+  workloads are delivered to the SecureApp pipeline. Previously all OTLP logs
+  could be incorrectly routed to the SecureApp pipeline when secureAppEnabled
+  was true with logs or profiling disabled.
+issues: [2457]
