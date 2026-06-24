@@ -1120,11 +1120,7 @@ service:
       processors:
         - memory_limiter
         - k8s_attributes
-        - resourcedetection
         - resource
-        {{- if .Values.environment }}
-        - resource/add_environment
-        {{- end }}
         - batch
       exporters:
         {{- if .Values.gateway.enabled }}

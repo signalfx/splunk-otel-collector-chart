@@ -198,7 +198,7 @@ tests:
   # PR3: logs/secureapp enrichment processors
   # --------------------------------------------------------------------------
 
-  - it: "S=1 — logs/secureapp has k8s_attributes, resourcedetection, resource processors"
+  - it: "S=1 — logs/secureapp has k8s_attributes and resource processors"
     set:
       splunkObservability:
         secureAppEnabled: true
@@ -207,18 +207,12 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:"
-      - matchRegex:
-          path: data["relay"]
           pattern: "- k8s_attributes"
-      - matchRegex:
-          path: data["relay"]
-          pattern: "- resourcedetection"
       - matchRegex:
           path: data["relay"]
           pattern: "- resource\n"
 
-  - it: "S=1 — logs/secureapp omits resource/add_environment when environment not set"
+  - it: "S=1 — logs/secureapp has no resourcedetection processor"
     set:
       splunkObservability:
         secureAppEnabled: true
@@ -227,16 +221,4 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:[\\s\\S]*?- resource/add_environment[\\s\\S]*?logs/split:"
-
-  - it: "S=1 — logs/secureapp includes resource/add_environment when environment is set"
-    set:
-      splunkObservability:
-        secureAppEnabled: true
-        profilingEnabled: false
-      environment: production
-    template: configmap-agent.yaml
-    asserts:
-      - matchRegex:
-          path: data["relay"]
-          pattern: "- resource/add_environment"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
