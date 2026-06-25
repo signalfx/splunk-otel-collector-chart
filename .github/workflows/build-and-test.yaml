@@ -24,7 +24,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v4
         with:
           path: |
             ~/go/bin
@@ -49,7 +49,7 @@ jobs:
       - name: Cache Go
         id: go-cache
         timeout-minutes: 5
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v4
         with:
           path: |
             ~/go/bin
