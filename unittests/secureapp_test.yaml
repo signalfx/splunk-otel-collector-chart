@@ -207,10 +207,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "- k8s_attributes"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- k8s_attributes\\n(?:\\s+- .+\\n)*\\s+receivers:"
       - matchRegex:
           path: data["relay"]
-          pattern: "- resource\n"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   - it: "S=1 — logs/secureapp has no resourcedetection processor"
     set:
