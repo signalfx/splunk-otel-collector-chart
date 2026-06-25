@@ -446,6 +446,7 @@ otlp/platform_logs:
     {{- end }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     {{- if .Values.featureGates.noDropLogsPipeline }}
+    block_on_overflow: {{ .Values.splunkPlatform.sendingQueue.blockOnOverflow }}
     batch:
       flush_timeout: 200ms
       min_size: 2048
@@ -498,6 +499,7 @@ splunk_hec/platform_logs:
     {{- end }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     {{- if .Values.featureGates.noDropLogsPipeline }}
+    block_on_overflow: {{ .Values.splunkPlatform.sendingQueue.blockOnOverflow }}
     batch:
       flush_timeout: 200ms
       min_size: 2048
