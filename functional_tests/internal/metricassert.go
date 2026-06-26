@@ -416,64 +416,52 @@ func keepFirstDatapoint(metric pmetric.Metric, volatile map[string]struct{}) {
 		dps.Sort(func(a, b pmetric.NumberDataPoint) bool {
 			return attrsLess(a.Attributes(), b.Attributes(), volatile)
 		})
-		keepFirstNumberDatapoint(dps)
+		n := 0
+		dps.RemoveIf(func(pmetric.NumberDataPoint) bool {
+			n++
+			return n > 1
+		})
 	case pmetric.MetricTypeSum:
 		dps := metric.Sum().DataPoints()
 		dps.Sort(func(a, b pmetric.NumberDataPoint) bool {
 			return attrsLess(a.Attributes(), b.Attributes(), volatile)
 		})
-		keepFirstNumberDatapoint(dps)
+		n := 0
+		dps.RemoveIf(func(pmetric.NumberDataPoint) bool {
+			n++
+			return n > 1
+		})
 	case pmetric.MetricTypeHistogram:
 		dps := metric.Histogram().DataPoints()
 		dps.Sort(func(a, b pmetric.HistogramDataPoint) bool {
 			return attrsLess(a.Attributes(), b.Attributes(), volatile)
 		})
-		keepFirstHistogramDatapoint(dps)
+		n := 0
+		dps.RemoveIf(func(pmetric.HistogramDataPoint) bool {
+			n++
+			return n > 1
+		})
 	case pmetric.MetricTypeExponentialHistogram:
 		dps := metric.ExponentialHistogram().DataPoints()
 		dps.Sort(func(a, b pmetric.ExponentialHistogramDataPoint) bool {
 			return attrsLess(a.Attributes(), b.Attributes(), volatile)
 		})
-		keepFirstExponentialHistogramDatapoint(dps)
+		n := 0
+		dps.RemoveIf(func(pmetric.ExponentialHistogramDataPoint) bool {
+			n++
+			return n > 1
+		})
 	case pmetric.MetricTypeSummary:
 		dps := metric.Summary().DataPoints()
 		dps.Sort(func(a, b pmetric.SummaryDataPoint) bool {
 			return attrsLess(a.Attributes(), b.Attributes(), volatile)
 		})
-		keepFirstSummaryDatapoint(dps)
+		n := 0
+		dps.RemoveIf(func(pmetric.SummaryDataPoint) bool {
+			n++
+			return n > 1
+		})
 	}
-}
-
-func keepFirstNumberDatapoint(dps pmetric.NumberDataPointSlice) {
-	n := 0
-	dps.RemoveIf(func(pmetric.NumberDataPoint) bool {
-		n++
-		return n > 1
-	})
-}
-
-func keepFirstHistogramDatapoint(dps pmetric.HistogramDataPointSlice) {
-	n := 0
-	dps.RemoveIf(func(pmetric.HistogramDataPoint) bool {
-		n++
-		return n > 1
-	})
-}
-
-func keepFirstExponentialHistogramDatapoint(dps pmetric.ExponentialHistogramDataPointSlice) {
-	n := 0
-	dps.RemoveIf(func(pmetric.ExponentialHistogramDataPoint) bool {
-		n++
-		return n > 1
-	})
-}
-
-func keepFirstSummaryDatapoint(dps pmetric.SummaryDataPointSlice) {
-	n := 0
-	dps.RemoveIf(func(pmetric.SummaryDataPoint) bool {
-		n++
-		return n > 1
-	})
 }
 
 func attrsLess(a, b pcommon.Map, volatile map[string]struct{}) bool {
