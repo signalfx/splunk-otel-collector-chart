@@ -306,7 +306,16 @@ service:
     logs/secureapp:
       receivers:
         - routing/logs
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        - k8s_attributes
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
+        - resource/add_cluster_name
+        {{- end }}
+        - batch
       exporters: [otlp_http/secureapp]
     {{- end }}
     {{- end }}

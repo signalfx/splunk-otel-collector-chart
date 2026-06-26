@@ -1117,7 +1117,14 @@ service:
     # secure application events — always routed via routing/logs connector
     logs/secureapp:
       receivers: [routing/logs]
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        - k8s_attributes
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        - resource
+        - batch
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
