@@ -75,6 +75,7 @@ func Test_NoDropLogs(t *testing.T) {
 	// DropLogs: without noDropLogsPipeline feature gate, queue fills and records are dropped.
 	// HEC is started after a delay so the queue fills while HEC is unavailable, triggering drops.
 	t.Run("DropLogsWithoutFeatureGate", func(t *testing.T) {
+		teardown(t)
 		dropValuesFile, absErr := filepath.Abs(filepath.Join(testDir, dropLogsValuesTemplateFile))
 		require.NoError(t, absErr)
 		hostEp := internal.HostEndpoint(t)
