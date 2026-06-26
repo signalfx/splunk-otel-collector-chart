@@ -1,0 +1,26 @@
+clusterReceiver:
+  enabled: false
+
+clusterName: test-log-cluster
+
+splunkPlatform:
+  endpoint: {{ .LogURL }}
+  token: "00000000-0000-0000-0000-0000000000000"
+  logsEnabled: true
+  sendingQueue:
+    queueSize: 3
+
+agent:
+  extraVolumes:
+    - name: temp-log-test-storage
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: temp-log-test-storage
+      mountPath: /tmp/temp-log-test
+  config:
+    receivers:
+      file_log:
+        operators:
+        encoding: utf-8
+        include:
+        - /tmp/temp-log-test/test.log
