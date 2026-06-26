@@ -201,23 +201,45 @@ func assertionExpectedCounts(file string) (int, int, error) {
 	if unmarshalErr := yaml.Unmarshal(b, &doc); unmarshalErr != nil {
 		return 0, 0, fmt.Errorf("parse assertion file %s: %w", file, unmarshalErr)
 	}
-	res := asSlice(doc["resources"])
+	res, err := assertionSlice(file, "resources", doc["resources"])
+	if err != nil {
+		return 0, 0, err
+	}
 	resources := len(res)
 	metrics := 0
-	for _, r := range res {
+	for i, r := range res {
 		rm, ok := r.(map[string]any)
 		if !ok {
-			continue
+			return 0, 0, fmt.Errorf("parse assertion file %s: resources[%d] must be a map", file, i)
 		}
-		for _, s := range asSlice(rm["scopes"]) {
+		scopes, scopeErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes", i), rm["scopes"])
+		if scopeErr != nil {
+			return 0, 0, scopeErr
+		}
+		for j, s := range scopes {
 			sm, scopeOK := s.(map[string]any)
 			if !scopeOK {
-				continue
+				return 0, 0, fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
 			}
-			metrics += len(asSlice(sm["metrics"]))
+			ms, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), sm["metrics"])
+			if metricErr != nil {
+				return 0, 0, metricErr
+			}
+			metrics += len(ms)
 		}
 	}
+	if resources == 0 || metrics == 0 {
+		return 0, 0, fmt.Errorf("parse assertion file %s: expected at least one resource and metric", file)
+	}
 	return resources, metrics, nil
+}
+
+func assertionSlice(file, path string, v any) ([]any, error) {
+	s, ok := v.([]any)
+	if !ok {
+		return nil, fmt.Errorf("parse assertion file %s: %s must be a list", file, path)
+	}
+	return s, nil
 }
 
 func maybeUpdateExpectedMetricsAssertion(t *testing.T, file string, actual pmetric.Metrics, opts ...MetricsAssertionOption) {

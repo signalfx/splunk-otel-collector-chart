@@ -27,13 +27,13 @@ To create or refresh a snapshot from an existing golden, add an entry to
 `internal/assertiongen/gen_test.go`, then run:
 
 ```sh
-GENERATE_ASSERTION=true go test ./internal/assertiongen -run TestGenerateAssertions -v
+cd functional_tests && GENERATE_ASSERTION=true go test ./internal/assertiongen -run TestGenerateAssertions -v
 ```
 
 To refresh from a live functional run after an assertion mismatch:
 
 ```sh
-UPDATE_EXPECTED_RESULTS=true go test ./functional -run 'Test_Functions/<subtest>' -count=1 -v
+cd functional_tests && UPDATE_EXPECTED_RESULTS=true go test ./functional -run 'Test_Functions/<subtest>' -count=1 -v
 ```
 
 If a cluster-specific attribute appears, add it to that test's exists or regex

@@ -70,9 +70,10 @@ func TestAssertionsMatchGolden(t *testing.T) {
 	for _, m := range migrations {
 		t.Run(m.name, func(t *testing.T) {
 			goldenPath, assertionPath := m.paths()
-			if _, err := os.Stat(assertionPath); os.IsNotExist(err) {
-				t.Skipf("assertion snapshot %s not generated yet", assertionPath)
-			}
+			_, err := os.Stat(assertionPath)
+			require.NoError(t, err,
+				"assertion snapshot %s is missing; run `cd functional_tests && GENERATE_ASSERTION=true go test ./internal/assertiongen -run TestGenerateAssertions -v`",
+				assertionPath)
 			metrics, err := golden.ReadMetrics(goldenPath)
 			require.NoError(t, err, "failed to read golden %s", goldenPath)
 			require.NoError(t, internal.CompareMetricsAssertion(assertionPath, metrics, m.options()...))
