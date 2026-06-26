@@ -25,7 +25,6 @@ type metricsAssertionConfig struct {
 	volatileAttrs      []string
 	regexAttrs         map[string]string
 	firstDatapointOnly []string
-	ignoreScopeVersion bool
 }
 
 // MetricsAssertionOption configures preprocessing before pmetricassert comparison.
@@ -104,13 +103,6 @@ func WithRegexAttributes(attrs map[string]string) MetricsAssertionOption {
 func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
 		cfg.firstDatapointOnly = append(cfg.firstDatapointOnly, metricNames...)
-	}
-}
-
-// WithIgnoreScopeVersion preserves old pmetrictest.IgnoreScopeVersion behavior.
-func WithIgnoreScopeVersion() MetricsAssertionOption {
-	return func(cfg *metricsAssertionConfig) {
-		cfg.ignoreScopeVersion = true
 	}
 }
 
@@ -195,7 +187,7 @@ func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink)
 func assertionExpectedCounts(file string) (int, int, error) {
 	b, err := os.ReadFile(file)
 	if err != nil {
-		return 0, 0, fmt.Errorf("read assertion file: %w", err)
+		return 0, 0, fmt.Errorf("read assertion file %s: %w", file, err)
 	}
 	var doc map[string]any
 	if unmarshalErr := yaml.Unmarshal(b, &doc); unmarshalErr != nil {
@@ -256,7 +248,7 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 	cfg := newMetricsAssertionConfig(opts...)
 	prepared := prepareMetricsAssertion(actual, cfg)
 	if err := pmetricassert.WriteAssertionFile(tb, file, prepared); err != nil {
-		return err
+		return fmt.Errorf("write assertion file %s: %w", file, err)
 	}
 	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs)
 }
@@ -273,36 +265,59 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 
 	b, err := os.ReadFile(file)
 	if err != nil {
-		return fmt.Errorf("read assertion file: %w", err)
+		return fmt.Errorf("read assertion file %s: %w", file, err)
 	}
 	var doc map[string]any
 	if unmarshalErr := yaml.Unmarshal(b, &doc); unmarshalErr != nil {
 		return fmt.Errorf("parse assertion file %s: %w", file, unmarshalErr)
 	}
 
-	for _, res := range asSlice(doc["resources"]) {
+	resources, err := assertionSlice(file, "resources", doc["resources"])
+	if err != nil {
+		return err
+	}
+	for i, res := range resources {
 		resMap, ok := res.(map[string]any)
 		if !ok {
-			continue
+			return fmt.Errorf("parse assertion file %s: resources[%d] must be a map", file, i)
 		}
-		markAttrs(resMap["attributes"], vol, regex)
-		for _, scope := range asSlice(resMap["scopes"]) {
+		if markErr := markAttrs(file, fmt.Sprintf("resources[%d].attributes", i), resMap["attributes"], vol, regex); markErr != nil {
+			return markErr
+		}
+		scopes, scopeErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes", i), resMap["scopes"])
+		if scopeErr != nil {
+			return scopeErr
+		}
+		for j, scope := range scopes {
 			scopeMap, scopeOK := scope.(map[string]any)
 			if !scopeOK {
-				continue
+				return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
 			}
-			markAttrs(scopeMap["attributes"], vol, regex)
-			for _, metric := range asSlice(scopeMap["metrics"]) {
+			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), scopeMap["metrics"])
+			if metricErr != nil {
+				return metricErr
+			}
+			for k, metric := range metrics {
 				metricMap, metricOK := metric.(map[string]any)
 				if !metricOK {
-					continue
+					return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d] must be a map", file, i, j, k)
 				}
-				for _, dp := range asSlice(metricMap["datapoints"]) {
+				var datapoints []any
+				if rawDatapoints := metricMap["datapoints"]; rawDatapoints != nil {
+					var datapointErr error
+					datapoints, datapointErr = assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints", i, j, k), rawDatapoints)
+					if datapointErr != nil {
+						return datapointErr
+					}
+				}
+				for l, dp := range datapoints {
 					dpMap, datapointOK := dp.(map[string]any)
 					if !datapointOK {
-						continue
+						return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d].datapoints[%d] must be a map", file, i, j, k, l)
 					}
-					markAttrs(dpMap["attributes"], vol, regex)
+					if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints[%d].attributes", i, j, k, l), dpMap["attributes"], vol, regex); markErr != nil {
+						return markErr
+					}
 				}
 			}
 		}
@@ -310,15 +325,22 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 
 	out, err := yaml.Marshal(doc)
 	if err != nil {
-		return fmt.Errorf("marshal assertion file: %w", err)
+		return fmt.Errorf("marshal assertion file %s: %w", file, err)
 	}
-	return os.WriteFile(file, out, 0o600)
+	//nolint:gosec // Assertion snapshots are committed testdata.
+	if writeErr := os.WriteFile(file, out, 0o644); writeErr != nil {
+		return fmt.Errorf("write assertion file %s: %w", file, writeErr)
+	}
+	return nil
 }
 
-func markAttrs(attrs any, vol map[string]struct{}, regex map[string]string) {
+func markAttrs(file, path string, attrs any, vol map[string]struct{}, regex map[string]string) error {
+	if attrs == nil {
+		return nil
+	}
 	m, ok := attrs.(map[string]any)
 	if !ok {
-		return
+		return fmt.Errorf("parse assertion file %s: %s must be a map", file, path)
 	}
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -339,11 +361,7 @@ func markAttrs(attrs any, vol map[string]struct{}, regex map[string]string) {
 			m[k+"/exists"] = true
 		}
 	}
-}
-
-func asSlice(v any) []any {
-	s, _ := v.([]any)
-	return s
+	return nil
 }
 
 func newMetricsAssertionConfig(opts ...MetricsAssertionOption) metricsAssertionConfig {
@@ -357,9 +375,6 @@ func newMetricsAssertionConfig(opts ...MetricsAssertionOption) metricsAssertionC
 func prepareMetricsAssertion(actual pmetric.Metrics, cfg metricsAssertionConfig) pmetric.Metrics {
 	prepared := pmetric.NewMetrics()
 	actual.CopyTo(prepared)
-	if cfg.ignoreScopeVersion {
-		clearScopeVersions(prepared)
-	}
 	keepFirstDatapointOnly(prepared, cfg.firstDatapointOnly, cfg.flexibleAttrs())
 	return prepared
 }
@@ -370,15 +385,6 @@ func (cfg metricsAssertionConfig) flexibleAttrs() []string {
 		attrs = append(attrs, attr)
 	}
 	return attrs
-}
-
-func clearScopeVersions(metrics pmetric.Metrics) {
-	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
-		rms := metrics.ResourceMetrics().At(i)
-		for j := 0; j < rms.ScopeMetrics().Len(); j++ {
-			rms.ScopeMetrics().At(j).Scope().SetVersion("")
-		}
-	}
 }
 
 // keepFirstDatapointOnly preserves old comparison semantics for noisy multi-series metrics.

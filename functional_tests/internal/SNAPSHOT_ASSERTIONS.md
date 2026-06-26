@@ -20,9 +20,6 @@ test-specific attributes.
 If the old comparison used `pmetrictest.IgnoreSubsequentDataPoints`, pass those
 metric names through `internal.WithFirstDatapointOnly(...)`.
 
-If the old comparison used `pmetrictest.IgnoreScopeVersion`, pass
-`internal.WithIgnoreScopeVersion()`.
-
 To refresh from a live functional run after an assertion mismatch:
 
 ```sh

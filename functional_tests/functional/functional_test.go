@@ -832,7 +832,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 			"k8s.container.restarts",
 			"k8s.pod.phase",
 		),
-		internal.WithIgnoreScopeVersion())
+	)
 }
 
 func testAgentLogs(t *testing.T) {
