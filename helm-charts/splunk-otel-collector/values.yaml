@@ -157,10 +157,6 @@ splunkPlatform:
     # The sending queue keeps by default all elements in memory, so it is best to keep it small
     # and allow the collector to slow down ingestion.
     queueSize: 1000
-    # When block_on_overflow is enabled, the caller may instead wait until space becomes available, and the request may
-    # still be enqueued if capacity frees up before the timeout.
-    # The parameter is set only when featureGates.noDropLogsPipelin is enabled
-    blockOnOverflow: false
 
     # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
     # It allows setting higher queue limits and preserving the data across restarts of the collector container.
