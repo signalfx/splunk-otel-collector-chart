@@ -67,7 +67,7 @@ func Test_NoDropLogs(t *testing.T) {
 		var podLogs string
 		podLogs, err = internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
 		require.NoError(t, err, "failed to get logs for pod: %s", podName)
-		require.Contains(t, podLogs, "Exporting failed. Rejecting data.", "expected log message not found in pod logs")
+		require.NotContains(t, podLogs, "Exporting failed. Rejecting data.", "expected log message not found in pod logs")
 
 		logsConsumer := internal.SetupHECLogsSink(t)
 
