@@ -156,32 +156,37 @@ func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metri
 }
 
 func selectMetricSetByCounts(targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int) *pmetric.Metrics {
-	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
-		m := metricSink.AllMetrics()[h]
+	metrics := metricSink.AllMetrics()
+	for h := len(metrics) - 1; h >= 0; h-- {
+		m := metrics[h]
 		if !containsMetric(m, targetMetric) {
 			continue
 		}
 		if m.ResourceMetrics().Len() == wantResources && m.MetricCount() == wantMetrics {
-			return &m
+			return &metrics[h]
 		}
 	}
 	return nil
 }
 
 func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink) *pmetric.Metrics {
-	var best *pmetric.Metrics
+	metrics := metricSink.AllMetrics()
+	bestIndex := -1
 	bestCount := -1
-	for h := len(metricSink.AllMetrics()) - 1; h >= 0; h-- {
-		m := metricSink.AllMetrics()[h]
+	for h := len(metrics) - 1; h >= 0; h-- {
+		m := metrics[h]
 		if !containsMetric(m, targetMetric) {
 			continue
 		}
 		if m.MetricCount() > bestCount {
-			best = &m
+			bestIndex = h
 			bestCount = m.MetricCount()
 		}
 	}
-	return best
+	if bestIndex < 0 {
+		return nil
+	}
+	return &metrics[bestIndex]
 }
 
 func assertionExpectedCounts(file string) (int, int, error) {
