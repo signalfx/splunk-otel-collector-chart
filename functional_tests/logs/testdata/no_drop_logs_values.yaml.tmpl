@@ -27,3 +27,9 @@ agent:
         encoding: utf-8
         include:
         - /tmp/temp-log-test/test.log
+    exporters:
+      splunk_hec/platform_logs:
+        sending_queue:
+          queue_size: 400
+          batch:
+            min_size: 100
