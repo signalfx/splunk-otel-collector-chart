@@ -23,13 +23,6 @@ metric names through `internal.WithFirstDatapointOnly(...)`.
 If the old comparison used `pmetrictest.IgnoreScopeVersion`, pass
 `internal.WithIgnoreScopeVersion()`.
 
-To create or refresh a snapshot from an existing golden, add an entry to
-`internal/assertiongen/gen_test.go`, then run:
-
-```sh
-cd functional_tests && GENERATE_ASSERTION=true go test ./internal/assertiongen -run TestGenerateAssertions -v
-```
-
 To refresh from a live functional run after an assertion mismatch:
 
 ```sh
