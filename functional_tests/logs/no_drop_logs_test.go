@@ -74,9 +74,9 @@ func Test_NoDropLogs(t *testing.T) {
 		// entriesNum calculation logic:
 		// - test log file contains 600 log lines
 		// - file_log receiver batches 100 lines/request
-		// - for this test, I set the sender queue size to 3 requests; ie: 3 * 100 log messages, before the queue is full.
+		// - for this test, I set the sender queue size to 300 requests; ie:3 * 100 log messages, before the queue is full.
 		// entriesNum = 600 / (3 * 100) = 2
-		internal.WaitForLogs(t, 2, logsConsumer)
+		internal.WaitForLogs(t, 6, logsConsumer)
 		require.Equal(t, 600, logsConsumer.LogRecordCount(), "expected number of log records does not match what received")
 	})
 }
