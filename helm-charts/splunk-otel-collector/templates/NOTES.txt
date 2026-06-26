@@ -51,7 +51,7 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- if .Values.certmanager.enabled }}
 [WARNING] Installing cert-manager as a subchart with "certmanager.enabled=true" is deprecated and will be removed in a future release.
           Install cert-manager separately or use the default Helm-generated operator webhook certificate.
-          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01530-to-01540
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01540-to-01550
 {{ end }}
 {{- if not (eq (toString .Values.gateway.securityContext) "<nil>") }}
 [WARNING] "gateway.securityContext" parameter is deprecated. Please use "gateway.podSecurityContext" instead.

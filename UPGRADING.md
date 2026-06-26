@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.153.0 to 0.154.0
+## 0.154.0 to 0.155.0
 
 ### cert-manager subchart is deprecated
 
