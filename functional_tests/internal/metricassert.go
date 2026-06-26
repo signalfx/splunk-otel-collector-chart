@@ -106,12 +106,6 @@ func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	}
 }
 
-// CompareMetricsAssertion applies the same preprocessing as live snapshot checks.
-func CompareMetricsAssertion(file string, actual pmetric.Metrics, opts ...MetricsAssertionOption) error {
-	cfg := newMetricsAssertionConfig(opts...)
-	return pmetricassert.AssertMetrics(file, prepareMetricsAssertion(actual, cfg))
-}
-
 // AssertMetricsSnapshot waits for a live batch that matches the snapshot shape.
 func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetMetric, assertionFile string, timeout, interval time.Duration, opts ...MetricsAssertionOption) {
 	t.Helper()
