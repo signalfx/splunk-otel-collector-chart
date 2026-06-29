@@ -1,7 +1,7 @@
 suite: Image Configuration Tests
 templates:
   - "daemonset.yaml"
-  - "deployment-gateway.yaml"
+  - "gateway-workload.yaml"
   - "deployment-cluster-receiver.yaml"
   - "secret-splunk-validation-hook.yaml"
   - "configmap-agent.yaml"
@@ -27,7 +27,7 @@ tests:
           pattern: "^custom-otelcol-repo:1.2.3$"
 
   - it: should use correct otelcol image configuration in gateway deployment
-    template: deployment-gateway.yaml
+    template: gateway-workload.yaml
     set:
       gateway:
         enabled: true

@@ -1,9 +1,10 @@
-{{- $svc := (include "splunk-otel-collector.getServiceConfig" (dict "context" . "svc" .Values.gateway.service) | fromYaml) }}
-{{ if and .Values.gateway.enabled }}
+{{- $gatewayMode := default "deployment" .Values.gateway.mode }}
+{{- if and .Values.gateway.enabled (eq $gatewayMode "statefulset") (dig "headlessService" "enabled" false .Values.gateway) }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "splunk-otel-collector.gatewayServiceName" . }}
+  name: {{ include "splunk-otel-collector.gatewayHeadlessServiceName" . }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
@@ -12,17 +13,14 @@ metadata:
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
     app.kubernetes.io/component: otel-collector
-{{- with $svc.annotations }}
+{{- with .Values.gateway.headlessService.annotations }}
   annotations:
-{{ toYaml . | trim | indent 4 }}
+{{ toYaml . | trim | nindent 4 }}
 {{- end }}
 spec:
-  type: {{ $svc.type }}
-  {{- if $svc.trafficDistribution }}
-  trafficDistribution: {{ $svc.trafficDistribution }}
-  {{- end }}
+  clusterIP: None
   ports:
-{{- include "splunk-otel-collector.gatewayServicePorts" . | trim | nindent 2 }}
+{{- include "splunk-otel-collector.gatewayServicePorts" . | trim | nindent 4 }}
   selector:
     app: {{ template "splunk-otel-collector.name" . }}
     component: otel-collector
