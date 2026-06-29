@@ -48,15 +48,6 @@ func Test_NoDropLogs(t *testing.T) {
 	clientset, err := kubernetes.NewForConfig(config)
 	require.NoError(t, err)
 
-	if os.Getenv("SKIP_SETUP") == "true" {
-		t.Log("Skipping setup as SKIP_SETUP is set to true")
-	} else {
-		deployChart(t, testKubeConfig, clientset, valuesTemplateFile)
-		deployTestLogToPod(t, clientset, config)
-		// wait to ensure the collector has attempted exports and the queue has filled before HEC starts
-		time.Sleep(10 * time.Second)
-	}
-
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
@@ -65,38 +56,44 @@ func Test_NoDropLogs(t *testing.T) {
 	// NoDropLogs: with noDropLogsPipeline feature gate enabled, block_on_overflow=true applies backpressure
 	// to the filelog receiver when the queue is full. No records are dropped — all 600 lines must arrive.
 	t.Run("NoDropLogs", func(t *testing.T) {
+		if os.Getenv("SKIP_SETUP") != "true" {
+			deployChart(t, testKubeConfig, clientset, valuesTemplateFile)
+			deployTestLogToPod(t, clientset, config)
+		}
+		// wait to ensure the queue fills and backpressure is applied before HEC starts
+		time.Sleep(10 * time.Second)
 		logsConsumer := internal.SetupHECLogsSink(t)
 
 		// test log file contains 600 log lines, min_size=100 so expect 6 batches
 		internal.WaitForLogs(t, 6, logsConsumer)
+		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
+		require.NoError(t, podLogsErr, "failed to get logs for pod: %s", podName)
+		require.NotContains(t, podLogs, "Exporting failed. Rejecting data.", "drop log message not found — records shouldn't be dropped with noDropLogsPipeline feature gate")
 		require.Equal(t, testLogLineCount, logsConsumer.LogRecordCount(), "expected number of log records does not match what received")
+		if os.Getenv("SKIP_TEARDOWN") != "true" {
+			teardown(t)
+		}
 	})
 
 	// DropLogs: without noDropLogsPipeline feature gate, queue fills and records are dropped.
 	// HEC is started after a delay so the queue fills while HEC is unavailable, triggering drops.
 	t.Run("DropLogsWithoutFeatureGate", func(t *testing.T) {
-		teardown(t)
-		dropValuesFile, absErr := filepath.Abs(filepath.Join(testDir, dropLogsValuesTemplateFile))
-		require.NoError(t, absErr)
-		hostEp := internal.HostEndpoint(t)
-		require.NotEmpty(t, hostEp, "host endpoint not found")
-		replacements := map[string]any{
-			"LogURL": internal.HostPortHTTP(hostEp, internal.HECLogsReceiverPort),
+		if os.Getenv("SKIP_SETUP") != "true" {
+			teardown(t)
+			deployChart(t, testKubeConfig, clientset, dropLogsValuesTemplateFile)
+			deployTestLogToPod(t, clientset, config)
 		}
-		internal.ChartInstallOrUpgrade(t, testKubeConfig, dropValuesFile, replacements, 0, internal.GetDefaultChartOptions())
-		internal.CheckPodsReady(t, clientset, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 5*time.Second)
-
-		// copy log file before HEC is started — collector will attempt exports immediately,
-		// fill the small queue (queueSize=3), and drop records
-		deployTestLogToPod(t, clientset, config)
 		time.Sleep(10 * time.Second)
+
+		logsConsumer := internal.SetupHECLogsSink(t)
+		internal.WaitForLogs(t, 1, logsConsumer)
 
 		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
 		require.NoError(t, podLogsErr, "failed to get logs for pod: %s", podName)
 		require.Contains(t, podLogs, "Exporting failed. Rejecting data.", "expected drop log message not found — records should be dropped without noDropLogsPipeline feature gate")
-
-		// start HEC now to drain whatever remains in the queue
-		internal.SetupHECLogsSink(t)
+		if os.Getenv("SKIP_TEARDOWN") != "true" {
+			teardown(t)
+		}
 	})
 }
 
