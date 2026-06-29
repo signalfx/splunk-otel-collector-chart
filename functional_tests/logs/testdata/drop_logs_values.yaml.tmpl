@@ -18,6 +18,9 @@ agent:
     - name: temp-log-test-storage
       mountPath: /tmp/temp-log-test
   config:
+    processors:
+      batch:
+        send_batch_size: 100
     receivers:
       file_log:
         operators:
