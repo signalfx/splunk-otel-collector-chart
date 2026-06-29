@@ -450,7 +450,7 @@ otlp/platform_logs:
       flush_timeout: 200ms
       min_size: 2048
       sizer: items
-    queue_size: 10000
+    queue_size: {{ max 10000 .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- else }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- end }}
@@ -505,7 +505,7 @@ splunk_hec/platform_logs:
       flush_timeout: 200ms
       min_size: 2048
       sizer: items
-    queue_size: 10000
+    queue_size: {{ max 10000 .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- else }}
     queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- end }}

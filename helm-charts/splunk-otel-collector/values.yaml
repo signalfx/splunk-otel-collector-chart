@@ -153,9 +153,13 @@ splunkPlatform:
     enabled: true
     # Number of consumers that dequeue batches; ignored if enabled is false
     numConsumers: 10
-    # Maximum number of batches kept in memory before applying backpressure; ignored if enabled is false
-    # The sending queue keeps by default all elements in memory, so it is best to keep it small
-    # and allow the collector to slow down ingestion.
+    # Maximum number of items kept in the sending queue before applying backpressure; ignored if enabled is false.
+    # The unit depends on whether featureGates.noDropLogsPipeline is enabled:
+    #   - noDropLogsPipeline disabled (default): queue size is in batches. Keep this small (default 1000)
+    #     to limit memory usage and allow the collector to slow down ingestion.
+    #   - noDropLogsPipeline enabled: queue size is in individual records, not batches. The default
+    #     of 1000 is automatically raised to a minimum of 10000 in this mode. For high-throughput workloads
+    #     consider setting this significantly higher (e.g. 100000).
     queueSize: 1000
 
     # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
