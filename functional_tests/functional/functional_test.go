@@ -818,50 +818,21 @@ func shortenNames(value string) string {
 }
 
 func testK8sClusterReceiverMetrics(t *testing.T) {
-	metricsConsumer := globalSinks.k8sclusterReceiverMetricsConsumer
-	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver.yaml")
-	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
-	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
-
-	targetMetric := "k8s.pod.phase"
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
-	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
-
-	metricNames := internal.GetMetricNames(&expectedMetrics)
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
+	assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver_assertion.yaml")
+	existsAttrs := internal.ExtendMetricAssertionAttrs(
+		internal.CommonK8sMetricAssertionExistsAttrs,
+		"k8s.container.status.last_terminated_reason",
 	)
-	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
-		}
-		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
-	}
-
-	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", selectedMetrics.MetricCount())
+	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
+		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
+		internal.WithVolatileAttributes(existsAttrs...),
+		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
+		internal.WithFirstDatapointOnly(
+			"k8s.container.ready",
+			"k8s.container.restarts",
+			"k8s.pod.phase",
+		),
+	)
 }
 
 func testAgentLogs(t *testing.T) {
