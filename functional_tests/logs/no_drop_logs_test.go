@@ -66,9 +66,9 @@ func Test_NoDropLogs(t *testing.T) {
 
 		// test log file contains 600 log lines, min_size=100 so expect 6 batches
 		internal.WaitForLogs(t, 6, logsConsumer)
-		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
+		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 1000)
 		require.NoError(t, podLogsErr, "failed to get logs for pod: %s", podName)
-		require.NotContains(t, podLogs, "Exporting failed. Rejecting data.", "drop log message not found — records shouldn't be dropped with noDropLogsPipeline feature gate")
+		require.NotContains(t, podLogs, "Exporting failed. Rejecting data.", "unexpected drop log message found — records shouldn't be dropped with noDropLogsPipeline feature gate")
 		require.Equal(t, testLogLineCount, logsConsumer.LogRecordCount(), "expected number of log records does not match what received")
 		if os.Getenv("SKIP_TEARDOWN") != "true" {
 			teardown(t)
@@ -88,7 +88,7 @@ func Test_NoDropLogs(t *testing.T) {
 		logsConsumer := internal.SetupHECLogsSink(t)
 		internal.WaitForLogs(t, 1, logsConsumer)
 
-		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 100)
+		podLogs, podLogsErr := internal.GetPodLogs(t, clientset, internal.DefaultNamespace, podName, internal.CollectorContainerName, 1000)
 		require.NoError(t, podLogsErr, "failed to get logs for pod: %s", podName)
 		require.Contains(t, podLogs, "Exporting failed. Rejecting data.", "expected drop log message not found — records should be dropped without noDropLogsPipeline feature gate")
 		if os.Getenv("SKIP_TEARDOWN") != "true" {
