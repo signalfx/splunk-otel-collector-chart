@@ -16,6 +16,8 @@
 
 # Include the base utility functions for setting and debugging variables
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# shellcheck source=base_util.sh
+# shellcheck disable=SC1091 # Resolved relative to SCRIPT_DIR at runtime.
 source "$SCRIPT_DIR/base_util.sh"
 
 # ---- Validate Input Arguments ----
@@ -35,67 +37,7 @@ setd "SUBCHART_NAME" "$2"
 update_operator_images() {
     # TODO: Migrate the logic from update-images-operator-otel.sh to here
     echo "Updating OpenTelemetry operator images for $SUBCHART_NAME..."
-    $SCRIPT_DIR/update-images-operator-otel.sh
-}
-
-# Function: update_obi_image_tag
-# Description: Keeps the parent chart's default OBI image tag aligned with the subchart version.
-update_obi_image_tag() {
-    local values_file="$VALUES_FILE_PATH"
-    local normalized_ver="${LATEST_VER#v}"  # Strip leading 'v' if present
-    local target_tag="v$normalized_ver"
-    local current_tag
-
-    current_tag=$(yq eval '.obi.image.tag' "$values_file")
-    echo "Current OBI image tag in values.yaml is $current_tag"
-
-    if [ "$current_tag" != "$target_tag" ]; then
-        echo "Updating OBI image tag to $target_tag in values.yaml"
-        if (
-            updated_file=$(mktemp "${values_file}.XXXXXX")
-            trap 'if [ -n "$updated_file" ] && [ -f "$updated_file" ]; then rm -f "$updated_file"; fi' EXIT
-
-            if awk -v target_tag="$target_tag" '
-                BEGIN {
-                    in_obi=0
-                    in_image=0
-                    updated=0
-                    image_indent=""
-                }
-                /^obi:/ { in_obi=1 }
-                in_obi && /^[^[:space:]][^:]*:/ && !/^obi:/ { in_obi=0; in_image=0 }
-                in_obi && match($0, /^[[:space:]]+image:/) {
-                    in_image=1
-                    image_indent=substr($0, RSTART, RLENGTH - length("image:"))
-                }
-                in_image && $0 ~ ("^" image_indent "[^[:space:]][^:]*:") && $0 !~ ("^" image_indent "image:") { in_image=0 }
-                in_image && $0 ~ ("^" image_indent "[[:space:]]+tag: ") {
-                    print image_indent "  tag: \"" target_tag "\""
-                    updated=1
-                    in_image=0
-                    next
-                }
-                { print }
-                END {
-                    if (!updated) {
-                        exit 1
-                    }
-                }
-            ' "$values_file" > "$updated_file"; then
-                mv "$updated_file" "$values_file"
-                updated_file=""
-            else
-                echo "Error: Failed to update obi.image.tag in $values_file; expected to find obi.image.tag and rewrite it to $target_tag." >&2
-                exit 1
-            fi
-        ); then
-            :
-        else
-            return 1
-        fi
-    else
-        echo "OBI image tag is already up to date in values.yaml"
-    fi
+    "$SCRIPT_DIR/update-images-operator-otel.sh"
 }
 
 # Function: maybe_update_chart_dependency_version
@@ -104,25 +46,24 @@ maybe_update_chart_dependency_version() {
     echo "Checking for updates to $SUBCHART_NAME in $CHART_PATH..."
 
     # Fetch the latest version using Helm
-    LATEST_VER=$(helm search repo $SUBCHART_NAME --versions | awk 'NR==2{print $2}')
+    LATEST_VER=$(helm search repo "$SUBCHART_NAME" --versions | awk 'NR==2{print $2}')
     echo "Latest version of $SUBCHART_NAME is $LATEST_VER"
 
     # Retrieve the current version from Chart.yaml
-    CURRENT_VER=$(yq eval ".dependencies[] | select(.name == \"$SUBCHART_NAME\") | .version" $CHART_PATH)
+    CURRENT_VER=$(yq eval ".dependencies[] | select(.name == \"$SUBCHART_NAME\") | .version" "$CHART_PATH")
     echo "Current version of $SUBCHART_NAME in Chart.yaml is $CURRENT_VER"
 
     if [ "$LATEST_VER" != "$CURRENT_VER" ]; then
       echo "Updating to new version $LATEST_VER in Chart.yaml"
 
+      # shellcheck disable=SC2034 # Read indirectly by emit_output.
       NEED_UPDATE=1
 
       # Update the version in Chart.yaml
-      yq eval -i "(.dependencies[] | select(.name == \"$SUBCHART_NAME\")).version = \"$LATEST_VER\"" $CHART_PATH
+      yq eval -i "(.dependencies[] | select(.name == \"$SUBCHART_NAME\")).version = \"$LATEST_VER\"" "$CHART_PATH"
 
       if [ "$SUBCHART_NAME" == "opentelemetry-operator" ]; then
         update_operator_images
-      elif [ "$SUBCHART_NAME" == "opentelemetry-ebpf-instrumentation" ]; then
-        update_obi_image_tag
       fi
 
       emit_output "NEED_UPDATE"

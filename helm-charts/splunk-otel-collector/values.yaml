@@ -1215,8 +1215,8 @@ obi:
 
   image:
     # Image configuration for eBPF instrumentation.
-    # NOTE: Keep this tag in sync with the OBI chart version specified in Chart.yaml.
-    tag: "v0.9.0"
+    # When empty, the OBI subchart uses its appVersion.
+    tag: ""
 
   podSecurityContext:
     # Pod Security Context - Required for eBPF to access kernel capabilities
