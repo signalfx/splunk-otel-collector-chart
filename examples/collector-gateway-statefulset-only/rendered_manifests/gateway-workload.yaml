@@ -1,7 +1,7 @@
 ---
-# Source: splunk-otel-collector/templates/deployment-gateway.yaml
+# Source: splunk-otel-collector/templates/gateway-workload.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: default-splunk-otel-collector
   namespace: default
@@ -17,7 +17,22 @@ metadata:
     release: default
     app.kubernetes.io/component: otel-collector
 spec:
-  replicas: 3
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  podManagementPolicy: Parallel
+  serviceName: default-splunk-otel-collector-headless
+  volumeClaimTemplates:
+  - metadata:
+      name: queue
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: standard
+  replicas: 1
   selector:
     matchLabels:
       app: splunk-otel-collector
@@ -30,7 +45,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: e1cafd34275d7fd939b74d0eaa9f712979e62bc02f5cc90cabef22ac12c71b37
+        checksum/config: 40f05becedcd1ab69ceb4f42d8e5d3c69feb02425f6fa9908c82cdacb4724856
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -105,11 +120,13 @@ spec:
             port: 13133
         resources:
           limits:
-            cpu: 4
-            memory: 8Gi
+            cpu: 2
+            memory: 4Gi
         volumeMounts:
         - mountPath: /conf
           name: collector-configmap
+        - mountPath: /var/addon/splunk/exporter_queue/agent
+          name: queue
       terminationGracePeriodSeconds: 600
       volumes:
       - name: collector-configmap

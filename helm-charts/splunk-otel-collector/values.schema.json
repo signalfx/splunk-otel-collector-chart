@@ -1211,12 +1211,19 @@
       "type": "object"
     },
     "gateway": {
-      "description": "Splunk OpenTelemetry Collector gateway deployment configuration.",
+      "description": "Splunk OpenTelemetry Collector gateway workload configuration.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "enabled": {
           "type": "boolean"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "deployment",
+            "statefulset"
+          ]
         },
         "replicaCount": {
           "type": [
@@ -1321,6 +1328,18 @@
             }
           }
         },
+        "headlessService": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          }
+        },
         "nodeSelector": {
           "type": "object"
         },
@@ -1378,6 +1397,10 @@
           "items": {
             "type": "object"
           }
+        },
+        "statefulsetSpec": {
+          "type": "object",
+          "additionalProperties": true
         },
         "featureGates": {
           "type": "string"

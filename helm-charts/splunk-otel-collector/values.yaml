@@ -895,9 +895,12 @@ securityContextConstraintsOverwrite: {}
 ################################################################################
 
 gateway:
-  # Defines if collector deployment is enabled
+  # Defines if the gateway collector workload is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
+
+  # Gateway workload mode. Supported values: deployment, statefulset.
+  mode: deployment
 
   # Number of collector replicas
   # Set to null if using HorizontalPodAutoscaler to avoid conflicts
@@ -952,6 +955,12 @@ gateway:
     # Service annotations
     annotations: {}
 
+  # Optional headless service used for StatefulSet pod identity DNS records.
+  # This only applies when gateway.mode=statefulset.
+  headlessService:
+    enabled: false
+    annotations: {}
+
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
@@ -979,6 +988,11 @@ gateway:
   # Extra volumes to be mounted to the OTel Collector container.
   extraVolumes: []
   extraVolumeMounts: []
+
+  # Additional StatefulSet-only spec fields.
+  # These are only applied when gateway.mode is set to statefulset.
+  # Example keys: volumeClaimTemplates, podManagementPolicy, persistentVolumeClaimRetentionPolicy.
+  statefulsetSpec: {}
 
   # Enable or disable features of the gateway.
   featureGates: ""
@@ -1136,7 +1150,7 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.28.0
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.29.0
       secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
