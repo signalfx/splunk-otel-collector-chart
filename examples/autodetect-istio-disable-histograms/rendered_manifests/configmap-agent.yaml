@@ -34,7 +34,7 @@ data:
         root_path: /hostfs
         sync_host_metadata: true
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: main

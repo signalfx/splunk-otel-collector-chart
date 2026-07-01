@@ -18,7 +18,7 @@ data:
   relay: |
     exporters:
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
         index: main
