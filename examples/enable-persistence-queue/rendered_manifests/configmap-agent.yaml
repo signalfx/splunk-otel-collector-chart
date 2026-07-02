@@ -18,7 +18,7 @@ data:
   relay: |
     exporters:
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: CHANGEME
@@ -43,7 +43,7 @@ data:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_metrics:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: CHANGEME
@@ -67,7 +67,7 @@ data:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_traces:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: ""

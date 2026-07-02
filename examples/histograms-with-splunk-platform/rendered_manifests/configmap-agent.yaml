@@ -37,7 +37,7 @@ data:
         ingest_url: https://ingest.CHANGEME.observability.splunkcloud.com
         send_otlp_histograms: true
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
         index: main
@@ -61,7 +61,7 @@ data:
           insecure_skip_verify: false
         token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_metrics:
-        disable_compression: true
+        disable_compression: false
         endpoint: http://localhost:8088/services/collector
         idle_conn_timeout: 10s
         index: CHANGEME

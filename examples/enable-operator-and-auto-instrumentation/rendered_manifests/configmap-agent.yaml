@@ -39,7 +39,7 @@ data:
         ingest_url: https://ingest.us0.observability.splunkcloud.com
         send_otlp_histograms: true
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: main
