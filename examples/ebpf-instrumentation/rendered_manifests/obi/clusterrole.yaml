@@ -5,10 +5,10 @@ kind: ClusterRole
 metadata:
   name: default-obi
   labels:
-    helm.sh/chart: obi-0.9.4
+    helm.sh/chart: obi-0.10.0
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "v0.9.0"
+    app.kubernetes.io/version: "v0.10.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: obi
     app.kubernetes.io/component: rbac
