@@ -1102,6 +1102,8 @@ service:
     - health_check
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
     - headers_setter
+    {{- end }}
+    {{- if (eq (include "splunk-otel-collector.directO11yOpampEnabled" .) "true") }}
     - http_forwarder/opamp_splunk_o11y
     - opamp/splunk_o11y
     {{- end }}

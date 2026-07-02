@@ -642,7 +642,7 @@ prometheus/{{ $receiver }}:
 Common config for OpAMP extension
 */}}
 {{- define "splunk-otel-collector.opampExtension" -}}
-{{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+{{- if eq (include "splunk-otel-collector.directO11yOpampEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
 opamp/splunk_o11y:
   server:
@@ -664,7 +664,7 @@ opamp/splunk_o11y:
 Common config for Splunk O11Y Ingest HTTP Forwarder extension
 */}}
 {{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
-{{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
+{{- if eq (include "splunk-otel-collector.directO11yOpampEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
 http_forwarder/opamp_splunk_o11y:
   ingress:

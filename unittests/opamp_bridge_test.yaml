@@ -1,0 +1,198 @@
+suite: splunk-otel-collector.opampBridge
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - opamp-bridge.yaml
+  - configmap-agent.yaml
+
+tests:
+  - it: should not render when disabled
+    template: opamp-bridge.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render standalone bridge using Splunk Observability OpAMP defaults
+    template: opamp-bridge.yaml
+    set:
+      opampBridge:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 5
+
+  - it: should render bridge config using Splunk Observability OpAMP defaults
+    template: opamp-bridge.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      opampBridge:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "mode: standalone"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "https://ingest.test.observability.splunkcloud.com/v1/opamp"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'X-SF-Token: "\$\{SPLUNK_OBSERVABILITY_ACCESS_TOKEN\}"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "otelcol.service.mode: agent"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "otelcol.service.mode: cluster-receiver"
+
+  - it: should render bridge deployment with default image
+    template: opamp-bridge.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      opampBridge:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge:v0.153.0
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --mode=standalone
+
+  - it: should render custom endpoint headers and gateway statefulset agent
+    template: opamp-bridge.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+      opampBridge:
+        enabled: true
+        endpoint: ws://opamp.example.com/v1/opamp
+        headers:
+          Authorization: Bearer test
+        tls:
+          insecure_skip_verify: true
+        workloads:
+          gateway:
+            type: otel-gateway
+            configName: custom-gateway
+            serviceMode: gateway-custom
+            description:
+              non_identifying_attributes:
+                service.namespace: edge
+        componentsAllowed:
+          receivers:
+            - otlp
+          exporters:
+            - debug
+        description:
+          non_identifying_attributes:
+            deployment.environment: staging
+        extraAgents:
+          - namespace: test-ns
+            type: otel-collector
+            description:
+              non_identifying_attributes:
+                otelcol.service.mode: custom
+            workloadRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: custom-collector
+            config:
+              custom:
+                kind: configmap
+                name: custom-collector
+                key: relay
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "ws://opamp.example.com/v1/opamp"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "Authorization: Bearer test"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "insecure_skip_verify: true"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "componentsAllowed:"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "deployment.environment: staging"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "kind: StatefulSet"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "type: otel-gateway"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom-gateway:"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "service.namespace: edge"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "otelcol.service.mode: gateway-custom"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "otelcol.service.mode: custom"
+
+  - it: should fail without any OpAMP endpoint source
+    template: opamp-bridge.yaml
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://splunk.example.com/services/collector/event
+        token: test-token
+      opampBridge:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "/opampBridge/endpoint"
+
+  - it: should fail when no managed workloads are configured
+    template: opamp-bridge.yaml
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://splunk.example.com/services/collector/event
+        token: test-token
+      agent:
+        enabled: false
+      clusterReceiver:
+        enabled: false
+      opampBridge:
+        enabled: true
+        endpoint: ws://opamp.example.com/v1/opamp
+    asserts:
+      - failedTemplate:
+          errorPattern: "/opampBridge requires at least one managed collector workload"
+
+  - it: should remove direct collector OpAMP when bridge is enabled
+    template: configmap-agent.yaml
+    set:
+      opampBridge:
+        enabled: true
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "http_forwarder/opamp_splunk_o11y"
