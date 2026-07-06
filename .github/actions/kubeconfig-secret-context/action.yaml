@@ -8,6 +8,10 @@ inputs:
   kubeconfig-path:
     description: Kubeconfig path to export as KUBECONFIG.
     required: true
+  certificate-authority-file:
+    description: Optional CA bundle file to embed into the kubeconfig cluster entry.
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -23,4 +27,33 @@ runs:
         KUBECONFIG_PATH: ${{ inputs.kubeconfig-path }}
       run: |
         printf '%s' "$KUBECONFIG_CONTENT" > "$KUBECONFIG_PATH"
+        chmod 600 "$KUBECONFIG_PATH"
+
+    - name: Update kubeconfig certificate authority
+      if: inputs.certificate-authority-file != ''
+      shell: bash
+      env:
+        CA_FILE: ${{ inputs.certificate-authority-file }}
+        KUBECONFIG_PATH: ${{ inputs.kubeconfig-path }}
+      run: |
+        if ! command -v kubectl >/dev/null 2>&1; then
+          echo "::error::kubectl is required to update kubeconfig certificate authority"
+          exit 1
+        fi
+
+        if [ ! -r "$CA_FILE" ]; then
+          echo "::error::certificate-authority-file '$CA_FILE' does not exist or is not readable"
+          exit 1
+        fi
+
+        cluster_name="$(KUBECONFIG="$KUBECONFIG_PATH" kubectl config view --raw --minify -o jsonpath='{.clusters[0].name}')"
+        if [ -z "$cluster_name" ]; then
+          echo "::error::Unable to determine the current cluster name from '$KUBECONFIG_PATH'"
+          exit 1
+        fi
+
+        KUBECONFIG="$KUBECONFIG_PATH" kubectl config set-cluster "$cluster_name" \
+          --certificate-authority="$CA_FILE" \
+          --embed-certs=true \
+          --insecure-skip-tls-verify=false >/dev/null
         chmod 600 "$KUBECONFIG_PATH"
