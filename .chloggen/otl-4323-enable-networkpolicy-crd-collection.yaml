@@ -1,0 +1,15 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: clusterReceiver
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Enable collection of NetworkPolicy and CustomResourceDefinition objects via k8s_objects receiver, routed to /v3/event endpoint.
+# One or more tracking issues related to the change
+issues: [4323]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  Adds NetworkPolicy (networking.k8s.io/v1) and CustomResourceDefinition (apiextensions.k8s.io/v1) to the default
+  k8sObjects list using pull mode, consistent with the existing pods object. Also adds the required RBAC rules to
+  the ClusterRole so the collector can query these API groups.
