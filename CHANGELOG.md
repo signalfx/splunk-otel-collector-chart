@@ -12,6 +12,11 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 - `agent, clusterReceiver`: Change default of `splunkPlatform.disableCompression` from `true` to `false`, enabling gzip compression by default for HEC exporters. ([#2491](https://github.com/signalfx/splunk-otel-collector-chart/pull/2491))
 
+### 🚩 Deprecations 🚩
+
+- `chart`: Deprecate installing cert-manager as a subchart with `certmanager.enabled=true` ([#2451](https://github.com/signalfx/splunk-otel-collector-chart/pull/2451))
+  Installing cert-manager through this chart will be removed in a future release. See the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01540-to-01550) for migration details.
+
 ### 💡 Enhancements 💡
 
 - `agent, gateway`: Enrich SecureApp logs pipeline with Kubernetes metadata, resource detection, and environment attributes so that SecureApp events carry the same resource context as other log pipelines in the agent.
