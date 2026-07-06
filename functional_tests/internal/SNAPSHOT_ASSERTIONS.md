@@ -13,9 +13,8 @@ internal.AssertMetricsSnapshot(t, metricsSink, "target.metric", assertionFile,
     internal.WithRegexAttributes(regexAttrs))
 ```
 
-Start with `internal.CommonK8sMetricAssertionExistsAttrs` and
-`internal.CommonK8sMetricAssertionRegexAttrs`, then extend them near the test for
-test-specific attributes.
+Use `internal.CommonK8sMetricAssertionRegexAttrs` for shared Kubernetes regex
+attrs, and keep test-specific exists or regex attrs near the assertion call.
 
 If the old comparison used `pmetrictest.IgnoreSubsequentDataPoints`, pass those
 metric names through `internal.WithFirstDatapointOnly(...)`.

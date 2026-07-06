@@ -41,9 +41,6 @@ const (
 	KubeletVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
 )
 
-// CommonK8sMetricAssertionExistsAttrs holds shared attrs asserted as present-only.
-var CommonK8sMetricAssertionExistsAttrs []string
-
 // CommonK8sMetricAssertionRegexAttrs holds shared Kubernetes attrs with stable value shapes.
 var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"container.id":         ContainerIDRegex,
@@ -59,25 +56,6 @@ var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"k8s.pod.uid":          K8sUIDRegex,
 	"k8s.replicaset.name":  K8sNameRegex,
 	"k8s.replicaset.uid":   K8sUIDRegex,
-}
-
-// ExtendMetricAssertionAttrs copies a shared attr list before adding test-specific attrs.
-func ExtendMetricAssertionAttrs(base []string, attrs ...string) []string {
-	out := make([]string, 0, len(base)+len(attrs))
-	out = append(out, base...)
-	return append(out, attrs...)
-}
-
-// ExtendMetricAssertionRegexAttrs copies shared regex attrs before adding test-specific attrs.
-func ExtendMetricAssertionRegexAttrs(base map[string]string, attrs map[string]string) map[string]string {
-	out := make(map[string]string, len(base)+len(attrs))
-	for attr, pattern := range base {
-		out[attr] = pattern
-	}
-	for attr, pattern := range attrs {
-		out[attr] = pattern
-	}
-	return out
 }
 
 // WithVolatileAttributes writes selected attributes as pmetricassert `/exists` matchers.

@@ -819,13 +819,9 @@ func shortenNames(value string) string {
 
 func testK8sClusterReceiverMetrics(t *testing.T) {
 	assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver_assertion.yaml")
-	existsAttrs := internal.ExtendMetricAssertionAttrs(
-		internal.CommonK8sMetricAssertionExistsAttrs,
-		"k8s.container.status.last_terminated_reason",
-	)
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
 		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
-		internal.WithVolatileAttributes(existsAttrs...),
+		internal.WithVolatileAttributes("k8s.container.status.last_terminated_reason"),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 		internal.WithFirstDatapointOnly(
 			"k8s.container.ready",
