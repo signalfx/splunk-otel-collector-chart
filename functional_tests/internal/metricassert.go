@@ -22,9 +22,14 @@ import (
 )
 
 type metricsAssertionConfig struct {
-	volatileAttrs      []string
-	regexAttrs         map[string]string
-	firstDatapointOnly []string
+	volatileAttrs                  []string
+	regexAttrs                     map[string]string
+	datapointAttrs                 map[string]struct{}
+	firstDatapointOnly             []string
+	firstDatapointOnlyAll          bool
+	ignoreScopeVersion             bool
+	expectedMetricsOnly            bool
+	includeHistogramExplicitBounds bool
 }
 
 // MetricsAssertionOption configures preprocessing before pmetricassert comparison.
@@ -36,9 +41,10 @@ const (
 	ContainerImageRegex    = `[-./:0-9a-z_]+`
 	ContainerImageTagRegex = `[-.0-9A-Za-z_]+`
 	// K8sNameRegex matches Kubernetes DNS label and DNS subdomain names.
-	K8sNameRegex        = `[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`
-	K8sUIDRegex         = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
-	KubeletVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
+	K8sNameRegex = `[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`
+	K8sUIDRegex  = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+	// K8sVersionRegex matches Kubernetes semantic versions with optional suffixes.
+	K8sVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
 )
 
 // CommonK8sMetricAssertionRegexAttrs holds shared Kubernetes attrs with stable value shapes.
@@ -48,7 +54,7 @@ var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"container.image.tag":  ContainerImageTagRegex,
 	"k8s.daemonset.uid":    K8sUIDRegex,
 	"k8s.deployment.uid":   K8sUIDRegex,
-	"k8s.kubelet.version":  KubeletVersionRegex,
+	"k8s.kubelet.version":  K8sVersionRegex,
 	"k8s.namespace.uid":    K8sUIDRegex,
 	"k8s.node.name":        K8sNameRegex,
 	"k8s.node.uid":         K8sUIDRegex,
@@ -77,10 +83,50 @@ func WithRegexAttributes(attrs map[string]string) MetricsAssertionOption {
 	}
 }
 
+// WithDatapointAttributes keeps only selected datapoint attributes before comparison.
+func WithDatapointAttributes(attrs ...string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		if cfg.datapointAttrs == nil {
+			cfg.datapointAttrs = map[string]struct{}{}
+		}
+		for _, attr := range attrs {
+			cfg.datapointAttrs[attr] = struct{}{}
+		}
+	}
+}
+
 // WithFirstDatapointOnly preserves old pmetrictest.IgnoreSubsequentDataPoints behavior.
 func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
 		cfg.firstDatapointOnly = append(cfg.firstDatapointOnly, metricNames...)
+	}
+}
+
+// WithFirstDatapointOnlyForAllMetrics keeps one stable datapoint per metric.
+func WithFirstDatapointOnlyForAllMetrics() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.firstDatapointOnlyAll = true
+	}
+}
+
+// WithIgnoredScopeVersion clears instrumentation scope versions before comparison.
+func WithIgnoredScopeVersion() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.ignoreScopeVersion = true
+	}
+}
+
+// WithExpectedMetricsOnly ignores metrics not listed in the assertion snapshot.
+func WithExpectedMetricsOnly() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.expectedMetricsOnly = true
+	}
+}
+
+// WithHistogramExplicitBounds keeps histogram bucket boundaries in generated snapshots.
+func WithHistogramExplicitBounds() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.includeHistogramExplicitBounds = true
 	}
 }
 
@@ -96,17 +142,46 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 
 	actual := prepareMetricsAssertion(*selected, cfg)
+	updated := maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
 	assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
 	if assertErr != nil {
 		if !exactMatch {
 			t.Logf("No exact-count match (want %d resources, %d metrics); selected payload has %d metrics",
 				wantResources, wantMetrics, selected.MetricCount())
 		}
-		maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
+		if !updated {
+			maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
+		}
 		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
 	}
 
 	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+}
+
+// AssertMetricsDataSnapshot compares already-selected metrics with an assertion snapshot.
+func AssertMetricsDataSnapshot(t *testing.T, assertionFile string, actual pmetric.Metrics, opts ...MetricsAssertionOption) {
+	t.Helper()
+
+	cfg := newMetricsAssertionConfig(opts...)
+	prepared := prepareMetricsAssertion(actual, cfg)
+	updated := maybeUpdateExpectedMetricsAssertion(t, assertionFile, prepared, opts...)
+	compareMetrics := prepared
+	if cfg.expectedMetricsOnly {
+		metricNames, err := assertionMetricNames(assertionFile)
+		if err == nil {
+			compareMetrics = keepExpectedMetricsOnly(prepared, metricNames)
+		} else if !os.IsNotExist(err) {
+			require.NoError(t, err, "Failed to read expected metric names from %s", assertionFile)
+		}
+	}
+
+	assertErr := pmetricassert.AssertMetrics(assertionFile, compareMetrics)
+	if assertErr != nil {
+		if !updated {
+			maybeUpdateExpectedMetricsAssertion(t, assertionFile, prepared, opts...)
+		}
+		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
+	}
 }
 
 func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
@@ -203,6 +278,57 @@ func assertionExpectedCounts(file string) (int, int, error) {
 	return resources, metrics, nil
 }
 
+func assertionMetricNames(file string) (map[string]struct{}, error) {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	var doc map[string]any
+	if unmarshalErr := yaml.Unmarshal(b, &doc); unmarshalErr != nil {
+		return nil, fmt.Errorf("parse assertion file %s: %w", file, unmarshalErr)
+	}
+	res, err := assertionSlice(file, "resources", doc["resources"])
+	if err != nil {
+		return nil, err
+	}
+	names := map[string]struct{}{}
+	for i, r := range res {
+		rm, ok := r.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("parse assertion file %s: resources[%d] must be a map", file, i)
+		}
+		scopes, scopeErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes", i), rm["scopes"])
+		if scopeErr != nil {
+			return nil, scopeErr
+		}
+		for j, s := range scopes {
+			sm, scopeOK := s.(map[string]any)
+			if !scopeOK {
+				return nil, fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
+			}
+			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), sm["metrics"])
+			if metricErr != nil {
+				return nil, metricErr
+			}
+			for k, metric := range metrics {
+				metricMap, metricOK := metric.(map[string]any)
+				if !metricOK {
+					return nil, fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d] must be a map", file, i, j, k)
+				}
+				name, nameOK := metricMap["name"].(string)
+				if !nameOK {
+					return nil, fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d].name must be a string", file, i, j, k)
+				}
+				names[name] = struct{}{}
+			}
+		}
+	}
+	if len(names) == 0 {
+		return nil, fmt.Errorf("parse assertion file %s: expected at least one metric", file)
+	}
+	return names, nil
+}
+
 func assertionSlice(file, path string, v any) ([]any, error) {
 	s, ok := v.([]any)
 	if !ok {
@@ -211,12 +337,13 @@ func assertionSlice(file, path string, v any) ([]any, error) {
 	return s, nil
 }
 
-func maybeUpdateExpectedMetricsAssertion(t *testing.T, file string, actual pmetric.Metrics, opts ...MetricsAssertionOption) {
+func maybeUpdateExpectedMetricsAssertion(t *testing.T, file string, actual pmetric.Metrics, opts ...MetricsAssertionOption) bool {
 	if !shouldUpdateExpectedResults() {
-		return
+		return false
 	}
 	require.NoError(t, WriteMetricsAssertion(t, file, actual, opts...))
 	t.Logf("Wrote updated expected metric assertion to %s", file)
+	return true
 }
 
 // WriteMetricsAssertion applies assertion preprocessing before writing.
@@ -224,19 +351,23 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 	tb.Helper()
 	cfg := newMetricsAssertionConfig(opts...)
 	prepared := prepareMetricsAssertion(actual, cfg)
-	if err := pmetricassert.WriteAssertionFile(tb, file, prepared); err != nil {
+	writeOpts := []pmetricassert.WriteOption{}
+	if cfg.includeHistogramExplicitBounds {
+		writeOpts = append(writeOpts, pmetricassert.IncludeValues())
+	}
+	if err := pmetricassert.WriteAssertionFile(tb, file, prepared, writeOpts...); err != nil {
 		return fmt.Errorf("write assertion file %s: %w", file, err)
 	}
-	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs)
+	return editAssertionFile(file, prepared, cfg)
 }
 
-// markFlexibleAttrs applies `/exists` and `/regex` after pmetricassert writes exact values.
-func markFlexibleAttrs(file string, volatile []string, regex map[string]string) error {
-	if len(volatile) == 0 && len(regex) == 0 {
+// editAssertionFile applies local matcher options after pmetricassert writes exact values.
+func editAssertionFile(file string, actual pmetric.Metrics, cfg metricsAssertionConfig) error {
+	if len(cfg.volatileAttrs) == 0 && len(cfg.regexAttrs) == 0 && !cfg.includeHistogramExplicitBounds {
 		return nil
 	}
-	vol := make(map[string]struct{}, len(volatile))
-	for _, k := range volatile {
+	vol := make(map[string]struct{}, len(cfg.volatileAttrs))
+	for _, k := range cfg.volatileAttrs {
 		vol[k] = struct{}{}
 	}
 
@@ -258,7 +389,7 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 		if !ok {
 			return fmt.Errorf("parse assertion file %s: resources[%d] must be a map", file, i)
 		}
-		if markErr := markAttrs(file, fmt.Sprintf("resources[%d].attributes", i), resMap["attributes"], vol, regex); markErr != nil {
+		if markErr := markAttrs(file, fmt.Sprintf("resources[%d].attributes", i), resMap["attributes"], vol, cfg.regexAttrs); markErr != nil {
 			return markErr
 		}
 		scopes, scopeErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes", i), resMap["scopes"])
@@ -279,6 +410,11 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 				if !metricOK {
 					return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d] must be a map", file, i, j, k)
 				}
+				if cfg.includeHistogramExplicitBounds && metricMap["datapoints"] == nil {
+					if bounds := histogramExplicitBounds(actual, metricMap["name"]); len(bounds) > 0 {
+						metricMap["datapoints"] = []any{map[string]any{"explicit_bounds": bounds}}
+					}
+				}
 				var datapoints []any
 				if rawDatapoints := metricMap["datapoints"]; rawDatapoints != nil {
 					var datapointErr error
@@ -292,7 +428,8 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 					if !datapointOK {
 						return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d].datapoints[%d] must be a map", file, i, j, k, l)
 					}
-					if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints[%d].attributes", i, j, k, l), dpMap["attributes"], vol, regex); markErr != nil {
+					stripDatapointValues(dpMap, cfg.includeHistogramExplicitBounds)
+					if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints[%d].attributes", i, j, k, l), dpMap["attributes"], vol, cfg.regexAttrs); markErr != nil {
 						return markErr
 					}
 				}
@@ -309,6 +446,50 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 		return fmt.Errorf("write assertion file %s: %w", file, writeErr)
 	}
 	return nil
+}
+
+func histogramExplicitBounds(metrics pmetric.Metrics, rawName any) []float64 {
+	name, ok := rawName.(string)
+	if !ok {
+		return nil
+	}
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		rm := metrics.ResourceMetrics().At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			ms := rm.ScopeMetrics().At(j).Metrics()
+			for k := 0; k < ms.Len(); k++ {
+				metric := ms.At(k)
+				if metric.Name() != name || metric.Type() != pmetric.MetricTypeHistogram {
+					continue
+				}
+				dps := metric.Histogram().DataPoints()
+				for l := 0; l < dps.Len(); l++ {
+					bounds := dps.At(l).ExplicitBounds()
+					if bounds.Len() == 0 {
+						continue
+					}
+					out := make([]float64, bounds.Len())
+					for m := 0; m < bounds.Len(); m++ {
+						out[m] = bounds.At(m)
+					}
+					return out
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func stripDatapointValues(dp map[string]any, keepExplicitBounds bool) {
+	delete(dp, "value")
+	delete(dp, "count")
+	delete(dp, "sum")
+	delete(dp, "min")
+	delete(dp, "max")
+	delete(dp, "bucket_counts")
+	if !keepExplicitBounds {
+		delete(dp, "explicit_bounds")
+	}
 }
 
 func markAttrs(file, path string, attrs any, vol map[string]struct{}, regex map[string]string) error {
@@ -352,8 +533,88 @@ func newMetricsAssertionConfig(opts ...MetricsAssertionOption) metricsAssertionC
 func prepareMetricsAssertion(actual pmetric.Metrics, cfg metricsAssertionConfig) pmetric.Metrics {
 	prepared := pmetric.NewMetrics()
 	actual.CopyTo(prepared)
-	keepFirstDatapointOnly(prepared, cfg.firstDatapointOnly, cfg.flexibleAttrs())
+	if cfg.ignoreScopeVersion {
+		clearScopeVersions(prepared)
+	}
+	keepDatapointAttributes(prepared, cfg.datapointAttrs)
+	keepFirstDatapointOnly(prepared, cfg.firstDatapointOnly, cfg.firstDatapointOnlyAll, cfg.flexibleAttrs())
 	return prepared
+}
+
+func clearScopeVersions(metrics pmetric.Metrics) {
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		rm := metrics.ResourceMetrics().At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			rm.ScopeMetrics().At(j).Scope().SetVersion("")
+		}
+	}
+}
+
+func keepDatapointAttributes(metrics pmetric.Metrics, keep map[string]struct{}) {
+	if keep == nil {
+		return
+	}
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		rm := metrics.ResourceMetrics().At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			ms := rm.ScopeMetrics().At(j).Metrics()
+			for k := 0; k < ms.Len(); k++ {
+				keepMetricDatapointAttributes(ms.At(k), keep)
+			}
+		}
+	}
+}
+
+func keepMetricDatapointAttributes(metric pmetric.Metric, keep map[string]struct{}) {
+	remove := func(attrs pcommon.Map) {
+		attrs.RemoveIf(func(k string, _ pcommon.Value) bool {
+			_, ok := keep[k]
+			return !ok
+		})
+	}
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		dps := metric.Gauge().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			remove(dps.At(i).Attributes())
+		}
+	case pmetric.MetricTypeSum:
+		dps := metric.Sum().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			remove(dps.At(i).Attributes())
+		}
+	case pmetric.MetricTypeHistogram:
+		dps := metric.Histogram().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			remove(dps.At(i).Attributes())
+		}
+	case pmetric.MetricTypeExponentialHistogram:
+		dps := metric.ExponentialHistogram().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			remove(dps.At(i).Attributes())
+		}
+	case pmetric.MetricTypeSummary:
+		dps := metric.Summary().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			remove(dps.At(i).Attributes())
+		}
+	}
+}
+
+func keepExpectedMetricsOnly(metrics pmetric.Metrics, names map[string]struct{}) pmetric.Metrics {
+	filtered := pmetric.NewMetrics()
+	metrics.CopyTo(filtered)
+	filtered.ResourceMetrics().RemoveIf(func(rm pmetric.ResourceMetrics) bool {
+		rm.ScopeMetrics().RemoveIf(func(sm pmetric.ScopeMetrics) bool {
+			sm.Metrics().RemoveIf(func(metric pmetric.Metric) bool {
+				_, ok := names[metric.Name()]
+				return !ok
+			})
+			return sm.Metrics().Len() == 0
+		})
+		return rm.ScopeMetrics().Len() == 0
+	})
+	return filtered
 }
 
 func (cfg metricsAssertionConfig) flexibleAttrs() []string {
@@ -365,8 +626,8 @@ func (cfg metricsAssertionConfig) flexibleAttrs() []string {
 }
 
 // keepFirstDatapointOnly preserves old comparison semantics for noisy multi-series metrics.
-func keepFirstDatapointOnly(metrics pmetric.Metrics, metricNames []string, volatileAttrs []string) {
-	if len(metricNames) == 0 {
+func keepFirstDatapointOnly(metrics pmetric.Metrics, metricNames []string, allMetrics bool, volatileAttrs []string) {
+	if len(metricNames) == 0 && !allMetrics {
 		return
 	}
 	names := make(map[string]struct{}, len(metricNames))
@@ -383,7 +644,7 @@ func keepFirstDatapointOnly(metrics pmetric.Metrics, metricNames []string, volat
 			ms := rms.ScopeMetrics().At(j).Metrics()
 			for k := 0; k < ms.Len(); k++ {
 				metric := ms.At(k)
-				if _, ok := names[metric.Name()]; !ok {
+				if _, ok := names[metric.Name()]; !ok && !allMetrics {
 					continue
 				}
 				keepFirstDatapoint(metric, volatile)

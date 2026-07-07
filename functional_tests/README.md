@@ -38,7 +38,7 @@ If you prefer to run commands directly:
 # Set up environment variables
 export KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing
 export KUBE_TEST_ENV=kind
-export K8S_VERSION=v1.33.2
+export K8S_VERSION=v1.36.1
 
 # Create kind cluster with functional test configuration
 kind create cluster \
@@ -104,8 +104,8 @@ make functionaltest
 make functionaltest SUITE=histogram
 
 # Run with specific environment variables
-KUBE_TEST_ENV=kind K8S_VERSION=v1.33.2 make functionaltest SUITE=functional
+KUBE_TEST_ENV=kind K8S_VERSION=v1.36.1 make functionaltest SUITE=functional
 
-# Update golden files (expected test results)
+# Update expected test results
 UPDATE_EXPECTED_RESULTS=true make functionaltest SUITE=functional
 ```

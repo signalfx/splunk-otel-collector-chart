@@ -307,7 +307,7 @@ generate-crd-schemas: ## Generate JSON schemas from operator CRDs for kubeconfor
 # Configuration for Kind cluster management
 KUBECONFIG_TEST ?= /tmp/kube-config-splunk-otel-collector-chart-functional-testing
 KIND_CLUSTER_NAME ?= kind
-K8S_VERSION ?= v1.33.2
+K8S_VERSION ?= v1.36.1
 
 .PHONY: kind-setup
 kind-setup: ## Create kind cluster for functional testing

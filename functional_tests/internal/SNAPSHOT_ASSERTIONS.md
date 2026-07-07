@@ -19,7 +19,12 @@ attrs, and keep test-specific exists or regex attrs near the assertion call.
 If the old comparison used `pmetrictest.IgnoreSubsequentDataPoints`, pass those
 metric names through `internal.WithFirstDatapointOnly(...)`.
 
-To refresh from a live functional run after an assertion mismatch:
+For tests that select their own metric payload, use
+`internal.AssertMetricsDataSnapshot(...)`. `internal.WithExpectedMetricsOnly()`
+keeps old subset-style comparisons, and `UPDATE_EXPECTED_RESULTS=true` refreshes
+the assertion file before comparing.
+
+To refresh from a live functional run:
 
 ```sh
 cd functional_tests && UPDATE_EXPECTED_RESULTS=true go test ./functional -run 'Test_Functions/<subtest>' -count=1 -v

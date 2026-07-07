@@ -1,0 +1,40 @@
+resources:
+    - attributes:
+        host.name: kind-control-plane
+        k8s.cluster.name: sock
+        k8s.namespace.name: kube-system
+        k8s.node.name: kind-control-plane
+        k8s.pod.name/regex: coredns-.*
+        k8s.pod.uid/regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+        os.type: linux
+        server.address/regex: .+
+        server.port/regex: '[0-9]+'
+        service.instance.id/regex: .+
+        service.name: coredns
+        url.scheme: http
+      scopes:
+        - metrics:
+            - datapoints:
+                - explicit_bounds:
+                    - 0.00025
+                    - 0.0005
+                    - 0.001
+                    - 0.002
+                    - 0.004
+                    - 0.008
+                    - 0.016
+                    - 0.032
+                    - 0.064
+                    - 0.128
+                    - 0.256
+                    - 0.512
+                    - 1.024
+                    - 2.048
+                    - 4.096
+                    - 8.192
+              name: coredns_dns_request_duration_seconds
+              temporality: cumulative
+              type: histogram
+          name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
+signal: metrics
+version: 1

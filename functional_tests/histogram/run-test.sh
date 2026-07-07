@@ -19,8 +19,8 @@ echo "Kubernetes versions: ${k8s_versions[*]}"
 # Number of times to run each test (default: 1, override with RUNS)
 RUNS="${RUNS:-1}"
 
-# Set to true to get expected output files for histogram tests (default: false)
-GENERATE_EXPECTED="${GENERATE_EXPECTED:-false}"
+# Set to true to update histogram assertion snapshots (default: false).
+UPDATE_EXPECTED_RESULTS="${UPDATE_EXPECTED_RESULTS:-${GENERATE_EXPECTED:-false}}"
 
 run_histogram_test() {
   local k8s_version=$1
@@ -43,7 +43,7 @@ run_histogram_test() {
     sleep 30
 
     echo "Running histogram test (Attempt $i)"
-    if GENERATE_EXPECTED="$GENERATE_EXPECTED" K8S_VERSION="$k8s_version" KUBECONFIG="$KUBECONFIG" SKIP_TEARDOWN=false SUITE=histogram make functionaltest; then
+    if UPDATE_EXPECTED_RESULTS="$UPDATE_EXPECTED_RESULTS" K8S_VERSION="$k8s_version" KUBECONFIG="$KUBECONFIG" SKIP_TEARDOWN=false SUITE=histogram make functionaltest; then
       pass_count=$((pass_count + 1))
     else
       fail_count=$((fail_count + 1))

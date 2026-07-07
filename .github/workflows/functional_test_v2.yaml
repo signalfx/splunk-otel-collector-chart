@@ -148,7 +148,7 @@ jobs:
       - uses: ./.github/actions/functional-test
         with:
           go-version: ${{ env.GO_VERSION }}
-          k8s-version: v1.35.1
+          k8s-version: v1.36.1
           mode: upgrade
           suite: functional
           update-expected-results: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
