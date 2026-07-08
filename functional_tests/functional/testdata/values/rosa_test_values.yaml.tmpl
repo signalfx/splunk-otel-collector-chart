@@ -27,7 +27,10 @@ agent:
       mountPath: /splunk-metrics
   resources:
     limits:
-      memory: 1Gi
+      # ROSA control-plane receiver checks scrape multiple OpenShift control-plane
+      # endpoints and file-export metrics in the same agent. Keep extra headroom
+      # so memory_limiter does not refuse scrape data during CI startup.
+      memory: 2Gi
   controlPlaneMetrics:
     scrapeInterval: 30s
     etcd:

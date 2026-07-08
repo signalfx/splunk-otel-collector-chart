@@ -440,16 +440,19 @@ otlp/platform_logs:
     {{- end }}
   sending_queue:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
-    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- if .addPersistentStorage }}
     storage: file_storage/persistent_queue
     {{- end }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     {{- if .Values.featureGates.noDropLogsPipeline }}
+    block_on_overflow: true
+    sizer: items
     batch:
       flush_timeout: 200ms
       min_size: 2048
-      sizer: items
+    queue_size: {{ max 10000 .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- else }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- end }}
 {{- end -}}
 
@@ -492,16 +495,19 @@ splunk_hec/platform_logs:
     {{- end }}
   sending_queue:
     enabled:  {{ .Values.splunkPlatform.sendingQueue.enabled }}
-    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- if .addPersistentStorage }}
     storage: file_storage/persistent_queue
     {{- end }}
     num_consumers: {{ .Values.splunkPlatform.sendingQueue.numConsumers }}
     {{- if .Values.featureGates.noDropLogsPipeline }}
+    sizer: items
+    block_on_overflow: true
     batch:
       flush_timeout: 200ms
       min_size: 2048
-      sizer: items
+    queue_size: {{ max 10000 .Values.splunkPlatform.sendingQueue.queueSize }}
+    {{- else }}
+    queue_size: {{ .Values.splunkPlatform.sendingQueue.queueSize }}
     {{- end }}
 {{- end }}
 

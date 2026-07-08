@@ -3,13 +3,12 @@ clusterReceiver:
 
 clusterName: test-log-cluster
 
-featureGates:
-  noDropLogsPipeline: true
-
 splunkPlatform:
   endpoint: {{ .LogURL }}
   token: "00000000-0000-0000-0000-0000000000000"
   logsEnabled: true
+  sendingQueue:
+    queueSize: 3
 
 agent:
   extraVolumes:
@@ -19,16 +18,12 @@ agent:
     - name: temp-log-test-storage
       mountPath: /tmp/temp-log-test
   config:
+    processors:
+      batch:
+        send_batch_size: 100
     receivers:
       file_log:
         operators:
         encoding: utf-8
         include:
         - /tmp/temp-log-test/test.log
-    exporters:
-      splunk_hec/platform_logs:
-        sending_queue:
-          # this is set here to bypass max validation (10000), such config shouldn't be used in real environment
-          queue_size: 300
-          batch:
-            min_size: 100

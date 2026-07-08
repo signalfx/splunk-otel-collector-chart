@@ -421,6 +421,7 @@ jobs:
 
       - uses: ./.github/actions/kubeconfig-secret-context
         with:
+          certificate-authority-file: /etc/ssl/certs/ca-certificates.crt
           kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
 
@@ -441,6 +442,7 @@ jobs:
 
       - uses: ./.github/actions/kubeconfig-secret-context
         with:
+          certificate-authority-file: /etc/ssl/certs/ca-certificates.crt
           kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
 

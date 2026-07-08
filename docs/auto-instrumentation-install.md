@@ -739,7 +739,7 @@ Using `cert-manager` offers more control over certificate management and is more
 
 ##### Option 1: **Pre-deploy cert-manager**
 
-If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm.
+If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm. If `cert-manager` is not already deployed, install it first by following the official [cert-manager installation documentation](https://cert-manager.io/docs/installation/helm/).
 
 **Configuration:**
 ```yaml
