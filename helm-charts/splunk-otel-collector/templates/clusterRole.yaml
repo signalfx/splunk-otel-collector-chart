@@ -121,6 +121,20 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
 {{- if eq .Values.distribution "gke/autopilot" }}
 - apiGroups:
   - ""
