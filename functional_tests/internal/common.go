@@ -47,6 +47,9 @@ const (
 	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
 	fileCopyHelperImage          = "busybox:1.38.0"
+
+	// winControlCExitCode is Windows STATUS_CONTROL_C_EXIT (0xC000013A).
+	winControlCExitCode = "3221225786"
 )
 
 func HostEndpoint(t *testing.T) string {
@@ -224,9 +227,10 @@ func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.C
 func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, podFilePath, localFilePath string,
 ) {
+	isWindows := !strings.HasPrefix(podFilePath, "/")
 	execContainer := containerName
 	command := []string{"cmd.exe", "/c", "type", podFilePath}
-	if strings.HasPrefix(podFilePath, "/") {
+	if !isWindows {
 		execContainer = startFileCopyHelper(t, clientset, namespace, podName, containerName, podFilePath)
 		command = []string{"cat", podFilePath}
 	}
@@ -239,7 +243,21 @@ func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest
 		}
 		defer localFile.Close()
 		if err = streamExec(t, config, clientset, namespace, podName, execContainer, command, nil, localFile); err != nil {
+			info, statErr := localFile.Stat()
+			if isWindows && strings.Contains(err.Error(), winControlCExitCode) && statErr == nil && info.Size() > 0 {
+				t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
+				return true
+			}
 			t.Logf("retrying copy of %s from pod %s: %v", podFilePath, podName, err)
+			return false
+		}
+		info, statErr := localFile.Stat()
+		if statErr != nil {
+			t.Logf("failed to stat copied file %s: %v", localFilePath, statErr)
+			return false
+		}
+		if info.Size() == 0 {
+			t.Logf("retrying copy of %s from pod %s: copied file is empty", podFilePath, podName)
 			return false
 		}
 		return true
