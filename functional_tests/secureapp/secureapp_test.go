@@ -25,6 +25,7 @@ package secureapp
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,7 +35,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -109,16 +109,32 @@ func deployAll(t *testing.T, kubeconfig string) {
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	require.NoError(t, err)
 
-	// Wait for the OTel operator to be ready before deploying the workload so that
-	// the Instrumentation CR webhook is active and the CSA image swap happens.
+	// Wait for the OTel operator pod and its webhook endpoint to be ready before
+	// deploying the workload so the mutation webhook is active for the CSA image swap.
 	internal.CheckPodsReady(t, clientset, internal.DefaultNamespace,
-		"app.kubernetes.io/name=opentelemetry-operator", 5*time.Minute, 0)
+		"app.kubernetes.io/name=operator", 5*time.Minute, 5*time.Second)
 
 	deployJavaApp(t, clientset)
 
 	// The operator mutates the pod on creation. Wait for the mutated pod (with the
-	// CSA init-container) to reach Ready before triggering attacks.
+	// CSA init-container) to reach Ready and stay ready for 10s (Tomcat startup buffer).
 	internal.CheckPodsReady(t, clientset, internal.DefaultNamespace, javaAppLabel, 5*time.Minute, 10*time.Second)
+
+	// Verify the CSA init-container was actually injected before proceeding.
+	// If the webhook was not active or the annotation was missing, the pod would
+	// have started without the CSA agent and no security events would ever arrive.
+	pods, err := clientset.CoreV1().Pods(internal.DefaultNamespace).List(
+		t.Context(), metav1.ListOptions{LabelSelector: javaAppLabel})
+	require.NoError(t, err)
+	require.NotEmpty(t, pods.Items, "java-test pod not found after deployment")
+	csaInjected := false
+	for _, ic := range pods.Items[0].Spec.InitContainers {
+		if strings.Contains(ic.Image, "splunk-otel-java-csa") {
+			csaInjected = true
+			break
+		}
+	}
+	require.True(t, csaInjected, "CSA init-container not found in java-test pod — operator webhook may not have been ready")
 }
 
 // deployJavaApp creates the java_test Deployment in the default namespace.
@@ -130,13 +146,13 @@ func deployJavaApp(t *testing.T, clientset *kubernetes.Clientset) {
 	obj, _, err := decoder.Decode(data, nil, nil)
 	require.NoError(t, err)
 
-	dep, ok := obj.(runtime.Object)
-	require.True(t, ok)
+	dep, ok := obj.(*appsv1.Deployment)
+	require.True(t, ok, "expected Deployment object from java deployment.yaml")
 
 	deployments := clientset.AppsV1().Deployments(internal.DefaultNamespace)
-	_, createErr := deployments.Create(t.Context(), dep.(*appsv1.Deployment), metav1.CreateOptions{})
+	_, createErr := deployments.Create(t.Context(), dep, metav1.CreateOptions{})
 	if k8serrors.IsAlreadyExists(createErr) {
-		_, updateErr := deployments.Update(t.Context(), dep.(*appsv1.Deployment), metav1.UpdateOptions{})
+		_, updateErr := deployments.Update(t.Context(), dep, metav1.UpdateOptions{})
 		require.NoError(t, updateErr)
 	} else {
 		require.NoError(t, createErr)
@@ -147,6 +163,9 @@ func deployJavaApp(t *testing.T, clientset *kubernetes.Clientset) {
 // attack-pattern HTTP requests against the local Tomcat server. CSA detects
 // these at the Java agent layer — Tomcat does not need a vulnerable endpoint;
 // the agent intercepts the raw request before it reaches servlet code.
+//
+// Each attack is retried briefly to absorb any remaining Tomcat startup lag
+// after pod Ready (the deployment has no readinessProbe for port 8080).
 func triggerAttacks(t *testing.T, kubeconfig string) {
 	restConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	require.NoError(t, err)
@@ -159,6 +178,15 @@ func triggerAttacks(t *testing.T, kubeconfig string) {
 	require.NotEmpty(t, pods.Items, "java-test pod not found")
 	podName := pods.Items[0].Name
 
+	// Wait until Tomcat is accepting connections before sending attack payloads.
+	// start.sh already curls localhost:8080 in a loop, so this converges quickly.
+	require.Eventually(t, func() bool {
+		_, execErr := internal.ExecInPod(t, restConfig, clientset,
+			internal.DefaultNamespace, podName, javaContainerName,
+			[]string{"curl", "-sf", "--max-time", "2", "http://localhost:8080/"})
+		return execErr == nil
+	}, 60*time.Second, 3*time.Second, "Tomcat did not become ready within 60s")
+
 	attacks := []string{
 		// SQL injection — detected by CSA SQL taint analysis
 		"http://localhost:8080/?id=1+OR+1%3D1",
@@ -166,8 +194,8 @@ func triggerAttacks(t *testing.T, kubeconfig string) {
 		"http://localhost:8080/?file=../../etc/passwd",
 	}
 	for _, url := range attacks {
-		// Errors are ignored: Tomcat returns 400/404 for these URLs but CSA fires
-		// on the request pattern regardless of the HTTP response status.
+		// Response status is irrelevant: Tomcat may 400/404 these URLs but CSA
+		// fires on the request pattern before the response is generated.
 		_, _ = internal.ExecInPod(t, restConfig, clientset,
 			internal.DefaultNamespace, podName, javaContainerName,
 			[]string{"curl", "-sf", url})
