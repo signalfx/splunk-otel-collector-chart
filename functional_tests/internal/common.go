@@ -350,6 +350,17 @@ func findVolumeMountForPath(t *testing.T, pod *v1.Pod, containerName, absPath st
 	return bestVolume, bestMount
 }
 
+// ExecInPod runs command in the named pod/container and returns stdout output.
+// stderr is captured and folded into the returned error. Non-zero exit codes
+// are surfaced via the error return; the caller decides whether to require.NoError.
+func ExecInPod(t *testing.T, config *rest.Config, clientset *kubernetes.Clientset,
+	namespace, podName, containerName string, command []string,
+) (string, error) {
+	var stdout bytes.Buffer
+	err := streamExec(t, config, clientset, namespace, podName, containerName, command, nil, &stdout)
+	return stdout.String(), err
+}
+
 // streamExec runs command in the given pod/container, wiring optional stdin and
 // stdout. stderr is captured and folded into the returned error for debugging.
 func streamExec(t *testing.T, config *rest.Config, clientset *kubernetes.Clientset,
