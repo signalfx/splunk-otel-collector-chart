@@ -105,8 +105,8 @@ print_summary() {
   echo "  - ${ECR_OTELCOL_REPO}:${CHART_APPVERSION}"
 }
 
-prepare_chart
 aws_okta_auth
 copy_docker_image_to_ecr
+prepare_chart
 push_chart
 print_summary
