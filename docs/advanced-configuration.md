@@ -86,18 +86,23 @@ the chart stores them in the Splunk Platform Secret, mounts that Secret at
 `/otel/etc`, and renders the corresponding Collector `tls.ca_file`,
 `tls.cert_file`, and `tls.key_file` paths.
 
-## Provide tokens as a secret
+## Splunk Secret and mounted file permissions
 
-Instead of having tokens and TLS PEM content as clear text in the values, those
-can be provided via a secret that is created before deploying the chart. See
+The chart stores tokens and TLS PEM content in the Splunk Secret. By default,
+the chart creates this Secret from values.
+
+The legacy pre-created Secret configuration uses:
 [secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml)
-for the rendered fields.
 
 ```yaml
 secret:
   create: false
   name: your-secret
 ```
+
+Avoid using this pre-created Secret option for new deployments. Prefer the
+default chart-created Secret because the pre-created Secret option will be
+unsupported in a future release.
 
 Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
 default, so token and key files are not readable by other users in the

@@ -37,8 +37,6 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: default-splunk-otel-collector
-      securityContext:
-        fsGroup: 999
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
@@ -158,9 +156,6 @@ spec:
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
           readOnly: true
-        - name: secret
-          mountPath: /otel/etc
-          readOnly: true
         - mountPath: /usr/lib/splunk-otel-collector/agent-bundle/run/collectd
           name: run-collectd
           readOnly: false
@@ -187,10 +182,6 @@ spec:
       - name: host-var-run-utmp
         hostPath:
           path: /var/run/utmp
-      - name: secret
-        secret:
-          secretName: default-splunk-otel-collector
-          defaultMode: 0440
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent
