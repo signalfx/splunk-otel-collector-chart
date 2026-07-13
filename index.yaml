@@ -66,6 +66,57 @@ entries:
     version: 0.1.0
   splunk-otel-collector:
   - apiVersion: v2
+    appVersion: 0.156.0
+    created: "2026-07-13T16:21:19.419437728Z"
+    dependencies:
+    - alias: certmanager
+      condition: certmanager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.19.5
+    - alias: operatorcrds
+      condition: operatorcrds.install
+      name: opentelemetry-operator-crds
+      repository: ""
+      version: 0.0.7
+    - alias: operator
+      condition: operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.117.0
+    - alias: obi
+      condition: obi.enabled
+      name: opentelemetry-ebpf-instrumentation
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.10.0
+    - alias: targetallocator
+      condition: targetallocator.enabled
+      name: opentelemetry-target-allocator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.130.0
+    description: Splunk OpenTelemetry Collector for Kubernetes
+    digest: e7b3f714736ebe8b7aadba12c3231db76ac17dd0452ec567fe90a773c6dd0f58
+    icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
+    keywords:
+    - splunk
+    - opentelemetry
+    - observability
+    - logs
+    - traces
+    - metrics
+    - apm
+    - instrumentation
+    maintainers:
+    - name: dmitryax
+    - name: atoulme
+    - name: jinja2
+    - name: dloucasfx
+    name: splunk-otel-collector
+    type: application
+    urls:
+    - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.156.0/splunk-otel-collector-0.156.0.tgz
+    version: 0.156.0
+  - apiVersion: v2
     appVersion: 0.155.0
     created: "2026-07-06T17:46:20.853626628Z"
     dependencies:
@@ -6031,4 +6082,4 @@ entries:
     urls:
     - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.20.0/splunk-otel-collector-0.20.0.tgz
     version: 0.20.0
-generated: "2026-07-06T17:46:20.85420483Z"
+generated: "2026-07-13T16:21:19.41985308Z"
