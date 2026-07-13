@@ -11,7 +11,7 @@ templates:
   - secret-splunk.yaml
   - secret-splunk-validation-hook.yaml
   - daemonset.yaml
-  - deployment-gateway.yaml
+  - gateway-workload.yaml
   - deployment-cluster-receiver.yaml
 
 tests:
@@ -684,7 +684,7 @@ tests:
           endpoint: otlp-logs.example.com:4317
           protocol: grpc
           caFile: ca
-    template: deployment-gateway.yaml
+    template: gateway-workload.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].volumeMounts

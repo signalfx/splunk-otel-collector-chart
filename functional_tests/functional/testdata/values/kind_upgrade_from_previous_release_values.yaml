@@ -1,0 +1,14 @@
+clusterName: dev-operator
+environment: dev
+splunkObservability:
+  realm: us0
+  accessToken: xxxxx
+operatorcrds:
+  install: true
+operator:
+  enabled: true
+instrumentation:
+  installationJob:
+    enabled: true
+targetallocator:
+  enabled: true

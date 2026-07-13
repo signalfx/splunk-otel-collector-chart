@@ -61,8 +61,8 @@ splunkPlatform:
   metricsSourcetype: ""
   # Maximum HTTP connections to use simultaneously when sending data.
   maxConnections: 200
-  # Whether to disable gzip compression over HTTP. Defaults to true.
-  disableCompression: true
+  # Whether to disable gzip compression over HTTP. Defaults to false.
+  disableCompression: false
   # HTTP timeout when sending data. Defaults to 10s.
   timeout: 10s
   # Idle connection timeout. defaults to 10s
@@ -154,9 +154,13 @@ splunkPlatform:
     enabled: true
     # Number of consumers that dequeue batches; ignored if enabled is false
     numConsumers: 10
-    # Maximum number of batches kept in memory before applying backpressure; ignored if enabled is false
-    # The sending queue keeps by default all elements in memory, so it is best to keep it small
-    # and allow the collector to slow down ingestion.
+    # Maximum number of items kept in the sending queue before applying backpressure; ignored if enabled is false.
+    # The unit depends on whether featureGates.noDropLogsPipeline is enabled:
+    #   - noDropLogsPipeline disabled (default): queue size is in batches. Keep this small (default 1000)
+    #     to limit memory usage and allow the collector to slow down ingestion.
+    #   - noDropLogsPipeline enabled: queue size is in individual records, not batches. The default
+    #     of 1000 is automatically raised to a minimum of 10000 in this mode. For high-throughput workloads
+    #     consider setting this significantly higher (e.g. 100000).
     queueSize: 1000
 
     # This option enables the persistent queue to store data on the disk instead of memory before sending it to the backend.
@@ -625,6 +629,14 @@ clusterReceiver:
     - name: pods
       mode: pull
       interval: 6h
+    - name: networkpolicies
+      mode: pull
+      interval: 6h
+      group: networking.k8s.io
+    - name: customresourcedefinitions
+      mode: pull
+      interval: 6h
+      group: apiextensions.k8s.io
 
   # hostNetwork schedules the pod with the host's network namespace.
   # The default value depends on distribution option: true for eks/auto-mode, otherwise false.
@@ -912,9 +924,12 @@ securityContextConstraintsOverwrite: {}
 ################################################################################
 
 gateway:
-  # Defines if collector deployment is enabled
+  # Defines if the gateway collector workload is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
+
+  # Gateway workload mode. Supported values: deployment, statefulset.
+  mode: deployment
 
   # Number of collector replicas
   # Set to null if using HorizontalPodAutoscaler to avoid conflicts
@@ -969,6 +984,12 @@ gateway:
     # Service annotations
     annotations: {}
 
+  # Optional headless service used for StatefulSet pod identity DNS records.
+  # This only applies when gateway.mode=statefulset.
+  headlessService:
+    enabled: false
+    annotations: {}
+
   # Scheduling configurations
   nodeSelector: {}
   tolerations: []
@@ -1000,6 +1021,11 @@ gateway:
   # Extra volumes to be mounted to the OTel Collector container.
   extraVolumes: []
   extraVolumeMounts: []
+
+  # Additional StatefulSet-only spec fields.
+  # These are only applied when gateway.mode is set to statefulset.
+  # Example keys: volumeClaimTemplates, podManagementPolicy, persistentVolumeClaimRetentionPolicy.
+  statefulsetSpec: {}
 
   # Enable or disable features of the gateway.
   featureGates: ""
@@ -1157,7 +1183,8 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.28.0
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.29.0
+      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1176,12 +1203,13 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.2
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.9.0
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
       image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+      secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
           value: ""
@@ -1220,8 +1248,8 @@ obi:
 
   image:
     # Image configuration for eBPF instrumentation.
-    # NOTE: Keep this tag in sync with the OBI chart version specified in Chart.yaml.
-    tag: "v0.9.0"
+    # When empty, the OBI subchart uses its appVersion.
+    tag: ""
 
   podSecurityContext:
     # Pod Security Context - Required for eBPF to access kernel capabilities
@@ -1408,42 +1436,21 @@ obi:
 # maturity level and be experimental. There may be breaking changes or Operator
 # features may be replaced entirely with a better alternative in the future.
 #
-# The Target Allocator is running as a deployment with a replica count of 1.
+# The Target Allocator is run as a deployment with a replica count of 1.
 # It discovers scraping configurations from ServiceMonitor and PodMonitor CRDs and
 # assigns them to collectors.
-# Related documentation: https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+# Related documentation: https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator
 # Not available in EKS Add-on.
 ################################################################################
 
-targetAllocator:
+targetallocator:
   enabled: false
-  image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:v0.132.0
-  resources: {}
-  serviceAccount:
-    # Specifies whether a ServiceAccount should be created
-    create: true
-    # The name of the ServiceAccount to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-
-    # Service account annotations
-    annotations: {}
-  config:
-    allocation_strategy: per-node
-    # Optional: Namespace where the collector pods are running. Defaults to the release namespace,
-    collector_namespace: ""
-    collector_selector:
-      matchlabels:
-        component: otel-collector-agent
-    prometheus_cr:
-      enabled: true
-      scrapeInterval: 30s
-      # An empty value means any service monitor will be accepted.
-      service_monitor_selector: {}
-      # An empty value means any pod monitor will be accepted.
-      pod_monitor_selector: {}
-
-    filter_strategy: relabel-config
+  targetAllocator:
+    config:
+      allocation_strategy: per-node
+      collector_selector:
+        matchlabels:
+          component: otel-collector-agent
 
 ################################################################################
 # Helm Chart Feature Gates.

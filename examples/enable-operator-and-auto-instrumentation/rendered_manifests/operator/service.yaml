@@ -4,9 +4,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    helm.sh/chart: operator-0.114.1
+    helm.sh/chart: operator-0.117.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.152.0"
+    app.kubernetes.io/version: "0.153.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default
@@ -28,9 +28,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    helm.sh/chart: operator-0.114.1
+    helm.sh/chart: operator-0.117.0
     app.kubernetes.io/name: operator
-    app.kubernetes.io/version: "0.152.0"
+    app.kubernetes.io/version: "0.153.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-operator
     app.kubernetes.io/instance: default

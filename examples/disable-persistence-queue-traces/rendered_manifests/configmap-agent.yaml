@@ -7,18 +7,18 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.153.1
+    helm.sh/chart: splunk-otel-collector-0.155.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.153.0"
+    app.kubernetes.io/version: "0.155.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.153.1
+    chart: splunk-otel-collector-0.155.0
     release: default
 data:
   relay: |
     exporters:
       splunk_hec/platform_logs:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: CHANGEME
@@ -37,13 +37,13 @@ data:
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector-chart
-        splunk_app_version: 0.153.1
+        splunk_app_version: 0.155.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
         token: ${file:/otel/etc/splunk_platform_hec_token}
       splunk_hec/platform_metrics:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: CHANGEME
@@ -61,13 +61,13 @@ data:
           storage: file_storage/persistent_queue
         source: kubernetes
         splunk_app_name: splunk-otel-collector-chart
-        splunk_app_version: 0.153.1
+        splunk_app_version: 0.155.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
         token: ${file:/otel/etc/splunk_platform_hec_token}
       splunk_hec/platform_traces:
-        disable_compression: true
+        disable_compression: false
         endpoint: CHANGEME
         idle_conn_timeout: 10s
         index: ""
@@ -85,7 +85,7 @@ data:
           storage: null
         source: kubernetes
         splunk_app_name: splunk-otel-collector-chart
-        splunk_app_version: 0.153.1
+        splunk_app_version: 0.155.0
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -214,11 +214,6 @@ data:
         - action: insert
           key: k8s.namespace.name
           value: ${K8S_NAMESPACE}
-      resource/add_mode:
-        attributes:
-        - action: insert
-          key: otelcol.service.mode
-          value: agent
       resource/logs:
         attributes:
         - action: upsert
@@ -382,10 +377,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resource/add_agent_k8s
           - resourcedetection
-          - resource
-          - resource/add_mode
           - k8s_attributes/metrics
           receivers:
           - prometheus/agent
@@ -417,3 +409,15 @@ data:
           attributes:
           - name: service.name
             value: otel-agent
+          - name: otelcol.service.mode
+            value: agent
+          - name: k8s.pod.name
+            value: ${K8S_POD_NAME}
+          - name: k8s.namespace.name
+            value: ${K8S_NAMESPACE}
+          - name: k8s.pod.uid
+            value: ${K8S_POD_UID}
+          - name: k8s.node.name
+            value: ${K8S_NODE_NAME}
+          - name: k8s.cluster.name
+            value: CHANGEME

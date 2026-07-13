@@ -75,22 +75,6 @@ processors:
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
-  # Resource attributes specific to the collector itself.
-  resource/add_collector_k8s:
-    attributes:
-      - action: insert
-        key: k8s.node.name
-        value: "${K8S_NODE_NAME}"
-      - action: insert
-        key: k8s.pod.name
-        value: "${K8S_POD_NAME}"
-      - action: insert
-        key: k8s.pod.uid
-        value: "${K8S_POD_UID}"
-      - action: insert
-        key: k8s.namespace.name
-        value: "${K8S_NAMESPACE}"
-
   # It's important to put this processor after resourcedetection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
@@ -117,13 +101,6 @@ processors:
         value: {{ .Values.environment }}
         key: deployment.environment
   {{- end }}
-
-  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
-  resource/add_mode:
-    attributes:
-      - action: insert
-        value: "gateway"
-        key: otelcol.service.mode
 
 exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -204,6 +181,27 @@ service:
       attributes:
         - name: service.name
           value: otel-collector
+        - name: otelcol.service.mode
+          value: gateway
+        - name: k8s.node.name
+          value: "${K8S_NODE_NAME}"
+        - name: k8s.pod.name
+          value: "${K8S_POD_NAME}"
+        - name: k8s.pod.uid
+          value: "${K8S_POD_UID}"
+        - name: k8s.namespace.name
+          value: "${K8S_NAMESPACE}"
+        {{- if .Values.clusterName }}
+        - name: k8s.cluster.name
+          value: {{ .Values.clusterName }}
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        {{- $splunkSourcetype := .Values.splunkPlatform.metricsSourcetype | default .Values.splunkPlatform.sourcetype }}
+        {{- if $splunkSourcetype }}
+        - name: com.splunk.sourcetype
+          value: {{ $splunkSourcetype | quote }}
+        {{- end }}
+        {{- end }}
     metrics:
       readers:
         - pull:
@@ -310,7 +308,16 @@ service:
     logs/secureapp:
       receivers:
         - routing/logs
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        - k8s_attributes
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
+        - resource/add_cluster_name
+        {{- end }}
+        - batch
       exporters: [otlp_http/secureapp]
     {{- end }}
     {{- end }}
@@ -358,17 +365,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource/add_collector_k8s
         - resourcedetection
-        - resource/add_mode
-        {{- if .Values.clusterName }}
-        - resource/add_cluster_name
-        {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
-        {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
-        - resource/metrics
-        {{- end }}
         {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}

@@ -593,13 +593,13 @@ receivers:
     {{- end }}
   {{- end }}
 
-  {{- if .Values.targetAllocator.enabled  }}
+  {{- if .Values.targetallocator.enabled  }}
   prometheus/ta:
     config:
       global:
         scrape_interval: 30s
     target_allocator:
-      endpoint: http://{{ template "splunk-otel-collector.fullname" . }}-ta.{{ template "splunk-otel-collector.namespace" . }}.svc.cluster.local:80
+      endpoint: http://{{ include "splunk-otel-collector.targetAllocatorFullname" . }}-ta.{{ .Release.Namespace }}.svc.cluster.local:80
       interval: 30s
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
@@ -885,13 +885,6 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
-  # The following processor is used to add "otelcol.service.mode" attribute to the internal metrics
-  resource/add_mode:
-    attributes:
-      - action: insert
-        value: "agent"
-        key: otelcol.service.mode
-
   {{- if .Values.isWindows }}
   metricstransform:
     transforms:
@@ -1040,13 +1033,14 @@ exporters:
   {{- end }}
   {{- end }}
 
-{{- if and
-  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true"))
-  (.Values.splunkObservability.secureAppEnabled)
-}}
+{{- if .Values.splunkObservability.secureAppEnabled }}
 connectors:
   routing/logs:
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     default_pipelines: [logs]
+    {{- else }}
+    default_pipelines: []
+    {{- end }}
     table:
       - context: log
         condition: instrumentation_scope.name == "secureapp"
@@ -1059,6 +1053,35 @@ service:
       attributes:
         - name: service.name
           value: otel-agent
+        - name: otelcol.service.mode
+          value: agent
+        - name: k8s.pod.name
+          value: "${K8S_POD_NAME}"
+        - name: k8s.namespace.name
+          value: "${K8S_NAMESPACE}"
+        - name: k8s.pod.uid
+          value: "${K8S_POD_UID}"
+        - name: k8s.node.name
+          value: "${K8S_NODE_NAME}"
+        {{- if and .Values.clusterName .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+        - name: k8s.cluster.name
+          value: {{ .Values.clusterName }}
+        {{- end }}
+        {{- if and .Values.clusterName .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+        - name: cluster_name
+          value: {{ .Values.clusterName }}
+        {{- end }}
+        {{- range .Values.extraAttributes.custom }}
+        - name: "{{ .name }}"
+          value: "{{ .value }}"
+        {{- end }}
+        {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
+        {{- $splunkSourcetype := .Values.splunkPlatform.metricsSourcetype | default .Values.splunkPlatform.sourcetype }}
+        {{- if $splunkSourcetype }}
+        - name: com.splunk.sourcetype
+          value: {{ $splunkSourcetype | quote }}
+        {{- end }}
+        {{- end }}
     metrics:
       readers:
         - pull:
@@ -1091,28 +1114,29 @@ service:
   # In order to disable a default pipeline just set it to `null` in agent.config overrides.
   pipelines:
     {{- if .Values.splunkObservability.secureAppEnabled }}
-    # secure application events
+    # secure application events — always routed via routing/logs connector
     logs/secureapp:
-      receivers:
-        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-        - routing/logs
-        {{- else }}
-        - otlp
+      receivers: [routing/logs]
+      processors:
+        - memory_limiter
+        - k8s_attributes
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resourcedetection/k8s_cluster_name
         {{- end }}
-      processors: [memory_limiter, batch]
+        - resource
+        - batch
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
         {{- else }}
         - otlp_http/secureapp
         {{- end }}
-    {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-    {{- if .Values.splunkObservability.secureAppEnabled }}
+    # receives all OTLP logs; routes secureapp scope to logs/secureapp, rest to default_pipelines
     logs/split:
       receivers: [otlp]
       exporters: [routing/logs]
     {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     # default logs + profiling data pipeline
     logs:
       receivers:
@@ -1245,7 +1269,7 @@ service:
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
-        {{- if .Values.targetAllocator.enabled  }}
+        {{- if .Values.targetallocator.enabled  }}
         - prometheus/ta
         {{- end }}
       processors:
@@ -1298,15 +1322,9 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resource/add_agent_k8s
         - resourcedetection
-        - resource
-        - resource/add_mode
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
-        {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
-        - resource/metrics
-        {{- end }}
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}

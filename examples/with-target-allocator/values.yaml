@@ -3,12 +3,17 @@ splunkObservability:
   realm: CHANGEME
   accessToken: CHANGEME
 
-targetAllocator:
+targetallocator:
   enabled: true
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 250m
-      memory: 512Mi
+  targetAllocator:
+    serviceAccount:
+      create: true
+    imagePullSecrets:
+      - my-registry-secret
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi

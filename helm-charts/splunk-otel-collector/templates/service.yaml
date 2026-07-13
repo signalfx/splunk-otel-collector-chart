@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}
+  name: {{ include "splunk-otel-collector.gatewayServiceName" . }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
@@ -22,18 +22,7 @@ spec:
   trafficDistribution: {{ $svc.trafficDistribution }}
   {{- end }}
   ports:
-  {{- range $key, $port := .Values.gateway.ports }}
-  {{- $metricsEnabled   := and (eq (include "splunk-otel-collector.metricsEnabled"   $) "true") (has "metrics"   $port.enabled_for) }}
-  {{- $tracesEnabled    := and (eq (include "splunk-otel-collector.tracesEnabled"    $) "true") (has "traces"    $port.enabled_for) }}
-  {{- $logsEnabled      := and (eq (include "splunk-otel-collector.logsEnabled"      $) "true") (has "logs"      $port.enabled_for) }}
-  {{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
-  {{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
-  - name: {{ $key }}
-    port: {{ $port.containerPort }}
-    targetPort: {{ $key }}
-    protocol: {{ $port.protocol }}
-  {{- end }}
-  {{- end }}
+{{- include "splunk-otel-collector.gatewayServicePorts" . | trim | nindent 2 }}
   selector:
     app: {{ template "splunk-otel-collector.name" . }}
     component: otel-collector

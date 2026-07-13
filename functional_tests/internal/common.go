@@ -4,11 +4,13 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -42,8 +44,12 @@ const (
 	CollectorContainerName       = "otel-collector"
 	maxHistogramBucketCount      = 32
 	TargetAllocatorContainerName = "targetallocator"
-	TargetAllocatorLabelSelector = "app=targetAllocator"
+	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
+	fileCopyHelperImage          = "busybox:1.38.0"
+
+	// winControlCExitCode is Windows STATUS_CONTROL_C_EXIT (0xC000013A).
+	winControlCExitCode = "3221225786"
 )
 
 func HostEndpoint(t *testing.T) string {
@@ -190,81 +196,207 @@ func FormatAttributes(m pcommon.Map) string {
 	return b.String()
 }
 
-// CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod using `cat`,
-// since our collector container images do not include the `tar` utility.
+// CopyFileToPod streams the contents of a local file to a file inside a Kubernetes pod.
+// remoteFilePath must live under one of containerName's mounted volumes
 func CopyFileToPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, localFilePath, remoteFilePath string,
 ) {
-	localFile, err := os.Open(localFilePath)
-	require.NoError(t, err, "failed to open local file %s", localFilePath)
+	helper := startFileCopyHelper(t, clientset, namespace, podName, containerName, remoteFilePath)
+	command := []string{"sh", "-c", fmt.Sprintf("mkdir -p %q && cat > %q", path.Dir(remoteFilePath), remoteFilePath)}
 
-	defer localFile.Close()
-
-	req := clientset.CoreV1().RESTClient().Post().
-		Resource("pods").
-		Name(podName).
-		Namespace(namespace).
-		SubResource("exec").
-		VersionedParams(&v1.PodExecOptions{
-			Container: containerName,
-			Command:   []string{"sh", "-c", "cat > " + remoteFilePath},
-			Stdin:     true,
-			Stdout:    true,
-			Stderr:    true,
-			TTY:       false,
-		}, scheme.ParameterCodec)
-
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
-	require.NoError(t, err, "failed to create SPDY executor")
-
-	err = exec.StreamWithContext(t.Context(), remotecommand.StreamOptions{
-		Stdin:  localFile,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Tty:    false,
-	})
-	require.NoError(t, err, "failed to stream file %s to pod", localFilePath)
+	require.Eventually(t, func() bool {
+		localFile, err := os.Open(localFilePath)
+		if err != nil {
+			t.Logf("failed to open local file %s: %v", localFilePath, err)
+			return false
+		}
+		defer localFile.Close()
+		if err = streamExec(t, config, clientset, namespace, podName, helper, command, localFile, io.Discard); err != nil {
+			t.Logf("retrying copy of %s to pod %s: %v", localFilePath, podName, err)
+			return false
+		}
+		return true
+	}, time.Minute, 3*time.Second, "failed to copy file %s to pod %s", localFilePath, podName)
 }
 
-// CopyFileFromPod streams the contents of a remote file inside a Kubernetes pod to a local file using `cat`,
-// since our collector container images do not include the `tar` utility.
+// CopyFileFromPod streams the contents of a remote file inside a Kubernetes pod to a local file.
+//
+// On Linux the file is read through a busybox ephemeral container that mounts the
+// volume backing podFilePath. Windows collector images still provide cmd.exe, so the
+// Windows path execs directly in the collector container.
 func CopyFileFromPod(t *testing.T, clientset *kubernetes.Clientset, config *rest.Config,
 	namespace, podName, containerName, podFilePath, localFilePath string,
 ) {
-	var command []string
-	if strings.HasPrefix(podFilePath, "/") {
+	isWindows := !strings.HasPrefix(podFilePath, "/")
+	execContainer := containerName
+	command := []string{"cmd.exe", "/c", "type", podFilePath}
+	if !isWindows {
+		execContainer = startFileCopyHelper(t, clientset, namespace, podName, containerName, podFilePath)
 		command = []string{"cat", podFilePath}
-	} else {
-		command = []string{"cmd.exe", "/c", "type", podFilePath}
 	}
+
+	require.Eventually(t, func() bool {
+		localFile, err := os.Create(localFilePath)
+		if err != nil {
+			t.Logf("failed to create local file %s: %v", localFilePath, err)
+			return false
+		}
+		defer localFile.Close()
+		if err = streamExec(t, config, clientset, namespace, podName, execContainer, command, nil, localFile); err != nil {
+			info, statErr := localFile.Stat()
+			if isWindows && strings.Contains(err.Error(), winControlCExitCode) && statErr == nil && info.Size() > 0 {
+				t.Logf("ignoring benign Windows exit code error while streaming %s from pod: %v", podFilePath, err)
+				return true
+			}
+			t.Logf("retrying copy of %s from pod %s: %v", podFilePath, podName, err)
+			return false
+		}
+		info, statErr := localFile.Stat()
+		if statErr != nil {
+			t.Logf("failed to stat copied file %s: %v", localFilePath, statErr)
+			return false
+		}
+		if info.Size() == 0 {
+			t.Logf("retrying copy of %s from pod %s: copied file is empty", podFilePath, podName)
+			return false
+		}
+		return true
+	}, time.Minute, 3*time.Second, "failed to copy file %s from pod %s", podFilePath, podName)
+}
+
+// startFileCopyHelper attaches a busybox ephemeral container to the pod and
+// blocks until it is running, returning its name for use as an exec target.
+// absPath must live under one of targetContainer's non-subPath volume mounts.
+func startFileCopyHelper(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, targetContainer, absPath string) string {
+	pod, err := clientset.CoreV1().Pods(namespace).Get(t.Context(), podName, metav1.GetOptions{})
+	require.NoError(t, err, "failed to get pod %s", podName)
+
+	volumeName, mountPath := findVolumeMountForPath(t, pod, targetContainer, absPath)
+	helperName := fmt.Sprintf("file-copy-helper-%d", time.Now().UnixNano())
+
+	pod.Spec.EphemeralContainers = append(pod.Spec.EphemeralContainers, v1.EphemeralContainer{
+		EphemeralContainerCommon: v1.EphemeralContainerCommon{
+			Name:            helperName,
+			Image:           fileCopyHelperImage,
+			ImagePullPolicy: v1.PullIfNotPresent,
+			Command:         []string{"sleep", "600"},
+			VolumeMounts: []v1.VolumeMount{{
+				Name:      volumeName,
+				MountPath: mountPath,
+			}},
+			SecurityContext: &v1.SecurityContext{
+				AllowPrivilegeEscalation: boolPtr(false),
+				ReadOnlyRootFilesystem:   boolPtr(true),
+				Capabilities:             &v1.Capabilities{Drop: []v1.Capability{"ALL"}},
+				SeccompProfile:           &v1.SeccompProfile{Type: v1.SeccompProfileTypeRuntimeDefault},
+			},
+		},
+	})
+
+	_, err = clientset.CoreV1().Pods(namespace).UpdateEphemeralContainers(t.Context(), podName, pod, metav1.UpdateOptions{})
+	require.NoError(t, err, "failed to add ephemeral helper container to pod %s", podName)
+
+	require.Eventually(t, func() bool {
+		p, getErr := clientset.CoreV1().Pods(namespace).Get(t.Context(), podName, metav1.GetOptions{})
+		if getErr != nil {
+			t.Logf("failed to get pod %s while waiting for helper: %v", podName, getErr)
+			return false
+		}
+		for _, st := range p.Status.EphemeralContainerStatuses {
+			if st.Name != helperName {
+				continue
+			}
+			if st.State.Terminated != nil {
+				require.Failf(t, "file copy helper terminated unexpectedly",
+					"helper %s in pod %s terminated: reason=%s message=%s",
+					helperName, podName, st.State.Terminated.Reason, st.State.Terminated.Message)
+			}
+			return st.State.Running != nil
+		}
+		return false
+	}, 2*time.Minute, 2*time.Second, "ephemeral helper %s did not start in pod %s", helperName, podName)
+
+	return helperName
+}
+
+// findVolumeMountForPath returns the name and mount path of the longest
+// non-subPath volume mount in containerName whose mount path contains absPath.
+// The file targeted by the ephemeral copy helper must live on such a volume.
+func findVolumeMountForPath(t *testing.T, pod *v1.Pod, containerName, absPath string) (string, string) {
+	clean := path.Clean(absPath)
+	var bestVolume, bestMount string
+	for i := range pod.Spec.Containers {
+		c := pod.Spec.Containers[i]
+		if c.Name != containerName {
+			continue
+		}
+		for _, vm := range c.VolumeMounts {
+			if vm.SubPath != "" || vm.SubPathExpr != "" {
+				continue
+			}
+			mp := path.Clean(vm.MountPath)
+			if clean != mp && !strings.HasPrefix(clean, mp+"/") {
+				continue
+			}
+			if len(mp) > len(bestMount) {
+				bestMount = mp
+				bestVolume = vm.Name
+			}
+		}
+	}
+	require.NotEmptyf(t, bestVolume,
+		"no volume mount in container %s backs path %s; the file must live on a mounted volume so the ephemeral copy helper can reach it",
+		containerName, absPath)
+	return bestVolume, bestMount
+}
+
+// ExecInPod runs command in the named pod/container and returns stdout output.
+// stderr is captured and folded into the returned error. Non-zero exit codes
+// are surfaced via the error return; the caller decides whether to require.NoError.
+func ExecInPod(t *testing.T, config *rest.Config, clientset *kubernetes.Clientset,
+	namespace, podName, containerName string, command []string,
+) (string, error) {
+	var stdout bytes.Buffer
+	err := streamExec(t, config, clientset, namespace, podName, containerName, command, nil, &stdout)
+	return stdout.String(), err
+}
+
+// streamExec runs command in the given pod/container, wiring optional stdin and
+// stdout. stderr is captured and folded into the returned error for debugging.
+func streamExec(t *testing.T, config *rest.Config, clientset *kubernetes.Clientset,
+	namespace, podName, containerName string, command []string, stdin io.Reader, stdout io.Writer,
+) error {
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
 		Namespace(namespace).
-		SubResource("exec").
-		VersionedParams(&v1.PodExecOptions{
-			Command:   command,
-			Container: containerName,
-			Stdin:     false,
-			Stdout:    true,
-			Stderr:    true,
-			TTY:       false,
-		}, scheme.ParameterCodec)
+		SubResource("exec").VersionedParams(&v1.PodExecOptions{
+		Container: containerName,
+		Command:   command,
+		Stdin:     stdin != nil,
+		Stdout:    true,
+		Stderr:    true,
+		TTY:       false,
+	}, scheme.ParameterCodec)
 
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
-	require.NoError(t, err, "failed to create SPDY executor")
+	if err != nil {
+		return fmt.Errorf("failed to create SPDY executor: %w", err)
+	}
 
-	localFile, err := os.Create(localFilePath)
-	require.NoError(t, err, "failed to create local file %s", localFilePath)
-	defer localFile.Close()
-
-	err = exec.StreamWithContext(t.Context(), remotecommand.StreamOptions{
-		Stdout: localFile,
-		Stderr: os.Stderr, // Direct stderr to local stderr for debugging
+	var stderr bytes.Buffer
+	if err = exec.StreamWithContext(t.Context(), remotecommand.StreamOptions{
+		Stdin:  stdin,
+		Stdout: stdout,
+		Stderr: &stderr,
 		Tty:    false,
-	})
-	require.NoError(t, err, "failed to stream file %s from pod", podFilePath)
+	}); err != nil {
+		return fmt.Errorf("exec %v failed: %w (stderr: %s)", command, err, strings.TrimSpace(stderr.String()))
+	}
+	return nil
 }
+
+func boolPtr(b bool) *bool { return &b }
 
 func GetPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, podName, containerName string, tailLines int64) (string, error) {
 	podLogOptions := v1.PodLogOptions{

@@ -10,6 +10,12 @@ splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}
 
 agent:
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   resources:
     requests:
       cpu: 100m
@@ -20,7 +26,7 @@ agent:
   config:
     exporters:
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:

@@ -68,3 +68,163 @@ tests:
           content:
             name: SPLUNK_PROFILER_MEMORY_ENABLED
             value: "true"
+
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — Java image swap
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.java.image replaced with secureAppImage value"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
+            secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+      - isNull:
+          path: spec.java.secureAppImage
+
+  - it: "secureAppEnabled=false — spec.java.image is NOT replaced"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
+            secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+    asserts:
+      - equal:
+          path: spec.java.image
+          value: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
+      - isNull:
+          path: spec.java.secureAppImage
+
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — Node.js env var injection
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.nodejs.env includes SPLUNK_SECUREAPP_AGENT_ENABLED=true"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.2
+    asserts:
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=false — spec.nodejs.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.2
+    asserts:
+      - notContains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=true, customer sets SPLUNK_SECUREAPP_AGENT_ENABLED=false — must NOT be overridden"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          nodejs:
+            image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.7.2
+            env:
+              - name: SPLUNK_SECUREAPP_AGENT_ENABLED
+                value: "false"
+    asserts:
+      - contains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.nodejs.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  - it: "secureAppEnabled=true — spec.java.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          java:
+            image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.27.0
+    asserts:
+      - notContains:
+          path: spec.java.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"
+
+  # --------------------------------------------------------------------------
+  # secureAppEnabled — Python image swap
+  # --------------------------------------------------------------------------
+
+  - it: "secureAppEnabled=true — spec.python.image replaced with secureAppImage value"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          python:
+            image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+            secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+    asserts:
+      - equal:
+          path: spec.python.image
+          value: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+      - isNull:
+          path: spec.python.secureAppImage
+
+  - it: "secureAppEnabled=false — spec.python.image is NOT replaced"
+    set:
+      splunkObservability:
+        secureAppEnabled: false
+      instrumentation:
+        spec:
+          python:
+            image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+            secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+    asserts:
+      - equal:
+          path: spec.python.image
+          value: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+      - isNull:
+          path: spec.python.secureAppImage
+
+  - it: "secureAppEnabled=true, python — spec.python.env does NOT include SPLUNK_SECUREAPP_AGENT_ENABLED"
+    set:
+      splunkObservability:
+        secureAppEnabled: true
+      instrumentation:
+        spec:
+          python:
+            image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+            secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+    asserts:
+      - notContains:
+          path: spec.python.env
+          content:
+            name: SPLUNK_SECUREAPP_AGENT_ENABLED
+            value: "true"

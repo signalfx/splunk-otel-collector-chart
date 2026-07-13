@@ -330,6 +330,34 @@ The name of the gateway service.
 {{- end -}}
 
 {{/*
+The name of the gateway headless service used for StatefulSet identity.
+Truncating the base name to 54 characters to allow for the "-headless" suffix, which is 9 characters long, resulting in a total of 63 characters.
+This guarantees that `-headless` is part of the name and not truncated, which is important for StatefulSet identity.
+*/}}
+{{- define "splunk-otel-collector.gatewayHeadlessServiceName" -}}
+{{- $base := (include "splunk-otel-collector.gatewayServiceName" .) | trunc 54 | trimSuffix "-" -}}
+{{ printf "%s-headless" $base | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+Render gateway service ports using the same filtering rules for all gateway services.
+*/}}
+{{- define "splunk-otel-collector.gatewayServicePorts" -}}
+{{- range $key, $port := .Values.gateway.ports }}
+{{- $metricsEnabled := and (eq (include "splunk-otel-collector.metricsEnabled" $) "true") (has "metrics" $port.enabled_for) }}
+{{- $tracesEnabled := and (eq (include "splunk-otel-collector.tracesEnabled" $) "true") (has "traces" $port.enabled_for) }}
+{{- $logsEnabled := and (eq (include "splunk-otel-collector.logsEnabled" $) "true") (has "logs" $port.enabled_for) }}
+{{- $profilingEnabled := and (eq (include "splunk-otel-collector.profilingEnabled" $) "true") (has "profiling" $port.enabled_for) }}
+{{- if or $metricsEnabled $tracesEnabled $logsEnabled $profilingEnabled }}
+- name: {{ $key }}
+  port: {{ $port.containerPort }}
+  targetPort: {{ $key }}
+  protocol: {{ $port.protocol }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 "clusterReceiverTruncatedName" for the eks/fargate cluster receiver statefulSet name accounting for 11 appended random chars
 */}}
 {{- define "splunk-otel-collector.clusterReceiverTruncatedName" -}}
@@ -488,34 +516,6 @@ Helper used to define a namespace.
 {{- end -}}
 
 {{/*
-Create the name of the target allocator service account to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorServiceAccountName" -}}
-{{- default (printf "%s-ta" ( include "splunk-otel-collector.fullname" .) | trunc 63 | trimSuffix "-") .Values.targetAllocator.serviceAccount.name -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster role to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorClusterRoleName" -}}
-{{- printf "%s-ta-clusterRole" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster config map to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorConfigMapName" -}}
-{{- printf "%s-ta-configmap" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the target allocator cluster role binding to use
-*/}}
-{{- define "splunk-otel-collector.targetAllocatorClusterRoleBindingName" -}}
-{{- printf "%s-ta-clusterRoleBinding" ( include "splunk-otel-collector.fullname" . ) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Returns true if the distribution is eks but not eks/fargate.
 */}}
 {{- define "splunk-otel-collector.isNonFargateEKS" -}}
@@ -629,6 +629,22 @@ Usage:
     {{- end -}}
   {{- end -}}
   {{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the target allocator endpoint to match subchart's naming logic
+*/}}
+{{- define "splunk-otel-collector.targetAllocatorFullname" -}}
+{{- if .Values.targetallocator.fullnameOverride -}}
+{{- .Values.targetallocator.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "targetallocator" .Values.targetallocator.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

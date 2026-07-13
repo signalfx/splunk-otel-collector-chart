@@ -276,6 +276,13 @@
               "const": true
             }
           }
+        },
+        {
+          "properties": {
+            "secureAppEnabled": {
+              "const": true
+            }
+          }
         }
       ]
     },
@@ -1223,12 +1230,19 @@
       "type": "object"
     },
     "gateway": {
-      "description": "Splunk OpenTelemetry Collector gateway deployment configuration.",
+      "description": "Splunk OpenTelemetry Collector gateway workload configuration.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "enabled": {
           "type": "boolean"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "deployment",
+            "statefulset"
+          ]
         },
         "replicaCount": {
           "type": [
@@ -1333,6 +1347,18 @@
             }
           }
         },
+        "headlessService": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          }
+        },
         "nodeSelector": {
           "type": "object"
         },
@@ -1391,6 +1417,10 @@
           "items": {
             "type": "object"
           }
+        },
+        "statefulsetSpec": {
+          "type": "object",
+          "additionalProperties": true
         },
         "featureGates": {
           "type": "string"
@@ -1490,71 +1520,13 @@
       "type": "object",
       "additionalProperties": true
     },
-    "targetAllocator": {
+    "targetallocator": {
       "description": "Target Allocator configuration.",
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "enabled": {
           "type": "boolean"
-        },
-        "image": {
-          "type": "string"
-        },
-        "resources": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "limits": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "type": [
-                    "string",
-                    "integer"
-                  ]
-                },
-                "memory": {
-                  "type": "string"
-                }
-              }
-            },
-            "requests": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "type": [
-                    "string",
-                    "integer"
-                  ]
-                },
-                "memory": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "serviceAccount": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "create": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "string"
-            },
-            "annotations": {
-              "type": "object"
-            }
-          }
-        },
-        "config": {
-          "type": "object",
-          "additionalProperties": true
         }
       }
     },

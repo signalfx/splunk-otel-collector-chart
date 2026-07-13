@@ -1,0 +1,135 @@
+suite: splunk-otel-collector.gatewayWorkload
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - gateway-workload.yaml
+  - configmap-gateway.yaml
+
+tests:
+  - it: should not render gateway workload when gateway.enabled is false
+    set:
+      gateway:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render gateway deployment with default replicaCount
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should render gateway deployment with custom replicaCount
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        replicaCount: 5
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  - it: should not set replicas field when replicaCount is null (for HPA usage)
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        replicaCount: null
+    asserts:
+      - isKind:
+          of: Deployment
+      - isNull:
+          path: spec.replicas
+
+  - it: should render gateway as statefulset when gateway.mode is statefulset
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: spec.serviceName
+          value: test-release-splunk-otel-collector
+
+  - it: should use headless service name for statefulset identity when opted in
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+        headlessService:
+          enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: spec.serviceName
+          value: test-release-splunk-otel-collector-headless
+
+  - it: should render statefulsetSpec when gateway mode is statefulset
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        mode: statefulset
+        statefulsetSpec:
+          volumeClaimTemplates:
+            - metadata:
+                name: data
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 10Gi
+          podManagementPolicy: Parallel
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: should not render statefulsetSpec in deployment mode
+    template: gateway-workload.yaml
+    set:
+      gateway:
+        enabled: true
+        mode: deployment
+        statefulsetSpec:
+          podManagementPolicy: Parallel
+    asserts:
+      - isKind:
+          of: Deployment
+      - isNull:
+          path: spec.podManagementPolicy
+      - isNull:
+          path: spec.volumeClaimTemplates
+
+  - it: should fail when gateway.mode has an unsupported value
+    set:
+      gateway:
+        enabled: true
+        mode: daemonset
+    asserts:
+      - failedTemplate:
+          errorPattern: "/gateway/mode"

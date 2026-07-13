@@ -65,6 +65,27 @@ these frameworks often have pre-built instrumentation capabilities already avail
       - Automatically injects `SPLUNK_PROFILER_ENABLED=true` and `SPLUNK_PROFILER_MEMORY_ENABLED=true` into the Instrumentation CR's global `spec.env`, unless already defined there.
       - To disable profiling for specific languages, override these vars in the per-language env (e.g. `instrumentation.spec.java.env`). See the [partially enable profiling](../examples/enable-operator-and-auto-instrumentation/instrumentation/instrumentation-enable-profiling-partially.yaml) example.
       - To disable profiling globally while keeping the pipeline active, set `SPLUNK_PROFILER_ENABLED=false` and `SPLUNK_PROFILER_MEMORY_ENABLED=false` in `instrumentation.spec.env`.
+  - **SecureApp Activation (Optional)**
+    - Set `splunkObservability.secureAppEnabled: true` to activate SecureApp for instrumented workloads. When enabled, the chart modifies the Instrumentation CR per language:
+      - **Java**: swaps the init-container image to the CSA variant specified in `instrumentation.spec.java.secureAppImage`. The field is stripped before the CR is applied (the OTel Operator does not recognise it).
+      - **Node.js**: injects `SPLUNK_SECUREAPP_AGENT_ENABLED=true` into the pod environment. The SecureApp agent is pre-bundled in the standard Node.js image (`v4.7.0+`); no image change is required. The env var is not injected if already set by the user.
+      - **Python**: swaps the init-container image to the secureapp variant specified in `instrumentation.spec.python.secureAppImage`. The field is stripped before the CR is applied.
+
+    Example `values.yaml` snippet:
+    ```yaml
+    splunkObservability:
+      secureAppEnabled: true
+
+    instrumentation:
+      spec:
+        java:
+          secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+        python:
+          secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+    ```
+
+    No annotation changes are required — the same `instrumentation.opentelemetry.io/inject-{language}` annotations continue to apply.
+
   - **Customizing Instrumentation**
     - `instrumentation.spec`: Override values under this parameter to customize the deployed opentelemetry.io/v1alpha1 Instrumentation object.
       - **Examples**
@@ -718,7 +739,7 @@ Using `cert-manager` offers more control over certificate management and is more
 
 ##### Option 1: **Pre-deploy cert-manager**
 
-If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm.
+If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm. If `cert-manager` is not already deployed, install it first by following the official [cert-manager installation documentation](https://cert-manager.io/docs/installation/helm/).
 
 **Configuration:**
 ```yaml

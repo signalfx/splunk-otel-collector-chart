@@ -5,6 +5,7 @@ package functional
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -61,9 +62,11 @@ const (
 	rosaValuesDir                          = "expected_rosa_values"
 	gceValuesDir                           = "expected_gce_values"
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
-	linuxPodMetricsPath                    = "/tmp/metrics.json"
+	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
+	taResourceName                         = "targetallocator-ta"
+	linuxPodMetricsPath                    = "/splunk-metrics/metrics.json"
 	winPodMetricsPath                      = "C:\\metrics.json"
-	linuxPodK8sClusterMetricsPath          = "/tmp/k8s_cluster_metrics.json"
+	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
 	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
 )
 
@@ -400,10 +403,148 @@ func Test_Functions(t *testing.T) {
 
 	if kubeTestEnv == kindTestKubeEnv {
 		expectedValuesDir = kindValuesDir
-		runLocalClusterTests(t)
+		if os.Getenv("UPGRADE_FROM_VALUES") != "" {
+			runLocalClusterUpgradeTests(t)
+		} else {
+			runLocalClusterTests(t)
+		}
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
+
+func runLocalClusterUpgradeTests(t *testing.T) {
+	t.Run("test target allocator resources cleaned up and installed", testTargetAllocatorUpgrade)
+	t.Run("test component health", testLocalClusterComponentHealth)
+}
+
+func testTargetAllocatorUpgrade(t *testing.T) {
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	require.NoError(t, testTargetAllocatorClusterRoleUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorClusterRoleBindingUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorConfigMapUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorDeploymentUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorServiceUpgrade(t, client))
+	require.NoError(t, testTargetAllocatorServiceAccountUpgrade(t, client))
+}
+
+func testTargetAllocatorClusterRoleUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allClusterRoles, err := client.RbacV1().ClusterRoles().List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allClusterRoles.Kind, allClusterRoles.Items)
+}
+
+func testTargetAllocatorClusterRoleBindingUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allClusterRoleBindings, err := client.RbacV1().ClusterRoleBindings().List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allClusterRoleBindings.Kind, allClusterRoleBindings.Items)
+}
+
+func testTargetAllocatorConfigMapUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allConfigMaps, err := client.CoreV1().ConfigMaps(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allConfigMaps.Kind, allConfigMaps.Items)
+}
+
+func testTargetAllocatorDeploymentUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allDeployments, err := client.AppsV1().Deployments(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allDeployments.Kind, allDeployments.Items)
+}
+
+func testTargetAllocatorServiceUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allServices, err := client.CoreV1().Services(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allServices.Kind, allServices.Items)
+}
+
+func testTargetAllocatorServiceAccountUpgrade(t *testing.T, client *kubernetes.Clientset) error {
+	allServiceAccounts, err := client.CoreV1().ServiceAccounts(metav1.NamespaceAll).List(t.Context(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	return validateTargetAllocatorResourceUpgrade(allServiceAccounts.Kind, allServiceAccounts.Items)
+}
+
+type namedK8sResource interface {
+	GetName() string
+}
+
+func validateTargetAllocatorResourceUpgrade[T any](resourceKind string, resources []T) error {
+	if err := validateOldTargetAllocatorResourceDoesNotExist(resourceKind, resources); err != nil {
+		return err
+	}
+
+	return validateNewTargetAllocatorResourceExists(resourceKind, resources)
+}
+
+func validateOldTargetAllocatorResourceDoesNotExist[T any](resourceKind string, resources []T) error {
+	for i := range resources {
+		resource, ok := any(&resources[i]).(namedK8sResource)
+		if !ok {
+			return fmt.Errorf("expected %s resource to expose a Kubernetes name", resourceKind)
+		}
+		resourceName := resource.GetName()
+		if strings.Contains(resourceName, splunkOtelCollectorTAResourceName) {
+			return fmt.Errorf("expected old %s resource %q to no longer exist", resourceKind, resourceName)
+		}
+	}
+
+	return nil
+}
+
+func validateNewTargetAllocatorResourceExists[T any](resourceKind string, resources []T) error {
+	for i := range resources {
+		resource, ok := any(&resources[i]).(namedK8sResource)
+		if !ok {
+			return fmt.Errorf("expected %s resource to expose a Kubernetes name", resourceKind)
+		}
+		resourceName := resource.GetName()
+		if strings.Contains(resourceName, taResourceName) {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("expected at least one new %s resource with %q in the name", resourceKind, taResourceName)
+}
+
+func testLocalClusterComponentHealth(t *testing.T) {
+	// Test component health - verify no RBAC or connection errors
+	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+	require.NoError(t, err)
+	client, err := kubernetes.NewForConfig(kubeConfig)
+	require.NoError(t, err)
+
+	t.Run("component error logs checks", func(t *testing.T) {
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
+		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+	})
+
+	t.Run("control plane receiver checks", func(t *testing.T) {
+		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
+	})
 }
 
 // runLocalClusterTests runs tests that are expected to pass on local clusters like kind, minikube, etc.
@@ -432,22 +573,7 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("test agent metrics", testAgentMetrics)
 	t.Run("test target allocator", testTargetAllocator)
 	t.Run("test prometheus metrics", testPrometheusAnnotationMetrics)
-
-	// Test component health - verify no RBAC or connection errors
-	testKubeConfig := requireEnv(t, "KUBECONFIG")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-
-	t.Run("component error logs checks", func(t *testing.T) {
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
-		internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
-	})
-
-	t.Run("control plane receiver checks", func(t *testing.T) {
-		runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kindTestKubeEnv))
-	})
+	t.Run("test component health", testLocalClusterComponentHealth)
 }
 
 // runHostedClusterTests runs tests that are specific to hosted clusters like EKS, GKE, AKS, etc.
@@ -692,50 +818,21 @@ func shortenNames(value string) string {
 }
 
 func testK8sClusterReceiverMetrics(t *testing.T) {
-	metricsConsumer := globalSinks.k8sclusterReceiverMetricsConsumer
-	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver.yaml")
-	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
-	require.NoError(t, err, "Failed to read expected metrics from expected_cluster_receiver.yaml")
-
-	targetMetric := "k8s.pod.phase"
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsConsumer, 3*time.Minute, 10*time.Second)
-	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
-
-	metricNames := internal.GetMetricNames(&expectedMetrics)
-	err = pmetrictest.CompareMetrics(expectedMetrics, *selectedMetrics,
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.kubelet.version", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.container.status.last_terminated_reason", metricNames...),
-		pmetrictest.IgnoreMetricValues(metricNames...),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints("k8s.container.ready", "k8s.container.restarts", "k8s.pod.phase"),
+	assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver_assertion.yaml")
+	existsAttrs := internal.ExtendMetricAssertionAttrs(
+		internal.CommonK8sMetricAssertionExistsAttrs,
+		"k8s.container.status.last_terminated_reason",
 	)
-	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
-		}
-		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		require.NoError(t, err, "K8s cluster receiver metrics comparison failed. Error: %v", err)
-	}
-
-	t.Logf("K8s cluster receiver metrics comparison passed for %d metrics", selectedMetrics.MetricCount())
+	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
+		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
+		internal.WithVolatileAttributes(existsAttrs...),
+		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
+		internal.WithFirstDatapointOnly(
+			"k8s.container.ready",
+			"k8s.container.restarts",
+			"k8s.pod.phase",
+		),
+	)
 }
 
 func testAgentLogs(t *testing.T) {
@@ -1072,7 +1169,7 @@ func testHECMetrics(t *testing.T) {
 		"otelcol_exporter_sent_metric_points",
 		"otelcol_exporter_sent_log_records",
 		"otelcol_otelsvc_k8s_ip_lookup_miss",
-		"otelcol_processor_accepted_log_records",
+		"otelcol_processor_memory_limiter_accepted_log_records",
 		"otelcol_otelsvc_k8s_namespace_added",
 		"otelcol_otelsvc_k8s_pod_added",
 		"otelcol_otelsvc_k8s_pod_table_size",
@@ -1083,7 +1180,7 @@ func testHECMetrics(t *testing.T) {
 		"otelcol_process_runtime_total_alloc_bytes",
 		"otelcol_process_runtime_total_sys_memory_bytes",
 		"otelcol_process_uptime",
-		"otelcol_processor_accepted_metric_points",
+		"otelcol_processor_memory_limiter_accepted_metric_points",
 		"otelcol_receiver_accepted_metric_points",
 		"otelcol_receiver_refused_metric_points",
 		"otelcol_scraper_errored_metric_points",

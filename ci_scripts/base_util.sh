@@ -300,9 +300,10 @@ get_latest_tag() {
         local repo_name="${BASH_REMATCH[2]}"
         local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=1&onlyActiveTags=true"
         if [ -n "$filter" ]; then
-            latest_api+="&filter_tag_name=$filter"
+            # quay.io requires filter_tag_name in "<op>:<value>" form; a bare value is rejected.
+            latest_api+="&filter_tag_name=like:$filter"
         fi
-        local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name')
+        local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name // empty')
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from quay.io" >&2
             return 1
@@ -312,9 +313,9 @@ get_latest_tag() {
     elif [[ $repo_value =~ ^ghcr\.io/([^/]+/[^/]+) ]]; then
         local full_repo_name="${BASH_REMATCH[1]}"
         local latest_api="https://api.github.com/repos/${full_repo_name}/tags"
-        local tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r '.[0].name')
+        local tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r '.[0].name // empty')
         if [ -n "$filter" ]; then
-            tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r --arg filter "$filter" 'first(.[] | select(.name | startswith($filter))).name')
+            tag_name=$(curl -sL -H 'Accept: application/vnd.github+json' "$latest_api" | jq -r --arg filter "$filter" 'first(.[] | select(.name | startswith($filter))).name // empty')
         fi
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from ghcr.io" >&2
@@ -387,8 +388,20 @@ update_version() {
 
     # TODO: use yq to update the tag after adapting the yq formatting requirements in values.yaml
     # This is a workaround to avoid reformatting the entire YAML file.
-    # We match the last segment of the yq query as the key, and the current value, then replace the tag part.
-    local key_name=$(basename "$yq_query_string" | sed 's/\..*//')
+    # Pick the key the awk below scopes the edit to, so it only touches the targeted line
+    # Map paths (repo/tag) carry the tag on a "tag:" line; string paths (e.g. ".spec.java.secureAppImage") carry it inline.
+    local value_type
+    if [[ "$yq_query_string" =~ ^select\(.*\) || "$yq_query_string" =~ ^\..* ]]; then
+        value_type="$(yq eval-all "${yq_query_string} | type" "${yaml_file_path}")"
+    else
+        value_type="$(yq eval-all ".${yq_query_string} | type" "${yaml_file_path}")"
+    fi
+    local key_name
+    if [[ "$value_type" == *'map'* ]]; then
+        key_name="tag"
+    else
+        key_name="${yq_query_string##*.}"
+    fi
     if awk -v KEY="$key_name" -v CURRENT_TAG="$current_tag" -v LATEST_TAG="$latest_tag" '
         {
             # Match lines with the key (e.g., image: or tag:) and the current tag value

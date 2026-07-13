@@ -4,6 +4,70 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.155.0] - 2026-07-06
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.155.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.155.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver`: Change default of `splunkPlatform.disableCompression` from `true` to `false`, enabling gzip compression by default for HEC exporters. ([#2491](https://github.com/signalfx/splunk-otel-collector-chart/pull/2491))
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Deprecate installing cert-manager as a subchart with `certmanager.enabled=true` ([#2451](https://github.com/signalfx/splunk-otel-collector-chart/pull/2451))
+  Installing cert-manager through this chart will be removed in a future release. See the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01540-to-01550) for migration details.
+
+### 💡 Enhancements 💡
+
+- `agent, gateway`: Enrich SecureApp logs pipeline with Kubernetes metadata, resource detection, and environment attributes so that SecureApp events carry the same resource context as other log pipelines in the agent.
+ ([#2480](https://github.com/signalfx/splunk-otel-collector-chart/pull/2480))
+- `chart`: Enable block_on_overflow and improve no-drop logs pipeline reliability when featureGates.noDropLogsPipeline is enabled. ([#2488](https://github.com/signalfx/splunk-otel-collector-chart/pull/2488))
+  Sets block_on_overflow: true on the exporter sending queue to apply backpressure to the filelog receiver when the queue is full, preventing data loss.
+  The `queue_size` setting now counts individual log records instead of batches when `noDropLogsPipeline` is enabled.
+  The default value of 1000 is automatically raised to a minimum of 10000 in this mode.
+  For high-throughput workloads consider setting `splunkPlatform.sendingQueue.queueSize` significantly higher (e.g. 100000).
+  
+- `chart`: Bump TargetAllocator to 0.130.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2471](https://github.com/signalfx/splunk-otel-collector-chart/pull/2471))
+- `chart`: Bump obi to 0.10.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2434](https://github.com/signalfx/splunk-otel-collector-chart/pull/2434),[#2496](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2496))
+- `gateway`: Add support for deploying the gateway as a StatefulSet, which allows users to use features like persistent storage. ([#2453](https://github.com/signalfx/splunk-otel-collector-chart/pull/2453))
+  This change adds a new `gateway.mode` configuration option that can be set to `statefulset` to deploy the gateway as a StatefulSet instead of a Deployment.
+  When `gateway.mode` is set to `statefulset`, users can also provide additional StatefulSet-specific configuration through the `gateway.statefulsetSpec` field.
+  We also added support for a headless service when deploying the gateway as a StatefulSet, which can be enabled through the `gateway.headlessService.enabled` field.
+  
+- `operator`: Bump java to v2.29.0 in helm-charts/splunk-otel-collector/values.yaml ([#2475](https://github.com/signalfx/splunk-otel-collector-chart/pull/2475))
+- `operator`: Bump nodejs to v4.9.0 in helm-charts/splunk-otel-collector/values.yaml ([#2472](https://github.com/signalfx/splunk-otel-collector-chart/pull/2472))
+- `operator`: Bump operator to 0.117.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2478](https://github.com/signalfx/splunk-otel-collector-chart/pull/2478))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix SecureApp log routing so that only logs from SecureApp-instrumented workloads are delivered to the SecureApp pipeline. Previously all OTLP logs could be incorrectly routed to the SecureApp pipeline when secureAppEnabled was true with logs or profiling disabled.
+ ([#2457](https://github.com/signalfx/splunk-otel-collector-chart/pull/2457))
+
+## [0.154.0] - 2026-06-16
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.154.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.154.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver, gateway`: Moved internal metrics resource attributes from `resource` processors to telemetry configuration. ([#2456](https://github.com/signalfx/splunk-otel-collector-chart/pull/2456))
+  As part of this change, we removed the following processors as they were only used to set resource attributes on internal metrics:
+  - `resource/add_mode` from the agent, clusterReceiver and gateway configurations
+  - `resource/add_collector_k8s` from the clusterReceiver and gateway configuration
+  
+- `chart`: Use upstream [target allocator helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-target-allocator) as subchart instead of local custom configuration ([#2381](https://github.com/signalfx/splunk-otel-collector-chart/pull/2381))
+  Please refer to the [upgrade guidelines from 0.153.1 to 0.154.0](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01531-to-01540)
+  for more information. This change is only relevant when the
+  target allocator is enabled.
+  
+
+### 💡 Enhancements 💡
+
+- `clusterReceiver`: Add `featureGates.useEntityEventsForK8sProperties` to send Kubernetes entity updates through the signalfx entity events path. ([#2429](https://github.com/signalfx/splunk-otel-collector-chart/pull/2429))
+- `operator`: When secureAppEnabled is set to true, the Instrumentation CR now activates SecureApp for Java (CSA image swap), Node.js (environment variable injection), and Python (secureapp variant image swap).
+ ([#2455](https://github.com/signalfx/splunk-otel-collector-chart/pull/2455))
+- `operator`: Bump nodejs to v4.8.0 in helm-charts/splunk-otel-collector/values.yaml ([#2450](https://github.com/signalfx/splunk-otel-collector-chart/pull/2450))
+- `operator`: Bump operator to 0.115.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2461](https://github.com/signalfx/splunk-otel-collector-chart/pull/2461))
+
 ## [0.153.1] - 2026-06-01
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.153.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.153.0).

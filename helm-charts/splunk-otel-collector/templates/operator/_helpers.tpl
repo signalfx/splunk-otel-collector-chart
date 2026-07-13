@@ -129,6 +129,24 @@ Helper to build entries for instrumentation libraries
     {{- if and (eq (kindOf $.Values.instrumentation.spec) "map") (hasKey $.Values.instrumentation.spec $lib) -}}
       {{- $libSpec := get $.Values.instrumentation.spec $lib }}
 
+      {{- /* When secureAppEnabled=true, swap image to secureAppImage for languages that define it (java, python). */ -}}
+      {{- if and $.Values.splunkObservability.secureAppEnabled $libSpec.secureAppImage -}}
+        {{- $libSpec = merge (dict "image" $libSpec.secureAppImage) $libSpec -}}
+      {{- end -}}
+
+      {{- /* When secureAppEnabled=true and processing nodejs, inject the SecureApp activation env var. */ -}}
+      {{- /* The @splunk/secureapp-agent npm package is pre-bundled in the standard image (v4.7.0+); no image swap needed. */ -}}
+      {{- if and (eq $lib "nodejs") $.Values.splunkObservability.secureAppEnabled -}}
+        {{- if eq (include "splunk-otel-collector.operator.env-has" (dict "env" $libSpec.env "envName" "SPLUNK_SECUREAPP_AGENT_ENABLED")) "false" -}}
+          {{- $currentEnv := default list $libSpec.env -}}
+          {{- $newEnv := append $currentEnv (dict "name" "SPLUNK_SECUREAPP_AGENT_ENABLED" "value" "true") -}}
+          {{- $libSpec = merge (dict "env" $newEnv) $libSpec -}}
+        {{- end -}}
+      {{- end -}}
+
+      {{- /* Strip secureAppImage before rendering — OTel Operator does not recognise this field. */ -}}
+      {{- $libSpec = omit $libSpec "secureAppImage" -}}
+
       {{- /* Instead of including as a string, use a template function that returns proper data structure */ -}}
       {{- $envData := dict "endpoint" $endpoint "instLibName" $lib "env" $libSpec.env "image" $libSpec.image -}}
       {{- $envVars := include "splunk-otel-collector.operator.extract-instrumentation-env" $envData | fromYaml -}}

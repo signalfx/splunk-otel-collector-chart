@@ -22,10 +22,16 @@ logsCollection:
     enabled: true
     directory: /run/log/journal
 agent:
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   config:
     exporters:
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
@@ -42,12 +48,18 @@ agent:
             - file
 clusterReceiver:
   eventsEnabled: true
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   config:
     exporters:
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       file/k8s_cluster:
-        path: /tmp/k8s_cluster_metrics.json
+        path: /splunk-metrics/k8s_cluster_metrics.json
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:
@@ -97,7 +109,7 @@ operatorcrds:
   install: true
 operator:
   enabled: true
-targetAllocator:
+targetallocator:
   enabled: true
 
 cloudProvider: aws

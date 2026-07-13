@@ -1,0 +1,42 @@
+clusterName: CHANGEME
+splunkObservability:
+  realm: CHANGEME
+  accessToken: CHANGEME
+
+gateway:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+  service:
+    annotations:
+      gateway: "test-value"
+  mode: statefulset
+  headlessService:
+    enabled: true
+  statefulsetSpec:
+    volumeClaimTemplates:
+      - metadata:
+          name: queue
+        spec:
+          storageClassName: standard
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "1Gi"
+    podManagementPolicy: Parallel
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Delete
+      whenScaled: Delete
+
+  extraVolumeMounts:
+    - name: queue
+      mountPath: /var/addon/splunk/exporter_queue/agent
+
+agent:
+  enabled: false
+clusterReceiver:
+  enabled: false

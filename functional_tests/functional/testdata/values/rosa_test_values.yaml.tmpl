@@ -19,9 +19,18 @@ logsCollection:
     enabled: false
 
 agent:
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   resources:
     limits:
-      memory: 1Gi
+      # ROSA control-plane receiver checks scrape multiple OpenShift control-plane
+      # endpoints and file-export metrics in the same agent. Keep extra headroom
+      # so memory_limiter does not refuse scrape data during CI startup.
+      memory: 2Gi
   controlPlaneMetrics:
     scrapeInterval: 30s
     etcd:
@@ -35,7 +44,7 @@ agent:
         insecure_skip_verify: true
     exporters:
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       otlp_grpc:
         endpoint: {{ .OtlpEndpoint }}
         tls:
@@ -52,12 +61,18 @@ agent:
             - otlp_grpc
 clusterReceiver:
   eventsEnabled: true
+  extraVolumes:
+    - name: metrics-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: metrics-output
+      mountPath: /splunk-metrics
   config:
     exporters:
       file:
-        path: /tmp/metrics.json
+        path: /splunk-metrics/metrics.json
       file/k8s_cluster:
-        path: /tmp/k8s_cluster_metrics.json
+        path: /splunk-metrics/k8s_cluster_metrics.json
       signalfx:
         ingest_url: {{ .K8sClusterEndpoint }}
         tls:

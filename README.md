@@ -53,7 +53,7 @@ export metric, trace, and log data for:
 
 - The Splunk OpenTelemetry Collector for Kubernetes Helm chart is production tested; it is in use by a number of customers in their production environments
 - Customers using the helm chart can receive direct help from official Splunk support within SLA's
-- Customers can use or migrate to the Splunk OpenTelemetry Collector for Kubernetes Helm chart without worrying about future breaking changes to its core configuration experience for metrics and traces collection (OpenTelemetry logs collection configuration is in beta). There may be breaking changes to the Collector's own metrics.
+- The core configuration experience for metrics, traces and logs collection is stable and well supported. Please review the [versioning and breaking changes](#versioning-and-breaking-changes) guidance for upgrade best practices.
 
 **Installations that use this distribution can receive direct help from
 Splunk's support teams.** Customers are free to use the core OpenTelemetry OSS
@@ -92,6 +92,39 @@ The Helm chart works with default configurations of the main Kubernetes distribu
 While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to
 [values.yaml](helm-charts/splunk-otel-collector/values.yaml).
+
+## Versioning and breaking changes
+
+> [!IMPORTANT]
+> **Chart versions are SemVer-formatted, but they do not follow SemVer compatibility guarantees; a minor version bump can contain breaking changes.**
+
+The chart `version` mirrors the bundled [Splunk OpenTelemetry
+Collector](https://github.com/signalfx/splunk-otel-collector) image's `appVersion`: a release starts
+at the same patch as the image, and the patch is then bumped for a chart change or to pick up an image
+patch update. Because of this, breaking changes to chart values, templates, and rendered manifests
+can ship in what looks like a minor bump (for example `0.149.0` → `0.150.0`).
+
+To upgrade safely:
+
+- **Pin to an exact chart version.** Avoid `~` / `^` version constraints, and be careful with GitOps
+  tooling that auto-bumps minor versions, as these can apply a breaking upgrade without review.
+- **Read the release notes before every upgrade.** Check [UPGRADING.md](UPGRADING.md) for migration
+  steps and the [CHANGELOG.md](CHANGELOG.md) / [GitHub releases](https://github.com/signalfx/splunk-otel-collector-chart/releases)
+  for items marked as breaking.
+- **Read the Collector image release notes.** Each chart version bundles a matching Splunk
+  OpenTelemetry Collector image (the chart's `appVersion`). Image-level changes such as component
+  behavior, metric or attribute renames, default runtime settings, and upstream
+  `opentelemetry-collector-contrib` component updates can change the telemetry emitted by components
+  you configure, even when your chart values are unchanged. Review the
+  [image release notes](https://github.com/signalfx/splunk-otel-collector/releases) for the
+  `appVersion` you are moving to (each [CHANGELOG.md](CHANGELOG.md) entry links the image release it
+  adopts).
+- **Check bundled dependencies.** The chart ships versioned subcharts and dependencies, such as
+  the OpenTelemetry Operator (and its CRDs). Their upgrades can change operator behavior or injected
+  auto-instrumentation even when your chart values are unchanged, so review their release notes
+  if those features are enabled.
+- **Test the upgrade in a non-production environment first**, and diff the rendered manifests
+  (`helm template` / `helm diff upgrade`) to catch unexpected changes.
 
 ## Getting Started
 
@@ -192,6 +225,10 @@ The [examples directory](examples) contains examples of typical use cases with p
 ### How to upgrade
 
 **Make sure you run `helm repo update` before you upgrade**
+
+> [!IMPORTANT]
+> Before upgrading, review the
+> [versioning and breaking changes](#versioning-and-breaking-changes) guidance, and the [CHANGELOG.md](CHANGELOG.md).
 
 To upgrade a deployment follow the instructions for installing
 but use `upgrade` instead of `install`, for example:
