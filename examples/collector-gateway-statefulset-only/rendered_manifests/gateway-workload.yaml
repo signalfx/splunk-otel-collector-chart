@@ -45,11 +45,13 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: badbd6f3ec0071fe3e478d04f3ffbec39bb385df80771230aff1975e49bfb0ac
+        checksum/config: 9b85cad110ac60f372f3b3e02f5c1c822785c5ca4e06cc5430c402118d04ee3a
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 999
       containers:
       - name: otel-collector
         args:
@@ -123,6 +125,9 @@ spec:
             cpu: 2
             memory: 4Gi
         volumeMounts:
+        - name: secret
+          mountPath: /otel/etc
+          readOnly: true
         - mountPath: /conf
           name: collector-configmap
         - mountPath: /var/addon/splunk/exporter_queue/agent
@@ -135,3 +140,7 @@ spec:
           items:
             - key: relay
               path: relay.yaml
+      - name: secret
+        secret:
+          secretName: default-splunk-otel-collector
+          defaultMode: 0440
