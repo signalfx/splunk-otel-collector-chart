@@ -810,7 +810,7 @@ tests:
         podSecurityContext:
           fsGroup: 1234
           fsGroupChangePolicy: OnRootMismatch
-    template: deployment-gateway.yaml
+    template: gateway-workload.yaml
     asserts:
       - isNull:
           path: spec.template.spec.securityContext
@@ -834,7 +834,7 @@ tests:
           endpoint: otlp-logs.example.com:4317
           protocol: grpc
           caFile: ca
-    template: deployment-gateway.yaml
+    template: gateway-workload.yaml
     asserts:
       - equal:
           path: spec.template.spec.securityContext.fsGroup

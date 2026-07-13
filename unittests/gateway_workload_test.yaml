@@ -133,3 +133,37 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "/gateway/mode"
+
+  - it: should not configure headers_setter when gateway sends only to Splunk Platform
+    template: configmap-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "headers_setter"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "splunk_observability_access_token"
+
+  - it: should configure headers_setter when gateway sends to Splunk Observability
+    template: configmap-gateway.yaml
+    set:
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: us0
+        accessToken: o11y-token
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+headers_setter:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+- headers_setter"
