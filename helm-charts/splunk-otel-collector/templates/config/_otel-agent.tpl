@@ -5,7 +5,7 @@ The values can be overridden in .Values.agent.config
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" . | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -49,9 +49,15 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
+        {{- if .Values.agent.tokenPassthrough }}
+        include_metadata: true
+        {{- end }}
       http:
         # https://github.com/open-telemetry/opentelemetry-collector/blob/9d3a8a4608a7dbd9f787867226a78356ace9b5e4/receiver/otlpreceiver/otlp.go#L140-L152
         endpoint: 0.0.0.0:4318
+        {{- if .Values.agent.tokenPassthrough }}
+        include_metadata: true
+        {{- end }}
 
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode

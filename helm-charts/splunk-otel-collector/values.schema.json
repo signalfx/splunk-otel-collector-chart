@@ -387,6 +387,10 @@
         "enabled": {
           "type": "boolean"
         },
+        "tokenPassthrough": {
+          "description": "Enable passthrough of the client's authentication token for Splunk Observability and Splunk Platform backends and OpAMP.",
+          "type": "boolean"
+        },
         "controlPlaneEnabled": {
           "type": "boolean",
           "deprecated": true
@@ -1235,6 +1239,10 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "type": "boolean"
+        },
+        "tokenPassthrough": {
+          "description": "Enable passthrough of the client's authentication token for Splunk Observability and Splunk Platform backends and OpAMP.",
           "type": "boolean"
         },
         "mode": {

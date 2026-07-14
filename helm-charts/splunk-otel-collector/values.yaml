@@ -342,6 +342,16 @@ extraAttributes:
 agent:
   enabled: true
 
+  # Enables passthrough of the client's authentication token received by the agent's OTLP
+  # receivers and the OpAMP HTTP forwarder ingress. When true, the incoming `X-SF-Token`
+  # metadata is propagated to Splunk Observability and to the gateway (if enabled) via the
+  # `headers_setter` extension, and the OpAMP forwarder egress does not override the token
+  # set by the caller. When false (default), the agent authenticates upstream using the
+  # `splunkObservability.accessToken` and `splunkPlatform.token` values configured on this
+  # chart. Note: passthrough for Splunk Platform is only supported over OTLP; the HEC
+  # exporters continue to use the configured token.
+  tokenPassthrough: false
+
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
@@ -929,6 +939,15 @@ gateway:
   # Defines if the gateway collector workload is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
+
+  # Enables passthrough of the client's authentication token received by the gateway's OTLP
+  # receivers and the OpAMP HTTP forwarder ingress. When true, the incoming `X-SF-Token`
+  # metadata is propagated to Splunk Observability via the `headers_setter` extension, and the
+  # OpAMP forwarder egress does not override the token set by the caller. When false (default),
+  # the gateway authenticates upstream using the `splunkObservability.accessToken` and
+  # `splunkPlatform.token` values configured on this chart. Note: passthrough for Splunk Platform
+  # is only supported over OTLP; the HEC exporters continue to use the configured token.
+  tokenPassthrough: false
 
   # Gateway workload mode. Supported values: deployment, statefulset.
   mode: deployment

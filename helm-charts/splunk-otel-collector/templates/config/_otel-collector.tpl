@@ -5,7 +5,7 @@ The values can be overridden in .Values.gateway.config
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
