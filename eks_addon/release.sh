@@ -8,7 +8,7 @@
 # Note: This script requires OKTA_AWS_ROLE_ARN to be set in the environment.
 
 # Check required tools
-for tool in "okta-aws-login" "aws" "yq" "helm" "docker"; do
+for tool in "okta-aws-login" "aws" "yq" "jq" "helm" "docker"; do
   command -v "${tool}" &>/dev/null || { echo "❌ Required command '${tool}' is not installed or not in PATH"; exit 1; }
 done
 
@@ -91,7 +91,7 @@ push_chart() {
   echo "⏳ Packaging and pushing Helm chart ${ecr_chart_release} ..."
   helm package "${EKS_CHART_DIR}" -d "${BUILD_DIR}"
   local package_file="${BUILD_DIR}/splunk-otel-collector-${CHART_VERSION}.tgz"
-  ${DRY_RUN_PREFIX} helm push ${package_file} oci://${ECR_HELM_NAMESPACE}
+  ${DRY_RUN_PREFIX} helm push "${package_file}" oci://${ECR_HELM_NAMESPACE}
 
   echo "✅ Successfully pushed Helm chart to ${ecr_chart_release}"
 }
