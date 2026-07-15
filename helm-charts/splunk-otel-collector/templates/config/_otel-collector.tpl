@@ -33,11 +33,15 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
+        {{- if .Values.gateway.tokenPassthrough }}
         include_metadata: true
+        {{- end }}
       http:
         # https://github.com/open-telemetry/opentelemetry-collector/blob/9d3a8a4608a7dbd9f787867226a78356ace9b5e4/receiver/otlpreceiver/otlp.go#L140-L152
         endpoint: 0.0.0.0:4318
+        {{- if .Values.gateway.tokenPassthrough }}
         include_metadata: true
+        {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
