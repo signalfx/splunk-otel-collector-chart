@@ -682,6 +682,6 @@ http_forwarder/opamp_splunk_o11y:
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
       {{- end }}
       headers:
-        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        X-SF-Token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
 {{- end }}
 {{- end }}
