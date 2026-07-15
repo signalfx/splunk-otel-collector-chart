@@ -1395,18 +1395,9 @@ obi:
         path: /sys/kernel/security
         type: Directory
 
-    # Required for proper context propagation in requests.
-    - name: cgroup
-      hostPath:
-        path: /sys/fs/cgroup
-        type: Directory
-
   volumeMounts:
     - name: kernel-security
       mountPath: /sys/kernel/security
-      readOnly: true
-    - name: cgroup
-      mountPath: /sys/fs/cgroup
       readOnly: true
 
 ################################################################################
