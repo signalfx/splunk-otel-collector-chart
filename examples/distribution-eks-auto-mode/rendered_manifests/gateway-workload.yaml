@@ -30,7 +30,7 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: a33e1c26410ce6c66eef8c0aab755dd7b71d48f262cd9eb0eafff68f8ba8281b
+        checksum/config: 1173513c0ba37fe2b0c0d913aff5c0421c44623e05ef5456953567915ca8eb2e
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
@@ -110,9 +110,6 @@ spec:
             cpu: 4
             memory: 8Gi
         volumeMounts:
-        - name: secret
-          mountPath: /otel/etc
-          readOnly: true
         - mountPath: /conf
           name: collector-configmap
       terminationGracePeriodSeconds: 600
@@ -123,7 +120,3 @@ spec:
           items:
             - key: relay
               path: relay.yaml
-      - name: secret
-        secret:
-          secretName: default-splunk-otel-collector
-          defaultMode: 0440

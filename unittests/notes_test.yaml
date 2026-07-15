@@ -47,8 +47,35 @@ tests:
       - notMatchRegexRaw:
           pattern: "Splunk Platform logs to OTLP endpoint"
 
-  - it: should warn when custom collector config references Splunk token env vars
+  - it: should not warn about custom collector config token env vars by default
     set:
+      agent:
+        config:
+          exporters:
+            splunk_hec/custom:
+              token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+      gateway:
+        config:
+          exporters:
+            signalfx/custom:
+              access_token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      clusterReceiver:
+        config:
+          exporters:
+            splunk_hec/custom:
+              token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+    asserts:
+      - notMatchRegexRaw:
+          pattern: "\\[WARNING\\] agent\\.config references a Splunk token environment variable"
+      - notMatchRegexRaw:
+          pattern: "\\[WARNING\\] gateway\\.config references a Splunk token environment variable"
+      - notMatchRegexRaw:
+          pattern: "\\[WARNING\\] clusterReceiver\\.config references a Splunk token environment variable"
+
+  - it: should warn when custom collector config references Splunk token env vars while token file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
       agent:
         config:
           exporters:

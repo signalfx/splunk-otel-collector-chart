@@ -104,6 +104,11 @@ Avoid using this pre-created Secret option for new deployments. Prefer the
 default chart-created Secret because the pre-created Secret option will be
 unsupported in a future release.
 
+By default, the Collector reads token values from environment variables sourced
+from the Splunk Secret. To mount Splunk Observability and Splunk Platform HEC
+tokens as files and configure the Collector to read those files, enable
+`featureGates.mountSplunkSecretAsFile`.
+
 Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
 default, so token and key files are not readable by other users in the
 container. The chart sets `fsGroup: 999` by default under the agent, gateway,

@@ -32,7 +32,7 @@ spec:
         release: default
         sidecar.istio.io/inject: "false"
       annotations:
-        checksum/config: 3fed88693ab66ada0a16b870d2975f5f71799a2eff3e300504f7661c552822b4
+        checksum/config: 39dffdfc1983201131208f3e2258597feb7e13013037a3746b3bd05b05cd8922
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -169,9 +169,6 @@ spec:
         - mountPath: /hostfs/usr/lib/os-release
           name: host-usr-lib-osrelease
           readOnly: true
-        - name: secret
-          mountPath: /otel/etc
-          readOnly: true
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -219,10 +216,6 @@ spec:
       - name: host-usr-lib-osrelease
         hostPath:
           path: /usr/lib/os-release
-      - name: secret
-        secret:
-          secretName: default-splunk-otel-collector
-          defaultMode: 0440
       - name: otel-configmap
         configMap:
           name: default-splunk-otel-collector-otel-agent

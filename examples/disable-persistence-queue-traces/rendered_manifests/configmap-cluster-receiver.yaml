@@ -41,7 +41,7 @@ data:
         timeout: 10s
         tls:
           insecure_skip_verify: false
-        token: ${file:/otel/etc/splunk_platform_hec_token}
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
       splunk_hec/platform_metrics:
         disable_compression: false
         endpoint: CHANGEME
@@ -64,7 +64,7 @@ data:
         timeout: 10s
         tls:
           insecure_skip_verify: false
-        token: ${file:/otel/etc/splunk_platform_hec_token}
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
       health_check:
         endpoint: 0.0.0.0:13134

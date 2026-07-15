@@ -27,7 +27,7 @@ data:
           authenticator: headers_setter
         logs_endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v3/event
       signalfx:
-        access_token: ${file:/otel/etc/splunk_observability_access_token}
+        access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         api_url: https://api.CHANGEME.observability.splunkcloud.com
         correlation: null
         ingest_url: https://ingest.CHANGEME.observability.splunkcloud.com
@@ -56,14 +56,14 @@ data:
         timeout: 10s
         tls:
           insecure_skip_verify: false
-        token: ${file:/otel/etc/splunk_platform_hec_token}
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
     extensions:
       file_storage:
         directory: /var/addon/splunk/otel_pos
       headers_setter:
         headers:
         - action: upsert
-          default_value: ${file:/otel/etc/splunk_observability_access_token}
+          default_value: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
           from_context: X-SF-TOKEN
           key: X-SF-TOKEN
       health_check:
@@ -85,7 +85,7 @@ data:
           http:
             endpoint: https://ingest.CHANGEME.observability.splunkcloud.com/v1/opamp
             headers:
-              X-SF-Token: ${file:/otel/etc/splunk_observability_access_token}
+              X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
             polling_interval: 30s
       zpages: null
     processors:

@@ -29,11 +29,40 @@ If release name contains chart name it will be used as a full name.
 Warn if a collector config override still references Splunk token environment variables.
 */}}
 {{- define "splunk-otel-collector.warnOnTokenEnvVarRefs" -}}
-{{- if .config -}}
+{{- if and .enabled .config -}}
 {{- $source := .source -}}
 {{- if regexMatch "\\$\\{SPLUNK_[A-Z0-9_]*_TOKEN\\}" (toYaml .config) }}
 {{- printf "[WARNING] %s references a Splunk token environment variable (${SPLUNK_*_TOKEN}). Built-in chart configuration now reads tokens from mounted Secret files. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}. Token environment variables are still injected for compatibility but will be removed in a future release.\n" $source }}
 {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether Splunk tokens should be mounted and read as files instead of environment variables.
+*/}}
+{{- define "splunk-otel-collector.splunkSecretTokenFileEnabled" -}}
+{{- if .Values.featureGates.mountSplunkSecretAsFile }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Collector config value for the Splunk Observability access token.
+*/}}
+{{- define "splunk-otel-collector.splunkObservabilityAccessToken" -}}
+{{- if eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true" -}}
+${file:/otel/etc/splunk_observability_access_token}
+{{- else -}}
+${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Collector config value for the Splunk Platform HEC token.
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformHecToken" -}}
+{{- if eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true" -}}
+${file:/otel/etc/splunk_platform_hec_token}
+{{- else -}}
+${SPLUNK_PLATFORM_HEC_TOKEN}
 {{- end -}}
 {{- end -}}
 
@@ -83,8 +112,11 @@ Whether the Splunk Secret must be mounted as files for tokens (i.e. o11y access 
 */}}
 {{- define "splunk-otel-collector.secretMountRequired" -}}
 {{- if or
-      (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
-      (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")
+      (and
+        (eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true")
+        (or
+          (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+          (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")))
       (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
 {{- end -}}
 

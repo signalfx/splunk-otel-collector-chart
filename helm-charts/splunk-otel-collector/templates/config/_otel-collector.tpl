@@ -23,7 +23,7 @@ extensions:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
-        default_value: "${file:/otel/etc/splunk_observability_access_token}"
+        default_value: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
   {{- end }}
 
 receivers:
@@ -107,7 +107,7 @@ exporters:
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${file:/otel/etc/splunk_observability_access_token}
+    access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     sending_queue:
       num_consumers: 32
   # To send entities (applicable only if discovery mode is enabled)
@@ -119,7 +119,7 @@ exporters:
   otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
-      "X-SF-TOKEN": "${file:/otel/etc/splunk_observability_access_token}"
+      "X-SF-TOKEN": "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
       "X-Splunk-Instrumentation-Library": secureapp
   {{- end }}
   {{- end }}
@@ -133,7 +133,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${file:/otel/etc/splunk_observability_access_token}"
+    token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     sending_queue:

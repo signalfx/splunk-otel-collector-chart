@@ -30,11 +30,13 @@ spec:
         component: otel-k8s-cluster-receiver
         release: default
       annotations:
-        checksum/config: 67de70a81f93c7e1a9d9a9ccd7aa3644cc812104c2cadd61049f43f6fb726026
+        checksum/config: 6988d5dd6b005851483c00213e241e2350ec124c2e7ec2b12c33be908e35ea60
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 999
       containers:
       - name: otel-collector
         args:
