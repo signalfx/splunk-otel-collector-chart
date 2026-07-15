@@ -6,7 +6,7 @@ metadata:
   name: default-obi
   namespace: default
   labels:
-    helm.sh/chart: obi-0.10.0
+    helm.sh/chart: obi-0.11.0
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "v0.10.0"
@@ -23,10 +23,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 1e90626039e952b2a570160fa45c9e736bcc57a7f8becc46b6b497a1f91f0d0a
+        checksum/config: e1ccaba722b72f92f46483abb82be827625cc12f3fb435b93cd3f2a0f5ea28b9
         
       labels:
-        helm.sh/chart: obi-0.10.0
+        helm.sh/chart: obi-0.11.0
         app.kubernetes.io/name: obi
         app.kubernetes.io/instance: default
         app.kubernetes.io/version: "v0.10.0"
@@ -36,6 +36,8 @@ spec:
     spec:
       serviceAccountName: default-obi
       hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       initContainers:
       containers:
         - name: ebpf-instrument
@@ -63,6 +65,11 @@ spec:
           volumeMounts:
             - mountPath: /etc/ebpf-instrument/config
               name: ebpf-instrument-config
+            - mountPath: /sys/fs/cgroup
+              name: cgroup
+              readOnly: true
+            - mountPath: /sys/kernel/tracing
+              name: tracefs
             - mountPath: /sys/kernel/security
               name: kernel-security
               readOnly: true
@@ -80,6 +87,13 @@ spec:
         - name: ebpf-instrument-config
           configMap:
             name: default-obi
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+            type: Directory
+        - name: tracefs
+          hostPath:
+            path: /sys/kernel/tracing
         - hostPath:
             path: /sys/kernel/security
             type: Directory
