@@ -672,7 +672,6 @@ Common config for Splunk O11Y Ingest HTTP Forwarder extension
 {{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
-{{- $tokenPassthrough := .tokenPassthrough | default false }}
 http_forwarder/opamp_splunk_o11y:
   ingress:
       endpoint: "0.0.0.0:4320"
@@ -682,7 +681,7 @@ http_forwarder/opamp_splunk_o11y:
       {{- else }}
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
       {{- end }}
-      {{- if not $tokenPassthrough }}
+      {{- if not .tokenPassthrough }}
       headers:
         X-SF-Token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
       {{- end }}
