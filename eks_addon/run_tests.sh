@@ -50,6 +50,27 @@ test_schema_validation() {
   fi
 }
 
+test_no_chart_dependencies() {
+  echo "⏳ Running test_no_chart_dependencies ..."
+
+  if [[ -f "${EKS_CHART_DIR}/Chart.lock" ]]; then
+    echo "❌ Chart dependency test failed: Chart.lock must not be included in the EKS Add-on chart"
+    return 1
+  fi
+
+  if [[ -d "${EKS_CHART_DIR}/charts" ]]; then
+    echo "❌ Chart dependency test failed: charts/ must not be included in the EKS Add-on chart"
+    return 1
+  fi
+
+  local dependency_count
+  dependency_count=$(yq e '(.dependencies // []) | length' "${EKS_CHART_DIR}/Chart.yaml")
+  if [[ "${dependency_count}" != "0" ]]; then
+    echo "❌ Chart dependency test failed: Chart.yaml dependencies must be empty"
+    return 1
+  fi
+}
+
 test_images() {
   echo "⏳ Running test_images ..."
 
@@ -91,6 +112,7 @@ prepare_chart
 test_helm_lint
 test_helm_template
 test_schema_validation
+test_no_chart_dependencies
 test_images
 test_release_properties
 

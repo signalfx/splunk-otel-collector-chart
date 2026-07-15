@@ -28,8 +28,8 @@ prepare_chart() {
   mkdir -p "${BUILD_DIR}"
   cp -R "${CHART_DIR}" "${BUILD_DIR}/"
 
-  echo "⏳ Removing subcharts ..."
-  rm -rf "${EKS_CHART_DIR}/charts"
+  echo "⏳ Removing Helm dependency artifacts ..."
+  rm -rf "${EKS_CHART_DIR}/charts" "${EKS_CHART_DIR}/Chart.lock"
 
   echo "⏳ Modifying Helm chart in ${EKS_CHART_DIR} using overrides from ${EKS_CHART_OVERRIDES_DIR} ..."
   for override in "${EKS_CHART_OVERRIDES_DIR}"/*.yaml; do

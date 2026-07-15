@@ -1,0 +1,28 @@
+splunkObservability:
+  realm: test
+  accessToken: "00000000-0000-0000-0000-000000000000"
+  # Point ingestUrl at the test sink — the agent's otlp_http/secureapp exporter
+  # will POST to <ingestUrl>/v3/event, which is exactly where our OTLP logs sink
+  # is listening on port 4320.
+  ingestUrl: {{ .IngestURL }}
+  apiUrl: {{ .ApiURL }}
+  secureAppEnabled: true
+
+clusterName: dev-operator
+environment: test
+
+operator:
+  enabled: true
+
+operatorcrds:
+  install: true
+
+instrumentation:
+  installationJob:
+    enabled: true
+
+agent:
+  enabled: true
+
+clusterReceiver:
+  enabled: false

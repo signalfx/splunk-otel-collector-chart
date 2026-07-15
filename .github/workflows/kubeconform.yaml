@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: get-test-matrix
     strategy:
+      fail-fast: false
+      max-parallel: 2
       matrix: ${{ fromJSON(needs.get-test-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -47,4 +49,4 @@ jobs:
 
       - name: Run kubeconform on rendered examples
         run: |
-          make kubeconform K8S_VERSION="${{ matrix.k8s_version }}"
+          make kubeconform K8S_VERSION="${{ matrix['k8s-version'] }}"
