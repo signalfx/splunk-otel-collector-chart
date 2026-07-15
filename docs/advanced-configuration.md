@@ -1189,5 +1189,11 @@ agent:
   tokenPassthrough: true
 ```
 
+To disable passthrough on the gateway:
+```yaml
+gateway:
+  tokenPassthrough: false
+```
+
 Token passthrough is not supported for the Splunk Platform HEC exporters; they always use
 `splunkPlatform.token`.
