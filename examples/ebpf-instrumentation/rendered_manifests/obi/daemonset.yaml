@@ -73,9 +73,6 @@ spec:
             - mountPath: /sys/kernel/security
               name: kernel-security
               readOnly: true
-            - mountPath: /sys/fs/cgroup
-              name: cgroup
-              readOnly: true
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
@@ -98,7 +95,3 @@ spec:
             path: /sys/kernel/security
             type: Directory
           name: kernel-security
-        - hostPath:
-            path: /sys/fs/cgroup
-            type: Directory
-          name: cgroup
