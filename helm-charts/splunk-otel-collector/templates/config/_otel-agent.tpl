@@ -49,15 +49,11 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
-        {{- if .Values.agent.tokenPassthrough }}
-        include_metadata: true
-        {{- end }}
+        include_metadata: {{ .Values.agent.tokenPassthrough }}
       http:
         # https://github.com/open-telemetry/opentelemetry-collector/blob/9d3a8a4608a7dbd9f787867226a78356ace9b5e4/receiver/otlpreceiver/otlp.go#L140-L152
         endpoint: 0.0.0.0:4318
-        {{- if .Values.agent.tokenPassthrough }}
-        include_metadata: true
-        {{- end }}
+        include_metadata: {{ .Values.agent.tokenPassthrough }}
 
   {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
   # Placeholder receiver needed for discovery mode
