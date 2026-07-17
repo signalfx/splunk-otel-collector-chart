@@ -14,7 +14,7 @@ gateway:
   replicaCount: 1
   ports:
     signalfx:
-      containerPort: 99430
+      containerPort: 59433
       protocol: TCP
       enabled_for: [ metrics, traces, logs ]
   resources:
@@ -24,7 +24,7 @@ gateway:
   config:
     extensions:
       http_forwarder/o11y_ingest:
-        ingress: 0.0.0.0:99430
+        ingress: 0.0.0.0:59433
         egress: {{ .IngestURL }}
 
 clusterReceiver:
