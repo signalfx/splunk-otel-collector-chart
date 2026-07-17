@@ -30,11 +30,13 @@ spec:
         component: otel-collector
         release: default
       annotations:
-        checksum/config: 0467c0f415f3c5837d813905b2eba677f8110200dcfb5531bb73ff79ae3be4c6
+        checksum/config: 1173513c0ba37fe2b0c0d913aff5c0421c44623e05ef5456953567915ca8eb2e
     spec:
       serviceAccountName: default-splunk-otel-collector
       nodeSelector:
           kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 999
       containers:
       - name: otel-collector
         args:

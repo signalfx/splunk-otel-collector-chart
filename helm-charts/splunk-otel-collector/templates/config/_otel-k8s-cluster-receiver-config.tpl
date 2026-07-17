@@ -264,7 +264,7 @@ exporters:
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
@@ -275,7 +275,7 @@ exporters:
   otlp_http/o11y_events:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
-      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-SF-TOKEN": "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
@@ -283,7 +283,7 @@ exporters:
   otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
-      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-SF-TOKEN": "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
@@ -303,7 +303,7 @@ exporters:
   signalfx/histograms:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true

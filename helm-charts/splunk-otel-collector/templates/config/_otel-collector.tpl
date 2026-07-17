@@ -17,12 +17,14 @@ extensions:
 
   zpages:
 
+  {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   headers_setter:
     headers:
       - action: upsert
         key: X-SF-TOKEN
         from_context: X-SF-TOKEN
-        default_value: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        default_value: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
+  {{- end }}
 
 receivers:
   {{- include "splunk-otel-collector.traceReceivers" . | nindent 2 }}
@@ -105,7 +107,7 @@ exporters:
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
-    access_token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+    access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     sending_queue:
       num_consumers: 32
   # To send entities (applicable only if discovery mode is enabled)
@@ -117,7 +119,7 @@ exporters:
   otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
-      "X-SF-TOKEN": "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      "X-SF-TOKEN": "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
       "X-Splunk-Instrumentation-Library": secureapp
   {{- end }}
   {{- end }}
@@ -131,7 +133,7 @@ exporters:
   {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
   splunk_hec/o11y:
     endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v1/log
-    token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+    token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     sending_queue:
@@ -212,9 +214,9 @@ service:
                 without_type_suffix: true
   extensions:
     - health_check
-    - headers_setter
     - zpages
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    - headers_setter
     - http_forwarder
     - http_forwarder/opamp_splunk_o11y
     - opamp/splunk_o11y

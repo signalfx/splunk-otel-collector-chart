@@ -232,6 +232,124 @@ tests:
           path: data.splunk_observability_access_token
           value: YWJj
 
+  - it: should use env var references for Splunk tokens in agent config by default
+    set:
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{SPLUNK_PLATFORM_HEC_TOKEN\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{SPLUNK_PLATFORM_HEC_TOKEN\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{SPLUNK_OBSERVABILITY_ACCESS_TOKEN\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{file:/otel/etc/splunk_(platform_hec_token|observability_access_token)\\}"
+
+  - it: should use file references for Splunk tokens in agent config when enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
+  - it: should use file references for Splunk tokens in gateway config when enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
+  - it: should use file references for Splunk tokens in cluster receiver config when enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: true
+        metricsIndex: metrics
+        tracesEnabled: false
+      clusterReceiver:
+        eventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_metrics:[\\s\\S]+?token: \\$\\{file:/otel/etc/splunk_platform_hec_token\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "access_token: \\$\\{file:/otel/etc/splunk_observability_access_token\\}"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\$\\{SPLUNK_(PLATFORM_HEC|OBSERVABILITY_ACCESS)_TOKEN\\}"
+
   - it: should include HEC TLS files in generated secret when configured without HEC token
     set:
       splunkObservability:
@@ -576,7 +694,11 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
 
   - it: should mount Splunk secret on gateway when OTLP TLS files are configured
     set:
@@ -608,7 +730,11 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
 
   - it: should mount Splunk secret on cluster receiver when OTLP TLS files are configured
     set:
@@ -638,4 +764,249 @@ tests:
           content:
             name: secret
             secret:
+              defaultMode: 288
               secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+
+  - it: should allow overriding Splunk secret volume defaultMode
+    set:
+      secret:
+        defaultMode: "0444"
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              defaultMode: 292
+              secretName: test-release-splunk-otel-collector
+
+  - it: should set default agent pod fsGroup even when the Splunk secret is not mounted
+    set:
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+
+  - it: should mount Splunk secret for tokens when file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: secret
+            mountPath: /otel/etc
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: secret
+            secret:
+              defaultMode: 288
+              secretName: test-release-splunk-otel-collector
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
+
+  - it: should not inject Splunk token env vars on gateway when file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: gateway-workload.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
+
+  - it: should not inject Splunk token env vars on cluster receiver when file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
+
+  - it: should render configured fsGroupChangePolicy on Linux pods
+    set:
+      agent:
+        podSecurityContext:
+          fsGroupChangePolicy: OnRootMismatch
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: OnRootMismatch
+
+  - it: should strip configured pod fsGroup and fsGroupChangePolicy from Windows gateway pods
+    set:
+      isWindows: true
+      gateway:
+        enabled: true
+        podSecurityContext:
+          fsGroup: 1234
+          fsGroupChangePolicy: OnRootMismatch
+    template: gateway-workload.yaml
+    asserts:
+      - isNull:
+          path: spec.template.spec.securityContext
+
+  - it: should preserve configured pod fsGroup when mounting the Splunk secret
+    set:
+      gateway:
+        enabled: true
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: gateway-workload.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234
+
+  - it: should preserve configured agent pod fsGroup when mounting the Splunk secret
+    set:
+      agent:
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234
+
+  - it: should preserve configured cluster receiver pod fsGroup when mounting the Splunk secret
+    set:
+      clusterReceiver:
+        podSecurityContext:
+          fsGroup: 1234
+      splunkObservability:
+        realm: ""
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp-logs.example.com:4317
+          protocol: grpc
+          caFile: ca
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1234

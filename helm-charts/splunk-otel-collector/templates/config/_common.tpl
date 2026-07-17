@@ -462,7 +462,7 @@ Splunk Platform Logs exporter
 {{- define "splunk-otel-collector.splunkPlatformLogsExporter" -}}
 splunk_hec/platform_logs:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "{{ include "splunk-otel-collector.splunkPlatformHecToken" . }}"
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
@@ -517,7 +517,7 @@ Splunk Platform Metrics exporter
 {{- define "splunk-otel-collector.splunkPlatformMetricsExporter" -}}
 splunk_hec/platform_metrics:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "{{ include "splunk-otel-collector.splunkPlatformHecToken" . }}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
@@ -558,7 +558,7 @@ Splunk Platform Traces exporter
 {{- define "splunk-otel-collector.splunkPlatformTracesExporter" -}}
 splunk_hec/platform_traces:
   endpoint: {{ .Values.splunkPlatform.endpoint | quote }}
-  token: "${SPLUNK_PLATFORM_HEC_TOKEN}"
+  token: "{{ include "splunk-otel-collector.splunkPlatformHecToken" . }}"
   index: {{ .Values.splunkPlatform.tracesIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   {{- if .Values.splunkPlatform.sourcetype }}
@@ -660,7 +660,7 @@ opamp/splunk_o11y:
       {{- end }}
       polling_interval: 30s
       headers:
-        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        X-SF-Token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
   agent_description:
     include_resource_attributes: true
 {{- end }}
@@ -682,6 +682,6 @@ http_forwarder/opamp_splunk_o11y:
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
       {{- end }}
       headers:
-        X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+        X-SF-Token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
 {{- end }}
 {{- end }}

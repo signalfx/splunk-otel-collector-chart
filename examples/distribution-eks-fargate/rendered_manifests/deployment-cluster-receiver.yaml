@@ -47,6 +47,8 @@ spec:
                 values:
                 - otel-k8s-cluster-receiver
             topologyKey: kubernetes.io/hostname
+      securityContext:
+        fsGroup: 999
       initContainers:
         - name: cluster-receiver-node-discoverer
           image: public.ecr.aws/amazonlinux/amazonlinux:latest

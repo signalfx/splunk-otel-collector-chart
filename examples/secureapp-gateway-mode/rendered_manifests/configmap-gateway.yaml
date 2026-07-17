@@ -195,8 +195,8 @@ data:
     service:
       extensions:
       - health_check
-      - headers_setter
       - zpages
+      - headers_setter
       - http_forwarder
       - http_forwarder/opamp_splunk_o11y
       - opamp/splunk_o11y

@@ -77,6 +77,15 @@ tests:
     asserts:
       - notFailedTemplate: {}
 
+  - it: should fail when token file mounting is enabled on GKE Autopilot
+    set:
+      distribution: gke/autopilot
+      featureGates:
+        mountSplunkSecretAsFile: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "/featureGates/mountSplunkSecretAsFile"
+
   - it: should fail without token when platform endpoint is set and metrics are enabled
     set:
       splunkObservability:

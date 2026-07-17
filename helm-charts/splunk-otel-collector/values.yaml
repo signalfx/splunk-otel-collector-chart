@@ -40,7 +40,9 @@ splunkPlatform:
   # endpoint for proper extraction of fields.
   endpoint: ""
   # Required for Splunk Enterprise/Cloud (if `endpoint` is specified). Splunk
-  # HTTP Event Collector token.
+  # HTTP Event Collector token. The token is stored in a Kubernetes Secret. When
+  # featureGates.mountSplunkSecretAsFile is enabled, the token is mounted as a
+  # file in the collector pods.
   # Alternatively the token can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   token: ""
@@ -190,7 +192,9 @@ splunkObservability:
   # destination.
   realm: ""
   # Required for Splunk Observability (if `realm` is specified). Splunk
-  # Observability org access token.
+  # Observability org access token. The token is stored in a Kubernetes Secret.
+  # When featureGates.mountSplunkSecretAsFile is enabled, the token is mounted
+  # as a file in the collector pods.
   # Alternatively the accessToken can be provided as a secret.
   # Refer to https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#provide-tokens-as-a-secret
   accessToken: ""
@@ -452,6 +456,14 @@ agent:
   # Please note that on uninstallation of the chart, the permissions added to the
   # host log directories for given uid/gid are not reverted.
 
+  # Pod security context applied to the agent daemonset. The default fsGroup lets
+  # non-root Collector containers read group-readable Splunk Secret files. The
+  # chart removes fsGroup from Windows pods because it is Linux-specific.
+  # OpenShift users should set a value allowed by their SCC if the chart-created
+  # SCC is disabled or overridden.
+  podSecurityContext:
+    fsGroup: 999
+
   securityContext: {}
   #   runAsUser: 20000
   #   runAsGroup: 20000
@@ -540,8 +552,12 @@ clusterReceiver:
   tolerations: []
   affinity: {}
 
-  # Pod configurations
-  podSecurityContext: {}
+  # Pod configurations. The default fsGroup lets non-root Collector containers
+  # read group-readable Splunk Secret files. The chart removes fsGroup from
+  # Windows pods because it is Linux-specific. OpenShift users should set a value
+  # allowed by their SCC if the chart-created SCC is disabled or overridden.
+  podSecurityContext:
+    fsGroup: 999
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
@@ -840,6 +856,9 @@ rbac:
 secret:
   create: true
   name: ""
+  # File mode for files mounted from the Splunk secret. The default is group
+  # read-only so token files are not readable by other users in the container.
+  defaultMode: "0440"
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
   # Secret annotations
@@ -979,8 +998,12 @@ gateway:
   affinity: {}
   topologySpreadConstraints: []
 
-  # Pod configurations
-  podSecurityContext: {}
+  # Pod configurations. The default fsGroup lets non-root Collector containers
+  # read group-readable Splunk Secret files. The chart removes fsGroup from
+  # Windows pods because it is Linux-specific. OpenShift users should set a value
+  # allowed by their SCC if the chart-created SCC is disabled or overridden.
+  podSecurityContext:
+    fsGroup: 999
   terminationGracePeriodSeconds: 600
   priorityClassName: ""
 
@@ -1443,6 +1466,14 @@ featureGates:
   # and target allocator deployments.
   # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
+  # Mount Splunk Observability and Splunk Platform HEC tokens from the Splunk
+  # Secret and configure the default Collector configuration to read them from files.
+  # Token environment variables are not created when this is enabled. Custom
+  # Collector configuration must replace:
+  #   ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN} with ${file:/otel/etc/splunk_observability_access_token}
+  #   ${SPLUNK_PLATFORM_HEC_TOKEN} with ${file:/otel/etc/splunk_platform_hec_token}
+  # This option is not currently supported on GKE Autopilot.
+  mountSplunkSecretAsFile: false
   # Use a specific metrics pipeline to report control plane metrics as histograms. Enabled by default.
   useControlPlaneMetricsHistogramData: true
   # The feature gate provides a fix for a scenario where some logs might be missed due to the pod log file being

@@ -26,6 +26,48 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Fail if a collector config override still references Splunk token environment variables
+when token file mounting is enabled.
+*/}}
+{{- define "splunk-otel-collector.failOnTokenEnvVarRefs" -}}
+{{- if and .enabled .config -}}
+{{- $source := .source -}}
+{{- if regexMatch "\\$\\{SPLUNK_[A-Z0-9_]*_TOKEN\\}" (toYaml .config) }}
+{{- fail (printf "%s references a Splunk token environment variable (${SPLUNK_*_TOKEN}) while featureGates.mountSplunkSecretAsFile is enabled. Built-in chart configuration reads tokens from mounted Secret files and no longer injects token environment variables. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}." $source) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether Splunk tokens should be mounted and read as files instead of environment variables.
+*/}}
+{{- define "splunk-otel-collector.splunkSecretTokenFileEnabled" -}}
+{{- if .Values.featureGates.mountSplunkSecretAsFile }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Collector config value for the Splunk Observability access token.
+*/}}
+{{- define "splunk-otel-collector.splunkObservabilityAccessToken" -}}
+{{- if eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true" -}}
+${file:/otel/etc/splunk_observability_access_token}
+{{- else -}}
+${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Collector config value for the Splunk Platform HEC token.
+*/}}
+{{- define "splunk-otel-collector.splunkPlatformHecToken" -}}
+{{- if eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true" -}}
+${file:/otel/etc/splunk_platform_hec_token}
+{{- else -}}
+${SPLUNK_PLATFORM_HEC_TOKEN}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "splunk-otel-collector.chart" -}}
@@ -64,6 +106,19 @@ Whether the Splunk Platform secret must be mounted as files for HEC or OTLP TLS.
       .Values.splunkPlatform.otlpIngest.clientCert
       .Values.splunkPlatform.otlpIngest.clientKey
       .Values.splunkPlatform.otlpIngest.caFile }}true{{- else }}false{{- end }}
+{{- end -}}
+
+{{/*
+Whether the Splunk Secret must be mounted as files for tokens (i.e. o11y access token or HEC token) or platform TLS.
+*/}}
+{{- define "splunk-otel-collector.secretMountRequired" -}}
+{{- if or
+      (and
+        (eq (include "splunk-otel-collector.splunkSecretTokenFileEnabled" .) "true")
+        (or
+          (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
+          (eq (include "splunk-otel-collector.platformHecTokenRequired" .) "true")))
+      (eq (include "splunk-otel-collector.platformTlsSecretMountRequired" .) "true") }}true{{- else }}false{{- end }}
 {{- end -}}
 
 {{/*
@@ -444,10 +499,12 @@ Build the securityContext for Linux and Windows
 {{- define "splunk-otel-collector.securityContext" -}}
 {{- if .isWindows }}
 {{- $_ := unset .securityContext "runAsUser" }}
-{{- if not (hasKey .securityContext "windowsOptions")}}
+{{- $_ := unset .securityContext "fsGroup" }}
+{{- $_ := unset .securityContext "fsGroupChangePolicy" }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext "windowsOptions"))}}
 {{- $_ := set .securityContext "windowsOptions" dict }}
 {{- end }}
-{{- if and (not (hasKey .securityContext.windowsOptions "runAsUserName")) (.setRunAsUser) }}
+{{- if and (.setRunAsUser) (not (hasKey .securityContext.windowsOptions "runAsUserName")) }}
 {{- $_ := set .securityContext.windowsOptions "runAsUserName" "ContainerAdministrator"}}
 {{- end }}
 {{- else }}
@@ -455,7 +512,17 @@ Build the securityContext for Linux and Windows
 {{- $_ := set .securityContext "runAsUser" 0 }}
 {{- end }}
 {{- end }}
+{{- if .securityContext }}
 {{- toYaml .securityContext }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Build a pod securityContext for Linux and Windows.
+*/}}
+{{- define "splunk-otel-collector.podSecurityContext" -}}
+{{- $podSecurityContext := deepCopy (.podSecurityContext | default dict) -}}
+{{- include "splunk-otel-collector.securityContext" (dict "isWindows" .isWindows "securityContext" $podSecurityContext) }}
 {{- end -}}
 
 {{/*

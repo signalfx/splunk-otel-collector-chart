@@ -86,7 +86,7 @@ the chart stores them in the Splunk Platform Secret, mounts that Secret at
 `/otel/etc`, and renders the corresponding Collector `tls.ca_file`,
 `tls.cert_file`, and `tls.key_file` paths.
 
-## Provide tokens as a secret
+## Provide tokens as a secret from environment variables or mounted files
 
 Instead of having tokens and TLS PEM content as clear text in the values, those
 can be provided via a secret that is created before deploying the chart. See
@@ -98,6 +98,57 @@ secret:
   create: false
   name: your-secret
 ```
+
+By default, the Collector reads token values from environment variables sourced
+from the Splunk Secret. To mount Splunk Observability and Splunk Platform HEC
+tokens as files and configure the Collector to read those files, enable
+`featureGates.mountSplunkSecretAsFile`.
+
+Files mounted from the Splunk Secret use `secret.defaultMode: "0440"` by
+default, so token and key files are not readable by other users in the
+container. The chart sets `fsGroup: 999` by default under the agent, gateway,
+and cluster receiver pod security contexts so non-root Collector containers can
+read those group-readable files. The chart removes `fsGroup` from Windows pods
+because it is Linux-specific.
+
+To override the group, configure the pod security context for the component
+that mounts the Splunk Secret:
+
+```yaml
+agent:
+  podSecurityContext:
+    fsGroup: 1234
+
+clusterReceiver:
+  podSecurityContext:
+    fsGroup: 1234
+
+gateway:
+  podSecurityContext:
+    fsGroup: 1234
+```
+
+On OpenShift, explicit `fsGroup` values are validated by Security Context
+Constraints (SCCs). The chart-created SCC allows any `fsGroup` by default, but
+if you disable or override that SCC, make sure the configured `fsGroup` is
+allowed by the SCC used to admit the pod.
+
+The chart's built-in large host log and host metrics mounts use `hostPath`.
+If pod startup latency is observed from recursive volume ownership changes on
+user-provided volumes that support `fsGroup`, set
+`fsGroupChangePolicy: OnRootMismatch` in the same pod security context.
+For example:
+
+```yaml
+agent:
+  podSecurityContext:
+    fsGroup: 999
+    fsGroupChangePolicy: OnRootMismatch
+```
+
+Use the matching `gateway.podSecurityContext` or
+`clusterReceiver.podSecurityContext` field when the affected volume is mounted
+by those workloads.
 
 When a destination is enabled and the chart references a value from the Secret,
 the custom Secret must contain the matching key:
@@ -298,6 +349,11 @@ make sure to set `distribution` setting to `gke/autopilot`:
 ```yaml
 distribution: gke/autopilot
 ```
+
+GKE Autopilot is supported with the default Secret token behavior, where the
+Collector reads tokens from environment variables backed by the Splunk Secret.
+The `featureGates.mountSplunkSecretAsFile` option is not currently supported
+with `distribution: gke/autopilot`.
 
 Sometimes Splunk OTel Collector agent daemonset can have [problems scheduling in
 Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/daemonset#autopilot-ds-best-practices)
