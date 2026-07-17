@@ -1477,6 +1477,15 @@
         }
       }
     },
+    "opentelemetry-operator-crds": {
+      "description": "Configuration for opentelemetry-operator-crds. Prefer using the 'operatorcrds' alias for new installations. Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
+      "type": "object",
+      "properties": {
+        "install": {
+          "type": "boolean"
+        }
+      }
+    },
     "operator": {
       "description": "OpenTelemetry Operator configuration. A subchart that is used to install the operator, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/values.schema.json for more info.",
       "type": "object",
@@ -1532,6 +1541,11 @@
     },
     "obi": {
       "description": "OpenTelemetry eBPF Instrumentation configuration. A subchart that is used to install the eBPF instrumentation, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "opentelemetry-ebpf-instrumentation": {
+      "description": "OpenTelemetry eBPF Instrumentation configuration. Prefer using the 'obi' alias for new installations. This field is provided for compatibility with the original subchart name, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
       "type": "object",
       "additionalProperties": true
     },
