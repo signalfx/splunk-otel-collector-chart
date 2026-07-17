@@ -5,13 +5,17 @@ The values can be overridden in .Values.gateway.config
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   http_forwarder:
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+  http_forwarder/o11y_ingest:
+    ingress: 0.0.0.0:9943
+    egress:
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
   {{- end }}
 
 
@@ -219,6 +223,7 @@ service:
     - headers_setter
     - http_forwarder
     - http_forwarder/opamp_splunk_o11y
+    - http_forwarder/o11y_ingest
     - opamp/splunk_o11y
     {{- end }}
 

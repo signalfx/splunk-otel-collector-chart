@@ -5,7 +5,7 @@ The values can be overridden in .Values.agent.config
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -1013,7 +1013,7 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
+    # Note: The ingest URL is not used by this exporter when the gateway is enabled
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}

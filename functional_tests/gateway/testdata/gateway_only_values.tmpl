@@ -1,0 +1,31 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: CHANGEME
+   apiUrl: {{ .ApiURL }}
+   ingestUrl: {{ .IngestURL }}
+
+clusterName: test-cluster
+
+agent:
+  enabled: false
+
+gateway:
+  enabled: true
+  replicaCount: 1
+  ports:
+    signalfx:
+      containerPort: 99430
+      protocol: TCP
+      enabled_for: [ metrics, traces, logs ]
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  config:
+    extensions:
+      http_forwarder/o11y_ingest:
+        ingress: 0.0.0.0:99430
+        egress: {{ .IngestURL }}
+
+clusterReceiver:
+  enabled: false
