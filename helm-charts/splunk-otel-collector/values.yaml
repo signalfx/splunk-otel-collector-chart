@@ -973,7 +973,7 @@ gateway:
       protocol: TCP
       # SignalFx metrics enabled in gateway for all telemetry types since there may be
       # bundled metrics.
-      enabled_for: [ metrics, traces, logs ]
+      enabled_for: [metrics, traces, logs]
     zipkin:
       containerPort: 9411
       protocol: TCP
