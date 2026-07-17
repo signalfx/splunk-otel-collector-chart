@@ -74,6 +74,6 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 {{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.gateway.config "source" "gateway.config") }}
 {{- include "splunk-otel-collector.failOnDeprecatedNames" (dict "config" .Values.clusterReceiver.config "source" "clusterReceiver.config") }}
 
-{{- include "splunk-otel-collector.warnOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.agent.config "source" "agent.config") }}
-{{- include "splunk-otel-collector.warnOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.gateway.config "source" "gateway.config") }}
-{{- include "splunk-otel-collector.warnOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.clusterReceiver.config "source" "clusterReceiver.config") }}
+{{- include "splunk-otel-collector.failOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.agent.config "source" "agent.config") }}
+{{- include "splunk-otel-collector.failOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.gateway.config "source" "gateway.config") }}
+{{- include "splunk-otel-collector.failOnTokenEnvVarRefs" (dict "enabled" .Values.featureGates.mountSplunkSecretAsFile "config" .Values.clusterReceiver.config "source" "clusterReceiver.config") }}

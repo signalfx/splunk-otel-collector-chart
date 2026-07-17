@@ -1467,7 +1467,12 @@ featureGates:
   # AKS clusters with Azure Policy enabled might need to enable this to resolve automountServiceAccountToken policy.
   explicitMountServiceAccountToken: false
   # Mount Splunk Observability and Splunk Platform HEC tokens from the Splunk
-  # Secret and configure the Collector to read them from files instead of environment variables
+  # Secret and configure the default Collector configuration to read them from files.
+  # Token environment variables are not created when this is enabled. Custom
+  # Collector configuration must replace:
+  #   ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN} with ${file:/otel/etc/splunk_observability_access_token}
+  #   ${SPLUNK_PLATFORM_HEC_TOKEN} with ${file:/otel/etc/splunk_platform_hec_token}
+  # This option is not currently supported on GKE Autopilot.
   mountSplunkSecretAsFile: false
   # Use a specific metrics pipeline to report control plane metrics as histograms. Enabled by default.
   useControlPlaneMetricsHistogramData: true

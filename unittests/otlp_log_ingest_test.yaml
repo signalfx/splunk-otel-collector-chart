@@ -852,6 +852,64 @@ tests:
       - equal:
           path: spec.template.spec.securityContext.fsGroup
           value: 999
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
+
+  - it: should not inject Splunk token env vars on gateway when file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      gateway:
+        enabled: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: gateway-workload.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
+
+  - it: should not inject Splunk token env vars on cluster receiver when file mounting is enabled
+    set:
+      featureGates:
+        mountSplunkSecretAsFile: true
+      splunkObservability:
+        realm: us0
+        accessToken: abc
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN
 
   - it: should render configured fsGroupChangePolicy on Linux pods
     set:

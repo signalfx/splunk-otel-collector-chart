@@ -86,23 +86,18 @@ the chart stores them in the Splunk Platform Secret, mounts that Secret at
 `/otel/etc`, and renders the corresponding Collector `tls.ca_file`,
 `tls.cert_file`, and `tls.key_file` paths.
 
-## Splunk Secret and mounted file permissions
+## Provide tokens as a secret from environment variables or mounted files
 
-The chart stores tokens and TLS PEM content in the Splunk Secret. By default,
-the chart creates this Secret from values.
-
-The legacy pre-created Secret configuration uses:
+Instead of having tokens and TLS PEM content as clear text in the values, those
+can be provided via a secret that is created before deploying the chart. See
 [secret-splunk.yaml](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/secret-splunk.yaml)
+for the rendered fields.
 
 ```yaml
 secret:
   create: false
   name: your-secret
 ```
-
-Avoid using this pre-created Secret option for new deployments. Prefer the
-default chart-created Secret because the pre-created Secret option will be
-unsupported in a future release.
 
 By default, the Collector reads token values from environment variables sourced
 from the Splunk Secret. To mount Splunk Observability and Splunk Platform HEC
@@ -354,6 +349,11 @@ make sure to set `distribution` setting to `gke/autopilot`:
 ```yaml
 distribution: gke/autopilot
 ```
+
+GKE Autopilot is supported with the default Secret token behavior, where the
+Collector reads tokens from environment variables backed by the Splunk Secret.
+The `featureGates.mountSplunkSecretAsFile` option is not currently supported
+with `distribution: gke/autopilot`.
 
 Sometimes Splunk OTel Collector agent daemonset can have [problems scheduling in
 Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/daemonset#autopilot-ds-best-practices)

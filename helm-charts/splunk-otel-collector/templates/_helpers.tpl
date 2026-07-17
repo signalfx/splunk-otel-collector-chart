@@ -26,13 +26,14 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
-Warn if a collector config override still references Splunk token environment variables.
+Fail if a collector config override still references Splunk token environment variables
+when token file mounting is enabled.
 */}}
-{{- define "splunk-otel-collector.warnOnTokenEnvVarRefs" -}}
+{{- define "splunk-otel-collector.failOnTokenEnvVarRefs" -}}
 {{- if and .enabled .config -}}
 {{- $source := .source -}}
 {{- if regexMatch "\\$\\{SPLUNK_[A-Z0-9_]*_TOKEN\\}" (toYaml .config) }}
-{{- printf "[WARNING] %s references a Splunk token environment variable (${SPLUNK_*_TOKEN}). Built-in chart configuration now reads tokens from mounted Secret files. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}. Token environment variables are still injected for compatibility but will be removed in a future release.\n" $source }}
+{{- fail (printf "%s references a Splunk token environment variable (${SPLUNK_*_TOKEN}) while featureGates.mountSplunkSecretAsFile is enabled. Built-in chart configuration reads tokens from mounted Secret files and no longer injects token environment variables. Please update custom collector config to use ${file:/otel/etc/splunk_observability_access_token} or ${file:/otel/etc/splunk_platform_hec_token}." $source) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

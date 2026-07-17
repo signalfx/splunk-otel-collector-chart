@@ -1653,6 +1653,30 @@
       }
     },
     {
+      "$comment": "mountSplunkSecretAsFile is not currently supported on GKE Autopilot.",
+      "if": {
+        "properties": {
+          "distribution": {
+            "const": "gke/autopilot"
+          }
+        },
+        "required": [
+          "distribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "featureGates": {
+            "properties": {
+              "mountSplunkSecretAsFile": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "if": {
         "$comment": "if k8s secret resource created by the chart (default behavior)",
         "properties": {
