@@ -5,7 +5,6 @@ package k8sevents
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -67,7 +66,7 @@ func Test_Discovery(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 			eventsSink := internal.SetupOTLPLogsSink(t)
-			installCollectorChart(t, testKubeConfig, tt.valuesTmpl)
+			internal.BasicCollectorChartInstall(t, testKubeConfig, tt.valuesTmpl)
 			t.Cleanup(func() {
 				if os.Getenv("SKIP_TEARDOWN") == "true" {
 					return
@@ -154,23 +153,6 @@ func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
 	for _, rm := range expectedRedisMetrics {
 		assert.Contains(t, foundMetrics, rm)
 	}
-}
-
-func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
-	t.Helper()
-	if os.Getenv("SKIP_SETUP") == "true" {
-		t.Log("Skipping collector chart installation as SKIP_SETUP is set to true")
-		return
-	}
-
-	hostEp := internal.HostEndpoint(t)
-	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesTmpl))
-	require.NoError(t, err)
-	internal.ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
-		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
-		"IngestURL": internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
-		"EventsURL": internal.HostPortHTTP(hostEp, internal.OTLPHTTPReceiverPort),
-	}, 0, internal.GetDefaultChartOptions())
 }
 
 // installRedisChart deploys a simple Redis server with official helm chart.
