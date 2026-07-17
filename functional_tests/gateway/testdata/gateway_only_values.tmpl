@@ -24,7 +24,8 @@ gateway:
   config:
     extensions:
       http_forwarder/o11y_ingest:
-        ingress: 0.0.0.0:59433
+        ingress:
+          endpoint: 0.0.0.0:59433
         egress: {{ .IngestURL }}
 
 clusterReceiver:

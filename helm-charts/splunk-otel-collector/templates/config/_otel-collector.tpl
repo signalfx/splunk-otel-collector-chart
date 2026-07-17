@@ -13,7 +13,8 @@ extensions:
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
   http_forwarder/o11y_ingest:
-    ingress: 0.0.0.0:9943
+    ingress:
+      endpoint: 0.0.0.0:9943
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
   {{- end }}

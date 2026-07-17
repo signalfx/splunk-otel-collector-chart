@@ -67,7 +67,8 @@ data:
       http_forwarder/o11y_ingest:
         egress:
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
-        ingress: 0.0.0.0:9943
+        ingress:
+          endpoint: 0.0.0.0:9943
       http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
