@@ -21,6 +21,11 @@ extensions:
     {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
     fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
     {{- end }}
+    compaction:
+      on_start: true
+      on_rebound: true
+      rebound_needed_threshold_mib: 200
+      rebound_trigger_threshold_mib: 100
   {{- end }}
 
 
