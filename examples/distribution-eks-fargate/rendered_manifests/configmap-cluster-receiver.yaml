@@ -147,7 +147,7 @@ data:
               ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       receiver_creator:
         receivers:
-          kubeletstats:
+          kubelet_stats:
             config:
               auth_type: serviceAccount
               collection_interval: 10s

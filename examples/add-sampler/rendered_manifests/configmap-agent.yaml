@@ -182,7 +182,7 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      kubeletstats:
+      kubelet_stats:
         auth_type: serviceAccount
         collection_interval: 10s
         endpoint: ${K8S_NODE_IP}:10250
@@ -366,7 +366,7 @@ data:
           - resource
           receivers:
           - host_metrics
-          - kubeletstats
+          - kubelet_stats
           - otlp
         metrics/agent:
           exporters:

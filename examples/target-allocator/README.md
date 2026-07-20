@@ -42,7 +42,7 @@ agent:
         metrics:
           receivers:
             - host_metrics
-            - kubeletstats
+            - kubelet_stats
             - otlp
             - prometheus/crd
             - signalfx
