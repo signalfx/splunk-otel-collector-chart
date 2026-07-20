@@ -26,6 +26,7 @@ extensions:
       on_rebound: true
       rebound_needed_threshold_mib: 200
       rebound_trigger_threshold_mib: 100
+      directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
   {{- end }}
 
 
