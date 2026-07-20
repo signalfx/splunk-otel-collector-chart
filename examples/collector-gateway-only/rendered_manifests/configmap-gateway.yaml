@@ -49,8 +49,6 @@ data:
       http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
-          headers:
-            X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         ingress:
           endpoint: 0.0.0.0:4320
       opamp/splunk_o11y:
