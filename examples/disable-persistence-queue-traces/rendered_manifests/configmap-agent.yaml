@@ -95,6 +95,7 @@ data:
         directory: /var/addon/splunk/otel_pos
       file_storage/persistent_queue:
         compaction:
+          directory: /var/addon/splunk/exporter_queue/agent
           on_rebound: true
           on_start: true
           rebound_needed_threshold_mib: 200
