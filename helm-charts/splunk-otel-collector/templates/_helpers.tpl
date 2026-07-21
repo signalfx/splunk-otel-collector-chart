@@ -297,6 +297,67 @@ Create the validateSecret image name.
 {{- end -}}
 
 {{/*
+Create the OpAMP Bridge image name.
+*/}}
+{{- define "splunk-otel-collector.image.opampBridge" -}}
+{{- printf "%s:%s" .Values.image.opampBridge.repository .Values.image.opampBridge.tag | trimSuffix ":" -}}
+{{- end -}}
+
+{{/*
+Create the OpAMP Bridge resource name.
+*/}}
+{{- define "splunk-otel-collector.opampBridgeName" -}}
+{{- if .Values.opampBridge.name -}}
+{{- .Values.opampBridge.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-opamp-bridge" (include "splunk-otel-collector.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the OpAMP Bridge configmap name.
+*/}}
+{{- define "splunk-otel-collector.opampBridgeConfigMapName" -}}
+{{- printf "%s-config" (include "splunk-otel-collector.opampBridgeName" . | trunc 56 | trimSuffix "-") | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the OpAMP Bridge service account name.
+*/}}
+{{- define "splunk-otel-collector.opampBridgeServiceAccountName" -}}
+{{- default (include "splunk-otel-collector.opampBridgeName" .) .Values.opampBridge.serviceAccount.name -}}
+{{- end -}}
+
+{{/*
+Whether direct collector OpAMP should be enabled.
+*/}}
+{{- define "splunk-otel-collector.directO11yOpampEnabled" -}}
+{{- and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (not .Values.opampBridge.enabled) -}}
+{{- end -}}
+
+{{/*
+Get OpAMP Bridge endpoint.
+*/}}
+{{- define "splunk-otel-collector.opampBridgeEndpoint" -}}
+{{- if .Values.opampBridge.endpoint -}}
+{{- .Values.opampBridge.endpoint -}}
+{{- else if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
+{{- printf "%s/v1/opamp" (include "splunk-otel-collector.o11yIngestUrl" .) -}}
+{{- else -}}
+{{- fail "/opampBridge/endpoint is required when opampBridge.enabled is true and splunkObservability.realm is not set" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render standalone OpAMP Bridge non-identifying attributes for a chart-managed workload.
+*/}}
+{{- define "splunk-otel-collector.opampBridgeWorkloadAttributes" -}}
+{{- $attrs := deepCopy (dig "description" "non_identifying_attributes" (dict) .workload) -}}
+{{- $_ := set $attrs "otelcol.service.mode" .workload.serviceMode -}}
+{{- toYaml $attrs -}}
+{{- end -}}
+
+{{/*
 Create a filter expression for multiline logs configuration.
 */}}
 {{- define "splunk-otel-collector.newlineExpr" }}

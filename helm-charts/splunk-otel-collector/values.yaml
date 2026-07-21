@@ -827,6 +827,14 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
+  opampBridge:
+    # The registry and name of the OpenTelemetry Operator OpAMP Bridge image to pull
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge
+    # The tag of the OpenTelemetry Operator OpAMP Bridge image to pull
+    tag: v0.153.0
+    # The policy that specifies when the user wants the OpAMP Bridge image to be pulled
+    pullPolicy: IfNotPresent
+
 
 ################################################################################
 # Extra system configuration
@@ -1045,6 +1053,143 @@ gateway:
   # Any additional fields will be merged into the defaults,
   # existing fields can be disabled by setting them to `null`.
   config: {}
+
+################################################################################
+# OpenTelemetry OpAMP Bridge standalone mode.
+# Installs the OpenTelemetry Operator OpAMP Bridge without installing the
+# OpenTelemetry Operator or CRDs. When enabled, the bridge is configured to manage
+# the collector workloads created by this chart.
+################################################################################
+
+opampBridge:
+  enabled: false
+
+  # OpAMP server endpoint for the bridge. When empty and splunkObservability.realm
+  # is set, the chart uses the Splunk Observability ingest OpAMP endpoint:
+  # https://ingest.<realm>.observability.splunkcloud.com/v1/opamp
+  endpoint: ""
+
+  # Optional bridge name reported to the OpAMP server.
+  name: ""
+
+  # OpAMP heartbeat interval.
+  heartbeatInterval: 30s
+
+  # Headers sent to the OpAMP server. When empty and splunkObservability.realm is
+  # set, the chart sets X-SF-Token from the Splunk Observability access token.
+  headers: {}
+
+  # TLS settings for the OpAMP server connection.
+  tls: {}
+    # insecure: false
+    # insecure_skip_verify: false
+
+  capabilities:
+    AcceptsRemoteConfig: true
+    ReportsEffectiveConfig: true
+    ReportsHealth: true
+    ReportsOwnMetrics: true
+    ReportsRemoteConfig: true
+
+  # Optional allowed OpenTelemetry components for remote config validation.
+  componentsAllowed: {}
+
+  description:
+    non_identifying_attributes: {}
+
+  # The bridge is always deployed in standalone mode by this chart. These values
+  # control the standalone agent entries generated for collector workloads that
+  # this chart creates. The chart fills namespace, workloadRef, ConfigMap name,
+  # and ConfigMap key automatically.
+  workloads:
+    agent:
+      # Manage the DaemonSet created when agent.enabled=true.
+      enabled: true
+      # Type reported by the bridge for this standalone OpAMP agent.
+      type: otel-agent
+      # OpAMP config file name for the agent ConfigMap entry.
+      configName: agent
+      # Value for the required otelcol.service.mode non-identifying attribute.
+      serviceMode: agent
+      description:
+        non_identifying_attributes: {}
+    gateway:
+      # Manage the gateway Deployment/StatefulSet created when gateway.enabled=true.
+      enabled: true
+      type: otel-collector
+      configName: gateway
+      serviceMode: gateway
+      description:
+        non_identifying_attributes: {}
+    clusterReceiver:
+      # Manage the cluster receiver Deployment/StatefulSet created when clusterReceiver is active.
+      enabled: true
+      type: otel-collector
+      configName: cluster-receiver
+      serviceMode: cluster-receiver
+      description:
+        non_identifying_attributes: {}
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+
+  rbac:
+    create: true
+
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+  podAnnotations: {}
+  podLabels: {}
+  extraEnvs: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  # Additional standalone agents to add to the bridge config. Use this full
+  # standalone agent structure for workloads not created by this chart.
+  # Each entry should include description.non_identifying_attributes with
+  # otelcol.service.mode set to the collector mode/type.
+  #
+  # extraAgents:
+  #   - namespace: default
+  #     type: otel-collector
+  #     description:
+  #       non_identifying_attributes:
+  #         otelcol.service.mode: custom
+  #     workloadRef:
+  #       apiVersion: apps/v1
+  #       kind: Deployment
+  #       name: custom-collector
+  #     config:
+  #       collector:
+  #         kind: configmap
+  #         name: custom-collector
+  #         key: relay
+  extraAgents: []
 
 ################################################################################
 # Notice: Operator related features should be considered to have an alpha

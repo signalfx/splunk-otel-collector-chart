@@ -362,7 +362,7 @@ service:
                 without_type_suffix: true
   extensions:
     - health_check
-    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.directO11yOpampEnabled" .) "true") }}
     - opamp/splunk_o11y
     {{- end }}
   {{- if eq .Values.distribution "eks/fargate" }}

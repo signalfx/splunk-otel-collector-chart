@@ -1021,6 +1021,26 @@
               ]
             }
           }
+        },
+        "opampBridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
         }
       }
     },
@@ -1467,6 +1487,166 @@
         }
       }
     },
+    "opampBridge": {
+      "description": "OpenTelemetry Operator OpAMP Bridge standalone-mode configuration.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "heartbeatInterval": {
+          "type": "string"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tls": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "insecure": {
+              "type": "boolean"
+            },
+            "insecure_skip_verify": {
+              "type": "boolean"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "componentsAllowed": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "non_identifying_attributes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "workloads": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "agent": {
+              "$ref": "#/$defs/opampBridgeWorkload"
+            },
+            "gateway": {
+              "$ref": "#/$defs/opampBridgeWorkload"
+            },
+            "clusterReceiver": {
+              "$ref": "#/$defs/opampBridgeWorkload"
+            }
+          }
+        },
+        "resources": {
+          "type": "object"
+        },
+        "serviceAccount": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "create": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "create": {
+              "type": "boolean"
+            }
+          }
+        },
+        "podSecurityContext": {
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "type": "object"
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "priorityClassName": {
+          "type": "string"
+        },
+        "podAnnotations": {
+          "type": "object"
+        },
+        "podLabels": {
+          "type": "object"
+        },
+        "extraEnvs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "extraVolumes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "extraAgents": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
     "operatorcrds": {
       "description": "Deploys Operator related CRDs from https://github.com/open-telemetry/opentelemetry-operator/tree/main/config/crd via a Helm subchart and using the chart crds/ directory.",
       "type": "object",
@@ -1561,6 +1741,41 @@
       "description": "Helm Chart Feature Gates.",
       "type": "object",
       "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "opampBridgeWorkload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "serviceMode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "non_identifying_attributes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "allOf": [
