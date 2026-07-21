@@ -27,8 +27,8 @@ extensions:
       rebound_trigger_threshold_mib: 100
       directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
       cleanup_on_start: true
-      # Cleans up leftover temp files on startup.
-      # May delay initialization — increase the startup probe timeout when enabling.
+      # Compacts the persistent queue files on collector startup. May delay initialization for large queues
+      # increase the startup probe timeout when enabling.
       # on_start: true
   {{- end }}
 
