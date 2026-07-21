@@ -98,7 +98,6 @@ data:
           cleanup_on_start: true
           directory: /var/addon/splunk/exporter_queue/agent
           on_rebound: true
-          on_start: true
           rebound_needed_threshold_mib: 200
           rebound_trigger_threshold_mib: 100
         directory: /var/addon/splunk/exporter_queue/agent
