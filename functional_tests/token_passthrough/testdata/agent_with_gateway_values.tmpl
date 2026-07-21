@@ -7,14 +7,7 @@ splunkObservability:
 clusterName: test-cluster
 
 agent:
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
+  tokenPassthrough: true
 
 gateway:
   enabled: true
@@ -24,13 +17,6 @@ gateway:
       cpu: 200m
       memory: 256Mi
   config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
     exporters:
       otlp_http:
         traces_endpoint: {{ .OTLPSink }}/v2/trace/otlp

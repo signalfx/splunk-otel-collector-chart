@@ -1177,33 +1177,23 @@ where <my-splunk-otel-collector-gateway> is the gateway service name captured in
 
 ### OTLP Token Passthrough
 
-The collector's configurations for the agent and gateway support OTLP token passthrough.
-This functionality is disabled by default for the agent, and enabled by default for the gateway.
-This allows the collector to forward the authentication token received from the client, OTEL agent or instrumented application,
-to the backend services.
+The `agent.tokenPassthrough` and `gateway.tokenPassthrough` values forward the caller's
+`X-SF-Token` to Splunk Observability (via `headers_setter`) and to the OpAMP HTTP forwarder
+egress. Defaults preserve today's behavior: `agent.tokenPassthrough=false` and
+`gateway.tokenPassthrough=true`. When disabled, `splunkObservability.accessToken` is used
+instead.
 
-To enable OTLP token passthrough for the agent, use the following configuration in your values.yaml:
+To enable passthrough on the agent:
 ```yaml
 agent:
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
+  tokenPassthrough: true
 ```
 
-To disable OTLP token passthrough in the gateway:
+To disable passthrough on the gateway:
 ```yaml
 gateway:
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: false
-          http:
-            include_metadata: false
+  tokenPassthrough: false
 ```
+
+Token passthrough is not supported for the Splunk Platform HEC exporters; they always use
+`splunkPlatform.token`.

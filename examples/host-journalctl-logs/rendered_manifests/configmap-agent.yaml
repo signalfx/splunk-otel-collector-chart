@@ -220,8 +220,10 @@ data:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
+            include_metadata: false
           http:
             endpoint: 0.0.0.0:4318
+            include_metadata: false
       prometheus/agent:
         config:
           scrape_configs:

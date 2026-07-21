@@ -60,8 +60,6 @@ data:
       http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: http://default-splunk-otel-collector:4320
-          headers:
-            X-SF-Token: ${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}
         ingress:
           endpoint: 0.0.0.0:4320
       k8s_observer:

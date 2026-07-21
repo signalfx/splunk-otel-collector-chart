@@ -342,6 +342,10 @@ extraAttributes:
 agent:
   enabled: true
 
+  # Forward the caller's `X-SF-Token` to Splunk Observability (via OTLP) and to the OpAMP
+  # HTTP forwarder egress. When false, `splunkObservability.accessToken` is used instead.
+  tokenPassthrough: false
+
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
@@ -929,6 +933,10 @@ gateway:
   # Defines if the gateway collector workload is enabled
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
+
+  # Forward the caller's `X-SF-Token` to Splunk Observability (via OTLP) and to the OpAMP
+  # HTTP forwarder egress. When false, `splunkObservability.accessToken` is used instead.
+  tokenPassthrough: true
 
   # Gateway workload mode. Supported values: deployment, statefulset.
   mode: deployment

@@ -12,11 +12,4 @@ gateway:
       memory: 4Gi
 
 agent:
-  config:
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            include_metadata: true
-          http:
-            include_metadata: true
+  tokenPassthrough: true
