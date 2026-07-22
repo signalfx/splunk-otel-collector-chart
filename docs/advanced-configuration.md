@@ -211,17 +211,17 @@ adjust `ca_file` and use the node IP instead.
 agent:
   config:
     receivers:
-      kubeletstats:
+      kubelet_stats:
         ca_file: <Path to custom CA file>
         endpoint: ${K8S_NODE_IP}:10255
 ```
 
-If you don't have access to the CA file, add `insecure_skip_verify: true` to the `kubeletstats` receiver config.
+If you don't have access to the CA file, add `insecure_skip_verify: true` to the `kubelet_stats` receiver config.
 ```yaml
 agent:
   config:
     receivers:
-      kubeletstats:
+      kubelet_stats:
         insecure_skip_verify: true
 ```
 

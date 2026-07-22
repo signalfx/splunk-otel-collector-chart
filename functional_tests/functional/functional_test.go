@@ -1041,8 +1041,8 @@ func testAgentMetrics(t *testing.T) {
 		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_otelsvc_k8s_pod_updated")
 	})
 
-	t.Run("kubeletstats metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubeletstats_metrics.yaml", "container.memory.usage")
+	t.Run("kubelet_stats metrics", func(t *testing.T) {
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubelet_stats_metrics.yaml", "container.memory.usage")
 	})
 
 	t.Run("host_metrics", func(t *testing.T) {

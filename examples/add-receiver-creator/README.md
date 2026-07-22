@@ -14,7 +14,7 @@ pipelines:
   metrics:
     receivers:
       - host_metrics
-      - kubeletstats
+      - kubelet_stats
       - otlp
       - receiver_creator
       - signalfx

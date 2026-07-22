@@ -568,7 +568,7 @@ receivers:
       {{- end }}
     {{- end }}
 
-  kubeletstats:
+  kubelet_stats:
     collection_interval: 10s
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
@@ -1266,7 +1266,7 @@ service:
     metrics:
       receivers:
         - host_metrics
-        - kubeletstats
+        - kubelet_stats
         - otlp
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator

@@ -178,7 +178,7 @@ the kubelet API. In order to quickly resolve it add the following section to you
 agent:
   config:
     receivers:
-      kubeletstats:
+      kubelet_stats:
         insecure_skip_verify: true
 ```
 
