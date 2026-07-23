@@ -71,7 +71,7 @@ func sendMetric(t *testing.T) {
 	require.NoError(t, err)
 
 	// Send to kind cluster exposed port 9942, http forwarder sends to 9943
-	req, err := http.NewRequest(http.MethodPost, "http://"+internal.HostPort("127.0.0.1", 9942)+"/v2/datapoint", bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, "http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint", bytes.NewBuffer(data))
 	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-SF-Token", token)
