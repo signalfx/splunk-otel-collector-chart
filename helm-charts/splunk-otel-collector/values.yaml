@@ -1449,8 +1449,7 @@ obi:
 
 targetallocator:
   enabled: false
-  # The Target Allocator image is Linux-only. Keep it on Linux nodes when the
-  # Collector workloads are configured for Windows nodes in a mixed cluster.
+  # The Target Allocator image is Linux-only.
   nodeSelector:
     kubernetes.io/os: linux
   targetAllocator:
