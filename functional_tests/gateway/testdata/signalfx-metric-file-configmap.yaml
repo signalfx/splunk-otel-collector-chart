@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: signalfx-metric-configmap
+data:
+  signalfx-metric.json: |
+    {
+      "gauge": [
+        {
+          "dimensions": {
+            "service": "petstore"
+          },
+          "metric": "gaugeMetricName",
+          "timestamp": 1557225030000,
+          "value": 99.98751
+        }
+      ]
+    }
