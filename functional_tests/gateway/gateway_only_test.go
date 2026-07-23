@@ -4,9 +4,8 @@
 package gateway
 
 import (
-	"bytes"
-	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -16,7 +15,15 @@ import (
 )
 
 const (
-	testDir = "testdata"
+	configMapFile          = "signalfx-metric-file-configmap.yaml"
+	kubeConfigEnvKey       = "KUBECONFIG"
+	kubeConfigEnvSeparator = "="
+	kubectlApply           = "apply"
+	kubectlCommand         = "kubectl"
+	kubectlDelete          = "delete"
+	kubectlFileFlag        = "-f"
+	podFile                = "test-pod.yaml"
+	testDir                = "testdata"
 )
 
 // Env vars to control the test behavior:
@@ -25,7 +32,7 @@ const (
 // SKIP_TEARDOWN: if set to true, the test will skip teardown
 // SKIP_SETUP: if set to true, the test will skip setup
 func Test_GatewayOnly(t *testing.T) {
-	testKubeConfig := getEnvVar(t, "KUBECONFIG")
+	testKubeConfig := getEnvVar(t, kubeConfigEnvKey)
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		internal.ChartUninstall(t, testKubeConfig)
 	}
@@ -51,32 +58,49 @@ func Test_GatewayOnly(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			manifestFiles := gatewayOnlyManifestFiles()
 			metricSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 			internal.BasicCollectorChartInstall(t, testKubeConfig, tt.valuesTmpl)
+			applyKubectlFiles(t, testKubeConfig, manifestFiles)
 			t.Cleanup(func() {
 				if os.Getenv("SKIP_TEARDOWN") == "true" {
 					return
 				}
+				deleteKubectlFiles(t, testKubeConfig, manifestFiles)
 				internal.ChartUninstall(t, testKubeConfig)
 			})
-			sendMetric(t)
 			internal.WaitForMetrics(t, 1, metricSink)
 			require.NotEmpty(t, metricSink.AllMetrics(), "expected at least one metric")
 		})
 	}
 }
 
-func sendMetric(t *testing.T) {
-	data, err := os.ReadFile(filepath.Join(testDir, "signalfx_gauge_metric.json"))
-	require.NoError(t, err)
+func applyKubectlFiles(t *testing.T, kubeConfig string, manifestFiles []string) {
+	t.Helper()
+	for _, manifestFile := range manifestFiles {
+		runKubectlFileCommand(t, kubeConfig, kubectlApply, manifestFile)
+	}
+}
 
-	// Send to kind cluster exposed port 9942, http forwarder sends to 9943
-	req, err := http.NewRequest(http.MethodPost, "http://"+internal.HostPort("127.0.0.1", 9942)+"/v2/datapoint", bytes.NewBuffer(data))
-	require.NoError(t, err)
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-SF-Token", token)
+func deleteKubectlFiles(t *testing.T, kubeConfig string, manifestFiles []string) {
+	t.Helper()
+	for _, manifestFile := range manifestFiles {
+		runKubectlFileCommand(t, kubeConfig, kubectlDelete, manifestFile)
+	}
+}
 
-	resp, err := http.DefaultClient.Do(req)
-	require.NoError(t, err)
-	defer resp.Body.Close()
+func gatewayOnlyManifestFiles() []string {
+	return []string{
+		configMapFile,
+		podFile,
+	}
+}
+
+func runKubectlFileCommand(t *testing.T, kubeConfig, action, manifestFile string) {
+	t.Helper()
+	manifestPath := filepath.Join(testDir, manifestFile)
+	cmd := exec.Command(kubectlCommand, action, kubectlFileFlag, manifestPath)
+	cmd.Env = append(os.Environ(), kubeConfigEnvKey+kubeConfigEnvSeparator+kubeConfig)
+	output, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "failed to run kubectl %s for manifest %s: %s", action, manifestPath, string(output))
 }

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: file-uploader-pod
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: uploader-container
+      image: curlimages/curl
+      command: ["sh", "-c"]
+      args:
+        - sleep 1 && curl -X POST -F "file=@/data/signalfx-metric.json" http://soc-chart-splunk-otel-collector.default.svc.cluster.local:9943/v2/datapoint
+      volumeMounts:
+        - name: file-volume
+          mountPath: /data
+  volumes:
+    - name: file-volume
+      configMap:
+        name: signalfx-metric-configmap
