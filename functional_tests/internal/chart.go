@@ -23,6 +23,7 @@ import (
 	"helm.sh/helm/v4/pkg/kube"
 	releasev1 "helm.sh/helm/v4/pkg/release/v1"
 	"helm.sh/helm/v4/pkg/strvals"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,10 +35,13 @@ import (
 )
 
 const (
-	HelmActionTimeout       = 15 * time.Minute
-	DefaultChartReleaseName = "sock"
-	chartLabelKey           = "helm.sh/chart-name"
-	defaultChartPath        = "helm-charts/splunk-otel-collector"
+	HelmActionTimeout                    = 15 * time.Minute
+	DefaultChartReleaseName              = "sock"
+	chartLabelKey                        = "helm.sh/chart-name"
+	defaultChartDeploymentName           = "sock-splunk-otel-collector"
+	defaultChartPath                     = "helm-charts/splunk-otel-collector"
+	deploymentNotReadyErrorMessage       = "Deployment/default/sock-splunk-otel-collector not ready"
+	deploymentPodLogTailLines      int64 = 200
 )
 
 type ChartOptions struct {
@@ -139,13 +143,124 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		t.Log("Running helm install")
 		_, err = install.Run(loadChart(t), values)
 	}
-	require.NoError(t, err)
+	if err != nil {
+		logDefaultDeploymentPodLogsOnNotReady(t, testKubeConfig, err)
+		require.NoError(t, err)
+	}
 
 	// Wait for pods to be ready for at least minReadyTime
 	clientset, err := getKubeClient(testKubeConfig)
 	require.NoError(t, err)
 	labelSelector := "release=" + options.ChartReleaseName
 	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
+}
+
+func logDefaultDeploymentPodLogsOnNotReady(t *testing.T, testKubeConfig string, installErr error) {
+	t.Helper()
+	if !strings.Contains(installErr.Error(), deploymentNotReadyErrorMessage) {
+		return
+	}
+
+	clientset, err := getKubeClient(testKubeConfig)
+	if err != nil {
+		t.Logf("Failed to get Kubernetes client while collecting logs for deployment %s in namespace %s: %v", defaultChartDeploymentName, DefaultNamespace, err)
+		return
+	}
+	logNotStartedDeploymentPodLogs(t, clientset, DefaultNamespace, defaultChartDeploymentName)
+}
+
+func logNotStartedDeploymentPodLogs(t *testing.T, clientset *kubernetes.Clientset, namespace, deploymentName string) {
+	t.Helper()
+
+	deployment, err := clientset.AppsV1().Deployments(namespace).Get(t.Context(), deploymentName, v1.GetOptions{})
+	if err != nil {
+		t.Logf("Failed to get deployment %s in namespace %s while collecting pod logs: %v", deploymentName, namespace, err)
+		return
+	}
+	selector, err := v1.LabelSelectorAsSelector(deployment.Spec.Selector)
+	if err != nil {
+		t.Logf("Failed to build pod selector for deployment %s in namespace %s: %v", deploymentName, namespace, err)
+		return
+	}
+	pods, err := clientset.CoreV1().Pods(namespace).List(t.Context(), v1.ListOptions{
+		LabelSelector: selector.String(),
+	})
+	if err != nil {
+		t.Logf("Failed to list pods for deployment %s in namespace %s: %v", deploymentName, namespace, err)
+		return
+	}
+
+	notStartedPodCount := 0
+	for _, pod := range pods.Items {
+		if podSuccessfullyStarted(pod) {
+			continue
+		}
+		notStartedPodCount++
+		t.Logf("Collecting logs for pod %s in namespace %s because deployment %s is not ready. Phase: %s, reason: %s, message: %s",
+			pod.Name, namespace, deploymentName, pod.Status.Phase, pod.Status.Reason, pod.Status.Message)
+		logPodContainerStatuses(t, pod)
+		logPodContainerLogs(t, clientset, namespace, pod)
+	}
+	if notStartedPodCount == 0 {
+		t.Logf("No pods that failed to start were found for deployment %s in namespace %s", deploymentName, namespace)
+	}
+}
+
+func logPodContainerLogs(t *testing.T, clientset *kubernetes.Clientset, namespace string, pod corev1.Pod) {
+	t.Helper()
+	for _, container := range pod.Spec.InitContainers {
+		logs, err := GetPodLogs(t, clientset, namespace, pod.Name, container.Name, deploymentPodLogTailLines)
+		if err != nil {
+			t.Logf("Failed to get logs from pod %s init container %s in namespace %s: %v", pod.Name, container.Name, namespace, err)
+			continue
+		}
+		t.Logf("Logs from pod %s init container %s in namespace %s:\n%s", pod.Name, container.Name, namespace, logs)
+	}
+	for _, container := range pod.Spec.Containers {
+		logs, err := GetPodLogs(t, clientset, namespace, pod.Name, container.Name, deploymentPodLogTailLines)
+		if err != nil {
+			t.Logf("Failed to get logs from pod %s container %s in namespace %s: %v", pod.Name, container.Name, namespace, err)
+			continue
+		}
+		t.Logf("Logs from pod %s container %s in namespace %s:\n%s", pod.Name, container.Name, namespace, logs)
+	}
+}
+
+func logPodContainerStatuses(t *testing.T, pod corev1.Pod) {
+	t.Helper()
+	for _, status := range pod.Status.InitContainerStatuses {
+		t.Logf("Init container status for pod %s container %s: ready=%v restartCount=%d state=%s lastState=%s",
+			pod.Name, status.Name, status.Ready, status.RestartCount, formatContainerState(status.State), formatContainerState(status.LastTerminationState))
+	}
+	for _, status := range pod.Status.ContainerStatuses {
+		t.Logf("Container status for pod %s container %s: ready=%v restartCount=%d state=%s lastState=%s",
+			pod.Name, status.Name, status.Ready, status.RestartCount, formatContainerState(status.State), formatContainerState(status.LastTerminationState))
+	}
+}
+
+func formatContainerState(state corev1.ContainerState) string {
+	switch {
+	case state.Running != nil:
+		return fmt.Sprintf("running startedAt=%s", state.Running.StartedAt)
+	case state.Terminated != nil:
+		return fmt.Sprintf("terminated reason=%s message=%s exitCode=%d finishedAt=%s", state.Terminated.Reason, state.Terminated.Message, state.Terminated.ExitCode, state.Terminated.FinishedAt)
+	case state.Waiting != nil:
+		return fmt.Sprintf("waiting reason=%s message=%s", state.Waiting.Reason, state.Waiting.Message)
+	default:
+		return "unknown"
+	}
+}
+
+func podSuccessfullyStarted(pod corev1.Pod) bool {
+	if pod.Status.Phase != corev1.PodRunning || len(pod.Status.ContainerStatuses) == 0 {
+		return false
+	}
+	for _, status := range pod.Status.ContainerStatuses {
+		if !status.Ready {
+			return false
+		}
+	}
+	return true
 }
 
 // applyEnvOverrides merges environment-driven value overrides into the helm values map.
