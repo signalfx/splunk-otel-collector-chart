@@ -227,7 +227,7 @@ agent:
 
 ## Deployment environment
 
-Optional `environment` parameter can be used to specify an additional `deployment.environment`
+Optional `environment` parameter can be used to specify an additional `deployment.environment.name`
 attribute that will be added to all the telemetry data. It will help Splunk Observability
 users to investigate data coming from different source separately.
 Value examples: development, staging, production, etc.
@@ -235,6 +235,48 @@ Value examples: development, staging, production, etc.
 ```yaml
 environment: production
 ```
+
+### Restore the deprecated environment attribute
+
+If the deprecated `deployment.environment` name is still required,
+keep `environment` set and override the environment processor and
+applicable pipeline references for each enabled component. For example:
+
+```yaml
+environment: production
+
+agent:
+  config:
+    processors:
+      resource/add_environment:
+        attributes:
+          - action: insert
+            key: deployment.environment
+            value: production
+    service:
+      telemetry:
+        resource:
+          attributes:
+            - name: deployment.environment
+              value: production
+            # Copy rest of internal telemetry resource attributes here
+```
+
+Because overriding `service.telemetry.resource.attributes` replaces the
+complete list, preserve all existing attributes and change only
+`deployment.environment.name` to `deployment.environment`. Use `helm template`
+to render the chart using the same value arguments as your install command,
+then extract the resource section for each enabled component. For example,
+for the agent component:
+
+```bash
+helm template my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector --show-only templates/configmap-agent.yaml | yq '.data.relay | from_yaml | .service.telemetry.resource'
+```
+
+Use `templates/configmap-gateway.yaml` for the gateway and
+`templates/configmap-cluster-receiver.yaml` for the cluster receiver. Copy the
+complete output under the corresponding `<component>.config.service.telemetry.resource`
+section and change only the `deployment.environment.name` entry to `deployment.environment`.
 
 ## Disable particular types of telemetry
 

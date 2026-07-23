@@ -1,5 +1,46 @@
 # Upgrade guidelines
 
+## 0.156.0 to 0.157.0
+
+### Deployment environment resource attribute renamed
+
+When the optional `environment` value is set, the chart now emits the stable
+`deployment.environment.name` resource attribute instead of the deprecated
+`deployment.environment` attribute. The value is also added to the agent, gateway,
+and cluster receiver `service.telemetry.resource.attributes`, so Collector's
+internal telemetry now includes the deployment environment.
+
+If a consumer still requires `deployment.environment`, use Collector configuration overrides to
+restore the deprecated name. Keep `environment` set so the chart continues to configure the
+attribute and applicable pipeline references, then override `resource/add_environment` and
+`service.telemetry.resource.attributes` for each enabled component. For example:
+
+```yaml
+environment: production
+
+agent:
+  config:
+    processors:
+      resource/add_environment:
+        attributes:
+          - action: insert
+            key: deployment.environment
+            value: production
+    service:
+      telemetry:
+        resource:
+          attributes:
+            - name: deployment.environment
+              value: production
+            # Copy rest of internal telemetry resource attributes here
+```
+
+Because overriding `service.telemetry.resource.attributes` replaces the
+complete list, preserve all existing attributes and change only `deployment.environment.name`
+to `deployment.environment`. For commands that extract the complete internal telemetry
+resource configuration, see the
+[deployment environment configuration](docs/advanced-configuration.md#restore-the-deprecated-environment-attribute).
+
 ## 0.154.0 to 0.155.0
 
 ### cert-manager subchart is deprecated

@@ -260,9 +260,10 @@ distribution: ""
 
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry
-# data (traces/logs/metrics) as an attribute. It will allow Splunk Observability
-# users to investigate data coming from different source separately.
-# See: https://docs.splunk.com/observability/apm/set-up-apm/environments.html#setting-the-deployment-environment-span-tag
+# data (traces/logs/metrics), including Collector internal telemetry, as the
+# "deployment.environment.name" resource attribute. It will allow Splunk Observability
+# users to investigate data from different sources separately.
+# See: https://help.splunk.com/en/splunk-observability-cloud/monitor-application-performance/set-up-splunk-apm/set-up-deployment-environments-in-splunk-apm
 ################################################################################
 
 # environment: production

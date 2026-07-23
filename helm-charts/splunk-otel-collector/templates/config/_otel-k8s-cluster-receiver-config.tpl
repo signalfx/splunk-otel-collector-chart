@@ -235,7 +235,7 @@ processors:
   resource/add_environment:
     attributes:
       - action: insert
-        key: deployment.environment
+        key: deployment.environment.name
         value: "{{ .Values.environment }}"
   {{- end }}
 
@@ -319,6 +319,10 @@ service:
           value: otel-k8s-cluster-receiver
         - name: otelcol.service.mode
           value: clusterReceiver
+        {{- if .Values.environment }}
+        - name: deployment.environment.name
+          value: "{{ .Values.environment }}"
+        {{- end }}
         - name: k8s.node.name
           value: "${K8S_NODE_NAME}"
         - name: k8s.pod.name
