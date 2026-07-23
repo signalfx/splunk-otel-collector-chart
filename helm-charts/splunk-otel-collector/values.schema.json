@@ -1101,6 +1101,12 @@
         "validateSecret": {
           "type": "boolean"
         },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
         "annotations": {
           "type": "object"
         }
@@ -1656,6 +1662,26 @@
         "properties": {
           "clusterName": {
             "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Amazon EKS Fargate supports Linux Pods only.",
+      "if": {
+        "properties": {
+          "distribution": {
+            "const": "eks/fargate"
+          }
+        },
+        "required": [
+          "distribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "isWindows": {
+            "const": false
           }
         }
       }

@@ -9,6 +9,10 @@ splunkPlatform:
   token: foobar
   endpoint: {{ .LogHecEndpoint }}
 
+secret:
+  create: false
+  name: aks-win-validation-secret
+
 agent:
   podLabels:
     osType: "windows"

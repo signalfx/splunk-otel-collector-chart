@@ -1,0 +1,29 @@
+suite: Linux-only workloads
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  - it: should schedule Target Allocator on Linux when collectors run on Windows
+    template: charts/targetallocator/templates/deployment.yaml
+    set:
+      isWindows: true
+      targetallocator:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            kubernetes.io/os: linux
+
+  - it: should reject Windows workloads on EKS Fargate
+    template: deployment-cluster-receiver.yaml
+    set:
+      distribution: eks/fargate
+      clusterName: test-cluster
+      isWindows: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "/isWindows"

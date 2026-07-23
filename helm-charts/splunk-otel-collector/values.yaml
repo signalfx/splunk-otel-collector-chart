@@ -819,6 +819,8 @@ image:
 
   # Image to be used by a container to validate the secret's presence ahead of starting a helm install or upgrade using pre-install and pre-upgrade Helm hooks.
   # Effective only if `secret.create` is set to false and `secret.validateSecret` is set to true (default).
+  # The hook implementation requires Linux: it runs `sh -c` and mounts the
+  # Secret at `/otel/secret`. A custom image must support this contract.
   validateSecret:
     # The registry and name of the Universal Base Image 9 image to pull
     repository: registry.access.redhat.com/ubi9/ubi
@@ -865,6 +867,9 @@ secret:
   defaultMode: "0440"
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
+  # The pre-install/pre-upgrade validation hook requires Linux and always targets
+  # Linux nodes. Configure tolerations if eligible Linux nodes are tainted.
+  tolerations: []
   # Secret annotations
   annotations: {}
 
@@ -906,7 +911,8 @@ priorityClassName: ""
 readinessProbe: {}
 livenessProbe: {}
 
-# Specifies whether to apply for k8s cluster with windows worker node.
+# Specifies whether Collector workloads target Windows worker nodes. Linux-only
+# supporting workloads and enabled subcharts still require schedulable Linux nodes.
 isWindows: false
 
 # Whether to automatically create Openshift SCC or to create it manually.
@@ -1446,6 +1452,10 @@ obi:
 
 targetallocator:
   enabled: false
+  # The Target Allocator image is Linux-only. Keep it on Linux nodes when the
+  # Collector workloads are configured for Windows nodes in a mixed cluster.
+  nodeSelector:
+    kubernetes.io/os: linux
   targetAllocator:
     config:
       allocation_strategy: per-node
