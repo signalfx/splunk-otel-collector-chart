@@ -111,6 +111,7 @@ spec:
           protocol: TCP
         - name: signalfx
           containerPort: 9943
+          hostPort: 9943
           protocol: TCP
         - name: zipkin
           containerPort: 9411
