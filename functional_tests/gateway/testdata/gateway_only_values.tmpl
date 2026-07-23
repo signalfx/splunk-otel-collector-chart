@@ -15,6 +15,7 @@ gateway:
   ports:
     signalfx:
       containerPort: 9942
+      hostPort: 9942
       protocol: TCP
       enabled_for: [ metrics, traces, logs ]
   resources:
