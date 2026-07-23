@@ -24,6 +24,7 @@ const (
 	kubectlFileFlag        = "-f"
 	podFile                = "test-pod.yaml"
 	testDir                = "testdata"
+	testPodName            = "file-uploader-pod"
 )
 
 // Env vars to control the test behavior:
@@ -80,6 +81,7 @@ func Test_GatewayOnly(t *testing.T) {
 					}
 				}
 			}
+			internal.LogPodContainerLogs(t, testKubeConfig, internal.DefaultNamespace, testPodName)
 		})
 	}
 }
