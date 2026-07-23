@@ -206,6 +206,22 @@ func logNotStartedDeploymentPodLogs(t *testing.T, clientset *kubernetes.Clientse
 	}
 }
 
+func LogPodContainerLogs(t *testing.T, testKubeConfig, namespace, podName string) {
+	t.Helper()
+
+	clientset, err := getKubeClient(testKubeConfig)
+	if err != nil {
+		t.Logf("Failed to get Kubernetes client while collecting logs for pod %s in namespace %s: %v", podName, namespace, err)
+		return
+	}
+	pod, err := clientset.CoreV1().Pods(namespace).Get(t.Context(), podName, v1.GetOptions{})
+	if err != nil {
+		t.Logf("Failed to get pod %s in namespace %s while collecting pod logs: %v", podName, namespace, err)
+		return
+	}
+	logPodContainerLogs(t, clientset, namespace, *pod)
+}
+
 func logPodContainerLogs(t *testing.T, clientset *kubernetes.Clientset, namespace string, pod corev1.Pod) {
 	t.Helper()
 	for _, container := range pod.Spec.InitContainers {
