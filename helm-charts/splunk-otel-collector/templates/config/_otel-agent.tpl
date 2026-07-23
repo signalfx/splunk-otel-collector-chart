@@ -892,7 +892,7 @@ processors:
   resource/add_environment:
     attributes:
       - action: insert
-        key: deployment.environment
+        key: deployment.environment.name
         value: "{{ .Values.environment }}"
   {{- end }}
 
@@ -1066,6 +1066,10 @@ service:
           value: otel-agent
         - name: otelcol.service.mode
           value: agent
+        {{- if .Values.environment }}
+        - name: deployment.environment.name
+          value: "{{ .Values.environment }}"
+        {{- end }}
         - name: k8s.pod.name
           value: "${K8S_POD_NAME}"
         - name: k8s.namespace.name
@@ -1293,7 +1297,7 @@ service:
         - resourcedetection
         - resource
         {{/*
-        The attribute `deployment.environment` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
+        The attribute `deployment.environment.name` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
         More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
         */}}
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}

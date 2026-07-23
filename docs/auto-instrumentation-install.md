@@ -51,7 +51,7 @@ these frameworks often have pre-built instrumentation capabilities already avail
 
 - **Deployment Environment (Required)**
   - **Via `values.yaml` (Recommended)**
-    - `environment`: Required configuration to set the deployment environment attribute in exported traces.
+    - `environment`: Required configuration to set the `deployment.environment.name` resource attribute in exported traces.
 
   - **Alternative Methods**
     - **Instrumentation Spec**

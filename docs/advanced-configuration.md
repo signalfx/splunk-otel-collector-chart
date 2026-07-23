@@ -227,7 +227,7 @@ agent:
 
 ## Deployment environment
 
-Optional `environment` parameter can be used to specify an additional `deployment.environment`
+Optional `environment` parameter can be used to specify an additional `deployment.environment.name`
 attribute that will be added to all the telemetry data. It will help Splunk Observability
 users to investigate data coming from different source separately.
 Value examples: development, staging, production, etc.
