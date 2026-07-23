@@ -867,9 +867,6 @@ secret:
   defaultMode: "0440"
   # Specifies whether secret provided by user should be validated.
   validateSecret: true
-  # The pre-install/pre-upgrade validation hook requires Linux and always targets
-  # Linux nodes. Configure tolerations if eligible Linux nodes are tainted.
-  tolerations: []
   # Secret annotations
   annotations: {}
 
