@@ -70,7 +70,16 @@ func Test_GatewayOnly(t *testing.T) {
 				internal.ChartUninstall(t, testKubeConfig)
 			})
 			internal.WaitForMetrics(t, 1, metricSink)
+
 			require.NotEmpty(t, metricSink.AllMetrics(), "expected at least one metric")
+			for _, m := range metricSink.AllMetrics() {
+				for i := 0; i < m.ResourceMetrics().Len(); i++ {
+					sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
+					for j := 0; j < sm.Metrics().Len(); j++ {
+						t.Logf("Metric sink received metric name: %s, type: %s", sm.Metrics().At(j).Name(), sm.Metrics().At(j).Type().String())
+					}
+				}
+			}
 		})
 	}
 }
