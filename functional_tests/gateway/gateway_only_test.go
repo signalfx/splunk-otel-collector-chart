@@ -70,8 +70,8 @@ func sendMetric(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(testDir, "signalfx_gauge_metric.json"))
 	require.NoError(t, err)
 
-	// Send to kind cluster exposed port 59433, http forwarder sends to 9943
-	req, err := http.NewRequest(http.MethodPost, "http://"+internal.HostPort("127.0.0.1", 59433)+"/v2/datapoint", bytes.NewBuffer(data))
+	// Send to kind cluster exposed port 9942, http forwarder sends to 9943
+	req, err := http.NewRequest(http.MethodPost, "http://"+internal.HostPort("127.0.0.1", 9942)+"/v2/datapoint", bytes.NewBuffer(data))
 	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-SF-Token", token)
