@@ -10,7 +10,7 @@ When the optional `environment` value is set, the chart now emits the stable
 and cluster receiver `service.telemetry.resource.attributes`, so Collector's
 internal telemetry now includes the deployment environment.
 
-If a consumer still requires `deployment.environment`, use Collector configuration overrides to
+If `deployment.environment` is still required, use Collector configuration overrides to
 restore the deprecated name. Keep `environment` set so the chart continues to configure the
 attribute and applicable pipeline references, then override `resource/add_environment` and
 `service.telemetry.resource.attributes` for each enabled component. For example:
@@ -37,9 +37,19 @@ agent:
 
 Because overriding `service.telemetry.resource.attributes` replaces the
 complete list, preserve all existing attributes and change only `deployment.environment.name`
-to `deployment.environment`. For commands that extract the complete internal telemetry
-resource configuration, see the
-[deployment environment configuration](docs/advanced-configuration.md#restore-the-deprecated-environment-attribute).
+to `deployment.environment`. Use `helm template`
+to render the chart using the same value arguments as your install command,
+then extract the resource section for each enabled component. For example,
+for the agent component:
+
+```bash
+helm template my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector --show-only templates/configmap-agent.yaml | yq '.data.relay | from_yaml | .service.telemetry.resource'
+```
+
+Use `templates/configmap-gateway.yaml` for the gateway and
+`templates/configmap-cluster-receiver.yaml` for the cluster receiver. Copy the
+complete output under the corresponding `<component>.config.service.telemetry.resource`
+section and change only the `deployment.environment.name` entry to `deployment.environment`.
 
 ## 0.154.0 to 0.155.0
 
