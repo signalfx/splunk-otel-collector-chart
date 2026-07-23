@@ -32,6 +32,8 @@ spec:
     spec:
       serviceAccountName: default-targetallocator-ta
       automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/os: linux
       containers:
         - name: targetallocator
           image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.153.0
