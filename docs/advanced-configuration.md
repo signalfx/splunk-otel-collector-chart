@@ -1112,6 +1112,23 @@ agent:
            storage: null
 ```
 
+### Persistent queue compaction
+
+The chart enables online (`on_rebound`) compaction by default. Compaction runs when the queue database has allocated at least 200 MiB and its live data has dropped to 100 MiB or less.
+
+Startup (`on_start`) compaction is disabled by default because compacting a large queue delays Collector readiness and can cause K8s liveness probe failures. Before enabling it, set `livenessProbe.initialDelaySeconds` high enough to cover the expected compaction time.
+
+To enable startup compaction, override the Collector configuration:
+
+```yaml
+agent:
+  config:
+    extensions:
+      file_storage/persistent_queue:
+        compaction:
+          on_start: true
+```
+
 ## Using Edge Processor
 
 The [Edge Processor solution](https://help.splunk.com/splunk-cloud-platform/process-data-at-the-edge/use-edge-processors) is a data processing tool that can be used to enrich and filter your logs using SPL2.

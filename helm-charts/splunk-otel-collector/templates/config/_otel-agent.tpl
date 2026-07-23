@@ -21,6 +21,15 @@ extensions:
     {{- if not (eq (toString .Values.splunkPlatform.fsyncEnabled) "<nil>") }}
     fsync: {{ .Values.splunkPlatform.fsyncEnabled }}
     {{- end }}
+    compaction:
+      on_rebound: true
+      rebound_needed_threshold_mib: 200
+      rebound_trigger_threshold_mib: 100
+      directory: {{ .Values.splunkPlatform.sendingQueue.persistentQueue.storagePath }}/agent
+      cleanup_on_start: true
+      # Compacts the persistent queue files on collector startup. May delay initialization for large queues
+      # increase the startup probe timeout when enabling.
+      # on_start: true
   {{- end }}
 
 
