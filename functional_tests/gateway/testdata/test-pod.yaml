@@ -9,7 +9,8 @@ spec:
       image: curlimages/curl
       command: ["sh", "-c"]
       args:
-        - sleep 1 && curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H "Content-Type: application/x-protobuf"
+        - |
+          sleep 1 && curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H \"Content-Type: application/x-protobuf\"
       volumeMounts:
         - name: file-volume
           mountPath: /data
