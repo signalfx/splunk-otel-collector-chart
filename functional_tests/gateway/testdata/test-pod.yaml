@@ -1,20 +1,121 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pod-json-source
+data:
+  main.go: |
+    // Copyright Splunk Inc.
+    // SPDX-License-Identifier: Apache-2.0
+
+    package main
+
+    import (
+    	"bytes"
+    	"flag"
+    	"fmt"
+    	"io"
+    	"log"
+    	"net/http"
+    	"time"
+    )
+
+    const (
+    	contentTypeHeader string = "Content-Type"
+    	contentTypeValue  string = "application/x-protobuf"
+    	defaultDelay      string = "100ms"
+    	defaultPayload    string = `{ "gauge": [{ "dimensions": { "service": "petstore" }, "metric": "gaugeMetricName", "timestamp": 1557225030000, "value": 99.98751 }]}`
+    	defaultRuns       int    = 20
+    	flagDelay         string = "delay"
+    	flagDelayUsage    string = "delay between POST requests"
+    	flagPayload       string = "payload"
+    	flagPayloadUsage  string = "JSON text to upload"
+    	flagRuns          string = "runs"
+    	flagRunsUsage     string = "number of POST requests to send"
+    	flagURL           string = "url"
+    	flagURLUsage      string = "HTTP server URL"
+    	targetURL         string = "http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint"
+    )
+
+    func main() {
+    	var delay time.Duration
+    	var payload string
+    	var runs int
+
+    	flag.DurationVar(&delay, flagDelay, mustParseDuration(defaultDelay), flagDelayUsage)
+    	flag.StringVar(&payload, flagPayload, defaultPayload, flagPayloadUsage)
+    	flag.IntVar(&runs, flagRuns, defaultRuns, flagRunsUsage)
+    	flag.Parse()
+
+    	if err := postRepeatedly(http.DefaultClient, []byte(payload), runs, delay); err != nil {
+    		log.Fatalf("failed to POST JSON payload to %s: %v", targetURL, err)
+    	}
+    }
+
+    func mustParseDuration(value string) time.Duration {
+    	duration, err := time.ParseDuration(value)
+    	if err != nil {
+    		log.Fatalf("failed to parse default delay %s: %v", value, err)
+    	}
+    	return duration
+    }
+
+    func postRepeatedly(client *http.Client, payload []byte, runs int, delay time.Duration) error {
+    	for run := 1; run <= runs; run++ {
+    		if err := postOnce(client, payload); err != nil {
+    			return fmt.Errorf("request %d of %d failed: %w", run, runs, err)
+    		}
+
+    		log.Println("Successfully posted request")
+
+    		if run < runs {
+    			time.Sleep(delay)
+    		}
+    	}
+    	return nil
+    }
+
+    func postOnce(client *http.Client, payload []byte) error {
+    	request, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewReader(payload))
+    	if err != nil {
+    		return fmt.Errorf("failed to create POST request for %s: %w", targetURL, err)
+    	}
+    	request.Header.Set(contentTypeHeader, contentTypeValue)
+
+    	response, err := client.Do(request)
+    	if err != nil {
+    		return fmt.Errorf("failed to send POST request to %s: %w", targetURL, err)
+    	}
+    	defer response.Body.Close()
+
+    	if _, err = io.Copy(io.Discard, response.Body); err != nil {
+    		return fmt.Errorf("failed to read response body from %s: %w", targetURL, err)
+    	}
+
+    	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
+    		return fmt.Errorf("POST request to %s returned status %s", targetURL, response.Status)
+    	}
+    	return nil
+    }
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: file-uploader-pod
 spec:
   restartPolicy: OnFailure
   containers:
-    - name: uploader-container
-      image: curlimages/curl
-      command: ["sh", "-c"]
+    - name: pod-json
+      image: golang:1.26
+      command:
+        - go
       args:
-        - |
-          sleep 1 && for i in `seq 1 20`; do curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H \"Content-Type: application/x-protobuf\"; done
+        - run
+        - /scripts/main.go
       volumeMounts:
-        - name: file-volume
-          mountPath: /data
+        - name: pod-json-source
+          mountPath: /scripts
+          readOnly: true
   volumes:
-    - name: file-volume
+    - name: pod-json-source
       configMap:
-        name: signalfx-metric-configmap
+        name: pod-json-source
