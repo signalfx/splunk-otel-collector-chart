@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -73,14 +74,22 @@ func Test_GatewayOnly(t *testing.T) {
 			internal.WaitForMetrics(t, 1, metricSink)
 
 			require.NotEmpty(t, metricSink.AllMetrics(), "expected at least one metric")
-			for _, m := range metricSink.AllMetrics() {
-				for i := 0; i < m.ResourceMetrics().Len(); i++ {
-					sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
-					for j := 0; j < sm.Metrics().Len(); j++ {
-						t.Logf("Metric sink received metric name: %s, type: %s", sm.Metrics().At(j).Name(), sm.Metrics().At(j).Type().String())
+			require.Eventually(t, func() bool {
+				foundExpectedMetric := false
+				for _, m := range metricSink.AllMetrics() {
+					for i := 0; i < m.ResourceMetrics().Len(); i++ {
+						sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
+						for j := 0; j < sm.Metrics().Len(); j++ {
+							t.Logf("Metric sink received metric name: %s, type: %s", sm.Metrics().At(j).Name(), sm.Metrics().At(j).Type().String())
+							if sm.Metrics().At(j).Name() == "gaugeMetricName" {
+								t.Logf("Metric sink received gaugeMetricName: %s", sm.Metrics().At(j).Name())
+								foundExpectedMetric = true
+							}
+						}
 					}
 				}
-			}
+				return foundExpectedMetric
+			}, time.Minute*1, 1*time.Second, "expected to see metric")
 			internal.LogPodContainerLogs(t, testKubeConfig, internal.DefaultNamespace, testPodName)
 		})
 	}
