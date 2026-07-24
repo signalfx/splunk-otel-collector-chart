@@ -4,6 +4,7 @@
 package gateway
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,9 +18,7 @@ import (
 
 const (
 	kubectlApply    = "apply"
-	kubectlCommand  = "kubectl"
 	kubectlDelete   = "delete"
-	kubectlFileFlag = "-f"
 	testDir         = "testdata"
 	testPodManifest = "test-pod.yaml"
 )
@@ -89,8 +88,8 @@ func Test_GatewayOnly(t *testing.T) {
 
 func runKubectlFileCommand(t *testing.T, kubeConfig, action, manifestPath string) {
 	t.Helper()
-	cmd := exec.Command(kubectlCommand, action, kubectlFileFlag, manifestPath)
-	cmd.Env = append(os.Environ(), "KUBECONFIG="+kubeConfig)
+	cmd := exec.Command("kubectl", action, "-f", manifestPath)
+	cmd.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeConfig))
 	output, err := cmd.CombinedOutput()
 	require.NoErrorf(t, err, "failed to run kubectl %s for manifest %s: %s", action, manifestPath, string(output))
 }
