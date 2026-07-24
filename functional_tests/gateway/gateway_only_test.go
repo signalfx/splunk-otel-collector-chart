@@ -16,14 +16,12 @@ import (
 )
 
 const (
-	kubeConfigEnvKey       = "KUBECONFIG"
-	kubeConfigEnvSeparator = "="
-	kubectlApply           = "apply"
-	kubectlCommand         = "kubectl"
-	kubectlDelete          = "delete"
-	kubectlFileFlag        = "-f"
-	podFile                = "test-pod.yaml"
-	testDir                = "testdata"
+	kubectlApply    = "apply"
+	kubectlCommand  = "kubectl"
+	kubectlDelete   = "delete"
+	kubectlFileFlag = "-f"
+	testDir         = "testdata"
+	testPodManifest = "test-pod.yaml"
 )
 
 // Env vars to control the test behavior:
@@ -32,10 +30,12 @@ const (
 // SKIP_TEARDOWN: if set to true, the test will skip teardown
 // SKIP_SETUP: if set to true, the test will skip setup
 func Test_GatewayOnly(t *testing.T) {
-	testKubeConfig := getEnvVar(t, kubeConfigEnvKey)
+	testKubeConfig := getEnvVar(t, "KUBECONFIG")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		internal.ChartUninstall(t, testKubeConfig)
 	}
+
+	podManifestPath := filepath.Join(testDir, testPodManifest)
 
 	internal.SetupSignalFxAPIServer(t)
 
@@ -58,15 +58,14 @@ func Test_GatewayOnly(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manifestFiles := gatewayOnlyManifestFiles()
 			metricSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 			internal.BasicCollectorChartInstall(t, testKubeConfig, tt.valuesTmpl)
-			applyKubectlFiles(t, testKubeConfig, manifestFiles)
+			runKubectlFileCommand(t, testKubeConfig, kubectlApply, podManifestPath)
 			t.Cleanup(func() {
 				if os.Getenv("SKIP_TEARDOWN") == "true" {
 					return
 				}
-				deleteKubectlFiles(t, testKubeConfig, manifestFiles)
+				runKubectlFileCommand(t, testKubeConfig, kubectlDelete, podManifestPath)
 				internal.ChartUninstall(t, testKubeConfig)
 			})
 
@@ -88,31 +87,10 @@ func Test_GatewayOnly(t *testing.T) {
 	}
 }
 
-func applyKubectlFiles(t *testing.T, kubeConfig string, manifestFiles []string) {
+func runKubectlFileCommand(t *testing.T, kubeConfig, action, manifestPath string) {
 	t.Helper()
-	for _, manifestFile := range manifestFiles {
-		runKubectlFileCommand(t, kubeConfig, kubectlApply, manifestFile)
-	}
-}
-
-func deleteKubectlFiles(t *testing.T, kubeConfig string, manifestFiles []string) {
-	t.Helper()
-	for _, manifestFile := range manifestFiles {
-		runKubectlFileCommand(t, kubeConfig, kubectlDelete, manifestFile)
-	}
-}
-
-func gatewayOnlyManifestFiles() []string {
-	return []string{
-		podFile,
-	}
-}
-
-func runKubectlFileCommand(t *testing.T, kubeConfig, action, manifestFile string) {
-	t.Helper()
-	manifestPath := filepath.Join(testDir, manifestFile)
 	cmd := exec.Command(kubectlCommand, action, kubectlFileFlag, manifestPath)
-	cmd.Env = append(os.Environ(), kubeConfigEnvKey+kubeConfigEnvSeparator+kubeConfig)
+	cmd.Env = append(os.Environ(), "KUBECONFIG="+kubeConfig)
 	output, err := cmd.CombinedOutput()
 	require.NoErrorf(t, err, "failed to run kubectl %s for manifest %s: %s", action, manifestPath, string(output))
 }
