@@ -88,9 +88,9 @@ func Test_GatewayOnly(t *testing.T) {
 						}
 					}
 				}
+				internal.LogPodContainerLogs(t, testKubeConfig, internal.DefaultNamespace, testPodName)
 				return foundExpectedMetric
 			}, time.Minute*1, 1*time.Second, "expected to see metric")
-			internal.LogPodContainerLogs(t, testKubeConfig, internal.DefaultNamespace, testPodName)
 		})
 	}
 }
