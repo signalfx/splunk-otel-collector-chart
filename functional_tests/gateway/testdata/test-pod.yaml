@@ -10,7 +10,7 @@ spec:
       command: ["sh", "-c"]
       args:
         - |
-          sleep 1 && curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H \"Content-Type: application/x-protobuf\"
+          sleep 1 && for i in `seq 1 20`; do curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H \"Content-Type: application/x-protobuf\"; done
       volumeMounts:
         - name: file-volume
           mountPath: /data
