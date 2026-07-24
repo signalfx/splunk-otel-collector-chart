@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	configMapFile          = "signalfx-metric-file-configmap.yaml"
 	kubeConfigEnvKey       = "KUBECONFIG"
 	kubeConfigEnvSeparator = "="
 	kubectlApply           = "apply"
@@ -25,7 +24,6 @@ const (
 	kubectlFileFlag        = "-f"
 	podFile                = "test-pod.yaml"
 	testDir                = "testdata"
-	testPodName            = "file-uploader-pod"
 )
 
 // Env vars to control the test behavior:
@@ -71,26 +69,21 @@ func Test_GatewayOnly(t *testing.T) {
 				deleteKubectlFiles(t, testKubeConfig, manifestFiles)
 				internal.ChartUninstall(t, testKubeConfig)
 			})
-			internal.WaitForMetrics(t, 1, metricSink)
 
-			require.NotEmpty(t, metricSink.AllMetrics(), "expected at least one metric")
 			require.Eventually(t, func() bool {
 				foundExpectedMetric := false
 				for _, m := range metricSink.AllMetrics() {
 					for i := 0; i < m.ResourceMetrics().Len(); i++ {
 						sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
 						for j := 0; j < sm.Metrics().Len(); j++ {
-							t.Logf("Metric sink received metric name: %s, type: %s", sm.Metrics().At(j).Name(), sm.Metrics().At(j).Type().String())
 							if sm.Metrics().At(j).Name() == "cpu.num_processors" {
-								t.Logf("Metric sink received cpu.num_processors: %s", sm.Metrics().At(j).Name())
 								foundExpectedMetric = true
 							}
 						}
 					}
 				}
-				internal.LogPodContainerLogs(t, testKubeConfig, internal.DefaultNamespace, testPodName)
 				return foundExpectedMetric
-			}, time.Minute*1, 1*time.Second, "expected to see metric")
+			}, 1*time.Minute, 1*time.Second, "expected to see metric")
 		})
 	}
 }
@@ -111,7 +104,6 @@ func deleteKubectlFiles(t *testing.T, kubeConfig string, manifestFiles []string)
 
 func gatewayOnlyManifestFiles() []string {
 	return []string{
-		configMapFile,
 		podFile,
 	}
 }
