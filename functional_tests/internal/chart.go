@@ -75,6 +75,7 @@ func BasicCollectorChartInstall(t *testing.T, kubeConfig, valuesTmpl string) {
 	require.NoError(t, err)
 	ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
 		"ApiURL":    HostPortHTTP(hostEp, SignalFxAPIPort),
+		"EventsURL": HostPortHTTP(hostEp, OTLPHTTPReceiverPort),
 		"IngestURL": HostPortHTTP(hostEp, SignalFxReceiverPort),
 		"OTLPSink":  HostPortHTTP(hostEp, OTLPHTTPReceiverPort),
 	}, 0, GetDefaultChartOptions())
