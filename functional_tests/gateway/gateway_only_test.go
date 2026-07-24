@@ -81,8 +81,8 @@ func Test_GatewayOnly(t *testing.T) {
 						sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
 						for j := 0; j < sm.Metrics().Len(); j++ {
 							t.Logf("Metric sink received metric name: %s, type: %s", sm.Metrics().At(j).Name(), sm.Metrics().At(j).Type().String())
-							if sm.Metrics().At(j).Name() == "system.cpu.logical.count" {
-								t.Logf("Metric sink received system.cpu.logical.count: %s", sm.Metrics().At(j).Name())
+							if sm.Metrics().At(j).Name() == "cpu.num_processors" {
+								t.Logf("Metric sink received cpu.num_processors: %s", sm.Metrics().At(j).Name())
 								foundExpectedMetric = true
 							}
 						}
