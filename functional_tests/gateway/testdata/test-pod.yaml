@@ -86,13 +86,10 @@ data:
     		return fmt.Errorf("failed to send POST request to %s: %w", targetURL, err)
     	}
     	defer response.Body.Close()
+    	body, _ := io.ReadAll(response.Body)
 
-    	if _, err = io.Copy(io.Discard, response.Body); err != nil {
-    		return fmt.Errorf("failed to read response body from %s: %w", targetURL, err)
-    	}
-
-    	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-    		return fmt.Errorf("POST request to %s returned status %s", targetURL, response.Status)
+      if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
+    		return fmt.Errorf("POST request to %s returned status %s, returned body: %s", targetURL, response.Status, string(body))
     	}
     	return nil
     }
