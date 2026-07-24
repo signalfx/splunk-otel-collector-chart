@@ -23,7 +23,7 @@ data:
     	contentTypeHeader string = "Content-Type"
     	contentTypeValue  string = "application/x-protobuf"
     	defaultDelay      string = "100ms"
-    	defaultPayload    string = `{ "gauge": [{ "dimensions": { "service": "petstore" }, "metric": "gaugeMetricName", "timestamp": 1557225030000, "value": 99.98751 }]}`
+    	defaultPayload    string = `{ "datapoints": [{ "dimensions": { "service": "petstore" }, "metric": "gaugeMetricName", "timestamp": 1557225030000, "value": 99.98751 }]}`
     	defaultRuns       int    = 20
     	flagDelay         string = "delay"
     	flagDelayUsage    string = "delay between POST requests"
