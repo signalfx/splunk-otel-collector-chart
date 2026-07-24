@@ -968,6 +968,13 @@ gateway:
       containerPort: 14250
       protocol: TCP
       enabled_for: [traces]
+    signalfx:
+      containerPort: 9943
+      hostPort: 9943
+      protocol: TCP
+      # SignalFx metrics enabled in gateway for all telemetry types since there may be
+      # bundled metrics.
+      enabled_for: [metrics, traces, logs]
     zipkin:
       containerPort: 9411
       protocol: TCP

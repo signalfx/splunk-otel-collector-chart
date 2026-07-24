@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: file-uploader-pod
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: uploader-container
+      image: curlimages/curl
+      command: ["sh", "-c"]
+      args:
+        - |
+          sleep 1 && for i in `seq 1 20`; do curl -X POST -F "file=@/data/signalfx-metric.json" http://sock-splunk-otel-collector.default.svc.cluster.local:9942/v2/datapoint -H \"Content-Type: application/x-protobuf\"; done
+      volumeMounts:
+        - name: file-volume
+          mountPath: /data
+  volumes:
+    - name: file-volume
+      configMap:
+        name: signalfx-metric-configmap

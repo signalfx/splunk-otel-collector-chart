@@ -46,6 +46,11 @@ data:
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.observability.splunkcloud.com
+      http_forwarder/o11y_ingest:
+        egress:
+          endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
+        ingress:
+          endpoint: 0.0.0.0:9943
       http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
@@ -179,6 +184,7 @@ data:
       - headers_setter
       - http_forwarder
       - http_forwarder/opamp_splunk_o11y
+      - http_forwarder/o11y_ingest
       - opamp/splunk_o11y
       pipelines:
         logs/entities:
