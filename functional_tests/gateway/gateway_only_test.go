@@ -20,14 +20,10 @@ const (
 	kubectlApply    = "apply"
 	kubectlDelete   = "delete"
 	testDir         = "testdata"
-	testPodManifest = "test-pod.yaml"
+	testMetricName  = "cpu.num_processors"
+	testPodManifest = "standalone-collector-pod.yaml"
 )
 
-// Env vars to control the test behavior:
-// KUBECONFIG (required): the path to the kubeconfig file
-// TEARDOWN_BEFORE_SETUP: if set to true, the test will run teardown before setup
-// SKIP_TEARDOWN: if set to true, the test will skip teardown
-// SKIP_SETUP: if set to true, the test will skip setup
 func Test_GatewayOnly(t *testing.T) {
 	testKubeConfig := getEnvVar(t, "KUBECONFIG")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
@@ -35,7 +31,6 @@ func Test_GatewayOnly(t *testing.T) {
 	}
 
 	podManifestPath := filepath.Join(testDir, testPodManifest)
-
 	internal.SetupSignalFxAPIServer(t)
 
 	t.Cleanup(func() {
@@ -74,14 +69,14 @@ func Test_GatewayOnly(t *testing.T) {
 					for i := 0; i < m.ResourceMetrics().Len(); i++ {
 						sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
 						for j := 0; j < sm.Metrics().Len(); j++ {
-							if sm.Metrics().At(j).Name() == "cpu.num_processors" {
+							if sm.Metrics().At(j).Name() == testMetricName {
 								foundExpectedMetric = true
 							}
 						}
 					}
 				}
 				return foundExpectedMetric
-			}, 1*time.Minute, 1*time.Second, "expected to see metric")
+			}, 1*time.Minute, 1*time.Second, fmt.Sprintf("failed to find expected metric %s", testMetricName))
 		})
 	}
 }
