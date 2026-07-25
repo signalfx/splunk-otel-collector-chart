@@ -4,6 +4,33 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.157.0] - 2026-07-25
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.157.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.157.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Enable compaction by default for the persistent queue file storage extension. ([#79002](https://github.com/signalfx/splunk-otel-collector-chart/pull/79002))
+  Prevents unbounded disk growth after traffic spikes. Compaction triggers when the file is ≥200 MiB and live data has dropped to ≤100 MiB and on collector start.
+  Override configuration via `agent.config.extensions.file_storage/persistent_queue.compaction`.
+  
+- `chart`: Add an opt-in setting to read Splunk tokens from mounted Secret files. ([#2441](https://github.com/signalfx/splunk-otel-collector-chart/pull/2441))
+  Enable `featureGates.mountSplunkSecretAsFile` to use this mode with either a chart-created or existing Secret. This option is disabled by default and is not currently supported with `distribution: gke/autopilot`.
+  
+- `chart`: Add the Splunk access token header to the default OpAMP HTTP forwarder egress config. ([#4437](https://github.com/signalfx/splunk-otel-collector-chart/pull/4437))
+- `chart`: Set mounted Splunk Secret files to mode `0440` by default and set `fsGroup: 999` on Linux Collector pods. Both settings remain configurable. ([#2441](https://github.com/signalfx/splunk-otel-collector-chart/pull/2441))
+- `chart`: Add `agent.tokenPassthrough` and `gateway.tokenPassthrough` options to enable passthrough of the client's authentication token to Splunk Observability and OpAMP. ([#2509](https://github.com/signalfx/splunk-otel-collector-chart/pull/2509))
+  When enabled, the collector propagates the caller's `X-SF-Token` to Splunk Observability
+  (via `headers_setter`) and to the OpAMP HTTP forwarder egress. Defaults preserve today's
+  behavior: `agent.tokenPassthrough=false` and `gateway.tokenPassthrough=true`.
+  
+- `chart`: Bump obi to 0.11.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2510](https://github.com/signalfx/splunk-otel-collector-chart/pull/2510))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Allow original OpenTelemetry subchart names in values.schema.json validation. ([#2493](https://github.com/signalfx/splunk-otel-collector-chart/pull/2493))
+- `chart`: Pin Linux-only workloads to Linux nodes, disable service account token mounting for the secret validation hook, and reject Windows workloads on EKS Fargate. ([#2522](https://github.com/signalfx/splunk-otel-collector-chart/pull/2522))
+
 ## [0.156.0] - 2026-07-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.156.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.156.0).
