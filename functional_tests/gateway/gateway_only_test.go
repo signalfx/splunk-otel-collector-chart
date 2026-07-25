@@ -76,7 +76,7 @@ func Test_GatewayOnly(t *testing.T) {
 					}
 				}
 				return foundExpectedMetric
-			}, 1*time.Minute, 1*time.Second, fmt.Sprintf("failed to find expected metric %s", testMetricName))
+			}, 1*time.Minute, 1*time.Second, "failed to find expected metric %s", testMetricName))
 		})
 	}
 }
