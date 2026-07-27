@@ -34,13 +34,10 @@ import (
 )
 
 const (
-	HelmActionTimeout                    = 15 * time.Minute
-	DefaultChartReleaseName              = "sock"
-	chartLabelKey                        = "helm.sh/chart-name"
-	defaultChartDeploymentName           = "sock-splunk-otel-collector"
-	defaultChartPath                     = "helm-charts/splunk-otel-collector"
-	deploymentNotReadyErrorMessage       = "Deployment/default/sock-splunk-otel-collector not ready"
-	deploymentPodLogTailLines      int64 = 200
+	HelmActionTimeout       = 15 * time.Minute
+	DefaultChartReleaseName = "sock"
+	chartLabelKey           = "helm.sh/chart-name"
+	defaultChartPath        = "helm-charts/splunk-otel-collector"
 )
 
 type ChartOptions struct {
