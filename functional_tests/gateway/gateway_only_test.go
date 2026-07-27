@@ -67,10 +67,13 @@ func Test_GatewayOnly(t *testing.T) {
 				foundExpectedMetric := false
 				for _, m := range metricSink.AllMetrics() {
 					for i := 0; i < m.ResourceMetrics().Len(); i++ {
-						sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
-						for j := 0; j < sm.Metrics().Len(); j++ {
-							if sm.Metrics().At(j).Name() == testMetricName {
-								foundExpectedMetric = true
+						rm := m.ResourceMetrics().At(i)
+						for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+							sm := rm.ScopeMetrics().At(j)
+							for k := 0; k < sm.Metrics().Len(); k++ {
+								if sm.Metrics().At(k).Name() == testMetricName {
+									foundExpectedMetric = true
+								}
 							}
 						}
 					}
