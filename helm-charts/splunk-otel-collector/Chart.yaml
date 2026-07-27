@@ -43,7 +43,7 @@ dependencies:
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: obi.enabled
   - name: opentelemetry-target-allocator
-    version: 0.130.0
+    version: 0.156.0
     alias: targetallocator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: targetallocator.enabled
