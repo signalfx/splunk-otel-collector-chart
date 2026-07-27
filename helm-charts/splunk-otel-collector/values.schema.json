@@ -1661,6 +1661,26 @@
       }
     },
     {
+      "$comment": "Amazon EKS Fargate supports Linux Pods only.",
+      "if": {
+        "properties": {
+          "distribution": {
+            "const": "eks/fargate"
+          }
+        },
+        "required": [
+          "distribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "isWindows": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
       "$comment": "mountSplunkSecretAsFile is not currently supported on GKE Autopilot.",
       "if": {
         "properties": {

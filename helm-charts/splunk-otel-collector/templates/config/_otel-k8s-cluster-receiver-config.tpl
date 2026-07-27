@@ -71,11 +71,11 @@ receivers:
       involvedObjectKind: Job
   {{- end }}
   {{- if eq .Values.distribution "eks/fargate" }}
-  # dynamically created kubeletstats receiver to report all Fargate "node" kubelet stats
+  # dynamically created kubelet_stats receiver to report all Fargate "node" kubelet stats
   # with exception of collector "node's" own since Fargate forbids connection.
   receiver_creator:
     receivers:
-      kubeletstats:
+      kubelet_stats:
         rule: type == "k8s.node" && name contains "fargate"
         config:
           auth_type: serviceAccount

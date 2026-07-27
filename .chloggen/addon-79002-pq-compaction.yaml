@@ -1,0 +1,7 @@
+change_type: enhancement
+component: agent
+note: Enable compaction by default for the persistent queue file storage extension.
+issues: [79002]
+subtext: |
+  Prevents unbounded disk growth after traffic spikes. Compaction triggers when the file is ≥200 MiB and live data has dropped to ≤100 MiB and on collector start.
+  Override configuration via `agent.config.extensions.file_storage/persistent_queue.compaction`.

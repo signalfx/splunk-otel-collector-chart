@@ -94,6 +94,12 @@ data:
       file_storage:
         directory: /var/addon/splunk/otel_pos
       file_storage/persistent_queue:
+        compaction:
+          cleanup_on_start: true
+          directory: /var/addon/splunk/exporter_queue/agent
+          on_rebound: true
+          rebound_needed_threshold_mib: 200
+          rebound_trigger_threshold_mib: 100
         directory: /var/addon/splunk/exporter_queue/agent
         timeout: 0
       health_check:
@@ -293,7 +299,7 @@ data:
             endpoint: 0.0.0.0:14250
           thrift_http:
             endpoint: 0.0.0.0:14268
-      kubeletstats:
+      kubelet_stats:
         auth_type: serviceAccount
         collection_interval: 10s
         endpoint: ${K8S_NODE_IP}:10250
@@ -371,7 +377,7 @@ data:
           - k8s_attributes/metrics
           receivers:
           - host_metrics
-          - kubeletstats
+          - kubelet_stats
           - otlp
         metrics/agent:
           exporters:

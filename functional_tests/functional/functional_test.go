@@ -68,6 +68,7 @@ const (
 	winPodMetricsPath                      = "C:\\metrics.json"
 	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
 	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
+	aksWindowsValidationResourceName       = "aks-win-validation-secret"
 )
 
 type collectorRole string
@@ -129,6 +130,9 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 
 	if requiresPrometheusResources(kubeTestEnv) {
 		deployPrometheusCRDs(t, extensionsClient)
+	}
+	if kubeTestEnv == aksTestKubeEnv {
+		createAKSWindowsValidationSecret(t, client)
 	}
 
 	chartInfo := map[string]internal.ChartOptions{}
@@ -293,6 +297,33 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	})
 }
 
+// createAKSWindowsValidationSecret ensures the mixed-node AKS test exercises the
+// Linux-only secret validation hook instead of using a chart-created Secret.
+func createAKSWindowsValidationSecret(t *testing.T, client kubernetes.Interface) {
+	secrets := client.CoreV1().Secrets(internal.DefaultNamespace)
+	desired := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: aksWindowsValidationResourceName,
+		},
+		Data: map[string][]byte{
+			"splunk_observability_access_token": []byte("test"),
+			"splunk_platform_hec_token":         []byte("test"),
+		},
+	}
+
+	existing, err := secrets.Get(t.Context(), desired.Name, metav1.GetOptions{})
+	switch {
+	case k8serrors.IsNotFound(err):
+		_, err = secrets.Create(t.Context(), desired, metav1.CreateOptions{})
+	case err != nil:
+		require.NoError(t, err)
+	default:
+		desired.ResourceVersion = existing.ResourceVersion
+		_, err = secrets.Update(t.Context(), desired, metav1.UpdateOptions{})
+	}
+	require.NoError(t, err)
+}
+
 func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
@@ -376,6 +407,14 @@ func teardown(ctx context.Context, t *testing.T, testKubeConfig string) {
 		}, 3*time.Minute, 3*time.Second, "namespace %s not removed in time", nm.Name)
 	}
 	internal.ChartUninstall(t, testKubeConfig)
+	if os.Getenv("KUBE_TEST_ENV") == aksTestKubeEnv {
+		err = client.CoreV1().Secrets(internal.DefaultNamespace).Delete(
+			ctx,
+			aksWindowsValidationResourceName,
+			metav1.DeleteOptions{},
+		)
+		require.True(t, err == nil || k8serrors.IsNotFound(err), "failed to delete AKS Windows validation secret: %v", err)
+	}
 }
 
 func Test_Functions(t *testing.T) {
@@ -1041,8 +1080,8 @@ func testAgentMetrics(t *testing.T) {
 		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_otelsvc_k8s_pod_updated")
 	})
 
-	t.Run("kubeletstats metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubeletstats_metrics.yaml", "container.memory.usage")
+	t.Run("kubelet_stats metrics", func(t *testing.T) {
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubelet_stats_metrics.yaml", "container.memory.usage")
 	})
 
 	t.Run("host_metrics", func(t *testing.T) {
