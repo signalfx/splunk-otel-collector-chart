@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 {{- /*
 eks/fargate distributions use a two-replica StatefulSet instead of a single node deployment.
-The first replica monitors all fargate node kubelets (except its own) via k8s_observer and kubeletstats receiver.
+The first replica monitors all fargate node kubelets (except its own) via k8s_observer and kubelet_stats receiver.
 The second replica monitors the first replica's kubelet and the cluster.
 */}}
 kind: {{- if eq .Values.distribution "eks/fargate" }} StatefulSet {{- else }} Deployment {{- end }}

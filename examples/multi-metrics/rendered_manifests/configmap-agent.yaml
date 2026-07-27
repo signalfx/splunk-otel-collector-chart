@@ -259,7 +259,7 @@ data:
           network: null
           paging: null
           processes: null
-      kubeletstats:
+      kubelet_stats:
         auth_type: serviceAccount
         collection_interval: 10s
         endpoint: ${K8S_NODE_IP}:10250
@@ -334,7 +334,7 @@ data:
           - k8s_attributes/metrics
           receivers:
           - host_metrics
-          - kubeletstats
+          - kubelet_stats
           - otlp
         metrics/agent:
           exporters:

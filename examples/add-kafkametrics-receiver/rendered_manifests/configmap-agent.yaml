@@ -253,7 +253,7 @@ data:
         - brokers
         - topics
         - consumers
-      kubeletstats:
+      kubelet_stats:
         auth_type: serviceAccount
         collection_interval: 10s
         endpoint: ${K8S_NODE_IP}:10250
