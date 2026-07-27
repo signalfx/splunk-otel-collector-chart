@@ -1,0 +1,398 @@
+suite: splunk-otel-collector.logsToMetrics
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+set:
+  splunkPlatform:
+    endpoint: https://hec.example.com/services/collector/event
+    token: test-token
+    logsEnabled: true
+    metricsEnabled: false
+    tracesEnabled: false
+  splunkObservability:
+    metricsEnabled: true
+    tracesEnabled: false
+
+tests:
+  - it: should not render Logs-to-Metrics components by default
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs_to_metrics|logs/log_to_metrics"
+
+  - it: should render the dedicated file_log pipeline and both connectors when enabled
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml)'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.service.pipelines["logs/log_to_metrics"].receivers
+          value:
+            - file_log
+      - equal:
+          path: data.relay.service.pipelines["logs/log_to_metrics"].processors
+          value:
+            - memory_limiter
+            - k8s_attributes/logs_to_metrics
+            - resourcedetection
+            - resource
+            - transform/logs_to_metrics
+      - equal:
+          path: data.relay.service.pipelines["logs/log_to_metrics"].exporters
+          value:
+            - count/logs_to_metrics
+            - sum/logs_to_metrics
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: count/logs_to_metrics
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: sum/logs_to_metrics
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: transform/logs_to_metrics_metrics
+
+  - it: should render all ten count metrics and no additional count metric
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .connectors."count/logs_to_metrics".logs | keys | sort | join(","))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: "app.authentication.failure.count,app.exception.unhandled.count,app.job.failure.count,app.log.error.count,app.log.record.count,app.request.throttled.count,app.retry.exhausted.count,http.server.error.count,k8s.event.warning.count,k8s.image_pull.failure.count"
+
+  - it: should render the numeric business transaction sum
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .connectors."sum/logs_to_metrics".logs)'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay["business.transaction.value"].source_attribute
+          value: business.transaction.value
+      - equal:
+          path: data.relay["business.transaction.value"].attributes
+          value:
+            - key: splunk.logs_to_metrics.business.transaction.type_unit
+
+  - it: should restore public business transaction attributes after the sum connector
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics_metrics".metric_statements)'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay
+          content: 'set(datapoint.attributes["business.transaction.type"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[0]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])'
+      - contains:
+          path: data.relay
+          content: 'set(datapoint.attributes["business.transaction.unit"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[1]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])'
+      - contains:
+          path: data.relay
+          content: 'delete_key(datapoint.attributes, "splunk.logs_to_metrics.business.transaction.type_unit") where metric.name == "business.transaction.value"'
+
+  - it: should normalize integral JSON severity and HTTP status fields to OTel integer types
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics".log_statements)'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay
+          content: 'set(log.attributes["severity_number"], Int(log.attributes["severity_number"])) where IsDouble(log.attributes["severity_number"]) and log.attributes["severity_number"] == Int(log.attributes["severity_number"])'
+      - contains:
+          path: data.relay
+          content: 'set(log.attributes["http.response.status_code"], Int(log.attributes["http.response.status_code"])) where IsDouble(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] == Int(log.attributes["http.response.status_code"])'
+
+  - it: should keep the request-duration histogram hidden
+    set:
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "http.server.request.duration"
+
+  - it: should use one explicit predicate for every conditional count rule
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .connectors."count/logs_to_metrics".logs | to_entries | map({"name": .key, "conditions": (.value.conditions // [] | length)}) | sort_by(.name))'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value:
+            - name: app.authentication.failure.count
+              conditions: 1
+            - name: app.exception.unhandled.count
+              conditions: 1
+            - name: app.job.failure.count
+              conditions: 1
+            - name: app.log.error.count
+              conditions: 1
+            - name: app.log.record.count
+              conditions: 0
+            - name: app.request.throttled.count
+              conditions: 1
+            - name: app.retry.exhausted.count
+              conditions: 1
+            - name: http.server.error.count
+              conditions: 1
+            - name: k8s.event.warning.count
+              conditions: 1
+            - name: k8s.image_pull.failure.count
+              conditions: 1
+
+  - it: should preserve source-log delivery while metricizing only file_log
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines)'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay.logs.receivers
+          content: file_log
+      - contains:
+          path: data.relay.logs.receivers
+          content: otlp
+      - contains:
+          path: data.relay.logs.exporters
+          content: splunk_hec/platform_logs
+      - equal:
+          path: data.relay["logs/log_to_metrics"].receivers
+          value:
+            - file_log
+
+  - it: should keep only safe resource identity plus transient routing attributes before conversion
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics".log_statements | map(select(test("^keep_keys"))) | .[0])'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: 'keep_keys(resource.attributes, ["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.pod.uid", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"])'
+
+  - it: should apply the final cardinality allowlist last and remove its marker for direct export
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"last_processor": .service.pipelines.metrics.processors[-1], "statements": .processors."transform/logs_to_metrics_metrics".metric_statements})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.last_processor
+          value: transform/logs_to_metrics_metrics
+      - contains:
+          path: data.relay.statements
+          content: 'keep_keys(resource.attributes, ["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"]) where resource.attributes["splunk.logs_to_metrics"] == true'
+      - contains:
+          path: data.relay.statements
+          content: 'delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true'
+
+  - it: should omit unsafe route, operation, policy, and identity metric dimensions
+    set:
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | [.connectors."count/logs_to_metrics".logs[].attributes[]?.key, .connectors."sum/logs_to_metrics".logs[].attributes[]?.key] | flatten | unique | sort)'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value:
+            - auth.mechanism
+            - error.type
+            - exception.type
+            - http.request.method
+            - http.response.status_code
+            - job.type
+            - k8s.event.reason
+            - k8s.event.reporting_controller
+            - log.severity
+            - splunk.logs_to_metrics.business.transaction.type_unit
+
+  - it: should retain the configured environment on the metricization branch
+    set:
+      environment: production
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines."logs/log_to_metrics".processors)'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay
+          content: resource/add_environment
+
+  - it: should route generated metrics through the agent gateway exporter
+    set:
+      gateway.enabled: true
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"pipeline": .service.pipelines.metrics, "statements": .processors."transform/logs_to_metrics_metrics".metric_statements})'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay.pipeline.receivers
+          content: count/logs_to_metrics
+      - contains:
+          path: data.relay.pipeline.receivers
+          content: sum/logs_to_metrics
+      - contains:
+          path: data.relay.pipeline.exporters
+          content: otlp_grpc
+      - equal:
+          path: data.relay.pipeline.processors[-1]
+          value: transform/logs_to_metrics_metrics
+      - notContains:
+          path: data.relay.statements
+          content: 'delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true'
+
+  - it: should send generated metrics to the configured Splunk Platform metrics exporter
+    set:
+      splunkObservability:
+        realm: ""
+        metricsEnabled: false
+        tracesEnabled: true
+      splunkPlatform:
+        metricsEnabled: true
+        metricsIndex: metrics
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .service.pipelines.metrics.exporters)'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay
+          content: splunk_hec/platform_metrics
+      - notContains:
+          path: data.relay
+          content: signalfx
+
+  - it: should coexist with the SecureApp routing connector
+    set:
+      splunkObservability.secureAppEnabled: true
+      featureGates.enableLogsToMetrics: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .connectors | keys | sort)'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value:
+            - count/logs_to_metrics
+            - routing/logs
+            - sum/logs_to_metrics
+
+  - it: should fail when the agent is disabled
+    set:
+      agent.enabled: false
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "enableLogsToMetrics requires agent.enabled=true"
+
+  - it: should fail on EKS Fargate where the agent DaemonSet is unavailable
+    set:
+      distribution: eks/fargate
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "enableLogsToMetrics is not supported with distribution=eks/fargate"
+
+  - it: should fail when container file-log collection is disabled
+    set:
+      logsCollection.containers.enabled: false
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "enableLogsToMetrics requires logsCollection.containers.enabled=true"
+
+  - it: should fail without a source-log destination
+    set:
+      splunkPlatform:
+        endpoint: ""
+        token: ""
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "enableLogsToMetrics requires a configured logs destination"
+
+  - it: should fail without a metrics destination
+    set:
+      splunkPlatform.metricsEnabled: false
+      splunkObservability:
+        realm: test
+        accessToken: test
+        metricsEnabled: false
+        tracesEnabled: true
+        profilingEnabled: false
+        secureAppEnabled: false
+      featureGates.enableLogsToMetrics: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "enableLogsToMetrics requires a configured metrics destination"
+
+  - it: should reject a non-boolean feature-gate value
+    set:
+      featureGates.enableLogsToMetrics: enabled
+    asserts:
+      - failedTemplate:
+          errorPattern: "/featureGates/enableLogsToMetrics"

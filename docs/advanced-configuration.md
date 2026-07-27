@@ -793,6 +793,51 @@ collection is multi-threaded and provides high throughput with efficient resourc
 
 Logs collection is configured using the `logsCollection` section in values.yaml.
 
+### Generate metrics from Kubernetes container logs
+
+The experimental Logs-to-Metrics catalog creates alert-oriented count and sum metrics from structured Kubernetes
+container logs collected by the built-in `file_log` receiver. The source logs continue through the normal logs pipeline.
+The feature is disabled by default and requires the agent, container log collection, a logs destination, and a metrics
+destination.
+
+```yaml
+featureGates:
+  enableLogsToMetrics: true
+```
+
+The feature generates these metrics:
+
+| Metric | Required structured fields |
+| --- | --- |
+| `app.log.error.count` | OTel ERROR-or-higher severity, or `severity_number`, `severity_text`, `severity`, or `level` that can be normalized to OTel severity |
+| `http.server.error.count` | Numeric `http.response.status_code` from 500 through 599 |
+| `k8s.event.warning.count` | `k8s.event.type=Warning`, or a Warning-severity record with `k8s.event.reason` |
+| `k8s.image_pull.failure.count` | `k8s.event.reason=ErrImagePull` or `ImagePullBackOff` |
+| `app.exception.unhandled.count` | Non-empty `exception.type` and boolean `exception.escaped=true` |
+| `app.authentication.failure.count` | `event.name=authentication` and `event.outcome=failure` |
+| `app.job.failure.count` | `event.name=job`, `event.outcome=failure`, and a non-empty bounded `job.type` |
+| `app.retry.exhausted.count` | Boolean `retry.exhausted=true` |
+| `app.request.throttled.count` | Numeric `http.response.status_code=429` or boolean `request.throttled=true` |
+| `app.log.record.count` | Every record collected by the built-in Kubernetes container `file_log` receiver |
+| `business.transaction.value` | Numeric `business.transaction.value`, `event.outcome=success`, bounded `business.transaction.type`, and `business.transaction.unit` or `business.transaction.currency` |
+
+JSON object bodies are parsed into log attributes for this dedicated branch. Existing structured log attributes take
+precedence over fields parsed from the body. Transaction type and unit values containing `|` are rejected. The planned
+`http.server.request.duration` histogram is not generated because the Collector does not include a supported
+histogram-capable log connector.
+
+To control metric time-series cardinality, the generated metrics retain a workload-oriented resource allowlist and a
+small set of rule dimensions. Pod and node identity, container IDs, service instance IDs, raw routes, arbitrary labels,
+messages, stack traces, and request or execution IDs are not used as metric dimensions. The generated names are custom
+metrics unless your Splunk product configuration explicitly categorizes them otherwise. Values supplied for selected
+semantic dimensions such as `error.type`, `exception.type`, `job.type`, and `business.transaction.type` must come from
+bounded application vocabularies; the chart cannot infer or enforce an application-specific enumeration.
+
+The event rules only recognize Kubernetes Event fields that are serialized in a file-tailed container log. This feature
+does not query the Kubernetes API and does not replace cluster-wide Kubernetes Event collection. Generated metrics use
+the chart's existing metrics exporter and credentials, so a release sends them to the same Splunk organization and
+environment as its other metrics; per-record multi-organization routing is not supported.
+
 ### Add log files from Kubernetes host machines/volumes
 
 You can add additional log files to be ingested from Kubernetes host machines and Kubernetes volumes by configuring `agent.extraVolumes`, `agent.extraVolumeMounts` and `logsCollection.extraFileLogs` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.

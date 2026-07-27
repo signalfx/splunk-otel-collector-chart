@@ -1560,6 +1560,12 @@
     "featureGates": {
       "description": "Helm Chart Feature Gates.",
       "type": "object",
+      "properties": {
+        "enableLogsToMetrics": {
+          "description": "Generate the supported Logs-to-Metrics catalog from Kubernetes container logs collected by the agent file_log receiver.",
+          "type": "boolean"
+        }
+      },
       "additionalProperties": true
     }
   },

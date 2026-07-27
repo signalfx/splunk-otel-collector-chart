@@ -896,6 +896,92 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+  # Enrich the metricization branch with stable service and workload identity even when a gateway is enabled.
+  k8s_attributes/logs_to_metrics:
+    pod_association:
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.uid
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.ip
+      - sources:
+        - from: resource_attribute
+          name: ip
+    extract:
+      metadata:
+        - service.name
+        - service.namespace
+        - service.version
+        - k8s.namespace.name
+        - k8s.container.name
+        - k8s.deployment.name
+        - k8s.statefulset.name
+        - k8s.daemonset.name
+        - k8s.cronjob.name
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+
+  # Normalize structured container-log fields for the dedicated Logs-to-Metrics branch.
+  # This processor mutates only the file_log fan-out used by logs/log_to_metrics.
+  transform/logs_to_metrics:
+    error_mode: silent
+    log_statements:
+      - merge_maps(log.attributes, log.body, "insert") where IsMap(log.body)
+      - merge_maps(log.attributes, ParseJSON(log.body), "insert") where IsString(log.body) and IsMatch(log.body, "^\\s*\\{")
+      - set(log.attributes["severity_number"], Int(log.attributes["severity_number"])) where IsDouble(log.attributes["severity_number"]) and log.attributes["severity_number"] == Int(log.attributes["severity_number"])
+      - set(log.attributes["http.response.status_code"], Int(log.attributes["http.response.status_code"])) where IsDouble(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] == Int(log.attributes["http.response.status_code"])
+      - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["severity_text"])) where IsString(log.attributes["severity_text"])
+      - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["severity"])) where log.attributes["splunk.logs_to_metrics.severity.text"] == nil and IsString(log.attributes["severity"])
+      - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["level"])) where log.attributes["splunk.logs_to_metrics.severity.text"] == nil and IsString(log.attributes["level"])
+      - set(log.severity_number, SEVERITY_NUMBER_TRACE) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 1 and log.attributes["severity_number"] <= 4
+      - set(log.severity_number, SEVERITY_NUMBER_DEBUG) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 5 and log.attributes["severity_number"] <= 8
+      - set(log.severity_number, SEVERITY_NUMBER_INFO) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 9 and log.attributes["severity_number"] <= 12
+      - set(log.severity_number, SEVERITY_NUMBER_WARN) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 13 and log.attributes["severity_number"] <= 16
+      - set(log.severity_number, SEVERITY_NUMBER_ERROR) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 17 and log.attributes["severity_number"] <= 20
+      - set(log.severity_number, SEVERITY_NUMBER_FATAL) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsInt(log.attributes["severity_number"]) and log.attributes["severity_number"] >= 21 and log.attributes["severity_number"] <= 24
+      - set(log.severity_number, SEVERITY_NUMBER_TRACE) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^TRACE")
+      - set(log.severity_number, SEVERITY_NUMBER_DEBUG) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^DEBUG")
+      - set(log.severity_number, SEVERITY_NUMBER_INFO) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^INFO")
+      - set(log.severity_number, SEVERITY_NUMBER_WARN) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^(WARN|WARNING)")
+      - set(log.severity_number, SEVERITY_NUMBER_ERROR) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^(ERROR|ERR)")
+      - set(log.severity_number, SEVERITY_NUMBER_FATAL) where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED and IsString(log.attributes["splunk.logs_to_metrics.severity.text"]) and IsMatch(log.attributes["splunk.logs_to_metrics.severity.text"], "^(FATAL|CRITICAL)")
+      - set(log.attributes["log.severity"], "TRACE") where log.severity_number >= SEVERITY_NUMBER_TRACE and log.severity_number < SEVERITY_NUMBER_DEBUG
+      - set(log.attributes["log.severity"], "DEBUG") where log.severity_number >= SEVERITY_NUMBER_DEBUG and log.severity_number < SEVERITY_NUMBER_INFO
+      - set(log.attributes["log.severity"], "INFO") where log.severity_number >= SEVERITY_NUMBER_INFO and log.severity_number < SEVERITY_NUMBER_WARN
+      - set(log.attributes["log.severity"], "WARN") where log.severity_number >= SEVERITY_NUMBER_WARN and log.severity_number < SEVERITY_NUMBER_ERROR
+      - set(log.attributes["log.severity"], "ERROR") where log.severity_number >= SEVERITY_NUMBER_ERROR and log.severity_number < SEVERITY_NUMBER_FATAL
+      - set(log.attributes["log.severity"], "FATAL") where log.severity_number >= SEVERITY_NUMBER_FATAL
+      - set(log.attributes["log.severity"], "UNSPECIFIED") where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED
+      - set(log.attributes["http.request.method"], ToUpperCase(log.attributes["http.request.method"])) where IsString(log.attributes["http.request.method"])
+      - set(log.attributes["http.request.method"], "_OTHER") where IsString(log.attributes["http.request.method"]) and not IsMatch(log.attributes["http.request.method"], "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$")
+      - set(log.attributes["splunk.logs_to_metrics.event.name"], ToLowerCase(log.attributes["event.name"])) where IsString(log.attributes["event.name"])
+      - set(log.attributes["splunk.logs_to_metrics.event.outcome"], ToLowerCase(log.attributes["event.outcome"])) where IsString(log.attributes["event.outcome"])
+      - set(log.attributes["splunk.logs_to_metrics.k8s.event.type"], ToLowerCase(log.attributes["k8s.event.type"])) where IsString(log.attributes["k8s.event.type"])
+      - set(log.attributes["k8s.event.reporting_controller"], log.attributes["k8s.event.reporting.controller"]) where log.attributes["k8s.event.reporting_controller"] == nil and IsString(log.attributes["k8s.event.reporting.controller"])
+      - set(log.attributes["business.transaction.unit"], log.attributes["business.transaction.currency"]) where log.attributes["business.transaction.unit"] == nil and IsString(log.attributes["business.transaction.currency"])
+      # The 0.156 sum connector adds a value once per grouping attribute. Use one composite key,
+      # then restore the two public attributes in transform/logs_to_metrics_metrics.
+      - set(log.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], Concat([log.attributes["business.transaction.type"], log.attributes["business.transaction.unit"]], "|")) where IsString(log.attributes["business.transaction.type"]) and log.attributes["business.transaction.type"] != "" and not IsMatch(log.attributes["business.transaction.type"], "\\|") and IsString(log.attributes["business.transaction.unit"]) and log.attributes["business.transaction.unit"] != "" and not IsMatch(log.attributes["business.transaction.unit"], "\\|")
+      - set(resource.attributes["splunk.logs_to_metrics"], true)
+      # Keep workload-level correlation plus transient association/routing keys. The metrics-side
+      # transform removes pod identity and the internal marker before final export.
+      - keep_keys(resource.attributes, ["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.pod.uid", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"])
+
+  # Restore public transaction dimensions after the sum connector's single-key grouping workaround.
+  transform/logs_to_metrics_metrics:
+    error_mode: silent
+    metric_statements:
+      - set(datapoint.attributes["business.transaction.type"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[0]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])
+      - set(datapoint.attributes["business.transaction.unit"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[1]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])
+      - delete_key(datapoint.attributes, "splunk.logs_to_metrics.business.transaction.type_unit") where metric.name == "business.transaction.value"
+      - keep_keys(resource.attributes, {{ include "splunk-otel-collector.logsToMetricsResourceAllowlist" . }}) where resource.attributes["splunk.logs_to_metrics"] == true
+      {{- if not .Values.gateway.enabled }}
+      - delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true
+      {{- end }}
+  {{- end }}
+
   {{- if .Values.isWindows }}
   metricstransform:
     transforms:
@@ -1044,8 +1130,9 @@ exporters:
   {{- end }}
   {{- end }}
 
-{{- if .Values.splunkObservability.secureAppEnabled }}
+{{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true") }}
 connectors:
+  {{- if .Values.splunkObservability.secureAppEnabled }}
   routing/logs:
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     default_pipelines: [logs]
@@ -1056,6 +1143,96 @@ connectors:
       - context: log
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
+  {{- end }}
+  {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+  count/logs_to_metrics:
+    logs:
+      app.log.error.count:
+        description: Number of application log records with ERROR or higher severity.
+        conditions:
+          - 'log.severity_number >= SEVERITY_NUMBER_ERROR'
+        attributes:
+          - key: error.type
+            default_value: unknown
+          - key: log.severity
+            default_value: ERROR
+      http.server.error.count:
+        description: Number of HTTP server responses with a 5xx status code.
+        conditions:
+          - 'IsInt(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] >= 500 and log.attributes["http.response.status_code"] <= 599'
+        attributes:
+          - key: http.request.method
+            default_value: unknown
+          - key: http.response.status_code
+          - key: error.type
+            default_value: unknown
+      k8s.event.warning.count:
+        description: Number of Kubernetes Warning event records serialized in container logs.
+        conditions:
+          - 'log.attributes["splunk.logs_to_metrics.k8s.event.type"] == "warning" or (IsString(log.attributes["k8s.event.reason"]) and log.severity_number >= SEVERITY_NUMBER_WARN and log.severity_number < SEVERITY_NUMBER_ERROR)'
+        attributes:
+          - key: k8s.event.reason
+            default_value: unknown
+          - key: k8s.event.reporting_controller
+            default_value: unknown
+      k8s.image_pull.failure.count:
+        description: Number of Kubernetes container image-pull failure events serialized in container logs.
+        conditions:
+          - 'log.attributes["k8s.event.reason"] == "ErrImagePull" or log.attributes["k8s.event.reason"] == "ImagePullBackOff"'
+        attributes:
+          - key: k8s.event.reason
+      app.exception.unhandled.count:
+        description: Number of escaped or otherwise unhandled application exceptions.
+        conditions:
+          - 'IsString(log.attributes["exception.type"]) and log.attributes["exception.type"] != "" and IsBool(log.attributes["exception.escaped"]) and log.attributes["exception.escaped"] == true'
+        attributes:
+          - key: exception.type
+      app.authentication.failure.count:
+        description: Number of structured authentication failure events.
+        conditions:
+          - 'log.attributes["splunk.logs_to_metrics.event.name"] == "authentication" and log.attributes["splunk.logs_to_metrics.event.outcome"] == "failure"'
+        attributes:
+          - key: auth.mechanism
+            default_value: unknown
+      app.job.failure.count:
+        description: Number of terminal structured background-job failure events.
+        conditions:
+          - 'log.attributes["splunk.logs_to_metrics.event.name"] == "job" and log.attributes["splunk.logs_to_metrics.event.outcome"] == "failure" and IsString(log.attributes["job.type"]) and log.attributes["job.type"] != ""'
+        attributes:
+          - key: job.type
+          - key: error.type
+            default_value: unknown
+      app.retry.exhausted.count:
+        description: Number of operations that exhausted all configured retries.
+        conditions:
+          - 'IsBool(log.attributes["retry.exhausted"]) and log.attributes["retry.exhausted"] == true'
+        attributes:
+          - key: error.type
+            default_value: unknown
+      app.request.throttled.count:
+        description: Number of HTTP 429 responses or explicitly throttled requests.
+        conditions:
+          - '(IsInt(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] == 429) or (IsBool(log.attributes["request.throttled"]) and log.attributes["request.throttled"] == true)'
+        attributes:
+          - key: http.request.method
+            default_value: unknown
+          - key: http.response.status_code
+            default_value: 0
+      app.log.record.count:
+        description: Number of Kubernetes container log records processed by file_log.
+        attributes:
+          - key: log.severity
+            default_value: UNSPECIFIED
+  sum/logs_to_metrics:
+    logs:
+      business.transaction.value:
+        description: Sum of successful structured business transaction values.
+        source_attribute: business.transaction.value
+        conditions:
+          - '(IsInt(log.attributes["business.transaction.value"]) or IsDouble(log.attributes["business.transaction.value"])) and log.attributes["splunk.logs_to_metrics.event.outcome"] == "success" and IsString(log.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])'
+        attributes:
+          - key: splunk.logs_to_metrics.business.transaction.type_unit
+  {{- end }}
 {{- end }}
 
 service:
@@ -1199,6 +1376,25 @@ service:
         {{- end }}
         {{- end }}
 
+    {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+    # Dedicated file_log branch for the opt-in Logs-to-Metrics catalog.
+    logs/log_to_metrics:
+      receivers:
+        - file_log
+      processors:
+        - memory_limiter
+        - k8s_attributes/logs_to_metrics
+        - resourcedetection
+        - resource
+        {{- if .Values.environment }}
+        - resource/add_environment
+        {{- end }}
+        - transform/logs_to_metrics
+      exporters:
+        - count/logs_to_metrics
+        - sum/logs_to_metrics
+    {{- end }}
+
     {{- if or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled }}
     logs/host:
       receivers:
@@ -1277,6 +1473,10 @@ service:
         - host_metrics
         - kubelet_stats
         - otlp
+        {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+        - count/logs_to_metrics
+        - sum/logs_to_metrics
+        {{- end }}
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
@@ -1307,6 +1507,10 @@ service:
         {{- if or .Values.splunkPlatform.metricsSourcetype .Values.splunkPlatform.sourcetype }}
         - resource/metrics
         {{- end }}
+        {{- end }}
+        {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+        # Keep this last so resource detection and platform enrichment cannot reintroduce unsafe dimensions.
+        - transform/logs_to_metrics_metrics
         {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
