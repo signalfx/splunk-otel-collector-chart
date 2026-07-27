@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.156.0 to 0.157.0
+## 0.157.0 to 0.158.0
 
 ### Deployment environment resource attribute renamed
 
