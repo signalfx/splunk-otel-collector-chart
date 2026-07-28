@@ -212,7 +212,7 @@ tests:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "S=1 — logs/secureapp has no bare resourcedetection processor"
+  - it: "S=1 — logs/secureapp has no bare resource_detection processor"
     set:
       splunkObservability:
         secureAppEnabled: true
@@ -221,9 +221,9 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection\\n(?:\\s+- .+\\n)*\\s+receivers:"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "S=1,autoDetect=true — logs/secureapp has resourcedetection/k8s_cluster_name processor"
+  - it: "S=1,autoDetect=true — logs/secureapp has resource_detection/k8s_cluster_name processor"
     set:
       clusterName: ""
       distribution: openshift
@@ -234,9 +234,9 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "S=1,autoDetect=false — logs/secureapp has no resourcedetection/k8s_cluster_name processor"
+  - it: "S=1,autoDetect=false — logs/secureapp has no resource_detection/k8s_cluster_name processor"
     set:
       clusterName: my-cluster
       splunkObservability:
@@ -246,7 +246,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
   # --------------------------------------------------------------------------
   # PR3: gateway logs/secureapp enrichment processors
@@ -264,7 +264,7 @@ tests:
           path: data["relay"]
           pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- k8s_attributes\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "gateway,S=1,autoDetect=true — logs/secureapp has resourcedetection/k8s_cluster_name processor"
+  - it: "gateway,S=1,autoDetect=true — logs/secureapp has resource_detection/k8s_cluster_name processor"
     set:
       clusterName: ""
       distribution: openshift
@@ -276,9 +276,9 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "gateway,S=1,autoDetect=false — logs/secureapp has no resourcedetection/k8s_cluster_name processor"
+  - it: "gateway,S=1,autoDetect=false — logs/secureapp has no resource_detection/k8s_cluster_name processor"
     set:
       clusterName: my-cluster
       gateway.enabled: true
@@ -289,4 +289,4 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["relay"]
-          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resourcedetection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
+          pattern: "logs/secureapp:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"

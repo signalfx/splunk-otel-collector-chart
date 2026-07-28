@@ -135,7 +135,7 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - system
@@ -260,7 +260,7 @@ data:
           - k8s_attributes
           - filter/logs
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           - resource/logs
           receivers:

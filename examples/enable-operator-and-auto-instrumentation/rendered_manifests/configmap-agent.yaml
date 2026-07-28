@@ -181,7 +181,7 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - system
@@ -424,7 +424,7 @@ data:
           - k8s_attributes
           - filter/logs
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           - resource/logs
           - resource/add_environment
@@ -437,7 +437,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - nop
@@ -447,7 +447,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - host_metrics
@@ -459,7 +459,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/agent
         metrics/histograms:
@@ -469,7 +469,7 @@ data:
           - memory_limiter
           - batch
           - resource/add_agent_k8s
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - receiver_creator
@@ -480,7 +480,7 @@ data:
           - memory_limiter
           - k8s_attributes
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           - resource/add_environment
           receivers:

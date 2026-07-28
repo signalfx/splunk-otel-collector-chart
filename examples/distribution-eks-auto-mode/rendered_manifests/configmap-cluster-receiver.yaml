@@ -63,7 +63,7 @@ data:
         - action: insert
           key: receiver
           value: k8scluster
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - eks
@@ -89,7 +89,7 @@ data:
               enabled: true
         override: true
         timeout: 15s
-      resourcedetection/k8s_cluster_name:
+      resource_detection/k8s_cluster_name:
         detectors:
         - eks
         eks:
@@ -186,7 +186,7 @@ data:
           - memory_limiter
           - batch
           - transform/k8shpascaletargetref
-          - resourcedetection/k8s_cluster_name
+          - resource_detection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:
@@ -197,7 +197,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/k8s_cluster_receiver
         metrics/histograms:
@@ -206,7 +206,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection/k8s_cluster_name
+          - resource_detection/k8s_cluster_name
           - resource
           receivers:
           - prometheus/kubernetes-apiserver
