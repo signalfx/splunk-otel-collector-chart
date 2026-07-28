@@ -4114,12 +4114,6 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: data_type
-                      value:
-                        stringValue: metrics
-                    - key: exporter
-                      value:
-                        stringValue: signalfx/histograms
                     - key: host.name
                       value:
                         stringValue: kind-control-plane
@@ -4177,7 +4171,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: data_type
+                    - key: host.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.cluster.name
@@ -4291,7 +4285,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: data_type
+                    - key: host.name
                       value:
                         stringValue: kind-control-plane
                     - key: k8s.cluster.name
@@ -4407,7 +4401,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: exporter
+                    - key: detector
                       value:
                         stringValue: env
                     - key: host.name
@@ -4464,7 +4458,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: exporter
+                    - key: detector
                       value:
                         stringValue: system
                     - key: host.name
@@ -4526,7 +4520,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: exporter
+                    - key: detector
                       value:
                         stringValue: env
                     - key: host.name
@@ -4583,7 +4577,7 @@ resourceMetrics:
                     - key: customfield2
                       value:
                         stringValue: customvalue2
-                    - key: exporter
+                    - key: detector
                       value:
                         stringValue: system
                     - key: host.name
