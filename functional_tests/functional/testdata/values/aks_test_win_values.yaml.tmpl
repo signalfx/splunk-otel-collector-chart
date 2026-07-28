@@ -30,7 +30,7 @@ agent:
         tls:
           insecure: true
       file:
-        path: C:\metrics.json
+        path: 'C:\Users\ContainerUser\AppData\Local\Temp\metrics.json'
     service:
       pipelines:
         traces:
@@ -50,9 +50,9 @@ clusterReceiver:
         tls:
           insecure: true
       file:
-        path: C:\metrics.json
+        path: 'C:\Users\ContainerUser\AppData\Local\Temp\metrics.json'
       file/k8s_cluster:
-        path: C:\k8s_cluster_metrics.json
+        path: 'C:\Users\ContainerUser\AppData\Local\Temp\k8s_cluster_metrics.json'
     service:
       pipelines:
         metrics/collector:
