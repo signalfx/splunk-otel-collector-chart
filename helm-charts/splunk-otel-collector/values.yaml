@@ -1197,7 +1197,7 @@ instrumentation:
       #     value: go_value
     java:
       image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.29.0
-      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.28.0
+      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.29.0
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1216,7 +1216,7 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.9.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.10.0
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
