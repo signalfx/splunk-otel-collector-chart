@@ -75,7 +75,7 @@ processors:
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
-  # It's important to put this processor after resourcedetection to make sure that
+  # It's important to put this processor after resource_detection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
   resource/add_cluster_name:
@@ -238,7 +238,7 @@ service:
         - k8s_attributes
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -266,7 +266,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -316,7 +316,7 @@ service:
         - memory_limiter
         - k8s_attributes
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -369,7 +369,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
         {{- end }}

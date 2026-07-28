@@ -403,7 +403,7 @@ distribution: eks/auto-mode
 ```
 
 `EKS Auto Mode` restricts access to IMDS (Instance Metadata Service) so that only pods running in the host network namespace can access it.
-This causes the `ec2` and `eks` detectors in the `resourcedetection` processor to fail to collect attributes from the metadata server.
+This causes the `ec2` and `eks` detectors in the `resource_detection` processor to fail to collect attributes from the metadata server.
 
 In addition to IMDS, we have introduced a new method to the [eks detector](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#amazon-eks)
 that extracts the required attributes using the Kubernetes API server and EC2 API.
@@ -413,7 +413,7 @@ This distribution will operate similarly to the `eks` distribution but with the 
 
 By Default and to reduce friction, the helm chart attempts to configure the cluster receiver and the agent to run in host network namespace.
 This approach eliminates the need to configure `Pod Identity`, however, if user explicitly sets `agent.hostNetwork`
-or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resourcedetection`
+or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resource_detection`
 processor will fail unless `Pod Identity` is enabled and configured.
 
 **Note**: If you are deploying OTEL as Gateway in the EKS Auto Mode cluster, it's required to enable and configure `Pod Identity`.

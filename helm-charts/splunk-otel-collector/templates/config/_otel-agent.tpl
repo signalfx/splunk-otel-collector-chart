@@ -843,7 +843,7 @@ processors:
   {{- end }}
 
   # General resource attributes that apply to all telemetry passing through the agent.
-  # It's important to put this processor after resourcedetection to make sure that
+  # It's important to put this processor after resource_detection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
   resource:
@@ -1136,7 +1136,7 @@ service:
         - memory_limiter
         - k8s_attributes
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         - batch
@@ -1172,7 +1172,7 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if not .Values.gateway.enabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
@@ -1221,9 +1221,9 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
-        - resourcedetection
+        - resource_detection
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
@@ -1256,7 +1256,7 @@ service:
         - memory_limiter
         - k8s_attributes
         - batch
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if .Values.environment }}
         - resource/add_environment
@@ -1294,7 +1294,7 @@ service:
         - attributes/istio
         - transform/drop_server_attrs
         {{- end }}
-        - resourcedetection
+        - resource_detection
         - resource
         {{/*
         The attribute `deployment.environment.name` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
@@ -1337,7 +1337,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
         {{- end }}
@@ -1361,7 +1361,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         - resource
       exporters: [otlp_http/entities]
 
@@ -1373,7 +1373,7 @@ service:
         - memory_limiter
         - batch
         - resource/add_agent_k8s
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio

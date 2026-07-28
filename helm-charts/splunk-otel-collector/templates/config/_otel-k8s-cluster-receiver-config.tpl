@@ -382,7 +382,7 @@ service:
         - batch
         - transform/k8shpascaletargetref
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -407,7 +407,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -431,7 +431,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
         {{- end }}
@@ -453,7 +453,7 @@ service:
         - batch
         - attributes/drop_event_attrs
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         - resource/add_cluster_host
@@ -484,7 +484,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         - resource/add_cluster_host
@@ -514,7 +514,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         - resource/add_cluster_host
@@ -533,7 +533,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
       exporters:
@@ -548,7 +548,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
       exporters:
