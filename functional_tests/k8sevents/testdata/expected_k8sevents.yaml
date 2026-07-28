@@ -16,7 +16,7 @@ resourceLogs:
     scopeLogs:
       - logRecords:
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -80,7 +80,7 @@ resourceLogs:
               stringValue: Create Pod k8sevents-test-0 in StatefulSet k8sevents-test successful
             timeUnixNano: "1778047161000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -144,7 +144,7 @@ resourceLogs:
               stringValue: Successfully assigned k8sevents-test/k8sevents-test-0 to kind-control-plane
             timeUnixNano: "1778047161000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -211,7 +211,7 @@ resourceLogs:
               stringValue: Pulling image "busybox:latest"
             timeUnixNano: "1778047161000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -278,7 +278,7 @@ resourceLogs:
               stringValue: Successfully pulled image "busybox:latest" in <time> (<time> including waiting)
             timeUnixNano: "1778047164000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -345,7 +345,7 @@ resourceLogs:
               stringValue: Container created
             timeUnixNano: "1778047164000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -412,7 +412,7 @@ resourceLogs:
               stringValue: Container started
             timeUnixNano: "1778047164000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -479,7 +479,7 @@ resourceLogs:
               stringValue: Pulling image "alpine:latest"
             timeUnixNano: "1778047164000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -546,7 +546,7 @@ resourceLogs:
               stringValue: Successfully pulled image "alpine:latest" in <time> (<time> including waiting)
             timeUnixNano: "1778047167000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name
@@ -613,7 +613,7 @@ resourceLogs:
               stringValue: Container created
             timeUnixNano: "1778047167000000000"
           - attributes:
-              - key: deployment.environment
+              - key: deployment.environment.name
                 value:
                   stringValue: dev
               - key: k8s.cluster.name

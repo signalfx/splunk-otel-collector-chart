@@ -1,6 +1,6 @@
 ---
 # Source: splunk-otel-collector/templates/operator/instrumentation.yaml
-# Description: Set a custom value (dev) for the deployment.environment tag on exported spans
+# Description: Set a custom value (dev) for the deployment.environment.name tag on exported spans
 # Input values.yaml:
 # splunkObservability:
 #   accessToken: CHANGEME
@@ -13,7 +13,7 @@
 #     spec:
 #       env:
 #         - name: OTEL_RESOURCE_ATTRIBUTES
-#           value: "deployment.environment=dev"
+#           value: "deployment.environment.name=dev"
 # certmanager:
 #   enabled: true
 # Output instrumentation.yaml:
@@ -28,7 +28,7 @@ spec:
         value: http://$(SPLUNK_OTEL_AGENT):4318
     env:
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: deployment.environment=dev
+      value: deployment.environment.name=dev
     exporter:
       endpoint: http://$(SPLUNK_OTEL_AGENT):4317
     java:
