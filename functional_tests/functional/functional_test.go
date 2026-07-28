@@ -65,9 +65,9 @@ const (
 	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
 	taResourceName                         = "targetallocator-ta"
 	linuxPodMetricsPath                    = "/splunk-metrics/metrics.json"
-	winPodMetricsPath                      = "C:\\metrics.json"
+	winPodMetricsPath                      = "C:\\Users\\ContainerUser\\AppData\\Local\\Temp\\metrics.json"
 	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
-	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\Users\\ContainerUser\\AppData\\Local\\Temp\\k8s_cluster_metrics.json"
 	aksWindowsValidationResourceName       = "aks-win-validation-secret"
 )
 
