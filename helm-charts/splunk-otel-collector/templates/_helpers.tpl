@@ -615,7 +615,7 @@ Usage:
 {{- if .config -}}
 {{- $source := .source -}}
 {{- $depExporters := dict "otlp" "otlp_grpc" "otlphttp" "otlp_http" -}}
-{{- $depProcessors := dict "k8sattributes" "k8s_attributes" -}}
+{{- $depProcessors := dict "k8sattributes" "k8s_attributes" "resourcedetection" "resource_detection" -}}
 {{- $depReceivers := dict "filelog" "file_log" "hostmetrics" "host_metrics" "k8sobjects" "k8s_objects" "kubeletstats" "kubelet_stats" -}}
 {{- range $key, $_ := (dig "exporters" (dict) .config) -}}
   {{- range $old, $new := $depExporters -}}

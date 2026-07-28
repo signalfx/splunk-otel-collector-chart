@@ -128,7 +128,7 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - eks
@@ -154,7 +154,7 @@ data:
               enabled: true
         override: true
         timeout: 15s
-      resourcedetection/k8s_cluster_name:
+      resource_detection/k8s_cluster_name:
         detectors:
         - eks
         eks:
@@ -229,7 +229,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection/k8s_cluster_name
+          - resource_detection/k8s_cluster_name
           receivers:
           - otlp
         metrics/collector:
@@ -238,7 +238,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/collector
         traces:
@@ -248,7 +248,7 @@ data:
           - memory_limiter
           - k8s_attributes
           - batch
-          - resourcedetection/k8s_cluster_name
+          - resource_detection/k8s_cluster_name
           receivers:
           - otlp
           - jaeger

@@ -54,10 +54,10 @@ splunk.com/exclude
 {{- end }}
 
 {{/*
-Common config for resourcedetection processor
+Common config for resource_detection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
-resourcedetection:
+resource_detection:
   detectors:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
@@ -116,10 +116,10 @@ resourcedetection:
 {{- end }}
 
 {{/*
-Common config for adding k8s.cluster.name using the resourcedetection processor
+Common config for adding k8s.cluster.name using the resource_detection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
-resourcedetection/k8s_cluster_name:
+resource_detection/k8s_cluster_name:
   detectors:
     {{- if hasPrefix "gke" .Values.distribution }}
     - gcp

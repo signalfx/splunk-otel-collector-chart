@@ -94,3 +94,26 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "agent\\.config references a Splunk token environment variable \\(\\$\\{SPLUNK_\\*_TOKEN\\}\\) while featureGates\\.mountSplunkSecretAsFile is enabled"
+
+  - it: should fail when custom collector config defines the deprecated resourcedetection processor
+    set:
+      agent:
+        config:
+          processors:
+            resourcedetection/custom: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: 'agent\.config\.processors\.resourcedetection/custom: "resourcedetection" has been renamed to "resource_detection"'
+
+  - it: should fail when a custom pipeline references the deprecated resourcedetection processor
+    set:
+      clusterReceiver:
+        config:
+          service:
+            pipelines:
+              logs/custom:
+                processors:
+                  - resourcedetection/custom
+    asserts:
+      - failedTemplate:
+          errorPattern: 'clusterReceiver\.config\.service\.pipelines\.logs/custom\.processors references "resourcedetection/custom": "resourcedetection" has been renamed to "resource_detection"'

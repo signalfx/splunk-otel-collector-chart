@@ -59,7 +59,7 @@ data:
         - action: insert
           key: receiver
           value: k8scluster
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - aks
@@ -142,7 +142,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/k8s_cluster_receiver
       telemetry:
