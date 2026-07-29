@@ -555,6 +555,29 @@ configures a Prometheus receiver in the cluster receiver that scrapes the Kubern
 endpoint. The scrape interval for this receiver is controlled by
 `agent.controlPlaneMetrics.scrapeInterval` (default: `10s`).
 
+### Tuning agent memory for control plane metrics
+
+Control plane metrics can create a large Prometheus series cache, particularly when histogram
+collection is enabled. With the chart's default 500 MiB agent limit, the Collector uses `GOGC=400`
+and a soft `GOMEMLIMIT` of 450 MiB (90%). Because `GOMEMLIMIT` scales with
+`agent.resources.limits.memory`, raising the pod limit can also raise its working set; consider
+lowering `GOGC` before increasing the limit further.
+
+The chart deploys one agent DaemonSet, so these runtime settings apply to agents on worker nodes
+as well as control plane nodes. Start with `GOGC=100` and verify agent CPU and telemetry throughput
+on busy worker nodes before trying a lower value.
+
+```yaml
+agent:
+  extraEnvs:
+    - name: GOGC
+      value: "100"
+```
+
+If 10-second resolution is not required, increasing
+`agent.controlPlaneMetrics.scrapeInterval` can also reduce control plane scrape CPU and data
+volume. It does not have the same effect on the Prometheus series cache or on worker agents.
+
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).
 
