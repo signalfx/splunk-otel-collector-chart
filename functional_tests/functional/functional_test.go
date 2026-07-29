@@ -64,6 +64,7 @@ const (
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
 	taResourceName                         = "targetallocator-ta"
+	kindAgentPodNamePrefix                 = internal.DefaultChartReleaseName + "-splunk-otel-collector-agent"
 	linuxPodMetricsPath                    = "/splunk-metrics/metrics.json"
 	winPodMetricsPath                      = "C:\\Users\\ContainerUser\\AppData\\Local\\Temp\\metrics.json"
 	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
@@ -831,8 +832,8 @@ func shortenNames(value string) string {
 	if strings.HasPrefix(value, "otelcol") {
 		return "otelcol"
 	}
-	if strings.HasPrefix(value, "sock-splunk-otel-collector-agent") {
-		return "sock-splunk-otel-collector-agent"
+	if strings.HasPrefix(value, kindAgentPodNamePrefix) {
+		return kindAgentPodNamePrefix
 	}
 	if strings.HasPrefix(value, "sock-splunk-otel-collector-k8s-cluster-receiver") {
 		return "sock-splunk-otel-collector-k8s-cluster-receiver"
@@ -1081,7 +1082,13 @@ func testAgentMetrics(t *testing.T) {
 	})
 
 	t.Run("kubelet_stats metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubelet_stats_metrics.yaml", "container.memory.usage")
+		testAgentMetricsTemplate(
+			t,
+			agentMetricsConsumer,
+			"expected_kubelet_stats_metrics.yaml",
+			"container.memory.usage",
+			kindAgentPodNamePrefix,
+		)
 	})
 
 	t.Run("host_metrics", func(t *testing.T) {
@@ -1090,7 +1097,7 @@ func testAgentMetrics(t *testing.T) {
 }
 
 // testAgentMetricsTemplate tests metrics using template matching with target metric detection
-func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string) {
+func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string, podNamePrefix ...string) {
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
@@ -1103,7 +1110,7 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 		testName = testName[lastSlash+1:]
 	}
 
-	err = tryMetricsComparison(expectedMetrics, *selectedMetrics)
+	err = tryMetricsComparison(expectedMetrics, *selectedMetrics, podNamePrefix...)
 	if err != nil {
 		if !exactMatch {
 			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
@@ -1117,11 +1124,22 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 }
 
 // tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
-func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) error {
+func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, podNamePrefix ...string) error {
+	if len(podNamePrefix) > 0 {
+		normalizedExpected := pmetric.NewMetrics()
+		normalizedActual := pmetric.NewMetrics()
+		expected.CopyTo(normalizedExpected)
+		actual.CopyTo(normalizedActual)
+		internal.RetainNumberMetricDatapointsForPod(&normalizedExpected, podNamePrefix[0])
+		internal.RetainNumberMetricDatapointsForPod(&normalizedActual, podNamePrefix[0])
+		expected = normalizedExpected
+		actual = normalizedActual
+	}
+
 	replaceWithStar := func(string) string { return "*" }
 	metricNames := internal.GetMetricNames(&expected)
 
-	return pmetrictest.CompareMetrics(expected, actual,
+	options := []pmetrictest.CompareMetricsOption{
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
@@ -1171,9 +1189,12 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreDatapointAttributesOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
-		// pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
-	)
+	}
+	if len(podNamePrefix) == 0 {
+		options = append(options, pmetrictest.IgnoreSubsequentDataPoints(metricNames...))
+	}
+
+	return pmetrictest.CompareMetrics(expected, actual, options...)
 }
 
 func testHECMetrics(t *testing.T) {

@@ -21,7 +21,7 @@ inputs:
     required: false
     default: ''
   k8s-version:
-    description: 'Kubernetes version for the kind cluster (e.g. v1.34.3)'
+    description: 'Kubernetes version for the kind cluster (e.g. v1.36.1)'
     required: true
   kubernetes-debug-info:
     description: 'Whether to collect and upload k8s debug info'
@@ -64,6 +64,7 @@ runs:
     - name: Create kind cluster
       uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
       with:
+        version: v0.32.0
         node_image: kindest/node:${{ inputs.k8s-version }}
         kubectl_version: ${{ inputs.k8s-version }}
         cluster_name: kind
