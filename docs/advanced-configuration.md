@@ -558,10 +558,11 @@ endpoint. The scrape interval for this receiver is controlled by
 ### Tuning agent memory for control plane metrics
 
 Control plane metrics can create a large Prometheus series cache, particularly when histogram
-collection is enabled. With the chart's default 500 MiB agent limit, the Collector uses `GOGC=400`
-and a soft `GOMEMLIMIT` of 450 MiB (90%). Because `GOMEMLIMIT` scales with
-`agent.resources.limits.memory`, raising the pod limit can also raise its working set; consider
-lowering `GOGC` before increasing the limit further.
+collection is enabled. Unless overridden, the Splunk Collector uses `GOGC=400` and sets Go's soft
+memory limit to 90% of `agent.resources.limits.memory`—450 MiB for the chart's default 500 MiB
+limit. An explicit `GOMEMLIMIT` overrides this derived value. Raising the pod limit also raises the
+default soft limit and can increase the working set; consider lowering `GOGC` before increasing the
+limit further.
 
 The chart deploys one agent DaemonSet, so these runtime settings apply to agents on worker nodes
 as well as control plane nodes. Start with `GOGC=100` and verify agent CPU and telemetry throughput
