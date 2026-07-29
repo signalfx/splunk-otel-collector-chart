@@ -1123,17 +1123,23 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 	t.Logf("Metric comparison passed for %d metrics in %s test", selectedMetrics.MetricCount(), testName)
 }
 
-// tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
+// preparePodMetricsComparison keeps one stable pod from kubeletstats payloads, whose pod set is timing-dependent.
+func preparePodMetricsComparison(expected, actual pmetric.Metrics, podNamePrefix string) (pmetric.Metrics, pmetric.Metrics) {
+	normalizedExpected := pmetric.NewMetrics()
+	normalizedActual := pmetric.NewMetrics()
+	expected.CopyTo(normalizedExpected)
+	actual.CopyTo(normalizedActual)
+	internal.RetainNumberMetricDatapointsForPod(&normalizedExpected, podNamePrefix)
+	internal.RetainNumberMetricDatapointsForPod(&normalizedActual, podNamePrefix)
+	return normalizedExpected, normalizedActual
+}
+
+// tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error.
+// When podNamePrefix is provided, it compares every number datapoint retained for that pod.
 func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, podNamePrefix ...string) error {
-	if len(podNamePrefix) > 0 {
-		normalizedExpected := pmetric.NewMetrics()
-		normalizedActual := pmetric.NewMetrics()
-		expected.CopyTo(normalizedExpected)
-		actual.CopyTo(normalizedActual)
-		internal.RetainNumberMetricDatapointsForPod(&normalizedExpected, podNamePrefix[0])
-		internal.RetainNumberMetricDatapointsForPod(&normalizedActual, podNamePrefix[0])
-		expected = normalizedExpected
-		actual = normalizedActual
+	compareAllDatapoints := len(podNamePrefix) > 0
+	if compareAllDatapoints {
+		expected, actual = preparePodMetricsComparison(expected, actual, podNamePrefix[0])
 	}
 
 	replaceWithStar := func(string) string { return "*" }
@@ -1190,7 +1196,7 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, podN
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreDatapointAttributesOrder(),
 	}
-	if len(podNamePrefix) == 0 {
+	if !compareAllDatapoints {
 		options = append(options, pmetrictest.IgnoreSubsequentDataPoints(metricNames...))
 	}
 
