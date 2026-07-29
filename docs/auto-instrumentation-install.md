@@ -38,9 +38,8 @@ these frameworks often have pre-built instrumentation capabilities already avail
   - **Alternative Methods**
 
     - **Using cert-manager**
-      -  Use an already installed certmanager by setting `operator.admissionWebhooks.certManager.enabled` to `true`.
-        -  **Use Case**: Ideal for environments already leveraging `certmanager` for certificate management.
-      -  _NOTE_ - The option to install `certmanager` with our chart is deprecated and will be removed in future releases.
+      - Use a separately installed cert-manager by setting `operator.admissionWebhooks.certManager.enabled` to `true`.
+        - **Use Case**: Ideal for environments already using cert-manager for certificate management.
 
     - **Provide Your Own Certificate**
       - Ensure both `operator.admissionWebhooks.certManager.enabled` and `operator.admissionWebhooks.autoGenerateCert.enabled` are set to `false`.
@@ -373,13 +372,14 @@ can be deployed (by configuring `operator.enabled=true`) to your cluster and sta
 The chart and operator are two separate applications, but when used together they enable powerful telemetry data
 related features for users.
 
-The OpenTelemetry operator implement a
+The OpenTelemetry operator implements a
 [MutatingAdmissionWebhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook)
 that allows the operator to modify pod specs when a pod is created or updated. MutatingAdmissionWebhooks are
 essentially part of the cluster control-plane, they functionally work by intercepting and modifying requests to the
 Kubernetes API server after the request is authorized but before being persisted. MutatingAdmissionWebhooks are required
-to be served via HTTPS, we use the Linux Foundation [cert-manager](https://cert-manager.io/docs/installation/kubectl/)
-application to generate proper certificates.
+to be served via HTTPS, which requires valid TLS certificates. By default, Helm generates a self-signed certificate.
+Alternatively, install [cert-manager](https://cert-manager.io/docs/installation/) separately or provide your own
+certificate.
 
 For our Observability use case, the webhook modifies a pod to inject auto-instrumentation libraries into
 the application container.
@@ -735,42 +735,33 @@ operator:
 
 #### 2. **Using a cert-manager Certificate**
 
-Using `cert-manager` offers more control over certificate management and is more suitable for production environments. However, due to Helm’s install/upgrade order of operations, cert-manager CRDs and certificates cannot be installed within the same Helm operation. To work around this limitation, you can choose one of the following options:
+Using cert-manager offers automatic certificate renewal and more control over certificate management. cert-manager
+must be installed separately before the Splunk OpenTelemetry Collector chart is configured to use it.
 
-##### Option 1: **Pre-deploy cert-manager**
+If cert-manager is not already managed in your cluster, install it by following the official
+[cert-manager installation documentation](https://cert-manager.io/docs/installation/helm/). For example:
 
-If `cert-manager` is already deployed in your cluster, you can configure the operator to use it without enabling certificate generation by Helm. If `cert-manager` is not already deployed, install it first by following the official [cert-manager installation documentation](https://cert-manager.io/docs/installation/helm/).
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update jetstack
 
-**Configuration:**
+helm upgrade --install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true \
+  --wait
+```
+
+After cert-manager is ready, configure the operator to use it instead of Helm-generated certificates:
+
 ```yaml
 operator:
   admissionWebhooks:
+    autoGenerateCert:
+      enabled: false
     certManager:
       enabled: true
 ```
-
-##### Option 2: **Deploy cert-manager and the operator together (Deprecated)**
-
-If you need to install `cert-manager` along with the operator, use a Helm post-install or post-upgrade hook to ensure that the certificate is created after cert-manager CRDs are installed.
-
-**Configuration:**
-```yaml
-operator:
-  admissionWebhooks:
-    certManager:
-      enabled: true
-      certificateAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
-      issuerAnnotations:
-        "helm.sh/hook": post-install,post-upgrade
-        "helm.sh/hook-weight": "1"
-certmanager:
-  enabled: true
-  installCRDs: true
-```
-
-This method is useful when installing `cert-manager` as a subchart or as part of a larger Helm chart installation.
 
 ---
 
@@ -823,11 +814,12 @@ provided, assume it refers to the operator or chart's namespace.
     - [EKS: Enable or Disable Control Plane Logs](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)
     - [GKE: View Logs](https://cloud.google.com/kubernetes-engine/docs/how-to/view-logs)
     - [OpenShift: Logging and Monitoring](https://docs.openshift.com/container-platform/latest/logging/cluster-logging.html)
-- If using certmanager for TLS certificates, check its logs for issues:
+- If using cert-manager for TLS certificates, check its pods and logs for issues:
   ```bash
-  kubectl logs -l app=certmanager
-  kubectl logs -l app=cainjector
-  kubectl logs -l app=webhook
+  kubectl get pods -n cert-manager -l app.kubernetes.io/instance=cert-manager
+  kubectl logs -n cert-manager -l app.kubernetes.io/instance=cert-manager,app.kubernetes.io/component=controller
+  kubectl logs -n cert-manager -l app.kubernetes.io/instance=cert-manager,app.kubernetes.io/component=cainjector
+  kubectl logs -n cert-manager -l app.kubernetes.io/instance=cert-manager,app.kubernetes.io/component=webhook
   ```
 - **Verify Webhook Configurations**:
   Check `MutatingWebhookConfiguration` and `ValidatingWebhookConfiguration`:
