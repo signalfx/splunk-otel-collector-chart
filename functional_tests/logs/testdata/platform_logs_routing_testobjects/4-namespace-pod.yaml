@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: namespace-precedence
+  namespace: platform-logs-routing-precedence
+  labels:
+    test: platform-logs-routing-precedence
+    product: unmatched
+spec:
+  automountServiceAccountToken: false
+  containers:
+    - name: namespace-precedence
+      image: busybox:1.37
+      env:
+        - name: RUN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: platform-logs-routing-run
+              key: run-id
+      command: ["sh", "-c", "echo ${RUN_ID}:K8S_NAMESPACE_DEFAULT_ROUTE_MARKER; sleep 3600"]
+  nodeSelector:
+    kubernetes.io/os: "linux"

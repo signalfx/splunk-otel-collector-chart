@@ -32,6 +32,13 @@ extensions:
       # on_start: true
   {{- end }}
 
+  {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+  {{- range $name, $route := .Values.splunkPlatform.logsRouting.routes }}
+  {{- if eq (include "splunk-otel-collector.platformLogsRoutePersistentQueueEnabled" (dict "context" $ "route" $route)) "true" }}
+  {{- include "splunk-otel-collector.platformLogsRouteFileStorage" (dict "context" $ "name" $name) | nindent 2 }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
 
   health_check:
     endpoint: 0.0.0.0:13133
@@ -816,6 +823,9 @@ processors:
   {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
   {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
+  {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.platformLogsRouteMetadataProcessors" . | nindent 2 }}
+  {{- end }}
   {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
   transform/logs:
     log_statements:
@@ -982,6 +992,12 @@ exporters:
   {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
+  {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+  {{- range $name, $route := .Values.splunkPlatform.logsRouting.routes }}
+  {{- $routePersistent := eq (include "splunk-otel-collector.platformLogsRoutePersistentQueueEnabled" (dict "context" $ "route" $route)) "true" }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsRouteExporter" (dict "context" $ "name" $name "route" $route "addPersistentStorage" $routePersistent) | nindent 2 }}
+  {{- end }}
+  {{- end }}
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
   {{- end }}
@@ -1049,8 +1065,9 @@ exporters:
   {{- end }}
   {{- end }}
 
-{{- if .Values.splunkObservability.secureAppEnabled }}
+{{- if or .Values.splunkObservability.secureAppEnabled (and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true")) }}
 connectors:
+  {{- if .Values.splunkObservability.secureAppEnabled }}
   routing/logs:
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     default_pipelines: [logs]
@@ -1061,6 +1078,10 @@ connectors:
       - context: log
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
+  {{- end }}
+  {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+  {{- include "splunk-otel-collector.platformLogsRoutingConnector" . | nindent 2 }}
+  {{- end }}
 {{- end }}
 
 service:
@@ -1118,6 +1139,13 @@ service:
     {{- end }}
     {{- if .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}
     - file_storage/persistent_queue
+    {{- end }}
+    {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+    {{- range $name, $route := .Values.splunkPlatform.logsRouting.routes }}
+    {{- if eq (include "splunk-otel-collector.platformLogsRoutePersistentQueueEnabled" (dict "context" $ "route" $route)) "true" }}
+    - {{ include "splunk-otel-collector.platformLogsRouteStorageName" $name }}
+    {{- end }}
+    {{- end }}
     {{- end }}
     - health_check
     {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -1194,6 +1222,11 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+        {{- range $processor := .Values.splunkPlatform.logsRouting.preRoutingProcessors }}
+        - {{ $processor }}
+        {{- end }}
+        {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
@@ -1204,7 +1237,11 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
         - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
         {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true" }}
+        - routing/platform_logs
+        {{- else }}
         - splunk_hec/platform_logs
+        {{- end }}
         {{- end }}
         {{- end }}
 
@@ -1237,6 +1274,11 @@ service:
         {{- if .Values.environment }}
         - resource/add_environment
         {{- end }}
+        {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+        {{- range $processor := .Values.splunkPlatform.logsRouting.preRoutingProcessors }}
+        - {{ $processor }}
+        {{- end }}
+        {{- end }}
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc
@@ -1244,10 +1286,18 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
         - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
         {{- else if eq (include "splunk-otel-collector.platformLogsEnabled" .) "true" }}
+        {{- if eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true" }}
+        - routing/platform_logs
+        {{- else }}
         - splunk_hec/platform_logs
         {{- end }}
         {{- end }}
         {{- end }}
+        {{- end }}
+    {{- end }}
+
+    {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true") }}
+    {{- include "splunk-otel-collector.platformLogsRoutingPipelines" . | nindent 4 }}
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.tracesEnabled" .) "true") }}

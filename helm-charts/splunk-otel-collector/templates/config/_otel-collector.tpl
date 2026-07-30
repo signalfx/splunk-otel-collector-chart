@@ -3,6 +3,7 @@ Config for the optional standalone collector
 The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
+{{- $platformLogsRoutingEnabled := eq (include "splunk-otel-collector.platformLogsRoutingEnabled" .) "true" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
@@ -71,6 +72,9 @@ processors:
   {{- include "splunk-otel-collector.transformLogsProcessor" . | nindent 2 }}
   {{- end }}
   {{- include "splunk-otel-collector.filterLogsProcessors" . | nindent 2 }}
+  {{- if $platformLogsRoutingEnabled }}
+  {{- include "splunk-otel-collector.platformLogsRouteMetadataProcessors" . | nindent 2 }}
+  {{- end }}
 
   {{- include "splunk-otel-collector.otelMemoryLimiterConfig" . | nindent 2 }}
 
@@ -155,6 +159,11 @@ exporters:
   {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformLogsExporter" . | nindent 2 }}
   {{- end }}
+  {{- if and (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") $platformLogsRoutingEnabled }}
+  {{- range $name, $route := .Values.splunkPlatform.logsRouting.routes }}
+  {{- include "splunk-otel-collector.splunkPlatformLogsRouteExporter" (dict "context" $ "name" $name "route" $route "addPersistentStorage" false) | nindent 2 }}
+  {{- end }}
+  {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" .) "true") }}
   {{- include "splunk-otel-collector.splunkPlatformMetricsExporter" . | nindent 2 }}
@@ -164,11 +173,13 @@ exporters:
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
 
-{{- if and
+{{- $o11yLogsRoutingEnabled := and
   (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled))
   (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
-}}
+-}}
+{{- if or $o11yLogsRoutingEnabled $platformLogsRoutingEnabled }}
 connectors:
+  {{- if $o11yLogsRoutingEnabled }}
   # Routing connector to separate entity events from regular logs
   routing/logs:
     default_pipelines: [logs]
@@ -181,6 +192,10 @@ connectors:
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
       {{- end }}
+  {{- end }}
+  {{- if $platformLogsRoutingEnabled }}
+  {{- include "splunk-otel-collector.platformLogsRoutingConnector" . | nindent 2 }}
+  {{- end }}
 {{- end }}
 
 service:
@@ -360,6 +375,11 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
         - resource/otlp_platform_logs
         {{- end }}
+        {{- if $platformLogsRoutingEnabled }}
+        {{- range $processor := .Values.splunkPlatform.logsRouting.preRoutingProcessors }}
+        - {{ $processor }}
+        {{- end }}
+        {{- end }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yProfilingEnabled" .) "true") }}
         - splunk_hec/o11y
@@ -367,8 +387,16 @@ service:
         {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
         - {{ include "splunk-otel-collector.otlpPlatformLogsExporterName" . }}
         {{- else if (eq (include "splunk-otel-collector.platformLogsEnabled" .) "true") }}
+        {{- if $platformLogsRoutingEnabled }}
+        - routing/platform_logs
+        {{- else }}
         - splunk_hec/platform_logs
         {{- end }}
+        {{- end }}
+    {{- end }}
+
+    {{- if $platformLogsRoutingEnabled }}
+    {{- include "splunk-otel-collector.platformLogsRoutingPipelines" . | nindent 4 }}
     {{- end }}
 
     {{- if or (eq (include "splunk-otel-collector.splunkO11yEnabled" $) "true") (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}

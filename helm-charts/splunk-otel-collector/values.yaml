@@ -180,6 +180,27 @@ splunkPlatform:
   # Refer to: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage#file-storage
   # fsyncEnabled: true
 
+  # Route normal container and host logs to additional Splunk Platform HEC
+  # destinations. A non-empty routes map enables routing. Unmatched logs use
+  # the existing splunkPlatform destination.
+  logsRouting:
+    # Exact resource attribute used for route matching. For a pod label
+    # collected with extraAttributes.fromLabels, use
+    # k8s.pod.labels.<label_name> unless tag_name overrides it.
+    attribute: ""
+    # Ordered Collector processor IDs to run immediately before routing. Define
+    # them in gateway.config.processors when gateway.enabled=true; otherwise,
+    # define them in agent.config.processors.
+    preRoutingProcessors: []
+    # Ordered Collector processor IDs to run only for unmatched logs sent to
+    # the default splunkPlatform destination. Processor ownership is the same
+    # as for preRoutingProcessors.
+    defaultProcessors: []
+    # Map of route name to match and HEC destination policy. Explicit route
+    # index, source, and sourcetype values override matching log metadata. See
+    # docs/advanced-configuration.md#route-logs-to-multiple-splunk-platform-destinations.
+    routes: {}
+
 ################################################################################
 # Splunk Observability configuration
 ################################################################################

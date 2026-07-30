@@ -1,0 +1,2 @@
+{{/* Validate even when neither routing workload would otherwise render. */}}
+{{- include "splunk-otel-collector.validatePlatformLogsRouting" . -}}

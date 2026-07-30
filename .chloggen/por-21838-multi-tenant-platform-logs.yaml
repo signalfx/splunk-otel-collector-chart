@@ -1,0 +1,6 @@
+change_type: enhancement
+component: chart
+note: Add resource-attribute routing for normal logs sent to multiple Splunk Platform HEC destinations.
+issues: [21838]
+subtext: |
+  Explicit route index, source, and sourcetype values override matching log metadata. Routes use separate HEC queues and support persistent queues in direct-agent mode.

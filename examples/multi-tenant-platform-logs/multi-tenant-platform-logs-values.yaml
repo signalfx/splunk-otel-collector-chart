@@ -1,0 +1,87 @@
+# Replace CHANGEME values and example endpoints before installation.
+clusterName: CHANGEME
+
+splunkObservability:
+  realm: ""
+
+featureGates:
+  noDropLogsPipeline: true
+
+extraAttributes:
+  fromLabels:
+    - key: product
+      from: pod
+      tag_name: routing.product.pod
+    - key: product
+      from: namespace
+      tag_name: routing.product.namespace
+
+splunkPlatform:
+  endpoint: https://default.example.com:8088/services/collector/event
+  token: CHANGEME
+  index: shared-logs
+  logsEnabled: true
+  metricsEnabled: false
+  tracesEnabled: false
+
+  logsRouting:
+    attribute: product
+    preRoutingProcessors:
+      - transform/derive-product
+    defaultProcessors:
+      - resource/mark-default-route
+    routes:
+      application:
+        index: application-logs
+        processors:
+          - resource/mark-application-route
+        tokenSecret:
+          name: application-hec
+          key: token
+      security:
+        index: security-logs
+        processors:
+          - resource/mark-security-route
+        tokenFile: /var/run/splunk-route-tokens/security
+        sendingQueue:
+          queueSize: 10000
+          persistentQueue:
+            enabled: true
+
+agent:
+  config:
+    processors:
+      transform/derive-product:
+        error_mode: ignore
+        log_statements:
+          - context: resource
+            statements:
+              - set(attributes["product"], attributes["routing.product.pod"]) where attributes["routing.product.pod"] != nil
+              - set(attributes["product"], attributes["routing.product.namespace"]) where attributes["product"] == nil and attributes["routing.product.namespace"] != nil
+      resource/mark-default-route:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: default
+      resource/mark-application-route:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: application
+      resource/mark-security-route:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: security
+  extraVolumes:
+    - name: security-route-token
+      secret:
+        secretName: security-hec
+        defaultMode: 0440
+        items:
+          - key: token
+            path: security
+  extraVolumeMounts:
+    - name: security-route-token
+      mountPath: /var/run/splunk-route-tokens
+      readOnly: true

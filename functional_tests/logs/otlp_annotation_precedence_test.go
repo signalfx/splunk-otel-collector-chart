@@ -6,14 +6,12 @@ package logs
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/consumer/consumertest"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -64,7 +62,12 @@ func Test_OTLPAnnotationPrecedence(t *testing.T) {
 	}
 
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		attrs, found := findResourceAttrsForLog(logsConsumer, otlpAnnotationPrecedenceMarker)
+		attrs, found := findAttributesForLog(
+			logsConsumer,
+			otlpAnnotationPrecedenceMarker,
+			"com.splunk.index",
+			"com.splunk.sourcetype",
+		)
 		if assert.True(tt, found, "expected OTLP log record with marker %q", otlpAnnotationPrecedenceMarker) {
 			assert.Equal(tt, otlpAnnotationPodIndex, attrs["com.splunk.index"])
 			assert.Equal(tt, otlpAnnotationPodSourcetype, attrs["com.splunk.sourcetype"])
@@ -105,31 +108,6 @@ func otlpAnnotationPrecedenceDeployWorkloadAndCollector(t *testing.T, testKubeCo
 		}
 		otlpAnnotationPrecedenceTeardown(t, k8sClient)
 	})
-}
-
-func findResourceAttrsForLog(logsConsumer *consumertest.LogsSink, marker string) (map[string]string, bool) {
-	for _, logs := range logsConsumer.AllLogs() {
-		for i := 0; i < logs.ResourceLogs().Len(); i++ {
-			rl := logs.ResourceLogs().At(i)
-			for j := 0; j < rl.ScopeLogs().Len(); j++ {
-				sl := rl.ScopeLogs().At(j)
-				for k := 0; k < sl.LogRecords().Len(); k++ {
-					lr := sl.LogRecords().At(k)
-					if !strings.Contains(lr.Body().AsString(), marker) {
-						continue
-					}
-					attrs := make(map[string]string)
-					for _, key := range []string{"com.splunk.index", "com.splunk.sourcetype"} {
-						if value, exists := rl.Resource().Attributes().Get(key); exists {
-							attrs[key] = value.AsString()
-						}
-					}
-					return attrs, true
-				}
-			}
-		}
-	}
-	return nil, false
 }
 
 func otlpAnnotationPrecedenceTeardown(t *testing.T, k8sClient *k8stest.K8sClient) {
