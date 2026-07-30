@@ -125,7 +125,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	require.NoError(t, err)
 
 	// Wait for pods to be ready for at least minReadyTime
-	clientset, err := getKubeClient(testKubeConfig)
+	clientset, err := GetKubeClient(testKubeConfig)
 	require.NoError(t, err)
 	labelSelector := "release=" + options.ChartReleaseName
 	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
@@ -175,7 +175,8 @@ func parseCollectorImage(image string) (string, string) {
 	return repo, tag
 }
 
-func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
+// GetKubeClient returns a Kubernetes clientset configured with kubeConfig.
+func GetKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
 		return nil, err
