@@ -15,6 +15,7 @@ extensions:
   http_forwarder/o11y_ingest:
     ingress:
       endpoint: 0.0.0.0:9943
+      include_metadata: {{ .Values.gateway.tokenPassthrough }}
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
   {{- end }}
