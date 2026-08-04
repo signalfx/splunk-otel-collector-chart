@@ -48,6 +48,8 @@ data:
           endpoint: https://api.CHANGEME.observability.splunkcloud.com
       http_forwarder/o11y_ingest:
         egress:
+          auth:
+            authenticator: headers_setter
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
         ingress:
           endpoint: 0.0.0.0:9943

@@ -18,10 +18,8 @@ extensions:
       include_metadata: {{ .Values.gateway.tokenPassthrough }}
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
-      {{- if not .Values.gateway.tokenPassthrough }}
-      headers:
-        X-SF-Token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
-      {{- end }}
+      auth:
+        authenticator: headers_setter
   {{- end }}
 
 
