@@ -286,5 +286,4 @@ func SetupSignalFxReceiverWithToken(t *testing.T, port int, token string) *consu
 	}
 
 	return setupSignalfxReceiverSink(t, host, port)
-
 }
