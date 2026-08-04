@@ -245,13 +245,20 @@ func SetupOTLPLogsSinkOnPort(t *testing.T, port int, logsPath string) *consumert
 	return ls
 }
 
-func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int) *consumertest.MetricsSink {
+func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int, bearerTokenEnabled bool) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
 	cfg.NetAddr = confignet.AddrConfig{
 		Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
 		Transport: "tcp",
+	}
+	if bearerTokenEnabled {
+		cfg.Auth = configoptional.Some(confighttp.AuthConfig{
+			Config: configauth.Config{
+				AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
+			},
+		})
 	}
 
 	rcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, mc)
@@ -267,7 +274,7 @@ func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int) *con
 }
 
 func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
-	return setupSignalfxReceiverSink(t, componenttest.NewNopHost(), port)
+	return setupSignalfxReceiverSink(t, componenttest.NewNopHost(), port, false)
 }
 
 func SetupSignalFxReceiverWithToken(t *testing.T, port int, token string) *consumertest.MetricsSink {
@@ -285,5 +292,5 @@ func SetupSignalFxReceiverWithToken(t *testing.T, port int, token string) *consu
 		},
 	}
 
-	return setupSignalfxReceiverSink(t, host, port)
+	return setupSignalfxReceiverSink(t, host, port, true)
 }
