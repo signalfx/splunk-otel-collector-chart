@@ -49,7 +49,7 @@ func Test_GatewayOnly(t *testing.T) {
 		{
 			name:        "gateway_only_passthrough_enabled",
 			valuesTmpl:  "gateway_only_passthrough_enabled_values.tmpl",
-			accessToken: "standalonePodToken",
+			accessToken: "CHECKFAILURE",
 		},
 		{
 			name:        "gateway_only_passthrough_disabled",
