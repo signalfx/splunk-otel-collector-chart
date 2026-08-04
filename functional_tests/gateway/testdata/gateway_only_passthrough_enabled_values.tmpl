@@ -1,6 +1,6 @@
 splunkObservability:
    realm:       CHANGEME
-   accessToken: CHANGEME
+   accessToken: gatewayToken
    apiUrl: {{ .ApiURL }}
    ingestUrl: {{ .IngestURL }}
 
@@ -11,6 +11,7 @@ agent:
 
 gateway:
   enabled: true
+  tokenPassthrough: true
   replicaCount: 1
   resources:
     limits:

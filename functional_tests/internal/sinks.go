@@ -245,7 +245,7 @@ func SetupOTLPLogsSinkOnPort(t *testing.T, port int, logsPath string) *consumert
 	return ls
 }
 
-func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
+func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
@@ -257,11 +257,34 @@ func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
 	rcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, mc)
 	require.NoError(t, err)
 
-	require.NoError(t, rcvr.Start(t.Context(), componenttest.NewNopHost()))
+	require.NoError(t, rcvr.Start(t.Context(), host))
 	require.NoError(t, err, "failed creating metrics receiver")
 	t.Cleanup(func() {
 		require.NoError(t, rcvr.Shutdown(t.Context()))
 	})
 
 	return mc
+}
+
+func SetupSignalfxReceiver(t *testing.T, port int) *consumertest.MetricsSink {
+	return setupSignalfxReceiverSink(t, componenttest.NewNopHost(), port)
+}
+
+func SetupSignalFxReceiverWithToken(t *testing.T, port int, token string) *consumertest.MetricsSink {
+	btaFactory := bearertokenauthextension.NewFactory()
+	btaCfg := btaFactory.CreateDefaultConfig().(*bearertokenauthextension.Config)
+	btaCfg.BearerToken = configopaque.String(token)
+	btaCfg.Header = "X-Sf-Token"
+	btaCfg.Scheme = ""
+	btaExt, err := btaFactory.Create(t.Context(), extensiontest.NewNopSettings(btaFactory.Type()), btaCfg)
+	require.NoError(t, err)
+
+	host := &mockHost{
+		extensions: map[component.ID]component.Component{
+			component.MustNewIDWithName("bearertokenauth", "passthroughValidation"): btaExt,
+		},
+	}
+
+	return setupSignalfxReceiverSink(t, host, port)
+
 }

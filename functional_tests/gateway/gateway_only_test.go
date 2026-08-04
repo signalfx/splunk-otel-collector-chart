@@ -42,17 +42,24 @@ func Test_GatewayOnly(t *testing.T) {
 	})
 
 	tests := []struct {
-		name       string
-		valuesTmpl string
+		name        string
+		valuesTmpl  string
+		accessToken string
 	}{
 		{
-			name:       "gateway_only_values",
-			valuesTmpl: "gateway_only_values.tmpl",
+			name:        "gateway_only_passthrough_enabled",
+			valuesTmpl:  "gateway_only_passthrough_enabled_values.tmpl",
+			accessToken: "standalonePodToken",
+		},
+		{
+			name:        "gateway_only_passthrough_disabled",
+			valuesTmpl:  "gateway_only_passthrough_disabled_values.tmpl",
+			accessToken: "gatewayToken",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metricSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
+			metricSink := internal.SetupSignalFxReceiverWithToken(t, internal.SignalFxReceiverPort, tt.accessToken)
 			internal.BasicCollectorChartInstall(t, testKubeConfig, tt.valuesTmpl)
 			runKubectlFileCommand(t, testKubeConfig, kubectlApply, podManifestPath)
 			t.Cleanup(func() {

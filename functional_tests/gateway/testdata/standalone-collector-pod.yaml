@@ -12,7 +12,7 @@ data:
 
     exporters:
       signalfx:
-        access_token: CHANGEME
+        access_token: standalonePodToken
         api_url: http://sock-splunk-otel-collector.default.svc.cluster.local:6060
         ingest_url: http://sock-splunk-otel-collector.default.svc.cluster.local:9943
         tls:
