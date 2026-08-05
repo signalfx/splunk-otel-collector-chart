@@ -1507,6 +1507,14 @@ featureGates:
   #   - clusterReceiver.k8sObjects to be configured
   # Does not require splunkPlatform.logsEnabled (Splunk Platform logs) to be enabled.
   sendK8sEventsToSplunkO11y: false
+  # [EXPERIMENTAL] Generate the supported Logs-to-Metrics catalog from Kubernetes container logs.
+  # The agent uses the file_log receiver and the alpha count and sum connectors. Source logs continue
+  # through the existing logs pipeline. Generated metrics use the existing metrics destination and
+  # are considered custom metrics unless the product owner confirms another catalog category.
+  # Requires agent and container log collection, a configured logs destination, and a configured
+  # metrics destination. Kubernetes Event rules match only event fields serialized in file-tailed logs;
+  # this feature does not query the Kubernetes API.
+  enableLogsToMetrics: false
   # [EXPERIMENTAL] This feature gate enables a new logs pipeline that sends Kubernetes entity data
   # (collected from the k8s_cluster receiver) to the Splunk Observability v3/event endpoint via otlp_http.
   # Requires Splunk Observability to be configured (splunkObservability.realm or ingestUrl must be set).
