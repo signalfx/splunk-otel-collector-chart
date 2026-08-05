@@ -288,11 +288,9 @@ func SetupSignalFxReceiverWithToken(t *testing.T, port int, token string) *consu
 		},
 	}
 
-	receiverAuth := configoptional.Some(confighttp.AuthConfig{
+	return setupSignalfxReceiverSink(t, host, port, new(configoptional.Some(confighttp.AuthConfig{
 		Config: configauth.Config{
 			AuthenticatorID: component.MustNewIDWithName("bearertokenauth", "passthroughValidation"),
 		},
-	})
-
-	return setupSignalfxReceiverSink(t, host, port, new(receiverAuth))
+	})))
 }
