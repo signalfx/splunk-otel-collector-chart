@@ -114,8 +114,6 @@ func assertAttr(t *testing.T, attrs pcommon.Map, name string, val any) {
 }
 
 func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
-	internal.WaitForMetrics(t, 5, sink)
-
 	expectedRedisMetrics := []string{
 		"redis.clients.blocked",
 		"redis.clients.connected",
@@ -159,7 +157,6 @@ func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
 			assert.Contains(tt, foundMetrics, rm)
 		}
 	}, 5*time.Minute, 3*time.Second, "Missing expected redis metrics")
-
 }
 
 func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
