@@ -245,7 +245,7 @@ func SetupOTLPLogsSinkOnPort(t *testing.T, port int, logsPath string) *consumert
 	return ls
 }
 
-func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int, auth *configoptional.Optional[AuthConfig]) *consumertest.MetricsSink {
+func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int, auth *configoptional.Optional[confighttp.AuthConfig]) *consumertest.MetricsSink {
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
