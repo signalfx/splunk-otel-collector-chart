@@ -146,9 +146,12 @@ func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
 		foundMetrics := make(map[string]bool)
 		for _, m := range sink.AllMetrics() {
 			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
-				for j := 0; j < sm.Metrics().Len(); j++ {
-					foundMetrics[sm.Metrics().At(j).Name()] = true
+				rm := m.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					sm := m.ResourceMetrics().At(i).ScopeMetrics().At(j)
+					for k := 0; k < sm.Metrics().Len(); k++ {
+						foundMetrics[sm.Metrics().At(k).Name()] = true
+					}
 				}
 			}
 		}
