@@ -24,8 +24,8 @@ import (
 
 const (
 	redisReleaseName = "test-redis"
-	redisChartRepo   = "https://charts.bitnami.com/bitnami"
-	redisChart       = "redis"
+	redisChartRepo   = "https://valkey.io/valkey-helm/"
+	redisChart       = "valkey"
 )
 
 // Env vars to control the test behavior:
@@ -100,7 +100,11 @@ func assertRedisEntities(t *testing.T, sink *consumertest.LogsSink) {
 	assert.True(t, ok)
 	entityAttrs := entityAttrsVal.Map()
 	assertAttr(t, entityAttrs, "k8s.namespace.name", internal.DefaultNamespace)
-	assertAttr(t, entityAttrs, "k8s.pod.name", "test-redis-master-0")
+	podName, ok := entityAttrs.Get("k8s.pod.name")
+	assert.True(t, ok)
+	if ok {
+		assert.Regexp(t, `^test-redis-valkey-[a-z0-9]+-[a-z0-9]+$`, podName.AsString())
+	}
 	assertAttr(t, entityAttrs, "discovery.status", "successful")
 }
 
@@ -173,7 +177,7 @@ func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
 	}, 0, internal.GetDefaultChartOptions())
 }
 
-// installRedisChart deploys a simple Redis server with official helm chart.
+// installRedisChart deploys a Redis-compatible Valkey server with its official Helm chart.
 func installRedisChart(t *testing.T, kubeConfig string) {
 	t.Helper()
 	if os.Getenv("SKIP_SETUP") == "true" {
@@ -189,7 +193,7 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 	install.Namespace = internal.DefaultNamespace
 	install.ReleaseName = redisReleaseName
 	install.RepoURL = redisChartRepo
-	install.Version = "22.0.7"
+	install.Version = "0.11.0"
 	install.WaitStrategy = kube.StatusWatcherStrategy
 	install.Timeout = internal.HelmActionTimeout
 	hCli := cli.New()
@@ -204,10 +208,7 @@ func installRedisChart(t *testing.T, kubeConfig string) {
 			"enabled": false,
 		},
 		"replica": map[string]any{
-			"replicaCount": 0,
-		},
-		"image": map[string]any{
-			"repository": "bitnamilegacy/redis",
+			"enabled": false,
 		},
 	})
 	require.NoError(t, err)
