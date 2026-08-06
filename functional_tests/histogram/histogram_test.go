@@ -5,22 +5,18 @@ package histogram
 
 import (
 	"bytes"
-	"cmp"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"slices"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/pmetric"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -28,6 +24,7 @@ import (
 const (
 	signalFxReceiverPort = 4317
 	valuesDir            = "values"
+	expectedDir          = "expected"
 )
 
 func deployChart(t *testing.T) {
@@ -91,7 +88,20 @@ var testInputs = []TestInput{
 	},
 }
 
+func (input TestInput) assertionConfig(isHistogram bool) (string, string) {
+	if isHistogram {
+		return input.ServiceName + "_histogram_metrics_assertion.yaml",
+			input.HistogramMetricName
+	}
+	return input.ServiceName + "_metrics_assertion.yaml",
+		input.NonHistogramMetricName
+}
+
 func Test_ControlPlaneMetrics(t *testing.T) {
+	if k8sVersion := os.Getenv("K8S_VERSION"); k8sVersion != "" {
+		t.Logf("Running control plane metrics assertions against Kubernetes %s", k8sVersion)
+	}
+
 	metricsSink := internal.SetupSignalfxReceiver(t, signalFxReceiverPort)
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
@@ -101,8 +111,12 @@ func Test_ControlPlaneMetrics(t *testing.T) {
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	} else {
-		// generate some traffic to coredns to reduce metric flakiness
-		performDNSQueries(t)
+		// Prime CoreDNS cache metrics before the collector's first scrape.
+		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
+		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
+		clientset, err := internal.GetKubeClient(testKubeConfig)
+		require.NoError(t, err)
+		performDNSQueries(t, clientset)
 		deployChart(t)
 	}
 
@@ -120,299 +134,110 @@ func Test_ControlPlaneMetrics(t *testing.T) {
 	}
 }
 
-// latestExpectedDir returns the path to the expected metrics directory for the
-// given k8s major.minor version. If no directory exists for that version, it
-// falls back to the latest available version directory so that new k8s versions
-// are still validated against the closest known-good baseline.
-func latestExpectedDir(t *testing.T, majorMinor string) string {
-	t.Helper()
-	baseDir := filepath.Join("testdata", "expected")
-	exact := filepath.Join(baseDir, majorMinor)
-	if _, err := os.Stat(exact); err == nil {
-		return exact
-	}
-
-	entries, err := os.ReadDir(baseDir)
-	require.NoError(t, err, "failed to list expected metrics directories")
-
-	var versions []string
-	for _, e := range entries {
-		if e.IsDir() && strings.HasPrefix(e.Name(), "v") {
-			versions = append(versions, e.Name())
-		}
-	}
-	require.NotEmpty(t, versions, "no expected metrics directories found in %s", baseDir)
-	slices.SortFunc(versions, cmp.Compare)
-	fallback := filepath.Join(baseDir, versions[len(versions)-1])
-	t.Logf("No expected metrics directory for %s, falling back to %s", majorMinor, fallback)
-	return fallback
-}
-
 func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.MetricsSink, input TestInput) {
-	k8sVersion := os.Getenv("K8S_VERSION")
-	majorMinor := k8sVersion[0:strings.LastIndex(k8sVersion, ".")]
-
-	testDir := latestExpectedDir(t, majorMinor)
-
 	internal.WaitForMetrics(t, 5, metricsSink)
 
-	fileName := input.ServiceName + "_metrics.yaml"
+	fileName, metricName := input.assertionConfig(isHistogram)
+	expectedFilePath := filepath.Join("testdata", expectedDir, fileName)
+
+	t.Logf("checking for metrics matching component %s using target metric %s",
+		input.ServiceName, metricName)
+	opts := []internal.MetricsAssertionOption{
+		internal.WithVolatileAttributes(commonVolatileAttributes...),
+		internal.WithRegexAttributes(regexAttributes(input.ServiceName)),
+		internal.WithDatapointAttributesAsExistsExcept(metricIdentityAttributes...),
+		internal.WithMaxDatapointsPerMetric(1),
+	}
 	if isHistogram {
-		fileName = input.ServiceName + "_histogram_metrics.yaml"
-	}
-	expectedFilePath := filepath.Join(testDir, fileName)
-	expected, errReadGolden := golden.ReadMetrics(expectedFilePath)
-	if errReadGolden != nil && os.IsNotExist(errReadGolden) {
-		if os.Getenv("GENERATE_EXPECTED") == "true" {
-			t.Logf("Metrics file %q does not exist, will generate it", expectedFilePath)
-			expected = pmetric.NewMetrics()
-		} else {
-			require.NoError(t, errReadGolden, "Expected metrics file %q does not exist", expectedFilePath)
-		}
-	}
-	expectedMetrics := &expected
-
-	var actualMetrics *pmetric.Metrics
-
-	metricName := input.NonHistogramMetricName
-	if isHistogram {
-		metricName = input.HistogramMetricName
+		opts = append(opts, internal.WithHistogramExplicitBounds())
 	}
 
-	t.Logf("checking for metrics matching component %s", input.ServiceName)
-	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		for h := len(metricsSink.AllMetrics()) - 1; h >= 0; h-- {
-			m := metricsSink.AllMetrics()[h]
-			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				rm := m.ResourceMetrics().At(i)
-				if resourceMetricsContains(rm, metricName) {
-					filtered := pmetric.NewMetrics()
-					rm.CopyTo(filtered.ResourceMetrics().AppendEmpty())
-					actualMetrics = &filtered
-					break
-				}
-			}
-			if actualMetrics != nil {
-				break
-			}
-		}
-
-		assert.NotNil(tt, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
-	}, 3*time.Minute, 5*time.Second)
-
-	// Set GENERATE_EXPECTED to true to get a sample of the metrics for component - only for dev purposes
-	// The max datapoint count per metric can be adjusted as input to internal.ReduceDatapoints
-	if os.Getenv("GENERATE_EXPECTED") == "true" {
-		outputDir := filepath.Join("testdata", "expected", majorMinor)
-		require.NoError(t, os.MkdirAll(outputDir, 0o755))
-		require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
-		internal.ReduceDatapoints(actualMetrics, 1)
-		err := golden.WriteMetrics(t, filepath.Join(outputDir, fileName), *actualMetrics)
-		require.NoError(t, err)
-	}
-
-	require.NotNil(t, actualMetrics, "Did not receive any metrics for component %s", input.ServiceName)
-	internal.MaybeUpdateExpectedMetricsResults(t, filepath.Join(testDir, fileName), actualMetrics)
-	err := checkMetrics(t, isHistogram, expectedMetrics, actualMetrics, input.ServiceName)
-	if err != nil {
-		t.Errorf("Error occurred while checking metrics for component %s: %v", input.ServiceName, err)
-	}
+	internal.AssertMetricsSnapshot(t, metricsSink, metricName, expectedFilePath,
+		3*time.Minute, 5*time.Second, opts...)
 }
 
-func resourceMetricsContains(rm pmetric.ResourceMetrics, name string) bool {
-	for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-		for k := 0; k < rm.ScopeMetrics().At(j).Metrics().Len(); k++ {
-			if rm.ScopeMetrics().At(j).Metrics().At(k).Name() == name {
-				return true
-			}
+func performDNSQueries(t *testing.T, clientset *kubernetes.Clientset) {
+	kubernetesService, err := clientset.CoreV1().Services(corev1.NamespaceDefault).Get(
+		t.Context(), "kubernetes", metav1.GetOptions{},
+	)
+	require.NoError(t, err)
+	require.NotEmpty(t, kubernetesService.Spec.ClusterIP, "Kubernetes service did not have a cluster IP")
+
+	const coreDNSLabelSelector = "k8s-app=kube-dns"
+	internal.CheckPodsReady(
+		t, clientset, metav1.NamespaceSystem, coreDNSLabelSelector, 3*time.Minute, 0,
+	)
+	coreDNSPods, err := internal.GetPods(t, clientset, metav1.NamespaceSystem, coreDNSLabelSelector)
+	require.NoError(t, err)
+	coreDNSPodIPs := make([]string, 0, len(coreDNSPods.Items))
+	for _, pod := range coreDNSPods.Items {
+		if pod.Status.PodIP != "" {
+			coreDNSPodIPs = append(coreDNSPodIPs, pod.Status.PodIP)
 		}
 	}
-	return false
-}
+	require.NotEmpty(t, coreDNSPodIPs, "did not find any CoreDNS pod IPs")
 
-func performDNSQueries(t *testing.T) {
 	overrides := `{"spec": {"dnsPolicy": "ClusterFirst"}}`
-	cmd := exec.Command("kubectl", "run", "--rm", "-i", "--tty", "dns-query", "--image=busybox", "--restart=Never", "--overrides="+overrides, "--", "sh", "-c", "for i in $(seq 1 10); do nslookup kubernetes.default.svc.cluster.local; sleep 1; done")
+	// CoreDNS disables caching for cluster.local; reverse service lookups use the cacheable in-addr.arpa zone.
+	queries := `target=$1
+	shift
+	for server in "$@"; do
+		for i in $(seq 1 100); do
+			nslookup "$target" "$server" >/dev/null || exit 1
+		done
+	done`
+	args := []string{
+		"run", "--rm", "-i", "--tty", "dns-query",
+		"--image=busybox", "--restart=Never", "--overrides=" + overrides, "--",
+		"sh", "-c", queries, "dns-query", kubernetesService.Spec.ClusterIP,
+	}
+	args = append(args, coreDNSPodIPs...)
+	cmd := exec.Command("kubectl", args...)
 	var out, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &stderr
-	err := cmd.Run()
-	if err != nil {
-		t.Logf("DNS query failed: %v", err)
-		t.Logf("Standard Output: %s", out.String())
-		t.Logf("Standard Error: %s", stderr.String())
-	}
+	err = cmd.Run()
+	require.NoErrorf(t, err, "DNS queries failed\nStandard Output: %s\nStandard Error: %s",
+		out.String(), stderr.String())
 }
 
-func checkMetrics(t *testing.T, isHistogram bool, expected, actual *pmetric.Metrics, component string) error {
-	require.NotNil(t, expected, "Expected metrics should not be nil")
-	require.NotNil(t, actual, "Actual metrics should not be nil")
-
-	commonAttrs := map[string]string{
-		"host.name":           "kind-control-plane",
-		"k8s.cluster.name":    "sock",
-		"k8s.namespace.name":  "kube-system",
-		"k8s.node.name":       "kind-control-plane",
-		"k8s.pod.uid":         ".*",
-		"os.type":             "linux",
-		"server.address":      ".*",
-		"server.port":         ".*",
-		"url.scheme":          "http",
-		"service.instance.id": ".*:.*",
-	}
-
-	componentAttrs := map[string]map[string]string{
-		"coredns": {
-			"k8s.pod.name": "coredns-.*",
-			"service.name": "coredns",
-		},
-		"etcd": {
-			"k8s.pod.name": "etcd-kind-control-plane",
-			"service.name": "etcd",
-		},
-		"kube-controller": {
-			"k8s.pod.name": "kube-controller-manager-kind-control-plane",
-			"service.name": "kube-controller-manager",
-		},
-		"kubernetes-apiserver": {
-			"k8s.pod.name": "kube-apiserver-kind-control-plane",
-			"service.name": "kubernetes-apiserver",
-		},
-		"kubernetes-proxy": {
-			"k8s.pod.name": "kube-proxy-.*",
-			"service.name": "kubernetes-proxy",
-		},
-		"kubernetes-scheduler": {
-			"k8s.pod.name": "kube-scheduler-kind-control-plane",
-			"service.name": "kubernetes-scheduler",
-		},
-	}
-
-	mergedAttrs := mergeMaps(commonAttrs, componentAttrs[component])
-
-	if isHistogram {
-		return checkHistogramMetrics(t, expected, actual, component, mergedAttrs)
-	}
-	return checkNonHistogramMetrics(t, expected, actual, component, mergedAttrs)
+var commonVolatileAttributes = []string{
+	"server.address",
+	"server.port",
+	"service.instance.id",
 }
 
-func mergeMaps(map1, map2 map[string]string) map[string]string {
-	merged := make(map[string]string)
-	for k, v := range map1 {
-		merged[k] = v
-	}
-	for k, v := range map2 {
-		merged[k] = v
-	}
-	return merged
+var metricRegexAttributes = map[string]string{
+	"k8s.pod.uid": "^" + internal.K8sUIDRegex + "$",
+	"verb":        internal.K8sAPIVerbRegex,
 }
 
-func checkHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, component string, attrs map[string]string) error {
-	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
-		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
-			actualRm := actual.ResourceMetrics().At(j)
-			if err := checkAttributes(t, actualRm.Resource().Attributes(), attrs, component); err != nil {
-				return err
-			}
-		}
-	}
-
-	expectedNames := internal.GetMetricNames(expected)
-	actualNames := internal.GetMetricNames(actual)
-	for _, name := range expectedNames {
-		if !assert.Contains(t, actualNames, name, "Metric name %s not found in received metrics for component %s", name, component) {
-			return fmt.Errorf("metric name %s not found in received metrics for component %s", name, component)
-		}
-	}
-
-	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
-		expectedRm := expected.ResourceMetrics().At(i)
-		for j := 0; j < expectedRm.ScopeMetrics().Len(); j++ {
-			sm := expectedRm.ScopeMetrics().At(j)
-			for k := 0; k < sm.Metrics().Len(); k++ {
-				expectedMetric := sm.Metrics().At(k)
-				if expectedMetric.Type() != pmetric.MetricTypeHistogram {
-					continue
-				}
-
-				actualMetric, found := internal.GetMetric(actual, expectedMetric.Name())
-				if !found {
-					return fmt.Errorf("metric %s not found in received metrics for component %s", expectedMetric.Name(), component)
-				}
-				if actualMetric.Type() != pmetric.MetricTypeHistogram {
-					return fmt.Errorf("expected metric is %v but actual metric received is %v", pmetric.MetricTypeHistogram.String(), actualMetric.Type().String())
-				}
-				if err := internal.CompareHistograms(expectedMetric.Histogram(), actualMetric.Histogram()); err != nil {
-					return fmt.Errorf("metric %s hit error: %w", expectedMetric.Name(), err)
-				}
-			}
-		}
-	}
-
-	return nil
+var componentMetricRegexAttributes = map[string]map[string]string{
+	"coredns": {
+		"k8s.pod.name": "^coredns-" + internal.K8sNameRegex + "$",
+	},
+	"kubernetes-proxy": {
+		"k8s.pod.name": "^kube-proxy-" + internal.K8sNameRegex + "$",
+	},
 }
 
-func checkNonHistogramMetrics(t *testing.T, expected, actual *pmetric.Metrics, component string, attrs map[string]string) error {
-	for i := 0; i < expected.ResourceMetrics().Len(); i++ {
-		for j := 0; j < actual.ResourceMetrics().Len(); j++ {
-			actualRm := actual.ResourceMetrics().At(j)
-			for k := 0; k < actualRm.ScopeMetrics().Len(); k++ {
-				sm := actualRm.ScopeMetrics().At(k)
-				for l := 0; l < sm.Metrics().Len(); l++ {
-					metric := sm.Metrics().At(l)
-					switch metric.Type() {
-					case pmetric.MetricTypeSum:
-						for m := 0; m < metric.Sum().DataPoints().Len(); m++ {
-							dp := metric.Sum().DataPoints().At(m)
-							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
-								return err
-							}
-						}
-					case pmetric.MetricTypeGauge:
-						for m := 0; m < metric.Gauge().DataPoints().Len(); m++ {
-							dp := metric.Gauge().DataPoints().At(m)
-							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
-								return err
-							}
-						}
-					case pmetric.MetricTypeHistogram:
-						for m := 0; m < metric.Histogram().DataPoints().Len(); m++ {
-							dp := metric.Histogram().DataPoints().At(m)
-							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
-								return err
-							}
-						}
-					case pmetric.MetricTypeSummary:
-						for m := 0; m < metric.Summary().DataPoints().Len(); m++ {
-							dp := metric.Summary().DataPoints().At(m)
-							if err := checkAttributes(t, dp.Attributes(), attrs, component); err != nil {
-								return err
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	expectedNames := internal.GetMetricNames(expected)
-	actualNames := internal.GetMetricNames(actual)
-	for _, name := range expectedNames {
-		if !assert.Contains(t, actualNames, name, "Metric name %s not found in actual metrics", name) {
-			return fmt.Errorf("metric name %s not found in actual metrics", name)
-		}
-	}
-	return nil
+var metricIdentityAttributes = []string{
+	"host.name",
+	"k8s.cluster.name",
+	"k8s.namespace.name",
+	"k8s.node.name",
+	"k8s.pod.name",
+	"k8s.pod.uid",
+	"os.type",
+	"server.address",
+	"server.port",
+	"service.instance.id",
+	"service.name",
+	"url.scheme",
 }
 
-func checkAttributes(t *testing.T, attrs pcommon.Map, expectedAttrs map[string]string, component string) error {
-	for key, regex := range expectedAttrs {
-		val, found := attrs.Get(key)
-		if !found {
-			return fmt.Errorf("attribute %s not found", key)
-		}
-		if !assert.Regexp(t, regex, val.AsString(), "Attribute %s does not match regex %s for component %s", key, regex, component) {
-			return fmt.Errorf("attribute %s does not match regex %s for component %s", key, regex, component)
-		}
-	}
-	return nil
+func regexAttributes(component string) map[string]string {
+	return internal.ExtendMetricAssertionRegexAttrs(
+		metricRegexAttributes,
+		componentMetricRegexAttributes[component],
+	)
 }

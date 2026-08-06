@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -113,16 +114,6 @@ func assertAttr(t *testing.T, attrs pcommon.Map, name string, val any) {
 }
 
 func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
-	internal.WaitForMetrics(t, 5, sink)
-	foundMetrics := make(map[string]bool)
-	for _, m := range sink.AllMetrics() {
-		for i := 0; i < m.ResourceMetrics().Len(); i++ {
-			sm := m.ResourceMetrics().At(i).ScopeMetrics().At(0)
-			for j := 0; j < sm.Metrics().Len(); j++ {
-				foundMetrics[sm.Metrics().At(j).Name()] = true
-			}
-		}
-	}
 	expectedRedisMetrics := []string{
 		"redis.clients.blocked",
 		"redis.clients.connected",
@@ -151,9 +142,24 @@ func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
 		"redis.slaves.connected",
 		"redis.uptime",
 	}
-	for _, rm := range expectedRedisMetrics {
-		assert.Contains(t, foundMetrics, rm)
-	}
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		foundMetrics := make(map[string]bool)
+		for _, m := range sink.AllMetrics() {
+			for i := 0; i < m.ResourceMetrics().Len(); i++ {
+				rm := m.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					sm := rm.ScopeMetrics().At(j)
+					for k := 0; k < sm.Metrics().Len(); k++ {
+						foundMetrics[sm.Metrics().At(k).Name()] = true
+					}
+				}
+			}
+		}
+
+		for _, rm := range expectedRedisMetrics {
+			assert.Contains(tt, foundMetrics, rm)
+		}
+	}, 5*time.Minute, 3*time.Second, "Missing expected redis metrics")
 }
 
 func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
