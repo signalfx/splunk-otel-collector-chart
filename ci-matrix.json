@@ -16,6 +16,7 @@
     ]
   },
   "functional_test_v2": {
+    "exclude": [],
     "k8s-kind-version": [
       "v1.36.1",
       "v1.35.5",
@@ -33,8 +34,7 @@
       "logs",
       "obi",
       "secureapp"
-    ],
-    "exclude": []
+    ]
   },
   "kubeconform_tests": {
     "k8s-version": [
