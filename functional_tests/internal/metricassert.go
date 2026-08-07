@@ -166,7 +166,7 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 			if assertErr == nil {
 				return true
 			}
-			t.Logf("metrics assertion failed: %s", assertErr.Error())
+			t.Logf("metrics assertion failed: %v", assertErr)
 		}
 		return false
 	}, timeout, interval, "Failed to find expected metrics in allotted time")
