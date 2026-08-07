@@ -14,7 +14,6 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetricassert"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -148,33 +147,30 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
 
-	require.EventuallyWithT(t, func(c *assert.CollectT) {
-		selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics)
-		assert.NotNil(c, selected, "No metrics batch found containing target metric: %s", targetMetric)
-
-		actual := prepareMetricsAssertion(*selected, cfg)
-		maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
-		assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
-		if assertErr != nil {
-			assert.NoError(c, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
+	require.Eventually(t, func() bool {
+		sinkMetrics := sink.AllMetrics()
+		for i := len(sinkMetrics) - 1; i >= 0; i-- {
+			m := sinkMetrics[i]
+			if !containsMetric(m, targetMetric) {
+				continue
+			}
+			if m.ResourceMetrics().Len() != wantResources {
+				continue
+			}
+			if m.MetricCount() != wantMetrics {
+				continue
+			}
+			actual := prepareMetricsAssertion(m, cfg)
+			maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
+			assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
+			if assertErr != nil {
+				return true
+			}
 		}
-	}, 5*time.Minute, 1*time.Second, "Failed to find expected metrics in allotted time")
+		return false
+	}, timeout, interval, "Failed to find expected metrics in allotted time")
 
 	t.Logf("Metric assertion passed for %d metrics (%s)", wantMetrics, assertionFile)
-}
-
-func selectMetricSetByCounts(targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int) *pmetric.Metrics {
-	metrics := metricSink.AllMetrics()
-	for h := len(metrics) - 1; h >= 0; h-- {
-		m := metrics[h]
-		if !containsMetric(m, targetMetric) {
-			continue
-		}
-		if m.ResourceMetrics().Len() == wantResources && m.MetricCount() == wantMetrics {
-			return &metrics[h]
-		}
-	}
-	return nil
 }
 
 func assertionExpectedCounts(file string) (int, int, error) {
