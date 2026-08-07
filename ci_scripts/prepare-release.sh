@@ -68,12 +68,10 @@ LATEST_APP_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
   sed 's/^v//')
 LATEST_CONTRIB_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
   "https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases?per_page=50" | \
-  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | first' | \
-  sed 's/^v//')
+  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | first')
 PREVIOUS_CONTRIB_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
   "https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases?per_page=50" | \
-  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | nth(1)' | \
-  sed 's/^v//')
+  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | nth(1)')
 if [[ "$APP_VERSION_OVERRIDDEN" = true ]]; then
     LATEST_APP_VERSION=$APP_VERSION
     debug "Using override collector app version value $LATEST_APP_VERSION"
