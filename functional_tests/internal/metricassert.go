@@ -163,7 +163,7 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 			assert.NoError(c, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
 		}
 		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
-	}, 5*time.Minute, 1*time.Second, "Failed to find expected metrics in alloted time")
+	}, 5*time.Minute, 1*time.Second, "Failed to find expected metrics in allotted time")
 }
 
 func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
