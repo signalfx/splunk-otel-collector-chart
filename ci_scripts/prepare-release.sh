@@ -16,7 +16,7 @@ update_versions() {
     yq e ".appVersion = \"$LATEST_APP_VERSION\"" -i "${CHART_FILE_PATH}"
     # Histogram tests check version as part of expected metric tests, upgrade expected version
     # as a part of the upgrade.
-    find functional_tests/histogram/testdata/expected -type f -exec sed -i.bak "s/version: ${PREVIOUS_CONTRIB_RELEASE}/version: ${LATEST_CONTRIB_RELEASE}/g" {} + && find functional_tests/histogram/testdata/expected -type f -name '*.bak' -delete
+    find functional_tests/histogram/testdata/expected -type f -exec sed -i.bak "s/version: ${PREVIOUS_CONTRIB_VERSION}/version: ${LATEST_CONTRIB_VERSION}/g" {} + && find functional_tests/histogram/testdata/expected -type f -name '*.bak' -delete
 }
 
 notify_workflows_for_need_update() {
