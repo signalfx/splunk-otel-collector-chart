@@ -333,6 +333,9 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string, 
 			if !scopeOK {
 				return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
 			}
+			if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].attributes", i, j), scopeMap["attributes"], vol, regex); markErr != nil {
+				return markErr
+			}
 			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), scopeMap["metrics"])
 			if metricErr != nil {
 				return metricErr
