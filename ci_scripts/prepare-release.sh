@@ -14,6 +14,9 @@ source "$SCRIPT_DIR/base_util.sh"
 update_versions() {
     yq e ".version = \"$LATEST_CHART_VERSION\"" -i "${CHART_FILE_PATH}"
     yq e ".appVersion = \"$LATEST_APP_VERSION\"" -i "${CHART_FILE_PATH}"
+    # Histogram tests check version as part of expected metric tests, upgrade expected version
+    # as a part of the upgrade.
+    find functional_tests/histogram/testdata/expected -type f -exec sed -i.bak "s/version: ${PREVIOUS_CONTRIB_RELEASE}/version: ${LATEST_CONTRIB_RELEASE}/g" {} + && find functional_tests/histogram/testdata/expected -type f -name '*.bak' -delete
 }
 
 notify_workflows_for_need_update() {
@@ -62,6 +65,14 @@ CURRENT_CHART_VERSION_MINOR=$(get_minor_version "v$CURRENT_CHART_VERSION")
 LATEST_APP_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
   "https://api.github.com/repos/$OWNER/splunk-otel-collector/releases?per_page=50" | \
   jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | first' | \
+  sed 's/^v//')
+LATEST_CONTRIB_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
+  "https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases?per_page=50" | \
+  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | first' | \
+  sed 's/^v//')
+PREVIOUS_CONTRIB_VERSION=$(curl -L -qs -H 'Accept: application/vnd.github+json' \
+  "https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases?per_page=50" | \
+  jq -r '[.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name] | nth(1)' | \
   sed 's/^v//')
 if [[ "$APP_VERSION_OVERRIDDEN" = true ]]; then
     LATEST_APP_VERSION=$APP_VERSION
