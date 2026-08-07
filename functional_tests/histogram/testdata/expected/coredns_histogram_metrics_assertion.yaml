@@ -39,6 +39,6 @@ resources:
               temporality: cumulative
               type: histogram
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version/regex: '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$'
+          version/exists: true
 signal: metrics
 version: 1

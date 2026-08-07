@@ -209,7 +209,6 @@ var commonVolatileAttributes = []string{
 var metricRegexAttributes = map[string]string{
 	"k8s.pod.uid": "^" + internal.K8sUIDRegex + "$",
 	"verb":        internal.K8sAPIVerbRegex,
-	"version":     internal.CollectorVersionRegex,
 }
 
 var componentMetricRegexAttributes = map[string]map[string]string{

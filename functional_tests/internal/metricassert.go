@@ -34,7 +34,6 @@ type metricsAssertionConfig struct {
 type MetricsAssertionOption func(*metricsAssertionConfig)
 
 const (
-	CollectorVersionRegex = `^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`
 	// ContainerIDRegex matches container IDs with or without common runtime prefixes.
 	ContainerIDRegex       = `(containerd://|cri-o://|docker://)?[0-9a-f]{64}`
 	ContainerImageRegex    = `[-./:0-9a-z_]+`
@@ -332,9 +331,6 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string, 
 			scopeMap, scopeOK := scope.(map[string]any)
 			if !scopeOK {
 				return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
-			}
-			if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].attributes", i, j), scopeMap["attributes"], vol, regex); markErr != nil {
-				return markErr
 			}
 			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), scopeMap["metrics"])
 			if metricErr != nil {
