@@ -148,6 +148,7 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
 
 	require.Eventually(t, func() bool {
+		firstFailure := true
 		sinkMetrics := sink.AllMetrics()
 		for i := len(sinkMetrics) - 1; i >= 0; i-- {
 			m := sinkMetrics[i]
@@ -166,7 +167,10 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 			if assertErr == nil {
 				return true
 			}
-			t.Logf("metrics assertion failed: %v", assertErr)
+			if firstFailure {
+				t.Logf("metrics assertion failed: %v", assertErr)
+				firstFailure = false
+			}
 		}
 		return false
 	}, timeout, interval, "Failed to find expected metrics in allotted time")
