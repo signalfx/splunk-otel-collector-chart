@@ -34,6 +34,7 @@ type metricsAssertionConfig struct {
 type MetricsAssertionOption func(*metricsAssertionConfig)
 
 const (
+	CollectorVersionRegex = `^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`
 	// ContainerIDRegex matches container IDs with or without common runtime prefixes.
 	ContainerIDRegex       = `(containerd://|cri-o://|docker://)?[0-9a-f]{64}`
 	ContainerImageRegex    = `[-./:0-9a-z_]+`
