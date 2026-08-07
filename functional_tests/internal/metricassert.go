@@ -149,39 +149,18 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
 
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
-		selected, exactMatch := selectMetricSetByCountsWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, timeout, interval)
+		selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics)
 		assert.NotNil(c, selected, "No metrics batch found containing target metric: %s", targetMetric)
 
 		actual := prepareMetricsAssertion(*selected, cfg)
 		maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
 		assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
 		if assertErr != nil {
-			if !exactMatch {
-				t.Logf("No exact-count match (want %d resources, %d metrics); selected payload has %d metrics",
-					wantResources, wantMetrics, selected.MetricCount())
-			}
 			assert.NoError(c, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
 		}
-		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
 	}, 5*time.Minute, 1*time.Second, "Failed to find expected metrics in allotted time")
-}
 
-func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
-	deadline := time.Now().Add(timeout)
-	for time.Now().Before(deadline) {
-		if m := selectMetricSetByCounts(targetMetric, metricSink, wantResources, wantMetrics); m != nil {
-			t.Logf("Selected exact-count payload with target metric '%s': %d metrics, %d resources",
-				targetMetric, m.MetricCount(), m.ResourceMetrics().Len())
-			return m, true
-		}
-		time.Sleep(interval)
-	}
-
-	best := richestMetricSet(targetMetric, metricSink)
-	require.NotNilf(t, best, "No payload containing metric %s found within %v", targetMetric, timeout)
-	t.Logf("No exact-count payload (%d resources, %d metrics) for '%s' within %v; using best-effort fallback: %d metrics, %d resources",
-		wantResources, wantMetrics, targetMetric, timeout, best.MetricCount(), best.ResourceMetrics().Len())
-	return best, false
+	t.Logf("Metric assertion passed for %d metrics (%s)", wantMetrics, assertionFile)
 }
 
 func selectMetricSetByCounts(targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int) *pmetric.Metrics {
@@ -196,26 +175,6 @@ func selectMetricSetByCounts(targetMetric string, metricSink *consumertest.Metri
 		}
 	}
 	return nil
-}
-
-func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink) *pmetric.Metrics {
-	metrics := metricSink.AllMetrics()
-	bestIndex := -1
-	bestCount := -1
-	for h := len(metrics) - 1; h >= 0; h-- {
-		m := metrics[h]
-		if !containsMetric(m, targetMetric) {
-			continue
-		}
-		if m.MetricCount() > bestCount {
-			bestIndex = h
-			bestCount = m.MetricCount()
-		}
-	}
-	if bestIndex < 0 {
-		return nil
-	}
-	return &metrics[bestIndex]
 }
 
 func assertionExpectedCounts(file string) (int, int, error) {
