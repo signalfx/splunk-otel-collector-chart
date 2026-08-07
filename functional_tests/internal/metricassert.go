@@ -163,7 +163,7 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 			actual := prepareMetricsAssertion(m, cfg)
 			maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
 			assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
-			if assertErr != nil {
+			if assertErr == nil {
 				return true
 			}
 		}
