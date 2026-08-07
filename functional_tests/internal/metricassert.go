@@ -14,6 +14,7 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetricassert"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -147,21 +148,22 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
 
-	selected, exactMatch := selectMetricSetByCountsWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, timeout, interval)
-	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		selected, exactMatch := selectMetricSetByCountsWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, timeout, interval)
+		assert.NotNil(c, selected, "No metrics batch found containing target metric: %s", targetMetric)
 
-	actual := prepareMetricsAssertion(*selected, cfg)
-	maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
-	assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
-	if assertErr != nil {
-		if !exactMatch {
-			t.Logf("No exact-count match (want %d resources, %d metrics); selected payload has %d metrics",
-				wantResources, wantMetrics, selected.MetricCount())
+		actual := prepareMetricsAssertion(*selected, cfg)
+		maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
+		assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
+		if assertErr != nil {
+			if !exactMatch {
+				t.Logf("No exact-count match (want %d resources, %d metrics); selected payload has %d metrics",
+					wantResources, wantMetrics, selected.MetricCount())
+			}
+			assert.NoError(c, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
 		}
-		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
-	}
-
-	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+	}, 5*time.Minute, 1*time.Second, "Failed to find expected metrics in alloted time")
 }
 
 func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
