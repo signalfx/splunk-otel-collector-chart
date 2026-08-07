@@ -151,6 +151,14 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 	if isHistogram {
 		opts = append(opts, internal.WithHistogramExplicitBounds())
 	}
+	if input.ServiceName == "kubernetes-apiserver" && !isHistogram {
+		// TODO: Replace this selector with a datapoints/include assertion in the YAML once
+		// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/48545 lands.
+		opts = append(opts, internal.WithSelectedNumberDatapoint(input.NonHistogramMetricName, map[string]string{
+			"code": "200", "component": "apiserver", "resource": "services",
+			"scope": "resource", "verb": "GET", "version": "v1",
+		}))
+	}
 
 	internal.AssertMetricsSnapshot(t, metricsSink, metricName, expectedFilePath,
 		3*time.Minute, 5*time.Second, opts...)

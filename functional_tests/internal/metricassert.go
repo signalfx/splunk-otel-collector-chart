@@ -26,6 +26,8 @@ type metricsAssertionConfig struct {
 	regexAttrs                     map[string]string
 	firstDatapointOnly             []string
 	maxDatapointsPerMetric         int
+	selectedNumberMetric           string
+	selectedNumberDatapoint        map[string]string
 	exactDatapointAttrs            map[string]struct{}
 	includeHistogramExplicitBounds bool
 }
@@ -115,6 +117,15 @@ func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 func WithMaxDatapointsPerMetric(maxDatapoints int) MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
 		cfg.maxDatapointsPerMetric = maxDatapoints
+	}
+}
+
+// WithSelectedNumberDatapoint retains datapoints for a number metric that
+// contain the provided attributes.
+func WithSelectedNumberDatapoint(metricName string, attributes map[string]string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.selectedNumberMetric = metricName
+		cfg.selectedNumberDatapoint = attributes
 	}
 }
 
@@ -446,11 +457,34 @@ func newMetricsAssertionConfig(opts ...MetricsAssertionOption) metricsAssertionC
 func prepareMetricsAssertion(actual pmetric.Metrics, cfg metricsAssertionConfig) pmetric.Metrics {
 	prepared := pmetric.NewMetrics()
 	actual.CopyTo(prepared)
+	retainSelectedNumberDatapoint(prepared, cfg.selectedNumberMetric, cfg.selectedNumberDatapoint)
 	if cfg.maxDatapointsPerMetric > 0 {
 		ReduceDatapoints(&prepared, cfg.maxDatapointsPerMetric)
 	}
 	keepFirstDatapointOnly(prepared, cfg.firstDatapointOnly, cfg.flexibleAttrs())
 	return prepared
+}
+
+func retainSelectedNumberDatapoint(metrics pmetric.Metrics, metricName string, attributes map[string]string) {
+	metric, found := GetMetric(&metrics, metricName)
+	if !found {
+		return
+	}
+	remove := func(dp pmetric.NumberDataPoint) bool {
+		for key, expected := range attributes {
+			actual, ok := dp.Attributes().Get(key)
+			if !ok || actual.Type() != pcommon.ValueTypeStr || actual.Str() != expected {
+				return true
+			}
+		}
+		return false
+	}
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		metric.Gauge().DataPoints().RemoveIf(remove)
+	case pmetric.MetricTypeSum:
+		metric.Sum().DataPoints().RemoveIf(remove)
+	}
 }
 
 func (cfg metricsAssertionConfig) flexibleAttrs() []string {

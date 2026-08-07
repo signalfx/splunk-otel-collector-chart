@@ -39,7 +39,6 @@ resources:
                     server.port/exists: true
                     service.instance.id/exists: true
                     service.name: kubernetes-apiserver
-                    subresource/exists: true
                     url.scheme: https
                     verb/regex: ^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$
                     version/exists: true
