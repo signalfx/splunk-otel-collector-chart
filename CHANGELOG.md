@@ -4,6 +4,30 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.158.0] - 2026-08-07
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.158.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.158.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver, gateway`: Use `deployment.environment.name` instead of the deprecated `deployment.environment` resource attribute. ([#2520](https://github.com/signalfx/splunk-otel-collector-chart/pull/2520))
+  The optional `environment` value now adds `deployment.environment.name` to collected telemetry and Collector internal telemetry.
+  To restore the deprecated name, see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01570-to-01580)
+  for details.
+  
+- `chart`: Rename all `resourcedetection` processor references to `resource_detection` ([#2529](https://github.com/signalfx/splunk-otel-collector-chart/pull/2529))
+  The `resourcedetection` alias has been deprecated in favor of `resource_detection` in the chart-generated configuration.
+  Any Helm values or overrides that reference `resourcedetection` (for example, `*.config.processors.resourcedetection`
+  or pipelines that list `resourcedetection` as a processor) must be updated to use `resource_detection`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver, gateway`: Add `deployment.environment.name` resource attribute to Collector internal telemetry when environment is configured. ([#2520](https://github.com/signalfx/splunk-otel-collector-chart/pull/2520))
+- `operator`: Bump java-csa to v2.30.0 in helm-charts/splunk-otel-collector/values.yaml ([#2535](https://github.com/signalfx/splunk-otel-collector-chart/pull/2535))
+- `operator`: Bump java to v2.30.0 in helm-charts/splunk-otel-collector/values.yaml ([#2534](https://github.com/signalfx/splunk-otel-collector-chart/pull/2534))
+
 ## [0.157.0] - 2026-07-28
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.157.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.157.0).
