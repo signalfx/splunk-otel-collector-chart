@@ -1223,7 +1223,7 @@ instrumentation:
       #     value: nodejs_value
     python:
       image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
-      secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.11.0-secureapp
+      secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.12.1-secureapp
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
           value: ""
