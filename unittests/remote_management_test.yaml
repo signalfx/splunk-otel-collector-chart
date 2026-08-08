@@ -238,6 +238,9 @@ tests:
           pattern: 'otelcol.service.mode: agent'
       - matchRegex:
           path: data["config.yaml"]
+          pattern: 'service.version: 0\.158\.0'
+      - matchRegex:
+          path: data["config.yaml"]
           pattern: 'otelcol.service.mode: clusterReceiver'
 
   - it: should include gateway workload when gateway is enabled
@@ -291,6 +294,77 @@ tests:
           path: data["relay"]
           pattern: "opamp/splunk_o11y"
 
+  - it: should annotate remote-managed agent config map
+    template: configmap-agent.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+          value: "true"
+
+  - it: should annotate remote-managed gateway config map
+    template: configmap-gateway.yaml
+    set:
+      remoteManagement:
+        enabled: true
+      gateway:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+          value: "true"
+
+  - it: should annotate remote-managed cluster receiver config map
+    template: configmap-cluster-receiver.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+          value: "true"
+
+  - it: should not annotate collector config maps when remote management is disabled
+    template: configmap-agent.yaml
+    set:
+      gateway:
+        enabled: true
+    asserts:
+      - isNull:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+
+  - it: should not annotate workloads excluded from remote management
+    template: configmap-gateway.yaml
+    set:
+      remoteManagement:
+        enabled: true
+        opampBridge:
+          workloads:
+            gateway:
+              enabled: false
+      gateway:
+        enabled: true
+    asserts:
+      - isNull:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+
+  - it: should accept reset from Helm collector config upgrade strategy
+    template: configmap-agent.yaml
+    set:
+      remoteManagement:
+        enabled: true
+        collectorConfig:
+          upgradeStrategy: resetFromHelm
+    asserts:
+      - equal:
+          path: metadata.annotations["splunk.com/remote-management-config"]
+          value: "true"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+
   - it: should fail when remote management has no managed workloads
     template: opamp-bridge-serviceaccount.yaml
     set:
@@ -328,3 +402,17 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: "Authorization: Bearer custom-token"
+
+  - it: should report custom collector image tag as managed workload service version
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+      image:
+        otelcol:
+          tag: 0.200.0
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'service.version: 0\.200\.0'
