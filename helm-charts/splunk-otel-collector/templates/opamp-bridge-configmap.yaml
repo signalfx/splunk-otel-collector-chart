@@ -1,0 +1,105 @@
+{{- if .Values.remoteManagement.enabled }}
+{{- include "splunk-otel-collector.opampBridge.requireManagedWorkload" . }}
+{{- $namespace := include "splunk-otel-collector.namespace" . }}
+{{- $bridge := .Values.remoteManagement.opampBridge }}
+{{- $bridgeName := include "splunk-otel-collector.opampBridgeName" . }}
+{{- $configMapName := include "splunk-otel-collector.opampBridgeConfigMapName" . }}
+{{- $agentManaged := eq (include "splunk-otel-collector.opampBridge.agentManaged" .) "true" }}
+{{- $gatewayManaged := eq (include "splunk-otel-collector.opampBridge.gatewayManaged" .) "true" }}
+{{- $clusterReceiverManaged := eq (include "splunk-otel-collector.opampBridge.clusterReceiverManaged" .) "true" }}
+{{- $bridgeAttributes := include "splunk-otel-collector.opampBridge.descriptionAttributes" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $configMapName }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: opamp-bridge
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+data:
+  config.yaml: |
+    mode: standalone
+    endpoint: {{ include "splunk-otel-collector.opampBridgeEndpoint" . | quote }}
+    healthListenAddr: ":8081"
+    heartbeatInterval: {{ $bridge.heartbeatInterval | quote }}
+    name: {{ $bridgeName | quote }}
+    {{- if $bridge.tls }}
+    tls:
+      {{- toYaml $bridge.tls | nindent 6 }}
+    {{- end }}
+    {{- if or $bridge.headers (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    headers:
+      {{- if $bridge.headers }}
+      {{- toYaml $bridge.headers | nindent 6 }}
+      {{- else }}
+      X-SF-Token: "${SPLUNK_OBSERVABILITY_ACCESS_TOKEN}"
+      {{- end }}
+    {{- end }}
+    capabilities:
+      {{- toYaml $bridge.capabilities | nindent 6 }}
+    {{- if $bridge.componentsAllowed }}
+    componentsAllowed:
+      {{- toYaml $bridge.componentsAllowed | nindent 6 }}
+    {{- end }}
+    {{- with $bridgeAttributes }}
+    description:
+      non_identifying_attributes:
+        {{- . | nindent 8 }}
+    {{- end }}
+    standalone:
+      agents:
+        {{- if $agentManaged }}
+        - namespace: {{ $namespace | quote }}
+          type: {{ $bridge.workloads.agent.type }}
+          description:
+            non_identifying_attributes:
+              {{- include "splunk-otel-collector.opampBridgeWorkloadAttributes" (dict "root" . "workload" $bridge.workloads.agent) | nindent 14 }}
+          workloadRef:
+            apiVersion: apps/v1
+            kind: DaemonSet
+            name: {{ printf "%s-agent" (include "splunk-otel-collector.fullname" .) | quote }}
+          config:
+            {{ $bridge.workloads.agent.configName }}:
+              kind: configmap
+              name: {{ printf "%s-otel-agent" (include "splunk-otel-collector.fullname" .) | quote }}
+              key: relay
+        {{- end }}
+        {{- if $gatewayManaged }}
+        - namespace: {{ $namespace | quote }}
+          type: {{ $bridge.workloads.gateway.type }}
+          description:
+            non_identifying_attributes:
+              {{- include "splunk-otel-collector.opampBridgeWorkloadAttributes" (dict "root" . "workload" $bridge.workloads.gateway) | nindent 14 }}
+          workloadRef:
+            apiVersion: apps/v1
+            kind: {{ if eq (default "deployment" .Values.gateway.mode) "statefulset" }}StatefulSet{{ else }}Deployment{{ end }}
+            name: {{ include "splunk-otel-collector.fullname" . | quote }}
+          config:
+            {{ $bridge.workloads.gateway.configName }}:
+              kind: configmap
+              name: {{ printf "%s-otel-collector" (include "splunk-otel-collector.fullname" .) | quote }}
+              key: relay
+        {{- end }}
+        {{- if $clusterReceiverManaged }}
+        - namespace: {{ $namespace | quote }}
+          type: {{ $bridge.workloads.clusterReceiver.type }}
+          description:
+            non_identifying_attributes:
+              {{- include "splunk-otel-collector.opampBridgeWorkloadAttributes" (dict "root" . "workload" $bridge.workloads.clusterReceiver) | nindent 14 }}
+          workloadRef:
+            apiVersion: apps/v1
+            kind: {{ if eq .Values.distribution "eks/fargate" }}StatefulSet{{ else }}Deployment{{ end }}
+            name: {{ if eq .Values.distribution "eks/fargate" }}{{ include "splunk-otel-collector.clusterReceiverTruncatedName" . | quote }}{{ else }}{{ printf "%s-k8s-cluster-receiver" (include "splunk-otel-collector.fullname" .) | quote }}{{ end }}
+          config:
+            {{ $bridge.workloads.clusterReceiver.configName }}:
+              kind: configmap
+              name: {{ printf "%s-otel-k8s-cluster-receiver" (include "splunk-otel-collector.fullname" .) | quote }}
+              key: relay
+        {{- end }}
+        {{- with $bridge.extraAgents }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

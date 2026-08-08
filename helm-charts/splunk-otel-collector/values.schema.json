@@ -1021,6 +1021,26 @@
               ]
             }
           }
+        },
+        "opampBridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
         }
       }
     },
@@ -1232,6 +1252,155 @@
     "securityContextConstraintsOverwrite": {
       "description": "Openshift SecurityContextConstraints can be overridden in this field.",
       "type": "object"
+    },
+    "remoteManagement": {
+      "description": "Splunk Remote Management configuration.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Deploy the OpAMP Bridge and configure it to manage chart-created collectors.",
+          "type": "boolean"
+        },
+        "opampBridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "heartbeatInterval": {
+              "type": "string"
+            },
+            "headers": {
+              "type": "object"
+            },
+            "tls": {
+              "type": "object"
+            },
+            "capabilities": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "componentsAllowed": {
+              "type": "object"
+            },
+            "description": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "non_identifying_attributes": {
+                  "type": "object"
+                }
+              }
+            },
+            "workloads": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "agent": {
+                  "$ref": "#/$defs/remoteManagementWorkload"
+                },
+                "gateway": {
+                  "$ref": "#/$defs/remoteManagementWorkload"
+                },
+                "clusterReceiver": {
+                  "$ref": "#/$defs/remoteManagementWorkload"
+                }
+              }
+            },
+            "resources": {
+              "type": "object"
+            },
+            "serviceAccount": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "create": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "annotations": {
+                  "type": "object"
+                }
+              }
+            },
+            "rbac": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "create": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "podSecurityContext": {
+              "type": "object"
+            },
+            "containerSecurityContext": {
+              "type": "object"
+            },
+            "nodeSelector": {
+              "type": "object"
+            },
+            "tolerations": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "affinity": {
+              "type": "object"
+            },
+            "topologySpreadConstraints": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "priorityClassName": {
+              "type": "string"
+            },
+            "podAnnotations": {
+              "type": "object"
+            },
+            "podLabels": {
+              "type": "object"
+            },
+            "extraEnvs": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "extraVolumes": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "extraVolumeMounts": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "extraAgents": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
     },
     "gateway": {
       "description": "Splunk OpenTelemetry Collector gateway workload configuration.",
@@ -1536,6 +1705,11 @@
         }
       }
     },
+    "opentelemetry-target-allocator": {
+      "description": "Target Allocator configuration. Prefer using the 'targetallocator' alias for new installations. This field is provided for compatibility with the original subchart name.",
+      "type": "object",
+      "additionalProperties": true
+    },
     "obi": {
       "description": "OpenTelemetry eBPF Instrumentation configuration. A subchart that is used to install the eBPF instrumentation, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
       "type": "object",
@@ -1550,6 +1724,35 @@
       "description": "Helm Chart Feature Gates.",
       "type": "object",
       "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "remoteManagementWorkload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        },
+        "configName": {
+          "type": "string"
+        },
+        "serviceMode": {
+          "type": "string"
+        },
+        "description": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "non_identifying_attributes": {
+              "type": "object"
+            }
+          }
+        }
+      }
     }
   },
   "allOf": [

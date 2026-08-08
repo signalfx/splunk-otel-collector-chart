@@ -196,6 +196,13 @@ Sending data to Splunk Observability Cloud
 helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster" splunk-otel-collector-chart/splunk-otel-collector
 ```
 
+To enable Splunk Remote Management for the collectors installed by this chart, add
+`remoteManagement.enabled=true` to the same Helm install or upgrade command:
+
+```bash
+helm install my-splunk-otel-collector --set="splunkObservability.realm=us0,splunkObservability.accessToken=xxxxxx,clusterName=my-cluster,remoteManagement.enabled=true" splunk-otel-collector-chart/splunk-otel-collector
+```
+
 Sending data to Splunk Enterprise or Splunk Cloud
 
 ```bash

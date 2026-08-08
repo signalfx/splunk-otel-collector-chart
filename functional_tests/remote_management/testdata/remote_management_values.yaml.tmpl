@@ -1,0 +1,23 @@
+splunkObservability:
+  realm: test
+  accessToken: test-token
+  apiUrl: {{ .ApiURL }}
+  ingestUrl: {{ .IngestURL }}
+
+clusterName: remote-management-test
+
+remoteManagement:
+  enabled: true
+
+clusterReceiver:
+  enabled: true
+  eventsEnabled: false
+
+agent:
+  controlPlaneMetrics:
+    apiserver:
+      enabled: false
+    controllerManager:
+      enabled: false
+    coredns:
+      enabled: false
