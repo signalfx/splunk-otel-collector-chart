@@ -1037,8 +1037,13 @@ exporters:
 
   {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
   signalfx/histograms:
+    {{- if .Values.gateway.enabled }}
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    {{- end }}
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     send_otlp_histograms: true
   {{- end }}
