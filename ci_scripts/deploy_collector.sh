@@ -16,7 +16,6 @@ helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
 --set splunkPlatform.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \
 -f ci_scripts/sck_otel_values.yaml helm-charts/splunk-otel-collector/
 #--set containerLogs.containerRuntime=$CONTAINER_RUNTIME \
-#wait for deployment to finish
-until kubectl get pod | grep Running | [[ $(wc -l) == 1 ]]; do
-   sleep 1;
-done
+# Wait for the Collector workloads, including their processors, to become ready.
+kubectl rollout status daemonset/ci-sck-splunk-otel-collector-agent --timeout=3m
+kubectl rollout status deployment/ci-sck-splunk-otel-collector-k8s-cluster-receiver --timeout=3m

@@ -35,6 +35,14 @@ clusterName: "functional-test"
 
 agent:
   controlPlaneEnabled: true
+  config:
+    processors:
+      k8s_attributes:
+        wait_for_metadata: true
+        wait_for_metadata_timeout: 30s
+      k8s_attributes/metrics:
+        wait_for_metadata: true
+        wait_for_metadata_timeout: 30s
 
 # Metadata to be set on the telemetry data from Kubernetes objects.
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor.
@@ -91,6 +99,11 @@ logsCollection:
 
 clusterReceiver:
   enabled: true
+  config:
+    processors:
+      k8s_attributes/metrics:
+        wait_for_metadata: true
+        wait_for_metadata_timeout: 30s
   # This flag enables Kubernetes objects collection using OpenTelemetry Kubernetes Object Receiver
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sobjectsreceiver
   # This option requires `logsEnabled` to be set to `true` for `splunkPlatform`.
