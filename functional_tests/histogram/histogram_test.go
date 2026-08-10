@@ -149,7 +149,10 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 		internal.WithMaxDatapointsPerMetric(1),
 	}
 	if isHistogram {
-		opts = append(opts, internal.WithHistogramExplicitBounds())
+		opts = append(opts,
+			internal.WithHistogramExplicitBounds(),
+			internal.WithScopeVersionRegex(internal.OtelCollectorVersionRegex),
+		)
 	}
 
 	internal.AssertMetricsSnapshot(t, metricsSink, metricName, expectedFilePath,
