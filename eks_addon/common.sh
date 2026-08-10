@@ -58,8 +58,6 @@ EOF" > "${tmp_file}"
     "operator"
     "opentelemetry-operator"
     "instrumentation"
-    "certmanager"
-    "cert-manager"
     "targetallocator"
   )
   for prop in "${disabled_properties[@]}"; do
