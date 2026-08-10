@@ -24,6 +24,7 @@ import (
 type metricsAssertionConfig struct {
 	volatileAttrs                  []string
 	regexAttrs                     map[string]string
+	scopeVersionRegex              string
 	firstDatapointOnly             []string
 	maxDatapointsPerMetric         int
 	selectedNumberMetric           string
@@ -44,8 +45,9 @@ const (
 	K8sNameRegex = `[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`
 	K8sUIDRegex  = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
 	// K8sAPIVerbRegex matches canonical request verbs reported in API server metrics.
-	K8sAPIVerbRegex     = `^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$`
-	KubeletVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
+	K8sAPIVerbRegex           = `^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$`
+	KubeletVersionRegex       = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
+	OtelCollectorVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+`
 )
 
 // CommonK8sMetricAssertionExistsAttrs holds shared attrs asserted as present-only.
@@ -103,6 +105,13 @@ func WithRegexAttributes(attrs map[string]string) MetricsAssertionOption {
 		for attr, pattern := range attrs {
 			cfg.regexAttrs[attr] = pattern
 		}
+	}
+}
+
+// WithScopeVersionRegex writes scope versions as pmetricassert `version/regex` matchers.
+func WithScopeVersionRegex(pattern string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.scopeVersionRegex = pattern
 	}
 }
 
@@ -297,15 +306,15 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 	if err := pmetricassert.WriteAssertionFile(tb, file, prepared, writeOpts...); err != nil {
 		return fmt.Errorf("write assertion file %s: %w", file, err)
 	}
-	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs, cfg.exactDatapointAttrs)
+	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs, cfg.scopeVersionRegex, cfg.exactDatapointAttrs)
 }
 
 // TODO: Replace YAML rewriting after attributes/include and writer matchers merge:
 // https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/48622
 // https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/49816
 // markFlexibleAttrs applies `/exists` and `/regex` after pmetricassert writes exact values.
-func markFlexibleAttrs(file string, volatile []string, regex map[string]string, exactDatapointAttrs map[string]struct{}) error {
-	if len(volatile) == 0 && len(regex) == 0 && exactDatapointAttrs == nil {
+func markFlexibleAttrs(file string, volatile []string, regex map[string]string, scopeVersionRegex string, exactDatapointAttrs map[string]struct{}) error {
+	if len(volatile) == 0 && len(regex) == 0 && scopeVersionRegex == "" && exactDatapointAttrs == nil {
 		return nil
 	}
 	vol := make(map[string]struct{}, len(volatile))
@@ -342,6 +351,10 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string, 
 			scopeMap, scopeOK := scope.(map[string]any)
 			if !scopeOK {
 				return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
+			}
+			if scopeVersionRegex != "" {
+				delete(scopeMap, "version")
+				scopeMap["version/regex"] = scopeVersionRegex
 			}
 			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), scopeMap["metrics"])
 			if metricErr != nil {
