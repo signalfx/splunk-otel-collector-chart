@@ -10,5 +10,5 @@ issues: [2553]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Previously, histogram data was sent directly to Splunk Observability Cloud even when a gateway was deployed, bypassing it.
-  This change ensures that histogram data is routed through the gateway when it is enabled.
+  When `gateway.enabled` and `featureGates.useControlPlaneMetricsHistogramData` are enabled, the agent's `signalfx/histograms` exporter now uses the gateway's SignalFx HTTP forwarder.
+  Forwarded requests bypass the gateway metrics pipeline, so its processors are not applied.
