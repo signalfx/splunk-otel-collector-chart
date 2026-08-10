@@ -938,8 +938,8 @@ gateway:
   # Recommended for large k8s clusters, disabled by default.
   enabled: false
 
-  # Forward the caller's `X-SF-Token` to Splunk Observability (via OTLP) and to the OpAMP
-  # HTTP forwarder egress. When false, `splunkObservability.accessToken` is used instead.
+  # Forward the caller's `X-SF-Token` to Splunk Observability.
+  # When false, `splunkObservability.accessToken` is used instead.
   tokenPassthrough: true
 
   # Gateway workload mode. Supported values: deployment, statefulset.
@@ -969,6 +969,12 @@ gateway:
       containerPort: 14250
       protocol: TCP
       enabled_for: [traces]
+    signalfx:
+      containerPort: 9943
+      protocol: TCP
+      # SignalFx metrics enabled in gateway for all telemetry types since there may be
+      # bundled metrics.
+      enabled_for: [metrics, traces, logs]
     zipkin:
       containerPort: 9411
       protocol: TCP

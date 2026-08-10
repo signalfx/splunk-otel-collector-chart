@@ -667,9 +667,9 @@ opamp/splunk_o11y:
 {{- end }}
 
 {{/*
-Common config for Splunk O11Y Ingest HTTP Forwarder extension
+Common config for Splunk O11Y OpAmp Ingest HTTP Forwarder extension
 */}}
-{{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
+{{- define "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" -}}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
 http_forwarder/opamp_splunk_o11y:
