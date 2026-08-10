@@ -8,24 +8,19 @@ import (
 	"testing"
 	"time"
 
+	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	"helm.sh/helm/v4/pkg/action"
-	"helm.sh/helm/v4/pkg/chart/loader"
-	"helm.sh/helm/v4/pkg/cli"
-	"helm.sh/helm/v4/pkg/kube"
-	"helm.sh/helm/v4/pkg/registry"
-	releasev1 "helm.sh/helm/v4/pkg/release/v1"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
 const (
-	redisReleaseName = "test-redis"
-	redisChartRepo   = "https://valkey.io/valkey-helm/"
-	redisChart       = "valkey"
+	redisDeploymentName = "test-redis"
+	redisManifestDir    = "testdata/valkey"
+	redisLabelSelector  = "app.kubernetes.io/instance=" + redisDeploymentName
 )
 
 // Env vars to control the test behavior:
@@ -39,7 +34,7 @@ func Test_Discovery(t *testing.T) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		teardown(t, testKubeConfig)
 	}
-	installRedisChart(t, testKubeConfig)
+	installRedisDeployment(t, testKubeConfig)
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
@@ -103,7 +98,7 @@ func assertRedisEntities(t *testing.T, sink *consumertest.LogsSink) {
 	podName, ok := entityAttrs.Get("k8s.pod.name")
 	assert.True(t, ok)
 	if ok {
-		assert.Regexp(t, `^test-redis-valkey-[a-z0-9]+-[a-z0-9]+$`, podName.AsString())
+		assert.Regexp(t, `^test-redis-[a-z0-9]+-[a-z0-9]+$`, podName.AsString())
 	}
 	assertAttr(t, entityAttrs, "discovery.status", "successful")
 }
@@ -165,59 +160,46 @@ func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
 	}, 5*time.Minute, 3*time.Second, "Missing expected redis metrics")
 }
 
-// installRedisChart deploys a Redis-compatible Valkey server with its official Helm chart.
-func installRedisChart(t *testing.T, kubeConfig string) {
+func installRedisDeployment(t *testing.T, kubeConfig string) {
 	t.Helper()
 	if os.Getenv("SKIP_SETUP") == "true" {
-		t.Log("Skipping redis chart installation as SKIP_SETUP is set to true")
+		t.Log("Skipping Redis-compatible deployment as SKIP_SETUP is set to true")
 		return
 	}
 
-	actionConfig := internal.InitHelmActionConfig(t, kubeConfig)
-	rc, err := registry.NewClient()
+	k8sClient, err := k8stest.NewK8sClient(kubeConfig)
 	require.NoError(t, err)
-	actionConfig.RegistryClient = rc
-	install := action.NewInstall(actionConfig)
-	install.Namespace = internal.DefaultNamespace
-	install.ReleaseName = redisReleaseName
-	install.RepoURL = redisChartRepo
-	install.Version = "0.11.0"
-	install.WaitStrategy = kube.StatusWatcherStrategy
-	install.Timeout = internal.HelmActionTimeout
-	hCli := cli.New()
-	hCli.KubeConfig = kubeConfig
-	chartPath, err := install.LocateChart(redisChart, hCli)
+	createdObjects, err := k8stest.CreateObjects(k8sClient, redisManifestDir)
 	require.NoError(t, err)
-	ch, err := loader.Load(chartPath)
-	require.NoError(t, err)
+	require.NotEmpty(t, createdObjects)
 
-	rel, err := install.Run(ch, map[string]any{
-		"auth": map[string]any{
-			"enabled": false,
-		},
-		"replica": map[string]any{
-			"enabled": false,
-		},
-	})
+	clientset, err := internal.GetKubeClient(kubeConfig)
 	require.NoError(t, err)
-	r, ok := rel.(*releasev1.Release)
-	require.Truef(t, ok, "expected *releasev1.Release, got %T", rel)
-	t.Logf("Helm chart installed. Release name: %s", r.Name)
+	internal.CheckPodsReady(
+		t,
+		clientset,
+		internal.DefaultNamespace,
+		redisLabelSelector,
+		2*time.Minute,
+		0,
+	)
 }
 
-func uninstallRedisChart(t *testing.T, kubeConfig string) {
+func uninstallRedisDeployment(t *testing.T, kubeConfig string) {
 	t.Helper()
-	uninstallAction := action.NewUninstall(internal.InitHelmActionConfig(t, kubeConfig))
-	uninstallAction.WaitStrategy = kube.StatusWatcherStrategy
-	uninstallAction.Timeout = internal.HelmActionTimeout
-	uninstallAction.IgnoreNotFound = true
-	_, err := uninstallAction.Run(redisReleaseName)
+	k8sClient, err := k8stest.NewK8sClient(kubeConfig)
 	require.NoError(t, err)
-	t.Logf("Helm release %q uninstalled", redisReleaseName)
+	internal.DeleteObject(t, k8sClient, `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-redis
+  namespace: default
+`)
 }
 
 func teardown(t *testing.T, kubeConfig string) {
 	t.Helper()
-	uninstallRedisChart(t, kubeConfig)
+	uninstallRedisDeployment(t, kubeConfig)
 	internal.ChartUninstall(t, kubeConfig)
 }
