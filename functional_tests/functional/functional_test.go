@@ -116,15 +116,14 @@ func setupSinks(t *testing.T) {
 	}
 }
 
-func deployCharts(t *testing.T, testKubeConfig string) {
+func deployCharts(
+	t *testing.T,
+	testKubeConfig string,
+	client *kubernetes.Clientset,
+	extensionsClient *clientset.Clientset,
+) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	extensionsClient, err := clientset.NewForConfig(kubeConfig)
-	require.NoError(t, err)
 
 	if requiresPrometheusResources(kubeTestEnv) {
 		deployPrometheusCRDs(t, extensionsClient)
@@ -178,7 +177,6 @@ func deployCharts(t *testing.T, testKubeConfig string) {
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
-	assert.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
@@ -215,14 +213,8 @@ func deployCharts(t *testing.T, testKubeConfig string) {
 	})
 }
 
-func deployTestResources(t *testing.T, testKubeConfig string) {
+func deployTestResources(t *testing.T, client *kubernetes.Clientset, dynamicClient dynamic.Interface) {
 	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
-	require.NoError(t, err)
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
@@ -444,11 +436,20 @@ func Test_Functions(t *testing.T) {
 	}
 
 	if !skipSetup {
-		deployCharts(t, testKubeConfig)
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		require.NoError(t, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+		extensionsClient, err := clientset.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+		dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+
+		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 		}
-		deployTestResources(t, testKubeConfig)
+		deployTestResources(t, client, dynamicClient)
 	} else {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	}
