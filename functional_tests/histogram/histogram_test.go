@@ -149,7 +149,10 @@ func runMetricsTest(t *testing.T, isHistogram bool, metricsSink *consumertest.Me
 		internal.WithMaxDatapointsPerMetric(1),
 	}
 	if isHistogram {
-		opts = append(opts, internal.WithHistogramExplicitBounds())
+		opts = append(opts,
+			internal.WithHistogramExplicitBounds(),
+			internal.WithScopeVersionRegex(internal.OtelCollectorVersionRegex),
+		)
 	}
 	if input.ServiceName == "kubernetes-apiserver" && !isHistogram {
 		// TODO: Replace this selector with a datapoints/include assertion in the YAML once

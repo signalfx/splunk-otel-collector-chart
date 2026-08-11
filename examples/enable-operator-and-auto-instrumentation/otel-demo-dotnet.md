@@ -27,7 +27,7 @@ To install the chart with the operator, set the following values with this Helm 
 This Helm install command deploys the chart to the current namespace, assumed to be the `default` namespace for this exercise.
 
 ```bash
-helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,certmanager.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
+helm install splunk-otel-collector -f ./my_values.yaml --set operatorcrds.install=true,operator.enabled=true,environment=dev splunk-otel-collector-chart/splunk-otel-collector
 ```
 
 #### 2.2 Verify all the OpenTelemetry resources (collector, operator, webhook, instrumentation) are deployed successfully

@@ -14,8 +14,6 @@
 #       env:
 #         - name: OTEL_RESOURCE_ATTRIBUTES
 #           value: "deployment.environment.name=dev"
-# certmanager:
-#   enabled: true
 # Output instrumentation.yaml:
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
