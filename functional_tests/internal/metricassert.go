@@ -31,9 +31,10 @@ type metricsAssertionConfig struct {
 	selectedNumberDatapoint        map[string]string
 	exactDatapointAttrs            map[string]struct{}
 	includeHistogramExplicitBounds bool
+	waitForSnapshotMatch           bool
 }
 
-// MetricsAssertionOption configures preprocessing before pmetricassert comparison.
+// MetricsAssertionOption configures snapshot selection and preprocessing.
 type MetricsAssertionOption func(*metricsAssertionConfig)
 
 const (
@@ -115,6 +116,13 @@ func WithScopeVersionRegex(pattern string) MetricsAssertionOption {
 	}
 }
 
+// WithWaitForSnapshotMatch retries live batches until one satisfies the assertion.
+func WithWaitForSnapshotMatch() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.waitForSnapshotMatch = true
+	}
+}
+
 // WithFirstDatapointOnly preserves old pmetrictest.IgnoreSubsequentDataPoints behavior.
 func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
@@ -166,6 +174,13 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	cfg := newMetricsAssertionConfig(opts...)
 	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
+	if cfg.waitForSnapshotMatch && !shouldUpdateExpectedResults() {
+		selected, assertErr := selectMetricSetByAssertionWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, assertionFile, cfg, timeout, interval)
+		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
+		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
+		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+		return
+	}
 
 	selected, exactMatch := selectMetricSetByCountsWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, timeout, interval)
 	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
@@ -182,6 +197,30 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	}
 
 	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+}
+
+func selectMetricSetByAssertionWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, assertionFile string, cfg metricsAssertionConfig, timeout, interval time.Duration) (*pmetric.Metrics, error) {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if selected := selectMetricSetByCounts(targetMetric, metricSink, wantResources, wantMetrics); selected != nil {
+			actual := prepareMetricsAssertion(*selected, cfg)
+			if err := pmetricassert.AssertMetrics(assertionFile, actual); err == nil {
+				t.Logf("Selected matching payload with target metric '%s': %d metrics, %d resources",
+					targetMetric, selected.MetricCount(), selected.ResourceMetrics().Len())
+				return selected, nil
+			}
+		}
+		time.Sleep(interval)
+	}
+
+	selected := richestMetricSet(targetMetric, metricSink)
+	if selected == nil {
+		return nil, nil
+	}
+	t.Logf("No matching payload (%d resources, %d metrics) for '%s' within %v; using best-effort fallback: %d metrics, %d resources",
+		wantResources, wantMetrics, targetMetric, timeout, selected.MetricCount(), selected.ResourceMetrics().Len())
+	actual := prepareMetricsAssertion(*selected, cfg)
+	return selected, pmetricassert.AssertMetrics(assertionFile, actual)
 }
 
 func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
