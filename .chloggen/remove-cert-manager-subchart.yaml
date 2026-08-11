@@ -1,6 +1,0 @@
-change_type: breaking
-component: chart
-note: Remove the deprecated cert-manager subchart.
-issues: [2533]
-subtext: |
-  cert-manager is no longer bundled with the Splunk OpenTelemetry Collector chart. Users with `certmanager.enabled=true` must migrate to a standalone cert-manager installation. Any saved `certmanager` values, including values under the legacy `cert-manager` schema key, must be removed before upgrading. See the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01570-to-01580) for migration details.

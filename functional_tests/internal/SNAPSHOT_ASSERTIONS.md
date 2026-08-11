@@ -3,7 +3,8 @@
 Use `internal.AssertMetricsSnapshot` for functional metric tests that only need
 metric identity, not values or timestamps. Volatile attributes are passed as
 keys and written as `<key>/exists: true`; patterned attributes can be written
-as `<key>/regex: <pattern>`.
+as `<key>/regex: <pattern>`. Scope versions can be matched by pattern with
+`WithScopeVersionRegex`.
 
 ```go
 assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_my_metrics_assertion.yaml")

@@ -1,7 +1,7 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package passthrough
+package gateway
 
 import (
 	"bytes"
@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	token   = "tokenPassthrough"
-	testDir = "testdata"
+	token = "tokenPassthrough"
 )
 
 // Env vars to control the test behavior:
@@ -28,7 +27,7 @@ const (
 func Test_TokenPassthrough(t *testing.T) {
 	testKubeConfig := getEnvVar(t, "KUBECONFIG")
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
-		teardown(t, testKubeConfig)
+		internal.ChartUninstall(t, testKubeConfig)
 	}
 
 	internal.SetupSignalFxAPIServer(t)
@@ -38,7 +37,7 @@ func Test_TokenPassthrough(t *testing.T) {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		teardown(t, testKubeConfig)
+		internal.ChartUninstall(t, testKubeConfig)
 	})
 
 	tests := []struct {
@@ -58,7 +57,7 @@ func Test_TokenPassthrough(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 			traceSink := internal.SetupOTLPTracesSinkWithToken(t, token)
-			installCollectorChart(t, testKubeConfig, tt.valuesTmpl)
+			internal.BasicCollectorChartInstall(t, testKubeConfig, tt.valuesTmpl)
 			t.Cleanup(func() {
 				if os.Getenv("SKIP_TEARDOWN") == "true" {
 					return
@@ -70,28 +69,6 @@ func Test_TokenPassthrough(t *testing.T) {
 			require.NotEmpty(t, traceSink.AllTraces(), "expected at least one trace")
 		})
 	}
-}
-
-func installCollectorChart(t *testing.T, kubeConfig, valuesTmpl string) {
-	t.Helper()
-	if os.Getenv("SKIP_SETUP") == "true" {
-		t.Log("Skipping collector chart installation as SKIP_SETUP is set to true")
-		return
-	}
-
-	hostEp := internal.HostEndpoint(t)
-	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesTmpl))
-	require.NoError(t, err)
-	internal.ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
-		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
-		"IngestURL": internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
-		"OTLPSink":  internal.HostPortHTTP(hostEp, internal.OTLPHTTPReceiverPort),
-	}, 0, internal.GetDefaultChartOptions())
-}
-
-func teardown(t *testing.T, kubeConfig string) {
-	t.Helper()
-	internal.ChartUninstall(t, kubeConfig)
 }
 
 func getEnvVar(t *testing.T, key string) string {
