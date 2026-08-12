@@ -4,6 +4,7 @@
 package k8sevents
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -13,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -196,6 +199,26 @@ metadata:
   name: test-redis
   namespace: default
 `)
+
+	clientset, err := internal.GetKubeClient(kubeConfig)
+	require.NoError(t, err)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // teardown can run after t.Context is canceled
+	defer cancel()
+	require.EventuallyWithT(t, func(ct *assert.CollectT) {
+		_, deploymentErr := clientset.AppsV1().Deployments(internal.DefaultNamespace).Get(
+			ctx,
+			redisDeploymentName,
+			metav1.GetOptions{},
+		)
+		assert.True(ct, k8serrors.IsNotFound(deploymentErr), "waiting for Redis-compatible deployment to be deleted: %v", deploymentErr)
+
+		pods, podsErr := clientset.CoreV1().Pods(internal.DefaultNamespace).List(ctx, metav1.ListOptions{
+			LabelSelector: redisLabelSelector,
+		})
+		if assert.NoError(ct, podsErr) {
+			assert.Empty(ct, pods.Items, "waiting for Redis-compatible pods to be deleted")
+		}
+	}, 2*time.Minute, 3*time.Second)
 }
 
 func teardown(t *testing.T, kubeConfig string) {
