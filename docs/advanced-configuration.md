@@ -822,12 +822,43 @@ Logs collection is configured using the `logsCollection` section in values.yaml.
 The experimental Logs-to-Metrics catalog creates alert-oriented count and sum metrics from structured Kubernetes
 container logs collected by the built-in `file_log` receiver. The source logs continue through the normal logs pipeline.
 The feature is disabled by default and requires the agent, container log collection, a logs destination, and a metrics
-destination.
+destination. The configuration interface is experimental, is not guaranteed to be stable, and may change at any time.
+
+To enable the complete catalog for all Kubernetes container logs from the built-in `file_log` receiver, set only:
 
 ```yaml
-featureGates:
-  enableLogsToMetrics: true
+logsToMetrics:
+  enabled: true
 ```
+
+The default empty `rules`, `scope.namespaces`, and `scope.workloads` lists enable all nine current rules—eight count
+rules and one sum rule—across that entire receiver input, subject to the annotation filtering described below. To
+canary selected rules for a specific workload, configure the optional selectors:
+
+```yaml
+logsToMetrics:
+  enabled: true
+  rules:
+    - app.log.error.count
+    - http.server.error.count
+  scope:
+    namespaces:
+      - checkout
+    workloads:
+      - checkout-api
+```
+
+`rules` accepts metric names from the catalog below. Selecting only the rules needed for the initial use case avoids
+evaluating the other rules and limits the initial metric time-series impact. `scope.namespaces` and `scope.workloads`
+are exact-match allowlists applied before field normalization and rule evaluation. Empty scope lists include all
+Kubernetes container logs. When both lists are configured, a log must match both. Workload names match Deployment,
+StatefulSet, DaemonSet, CronJob, Job, and ReplicaSet owners.
+
+The metricization branch also honors the chart's annotation-based container log filtering. With the default
+`logsCollection.containers.useSplunkIncludeAnnotation=false`, logs marked by a namespace or pod
+`splunk.com/exclude=true` annotation do not generate metrics. In opt-in mode, only logs marked by a namespace or pod
+`splunk.com/include=true` annotation generate metrics. This keeps generated metrics aligned with the source logs
+available in Splunk.
 
 The feature generates these metrics:
 
@@ -835,8 +866,6 @@ The feature generates these metrics:
 | --- | --- |
 | `app.log.error.count` | OTel ERROR-or-higher severity, or `severity_number`, `severity_text`, `severity`, or `level` that can be normalized to OTel severity |
 | `http.server.error.count` | Numeric `http.response.status_code` from 500 through 599 |
-| `k8s.event.warning.count` | `k8s.event.type=Warning`, or a Warning-severity record with `k8s.event.reason` |
-| `k8s.image_pull.failure.count` | `k8s.event.reason=ErrImagePull` or `ImagePullBackOff` |
 | `app.exception.unhandled.count` | Non-empty `exception.type` and boolean `exception.escaped=true` |
 | `app.authentication.failure.count` | `event.name=authentication` and `event.outcome=failure` |
 | `app.job.failure.count` | `event.name=job`, `event.outcome=failure`, and a non-empty bounded `job.type` |
@@ -845,10 +874,47 @@ The feature generates these metrics:
 | `app.log.record.count` | Every record collected by the built-in Kubernetes container `file_log` receiver |
 | `business.transaction.value` | Numeric `business.transaction.value`, `event.outcome=success`, bounded `business.transaction.type`, and `business.transaction.unit` or `business.transaction.currency` |
 
-JSON object bodies are parsed into log attributes for this dedicated branch. Existing structured log attributes take
-precedence over fields parsed from the body. Transaction type and unit values containing `|` are rejected. The planned
-`http.server.request.duration` histogram is not generated because the Collector does not include a supported
-histogram-capable log connector.
+Catalog field names are literal, case-sensitive, top-level log attribute keys. A dot is part of the key: for example,
+`"http.response.status_code": 500` matches, but `{"http": {"response": {"status_code": 500}}}` does not. A field can
+come from a pre-existing log attribute or from a top-level key in a JSON object body parsed by this branch. Existing
+log attributes take precedence over fields parsed from the body. JSON value types also matter: numeric fields must be
+JSON numbers and boolean fields must be JSON booleans, not quoted strings.
+
+For example, this container log body matches `app.log.error.count`:
+
+```json
+{"message":"payment failed","severity_text":"ERROR","error.type":"payment_declined"}
+```
+
+Each matching record increments a data point equivalent to the following (resource attributes and aggregation details
+are omitted):
+
+```yaml
+name: app.log.error.count
+value: 1
+attributes:
+  error.type: payment_declined
+  log.severity: ERROR
+```
+
+This body matches the successful business transaction sum rule:
+
+```json
+{"event.outcome":"success","business.transaction.value":49.95,"business.transaction.type":"checkout","business.transaction.unit":"USD"}
+```
+
+The record contributes `49.95` to a data point equivalent to:
+
+```yaml
+name: business.transaction.value
+value: 49.95
+attributes:
+  business.transaction.type: checkout
+  business.transaction.unit: USD
+```
+
+Transaction type and unit values containing `|` are rejected. The planned `http.server.request.duration` histogram is
+not generated because the Collector does not include a supported histogram-capable log connector.
 
 To control metric time-series cardinality, the generated metrics retain a workload-oriented resource allowlist and a
 small set of rule dimensions. Pod and node identity, container IDs, service instance IDs, raw routes, arbitrary labels,
@@ -857,10 +923,8 @@ metrics unless your Splunk product configuration explicitly categorizes them oth
 semantic dimensions such as `error.type`, `exception.type`, `job.type`, and `business.transaction.type` must come from
 bounded application vocabularies; the chart cannot infer or enforce an application-specific enumeration.
 
-The event rules only recognize Kubernetes Event fields that are serialized in a file-tailed container log. This feature
-does not query the Kubernetes API and does not replace cluster-wide Kubernetes Event collection. Generated metrics use
-the chart's existing metrics exporter and credentials, so a release sends them to the same Splunk organization and
-environment as its other metrics; per-record multi-organization routing is not supported.
+Generated metrics use the chart's existing metrics exporter and credentials, so a release sends them to the same Splunk
+organization and environment as its other metrics; per-record multi-organization routing is not supported.
 
 ### Add log files from Kubernetes host machines/volumes
 

@@ -110,14 +110,7 @@ processors:
         key: deployment.environment.name
   {{- end }}
 
-  {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
-  # Apply the final cardinality allowlist after gateway-side metric enrichment.
-  transform/logs_to_metrics_metrics:
-    error_mode: silent
-    metric_statements:
-      - keep_keys(resource.attributes, {{ include "splunk-otel-collector.logsToMetricsResourceAllowlist" . }}) where resource.attributes["splunk.logs_to_metrics"] == true
-      - delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true
-  {{- end }}
+  {{- include "splunk-otel-collector.logsToMetricsGatewayProcessors" . | nindent 2 }}
 
 exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
@@ -305,10 +298,7 @@ service:
         - resource/metrics
         {{- end }}
         {{- end }}
-        {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
-        # Keep this last so gateway enrichment cannot reintroduce unsafe dimensions.
-        - transform/logs_to_metrics_metrics
-        {{- end }}
+        {{- include "splunk-otel-collector.logsToMetricsGatewayMetricProcessors" . | nindent 8 }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

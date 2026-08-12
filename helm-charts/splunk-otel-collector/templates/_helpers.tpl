@@ -226,44 +226,6 @@ Whether logs enabled for any destination.
 {{- end -}}
 
 {{/*
-Whether the experimental file-log Logs-to-Metrics pipeline is enabled.
-*/}}
-{{- define "splunk-otel-collector.logsToMetricsEnabled" -}}
-{{- .Values.featureGates.enableLogsToMetrics -}}
-{{- end -}}
-
-{{/*
-Final resource attribute allowlist for log-derived metrics. The internal marker is removed by
-the last collector that handles the generated metrics.
-*/}}
-{{- define "splunk-otel-collector.logsToMetricsResourceAllowlist" -}}
-["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"]
-{{- end -}}
-
-{{/*
-Validate prerequisites for the experimental file-log Logs-to-Metrics pipeline.
-*/}}
-{{- define "splunk-otel-collector.validateLogsToMetrics" -}}
-{{- if .Values.featureGates.enableLogsToMetrics -}}
-  {{- if not .Values.agent.enabled -}}
-    {{- fail "featureGates.enableLogsToMetrics requires agent.enabled=true" -}}
-  {{- end -}}
-  {{- if eq .Values.distribution "eks/fargate" -}}
-    {{- fail "featureGates.enableLogsToMetrics is not supported with distribution=eks/fargate because the agent DaemonSet is unavailable" -}}
-  {{- end -}}
-  {{- if not .Values.logsCollection.containers.enabled -}}
-    {{- fail "featureGates.enableLogsToMetrics requires logsCollection.containers.enabled=true" -}}
-  {{- end -}}
-  {{- if ne (include "splunk-otel-collector.logsEnabled" .) "true" -}}
-    {{- fail "featureGates.enableLogsToMetrics requires a configured logs destination so source logs remain available" -}}
-  {{- end -}}
-  {{- if ne (include "splunk-otel-collector.metricsEnabled" .) "true" -}}
-    {{- fail "featureGates.enableLogsToMetrics requires a configured metrics destination" -}}
-  {{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Whether profiling data is enabled (applicable to Splunk Observability only).
 */}}
 {{- define "splunk-otel-collector.profilingEnabled" -}}

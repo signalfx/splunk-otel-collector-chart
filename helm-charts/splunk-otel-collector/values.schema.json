@@ -951,6 +951,61 @@
         }
       }
     },
+    "logsToMetrics": {
+      "description": "Experimental configuration for generating selected metrics from scoped Kubernetes container logs. This interface may change at any time.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Generate selected Logs-to-Metrics rules from Kubernetes container logs collected by the agent file_log receiver.",
+          "type": "boolean"
+        },
+        "rules": {
+          "description": "Metric rules to enable. An empty list enables every supported rule.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "app.log.error.count",
+              "http.server.error.count",
+              "app.exception.unhandled.count",
+              "app.authentication.failure.count",
+              "app.job.failure.count",
+              "app.retry.exhausted.count",
+              "app.request.throttled.count",
+              "app.log.record.count",
+              "business.transaction.value"
+            ]
+          }
+        },
+        "scope": {
+          "description": "Exact-match allowlists applied before rule evaluation. When both lists are set, logs must match both.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespaces": {
+              "description": "Kubernetes namespace names to include. An empty list includes every namespace.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "workloads": {
+              "description": "Kubernetes Deployment, StatefulSet, DaemonSet, CronJob, Job, or ReplicaSet names to include. An empty list includes every workload.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
     "image": {
       "description": "Docker image configuration.",
       "type": "object",
@@ -1549,12 +1604,6 @@
     "featureGates": {
       "description": "Helm Chart Feature Gates.",
       "type": "object",
-      "properties": {
-        "enableLogsToMetrics": {
-          "description": "Generate the supported Logs-to-Metrics catalog from Kubernetes container logs collected by the agent file_log receiver.",
-          "type": "boolean"
-        }
-      },
       "additionalProperties": true
     }
   },

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-to-metrics-fixture
+  namespace: logs-to-metrics-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logs-to-metrics-fixture
+  template:
+    metadata:
+      labels:
+        app: logs-to-metrics-fixture
+    spec:
+      containers:
+        - name: logs-to-metrics-fixture
+          image: busybox:1.37.0
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_ERROR_MARKER","severity_text":"ERROR","error.type":"payment_declined"}'
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_TRANSACTION_MARKER","event.outcome":"success","business.transaction.value":49.95,"business.transaction.type":"checkout","business.transaction.unit":"USD"}'
+              sleep 3600

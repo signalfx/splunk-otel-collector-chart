@@ -26,7 +26,7 @@ tests:
 
   - it: should render the dedicated file_log pipeline and both connectors when enabled
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -43,7 +43,8 @@ tests:
           value:
             - memory_limiter
             - k8s_attributes/logs_to_metrics
-            - resourcedetection
+            - filter/logs_to_metrics
+            - resource_detection
             - resource
             - transform/logs_to_metrics
       - equal:
@@ -61,9 +62,56 @@ tests:
           path: data.relay.service.pipelines.metrics.processors
           content: transform/logs_to_metrics_metrics
 
-  - it: should render all ten count metrics and no additional count metric
+  - it: should honor the default annotation-based exclusion filter
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"annotations": .processors."k8s_attributes/logs_to_metrics".extract.annotations, "filter": .processors."filter/logs_to_metrics".log_conditions})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.annotations
+          value:
+            - key: splunk.com/exclude
+              tag_name: splunk.com/exclude
+              from: namespace
+            - key: splunk.com/exclude
+              tag_name: splunk.com/exclude
+              from: pod
+      - equal:
+          path: data.relay.filter[0]
+          value: 'resource.attributes["splunk.com/exclude"] == "true"'
+
+  - it: should honor annotation-based opt-in filtering
+    set:
+      logsToMetrics.enabled: true
+      logsCollection.containers.useSplunkIncludeAnnotation: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"annotations": .processors."k8s_attributes/logs_to_metrics".extract.annotations, "filter": .processors."filter/logs_to_metrics".log_conditions})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.annotations
+          value:
+            - key: splunk.com/include
+              tag_name: splunk.com/include
+              from: namespace
+            - key: splunk.com/include
+              tag_name: splunk.com/include
+              from: pod
+      - equal:
+          path: data.relay.filter[0]
+          value: 'resource.attributes["splunk.com/include"] != "true"'
+
+  - it: should render all eight count metrics and no additional count metric
+    set:
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -73,11 +121,116 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "app.authentication.failure.count,app.exception.unhandled.count,app.job.failure.count,app.log.error.count,app.log.record.count,app.request.throttled.count,app.retry.exhausted.count,http.server.error.count,k8s.event.warning.count,k8s.image_pull.failure.count"
+          value: "app.authentication.failure.count,app.exception.unhandled.count,app.job.failure.count,app.log.error.count,app.log.record.count,app.request.throttled.count,app.retry.exhausted.count,http.server.error.count"
+
+  - it: should render only the selected count rules and connector
+    set:
+      logsToMetrics:
+        enabled: true
+        rules:
+          - app.log.error.count
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"connectors": (.connectors | keys | sort), "rules": (.connectors."count/logs_to_metrics".logs | keys), "log_exporters": .service.pipelines."logs/log_to_metrics".exporters, "metric_receivers": .service.pipelines.metrics.receivers})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.connectors
+          value:
+            - count/logs_to_metrics
+      - equal:
+          path: data.relay.rules
+          value:
+            - app.log.error.count
+      - equal:
+          path: data.relay.log_exporters
+          value:
+            - count/logs_to_metrics
+      - contains:
+          path: data.relay.metric_receivers
+          content: count/logs_to_metrics
+      - notContains:
+          path: data.relay.metric_receivers
+          content: sum/logs_to_metrics
+
+  - it: should omit the count connector when only the sum rule is selected
+    set:
+      logsToMetrics:
+        enabled: true
+        rules:
+          - business.transaction.value
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"connectors": (.connectors | keys | sort), "log_exporters": .service.pipelines."logs/log_to_metrics".exporters, "metric_receivers": .service.pipelines.metrics.receivers})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.connectors
+          value:
+            - sum/logs_to_metrics
+      - equal:
+          path: data.relay.log_exporters
+          value:
+            - sum/logs_to_metrics
+      - contains:
+          path: data.relay.metric_receivers
+          content: sum/logs_to_metrics
+      - notContains:
+          path: data.relay.metric_receivers
+          content: count/logs_to_metrics
+
+  - it: should filter by namespace and workload before rule evaluation
+    set:
+      logsToMetrics:
+        enabled: true
+        scope:
+          namespaces:
+            - checkout
+            - checkout-canary
+          workloads:
+            - checkout-api
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"filter": .processors."filter/logs_to_metrics", "metadata": .processors."k8s_attributes/logs_to_metrics".extract.metadata, "pipeline_processors": .service.pipelines."logs/log_to_metrics".processors})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.filter.error_mode
+          value: ignore
+      - equal:
+          path: data.relay.filter.log_conditions[0]
+          value: 'resource.attributes["splunk.com/exclude"] == "true"'
+      - equal:
+          path: data.relay.filter.log_conditions[1]
+          value: 'not (resource.attributes["k8s.namespace.name"] == "checkout" or resource.attributes["k8s.namespace.name"] == "checkout-canary")'
+      - equal:
+          path: data.relay.filter.log_conditions[2]
+          value: 'not (resource.attributes["k8s.deployment.name"] == "checkout-api" or resource.attributes["k8s.statefulset.name"] == "checkout-api" or resource.attributes["k8s.daemonset.name"] == "checkout-api" or resource.attributes["k8s.cronjob.name"] == "checkout-api" or resource.attributes["k8s.job.name"] == "checkout-api" or resource.attributes["k8s.replicaset.name"] == "checkout-api")'
+      - equal:
+          path: data.relay.pipeline_processors
+          value:
+            - memory_limiter
+            - k8s_attributes/logs_to_metrics
+            - filter/logs_to_metrics
+            - resource_detection
+            - resource
+            - transform/logs_to_metrics
+      - contains:
+          path: data.relay.metadata
+          content: k8s.job.name
+      - contains:
+          path: data.relay.metadata
+          content: k8s.replicaset.name
 
   - it: should render the numeric business transaction sum
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -95,7 +248,7 @@ tests:
 
   - it: should restore public business transaction attributes after the sum connector
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -115,7 +268,7 @@ tests:
 
   - it: should normalize integral JSON severity and HTTP status fields to OTel integer types
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -132,7 +285,7 @@ tests:
 
   - it: should keep the request-duration histogram hidden
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - notMatchRegex:
           path: data["relay"]
@@ -140,7 +293,7 @@ tests:
 
   - it: should use one explicit predicate for every conditional count rule
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -167,14 +320,10 @@ tests:
               conditions: 1
             - name: http.server.error.count
               conditions: 1
-            - name: k8s.event.warning.count
-              conditions: 1
-            - name: k8s.image_pull.failure.count
-              conditions: 1
 
   - it: should preserve source-log delivery while metricizing only file_log
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -198,7 +347,7 @@ tests:
 
   - it: should keep only safe resource identity plus transient routing attributes before conversion
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -212,7 +361,7 @@ tests:
 
   - it: should apply the final cardinality allowlist last and remove its marker for direct export
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -232,7 +381,7 @@ tests:
 
   - it: should omit unsafe route, operation, policy, and identity metric dimensions
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -249,15 +398,13 @@ tests:
             - http.request.method
             - http.response.status_code
             - job.type
-            - k8s.event.reason
-            - k8s.event.reporting_controller
             - log.severity
             - splunk.logs_to_metrics.business.transaction.type_unit
 
   - it: should retain the configured environment on the metricization branch
     set:
       environment: production
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -272,12 +419,12 @@ tests:
   - it: should route generated metrics through the agent gateway exporter
     set:
       gateway.enabled: true
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
         - eval
-        - '.data.relay = (.data.relay | from_yaml | {"pipeline": .service.pipelines.metrics, "statements": .processors."transform/logs_to_metrics_metrics".metric_statements})'
+        - '.data.relay = (.data.relay | from_yaml | {"pipeline": .service.pipelines.metrics, "log_pipeline": .service.pipelines."logs/log_to_metrics", "annotation_filter": .processors."filter/logs_to_metrics".log_conditions[0], "statements": .processors."transform/logs_to_metrics_metrics".metric_statements})'
         - "-"
     asserts:
       - contains:
@@ -286,6 +433,12 @@ tests:
       - contains:
           path: data.relay.pipeline.receivers
           content: sum/logs_to_metrics
+      - contains:
+          path: data.relay.log_pipeline.processors
+          content: filter/logs_to_metrics
+      - equal:
+          path: data.relay.annotation_filter
+          value: 'resource.attributes["splunk.com/exclude"] == "true"'
       - contains:
           path: data.relay.pipeline.exporters
           content: otlp_grpc
@@ -305,7 +458,7 @@ tests:
       splunkPlatform:
         metricsEnabled: true
         metricsIndex: metrics
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -323,7 +476,7 @@ tests:
   - it: should coexist with the SecureApp routing connector
     set:
       splunkObservability.secureAppEnabled: true
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
@@ -341,26 +494,26 @@ tests:
   - it: should fail when the agent is disabled
     set:
       agent.enabled: false
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - failedTemplate:
-          errorPattern: "enableLogsToMetrics requires agent.enabled=true"
+          errorPattern: "logsToMetrics.enabled requires agent.enabled=true"
 
   - it: should fail on EKS Fargate where the agent DaemonSet is unavailable
     set:
       distribution: eks/fargate
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - failedTemplate:
-          errorPattern: "enableLogsToMetrics is not supported with distribution=eks/fargate"
+          errorPattern: "logsToMetrics.enabled is not supported with distribution=eks/fargate"
 
   - it: should fail when container file-log collection is disabled
     set:
       logsCollection.containers.enabled: false
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - failedTemplate:
-          errorPattern: "enableLogsToMetrics requires logsCollection.containers.enabled=true"
+          errorPattern: "logsToMetrics.enabled requires logsCollection.containers.enabled=true"
 
   - it: should fail without a source-log destination
     set:
@@ -370,10 +523,10 @@ tests:
         logsEnabled: true
         metricsEnabled: false
         tracesEnabled: false
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - failedTemplate:
-          errorPattern: "enableLogsToMetrics requires a configured logs destination"
+          errorPattern: "logsToMetrics.enabled requires a configured logs destination"
 
   - it: should fail without a metrics destination
     set:
@@ -385,14 +538,24 @@ tests:
         tracesEnabled: true
         profilingEnabled: false
         secureAppEnabled: false
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     asserts:
       - failedTemplate:
-          errorPattern: "enableLogsToMetrics requires a configured metrics destination"
+          errorPattern: "logsToMetrics.enabled requires a configured metrics destination"
 
-  - it: should reject a non-boolean feature-gate value
+  - it: should reject a non-boolean enabled value
     set:
-      featureGates.enableLogsToMetrics: enabled
+      logsToMetrics.enabled: enabled
     asserts:
       - failedTemplate:
-          errorPattern: "/featureGates/enableLogsToMetrics"
+          errorPattern: "/logsToMetrics/enabled"
+
+  - it: should reject a Kubernetes event rule
+    set:
+      logsToMetrics:
+        enabled: true
+        rules:
+          - k8s.event.warning.count
+    asserts:
+      - failedTemplate:
+          errorPattern: "/logsToMetrics/rules/0"

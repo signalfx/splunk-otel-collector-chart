@@ -27,7 +27,7 @@ tests:
 
   - it: should prune generated metric resources last and remove the routing marker
     set:
-      featureGates.enableLogsToMetrics: true
+      logsToMetrics.enabled: true
     postRenderer:
       cmd: yq
       args:
