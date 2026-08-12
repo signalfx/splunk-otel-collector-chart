@@ -60,6 +60,24 @@ func GetDefaultChartOptions() ChartOptions {
 	}
 }
 
+func BasicCollectorChartInstall(t *testing.T, kubeConfig, valuesTmpl string) {
+	t.Helper()
+	if os.Getenv("SKIP_SETUP") == "true" {
+		t.Log("Skipping collector chart installation as SKIP_SETUP is set to true")
+		return
+	}
+
+	hostEp := HostEndpoint(t)
+	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesTmpl))
+	require.NoError(t, err)
+	ChartInstallOrUpgrade(t, kubeConfig, valuesFile, map[string]any{
+		"ApiURL":    HostPortHTTP(hostEp, SignalFxAPIPort),
+		"EventsURL": HostPortHTTP(hostEp, OTLPHTTPReceiverPort),
+		"IngestURL": HostPortHTTP(hostEp, SignalFxReceiverPort),
+		"OTLPSink":  HostPortHTTP(hostEp, OTLPHTTPReceiverPort),
+	}, 0, GetDefaultChartOptions())
+}
+
 func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile string, replacements map[string]any, minReadyTime time.Duration, options ChartOptions) {
 	valuesBytes, err := os.ReadFile(valuesFile)
 	require.NoError(t, err)
@@ -125,7 +143,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 	require.NoError(t, err)
 
 	// Wait for pods to be ready for at least minReadyTime
-	clientset, err := getKubeClient(testKubeConfig)
+	clientset, err := GetKubeClient(testKubeConfig)
 	require.NoError(t, err)
 	labelSelector := "release=" + options.ChartReleaseName
 	CheckPodsReady(t, clientset, options.ChartNamespace, labelSelector, options.ChartTimeout, minReadyTime)
@@ -175,7 +193,8 @@ func parseCollectorImage(image string) (string, string) {
 	return repo, tag
 }
 
-func getKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
+// GetKubeClient returns a Kubernetes clientset configured with kubeConfig.
+func GetKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
 		return nil, err

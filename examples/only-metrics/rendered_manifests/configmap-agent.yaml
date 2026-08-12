@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.156.0
+    helm.sh/chart: splunk-otel-collector-0.158.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.156.0"
+    app.kubernetes.io/version: "0.158.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.156.0
+    chart: splunk-otel-collector-0.158.0
     release: default
 data:
   relay: |
@@ -145,7 +145,7 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - system
@@ -336,7 +336,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - nop
@@ -346,7 +346,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - host_metrics
@@ -358,7 +358,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/agent
         metrics/histograms:
@@ -368,7 +368,7 @@ data:
           - memory_limiter
           - batch
           - resource/add_agent_k8s
-          - resourcedetection
+          - resource_detection
           - resource
           receivers:
           - receiver_creator

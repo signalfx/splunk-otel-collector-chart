@@ -227,7 +227,7 @@ agent:
 
 ## Deployment environment
 
-Optional `environment` parameter can be used to specify an additional `deployment.environment`
+Optional `environment` parameter can be used to specify an additional `deployment.environment.name`
 attribute that will be added to all the telemetry data. It will help Splunk Observability
 users to investigate data coming from different source separately.
 Value examples: development, staging, production, etc.
@@ -403,7 +403,7 @@ distribution: eks/auto-mode
 ```
 
 `EKS Auto Mode` restricts access to IMDS (Instance Metadata Service) so that only pods running in the host network namespace can access it.
-This causes the `ec2` and `eks` detectors in the `resourcedetection` processor to fail to collect attributes from the metadata server.
+This causes the `ec2` and `eks` detectors in the `resource_detection` processor to fail to collect attributes from the metadata server.
 
 In addition to IMDS, we have introduced a new method to the [eks detector](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#amazon-eks)
 that extracts the required attributes using the Kubernetes API server and EC2 API.
@@ -413,7 +413,7 @@ This distribution will operate similarly to the `eks` distribution but with the 
 
 By Default and to reduce friction, the helm chart attempts to configure the cluster receiver and the agent to run in host network namespace.
 This approach eliminates the need to configure `Pod Identity`, however, if user explicitly sets `agent.hostNetwork`
-or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resourcedetection`
+or `clusterReceiver.hostNetwork` to `false`, the chart will be installed with a warning and the `eks` detector in the `resource_detection`
 processor will fail unless `Pod Identity` is enabled and configured.
 
 **Note**: If you are deploying OTEL as Gateway in the EKS Auto Mode cluster, it's required to enable and configure `Pod Identity`.
@@ -554,6 +554,30 @@ can still be collected via `featureGates.enableEKSApiServerMetrics` (enabled by 
 configures a Prometheus receiver in the cluster receiver that scrapes the Kubernetes API server
 endpoint. The scrape interval for this receiver is controlled by
 `agent.controlPlaneMetrics.scrapeInterval` (default: `10s`).
+
+### Tuning agent memory for control plane metrics
+
+Control plane metrics can create a large Prometheus series cache, particularly when histogram
+collection is enabled. Unless overridden, the Splunk Collector uses `GOGC=400` and sets Go's soft
+memory limit to 90% of `agent.resources.limits.memory`—450 MiB for the chart's default 500 MiB
+limit. An explicit `GOMEMLIMIT` overrides this derived value. Raising the pod limit also raises the
+default soft limit and can increase the working set; consider lowering `GOGC` before increasing the
+limit further.
+
+The chart deploys one agent DaemonSet, so these runtime settings apply to agents on worker nodes
+as well as control plane nodes. Start with `GOGC=100` and verify agent CPU and telemetry throughput
+on busy worker nodes before trying a lower value.
+
+```yaml
+agent:
+  extraEnvs:
+    - name: GOGC
+      value: "100"
+```
+
+If 10-second resolution is not required, increasing
+`agent.controlPlaneMetrics.scrapeInterval` can also reduce control plane scrape CPU and data
+volume. It does not have the same effect on the Prometheus series cache or on worker agents.
 
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).

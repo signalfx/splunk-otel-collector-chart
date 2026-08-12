@@ -1,7 +1,7 @@
 apiVersion: v2
 name: splunk-otel-collector
-version: 0.156.0
-appVersion: 0.156.0
+version: 0.158.0
+appVersion: 0.158.0
 description: Splunk OpenTelemetry Collector for Kubernetes
 icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
 type: application
@@ -23,17 +23,12 @@ dependencies:
   # Subchart Notes:
   # - Avoid uppercase letters in aliases, they cause install failure due to subchart resource naming
   # - Avoid hyphen characters in aliases, they introduce template rendering complications (https://github.com/helm/helm/issues/2192)
-  - name: cert-manager
-    version: v1.19.5
-    alias: certmanager
-    repository: https://charts.jetstack.io
-    condition: certmanager.enabled
   - name: opentelemetry-operator-crds
     version: 0.0.7
     alias: operatorcrds
     condition: operatorcrds.install
   - name: opentelemetry-operator
-    version: 0.117.0
+    version: 0.120.2
     alias: operator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: operator.enabled
@@ -43,7 +38,7 @@ dependencies:
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: obi.enabled
   - name: opentelemetry-target-allocator
-    version: 0.130.0
+    version: 0.156.0
     alias: targetallocator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: targetallocator.enabled

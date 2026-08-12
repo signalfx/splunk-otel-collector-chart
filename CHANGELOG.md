@@ -4,6 +4,87 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.158.0] - 2026-08-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.158.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.158.0).
+
+### 🛑 Breaking changes 🛑
+
+- `agent, clusterReceiver, gateway`: Use `deployment.environment.name` instead of the deprecated `deployment.environment` resource attribute. ([#2520](https://github.com/signalfx/splunk-otel-collector-chart/pull/2520))
+  The optional `environment` value now adds `deployment.environment.name` to collected telemetry and Collector internal telemetry.
+  To restore the deprecated name, see the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01570-to-01580)
+  for details.
+  
+- `chart`: Remove the deprecated cert-manager subchart. ([#2533](https://github.com/signalfx/splunk-otel-collector-chart/pull/2533))
+  cert-manager is no longer bundled with the Splunk OpenTelemetry Collector chart. Users with `certmanager.enabled=true` must migrate to a standalone cert-manager installation. Any saved `certmanager` values, including values under the legacy `cert-manager` schema key, must be removed before upgrading. See the [upgrade guidelines](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01570-to-01580) for migration details.
+  
+- `chart`: Rename all `resourcedetection` processor references to `resource_detection` ([#2529](https://github.com/signalfx/splunk-otel-collector-chart/pull/2529))
+  The `resourcedetection` alias has been deprecated in favor of `resource_detection` in the chart-generated configuration.
+  Any Helm values or overrides that reference `resourcedetection` (for example, `*.config.processors.resourcedetection`
+  or pipelines that list `resourcedetection` as a processor) must be updated to use `resource_detection`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent, clusterReceiver, gateway`: Add `deployment.environment.name` resource attribute to Collector internal telemetry when environment is configured. ([#2520](https://github.com/signalfx/splunk-otel-collector-chart/pull/2520))
+- `gateway`: Enable SignalFx telemetry forwarding on port 9943 ([#2513](https://github.com/signalfx/splunk-otel-collector-chart/pull/2513))
+  This adds a transparent HTTP forwarder for SignalFx exporters explicitly configured to use the gateway.
+  It does not send requests through gateway service pipelines, so gateway processors are not applied.
+  
+- `operator`: Bump java-csa to v2.30.0 in helm-charts/splunk-otel-collector/values.yaml ([#2535](https://github.com/signalfx/splunk-otel-collector-chart/pull/2535))
+- `operator`: Bump java to v2.30.0 in helm-charts/splunk-otel-collector/values.yaml ([#2534](https://github.com/signalfx/splunk-otel-collector-chart/pull/2534))
+- `operator`: Bump operator to 0.120.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#2538](https://github.com/signalfx/splunk-otel-collector-chart/pull/2538))
+- `operator`: Bump python-secureapp to v2.12.1-secureapp in helm-charts/splunk-otel-collector/values.yaml ([#2537](https://github.com/signalfx/splunk-otel-collector-chart/pull/2537))
+
+### 🧰 Bug fixes 🧰
+
+- `agent`: Fix `signalfx/histograms` exporter on agent to route through the gateway when gateway is enabled. ([#2553](https://github.com/signalfx/splunk-otel-collector-chart/pull/2553))
+  When `gateway.enabled` and `featureGates.useControlPlaneMetricsHistogramData` are enabled, the agent's `signalfx/histograms` exporter now uses the gateway's SignalFx HTTP forwarder.
+  Forwarded requests bypass the gateway metrics pipeline, so its processors are not applied.
+  
+
+## [0.157.0] - 2026-07-28
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.157.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.157.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Rename all `kubeletstats` receiver references to `kubelet_stats` ([#2515](https://github.com/signalfx/splunk-otel-collector-chart/pull/2515))
+  The `kubeletstats` alias has been deprecated in favor of `kubelet_stats` in the chart-generated configuration.
+  Any Helm values or overrides that reference `kubeletstats` (for example, `*.config.receivers.kubeletstats`
+  or pipelines that list `kubeletstats` as a receiver) must be updated to use `kubelet_stats`.
+  The chart will fail to be installed or upgraded if the deprecated alias is still referenced.
+  
+
+### 💡 Enhancements 💡
+
+- `agent`: Enable compaction by default for the persistent queue file storage extension. ([#79002](https://github.com/signalfx/splunk-otel-collector-chart/pull/79002))
+  Prevents unbounded disk growth after traffic spikes. Compaction triggers when the file is ≥200 MiB and live data has dropped to ≤100 MiB and on collector start.
+  Override configuration via `agent.config.extensions.file_storage/persistent_queue.compaction`.
+  
+- `chart`: Set mounted Splunk Secret files to mode `0440` by default and set `fsGroup: 999` on Linux Collector pods. Both settings remain configurable. ([#2441](https://github.com/signalfx/splunk-otel-collector-chart/pull/2441))
+- `chart`: Add the Splunk access token header to the default OpAMP HTTP forwarder egress config. ([#4437](https://github.com/signalfx/splunk-otel-collector-chart/pull/4437))
+- `chart`: Add an opt-in setting to read Splunk tokens from mounted Secret files. ([#2441](https://github.com/signalfx/splunk-otel-collector-chart/pull/2441))
+  Enable `featureGates.mountSplunkSecretAsFile` to use this mode with either a chart-created or existing Secret. This option is disabled by default and is not currently supported with `distribution: gke/autopilot`.
+  
+- `chart`: Add `agent.tokenPassthrough` and `gateway.tokenPassthrough` options to enable passthrough of the client's authentication token to Splunk Observability and OpAMP. ([#2509](https://github.com/signalfx/splunk-otel-collector-chart/pull/2509))
+  When enabled, the collector propagates the caller's `X-SF-Token` to Splunk Observability
+  (via `headers_setter`) and to the OpAMP HTTP forwarder egress. Defaults preserve today's
+  behavior: `agent.tokenPassthrough=false` and `gateway.tokenPassthrough=true`.
+  
+- `chart`: Bump TargetAllocator to 0.156.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2503](https://github.com/signalfx/splunk-otel-collector-chart/pull/2503))
+- `chart`: Bump obi to 0.11.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2510](https://github.com/signalfx/splunk-otel-collector-chart/pull/2510))
+- `operator`: Bump dotnet to v1.15.0 in helm-charts/splunk-otel-collector/values.yaml ([#2518](https://github.com/signalfx/splunk-otel-collector-chart/pull/2518))
+- `operator`: Bump java-csa to v2.29.0 in helm-charts/splunk-otel-collector/values.yaml ([#2485](https://github.com/signalfx/splunk-otel-collector-chart/pull/2485))
+- `operator`: Bump nodejs to v4.10.0 in helm-charts/splunk-otel-collector/values.yaml ([#2517](https://github.com/signalfx/splunk-otel-collector-chart/pull/2517))
+- `operator`: Bump operator to 0.120.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2500](https://github.com/signalfx/splunk-otel-collector-chart/pull/2500))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Allow original OpenTelemetry subchart names in values.schema.json validation. ([#2493](https://github.com/signalfx/splunk-otel-collector-chart/pull/2493))
+- `chart`: Pin Linux-only workloads to Linux nodes, disable service account token mounting for the secret validation hook, and reject Windows workloads on EKS Fargate. ([#2522](https://github.com/signalfx/splunk-otel-collector-chart/pull/2522))
+
 ## [0.156.0] - 2026-07-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.156.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.156.0).

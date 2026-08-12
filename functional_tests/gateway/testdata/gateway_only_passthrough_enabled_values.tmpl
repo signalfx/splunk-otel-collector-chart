@@ -1,0 +1,27 @@
+splunkObservability:
+   realm:       CHANGEME
+   accessToken: gatewayToken
+   apiUrl: {{ .ApiURL }}
+   ingestUrl: {{ .IngestURL }}
+
+clusterName: test-cluster
+
+agent:
+  enabled: false
+
+gateway:
+  enabled: true
+  tokenPassthrough: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  config:
+    extensions:
+      http_forwarder/o11y_ingest:
+        egress:
+          endpoint: {{ .IngestURL }}
+
+clusterReceiver:
+  enabled: false

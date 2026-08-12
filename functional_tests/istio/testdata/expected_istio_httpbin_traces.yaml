@@ -37,7 +37,7 @@ resourceSpans:
         - key: k8s.cluster.name
           value:
             stringValue: dev-operator
-        - key: deployment.environment
+        - key: deployment.environment.name
           value:
             stringValue: dev
     schemaUrl: https://opentelemetry.io/schemas/1.38.0

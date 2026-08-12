@@ -1,5 +1,95 @@
 # Upgrade guidelines
 
+## 0.157.0 to 0.158.0
+
+### Deployment environment resource attribute renamed
+
+When the optional `environment` value is set, the chart now emits the stable
+`deployment.environment.name` resource attribute instead of the deprecated
+`deployment.environment` attribute. The value is also added to the agent, gateway,
+and cluster receiver `service.telemetry.resource.attributes`, so Collector's
+internal telemetry now includes the deployment environment.
+
+If `deployment.environment` is still required, use Collector configuration overrides to
+restore the deprecated name. Keep `environment` set so the chart continues to configure the
+attribute and applicable pipeline references, then override `resource/add_environment` and
+`service.telemetry.resource.attributes` for each enabled component. For example:
+
+```yaml
+environment: production
+
+agent:
+  config:
+    processors:
+      resource/add_environment:
+        attributes:
+          - action: insert
+            key: deployment.environment
+            value: production
+    service:
+      telemetry:
+        resource:
+          attributes:
+            - name: deployment.environment
+              value: production
+            # Copy rest of internal telemetry resource attributes here
+```
+
+Because overriding `service.telemetry.resource.attributes` replaces the
+complete list, preserve all existing attributes and change only `deployment.environment.name`
+to `deployment.environment`. Use `helm template`
+to render the chart using the same value arguments as your install command,
+then extract the resource section for each enabled component. For example,
+for the agent component:
+
+```bash
+helm template my-splunk-otel-collector --values my_values.yaml splunk-otel-collector-chart/splunk-otel-collector --show-only templates/configmap-agent.yaml | yq '.data.relay | from_yaml | .service.telemetry.resource'
+```
+
+Use `templates/configmap-gateway.yaml` for the gateway and
+`templates/configmap-cluster-receiver.yaml` for the cluster receiver. Copy the
+complete output under the corresponding `<component>.config.service.telemetry.resource`
+section and change only the `deployment.environment.name` entry to `deployment.environment`.
+
+### cert-manager subchart is removed
+
+The deprecated cert-manager subchart and the top-level `certmanager` values have
+been removed. The operator still supports certificates from a separately managed
+cert-manager installation through `operator.admissionWebhooks.certManager`.
+Deployments using the default Helm-generated operator webhook certificate do not
+need to install cert-manager.
+
+If `certmanager.enabled=true` in your current release, migrate to a standalone
+cert-manager installation before upgrading. Follow the
+[standalone cert-manager migration steps](#migration-steps) while the Splunk
+OpenTelemetry Collector chart is still at version 0.157.0. Transfer any required
+settings under `certmanager.*` to the standalone `jetstack/cert-manager` release.
+
+The removed `certmanager` key is no longer accepted by the chart's values schema.
+Do not use `--reuse-values` for this upgrade if the release's saved values contain
+that key. Export the current user-supplied values and remove the entire
+`certmanager` block:
+
+```bash
+helm get values <release> \
+  --namespace <namespace> \
+  --output yaml > values-0.158.0.yaml
+```
+
+Then upgrade with the cleaned values file:
+
+```bash
+helm upgrade <release> splunk-otel-collector-chart/splunk-otel-collector \
+  --namespace <namespace> \
+  --reset-values \
+  --values values-0.158.0.yaml
+```
+
+If the release values are managed in source control, remove the `certmanager`
+block there and use that values file instead. Keep
+`operator.admissionWebhooks.certManager.enabled=true` when the operator should
+continue using the standalone cert-manager installation.
+
 ## 0.154.0 to 0.155.0
 
 ### cert-manager subchart is deprecated
@@ -113,9 +203,8 @@ This migration relies on the cert-manager CRDs being retained. Do not change
 cert-manager release. Deleting cert-manager CRDs also deletes cert-manager
 custom resources, including the operator webhook `Issuer` and `Certificate`.
 
-If your existing values use the deprecated
-[hook workaround](docs/auto-instrumentation-install.md#option-2-deploy-cert-manager-and-the-operator-together-deprecated)
-with `certificateAnnotations` or `issuerAnnotations`, the `--reuse-values`
+If your existing values use the deprecated hook workaround with
+`certificateAnnotations` or `issuerAnnotations`, the `--reuse-values`
 upgrade keeps those annotations during the migration. Helm may delete and
 recreate the operator webhook `Certificate` and `Issuer` during that upgrade.
 This is expected. The webhook serving Secret normally remains in place, and the

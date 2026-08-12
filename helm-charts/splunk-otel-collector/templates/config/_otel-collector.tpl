@@ -5,13 +5,21 @@ The values can be overridden in .Values.gateway.config
 {{- define "splunk-otel-collector.gatewayConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
   health_check:
     endpoint: 0.0.0.0:13133
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   http_forwarder:
     egress:
       endpoint: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+  http_forwarder/o11y_ingest:
+    ingress:
+      endpoint: 0.0.0.0:9943
+      include_metadata: {{ .Values.gateway.tokenPassthrough }}
+    egress:
+      endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+      auth:
+        authenticator: headers_setter
   {{- end }}
 
 
@@ -75,7 +83,7 @@ processors:
   {{- include "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" . | nindent 2 }}
   {{- end }}
 
-  # It's important to put this processor after resourcedetection to make sure that
+  # It's important to put this processor after resource_detection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
   resource/add_cluster_name:
@@ -99,7 +107,7 @@ processors:
     attributes:
       - action: insert
         value: {{ .Values.environment }}
-        key: deployment.environment
+        key: deployment.environment.name
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
@@ -192,6 +200,10 @@ service:
           value: otel-collector
         - name: otelcol.service.mode
           value: gateway
+        {{- if .Values.environment }}
+        - name: deployment.environment.name
+          value: {{ .Values.environment }}
+        {{- end }}
         - name: k8s.node.name
           value: "${K8S_NODE_NAME}"
         - name: k8s.pod.name
@@ -228,6 +240,7 @@ service:
     - headers_setter
     - http_forwarder
     - http_forwarder/opamp_splunk_o11y
+    - http_forwarder/o11y_ingest
     - opamp/splunk_o11y
     {{- end }}
 
@@ -243,7 +256,7 @@ service:
         - k8s_attributes
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -271,7 +284,7 @@ service:
         - memory_limiter
         - batch
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -280,7 +293,7 @@ service:
         - resource/add_custom_attrs
         {{- end }}
         {{/*
-        The attribute `deployment.environment` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
+        The attribute `deployment.environment.name` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
         More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
         */}}
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
@@ -325,7 +338,7 @@ service:
         - memory_limiter
         - k8s_attributes
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
@@ -378,7 +391,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
         {{- end }}

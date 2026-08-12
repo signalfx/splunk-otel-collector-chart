@@ -23,6 +23,8 @@ import (
 const (
 	EVENT_SEARCH_QUERY_STRING  = "| search "
 	METRIC_SEARCH_QUERY_STRING = "| mpreview "
+	splunkIngestionTimeout     = 90 * time.Second
+	splunkSearchInterval       = 5 * time.Second
 )
 
 func Test_Functions(t *testing.T) {
@@ -51,9 +53,9 @@ func testVerifyLogsIngestionUsingAnnotations(t *testing.T) {
 			fmt.Printf("Test: %s - %s", tt.name, tt.label)
 			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.labels.app::" + tt.label
 			startTime := "-1h@h"
-			events := CheckEventsFromSplunk(searchQuery, startTime)
+			events := waitForExactEventCount(t, searchQuery, startTime, tt.expectedNoOfEvents)
 			fmt.Println(" =========>  Events received: ", len(events))
-			assert.Equal(t, len(events), tt.expectedNoOfEvents)
+			assert.Equal(t, tt.expectedNoOfEvents, len(events))
 		})
 	}
 }
@@ -74,9 +76,9 @@ func testVerifyCustomMetadataFieldsAnnotations(t *testing.T) {
 			fmt.Printf("Testing custom metadata annotation label=%s value=%s expected=%d event(s)", tt.label, tt.value, tt.expectedNoOfEvents)
 			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.labels.app::" + tt.label + " customField::" + tt.value
 			startTime := "-1h@h"
-			events := CheckEventsFromSplunk(searchQuery, startTime)
+			events := waitForExactEventCount(t, searchQuery, startTime, tt.expectedNoOfEvents)
 			fmt.Println(" =========>  Events received: ", len(events))
-			assert.Equal(t, len(events), tt.expectedNoOfEvents)
+			assert.Equal(t, tt.expectedNoOfEvents, len(events))
 		})
 	}
 }
@@ -121,6 +123,9 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			addNamespaceAnnotation(t, client, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue, "")
+			t.Cleanup(func() {
+				removeAllNamespaceAnnotations(t, client, namespace)
+			})
 			index := defaultIndex
 			if tt.annotationIndexValue != "" {
 				index = tt.annotationIndexValue
@@ -131,21 +136,18 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 			}
 			if tt.usePodAnnotations {
 				addPodAnnotation(t, client, podName, namespace, podAnnotationIndex, podAnnotationSourcetype, "")
+				t.Cleanup(func() {
+					removeAllPodsAnnotations(t, client, podName, namespace)
+				})
 				index = podAnnotationIndex
 				sourcetype = podAnnotationSourcetype
 			}
-			time.Sleep(20 * time.Second)
 			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.namespace.name\"=" + namespace + " \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
-			startTime := "-15s@s"
-			events := CheckEventsFromSplunk(searchQuery, startTime)
+			startTime := fmt.Sprintf("%d", time.Now().Unix())
+			events := waitForMinimumEventCount(t, searchQuery, startTime, 2)
 			fmt.Println(" =========>  Events received: ", len(events))
-			assert.Greater(t, len(events), 1)
-
-			removeAllNamespaceAnnotations(t, client, namespace)
-			if tt.usePodAnnotations {
-				removeAllPodsAnnotations(t, client, podName, namespace)
-			}
+			assert.GreaterOrEqual(t, len(events), 2)
 		})
 	}
 }
@@ -177,7 +179,9 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			addPodAnnotation(t, client, podName, namespace, tt.annotationIndexValue, tt.annotationSourcetypeValue, tt.annotationMetricSourcetypeValue)
-			time.Sleep(20 * time.Second)
+			t.Cleanup(func() {
+				removeAllPodsAnnotations(t, client, podName, namespace)
+			})
 			index := defaultIndex
 			if tt.annotationIndexValue != "" {
 				index = tt.annotationIndexValue
@@ -191,14 +195,34 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 			}
 			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
-			startTime := "-15s@s"
-			events := CheckEventsFromSplunk(searchQuery, startTime)
+			startTime := fmt.Sprintf("%d", time.Now().Unix())
+			events := waitForMinimumEventCount(t, searchQuery, startTime, 2)
 			fmt.Println(" =========>  Events received: ", len(events))
-			assert.Greater(t, len(events), 1)
-
-			removeAllPodsAnnotations(t, client, podName, namespace)
+			assert.GreaterOrEqual(t, len(events), 2)
 		})
 	}
+}
+
+func waitForExactEventCount(t *testing.T, searchQuery string, startTime string, expected int) []any {
+	t.Helper()
+
+	var events []any
+	require.Eventually(t, func() bool {
+		events = CheckEventsFromSplunk(searchQuery, startTime)
+		return len(events) == expected
+	}, splunkIngestionTimeout, splunkSearchInterval, "expected %d Splunk events for query %q", expected, searchQuery)
+	return events
+}
+
+func waitForMinimumEventCount(t *testing.T, searchQuery string, startTime string, minimum int) []any {
+	t.Helper()
+
+	var events []any
+	require.Eventually(t, func() bool {
+		events = CheckEventsFromSplunk(searchQuery, startTime)
+		return len(events) >= minimum
+	}, splunkIngestionTimeout, splunkSearchInterval, "expected at least %d Splunk events for query %q", minimum, searchQuery)
+	return events
 }
 
 func createK8sClient(t *testing.T) *kubernetes.Clientset {

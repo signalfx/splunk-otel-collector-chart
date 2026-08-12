@@ -22,12 +22,19 @@ import (
 )
 
 type metricsAssertionConfig struct {
-	volatileAttrs      []string
-	regexAttrs         map[string]string
-	firstDatapointOnly []string
+	volatileAttrs                  []string
+	regexAttrs                     map[string]string
+	scopeVersionRegex              string
+	firstDatapointOnly             []string
+	maxDatapointsPerMetric         int
+	selectedNumberMetric           string
+	selectedNumberDatapoint        map[string]string
+	exactDatapointAttrs            map[string]struct{}
+	includeHistogramExplicitBounds bool
+	waitForSnapshotMatch           bool
 }
 
-// MetricsAssertionOption configures preprocessing before pmetricassert comparison.
+// MetricsAssertionOption configures snapshot selection and preprocessing.
 type MetricsAssertionOption func(*metricsAssertionConfig)
 
 const (
@@ -36,9 +43,12 @@ const (
 	ContainerImageRegex    = `[-./:0-9a-z_]+`
 	ContainerImageTagRegex = `[-.0-9A-Za-z_]+`
 	// K8sNameRegex matches Kubernetes DNS label and DNS subdomain names.
-	K8sNameRegex        = `[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`
-	K8sUIDRegex         = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
-	KubeletVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
+	K8sNameRegex = `[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`
+	K8sUIDRegex  = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+	// K8sAPIVerbRegex matches canonical request verbs reported in API server metrics.
+	K8sAPIVerbRegex           = `^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$`
+	KubeletVersionRegex       = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
+	OtelCollectorVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+`
 )
 
 // CommonK8sMetricAssertionExistsAttrs holds shared attrs asserted as present-only.
@@ -99,6 +109,20 @@ func WithRegexAttributes(attrs map[string]string) MetricsAssertionOption {
 	}
 }
 
+// WithScopeVersionRegex writes scope versions as pmetricassert `version/regex` matchers.
+func WithScopeVersionRegex(pattern string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.scopeVersionRegex = pattern
+	}
+}
+
+// WithWaitForSnapshotMatch retries live batches until one satisfies the assertion.
+func WithWaitForSnapshotMatch() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.waitForSnapshotMatch = true
+	}
+}
+
 // WithFirstDatapointOnly preserves old pmetrictest.IgnoreSubsequentDataPoints behavior.
 func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
@@ -106,29 +130,97 @@ func WithFirstDatapointOnly(metricNames ...string) MetricsAssertionOption {
 	}
 }
 
+// WithMaxDatapointsPerMetric limits every metric to the requested number of datapoints.
+func WithMaxDatapointsPerMetric(maxDatapoints int) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.maxDatapointsPerMetric = maxDatapoints
+	}
+}
+
+// WithSelectedNumberDatapoint retains datapoints for a number metric that
+// contain the provided attributes.
+func WithSelectedNumberDatapoint(metricName string, attributes map[string]string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.selectedNumberMetric = metricName
+		cfg.selectedNumberDatapoint = attributes
+	}
+}
+
+// WithHistogramExplicitBounds includes histogram bucket boundaries in the snapshot.
+func WithHistogramExplicitBounds() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.includeHistogramExplicitBounds = true
+	}
+}
+
+// WithDatapointAttributesAsExistsExcept writes all datapoint attributes except
+// the named identity attributes as pmetricassert `/exists` matchers.
+func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.exactDatapointAttrs = make(map[string]struct{}, len(exactAttrs))
+		for _, attr := range exactAttrs {
+			cfg.exactDatapointAttrs[attr] = struct{}{}
+		}
+	}
+}
+
 // AssertMetricsSnapshot waits for a live batch that matches the snapshot shape.
+// TODO: Simplify count selection and datapoint reduction after collection matchers merge:
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/48545
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/48571
 func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetMetric, assertionFile string, timeout, interval time.Duration, opts ...MetricsAssertionOption) {
 	t.Helper()
 
 	cfg := newMetricsAssertionConfig(opts...)
 	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
+	if cfg.waitForSnapshotMatch && !shouldUpdateExpectedResults() {
+		selected, assertErr := selectMetricSetByAssertionWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, assertionFile, cfg, timeout, interval)
+		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
+		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
+		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+		return
+	}
 
 	selected, exactMatch := selectMetricSetByCountsWithTimeout(t, targetMetric, sink, wantResources, wantMetrics, timeout, interval)
 	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 
 	actual := prepareMetricsAssertion(*selected, cfg)
+	maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
 	assertErr := pmetricassert.AssertMetrics(assertionFile, actual)
 	if assertErr != nil {
 		if !exactMatch {
 			t.Logf("No exact-count match (want %d resources, %d metrics); selected payload has %d metrics",
 				wantResources, wantMetrics, selected.MetricCount())
 		}
-		maybeUpdateExpectedMetricsAssertion(t, assertionFile, actual, opts...)
 		require.NoError(t, assertErr, "Metric assertion failed for %s. Error: %v", assertionFile, assertErr)
 	}
 
 	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+}
+
+func selectMetricSetByAssertionWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, assertionFile string, cfg metricsAssertionConfig, timeout, interval time.Duration) (*pmetric.Metrics, error) {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if selected := selectMetricSetByCounts(targetMetric, metricSink, wantResources, wantMetrics); selected != nil {
+			actual := prepareMetricsAssertion(*selected, cfg)
+			if err := pmetricassert.AssertMetrics(assertionFile, actual); err == nil {
+				t.Logf("Selected matching payload with target metric '%s': %d metrics, %d resources",
+					targetMetric, selected.MetricCount(), selected.ResourceMetrics().Len())
+				return selected, nil
+			}
+		}
+		time.Sleep(interval)
+	}
+
+	selected := richestMetricSet(targetMetric, metricSink)
+	if selected == nil {
+		return nil, nil
+	}
+	t.Logf("No matching payload (%d resources, %d metrics) for '%s' within %v; using best-effort fallback: %d metrics, %d resources",
+		wantResources, wantMetrics, targetMetric, timeout, selected.MetricCount(), selected.ResourceMetrics().Len())
+	actual := prepareMetricsAssertion(*selected, cfg)
+	return selected, pmetricassert.AssertMetrics(assertionFile, actual)
 }
 
 func selectMetricSetByCountsWithTimeout(t *testing.T, targetMetric string, metricSink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) (*pmetric.Metrics, bool) {
@@ -246,15 +338,22 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 	tb.Helper()
 	cfg := newMetricsAssertionConfig(opts...)
 	prepared := prepareMetricsAssertion(actual, cfg)
-	if err := pmetricassert.WriteAssertionFile(tb, file, prepared); err != nil {
+	var writeOpts []pmetricassert.WriteOption
+	if cfg.includeHistogramExplicitBounds {
+		writeOpts = append(writeOpts, pmetricassert.IncludeHistogramExplicitBounds())
+	}
+	if err := pmetricassert.WriteAssertionFile(tb, file, prepared, writeOpts...); err != nil {
 		return fmt.Errorf("write assertion file %s: %w", file, err)
 	}
-	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs)
+	return markFlexibleAttrs(file, cfg.volatileAttrs, cfg.regexAttrs, cfg.scopeVersionRegex, cfg.exactDatapointAttrs)
 }
 
+// TODO: Replace YAML rewriting after attributes/include and writer matchers merge:
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/48622
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/49816
 // markFlexibleAttrs applies `/exists` and `/regex` after pmetricassert writes exact values.
-func markFlexibleAttrs(file string, volatile []string, regex map[string]string) error {
-	if len(volatile) == 0 && len(regex) == 0 {
+func markFlexibleAttrs(file string, volatile []string, regex map[string]string, scopeVersionRegex string, exactDatapointAttrs map[string]struct{}) error {
+	if len(volatile) == 0 && len(regex) == 0 && scopeVersionRegex == "" && exactDatapointAttrs == nil {
 		return nil
 	}
 	vol := make(map[string]struct{}, len(volatile))
@@ -292,6 +391,10 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 			if !scopeOK {
 				return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d] must be a map", file, i, j)
 			}
+			if scopeVersionRegex != "" {
+				delete(scopeMap, "version")
+				scopeMap["version/regex"] = scopeVersionRegex
+			}
 			metrics, metricErr := assertionSlice(file, fmt.Sprintf("resources[%d].scopes[%d].metrics", i, j), scopeMap["metrics"])
 			if metricErr != nil {
 				return metricErr
@@ -314,8 +417,14 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 					if !datapointOK {
 						return fmt.Errorf("parse assertion file %s: resources[%d].scopes[%d].metrics[%d].datapoints[%d] must be a map", file, i, j, k, l)
 					}
-					if markErr := markAttrs(file, fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints[%d].attributes", i, j, k, l), dpMap["attributes"], vol, regex); markErr != nil {
+					attrsPath := fmt.Sprintf("resources[%d].scopes[%d].metrics[%d].datapoints[%d].attributes", i, j, k, l)
+					if markErr := markAttrs(file, attrsPath, dpMap["attributes"], vol, regex); markErr != nil {
 						return markErr
+					}
+					if exactDatapointAttrs != nil {
+						if markErr := markNonIdentityAttrs(file, attrsPath, dpMap["attributes"], exactDatapointAttrs); markErr != nil {
+							return markErr
+						}
 					}
 				}
 			}
@@ -329,6 +438,32 @@ func markFlexibleAttrs(file string, volatile []string, regex map[string]string) 
 	//nolint:gosec // Assertion snapshots are committed testdata.
 	if writeErr := os.WriteFile(file, out, 0o644); writeErr != nil {
 		return fmt.Errorf("write assertion file %s: %w", file, writeErr)
+	}
+	return nil
+}
+
+func markNonIdentityAttrs(file, path string, attrs any, exact map[string]struct{}) error {
+	if attrs == nil {
+		return nil
+	}
+	m, ok := attrs.(map[string]any)
+	if !ok {
+		return fmt.Errorf("parse assertion file %s: %s must be a map", file, path)
+	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if strings.HasSuffix(k, "/exists") || strings.HasSuffix(k, "/regex") {
+			continue
+		}
+		if _, identity := exact[k]; identity {
+			continue
+		}
+		delete(m, k)
+		m[k+"/exists"] = true
 	}
 	return nil
 }
@@ -374,8 +509,34 @@ func newMetricsAssertionConfig(opts ...MetricsAssertionOption) metricsAssertionC
 func prepareMetricsAssertion(actual pmetric.Metrics, cfg metricsAssertionConfig) pmetric.Metrics {
 	prepared := pmetric.NewMetrics()
 	actual.CopyTo(prepared)
+	retainSelectedNumberDatapoint(prepared, cfg.selectedNumberMetric, cfg.selectedNumberDatapoint)
+	if cfg.maxDatapointsPerMetric > 0 {
+		ReduceDatapoints(&prepared, cfg.maxDatapointsPerMetric)
+	}
 	keepFirstDatapointOnly(prepared, cfg.firstDatapointOnly, cfg.flexibleAttrs())
 	return prepared
+}
+
+func retainSelectedNumberDatapoint(metrics pmetric.Metrics, metricName string, attributes map[string]string) {
+	metric, found := GetMetric(&metrics, metricName)
+	if !found {
+		return
+	}
+	remove := func(dp pmetric.NumberDataPoint) bool {
+		for key, expected := range attributes {
+			actual, ok := dp.Attributes().Get(key)
+			if !ok || actual.Type() != pcommon.ValueTypeStr || actual.Str() != expected {
+				return true
+			}
+		}
+		return false
+	}
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		metric.Gauge().DataPoints().RemoveIf(remove)
+	case pmetric.MetricTypeSum:
+		metric.Sum().DataPoints().RemoveIf(remove)
+	}
 }
 
 func (cfg metricsAssertionConfig) flexibleAttrs() []string {

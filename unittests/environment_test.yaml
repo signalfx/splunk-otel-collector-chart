@@ -1,0 +1,262 @@
+suite: splunk-otel-collector.environment
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-cluster-receiver.yaml
+  - configmap-gateway.yaml
+
+tests:
+  - it: agent omits the deployment environment when environment is unset
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment"
+
+  - it: cluster receiver omits the deployment environment when environment is unset
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment"
+
+  - it: gateway omits the deployment environment when environment is unset
+    set:
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment"
+
+  - it: agent uses deployment.environment.name for collected and internal telemetry
+    set:
+      environment: production
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\.name\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\.name\\n\\s+value: production"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "(?m)^\\s+(key|name): deployment\\.environment$"
+
+  - it: gateway uses deployment.environment.name for collected and internal telemetry
+    set:
+      environment: production
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\.name\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\.name\\n\\s+value: production"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "(?m)^\\s+(key|name): deployment\\.environment$"
+
+  - it: cluster receiver uses deployment.environment.name for collected and internal telemetry
+    set:
+      environment: production
+      splunkPlatform:
+        endpoint: https://localhost
+        token: test-token
+        logsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\.name\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\.name\\n\\s+value: production"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "(?m)^\\s+(key|name): deployment\\.environment$"
+
+  - it: cluster receiver internal telemetry has the environment without object or event pipelines
+    set:
+      environment: production
+      clusterReceiver:
+        eventsEnabled: false
+        k8sObjects: []
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\.name\\n\\s+value: production"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "resource/add_environment:"
+
+  - it: agent keeps the environment processor out of Observability-only metrics
+    set:
+      environment: production
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: agent keeps the environment processor in metrics sent to Splunk Platform
+    set:
+      environment: production
+      splunkPlatform:
+        endpoint: https://localhost
+        token: test-token
+        metricsEnabled: true
+        metricsIndex: test-metrics
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: gateway keeps the environment processor out of Observability-only metrics
+    set:
+      environment: production
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: gateway keeps the environment processor in metrics sent to Splunk Platform
+    set:
+      environment: production
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://localhost
+        token: test-token
+        metricsEnabled: true
+        metricsIndex: test-metrics
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource/add_environment\\n(?:\\s+- .+\\n)*\\s+receivers:"
+
+  - it: agent can restore deployment.environment through config
+    set:
+      environment: production
+      agent:
+        config:
+          processors:
+            resource/add_environment:
+              attributes:
+                - action: insert
+                  key: deployment.environment
+                  value: production
+          service:
+            telemetry:
+              resource:
+                attributes:
+                  - name: service.name
+                    value: otel-agent
+                  - name: otelcol.service.mode
+                    value: agent
+                  - name: deployment.environment
+                    value: production
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: service\\.name\\n\\s+value: otel-agent"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: otelcol\\.service\\.mode\\n\\s+value: agent"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment\\.name"
+
+  - it: cluster receiver can restore deployment.environment through config
+    set:
+      environment: production
+      clusterReceiver:
+        config:
+          processors:
+            resource/add_environment:
+              attributes:
+                - action: insert
+                  key: deployment.environment
+                  value: production
+          service:
+            telemetry:
+              resource:
+                attributes:
+                  - name: service.name
+                    value: otel-k8s-cluster-receiver
+                  - name: otelcol.service.mode
+                    value: clusterReceiver
+                  - name: deployment.environment
+                    value: production
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: service\\.name\\n\\s+value: otel-k8s-cluster-receiver"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: otelcol\\.service\\.mode\\n\\s+value: clusterReceiver"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment\\.name"
+
+  - it: gateway can restore deployment.environment through config
+    set:
+      environment: production
+      gateway.enabled: true
+      gateway:
+        config:
+          processors:
+            resource/add_environment:
+              attributes:
+                - action: insert
+                  key: deployment.environment
+                  value: production
+          service:
+            telemetry:
+              resource:
+                attributes:
+                  - name: service.name
+                    value: otel-collector
+                  - name: otelcol.service.mode
+                    value: gateway
+                  - name: deployment.environment
+                    value: production
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "key: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: deployment\\.environment\\n\\s+value: production"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: service\\.name\\n\\s+value: otel-collector"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "name: otelcol\\.service\\.mode\\n\\s+value: gateway"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "deployment\\.environment\\.name"

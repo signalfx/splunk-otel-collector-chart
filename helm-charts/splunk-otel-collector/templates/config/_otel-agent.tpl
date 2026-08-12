@@ -5,7 +5,7 @@ The values can be overridden in .Values.agent.config
 {{- define "splunk-otel-collector.agentConfig" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
-  {{- include "splunk-otel-collector.o11yIngestHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
+  {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
   {{- if eq (include "splunk-otel-collector.logsEnabled" .) "true" }}
   file_storage:
     directory: {{ .Values.logsCollection.checkpointPath }}
@@ -843,7 +843,7 @@ processors:
   {{- end }}
 
   # General resource attributes that apply to all telemetry passing through the agent.
-  # It's important to put this processor after resourcedetection to make sure that
+  # It's important to put this processor after resource_detection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
   resource:
@@ -892,7 +892,7 @@ processors:
   resource/add_environment:
     attributes:
       - action: insert
-        key: deployment.environment
+        key: deployment.environment.name
         value: "{{ .Values.environment }}"
   {{- end }}
 
@@ -1081,7 +1081,7 @@ exporters:
   signalfx:
     correlation:
     {{- if .Values.gateway.enabled }}
-    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
+    # Note: The ingest URL is not being used when the gateway is enabled.
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     {{- else }}
@@ -1099,7 +1099,7 @@ exporters:
   {{- if and .Values.gateway.enabled (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
   signalfx/host_metadata:
     correlation:
-    # Note: The ingest URL is not used when the gateway is enabled, thus port 9943 is not exposed by the gateway
+    # Note: The ingest URL is not used by this exporter when the gateway is enabled
     ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
     api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
@@ -1123,8 +1123,13 @@ exporters:
 
   {{- if .Values.featureGates.useControlPlaneMetricsHistogramData }}
   signalfx/histograms:
+    {{- if .Values.gateway.enabled }}
+    ingest_url: http://{{ include "splunk-otel-collector.fullname" . }}:9943
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    {{- end }}
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     send_otlp_histograms: true
   {{- end }}
@@ -1243,6 +1248,10 @@ service:
           value: otel-agent
         - name: otelcol.service.mode
           value: agent
+        {{- if .Values.environment }}
+        - name: deployment.environment.name
+          value: "{{ .Values.environment }}"
+        {{- end }}
         - name: k8s.pod.name
           value: "${K8S_POD_NAME}"
         - name: k8s.namespace.name
@@ -1309,7 +1318,7 @@ service:
         - memory_limiter
         - k8s_attributes
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         - batch
@@ -1345,7 +1354,7 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if not .Values.gateway.enabled }}
         {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
@@ -1413,9 +1422,9 @@ service:
         {{- if not .Values.featureGates.noDropLogsPipeline }}
         - batch
         {{- end }}
-        - resourcedetection
+        - resource_detection
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resourcedetection/k8s_cluster_name
+        - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
         {{- if and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
@@ -1448,7 +1457,7 @@ service:
         - memory_limiter
         - k8s_attributes
         - batch
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if .Values.environment }}
         - resource/add_environment
@@ -1490,10 +1499,10 @@ service:
         - attributes/istio
         - transform/drop_server_attrs
         {{- end }}
-        - resourcedetection
+        - resource_detection
         - resource
         {{/*
-        The attribute `deployment.environment` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
+        The attribute `deployment.environment.name` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
         More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
         */}}
         {{- if (and .Values.splunkPlatform.metricsEnabled .Values.environment) }}
@@ -1537,7 +1546,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - k8s_attributes/metrics
         {{- end }}
@@ -1561,7 +1570,7 @@ service:
       processors:
         - memory_limiter
         - batch
-        - resourcedetection
+        - resource_detection
         - resource
       exporters: [otlp_http/entities]
 
@@ -1573,7 +1582,7 @@ service:
         - memory_limiter
         - batch
         - resource/add_agent_k8s
-        - resourcedetection
+        - resource_detection
         - resource
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio

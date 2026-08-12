@@ -54,10 +54,10 @@ splunk.com/exclude
 {{- end }}
 
 {{/*
-Common config for resourcedetection processor
+Common config for resource_detection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessor" -}}
-resourcedetection:
+resource_detection:
   detectors:
     # Note: Kubernetes distro detectors need to come first so they set the proper cloud.platform
     # before it gets set later by the cloud provider detector.
@@ -116,10 +116,10 @@ resourcedetection:
 {{- end }}
 
 {{/*
-Common config for adding k8s.cluster.name using the resourcedetection processor
+Common config for adding k8s.cluster.name using the resource_detection processor
 */}}
 {{- define "splunk-otel-collector.resourceDetectionProcessorKubernetesClusterName" -}}
-resourcedetection/k8s_cluster_name:
+resource_detection/k8s_cluster_name:
   detectors:
     {{- if hasPrefix "gke" .Values.distribution }}
     - gcp
@@ -667,9 +667,9 @@ opamp/splunk_o11y:
 {{- end }}
 
 {{/*
-Common config for Splunk O11Y Ingest HTTP Forwarder extension
+Common config for Splunk O11Y OpAmp Ingest HTTP Forwarder extension
 */}}
-{{- define "splunk-otel-collector.o11yIngestHttpForwarderExtension" -}}
+{{- define "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" -}}
 {{- if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" }}
 {{- $forceDirectEndpoint := .forceDirectEndpoint | default false }}
 http_forwarder/opamp_splunk_o11y:

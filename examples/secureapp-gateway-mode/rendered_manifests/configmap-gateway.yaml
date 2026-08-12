@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.156.0
+    helm.sh/chart: splunk-otel-collector-0.158.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.156.0"
+    app.kubernetes.io/version: "0.158.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.156.0
+    chart: splunk-otel-collector-0.158.0
     release: default
 data:
   relay: |
@@ -64,6 +64,14 @@ data:
       http_forwarder:
         egress:
           endpoint: https://api.CHANGEME.observability.splunkcloud.com
+      http_forwarder/o11y_ingest:
+        egress:
+          auth:
+            authenticator: headers_setter
+          endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
+        ingress:
+          endpoint: 0.0.0.0:9943
+          include_metadata: true
       http_forwarder/opamp_splunk_o11y:
         egress:
           endpoint: https://ingest.CHANGEME.observability.splunkcloud.com
@@ -146,7 +154,7 @@ data:
           key: k8s.pod.annotations.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
-      resourcedetection:
+      resource_detection:
         detectors:
         - env
         - system
@@ -197,6 +205,7 @@ data:
       - headers_setter
       - http_forwarder
       - http_forwarder/opamp_splunk_o11y
+      - http_forwarder/o11y_ingest
       - opamp/splunk_o11y
       pipelines:
         logs:
@@ -247,7 +256,7 @@ data:
           processors:
           - memory_limiter
           - batch
-          - resourcedetection
+          - resource_detection
           receivers:
           - prometheus/collector
         traces:

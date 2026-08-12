@@ -1,0 +1,37 @@
+resources:
+    - attributes:
+        host.name: kind-control-plane
+        k8s.cluster.name: sock
+        k8s.namespace.name: kube-system
+        k8s.node.name: kind-control-plane
+        k8s.pod.name: kube-controller-manager-kind-control-plane
+        k8s.pod.uid/regex: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        os.type: linux
+        server.address/exists: true
+        server.port/exists: true
+        service.instance.id/exists: true
+        service.name: kube-controller-manager
+        url.scheme: https
+      scopes:
+        - metrics:
+            - datapoints:
+                - attributes:
+                    name/exists: true
+                  explicit_bounds:
+                    - 1e-08
+                    - 1e-07
+                    - 1e-06
+                    - 9.999999999999999e-06
+                    - 9.999999999999999e-05
+                    - 0.001
+                    - 0.01
+                    - 0.1
+                    - 1
+                    - 10
+              name: workqueue_queue_duration_seconds
+              temporality: cumulative
+              type: histogram
+          name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
+          version/regex: v[0-9]+\.[0-9]+\.[0-9]+
+signal: metrics
+version: 1

@@ -64,10 +64,11 @@ const (
 	clusterReceiverLabelSelector           = "component=otel-k8s-cluster-receiver"
 	splunkOtelCollectorTAResourceName      = "splunk-otel-collector-ta"
 	taResourceName                         = "targetallocator-ta"
+	kindAgentPodNamePrefix                 = internal.DefaultChartReleaseName + "-splunk-otel-collector-agent"
 	linuxPodMetricsPath                    = "/splunk-metrics/metrics.json"
-	winPodMetricsPath                      = "C:\\metrics.json"
+	winPodMetricsPath                      = "C:\\Users\\ContainerUser\\AppData\\Local\\Temp\\metrics.json"
 	linuxPodK8sClusterMetricsPath          = "/splunk-metrics/k8s_cluster_metrics.json"
-	winPodK8sClusterMetricsPath            = "C:\\k8s_cluster_metrics.json"
+	winPodK8sClusterMetricsPath            = "C:\\Users\\ContainerUser\\AppData\\Local\\Temp\\k8s_cluster_metrics.json"
 	aksWindowsValidationResourceName       = "aks-win-validation-secret"
 )
 
@@ -115,18 +116,14 @@ func setupSinks(t *testing.T) {
 	}
 }
 
-func deployChartsAndApps(t *testing.T, testKubeConfig string) {
+func deployCharts(
+	t *testing.T,
+	testKubeConfig string,
+	client *kubernetes.Clientset,
+	extensionsClient *clientset.Clientset,
+) {
 	kubeTestEnv, setKubeTestEnv := os.LookupEnv("KUBE_TEST_ENV")
 	require.True(t, setKubeTestEnv, "the environment variable KUBE_TEST_ENV must be set")
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	client, err := kubernetes.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	extensionsClient, err := clientset.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
-	require.NoError(t, err)
-	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	if requiresPrometheusResources(kubeTestEnv) {
 		deployPrometheusCRDs(t, extensionsClient)
@@ -180,7 +177,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}
-	assert.NoError(t, err)
 
 	hostEp := internal.HostEndpoint(t)
 	if len(hostEp) == 0 {
@@ -202,6 +198,24 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 	for valuesFile, chartOption := range chartInfo {
 		internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 1*time.Minute, chartOption)
 	}
+
+	t.Cleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
+			return
+		}
+		t.Log("Cleaning up cluster")
+		// t.Cleanup is called after t.Context has been cancelled. teardown uses the passed in
+		// context to cleanup resources created for the test. A valid context needs to be used
+		// to properly delete k8s resources, otherwise all actions fail with a context
+		// cancelled error.
+		teardown(context.Background(), t, testKubeConfig) //nolint:usetesting
+	})
+}
+
+func deployTestResources(t *testing.T, client *kubernetes.Clientset, dynamicClient dynamic.Interface) {
+	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
+	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 
@@ -282,19 +296,6 @@ func deployChartsAndApps(t *testing.T, testKubeConfig string) {
 			t.Logf("Deployed job %s", job.Name)
 		}
 	}
-
-	t.Cleanup(func() {
-		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
-			return
-		}
-		t.Log("Cleaning up cluster")
-		// t.Cleanup is called after t.Context has been cancelled. teardown uses the passed in
-		// context to cleanup resources created for the test. A valid context needs to be used
-		// to properly delete k8s resources, otherwise all actions fail with a context
-		// cancelled error.
-		teardown(context.Background(), t, testKubeConfig) //nolint:usetesting
-	})
 }
 
 // createAKSWindowsValidationSecret ensures the mixed-node AKS test exercises the
@@ -421,31 +422,48 @@ func Test_Functions(t *testing.T) {
 	setupSinks(t)
 
 	testKubeConfig := requireEnv(t, "KUBECONFIG")
+	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
+	skipSetup := os.Getenv("SKIP_SETUP") == "true"
+	skipTests := os.Getenv("SKIP_TESTS") == "true"
+	if kubeTestEnv == kindTestKubeEnv {
+		expectedValuesDir = kindValuesDir
+	}
+
 	internal.AcquireLeaseForTest(t, testKubeConfig)
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		teardown(t.Context(), t, testKubeConfig)
 	}
 
-	if os.Getenv("SKIP_SETUP") != "true" {
-		deployChartsAndApps(t, testKubeConfig)
+	if !skipSetup {
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
+		require.NoError(t, err)
+		client, err := kubernetes.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+		extensionsClient, err := clientset.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+		dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+		require.NoError(t, err)
+
+		deployCharts(t, testKubeConfig, client, extensionsClient)
+		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
+		}
+		deployTestResources(t, client, dynamicClient)
 	} else {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	}
 
-	if os.Getenv("SKIP_TESTS") == "true" {
+	if skipTests {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
 		return
 	}
 
-	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
-
 	if kubeTestEnv == kindTestKubeEnv {
-		expectedValuesDir = kindValuesDir
 		if os.Getenv("UPGRADE_FROM_VALUES") != "" {
 			runLocalClusterUpgradeTests(t)
 		} else {
-			runLocalClusterTests(t)
+			runLocalClusterTests(t, skipSetup)
 		}
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
@@ -589,7 +607,7 @@ func testLocalClusterComponentHealth(t *testing.T) {
 // runLocalClusterTests runs tests that are expected to pass on local clusters like kind, minikube, etc.
 // These tests are not ready to run in hosted clusters as we don't have the setup to send data to sinks.
 // Eventually, we can update the tests to export to a file and run them in hosted clusters, example: testResourceAttributes
-func runLocalClusterTests(t *testing.T) {
+func runLocalClusterTests(t *testing.T, includeK8sClusterReceiverTest bool) {
 	t.Run("node.js traces captured", testNodeJSTraces)
 	t.Run("java traces captured", testJavaTraces)
 	t.Run(".NET traces captured", testDotNetTraces)
@@ -602,7 +620,9 @@ func runLocalClusterTests(t *testing.T) {
 	t.Run("node.js profiling captured", testNodeJSProfiling)
 	t.Run(".NET profiling captured", testDotNetProfiling)
 	t.Run("Python profiling captured", testPythonProfiling)
-	t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
+	if includeK8sClusterReceiverTest {
+		t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
+	}
 	t.Run("agent logs", testAgentLogs)
 	t.Run("container log attributes validation", func(t *testing.T) {
 		validateLogAttributes(t, globalSinks.logsConsumer)
@@ -831,14 +851,11 @@ func shortenNames(value string) string {
 	if strings.HasPrefix(value, "otelcol") {
 		return "otelcol"
 	}
-	if strings.HasPrefix(value, "sock-splunk-otel-collector-agent") {
-		return "sock-splunk-otel-collector-agent"
+	if strings.HasPrefix(value, kindAgentPodNamePrefix) {
+		return kindAgentPodNamePrefix
 	}
 	if strings.HasPrefix(value, "sock-splunk-otel-collector-k8s-cluster-receiver") {
 		return "sock-splunk-otel-collector-k8s-cluster-receiver"
-	}
-	if strings.HasPrefix(value, "cert-manager-cainjector") {
-		return "cert-manager-cainjector"
 	}
 	if strings.HasPrefix(value, "sock-operator") {
 		return "sock-operator"
@@ -846,13 +863,6 @@ func shortenNames(value string) string {
 	if strings.HasPrefix(value, "nodejs-test") {
 		return "nodejs-test"
 	}
-	if strings.HasPrefix(value, "cert-manager-webhook") {
-		return "cert-manager-webhook"
-	}
-	if strings.HasPrefix(value, "cert-manager") {
-		return "cert-manager"
-	}
-
 	return value
 }
 
@@ -864,6 +874,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	)
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
 		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
+		internal.WithWaitForSnapshotMatch(),
 		internal.WithVolatileAttributes(existsAttrs...),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 		internal.WithFirstDatapointOnly(
@@ -1081,7 +1092,13 @@ func testAgentMetrics(t *testing.T) {
 	})
 
 	t.Run("kubelet_stats metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_kubelet_stats_metrics.yaml", "container.memory.usage")
+		testAgentMetricsTemplate(
+			t,
+			agentMetricsConsumer,
+			"expected_kubelet_stats_metrics.yaml",
+			"container.memory.usage",
+			kindAgentPodNamePrefix,
+		)
 	})
 
 	t.Run("host_metrics", func(t *testing.T) {
@@ -1090,7 +1107,7 @@ func testAgentMetrics(t *testing.T) {
 }
 
 // testAgentMetricsTemplate tests metrics using template matching with target metric detection
-func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string) {
+func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string, podNamePrefix ...string) {
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
@@ -1103,7 +1120,7 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 		testName = testName[lastSlash+1:]
 	}
 
-	err = tryMetricsComparison(expectedMetrics, *selectedMetrics)
+	err = tryMetricsComparison(expectedMetrics, *selectedMetrics, podNamePrefix...)
 	if err != nil {
 		if !exactMatch {
 			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
@@ -1116,12 +1133,29 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 	t.Logf("Metric comparison passed for %d metrics in %s test", selectedMetrics.MetricCount(), testName)
 }
 
-// tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error
-func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) error {
+// preparePodMetricsComparison keeps one stable pod from kubeletstats payloads, whose pod set is timing-dependent.
+func preparePodMetricsComparison(expected, actual pmetric.Metrics, podNamePrefix string) (pmetric.Metrics, pmetric.Metrics) {
+	normalizedExpected := pmetric.NewMetrics()
+	normalizedActual := pmetric.NewMetrics()
+	expected.CopyTo(normalizedExpected)
+	actual.CopyTo(normalizedActual)
+	internal.RetainNumberMetricDatapointsForPod(&normalizedExpected, podNamePrefix)
+	internal.RetainNumberMetricDatapointsForPod(&normalizedActual, podNamePrefix)
+	return normalizedExpected, normalizedActual
+}
+
+// tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error.
+// When podNamePrefix is provided, it compares every number datapoint retained for that pod.
+func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, podNamePrefix ...string) error {
+	compareAllDatapoints := len(podNamePrefix) > 0
+	if compareAllDatapoints {
+		expected, actual = preparePodMetricsComparison(expected, actual, podNamePrefix[0])
+	}
+
 	replaceWithStar := func(string) string { return "*" }
 	metricNames := internal.GetMetricNames(&expected)
 
-	return pmetrictest.CompareMetrics(expected, actual,
+	options := []pmetrictest.CompareMetricsOption{
 		pmetrictest.IgnoreTimestamp(),
 		pmetrictest.IgnoreStartTimestamp(),
 		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
@@ -1171,9 +1205,12 @@ func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics) erro
 		pmetrictest.IgnoreScopeMetricsOrder(),
 		pmetrictest.IgnoreMetricDataPointsOrder(),
 		pmetrictest.IgnoreDatapointAttributesOrder(),
-		pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
-		// pmetrictest.IgnoreSubsequentDataPoints("otelcol_receiver_accepted_log_records", "otelcol_receiver_refused_log_records"),
-	)
+	}
+	if !compareAllDatapoints {
+		options = append(options, pmetrictest.IgnoreSubsequentDataPoints(metricNames...))
+	}
+
+	return pmetrictest.CompareMetrics(expected, actual, options...)
 }
 
 func testHECMetrics(t *testing.T) {
