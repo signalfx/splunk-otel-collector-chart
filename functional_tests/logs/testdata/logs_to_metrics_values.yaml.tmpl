@@ -5,14 +5,24 @@ clusterReceiver:
 
 logsToMetrics:
   enabled: true
+  aggregation: instance
   rules:
     - app.log.error.count
+    - app.request.throttled.count
     - business.transaction.value
+  fieldMappings:
+    - from: app.level
+      to: severity_text
+    - from: app.error_code
+      to: error.type
   scope:
     namespaces:
       - logs-to-metrics-test
     workloads:
       - logs-to-metrics-fixture
+      - logs-to-metrics-label-mismatch
+    podLabels:
+      logs-to-metrics-test: enabled
 
 splunkPlatform:
   endpoint: {{ .LogHecEndpoint }}

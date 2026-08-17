@@ -47,3 +47,25 @@ tests:
       - contains:
           path: data.relay.processor.metric_statements
           content: 'delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true'
+
+  - it: should preserve instance aggregation through the gateway final allowlist
+    set:
+      logsToMetrics:
+        enabled: true
+        aggregation: instance
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"last_processor": .service.pipelines.metrics.processors[-1], "statements": .processors."transform/logs_to_metrics_metrics".metric_statements})'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay.last_processor
+          value: transform/logs_to_metrics_metrics
+      - matchRegex:
+          path: data.relay.statements[0]
+          pattern: '"service.instance.id".*"k8s.pod.name".*"k8s.pod.uid".*"k8s.node.name".*"container.id"'
+      - contains:
+          path: data.relay.statements
+          content: 'delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true'

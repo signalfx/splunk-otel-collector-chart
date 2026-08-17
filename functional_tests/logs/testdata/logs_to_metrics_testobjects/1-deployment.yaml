@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: logs-to-metrics-fixture
+        logs-to-metrics-fixture: "true"
+        logs-to-metrics-test: enabled
     spec:
       containers:
         - name: logs-to-metrics-fixture
@@ -21,6 +23,11 @@ spec:
             - -c
           args:
             - |
-              printf '%s\n' '{"message":"LOGS_TO_METRICS_ERROR_MARKER","severity_text":"ERROR","error.type":"payment_declined"}'
+              # Give the k8s_attributes watcher time to observe the running
+              # container status, which is the source of container.id.
+              sleep 15
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_ERROR_MARKER","app.level":"ERROR","app.error_code":"payment_declined"}'
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_THROTTLED_NO_STATUS_MARKER","request.throttled":true,"http.request.method":"DELETE"}'
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_THROTTLED_WITH_STATUS_MARKER","request.throttled":true,"http.request.method":"POST","http.response.status_code":429}'
               printf '%s\n' '{"message":"LOGS_TO_METRICS_TRANSACTION_MARKER","event.outcome":"success","business.transaction.value":49.95,"business.transaction.type":"checkout","business.transaction.unit":"USD"}'
               sleep 3600

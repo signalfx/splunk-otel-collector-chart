@@ -14,17 +14,25 @@ Expects a dict containing the root context and the rule name.
 {{- end -}}
 
 {{/*
-Whether at least one count connector rule is selected.
+Whether any rule in a supplied list is selected.
+Expects a dict containing the root context and the rule list.
 */}}
-{{- define "splunk-otel-collector.logsToMetricsCountConnectorEnabled" -}}
-{{- $root := . -}}
+{{- define "splunk-otel-collector.logsToMetricsAnyRuleEnabled" -}}
+{{- $root := .root -}}
 {{- $enabled := false -}}
-{{- range $rule := list "app.log.error.count" "http.server.error.count" "app.exception.unhandled.count" "app.authentication.failure.count" "app.job.failure.count" "app.retry.exhausted.count" "app.request.throttled.count" "app.log.record.count" -}}
+{{- range $rule := .rules -}}
   {{- if eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" $root "rule" $rule)) "true" -}}
     {{- $enabled = true -}}
   {{- end -}}
 {{- end -}}
 {{- $enabled -}}
+{{- end -}}
+
+{{/*
+Whether at least one count connector rule is selected.
+*/}}
+{{- define "splunk-otel-collector.logsToMetricsCountConnectorEnabled" -}}
+{{- include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.log.error.count" "http.server.error.count" "app.exception.unhandled.count" "app.authentication.failure.count" "app.job.failure.count" "app.retry.exhausted.count" "app.request.throttled.count" "app.log.record.count")) -}}
 {{- end -}}
 
 {{/*
@@ -35,11 +43,30 @@ Whether the sum connector rule is selected.
 {{- end -}}
 
 {{/*
-Final resource attribute allowlist for log-derived metrics. The internal marker is removed by
-the last collector that handles the generated metrics.
+Working resource attribute allowlist for log-derived metrics. Pod UID remains transiently in
+workload mode so downstream Kubernetes enrichment can associate generated metrics.
+*/}}
+{{- define "splunk-otel-collector.logsToMetricsWorkingResourceAllowlist" -}}
+{{- $attributes := list "service.name" "service.namespace" "service.version" "deployment.environment" "deployment.environment.name" "cloud.provider" "cloud.platform" "cloud.account.id" "cloud.region" "cloud.availability_zone" "k8s.cluster.name" "k8s.cluster.uid" "k8s.namespace.name" "k8s.pod.uid" "k8s.container.name" "k8s.deployment.name" "k8s.statefulset.name" "k8s.daemonset.name" "k8s.cronjob.name" "k8s.workload.name" "k8s.workload.kind" "com.splunk.index" "com.splunk.sourcetype" -}}
+{{- if eq .Values.logsToMetrics.aggregation "instance" -}}
+  {{- $attributes = concat $attributes (list "service.instance.id" "k8s.pod.name" "k8s.node.name" "container.id") -}}
+{{- end -}}
+{{- $attributes = append $attributes "splunk.logs_to_metrics" -}}
+{{- $attributes | toJson | replace "\",\"" "\", \"" -}}
+{{- end -}}
+
+{{/*
+Final resource attribute allowlist for log-derived metrics. Instance aggregation adds unique
+pod, node, container ID, and available service instance identity. The internal marker is removed
+by the last collector that handles the generated metrics.
 */}}
 {{- define "splunk-otel-collector.logsToMetricsResourceAllowlist" -}}
-["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"]
+{{- $attributes := list "service.name" "service.namespace" "service.version" "deployment.environment" "deployment.environment.name" "cloud.provider" "cloud.platform" "cloud.account.id" "cloud.region" "cloud.availability_zone" "k8s.cluster.name" "k8s.cluster.uid" "k8s.namespace.name" "k8s.container.name" "k8s.deployment.name" "k8s.statefulset.name" "k8s.daemonset.name" "k8s.cronjob.name" "k8s.workload.name" "k8s.workload.kind" "com.splunk.index" "com.splunk.sourcetype" -}}
+{{- if eq .Values.logsToMetrics.aggregation "instance" -}}
+  {{- $attributes = concat $attributes (list "service.instance.id" "k8s.pod.name" "k8s.pod.uid" "k8s.node.name" "container.id") -}}
+{{- end -}}
+{{- $attributes = append $attributes "splunk.logs_to_metrics" -}}
+{{- $attributes | toJson | replace "\",\"" "\", \"" -}}
 {{- end -}}
 
 {{/*
@@ -48,6 +75,21 @@ Validate prerequisites for the experimental file-log Logs-to-Metrics pipeline.
 {{- define "splunk-otel-collector.validateLogsToMetrics" -}}
 {{- if .Values.logsToMetrics.enabled -}}
   {{- $supportedRules := list "app.log.error.count" "http.server.error.count" "app.exception.unhandled.count" "app.authentication.failure.count" "app.job.failure.count" "app.retry.exhausted.count" "app.request.throttled.count" "app.log.record.count" "business.transaction.value" -}}
+  {{- $supportedMappingTargets := list "severity_number" "severity_text" "error.type" "exception.type" "exception.escaped" "http.response.status_code" "http.request.method" "event.name" "event.outcome" "auth.mechanism" "job.type" "retry.exhausted" "request.throttled" "business.transaction.value" "business.transaction.type" "business.transaction.unit" -}}
+  {{- if not (has .Values.logsToMetrics.aggregation (list "workload" "instance")) -}}
+    {{- fail (printf "logsToMetrics.aggregation contains unsupported value %q" .Values.logsToMetrics.aggregation) -}}
+  {{- end -}}
+  {{- $mappingTargets := dict -}}
+  {{- range $mapping := .Values.logsToMetrics.fieldMappings -}}
+    {{- $target := index $mapping "to" -}}
+    {{- if not (has $target $supportedMappingTargets) -}}
+      {{- fail (printf "logsToMetrics.fieldMappings contains unsupported target %q" $target) -}}
+    {{- end -}}
+    {{- if hasKey $mappingTargets $target -}}
+      {{- fail (printf "logsToMetrics.fieldMappings contains duplicate target %q" $target) -}}
+    {{- end -}}
+    {{- $_ := set $mappingTargets $target true -}}
+  {{- end -}}
   {{- range $rule := .Values.logsToMetrics.rules -}}
     {{- if not (has $rule $supportedRules) -}}
       {{- fail (printf "logsToMetrics.rules contains unsupported rule %q" $rule) -}}
@@ -76,6 +118,11 @@ Agent processor definitions for Logs-to-Metrics.
 */}}
 {{- define "splunk-otel-collector.logsToMetricsAgentProcessors" -}}
 {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
+{{- $severityNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.log.error.count" "app.log.record.count"))) "true" -}}
+{{- $httpNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "http.server.error.count" "app.request.throttled.count"))) "true" -}}
+{{- $eventNameNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.authentication.failure.count" "app.job.failure.count"))) "true" -}}
+{{- $eventOutcomeNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.authentication.failure.count" "app.job.failure.count" "business.transaction.value"))) "true" -}}
+{{- $businessTransactionNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsSumConnectorEnabled" .) "true" -}}
 # Enrich the metricization branch with stable service and workload identity even when a gateway is enabled.
 k8s_attributes/logs_to_metrics:
   pod_association:
@@ -99,6 +146,12 @@ k8s_attributes/logs_to_metrics:
       - k8s.statefulset.name
       - k8s.daemonset.name
       - k8s.cronjob.name
+      {{- if eq .Values.logsToMetrics.aggregation "instance" }}
+      - k8s.pod.name
+      - k8s.pod.uid
+      - k8s.node.name
+      - container.id
+      {{- end }}
       {{- if gt (len .Values.logsToMetrics.scope.workloads) 0 }}
       - k8s.job.name
       - k8s.replicaset.name
@@ -110,6 +163,14 @@ k8s_attributes/logs_to_metrics:
       - key: {{ include "splunk-otel-collector.filterAttr" . }}
         tag_name: {{ include "splunk-otel-collector.filterAttr" . }}
         from: pod
+    {{- if gt (len .Values.logsToMetrics.scope.podLabels) 0 }}
+    labels:
+      {{- range $key, $_ := .Values.logsToMetrics.scope.podLabels }}
+      - key: {{ $key | quote }}
+        tag_name: {{ printf "splunk.logs_to_metrics.scope.pod_label.%s" $key | quote }}
+        from: pod
+      {{- end }}
+    {{- end }}
   filter:
     node_from_env_var: K8S_NODE_NAME
 
@@ -139,6 +200,9 @@ filter/logs_to_metrics:
     {{- end }}
     - {{ printf "not (%s)" (join " or " $workloadMatches) | quote }}
   {{- end }}
+  {{ range $key, $value := .Values.logsToMetrics.scope.podLabels }}
+    - {{ printf `resource.attributes[%s] != %s` (toJson (printf "splunk.logs_to_metrics.scope.pod_label.%s" $key)) (toJson $value) | quote }}
+  {{ end }}
 
 # Normalize structured container-log fields for the dedicated Logs-to-Metrics branch.
 # This processor mutates only the file_log fan-out used by logs/log_to_metrics.
@@ -147,8 +211,11 @@ transform/logs_to_metrics:
   log_statements:
     - merge_maps(log.attributes, log.body, "insert") where IsMap(log.body)
     - merge_maps(log.attributes, ParseJSON(log.body), "insert") where IsString(log.body) and IsMatch(log.body, "^\\s*\\{")
+    {{ range $mapping := .Values.logsToMetrics.fieldMappings }}
+    - {{ printf `set(log.attributes[%s], log.attributes[%s]) where log.attributes[%s] == nil and log.attributes[%s] != nil` (toJson (index $mapping "to")) (toJson (index $mapping "from")) (toJson (index $mapping "to")) (toJson (index $mapping "from")) | quote }}
+    {{ end }}
+    {{- if $severityNormalizationEnabled }}
     - set(log.attributes["severity_number"], Int(log.attributes["severity_number"])) where IsDouble(log.attributes["severity_number"]) and log.attributes["severity_number"] == Int(log.attributes["severity_number"])
-    - set(log.attributes["http.response.status_code"], Int(log.attributes["http.response.status_code"])) where IsDouble(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] == Int(log.attributes["http.response.status_code"])
     - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["severity_text"])) where IsString(log.attributes["severity_text"])
     - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["severity"])) where log.attributes["splunk.logs_to_metrics.severity.text"] == nil and IsString(log.attributes["severity"])
     - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["level"])) where log.attributes["splunk.logs_to_metrics.severity.text"] == nil and IsString(log.attributes["level"])
@@ -171,27 +238,40 @@ transform/logs_to_metrics:
     - set(log.attributes["log.severity"], "ERROR") where log.severity_number >= SEVERITY_NUMBER_ERROR and log.severity_number < SEVERITY_NUMBER_FATAL
     - set(log.attributes["log.severity"], "FATAL") where log.severity_number >= SEVERITY_NUMBER_FATAL
     - set(log.attributes["log.severity"], "UNSPECIFIED") where log.severity_number == SEVERITY_NUMBER_UNSPECIFIED
+    {{- end }}
+    {{- if $httpNormalizationEnabled }}
+    - set(log.attributes["http.response.status_code"], Int(log.attributes["http.response.status_code"])) where IsDouble(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] == Int(log.attributes["http.response.status_code"])
     - set(log.attributes["http.request.method"], ToUpperCase(log.attributes["http.request.method"])) where IsString(log.attributes["http.request.method"])
     - set(log.attributes["http.request.method"], "_OTHER") where IsString(log.attributes["http.request.method"]) and not IsMatch(log.attributes["http.request.method"], "^(CONNECT|DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT|TRACE)$")
+    {{- end }}
+    {{- if $eventNameNormalizationEnabled }}
     - set(log.attributes["splunk.logs_to_metrics.event.name"], ToLowerCase(log.attributes["event.name"])) where IsString(log.attributes["event.name"])
+    {{- end }}
+    {{- if $eventOutcomeNormalizationEnabled }}
     - set(log.attributes["splunk.logs_to_metrics.event.outcome"], ToLowerCase(log.attributes["event.outcome"])) where IsString(log.attributes["event.outcome"])
+    {{- end }}
+    {{- if $businessTransactionNormalizationEnabled }}
     - set(log.attributes["business.transaction.unit"], log.attributes["business.transaction.currency"]) where log.attributes["business.transaction.unit"] == nil and IsString(log.attributes["business.transaction.currency"])
     # The 0.156 sum connector adds a value once per grouping attribute. Use one composite key,
     # then restore the two public attributes in transform/logs_to_metrics_metrics.
     - set(log.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], Concat([log.attributes["business.transaction.type"], log.attributes["business.transaction.unit"]], "|")) where IsString(log.attributes["business.transaction.type"]) and log.attributes["business.transaction.type"] != "" and not IsMatch(log.attributes["business.transaction.type"], "\\|") and IsString(log.attributes["business.transaction.unit"]) and log.attributes["business.transaction.unit"] != "" and not IsMatch(log.attributes["business.transaction.unit"], "\\|")
+    {{- end }}
     - set(resource.attributes["splunk.logs_to_metrics"], true)
-    # Keep workload-level correlation plus transient association/routing keys. The metrics-side
-    # transform removes pod identity and the internal marker before final export.
-    - keep_keys(resource.attributes, ["service.name", "service.namespace", "service.version", "deployment.environment", "deployment.environment.name", "cloud.provider", "cloud.platform", "cloud.account.id", "cloud.region", "cloud.availability_zone", "k8s.cluster.name", "k8s.cluster.uid", "k8s.namespace.name", "k8s.pod.uid", "k8s.container.name", "k8s.deployment.name", "k8s.statefulset.name", "k8s.daemonset.name", "k8s.cronjob.name", "k8s.workload.name", "k8s.workload.kind", "com.splunk.index", "com.splunk.sourcetype", "splunk.logs_to_metrics"])
+    # Keep the selected resource identity plus transient association/routing keys. The metrics-side
+    # transform applies the final aggregation allowlist and removes the internal marker before export.
+    - {{ printf "keep_keys(resource.attributes, %s)" (include "splunk-otel-collector.logsToMetricsWorkingResourceAllowlist" .) | quote }}
 
-# Restore public transaction dimensions after the sum connector's single-key grouping workaround.
+# Normalize generated metric dimensions and enforce their resource allowlist.
 transform/logs_to_metrics_metrics:
   error_mode: silent
   metric_statements:
+    {{- if $businessTransactionNormalizationEnabled }}
+    # Restore public transaction dimensions after the sum connector's single-key grouping workaround.
     - set(datapoint.attributes["business.transaction.type"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[0]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])
     - set(datapoint.attributes["business.transaction.unit"], Split(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], "|")[1]) where metric.name == "business.transaction.value" and IsString(datapoint.attributes["splunk.logs_to_metrics.business.transaction.type_unit"])
     - delete_key(datapoint.attributes, "splunk.logs_to_metrics.business.transaction.type_unit") where metric.name == "business.transaction.value"
-    - keep_keys(resource.attributes, {{ include "splunk-otel-collector.logsToMetricsResourceAllowlist" . }}) where resource.attributes["splunk.logs_to_metrics"] == true
+    {{- end }}
+    - {{ printf `keep_keys(resource.attributes, %s) where resource.attributes["splunk.logs_to_metrics"] == true` (include "splunk-otel-collector.logsToMetricsResourceAllowlist" .) | quote }}
     {{- if not .Values.gateway.enabled }}
     - delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true
     {{- end }}
@@ -274,7 +354,6 @@ count/logs_to_metrics:
         - key: http.request.method
           default_value: unknown
         - key: http.response.status_code
-          default_value: 0
     {{- end }}
     {{- if eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.log.record.count")) "true" }}
     app.log.record.count:
@@ -322,11 +401,11 @@ connectors:
 {{- end -}}
 
 {{/*
-Dedicated agent file-log pipeline for Logs-to-Metrics.
+Agent file-log branch for Logs-to-Metrics.
 */}}
 {{- define "splunk-otel-collector.logsToMetricsAgentPipeline" -}}
 {{- if eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true" }}
-# Dedicated file_log branch for the opt-in Logs-to-Metrics catalog.
+# Opt-in Logs-to-Metrics branch sharing the normal container file_log receiver.
 logs/log_to_metrics:
   receivers:
     - file_log
@@ -383,7 +462,7 @@ Gateway processor definitions for Logs-to-Metrics.
 transform/logs_to_metrics_metrics:
   error_mode: silent
   metric_statements:
-    - keep_keys(resource.attributes, {{ include "splunk-otel-collector.logsToMetricsResourceAllowlist" . }}) where resource.attributes["splunk.logs_to_metrics"] == true
+    - {{ printf `keep_keys(resource.attributes, %s) where resource.attributes["splunk.logs_to_metrics"] == true` (include "splunk-otel-collector.logsToMetricsResourceAllowlist" .) | quote }}
     - delete_key(resource.attributes, "splunk.logs_to_metrics") where resource.attributes["splunk.logs_to_metrics"] == true
 {{- end }}
 {{- end -}}
