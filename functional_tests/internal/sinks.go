@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
+	//nolint:staticcheck // Required for SignalFx ingest compatibility tests.
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/stretchr/testify/require"
@@ -46,7 +47,7 @@ func SetupHECObjectsSink(t *testing.T) *consumertest.LogsSink {
 func setupHECLogsSink(t *testing.T, port int) *consumertest.LogsSink {
 	f := splunkhecreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	cfg.NetAddr = confignet.AddrConfig{
+	cfg.ServerConfig.NetAddr = confignet.AddrConfig{
 		Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
 		Transport: "tcp",
 	}
@@ -68,7 +69,7 @@ func SetupHECMetricsSink(t *testing.T) *consumertest.MetricsSink {
 	// the splunkhecreceiver does poorly at receiving logs and metrics. Use separate ports for now.
 	f := splunkhecreceiver.NewFactory()
 	mCfg := f.CreateDefaultConfig().(*splunkhecreceiver.Config)
-	mCfg.NetAddr = confignet.AddrConfig{
+	mCfg.ServerConfig.NetAddr = confignet.AddrConfig{
 		Endpoint:  fmt.Sprintf("0.0.0.0:%d", HECMetricsReceiverPort),
 		Transport: "tcp",
 	}
@@ -249,12 +250,12 @@ func setupSignalfxReceiverSink(t *testing.T, host component.Host, port int, auth
 	mc := new(consumertest.MetricsSink)
 	f := signalfxreceiver.NewFactory()
 	cfg := f.CreateDefaultConfig().(*signalfxreceiver.Config)
-	cfg.NetAddr = confignet.AddrConfig{
+	cfg.ServerConfig.NetAddr = confignet.AddrConfig{
 		Endpoint:  fmt.Sprintf("0.0.0.0:%d", port),
 		Transport: "tcp",
 	}
 	if auth != nil {
-		cfg.Auth = *auth
+		cfg.ServerConfig.Auth = *auth
 	}
 
 	rcvr, err := f.CreateMetrics(t.Context(), receivertest.NewNopSettings(f.Type()), cfg, mc)
