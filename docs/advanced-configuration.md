@@ -39,8 +39,8 @@ gateway processors.
 | Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
 | Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. |
 
-To apply gateway processing to the main Kubernetes cluster metrics pipeline,
-override its exporter to use the gateway's OTLP endpoint:
+To send cluster receiver SignalFx metrics and metadata requests through the
+gateway's transparent forwarders, override the SignalFx exporter endpoints:
 
 ```yaml
 gateway:
@@ -49,20 +49,22 @@ gateway:
 clusterReceiver:
   config:
     exporters:
-      otlp_grpc/gateway:
-        endpoint: <gateway-service>:4317
-        tls:
-          insecure: true
-    service:
-      pipelines:
-        metrics:
-          exporters: [otlp_grpc/gateway]
+      signalfx:
+        ingest_url: http://<gateway-service>:9943
+        api_url: http://<gateway-service>:6060
+      signalfx/histograms:
+        ingest_url: http://<gateway-service>:9943
+        api_url: http://<gateway-service>:6060
 ```
 
 Replace `<gateway-service>` with the gateway Service name, normally
-`<helm-release>-splunk-otel-collector`. This override changes only the main
-cluster metrics pipeline; configure other cluster receiver pipelines separately
-if they also need gateway processing.
+`<helm-release>-splunk-otel-collector`. This forwards SignalFx ingest and API
+traffic without applying gateway processors. Keep the default
+`k8s_cluster.metadata_exporters: [signalfx]`; port `6060` forwards its Kubernetes
+dimension and property updates, which OTLP metrics alone do not replace. Other
+cluster receiver exporters, including `otlp_http/o11y_events`,
+`otlp_http/o11y_entities`, and Splunk Platform exporters, remain direct unless
+configured separately.
 
 ## Send logs to Splunk Platform with Splunk Connect for OTLP
 
