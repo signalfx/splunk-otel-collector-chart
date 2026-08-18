@@ -28,14 +28,17 @@ clusterName: my-k8s-cluster
 
 ## Gateway routing
 
-Setting `gateway.enabled: true` deploys the gateway and automatically sends the
-agent's metrics, traces, logs, profiling data, SecureApp events, and entity events
-to its OTLP pipelines. It does not route every chart-managed data path through
-gateway processors.
+Setting `gateway.enabled: true` deploys the gateway. Data from agent pipelines
+that use the chart-managed `otlp_grpc` or `otlp_http/entities` exporters is sent
+over OTLP to the gateway's `otlp` receiver, then processed by the corresponding
+metrics, traces, or logs service pipeline. This includes the agent's primary
+metrics, traces, logs, profiling data, SecureApp events, and entity events. Other
+chart-managed data paths do not enter the gateway's `otlp` receiver; they are
+transparently forwarded or remain direct, as described below.
 
 | Data path | Behavior when the gateway is enabled |
 | --- | --- |
-| Agent OTLP pipelines | Sent through the gateway pipelines, where gateway processors apply. |
+| Agent data sent by the chart-managed `otlp_grpc` or `otlp_http/entities` exporters | Received by the gateway's `otlp` receiver and processed by the corresponding metrics, traces, or logs pipeline. |
 | Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
 | Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. |
 
