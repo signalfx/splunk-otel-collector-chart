@@ -26,6 +26,49 @@ splunkObservability:
 clusterName: my-k8s-cluster
 ```
 
+## Gateway routing
+
+Setting `gateway.enabled: true` deploys the gateway. Data from agent pipelines
+that use the chart-managed `otlp_grpc` or `otlp_http/entities` exporters is sent
+over OTLP to the gateway's `otlp` receiver, then processed by the corresponding
+metrics, traces, or logs service pipeline. This includes the agent's primary
+metrics, traces, logs, profiling data, SecureApp events, and entity events. Other
+chart-managed data paths do not enter the gateway's `otlp` receiver; they are
+transparently forwarded or remain direct, as described below.
+
+| Data path | Behavior when the gateway is enabled |
+| --- | --- |
+| Agent data sent by the chart-managed `otlp_grpc` or `otlp_http/entities` exporters | Received by the gateway's `otlp` receiver and processed by the corresponding metrics, traces, or logs pipeline. |
+| Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
+| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. |
+
+To send cluster receiver SignalFx metrics and metadata requests through the
+gateway's transparent forwarders, override the SignalFx exporter endpoints:
+
+```yaml
+gateway:
+  enabled: true
+
+clusterReceiver:
+  config:
+    exporters:
+      signalfx:
+        ingest_url: http://<gateway-service>:9943
+        api_url: http://<gateway-service>:6060
+      signalfx/histograms:
+        ingest_url: http://<gateway-service>:9943
+        api_url: http://<gateway-service>:6060
+```
+
+Replace `<gateway-service>` with the gateway Service name, normally
+`<helm-release>-splunk-otel-collector`. This forwards SignalFx ingest and API
+traffic without applying gateway processors. Keep the default
+`k8s_cluster.metadata_exporters: [signalfx]`; port `6060` forwards its Kubernetes
+dimension and property updates, which OTLP metrics alone do not replace. Other
+cluster receiver exporters, including `otlp_http/o11y_events`,
+`otlp_http/o11y_entities`, and Splunk Platform exporters, remain direct unless
+configured separately.
+
 ## Send logs to Splunk Platform with Splunk Connect for OTLP
 
 By default, this chart sends logs to Splunk Enterprise or Splunk Cloud Platform with
