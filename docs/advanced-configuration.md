@@ -26,6 +26,44 @@ splunkObservability:
 clusterName: my-k8s-cluster
 ```
 
+## Gateway routing
+
+Setting `gateway.enabled: true` deploys the gateway and automatically sends the
+agent's metrics, traces, logs, profiling data, SecureApp events, and entity events
+to its OTLP pipelines. It does not route every chart-managed data path through
+gateway processors.
+
+| Data path | Behavior when the gateway is enabled |
+| --- | --- |
+| Agent OTLP pipelines | Sent through the gateway pipelines, where gateway processors apply. |
+| Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
+| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. |
+
+To apply gateway processing to the main Kubernetes cluster metrics pipeline,
+override its exporter to use the gateway's OTLP endpoint:
+
+```yaml
+gateway:
+  enabled: true
+
+clusterReceiver:
+  config:
+    exporters:
+      otlp_grpc/gateway:
+        endpoint: <gateway-service>:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        metrics:
+          exporters: [otlp_grpc/gateway]
+```
+
+Replace `<gateway-service>` with the gateway Service name, normally
+`<helm-release>-splunk-otel-collector`. This override changes only the main
+cluster metrics pipeline; configure other cluster receiver pipelines separately
+if they also need gateway processing.
+
 ## Send logs to Splunk Platform with Splunk Connect for OTLP
 
 By default, this chart sends logs to Splunk Enterprise or Splunk Cloud Platform with
