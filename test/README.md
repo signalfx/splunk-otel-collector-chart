@@ -1,7 +1,7 @@
 # Splunk Platform Functional Test Environment Setup
 
 ## Prerequisites
-* Golang version >= 1.26.5
+* Golang version >= 1.26.6
 * Kubectl = v1.15.2
 * Minikube = v1.20.0
 * Helm = 3.3.x
