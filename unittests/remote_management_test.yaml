@@ -1,0 +1,330 @@
+suite: splunk-otel-collector.remoteManagement
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - opamp-bridge-configmap.yaml
+  - opamp-bridge-deployment.yaml
+  - opamp-bridge-rbac.yaml
+  - opamp-bridge-serviceaccount.yaml
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+  - configmap-cluster-receiver.yaml
+
+tests:
+  - it: should not render opamp bridge service account by default
+    template: opamp-bridge-serviceaccount.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render opamp bridge rbac by default
+    template: opamp-bridge-rbac.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render opamp bridge config map by default
+    template: opamp-bridge-configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render opamp bridge deployment by default
+    template: opamp-bridge-deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render opamp bridge config map when remote management is enabled
+    template: opamp-bridge-configmap.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should render opamp bridge deployment when remote management is enabled
+    template: opamp-bridge-deployment.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should render opamp bridge rbac when remote management is enabled
+    template: opamp-bridge-rbac.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: should render opamp bridge service account when remote management is enabled
+    template: opamp-bridge-serviceaccount.yaml
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should render opamp bridge service account
+    template: opamp-bridge-serviceaccount.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ServiceAccount
+
+  - it: should render opamp bridge role
+    template: opamp-bridge-rbac.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Role
+      - contains:
+          path: rules[0].resources
+          content: configmaps
+      - contains:
+          path: rules[0].verbs
+          content: get
+      - contains:
+          path: rules[0].verbs
+          content: list
+      - contains:
+          path: rules[0].verbs
+          content: watch
+      - contains:
+          path: rules[0].verbs
+          content: update
+      - contains:
+          path: rules[1].resources
+          content: daemonsets
+      - contains:
+          path: rules[1].resources
+          content: deployments
+      - contains:
+          path: rules[1].resources
+          content: statefulsets
+      - contains:
+          path: rules[1].verbs
+          content: get
+      - contains:
+          path: rules[1].verbs
+          content: list
+      - contains:
+          path: rules[1].verbs
+          content: watch
+      - contains:
+          path: rules[1].verbs
+          content: update
+      - contains:
+          path: rules[1].verbs
+          content: patch
+
+  - it: should render opamp bridge role binding
+    template: opamp-bridge-rbac.yaml
+    documentIndex: 1
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: roleRef.name
+          value: test-release-splunk-otel-collector-opamp-bridge
+      - equal:
+          path: subjects[0].name
+          value: test-release-splunk-otel-collector-opamp-bridge
+
+  - it: should render opamp bridge config map
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+
+  - it: should render opamp bridge deployment
+    template: opamp-bridge-deployment.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: test-release-splunk-otel-collector-opamp-bridge
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-splunk-otel-collector-opamp-bridge
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge:v0.158.0
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --config-file=/conf/config.yaml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --mode=standalone
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key
+          value: splunk_observability_access_token
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/os"]
+          value: linux
+
+  - it: should configure bridge to manage chart-created agent and cluster receiver workloads
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "mode: standalone"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "https://ingest.test.observability.splunkcloud.com/v1/opamp"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'X-SF-Token: "\$\{SPLUNK_OBSERVABILITY_ACCESS_TOKEN\}"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "k8s.cluster.name: test"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'kind: DaemonSet'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-agent"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-otel-agent"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'kind: Deployment'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-k8s-cluster-receiver"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-otel-k8s-cluster-receiver"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'otelcol.service.mode: agent'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'otelcol.service.mode: clusterReceiver'
+
+  - it: should include gateway workload when gateway is enabled
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+      gateway:
+        enabled: true
+        mode: statefulset
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'kind: StatefulSet'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'otelcol.service.mode: gateway'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-otel-collector"'
+
+  - it: should not configure collector direct opamp when remote management is enabled
+    set:
+      remoteManagement:
+        enabled: true
+      gateway:
+        enabled: true
+    asserts:
+      - notMatchRegex:
+          template: configmap-agent.yaml
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+      - notMatchRegex:
+          template: configmap-agent.yaml
+          path: data["relay"]
+          pattern: "http_forwarder/opamp_splunk_o11y"
+      - notMatchRegex:
+          template: configmap-gateway.yaml
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+      - notMatchRegex:
+          template: configmap-cluster-receiver.yaml
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+
+  - it: should keep collector direct opamp enabled by default
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "opamp/splunk_o11y"
+
+  - it: should fail when remote management has no managed workloads
+    template: opamp-bridge-serviceaccount.yaml
+    set:
+      remoteManagement:
+        enabled: true
+      agent:
+        enabled: false
+      clusterReceiver:
+        enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "/remoteManagement requires at least one managed collector workload"
+
+  - it: should allow custom endpoint and headers without Splunk Observability
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+        opampBridge:
+          endpoint: https://opamp.example.com/v1/opamp
+          headers:
+            Authorization: Bearer custom-token
+      splunkObservability:
+        realm: ""
+        accessToken: ""
+      splunkPlatform:
+        endpoint: https://hec.example.com/services/collector/event
+        token: platform-token
+        index: main
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "https://opamp.example.com/v1/opamp"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "Authorization: Bearer custom-token"

@@ -1,0 +1,21 @@
+clusterName: remote-management-test
+
+splunkObservability:
+  realm: fake-realm
+  accessToken: fake-token
+
+remoteManagement:
+  enabled: true
+
+clusterReceiver:
+  enabled: true
+  eventsEnabled: false
+
+agent:
+  controlPlaneMetrics:
+    apiserver:
+      enabled: false
+    controllerManager:
+      enabled: false
+    coredns:
+      enabled: false

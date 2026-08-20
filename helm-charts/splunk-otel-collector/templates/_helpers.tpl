@@ -297,6 +297,13 @@ Create the validateSecret image name.
 {{- end -}}
 
 {{/*
+Create the OpAMP Bridge image name.
+*/}}
+{{- define "splunk-otel-collector.image.opampBridge" -}}
+{{- printf "%s:%s" .Values.remoteManagement.opampBridge.image.repository .Values.remoteManagement.opampBridge.image.tag | trimSuffix ":" -}}
+{{- end -}}
+
+{{/*
 Create a filter expression for multiline logs configuration.
 */}}
 {{- define "splunk-otel-collector.newlineExpr" }}
