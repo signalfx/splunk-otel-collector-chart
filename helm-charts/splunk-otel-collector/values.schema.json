@@ -1021,26 +1021,6 @@
               ]
             }
           }
-        },
-        "opampBridge": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "repository": {
-              "type": "string"
-            },
-            "tag": {
-              "type": "string"
-            },
-            "pullPolicy": {
-              "type": "string",
-              "enum": [
-                "IfNotPresent",
-                "Always",
-                "Never"
-              ]
-            }
-          }
         }
       }
     },
@@ -1397,6 +1377,26 @@
               "items": {
                 "type": "object"
               }
+            },
+            "image": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "repository": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string",
+                  "enum": [
+                    "IfNotPresent",
+                    "Always",
+                    "Never"
+                  ]
+                }
+              }
             }
           }
         }
@@ -1704,16 +1704,6 @@
           "type": "boolean"
         }
       }
-    },
-    "opentelemetry-target-allocator": {
-      "description": "Target Allocator configuration. Prefer using the 'targetallocator' alias for new installations. This field is provided for compatibility with the original subchart name.",
-      "type": "object",
-      "additionalProperties": true
-    },
-    "obi": {
-      "description": "OpenTelemetry eBPF Instrumentation configuration. A subchart that is used to install the eBPF instrumentation, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
-      "type": "object",
-      "additionalProperties": true
     },
     "opentelemetry-ebpf-instrumentation": {
       "description": "OpenTelemetry eBPF Instrumentation configuration. Prefer using the 'obi' alias for new installations. This field is provided for compatibility with the original subchart name, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",

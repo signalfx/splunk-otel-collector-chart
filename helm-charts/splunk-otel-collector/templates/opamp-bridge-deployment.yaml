@@ -73,7 +73,7 @@ spec:
       containers:
         - name: bridge
           image: {{ include "splunk-otel-collector.image.opampBridge" . }}
-          imagePullPolicy: {{ .Values.image.opampBridge.pullPolicy }}
+          imagePullPolicy: {{ $bridge.image.pullPolicy }}
           args:
             - --config-file=/conf/config.yaml
             - --mode=standalone

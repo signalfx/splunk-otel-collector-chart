@@ -300,7 +300,7 @@ Create the validateSecret image name.
 Create the OpAMP Bridge image name.
 */}}
 {{- define "splunk-otel-collector.image.opampBridge" -}}
-{{- printf "%s:%s" .Values.image.opampBridge.repository .Values.image.opampBridge.tag | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.remoteManagement.opampBridge.image.repository .Values.remoteManagement.opampBridge.image.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{/*

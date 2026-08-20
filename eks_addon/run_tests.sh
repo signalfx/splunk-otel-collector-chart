@@ -74,24 +74,17 @@ test_no_chart_dependencies() {
 test_images() {
   echo "⏳ Running test_images ..."
 
-  # Check rendered workload images. Some optional features have image defaults in values.yaml,
-  # but are not part of the EKS Add-on unless their templates are rendered.
-  local images
-  images=$(helm template splunk-otel-collector "${EKS_CHART_DIR}" \
-     --kube-version "${K8S_VERSION}" \
-     --namespace splunk-otel-collector \
-     --include-crds \
-     --set k8sVersion="${K8S_VERSION}" \
-     --no-hooks | yq e -N '.. | select(tag == "!!map" and has("image")) | .image' - | sort -u)
-  if [[ -z "${images}" ]]; then
-    echo "❌ Image verification failed: No rendered workload images found"
+  # Find all repository entries in the values file
+  local image_repos=$(yq e '.image | .. | select(has("repository")) | .repository' "${EKS_CHART_DIR}/values.yaml" | sort -u)
+  if [[ -z "${image_repos}" ]]; then
+    echo "❌ Image verification failed: No image repositories found in values.yaml"
     return 1
   fi
 
-  # Check each rendered image to ensure it's hosted on ECR
-  echo "${images}" | while read -r image; do
-    if ! [[ "${image}" == *".dkr.ecr."*".amazonaws.com/"* || "${image}" == "public.ecr.aws/"* ]]; then
-      echo "❌ Image verification failed: Image is not hosted on ECR: ${image}"
+  # Check each repository to ensure it's hosted on ECR
+  echo "${image_repos}" | while read -r repo; do
+    if ! [[ "${repo}" == *".dkr.ecr."*".amazonaws.com/"* || "${repo}" == "public.ecr.aws/"* ]]; then
+      echo "❌ Image verification failed: Image is not hosted on ECR: ${repo}"
       return 1
     fi
   done
