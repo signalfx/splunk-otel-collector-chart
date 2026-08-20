@@ -1,0 +1,435 @@
+# Contract tests map routing values to the generated connector, pipelines,
+# processors, exporters, credentials, and queue storage. The corresponding
+# reviewable Collector config is committed under
+# examples/multi-tenant-platform-logs/rendered_manifests/configmap-agent.yaml.
+suite: splunk-otel-collector.logsRouting
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+  - daemonset.yaml
+  - gateway-workload.yaml
+  - configmap-cluster-receiver.yaml
+
+tests:
+  - it: preserves the existing logs pipeline when routing is not configured
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com:8088/services/collector/event
+        token: default-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "routing/platform_logs"
+
+  - it: routes on a Kubernetes pod label resource attribute
+    set:
+      splunkObservability.realm: ""
+      extraAttributes:
+        fromLabels:
+          - key: product
+            from: pod
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: k8s.pod.labels.product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'condition: resource\.attributes\["k8s\.pod\.labels\.product"\] == "application"'
+      - matchRegex:
+          path: data["relay"]
+          pattern: "k8s_attributes:[\\s\\S]+?labels:\\n\\s+- from: pod\\n\\s+key: product"
+
+  - it: routes matching logs to tenant exporters and unmatched logs to the default exporter
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com:8088/services/collector/event
+        token: default-token
+        index: shared
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        logsRouting:
+          attribute: product
+          defaultProcessors:
+            - resource/default-route
+          routes:
+            application:
+              index: application-logs
+              source: application-source
+              sourcetype: application:sourcetype
+              processors:
+                - resource/application-route
+              tokenSecret:
+                name: application-hec
+                key: token
+            security:
+              value: security-platform
+              endpoint: https://security.example.com:8088/services/collector/event
+              tokenFile: /var/run/splunk-route-tokens/security
+              retryOnFailure:
+                enabled: false
+              sendingQueue:
+                enabled: false
+      agent:
+        config:
+          processors:
+            resource/default-route:
+              attributes:
+                - action: upsert
+                  key: routing.destination
+                  value: default
+            resource/application-route:
+              attributes:
+                - action: upsert
+                  key: routing.destination
+                  value: application
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/platform_logs:[\\s\\S]+?default_pipelines:\\n\\s+- logs/platform/default[\\s\\S]+?condition: resource\\.attributes\\[\"product\"\\] == \"application\"[\\s\\S]+?logs/platform/application[\\s\\S]+?condition: resource\\.attributes\\[\"product\"\\] == \"security-platform\"[\\s\\S]+?logs/platform/security"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs/application:[\\s\\S]+?index: application-logs[\\s\\S]+?token: \\$\\{SPLUNK_PLATFORM_HEC_TOKEN_APPLICATION\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs/security:[\\s\\S]+?endpoint: https://security\\.example\\.com:8088/services/collector/event[\\s\\S]+?retry_on_failure:\\n\\s+enabled: false[\\s\\S]+?sending_queue:\\n\\s+enabled: false[\\s\\S]+?token: \\$\\{file:/var/run/splunk-route-tokens/security\\}"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/platform/default:[\\s\\S]+?exporters:\\n\\s+- splunk_hec/platform_logs[\\s\\S]+?processors:\\n\\s+- resource/default-route[\\s\\S]+?receivers:\\n\\s+- routing/platform_logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/platform/application:[\\s\\S]+?exporters:\\n\\s+- splunk_hec/platform_logs/application[\\s\\S]+?processors:\\n\\s+- resource/application-route\\n\\s+- transform/platform_logs_route_metadata_application[\\s\\S]+?receivers:\\n\\s+- routing/platform_logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_application:[\\s\\S]+?com\\.splunk\\.index[\\s\\S]+?application-logs[\\s\\S]+?com\\.splunk\\.source[\\s\\S]+?application-source[\\s\\S]+?com\\.splunk\\.sourcetype[\\s\\S]+?application:sourcetype"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_security:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+logs:\\n\\s+exporters:\\n\\s+- routing/platform_logs"
+
+  - it: injects route Secret credentials into the direct agent
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenSecret:
+                name: application-hec
+                key: hec-token
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN_APPLICATION
+            valueFrom:
+              secretKeyRef:
+                name: application-hec
+                key: hec-token
+
+  - it: injects route Secret credentials only into the gateway owner
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenSecret:
+                name: application-hec
+                key: hec-token
+    template: gateway-workload.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN_APPLICATION
+            valueFrom:
+              secretKeyRef:
+                name: application-hec
+                key: hec-token
+
+  - it: does not inject gateway-owned route credentials into the forwarding agent
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenSecret:
+                name: application-hec
+                key: hec-token
+    template: daemonset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SPLUNK_PLATFORM_HEC_TOKEN_APPLICATION
+            valueFrom:
+              secretKeyRef:
+                name: application-hec
+                key: hec-token
+
+  - it: gives an opted-in route isolated persistent queue storage
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        sendingQueue:
+          persistentQueue:
+            enabled: false
+        logsRouting:
+          attribute: product
+          routes:
+            security:
+              tokenFile: /var/run/security-token
+              sendingQueue:
+                queueSize: 12000
+                persistentQueue:
+                  enabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "file_storage/persistent_queue_security:[\\s\\S]+?directory: /var/addon/splunk/exporter_queue/agent/security"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs/security:[\\s\\S]+?queue_size: 12000[\\s\\S]+?storage: file_storage/persistent_queue_security"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+file_storage/persistent_queue:\\n"
+
+  - it: prepares the queue host path for a persistent route
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        sendingQueue:
+          persistentQueue:
+            enabled: false
+        logsRouting:
+          attribute: product
+          routes:
+            security:
+              tokenFile: /var/run/security-token
+              sendingQueue:
+                persistentQueue:
+                  enabled: true
+      agent:
+        securityContext:
+          runAsUser: 20000
+          runAsGroup: 20000
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: persistent-queue
+            mountPath: /var/addon/splunk/exporter_queue/agent
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "mkdir -p /var/addon/splunk/exporter_queue/agent/security"
+
+  - it: applies no-drop backpressure settings to tenant exporters
+    set:
+      splunkObservability.realm: ""
+      featureGates.noDropLogsPipeline: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "splunk_hec/platform_logs/application:[\\s\\S]+?max_elapsed_time: 0s[\\s\\S]+?batch:[\\s\\S]+?block_on_overflow: true[\\s\\S]+?queue_size: 10000[\\s\\S]+?sizer: items"
+
+  - it: pins only metadata fields explicitly configured by a route
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+            security:
+              index: security-logs
+              tokenFile: /var/run/security-token
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_security:[\\s\\S]+?com\\.splunk\\.index[\\s\\S]+?security-logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/platform/security:[\\s\\S]+?processors:\\n\\s+- transform/platform_logs_route_metadata_security"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_application:"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_security:\\n(?: {4,}[^\\n]*\\n)* {4,}[^\\n]*com\\.splunk\\.(source|sourcetype)"
+
+  - it: runs configured processors immediately before routing
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          preRoutingProcessors:
+            - transform/derive-product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+      agent:
+        config:
+          processors:
+            transform/derive-product:
+              log_statements:
+                - context: resource
+                  statements:
+                    - set(attributes["product"], "application")
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n\\s+- routing/platform_logs\\n\\s+processors:[\\s\\S]+?- resource/logs[\\s\\S]+?- transform/derive-product"
+
+  - it: makes the gateway the sole owner of tenant routing
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          preRoutingProcessors:
+            - transform/gateway-routing-key
+          defaultProcessors:
+            - resource/gateway-default
+          routes:
+            application:
+              index: gateway-application
+              processors:
+                - resource/gateway-application
+              tokenFile: /var/run/application-token
+      gateway:
+        enabled: true
+        config:
+          processors:
+            transform/gateway-routing-key:
+              log_statements:
+                - context: resource
+                  statements:
+                    - set(attributes["product"], "application") where attributes["product"] == nil
+            resource/gateway-default:
+              attributes:
+                - action: upsert
+                  key: routing.destination
+                  value: default
+            resource/gateway-application:
+              attributes:
+                - action: upsert
+                  key: routing.destination
+                  value: application
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "routing/platform_logs:[\\s\\S]+?splunk_hec/platform_logs/application:[\\s\\S]+?logs:\\n\\s+exporters:\\n\\s+- routing/platform_logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n\\s+- routing/platform_logs\\n\\s+processors:[\\s\\S]+?- resource/logs[\\s\\S]+?- transform/gateway-routing-key"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/platform/default:[\\s\\S]+?processors:\\n\\s+- resource/gateway-default"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/platform/application:[\\s\\S]+?processors:\\n\\s+- resource/gateway-application\\n\\s+- transform/platform_logs_route_metadata_application"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/platform_logs_route_metadata_application:[\\s\\S]+?gateway-application"
+
+  - it: keeps the gateway-mode agent as an OTLP forwarder
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "routing/platform_logs|splunk_hec/platform_logs/application"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs:\\n\\s+exporters:\\n\\s+- otlp_grpc"
+
+  - it: keeps cluster receiver events on the default destination
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/application-token
+      clusterReceiver.eventsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "routing/platform_logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "\\n\\s+logs:\\n\\s+exporters:\\n\\s+- splunk_hec/platform_logs"
