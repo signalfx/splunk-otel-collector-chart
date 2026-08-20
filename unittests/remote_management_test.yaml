@@ -94,8 +94,38 @@ tests:
       - isKind:
           of: Role
       - contains:
+          path: rules[0].resources
+          content: configmaps
+      - contains:
+          path: rules[0].verbs
+          content: get
+      - contains:
+          path: rules[0].verbs
+          content: list
+      - contains:
+          path: rules[0].verbs
+          content: watch
+      - contains:
           path: rules[0].verbs
           content: update
+      - contains:
+          path: rules[1].resources
+          content: daemonsets
+      - contains:
+          path: rules[1].resources
+          content: deployments
+      - contains:
+          path: rules[1].resources
+          content: statefulsets
+      - contains:
+          path: rules[1].verbs
+          content: get
+      - contains:
+          path: rules[1].verbs
+          content: list
+      - contains:
+          path: rules[1].verbs
+          content: watch
       - contains:
           path: rules[1].verbs
           content: update
@@ -112,6 +142,12 @@ tests:
     asserts:
       - isKind:
           of: RoleBinding
+      - equal:
+          path: roleRef.name
+          value: test-release-splunk-otel-collector-opamp-bridge
+      - equal:
+          path: subjects[0].name
+          value: test-release-splunk-otel-collector-opamp-bridge
 
   - it: should render opamp bridge config map
     template: opamp-bridge-configmap.yaml
@@ -136,11 +172,26 @@ tests:
           path: metadata.name
           value: test-release-splunk-otel-collector-opamp-bridge
       - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-splunk-otel-collector-opamp-bridge
+      - equal:
           path: spec.template.spec.containers[0].image
           value: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge:v0.158.0
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --config-file=/conf/config.yaml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --mode=standalone
       - equal:
           path: spec.template.spec.containers[0].env[0].name
           value: SPLUNK_OBSERVABILITY_ACCESS_TOKEN
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key
+          value: splunk_observability_access_token
       - equal:
           path: spec.template.spec.nodeSelector["kubernetes.io/os"]
           value: linux
@@ -154,7 +205,13 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
+          pattern: "mode: standalone"
+      - matchRegex:
+          path: data["config.yaml"]
           pattern: 'endpoint: "https://ingest.test.observability.splunkcloud.com/v1/opamp"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'X-SF-Token: "\$\{SPLUNK_OBSERVABILITY_ACCESS_TOKEN\}"'
       - matchRegex:
           path: data["config.yaml"]
           pattern: "k8s.cluster.name: test"
@@ -173,6 +230,12 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: 'name: "test-release-splunk-otel-collector-k8s-cluster-receiver"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'name: "test-release-splunk-otel-collector-otel-k8s-cluster-receiver"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'otelcol.service.mode: agent'
       - matchRegex:
           path: data["config.yaml"]
           pattern: 'otelcol.service.mode: clusterReceiver'

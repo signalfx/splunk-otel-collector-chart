@@ -26,6 +26,71 @@ splunkObservability:
 clusterName: my-k8s-cluster
 ```
 
+## Remote Management
+
+Setting `remoteManagement.enabled: true` deploys one OpAMP Bridge Deployment for
+the Helm release. The bridge connects to Splunk Observability Cloud by using the
+Open Agent Management Protocol (OpAMP) and applies remote configuration to the
+collector workloads created by this chart. At least one chart-created workload
+or extra agent must be managed when Remote Management is enabled.
+
+By default, the bridge connects to
+`https://ingest.<realm>.observability.splunkcloud.com/v1/opamp` and sends the
+`splunkObservability.accessToken` as the `X-SF-Token` header. Use
+`remoteManagement.opampBridge.endpoint`, `headers`, and `tls` when the bridge
+must connect to another OpAMP endpoint or use custom connection settings. When
+`headers` is set, include all headers required by the endpoint:
+
+```yaml
+remoteManagement:
+  enabled: true
+  opampBridge:
+    endpoint: https://opamp.example.com/v1/opamp
+    headers:
+      Authorization: "Bearer ${OPAMP_TOKEN}"
+    tls:
+      insecure_skip_verify: false
+    extraEnvs:
+      - name: OPAMP_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: opamp-token
+            key: token
+```
+
+The bridge runs as a single Linux pod with its own ConfigMap, ServiceAccount,
+Role, and RoleBinding. Its namespaced RBAC lets it read and update ConfigMaps and
+read, update, and patch managed DaemonSets, Deployments, and StatefulSets so it
+can apply remote configuration and roll out workload changes. When Remote
+Management is enabled, chart-created collectors do not open their own direct
+OpAMP sessions to Splunk Observability Cloud; the bridge owns that connection.
+
+By default, the bridge is configured to manage every enabled collector workload
+installed by this chart: the agent, gateway, and cluster receiver. If you do not
+override `remoteManagement.opampBridge.workloads`, every installed chart-managed
+collector workload is automatically included. Override individual
+`workloads.*.enabled` values only when part of the release should not be
+remote-managed, or use `extraAgents` to include collector workloads that were not
+created by this chart. When you override the workload configuration, make sure
+each workload that should be managed is listed and configured correctly:
+
+```yaml
+remoteManagement:
+  enabled: true
+  opampBridge:
+    workloads:
+      agent:
+        enabled: true
+      gateway:
+        enabled: false
+      clusterReceiver:
+        enabled: false
+```
+
+See
+[`remoteManagement` in values.yaml](../helm-charts/splunk-otel-collector/values.yaml)
+for the full set of supported options.
+
 ## Gateway routing
 
 Setting `gateway.enabled: true` deploys the gateway. Data from agent pipelines
