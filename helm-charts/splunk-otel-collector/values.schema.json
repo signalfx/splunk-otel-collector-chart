@@ -321,7 +321,7 @@
       ]
     },
     "environment": {
-      "description": "Optional \"environment\" parameter that will be added to all the telemetry data (traces/logs/metrics), including Collector internal telemetry, as the \"deployment.environment.name\" resource attribute. It will allow Splunk Observability users to investigate data from different sources separately.",
+      "description": "Optional \"environment\" parameter that will be added to all the telemetry data (traces/logs/metrics), including Collector internal telemetry, as the \"deployment.environment.name\" resource attribute, and to OpAMP Bridge descriptions as a non-identifying attribute. It will allow Splunk Observability users to investigate data from different sources separately.",
       "type": "string"
     },
     "autodetect": {
