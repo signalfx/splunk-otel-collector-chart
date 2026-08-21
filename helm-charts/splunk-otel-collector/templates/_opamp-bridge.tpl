@@ -99,6 +99,9 @@ Render standalone OpAMP Bridge non-identifying attributes.
 {{- with .Values.clusterName -}}
 {{- $_ := set $attrs "k8s.cluster.name" . -}}
 {{- end -}}
+{{- with .Values.environment -}}
+{{- $_ := set $attrs "deployment.environment.name" . -}}
+{{- end -}}
 {{- if $attrs -}}
 {{- toYaml $attrs -}}
 {{- end -}}
@@ -112,6 +115,9 @@ Render standalone OpAMP Bridge non-identifying attributes for a chart-managed wo
 {{- $_ := set $attrs "otelcol.service.mode" .workload.serviceMode -}}
 {{- with .root.Values.clusterName -}}
 {{- $_ := set $attrs "k8s.cluster.name" . -}}
+{{- end -}}
+{{- with .root.Values.environment -}}
+{{- $_ := set $attrs "deployment.environment.name" . -}}
 {{- end -}}
 {{- toYaml $attrs -}}
 {{- end -}}

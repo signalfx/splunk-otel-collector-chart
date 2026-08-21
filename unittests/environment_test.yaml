@@ -5,6 +5,7 @@ templates:
   - configmap-agent.yaml
   - configmap-cluster-receiver.yaml
   - configmap-gateway.yaml
+  - opamp-bridge-configmap.yaml
 
 tests:
   - it: agent omits the deployment environment when environment is unset
@@ -28,6 +29,16 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["relay"]
+          pattern: "deployment\\.environment"
+
+  - it: opamp bridge omits the deployment environment when environment is unset
+    set:
+      remoteManagement:
+        enabled: true
+    template: opamp-bridge-configmap.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["config.yaml"]
           pattern: "deployment\\.environment"
 
   - it: agent uses deployment.environment.name for collected and internal telemetry
@@ -78,6 +89,31 @@ tests:
           pattern: "name: deployment\\.environment\\.name\\n\\s+value: production"
       - notMatchRegex:
           path: data["relay"]
+          pattern: "(?m)^\\s+(key|name): deployment\\.environment$"
+
+  - it: opamp bridge uses deployment.environment.name for bridge and managed workload descriptions
+    set:
+      environment: production
+      remoteManagement:
+        enabled: true
+      gateway:
+        enabled: true
+    template: opamp-bridge-configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)name: \".*-opamp-bridge\".*description:\\n\\s+non_identifying_attributes:\\n\\s+deployment\\.environment\\.name: production"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)type: otel-agent\\n\\s+description:\\n\\s+non_identifying_attributes:\\n\\s+deployment\\.environment\\.name: production"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)type: otel-collector\\n\\s+description:\\n\\s+non_identifying_attributes:\\n\\s+deployment\\.environment\\.name: production\\n\\s+k8s\\.cluster\\.name: test\\n\\s+otelcol\\.service\\.mode: gateway"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)type: otel-collector\\n\\s+description:\\n\\s+non_identifying_attributes:\\n\\s+deployment\\.environment\\.name: production\\n\\s+k8s\\.cluster\\.name: test\\n\\s+otelcol\\.service\\.mode: clusterReceiver"
+      - notMatchRegex:
+          path: data["config.yaml"]
           pattern: "(?m)^\\s+(key|name): deployment\\.environment$"
 
   - it: cluster receiver internal telemetry has the environment without object or event pipelines
