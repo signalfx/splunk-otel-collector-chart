@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-to-metrics-label-mismatch
+  namespace: logs-to-metrics-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logs-to-metrics-label-mismatch
+  template:
+    metadata:
+      labels:
+        app: logs-to-metrics-label-mismatch
+        logs-to-metrics-fixture: "true"
+        logs-to-metrics-test: disabled
+    spec:
+      containers:
+        - name: logs-to-metrics-label-mismatch
+          image: busybox:1.37.0
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_LABEL_MISMATCH_MARKER","app.level":"ERROR","app.error_code":"label_mismatch"}'
+              sleep 3600
