@@ -1328,7 +1328,7 @@ instrumentation:
       #     value: go_value
     java:
       image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.30.0
-      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.30.0
+      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.30.2
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
