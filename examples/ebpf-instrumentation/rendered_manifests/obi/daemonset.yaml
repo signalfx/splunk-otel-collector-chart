@@ -6,10 +6,10 @@ metadata:
   name: default-obi
   namespace: default
   labels:
-    helm.sh/chart: obi-0.11.0
+    helm.sh/chart: obi-0.12.0
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v0.11.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: obi
     app.kubernetes.io/component: workload
@@ -23,13 +23,13 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: e1ccaba722b72f92f46483abb82be827625cc12f3fb435b93cd3f2a0f5ea28b9
+        checksum/config: 21d27b93fef456a351e8feab4c3a5faf61ccd4f7e459f1f262769d0a395dac65
         
       labels:
-        helm.sh/chart: obi-0.11.0
+        helm.sh/chart: obi-0.12.0
         app.kubernetes.io/name: obi
         app.kubernetes.io/instance: default
-        app.kubernetes.io/version: "v0.10.0"
+        app.kubernetes.io/version: "v0.11.0"
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: obi
         app.kubernetes.io/component: workload
@@ -41,7 +41,7 @@ spec:
       initContainers:
       containers:
         - name: ebpf-instrument
-          image: ghcr.io/open-telemetry/opentelemetry-ebpf-instrumentation/ebpf-instrument:v0.10.0
+          image: ghcr.io/open-telemetry/opentelemetry-ebpf-instrumentation/ebpf-instrument:v0.11.0
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
