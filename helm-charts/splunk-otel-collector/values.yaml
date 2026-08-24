@@ -793,8 +793,7 @@ logsCollection:
 ################################################################################
 # Experimental Logs-to-Metrics configuration.
 # This interface is experimental, is not guaranteed to be stable, and may change
-# at any time. Integrations, including onboarding, should use only this public
-# section and must not depend on generated Collector component names.
+# at any time.
 ################################################################################
 
 logsToMetrics:
@@ -817,11 +816,12 @@ logsToMetrics:
     - app.log.error.count
     - http.server.error.count
   # Exact-match allowlists applied before rule evaluation. Empty selectors match
-  # all values. Namespace and workload lists use OR internally; configured scope
-  # types and every pod label must all match.
+  # all values. Namespace lists and workload selectors use OR internally;
+  # configured scope types and every pod label must all match.
   scope:
     namespaces: []
-    # Matches Deployment, StatefulSet, DaemonSet, CronJob, Job, or ReplicaSet names.
+    # Exact Kubernetes workload kind/name pairs. Supported kinds are Deployment,
+    # StatefulSet, DaemonSet, CronJob, Job, and ReplicaSet.
     workloads: []
     # Exact pod label key/value pairs. All configured labels must match. Labels
     # are used only for selection and are not retained on generated metrics.

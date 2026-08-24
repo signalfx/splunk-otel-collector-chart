@@ -123,6 +123,12 @@ Agent processor definitions for Logs-to-Metrics.
 {{- $eventNameNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.authentication.failure.count" "app.job.failure.count"))) "true" -}}
 {{- $eventOutcomeNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.authentication.failure.count" "app.job.failure.count" "business.transaction.value"))) "true" -}}
 {{- $businessTransactionNormalizationEnabled := eq (include "splunk-otel-collector.logsToMetricsSumConnectorEnabled" .) "true" -}}
+{{- $errorTypeValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsAnyRuleEnabled" (dict "root" . "rules" (list "app.log.error.count" "http.server.error.count" "app.job.failure.count" "app.retry.exhausted.count"))) "true" -}}
+{{- $exceptionValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.exception.unhandled.count")) "true" -}}
+{{- $authenticationValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.authentication.failure.count")) "true" -}}
+{{- $jobValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.job.failure.count")) "true" -}}
+{{- $retryValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.retry.exhausted.count")) "true" -}}
+{{- $throttledValidationEnabled := eq (include "splunk-otel-collector.logsToMetricsRuleEnabled" (dict "root" . "rule" "app.request.throttled.count")) "true" -}}
 # Enrich the metricization branch with stable service and workload identity even when a gateway is enabled.
 k8s_attributes/logs_to_metrics:
   pod_association:
@@ -141,13 +147,14 @@ k8s_attributes/logs_to_metrics:
       - service.namespace
       - service.version
       - k8s.namespace.name
+      # Used transiently to remove the k8sattributes pod-name fallback for service.name.
+      - k8s.pod.name
       - k8s.container.name
       - k8s.deployment.name
       - k8s.statefulset.name
       - k8s.daemonset.name
       - k8s.cronjob.name
       {{- if eq .Values.logsToMetrics.aggregation "instance" }}
-      - k8s.pod.name
       - k8s.pod.uid
       - k8s.node.name
       - container.id
@@ -192,11 +199,17 @@ filter/logs_to_metrics:
   {{- end }}
   {{- if gt (len .Values.logsToMetrics.scope.workloads) 0 }}
     {{- $workloadMatches := list -}}
-    {{- $workloadAttributes := list "k8s.deployment.name" "k8s.statefulset.name" "k8s.daemonset.name" "k8s.cronjob.name" "k8s.job.name" "k8s.replicaset.name" -}}
+    {{- $workloadAttributes := dict
+      "Deployment" "k8s.deployment.name"
+      "StatefulSet" "k8s.statefulset.name"
+      "DaemonSet" "k8s.daemonset.name"
+      "CronJob" "k8s.cronjob.name"
+      "Job" "k8s.job.name"
+      "ReplicaSet" "k8s.replicaset.name"
+    -}}
     {{- range $workload := .Values.logsToMetrics.scope.workloads -}}
-      {{- range $attribute := $workloadAttributes -}}
-        {{- $workloadMatches = append $workloadMatches (printf `resource.attributes[%s] == %s` (toJson $attribute) (toJson $workload)) -}}
-      {{- end -}}
+      {{- $attribute := index $workloadAttributes (index $workload "kind") -}}
+      {{- $workloadMatches = append $workloadMatches (printf `resource.attributes[%s] == %s` (toJson $attribute) (toJson (index $workload "name"))) -}}
     {{- end }}
     - {{ printf "not (%s)" (join " or " $workloadMatches) | quote }}
   {{- end }}
@@ -214,6 +227,48 @@ transform/logs_to_metrics:
     {{ range $mapping := .Values.logsToMetrics.fieldMappings }}
     - {{ printf `set(log.attributes[%s], log.attributes[%s]) where log.attributes[%s] == nil and log.attributes[%s] != nil` (toJson (index $mapping "to")) (toJson (index $mapping "from")) (toJson (index $mapping "to")) (toJson (index $mapping "from")) | quote }}
     {{ end }}
+    # Remove canonical or mapped values with unexpected runtime types before connector
+    # defaults and required-attribute checks are evaluated.
+    {{- if $severityNormalizationEnabled }}
+    - delete_key(log.attributes, "severity_number") where log.attributes["severity_number"] != nil and not IsInt(log.attributes["severity_number"]) and not IsDouble(log.attributes["severity_number"])
+    - delete_key(log.attributes, "severity_number") where IsDouble(log.attributes["severity_number"]) and log.attributes["severity_number"] != Int(log.attributes["severity_number"])
+    - delete_key(log.attributes, "severity_text") where log.attributes["severity_text"] != nil and not IsString(log.attributes["severity_text"])
+    {{- end }}
+    {{- if $errorTypeValidationEnabled }}
+    - delete_key(log.attributes, "error.type") where log.attributes["error.type"] != nil and not IsString(log.attributes["error.type"])
+    {{- end }}
+    {{- if $exceptionValidationEnabled }}
+    - delete_key(log.attributes, "exception.type") where log.attributes["exception.type"] != nil and not IsString(log.attributes["exception.type"])
+    - delete_key(log.attributes, "exception.escaped") where log.attributes["exception.escaped"] != nil and not IsBool(log.attributes["exception.escaped"])
+    {{- end }}
+    {{- if $httpNormalizationEnabled }}
+    - delete_key(log.attributes, "http.response.status_code") where log.attributes["http.response.status_code"] != nil and not IsInt(log.attributes["http.response.status_code"]) and not IsDouble(log.attributes["http.response.status_code"])
+    - delete_key(log.attributes, "http.response.status_code") where IsDouble(log.attributes["http.response.status_code"]) and log.attributes["http.response.status_code"] != Int(log.attributes["http.response.status_code"])
+    - delete_key(log.attributes, "http.request.method") where log.attributes["http.request.method"] != nil and not IsString(log.attributes["http.request.method"])
+    {{- end }}
+    {{- if $eventNameNormalizationEnabled }}
+    - delete_key(log.attributes, "event.name") where log.attributes["event.name"] != nil and not IsString(log.attributes["event.name"])
+    {{- end }}
+    {{- if $eventOutcomeNormalizationEnabled }}
+    - delete_key(log.attributes, "event.outcome") where log.attributes["event.outcome"] != nil and not IsString(log.attributes["event.outcome"])
+    {{- end }}
+    {{- if $authenticationValidationEnabled }}
+    - delete_key(log.attributes, "auth.mechanism") where log.attributes["auth.mechanism"] != nil and not IsString(log.attributes["auth.mechanism"])
+    {{- end }}
+    {{- if $jobValidationEnabled }}
+    - delete_key(log.attributes, "job.type") where log.attributes["job.type"] != nil and not IsString(log.attributes["job.type"])
+    {{- end }}
+    {{- if $retryValidationEnabled }}
+    - delete_key(log.attributes, "retry.exhausted") where log.attributes["retry.exhausted"] != nil and not IsBool(log.attributes["retry.exhausted"])
+    {{- end }}
+    {{- if $throttledValidationEnabled }}
+    - delete_key(log.attributes, "request.throttled") where log.attributes["request.throttled"] != nil and not IsBool(log.attributes["request.throttled"])
+    {{- end }}
+    {{- if $businessTransactionNormalizationEnabled }}
+    - delete_key(log.attributes, "business.transaction.value") where log.attributes["business.transaction.value"] != nil and not IsInt(log.attributes["business.transaction.value"]) and not IsDouble(log.attributes["business.transaction.value"])
+    - delete_key(log.attributes, "business.transaction.type") where log.attributes["business.transaction.type"] != nil and not IsString(log.attributes["business.transaction.type"])
+    - delete_key(log.attributes, "business.transaction.unit") where log.attributes["business.transaction.unit"] != nil and not IsString(log.attributes["business.transaction.unit"])
+    {{- end }}
     {{- if $severityNormalizationEnabled }}
     - set(log.attributes["severity_number"], Int(log.attributes["severity_number"])) where IsDouble(log.attributes["severity_number"]) and log.attributes["severity_number"] == Int(log.attributes["severity_number"])
     - set(log.attributes["splunk.logs_to_metrics.severity.text"], ToUpperCase(log.attributes["severity_text"])) where IsString(log.attributes["severity_text"])
@@ -255,6 +310,11 @@ transform/logs_to_metrics:
     # The 0.156 sum connector adds a value once per grouping attribute. Use one composite key,
     # then restore the two public attributes in transform/logs_to_metrics_metrics.
     - set(log.attributes["splunk.logs_to_metrics.business.transaction.type_unit"], Concat([log.attributes["business.transaction.type"], log.attributes["business.transaction.unit"]], "|")) where IsString(log.attributes["business.transaction.type"]) and log.attributes["business.transaction.type"] != "" and not IsMatch(log.attributes["business.transaction.type"], "\\|") and IsString(log.attributes["business.transaction.unit"]) and log.attributes["business.transaction.unit"] != "" and not IsMatch(log.attributes["business.transaction.unit"], "\\|")
+    {{- end }}
+    {{- if eq .Values.logsToMetrics.aggregation "workload" }}
+    # k8sattributes uses the pod name as a service.name fallback. Remove only that fallback in
+    # workload aggregation; controller-, label-, and application-provided service names remain.
+    - delete_key(resource.attributes, "service.name") where resource.attributes["service.name"] != nil and resource.attributes["service.name"] == resource.attributes["k8s.pod.name"]
     {{- end }}
     - set(resource.attributes["splunk.logs_to_metrics"], true)
     # Keep the selected resource identity plus transient association/routing keys. The metrics-side

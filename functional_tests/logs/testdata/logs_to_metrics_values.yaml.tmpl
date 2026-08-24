@@ -19,8 +19,10 @@ logsToMetrics:
     namespaces:
       - logs-to-metrics-test
     workloads:
-      - logs-to-metrics-fixture
-      - logs-to-metrics-label-mismatch
+      - kind: Deployment
+        name: logs-to-metrics-fixture
+      - kind: Deployment
+        name: logs-to-metrics-label-mismatch
     podLabels:
       logs-to-metrics-test: enabled
 

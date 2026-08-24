@@ -31,7 +31,7 @@ tests:
       cmd: yq
       args:
         - eval
-        - '.data.relay = (.data.relay | from_yaml | {"log_pipeline": .service.pipelines."logs/log_to_metrics", "metric_pipeline": .service.pipelines.metrics, "connectors": (.connectors | keys | sort), "rules": (.connectors."count/logs_to_metrics".logs | keys | sort), "labels": (.processors."k8s_attributes/logs_to_metrics".extract.labels // []), "first_after_body_merge": .processors."transform/logs_to_metrics".log_statements[2]})'
+        - '.data.relay = (.data.relay | from_yaml | {"log_pipeline": .service.pipelines."logs/log_to_metrics", "metric_pipeline": .service.pipelines.metrics, "connectors": (.connectors | keys | sort), "rules": (.connectors."count/logs_to_metrics".logs | keys | sort), "labels": (.processors."k8s_attributes/logs_to_metrics".extract.labels // []), "first_normalization": (.processors."transform/logs_to_metrics".log_statements | map(select(test("^set\\(log\\.attributes\\[\"severity_number\"\\], Int"))) | .[0])})'
         - "-"
     asserts:
       - equal:
@@ -73,7 +73,7 @@ tests:
           path: data.relay.labels
           value: []
       - matchRegex:
-          path: data.relay.first_after_body_merge
+          path: data.relay.first_normalization
           pattern: '^set\(log.attributes\["severity_number"\]'
 
   - it: should share one file_log receiver between normal logs and metricization
@@ -286,7 +286,7 @@ tests:
             event_outcome: true
             business: false
 
-  - it: should omit rule-specific normalization when the selected rule needs none
+  - it: should omit unrelated normalization when the selected rule needs none
     set:
       logsToMetrics:
         enabled: true
@@ -340,7 +340,10 @@ tests:
             - checkout
             - checkout-canary
           workloads:
-            - checkout-api
+            - kind: Deployment
+              name: checkout-api
+            - kind: Job
+              name: checkout-worker
     postRenderer:
       cmd: yq
       args:
@@ -359,7 +362,7 @@ tests:
           value: 'not (resource.attributes["k8s.namespace.name"] == "checkout" or resource.attributes["k8s.namespace.name"] == "checkout-canary")'
       - equal:
           path: data.relay.filter.log_conditions[2]
-          value: 'not (resource.attributes["k8s.deployment.name"] == "checkout-api" or resource.attributes["k8s.statefulset.name"] == "checkout-api" or resource.attributes["k8s.daemonset.name"] == "checkout-api" or resource.attributes["k8s.cronjob.name"] == "checkout-api" or resource.attributes["k8s.job.name"] == "checkout-api" or resource.attributes["k8s.replicaset.name"] == "checkout-api")'
+          value: 'not (resource.attributes["k8s.deployment.name"] == "checkout-api" or resource.attributes["k8s.job.name"] == "checkout-worker")'
       - equal:
           path: data.relay.pipeline_processors
           value:
@@ -376,6 +379,27 @@ tests:
           path: data.relay.metadata
           content: k8s.replicaset.name
 
+  - it: should keep workload kind and name paired when different kinds share a name
+    set:
+      logsToMetrics:
+        enabled: true
+        scope:
+          workloads:
+            - kind: Deployment
+              name: shared-name
+            - kind: CronJob
+              name: shared-name
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .processors."filter/logs_to_metrics".log_conditions[-1])'
+        - "-"
+    asserts:
+      - equal:
+          path: data.relay
+          value: 'not (resource.attributes["k8s.deployment.name"] == "shared-name" or resource.attributes["k8s.cronjob.name"] == "shared-name")'
+
   - it: should map bounded flat fields before rule normalization without overwriting canonical fields
     set:
       logsToMetrics:
@@ -389,7 +413,7 @@ tests:
       cmd: yq
       args:
         - eval
-        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics".log_statements | {"body": .[0:2], "mappings": .[2:4], "first_normalization": .[4]})'
+        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics".log_statements | {"body": .[0:2], "mappings": .[2:4], "error_type_sanitizer": (map(select(contains("delete_key(log.attributes, \"error.type\")"))) | .[0]), "first_normalization": (map(select(test("^set\\(log\\.attributes\\[\"severity_number\"\\], Int"))) | .[0])})'
         - "-"
     asserts:
       - equal:
@@ -402,9 +426,37 @@ tests:
           value:
             - 'set(log.attributes["severity_text"], log.attributes["app.level"]) where log.attributes["severity_text"] == nil and log.attributes["app.level"] != nil'
             - 'set(log.attributes["error.type"], log.attributes["app/error-code"]) where log.attributes["error.type"] == nil and log.attributes["app/error-code"] != nil'
+      - equal:
+          path: data.relay.error_type_sanitizer
+          value: 'delete_key(log.attributes, "error.type") where log.attributes["error.type"] != nil and not IsString(log.attributes["error.type"])'
       - matchRegex:
           path: data.relay.first_normalization
           pattern: '^set\(log.attributes\["severity_number"\]'
+
+  - it: should remove invalid catalog input types before connector evaluation
+    set:
+      logsToMetrics:
+        enabled: true
+        rules: []
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | .processors."transform/logs_to_metrics".log_statements | map(select(test("^delete_key\\(log\\.attributes"))))'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay
+          content: 'delete_key(log.attributes, "error.type") where log.attributes["error.type"] != nil and not IsString(log.attributes["error.type"])'
+      - contains:
+          path: data.relay
+          content: 'delete_key(log.attributes, "exception.escaped") where log.attributes["exception.escaped"] != nil and not IsBool(log.attributes["exception.escaped"])'
+      - contains:
+          path: data.relay
+          content: 'delete_key(log.attributes, "http.response.status_code") where log.attributes["http.response.status_code"] != nil and not IsInt(log.attributes["http.response.status_code"]) and not IsDouble(log.attributes["http.response.status_code"])'
+      - contains:
+          path: data.relay
+          content: 'delete_key(log.attributes, "business.transaction.value") where log.attributes["business.transaction.value"] != nil and not IsInt(log.attributes["business.transaction.value"]) and not IsDouble(log.attributes["business.transaction.value"])'
 
   - it: should combine exact pod labels with annotation namespace and workload scope
     set:
@@ -414,7 +466,8 @@ tests:
           namespaces:
             - checkout
           workloads:
-            - checkout-api
+            - kind: Deployment
+              name: checkout-api
           podLabels:
             app.kubernetes.io/name: checkout-api
             observability.splunk.com/logs-to-metrics: "true"
@@ -442,7 +495,7 @@ tests:
           value: 'not (resource.attributes["k8s.namespace.name"] == "checkout")'
       - equal:
           path: data.relay.conditions[2]
-          value: 'not (resource.attributes["k8s.deployment.name"] == "checkout-api" or resource.attributes["k8s.statefulset.name"] == "checkout-api" or resource.attributes["k8s.daemonset.name"] == "checkout-api" or resource.attributes["k8s.cronjob.name"] == "checkout-api" or resource.attributes["k8s.job.name"] == "checkout-api" or resource.attributes["k8s.replicaset.name"] == "checkout-api")'
+          value: 'not (resource.attributes["k8s.deployment.name"] == "checkout-api")'
       - equal:
           path: data.relay.conditions[3]
           value: 'resource.attributes["splunk.logs_to_metrics.scope.pod_label.app.kubernetes.io/name"] != "checkout-api"'
@@ -453,6 +506,23 @@ tests:
           path: data.relay.working_allowlist
           pattern: 'scope\.pod_label'
 
+  - it: should remove only pod-derived service names from workload aggregation
+    set:
+      logsToMetrics.enabled: true
+    postRenderer:
+      cmd: yq
+      args:
+        - eval
+        - '.data.relay = (.data.relay | from_yaml | {"metadata": .processors."k8s_attributes/logs_to_metrics".extract.metadata, "statements": .processors."transform/logs_to_metrics".log_statements})'
+        - "-"
+    asserts:
+      - contains:
+          path: data.relay.metadata
+          content: k8s.pod.name
+      - contains:
+          path: data.relay.statements
+          content: 'delete_key(resource.attributes, "service.name") where resource.attributes["service.name"] != nil and resource.attributes["service.name"] == resource.attributes["k8s.pod.name"]'
+
   - it: should retain unique resource identity only for instance aggregation
     set:
       logsToMetrics:
@@ -462,7 +532,7 @@ tests:
       cmd: yq
       args:
         - eval
-        - '.data.relay = (.data.relay | from_yaml | {"metadata": .processors."k8s_attributes/logs_to_metrics".extract.metadata, "working": (.processors."transform/logs_to_metrics".log_statements | map(select(test("^keep_keys"))) | .[0]), "final": (.processors."transform/logs_to_metrics_metrics".metric_statements | map(select(test("^keep_keys"))) | .[0])})'
+        - '.data.relay = (.data.relay | from_yaml | {"metadata": .processors."k8s_attributes/logs_to_metrics".extract.metadata, "cleanup": (.processors."transform/logs_to_metrics".log_statements | map(select(contains("delete_key(resource.attributes, \"service.name\")")))), "working": (.processors."transform/logs_to_metrics".log_statements | map(select(test("^keep_keys"))) | .[0]), "final": (.processors."transform/logs_to_metrics_metrics".metric_statements | map(select(test("^keep_keys"))) | .[0])})'
         - "-"
     asserts:
       - contains:
@@ -477,6 +547,9 @@ tests:
       - contains:
           path: data.relay.metadata
           content: container.id
+      - equal:
+          path: data.relay.cleanup
+          value: []
       - matchRegex:
           path: data.relay.working
           pattern: '"service.instance.id".*"k8s.pod.name".*"k8s.node.name".*"container.id"'
@@ -838,6 +911,40 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "/logsToMetrics/aggregation"
+
+  - it: should reject an untyped workload name
+    set:
+      logsToMetrics:
+        enabled: true
+        scope:
+          workloads:
+            - checkout-api
+    asserts:
+      - failedTemplate:
+          errorPattern: "/logsToMetrics/scope/workloads/0"
+
+  - it: should reject an unsupported workload kind
+    set:
+      logsToMetrics:
+        enabled: true
+        scope:
+          workloads:
+            - kind: Pod
+              name: checkout-api
+    asserts:
+      - failedTemplate:
+          errorPattern: "/logsToMetrics/scope/workloads/0/kind"
+
+  - it: should require both workload kind and name
+    set:
+      logsToMetrics:
+        enabled: true
+        scope:
+          workloads:
+            - kind: Deployment
+    asserts:
+      - failedTemplate:
+          errorPattern: "/logsToMetrics/scope/workloads/0"
 
   - it: should reject an unsupported field mapping target
     set:

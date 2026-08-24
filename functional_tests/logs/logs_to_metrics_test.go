@@ -33,6 +33,7 @@ const (
 	logsToMetricsTransactionMetric = "business.transaction.value"
 
 	logsToMetricsErrorLog               = `{"message":"LOGS_TO_METRICS_ERROR_MARKER","app.level":"ERROR","app.error_code":"payment_declined"}`
+	logsToMetricsInvalidErrorTypeLog    = `{"message":"LOGS_TO_METRICS_INVALID_ERROR_TYPE_MARKER","severity_text":"ERROR","app.error_code":"must_not_replace_invalid_canonical","error.type":{"code":"payment_declined","request_id":"abc-123"}}`
 	logsToMetricsLabelMismatchLog       = `{"message":"LOGS_TO_METRICS_LABEL_MISMATCH_MARKER","app.level":"ERROR","app.error_code":"label_mismatch"}`
 	logsToMetricsThrottledNoStatusLog   = `{"message":"LOGS_TO_METRICS_THROTTLED_NO_STATUS_MARKER","request.throttled":true,"http.request.method":"DELETE"}`
 	logsToMetricsThrottledWithStatusLog = `{"message":"LOGS_TO_METRICS_THROTTLED_WITH_STATUS_MARKER","request.throttled":true,"http.request.method":"POST","http.response.status_code":429}`
@@ -77,6 +78,7 @@ func Test_LogsToMetricsRuntime(t *testing.T) {
 		require.EventuallyWithT(t, func(tt *assert.CollectT) {
 			bodies := collectBodiesFromContainer(logsSink, logsToMetricsContainerName)
 			assert.Contains(tt, bodies, logsToMetricsErrorLog)
+			assert.Contains(tt, bodies, logsToMetricsInvalidErrorTypeLog)
 			assert.Contains(tt, bodies, logsToMetricsThrottledNoStatusLog)
 			assert.Contains(tt, bodies, logsToMetricsThrottledWithStatusLog)
 			assert.Contains(tt, bodies, logsToMetricsTransactionLog)
@@ -99,6 +101,14 @@ func Test_LogsToMetricsRuntime(t *testing.T) {
 				assert.NotEmpty(tt, metricAttrs["container.id"])
 				assert.NotContains(tt, metricAttrs, "splunk.logs_to_metrics")
 				assert.NotContains(tt, metricAttrs, "splunk.logs_to_metrics.scope.pod_label.logs-to-metrics-test")
+			}
+
+			invalidTypeValue, invalidTypeFound := findNumberDatapoint(metricsSink, logsToMetricsErrorMetric, map[string]string{
+				"error.type":   "unknown",
+				"log.severity": "ERROR",
+			})
+			if assert.True(tt, invalidTypeFound, "expected malformed error.type to use the default dimension") {
+				assert.InDelta(tt, 1, invalidTypeValue, 0.0001)
 			}
 
 			transactionValue, transactionFound := findNumberDatapoint(metricsSink, logsToMetricsTransactionMetric, map[string]string{

@@ -27,6 +27,7 @@ spec:
               # container status, which is the source of container.id.
               sleep 15
               printf '%s\n' '{"message":"LOGS_TO_METRICS_ERROR_MARKER","app.level":"ERROR","app.error_code":"payment_declined"}'
+              printf '%s\n' '{"message":"LOGS_TO_METRICS_INVALID_ERROR_TYPE_MARKER","severity_text":"ERROR","app.error_code":"must_not_replace_invalid_canonical","error.type":{"code":"payment_declined","request_id":"abc-123"}}'
               printf '%s\n' '{"message":"LOGS_TO_METRICS_THROTTLED_NO_STATUS_MARKER","request.throttled":true,"http.request.method":"DELETE"}'
               printf '%s\n' '{"message":"LOGS_TO_METRICS_THROTTLED_WITH_STATUS_MARKER","request.throttled":true,"http.request.method":"POST","http.response.status_code":429}'
               printf '%s\n' '{"message":"LOGS_TO_METRICS_TRANSACTION_MARKER","event.outcome":"success","business.transaction.value":49.95,"business.transaction.type":"checkout","business.transaction.unit":"USD"}'

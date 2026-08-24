@@ -952,7 +952,7 @@
       }
     },
     "logsToMetrics": {
-      "description": "Experimental configuration for generating selected metrics from scoped Kubernetes container logs. Supports built-in rule selection, bounded exact field mappings, workload or instance resource aggregation, and exact namespace, workload-name, or pod-label scope. Integrations must not depend on generated Collector component names. This interface may change at any time.",
+      "description": "Experimental configuration for generating selected metrics from scoped Kubernetes container logs. Supports built-in rule selection, bounded exact field mappings, workload or instance resource aggregation, and exact namespace, workload kind/name, or pod-label scope. Integrations must not depend on generated Collector component names. This interface may change at any time.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -1032,7 +1032,7 @@
           }
         },
         "scope": {
-          "description": "Exact-match selectors applied before rule evaluation. Namespace and workload lists use OR internally. Configured selector types and all pod label entries must all match.",
+          "description": "Exact-match selectors applied before rule evaluation. Namespace lists and workload selectors use OR internally. Configured selector types and all pod label entries must all match.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -1046,12 +1046,35 @@
               }
             },
             "workloads": {
-              "description": "Kubernetes Deployment, StatefulSet, DaemonSet, CronJob, Job, or ReplicaSet names to include. An empty list includes every workload.",
+              "description": "Exact Kubernetes workload kind/name pairs to include. Entries use OR semantics. An empty list includes every workload.",
               "type": "array",
               "uniqueItems": true,
               "items": {
-                "type": "string",
-                "minLength": 1
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "name"
+                ],
+                "properties": {
+                  "kind": {
+                    "description": "Kubernetes workload kind.",
+                    "type": "string",
+                    "enum": [
+                      "Deployment",
+                      "StatefulSet",
+                      "DaemonSet",
+                      "CronJob",
+                      "Job",
+                      "ReplicaSet"
+                    ]
+                  },
+                  "name": {
+                    "description": "Exact Kubernetes workload name.",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               }
             },
             "podLabels": {
