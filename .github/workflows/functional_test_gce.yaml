@@ -3,6 +3,8 @@ name: functional-tests-gce
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       COLLECTOR_IMAGE:
@@ -22,7 +24,7 @@ env:
 
 jobs:
   collector-image-config:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     runs-on: ubuntu-latest
     outputs:
       cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
