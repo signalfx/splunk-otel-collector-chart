@@ -56,12 +56,30 @@ runs:
         # which is keyed on the quay.io/signalfx/splunk-otel-collector
         # repository.
         gke_autopilot_allowed=true
+        collector_repo="$COLLECTOR_IMAGE"
+        collector_repo="${collector_repo%%@*}"
+        image_name="${collector_repo##*/}"
+        if [[ "$image_name" == *:* ]]; then
+          collector_repo="${collector_repo%:*}"
+        fi
 
         case "$EVENT_NAME" in
           workflow_dispatch)
-            if [[ -n "$COLLECTOR_IMAGE" && "$COLLECTOR_IMAGE" != quay.io/signalfx/* ]]; then
-              echo "::error::COLLECTOR_IMAGE must be a quay.io/signalfx/* image"
-              exit 1
+            if [[ -n "$COLLECTOR_IMAGE" ]]; then
+              if [[ "$COLLECTOR_IMAGE" == *$'\n'* || "$COLLECTOR_IMAGE" == *$'\r'* ]]; then
+                echo "::error::COLLECTOR_IMAGE must be a single-line image reference"
+                exit 1
+              fi
+              case "$collector_repo" in
+                quay.io/signalfx/splunk-otel-collector | \
+                  quay.io/signalfx/splunk-otel-collector-dev | \
+                  quay.io/signalfx/splunk-otel-collector-fips)
+                  ;;
+                *)
+                  echo "::error::COLLECTOR_IMAGE must use an approved Splunk collector repository on quay.io"
+                  exit 1
+                  ;;
+              esac
             fi
             cloud_tests_enabled=true
             ;;
@@ -79,7 +97,6 @@ runs:
 
         # When COLLECTOR_IMAGE is empty the chart default is used, so leave gke_autopilot_allowed=true.
         if [[ -n "$COLLECTOR_IMAGE" ]]; then
-          collector_repo="${COLLECTOR_IMAGE%:*}"
           if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
             gke_autopilot_allowed=false
             echo "::notice::GKE Autopilot tests will be skipped because COLLECTOR_IMAGE='${COLLECTOR_IMAGE}' is not the stable quay.io/signalfx/splunk-otel-collector image."

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       COLLECTOR_IMAGE:
-        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must be a quay.io/signalfx/* image.'
+        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must use an approved Splunk collector repository on quay.io.'
         required: false
         default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
         type: string
@@ -68,11 +68,19 @@ jobs:
     name: Test helm install in EKS - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-rotel-eks
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
@@ -89,11 +97,19 @@ jobs:
     name: Test helm upgrade in EKS - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-rotel-eks
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
@@ -112,11 +128,19 @@ jobs:
     name: Test helm install in EKS Fargate - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-gdi-github-eks-fargate
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
@@ -134,11 +158,19 @@ jobs:
     name: Test helm upgrade in EKS Fargate - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-gdi-github-eks-fargate
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
@@ -158,11 +190,19 @@ jobs:
     name: Test helm install in EKS Auto Mode - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-rotel-eks-autotest
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
@@ -179,11 +219,19 @@ jobs:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
     needs: [ collector-image-config, eks-run-policy ]
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
-    environment: aws-eks-functional-tests
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: eks-rotel-eks-autotest
+      queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/eks-functional-test
         with:
