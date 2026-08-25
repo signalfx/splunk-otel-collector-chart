@@ -3,7 +3,7 @@ name: functional-tests-eks
 on:
   pull_request:
     branches: [ main ]
-    types: [ opened, synchronize, reopened, labeled ]
+    types: [ opened, synchronize, reopened ]
   workflow_dispatch:
     inputs:
       COLLECTOR_IMAGE:
@@ -23,28 +23,16 @@ env:
 
 jobs:
   collector-image-config:
+    # Keep the required check fast on ordinary PRs; release PRs get the same check name
+    # from release-eks-gate only after all EKS jobs finish.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'update-release') && 'EKS release gate' || 'Resolve EKS test configuration' }}
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     runs-on: ubuntu-latest
     outputs:
       cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
       otelcol-image: ${{ steps.config.outputs.otelcol-image }}
-      release-required: ${{ steps.policy.outputs.release-required }}
-      run-eks-tests: ${{ steps.policy.outputs.run-eks-tests }}
+      release-required: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' }}
     steps:
-      - name: Resolve EKS test policy
-        id: policy
-        env:
-          IS_MANUAL_RUN: ${{ github.event_name == 'workflow_dispatch' }}
-          IS_RELEASE_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' }}
-          RUN_EKS_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-eks-tests') }}
-        run: |
-          echo "release-required=$IS_RELEASE_PR" >> "$GITHUB_OUTPUT"
-          if [[ "$IS_MANUAL_RUN" == "true" || "$IS_RELEASE_PR" == "true" || "$RUN_EKS_LABEL" == "true" ]]; then
-            echo "run-eks-tests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run-eks-tests=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Resolve collector image and cloud-test gating
@@ -61,7 +49,7 @@ jobs:
   eks-test:
     name: Test helm install in EKS - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -90,7 +78,7 @@ jobs:
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -121,7 +109,7 @@ jobs:
   eks-fargate-test:
     name: Test helm install in EKS Fargate - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -151,7 +139,7 @@ jobs:
   eks-fargate-upgrade-test:
     name: Test helm upgrade in EKS Fargate - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -183,7 +171,7 @@ jobs:
   eks-auto-mode-test:
     name: Test helm install in EKS Auto Mode - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -212,7 +200,7 @@ jobs:
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
     needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
@@ -241,7 +229,8 @@ jobs:
           upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
 
   release-eks-gate:
-    name: EKS release gate
+    # Only release PRs expose the required check name here; other runs report optional results.
+    name: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' && 'EKS release gate' || 'EKS results (optional)' }}
     needs:
       - eks-test
       - eks-upgrade-test
